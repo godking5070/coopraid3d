@@ -181,7 +181,7 @@ namespace RaidRogue
             UpdateCooldownsAndComboTimers();
             UpdateCasterSpellCasting();
 
-            if (playerController == null || !playerController.IsBeingRescued)
+            if (!LocalGameplayInput.Blocked && (playerController == null || !playerController.IsBeingRescued))
             {
                 HandleCombatHotkeys();
             }
@@ -334,6 +334,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill1_FlankCombo()
         {
+            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (IsOnGcd || _isCastingSpell)
             {
                 return;
@@ -362,6 +363,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill2_RearCombo()
         {
+            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (IsOnGcd || _isCastingSpell)
             {
                 return;
@@ -390,6 +392,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill3_PersonalDefensive_oGCD()
         {
+            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (_skill3CooldownRemaining > 0.001f)
             {
                 return;
@@ -437,6 +440,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill4_GaleThrust_oGCD()
         {
+            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (_skill4CooldownRemaining > 0.001f)
             {
                 return;
@@ -476,7 +480,7 @@ namespace RaidRogue
         private bool TryBeginMeleeAttack(MeleeSkill skill, int comboStage, out BossAddMinion targetedAdd)
         {
             targetedAdd = null;
-            if (Time.timeScale <= 0.001f || CombatMetricsUI.BlocksUnderlyingInput) return false;
+            if (LocalGameplayInput.Blocked) return false;
             Transform target = GetOffensiveTarget();
             if (target == null || !CombatRange.LivingPartyMember(transform))
             {
@@ -503,6 +507,7 @@ namespace RaidRogue
         {
             _lastOffensiveVisualTarget = target;
             if (target == null) return;
+            if (playerController != null) { playerController.FaceAttackTarget(target); return; }
             Vector3 direction = target.position - transform.position;
             direction.y = 0;
             if (direction.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
@@ -544,24 +549,7 @@ namespace RaidRogue
                 }
             }
 
-            _lastOffensiveVisualTarget = enemyVisualTr;
-
-            if (enemyVisualTr != null)
-            {
-                Vector3 toEnemyXZ = new Vector3(
-                    enemyVisualTr.position.x - transform.position.x,
-                    0f,
-                    enemyVisualTr.position.z - transform.position.z
-                );
-                if (toEnemyXZ.sqrMagnitude > 0.001f)
-                {
-                    transform.rotation = Quaternion.LookRotation(toEnemyXZ.normalized, Vector3.up);
-                }
-            }
-            else if (playerController != null)
-            {
-                playerController.FaceBossImmediateXZ();
-            }
+            FaceOffensiveTarget(enemyVisualTr);
         }
 
         // =====================================================================
@@ -1208,11 +1196,7 @@ namespace RaidRogue
             float castSpeedReduction = Mathf.Clamp(swiftStacks * 0.22f, 0f, 0.9f);
             float effectiveCastTime = Mathf.Max(0.45f, baseCastTime - castSpeedReduction);
 
-            if (playerController != null)
-            {
-                playerController.FaceBossImmediateXZ();
-            }
-
+            FaceOffensiveTarget(GetOffensiveTarget());
             // [4]번 '삼연속 마법' 활성 중이면 캐스팅 시간 0초 즉발 무빙샷!
             if (IsTriplecastActive)
             {
@@ -1637,6 +1621,9 @@ namespace RaidRogue
             Vector3 start = new Vector3(transform.position.x, 1.0f, transform.position.z);
             Transform fxTargetTr = _lastOffensiveVisualTarget != null ? _lastOffensiveVisualTarget : targetBoss.transform;
             Vector3 bossCenter = new Vector3(fxTargetTr.position.x, 1.3f, fxTargetTr.position.z);
+            Vector3 attackForward = bossCenter - start;
+            attackForward.y = 0;
+            Vector3 attackRight = Vector3.Cross(Vector3.up, attackForward.normalized);
 
             Color mainColor;
             if (CurrentRole == PlayerRole.Archmage_Caster)
@@ -1699,7 +1686,7 @@ namespace RaidRogue
                 lr.startColor = mainColor;
                 lr.endColor = new Color(1f, 0.95f, 0.7f, 0.85f);
 
-                Vector3 sideOffset = transform.right * ((i - (activeLineCount - 1) * 0.5f) * 0.9f);
+                Vector3 sideOffset = attackRight * ((i - (activeLineCount - 1) * 0.5f) * 0.9f);
                 lr.SetPosition(0, start + sideOffset * 0.5f);
                 lr.SetPosition(1, bossCenter - sideOffset * 1.1f + Vector3.up * (i * 0.35f));
             }

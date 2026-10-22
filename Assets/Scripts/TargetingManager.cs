@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -108,7 +107,7 @@ namespace RaidRogue
             }
 
             ValidateCurrentTarget();
-            if (!CombatMetricsUI.BlocksUnderlyingInput)
+            if (!LocalGameplayInput.Blocked)
             {
                 HandleKeyboardShortcuts();
                 HandleMouseClickTargeting();
@@ -471,7 +470,7 @@ namespace RaidRogue
             }
 
             // [ESC] 타겟 해제
-            if (WasKeyPressed(KeyCode.Escape))
+            if (!LocalGameplayInput.EscapeConsumed && WasKeyPressed(KeyCode.Escape))
             {
                 ClearTarget();
             }
@@ -667,6 +666,7 @@ namespace RaidRogue
         /// </summary>
         private void HandleMouseClickTargeting()
         {
+            if (QuarterViewCamera.LocalCamera != null && QuarterViewCamera.LocalCamera.IsOrbitDragging) return;
             bool leftClickDown = false;
             Vector3 mousePos = Vector3.zero;
 
@@ -707,7 +707,7 @@ namespace RaidRogue
             }
 
             // UI 버튼(스킬 핫바, 직업 선택 모달, 카드 모달, 뷰 전환 버튼 등) 위를 클릭한 경우 월드 클릭 무시
-            if (IsPointerOverInteractiveUIButton(mousePos))
+            if (LocalGameplayInput.PointerOverUI(mousePos))
             {
                 return;
             }
@@ -830,31 +830,6 @@ namespace RaidRogue
                     SetTarget(closestCandidate);
                 }
             }
-        }
-
-        private static bool IsPointerOverInteractiveUIButton(Vector3 screenPos)
-        {
-            if (EventSystem.current == null) return false;
-
-            PointerEventData ped = new PointerEventData(EventSystem.current)
-            {
-                position = new Vector2(screenPos.x, screenPos.y)
-            };
-            List<RaycastResult> results = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(ped, results);
-
-            for (int i = 0; i < results.Count; i++)
-            {
-                GameObject go = results[i].gameObject;
-                if (go == null) continue;
-
-                // Button 컴포넌트가 있는 실제 인터랙티브 UI를 클릭한 경우에만 월드 클릭을 막음
-                if (go.GetComponentInParent<Button>() != null)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         // =====================================================================
