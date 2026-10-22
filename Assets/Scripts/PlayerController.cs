@@ -116,6 +116,7 @@ namespace RaidRogue
         private readonly DashPressGate _dashPress = new DashPressGate();
         private readonly PlayerMovementCollision _movementCollision = new PlayerMovementCollision();
         private PlayerDashPresentation _dashPresentation;
+        public CommonPotion Potion { get; private set; }
 
         // 힐러 '구출(Rescue)' 끌려감 상태
         private bool _isBeingRescued;
@@ -139,6 +140,7 @@ namespace RaidRogue
 
         private void Start()
         {
+            Potion = CommonPotion.Ensure(gameObject);
             if (targetBoss == null)
             {
                 targetBoss = FindFirstObjectByType<BossController>();
@@ -425,6 +427,8 @@ namespace RaidRogue
         /// </summary>
         public void ResetToFullHealthAndPosition(Vector3 spawnPos)
         {
+            // This is also used for revival/repositioning: preserve the item's cooldown.
+            Potion?.EndRevivalProtection();
             _dash.Cancel();
             _dashPress.RequireRelease();
             IsStunned = IsMovementLocked = false;
@@ -755,6 +759,7 @@ namespace RaidRogue
 
         public void TakeDamage(float rawDamage)
         {
+            if (Potion != null && Potion.HasRevivalProtection) return;
             float finalDamage = CalculateFinalDamageTaken(rawDamage);
             float absorbedByShield = 0f;
 
@@ -799,27 +804,28 @@ namespace RaidRogue
             FloatingTextPopup.Spawn(transform.position + Vector3.up * 2.1f, dmgText, dmgColor, false);
         }
 
-        public void ReceiveHeal(float healAmount, Transform source = null)
+        public float ReceiveHeal(float healAmount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
             if (healAmount <= 0f)
             {
-                return;
+                return 0;
             }
 
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + healAmount);
             float actualHealed = currentHp - before;
-            CombatMetricsManager.Healing(source != null ? source : transform, before, currentHp);
+            CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 
-            if (actualHealed > 0.5f)
+            if (actualHealed > 0.5f || (kind == HealingKind.Potion && actualHealed > 0))
             {
                 FloatingTextPopup.Spawn(
                     transform.position + Vector3.up * 2.2f,
-                    $"+{Mathf.RoundToInt(actualHealed)} HP",
+                    kind == HealingKind.Potion ? $"포션 +{actualHealed:0.##} HP" : $"+{Mathf.RoundToInt(actualHealed)} HP",
                     new Color(0.25f, 1f, 0.45f, 1f),
                     false
                 );
             }
+            return actualHealed;
         }
 
         public void PlaySkillLineVisual(Vector3 targetWorldPos, Color lineColor)
@@ -1098,7 +1104,7 @@ namespace RaidRogue
             hudStatusText.text =
                 $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [P] | 뷰: {viewModeLabel} [V])]</b>\n" +
                 $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[F1~F4]</b> 파티원 1~4번 | <b>[Tab]</b> 적(보스·쫄) 순환 | <b>[T]</b> 대상의 대상 | <b>[ESC]</b> 해제\n" +
-                $"• <b>이동/카메라</b> : {movementHint} · SPACE 대쉬 | 우측 [카메라 설정]\n" +
+                $"• <b>이동/카메라</b> : {movementHint} · SPACE 대쉬 · Q 포션 | 우측 [카메라 설정]\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
                 $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {targetBoss.LastHitMessage}\n" +

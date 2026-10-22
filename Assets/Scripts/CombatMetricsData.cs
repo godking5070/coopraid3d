@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace RaidRogue
 {
+    public enum HealingKind { Ability, Potion }
+
     // Pure data: no Unity clock, scene, UI, or combat simulation dependencies.
     public sealed class CombatMemberRecord
     {
@@ -12,6 +14,7 @@ namespace RaidRogue
         public double BossDamage { get; internal set; }
         public double AddDamage { get; internal set; }
         public double Healing { get; internal set; }
+        public double SelfHealing { get; internal set; } // Potion only; excluded from effective healing/HPS.
         public double ShieldAbsorbed { get; internal set; }
         public int Deaths { get; internal set; }
         public double Damage => BossDamage + AddDamage;
@@ -102,11 +105,13 @@ namespace RaidRogue
             else member.BossDamage += applied;
         }
 
-        public void RecordHealing(int source, double hpBefore, double hpAfter)
+        public void RecordHealing(int source, double hpBefore, double hpAfter, HealingKind kind = HealingKind.Ability)
         {
             if (!Active || !_members.TryGetValue(source, out var member)) return;
             double applied = hpAfter - hpBefore;
-            if (hpBefore >= 0 && ValidPositive(applied)) member.Healing += applied;
+            if (hpBefore < 0 || !ValidPositive(applied)) return;
+            if (kind == HealingKind.Potion) member.SelfHealing += applied;
+            else member.Healing += applied;
         }
 
         public void RecordAbsorption(int source, double amount)
@@ -138,6 +143,7 @@ namespace RaidRogue
                     total.BossDamage += member.BossDamage;
                     total.AddDamage += member.AddDamage;
                     total.Healing += member.Healing;
+                    total.SelfHealing += member.SelfHealing;
                     total.ShieldAbsorbed += member.ShieldAbsorbed;
                     total.Deaths += member.Deaths;
                 }
