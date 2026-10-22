@@ -184,13 +184,20 @@ namespace RaidRogue
 
         public void ResetAndHealAllPartyMembers()
         {
-            // 내 캐릭터 체력 100% 회복 및 초기 위치 재배치
+            // 내 캐릭터 체력 100% 회복 및 현재 직업에 맞는 초기 위치 재배치
             if (player != null)
             {
-                player.ResetToFullHealthAndPosition(playerSpawnPos);
+                Vector3 pSpawn = player.currentRole switch
+                {
+                    PlayerRole.Guardian_Tank => tankSpawnPos,
+                    PlayerRole.Oracle_Healer => healerSpawnPos,
+                    PlayerRole.Archmage_Caster => rangedSpawnPos,
+                    _ => playerSpawnPos
+                };
+                player.ResetToFullHealthAndPosition(pSpawn);
             }
 
-            // 3명의 AI 파티원 봇 전원 부활/체력 100% 회복 및 초기 위치 재배치
+            // 3명의 AI 파티원 봇 전원 부활/체력 100% 회복 및 각자 역할군 초기 위치 재배치
             PartyBotAI[] bots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
             foreach (PartyBotAI bot in bots)
             {
@@ -200,6 +207,7 @@ namespace RaidRogue
                 {
                     PartyBotRole.Tank => tankSpawnPos,
                     PartyBotRole.Healer => healerSpawnPos,
+                    PartyBotRole.MeleeDPS => playerSpawnPos,
                     PartyBotRole.RangedDPS => rangedSpawnPos,
                     _ => bot.transform.position
                 };
