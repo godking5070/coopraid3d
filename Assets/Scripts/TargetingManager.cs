@@ -108,8 +108,11 @@ namespace RaidRogue
             }
 
             ValidateCurrentTarget();
-            HandleKeyboardShortcuts();
-            HandleMouseClickTargeting();
+            if (!CombatMetricsUI.BlocksUnderlyingInput)
+            {
+                HandleKeyboardShortcuts();
+                HandleMouseClickTargeting();
+            }
             UpdateVisualIndicators();
             UpdateTargetInfoHUD();
         }
@@ -676,6 +679,7 @@ namespace RaidRogue
             }
 #endif
             if (!leftClickDown) return;
+            if (CombatMetricsUI.BlocksPointer(mousePos)) return;
 
             // 0차: 좌측 파티 리스트(PartyListUI) 슬롯 직접 클릭 체크
             if (partyListUI != null && partyListUI.TrySelectPartyMemberAtScreenPoint(mousePos))

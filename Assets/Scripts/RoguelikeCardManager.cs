@@ -268,6 +268,7 @@ namespace RaidRogue
 
         public void OnCardButtonClicked(int slotIndex)
         {
+            if (CombatMetricsUI.BlocksUnderlyingInput) return;
             if (!_isSelectionOpen || slotIndex < 0 || slotIndex >= _currentOfferedCards.Count)
             {
                 return;
@@ -459,6 +460,7 @@ namespace RaidRogue
 
         private void HandleUnscaledCardModalInput()
         {
+            if (CombatMetricsUI.BlocksUnderlyingInput) return;
             bool mouseClicked = false;
             Vector2 mousePos = Vector2.zero;
 

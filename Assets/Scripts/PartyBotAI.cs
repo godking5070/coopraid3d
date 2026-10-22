@@ -39,6 +39,7 @@ namespace RaidRogue
         public float maxHp = 1600f;
         public float currentHp = 1600f;
         public float currentShield = 0f;
+        private readonly CombatShieldLedger _metricsShields = new CombatShieldLedger();
         public bool isDead;
 
         [Header("Tank Settings (North Z+ Parking & Defensive)")]
@@ -160,6 +161,8 @@ namespace RaidRogue
         {
             role = newRole;
             isDead = false;
+            CombatMetricsManager.SetDead(transform, false);
+            _metricsShields.Clear();
             _isBeingKnockedBack = false;
             _isBeingRescuedByPlayer = false;
             _isInterceptingTetherForPlayer = false;
@@ -395,6 +398,8 @@ namespace RaidRogue
         public void ResetBotForNewStage(Vector3 spawnPos)
         {
             isDead = false;
+            CombatMetricsManager.SetDead(transform, false);
+            _metricsShields.Clear();
             _isBeingKnockedBack = false;
             _isBeingRescuedByPlayer = false;
             _isInterceptingTetherForPlayer = false;
@@ -697,7 +702,7 @@ namespace RaidRogue
                 _actionTimer = 0f;
                 if (priorityAdd != null)
                 {
-                    priorityAdd.ReceiveBotAttack(tankAttackDamage);
+                    priorityAdd.ReceiveBotAttack(tankAttackDamage, transform);
                     ShowBeamEffect(
                         transform.position + Vector3.up * 0.2f,
                         priorityAdd.transform.position + Vector3.up * 1.1f,
@@ -708,7 +713,7 @@ namespace RaidRogue
                 }
                 else
                 {
-                    targetBoss.ReceiveBotAttackDamage(tankAttackDamage, false);
+                    targetBoss.ReceiveBotAttackDamage(tankAttackDamage, false, transform);
                     ShowBeamEffect(
                         transform.position + Vector3.up * 0.2f,
                         targetBoss.transform.position + Vector3.up * 1.2f,
@@ -796,7 +801,7 @@ namespace RaidRogue
                 _actionTimer = 0f;
                 if (priorityAdd != null)
                 {
-                    priorityAdd.ReceiveBotAttack(meleeAttackDamage);
+                    priorityAdd.ReceiveBotAttack(meleeAttackDamage, transform);
                     ShowBeamEffect(
                         transform.position + Vector3.up * 0.25f,
                         priorityAdd.transform.position + Vector3.up * 1.15f,
@@ -807,7 +812,7 @@ namespace RaidRogue
                 }
                 else
                 {
-                    targetBoss.ReceiveBotAttackDamage(meleeAttackDamage, false);
+                    targetBoss.ReceiveBotAttackDamage(meleeAttackDamage, false, transform);
                     ShowBeamEffect(
                         transform.position + Vector3.up * 0.25f,
                         targetBoss.transform.position + Vector3.up * 1.25f,
@@ -852,6 +857,8 @@ namespace RaidRogue
             currentHp = 0f;
             currentShield = 0f;
             isDead = true;
+            _metricsShields.Clear();
+            CombatMetricsManager.SetDead(transform, true);
             isTankDefensiveActive = false;
             _deadReviveTimer = 6.5f;
 
@@ -875,6 +882,8 @@ namespace RaidRogue
         public void ReviveBot()
         {
             isDead = false;
+            CombatMetricsManager.SetDead(transform, false);
+            _metricsShields.Clear();
             currentHp = maxHp;
             currentShield = 0f;
             transform.position = new Vector3(transform.position.x, 1.0f, transform.position.z);
@@ -1063,14 +1072,14 @@ namespace RaidRogue
             {
                 CurrentActionTarget = humanPlayer.transform;
                 FaceTargetXZ(humanPlayer.transform.position);
-                humanPlayer.ReceiveHeal(healAmount);
+                humanPlayer.ReceiveHeal(healAmount, transform);
                 ShowTrackingHealBeam(humanPlayer.transform, healBeamDuration);
             }
             else if (targetBot != null)
             {
                 CurrentActionTarget = targetBot.transform;
                 FaceTargetXZ(targetBot.transform.position);
-                targetBot.ReceiveHeal(healAmount);
+                targetBot.ReceiveHeal(healAmount, transform);
                 ShowTrackingHealBeam(targetBot.transform, healBeamDuration);
             }
             else if (targetBoss != null)
@@ -1135,7 +1144,7 @@ namespace RaidRogue
             {
                 CurrentActionTarget = priorityAdd.transform;
                 FaceTargetXZ(priorityAdd.transform.position);
-                priorityAdd.ReceiveBotAttack(projectileDamage);
+                priorityAdd.ReceiveBotAttack(projectileDamage, transform);
                 ShowBeamEffect(
                     transform.position + Vector3.up * 0.35f,
                     priorityAdd.transform.position + Vector3.up * 1.15f,
@@ -1150,7 +1159,7 @@ namespace RaidRogue
             FaceTargetXZ(targetBoss.transform.position);
 
             Vector3 spawnPos = transform.position + transform.forward * 0.65f + Vector3.up * 0.25f;
-            RangedBotProjectile.Spawn(spawnPos, targetBoss, projectileSpeed, projectileDamage);
+            RangedBotProjectile.Spawn(spawnPos, targetBoss, projectileSpeed, projectileDamage, transform);
         }
 
         // =====================================================================
@@ -1229,9 +1238,11 @@ namespace RaidRogue
             float absorbedByShield = 0f;
             if (currentShield > 0f && finalAmount > 0f)
             {
+                _metricsShields.Reconcile(currentShield);
                 absorbedByShield = Mathf.Min(currentShield, finalAmount);
                 currentShield -= absorbedByShield;
                 finalAmount -= absorbedByShield;
+                _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
             }
 
             float minClamp = allowLethal ? 0f : 120f;
@@ -1255,7 +1266,7 @@ namespace RaidRogue
             }
         }
 
-        public void ReceiveHeal(float amount)
+        public void ReceiveHeal(float amount, Transform source = null)
         {
             if (isDead)
             {
@@ -1265,6 +1276,7 @@ namespace RaidRogue
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + amount);
             float actualHealed = currentHp - before;
+            CombatMetricsManager.Healing(source != null ? source : transform, before, currentHp);
 
             if (actualHealed > 0.5f)
             {
@@ -1277,14 +1289,17 @@ namespace RaidRogue
             }
         }
 
-        public void AddShield(float shieldAmount)
+        public void AddShield(float shieldAmount, Transform source = null)
         {
             if (isDead || shieldAmount <= 0f)
             {
                 return;
             }
 
+            _metricsShields.Reconcile(currentShield);
+            float shieldBefore = currentShield;
             currentShield = Mathf.Min(maxHp, currentShield + shieldAmount);
+            _metricsShields.Grant(CombatMetricsManager.SourceId(source != null ? source : transform), currentShield - shieldBefore);
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * 2.35f,
                 $"+{Mathf.RoundToInt(shieldAmount)} SHIELD (보호막)",
@@ -1592,11 +1607,13 @@ namespace RaidRogue
     public class RangedBotProjectile : MonoBehaviour
     {
         private BossController _targetBoss;
+        private Transform _source;
+        private int _encounterId;
         private float _speed;
         private int _damage;
         private float _lifetime = 3.0f;
 
-        public static RangedBotProjectile Spawn(Vector3 startPos, BossController boss, float speed, int damage)
+        public static RangedBotProjectile Spawn(Vector3 startPos, BossController boss, float speed, int damage, Transform source)
         {
             GameObject projObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             projObj.name = "RangedDPS_Projectile";
@@ -1638,6 +1655,8 @@ namespace RaidRogue
 
             RangedBotProjectile proj = projObj.AddComponent<RangedBotProjectile>();
             proj._targetBoss = boss;
+            proj._source = source;
+            proj._encounterId = CombatMetricsManager.EncounterId;
             proj._speed = speed;
             proj._damage = damage;
             return proj;
@@ -1645,6 +1664,8 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (_encounterId != CombatMetricsManager.EncounterId) { Destroy(gameObject); return; }
+            if (Time.timeScale <= 0.001f) return;
             _lifetime -= Time.deltaTime;
             if (_lifetime <= 0f || _targetBoss == null || _targetBoss.IsBossDefeatedCollapse)
             {
@@ -1663,7 +1684,7 @@ namespace RaidRogue
 
             if (toTargetXZ.magnitude <= 0.85f)
             {
-                _targetBoss.ReceiveBotAttackDamage(_damage, true);
+                _targetBoss.ReceiveBotAttackDamage(_damage, true, _source);
                 Destroy(gameObject);
                 return;
             }

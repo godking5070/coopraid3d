@@ -123,6 +123,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (CombatMetricsUI.BlocksUnderlyingInput) return;
             // 단축키 [P]: 언제든 직업 선택 창 열기/닫기
             if (WasShortcutPPressed())
             {
@@ -145,6 +146,7 @@ namespace RaidRogue
 
         public void OpenRoleSelectionModal()
         {
+            if (CombatMetricsUI.BlocksUnderlyingInput) return;
             EnsureUI();
 
             if (roleModalRoot != null)

@@ -835,7 +835,7 @@ namespace RaidRogue
                     if (pc.hasThornArmor && pc.IsDefensiveBuffActive)
                     {
                         int reflect = Mathf.RoundToInt(pc.thornReflectDamage * 0.35f);
-                        ApplyBossHpDamage(reflect);
+                        ApplyBossHpDamage(reflect, pc.transform);
                     }
                 }
                 else if (tank != null && !tank.isDead)
@@ -1465,7 +1465,7 @@ namespace RaidRogue
                         if (player.hasThornArmor && player.IsDefensiveBuffActive)
                         {
                             int reflectDmg = Mathf.RoundToInt(player.thornReflectDamage);
-                            ApplyBossHpDamage(reflectDmg);
+                            ApplyBossHpDamage(reflectDmg, player.transform);
                             FloatingTextPopup.Spawn(
                                 transform.position + Vector3.up * (popupHeightOffset + 0.5f),
                                 $"[가시 갑옷] 탱버 반사 피해!! - {reflectDmg}",
@@ -1674,7 +1674,7 @@ namespace RaidRogue
                 if (player != null && player.hasThornArmor)
                 {
                     int reflectDmg = Mathf.RoundToInt(player.thornReflectDamage);
-                    ApplyBossHpDamage(reflectDmg);
+                    ApplyBossHpDamage(reflectDmg, player.transform);
                     FloatingTextPopup.Spawn(
                         transform.position + Vector3.up * (popupHeightOffset + 0.5f),
                         $"[가시 갑옷] 탱커 수호 반사 피해!! - {reflectDmg}",
@@ -1705,7 +1705,7 @@ namespace RaidRogue
                     if (player.hasThornArmor)
                     {
                         int reflectDmg = Mathf.RoundToInt(player.thornReflectDamage);
-                        ApplyBossHpDamage(reflectDmg);
+                        ApplyBossHpDamage(reflectDmg, player.transform);
                         FloatingTextPopup.Spawn(
                             transform.position + Vector3.up * (popupHeightOffset + 0.5f),
                             $"[가시 갑옷] 반사 피해!! - {reflectDmg}",
@@ -1906,7 +1906,8 @@ namespace RaidRogue
             Vector3 attackerPosition,
             PositionalRequirement requirement,
             int baseDamage = 100,
-            bool hasMasterOfRearBonus = false)
+            bool hasMasterOfRearBonus = false,
+            Transform source = null)
         {
             if (fsmState == BossFSMState.Defeated)
             {
@@ -1939,7 +1940,7 @@ namespace RaidRogue
             }
 
             int finalDamage = Mathf.RoundToInt(damageCalc * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage);
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string popupText = isPositionalCrit
                 ? $"POSITIONAL CRIT!! - {finalDamage}"
@@ -1973,7 +1974,8 @@ namespace RaidRogue
             int comboStage,
             int normalDamage,
             int positionalDamage,
-            bool hasMasterOfRearBonus)
+            bool hasMasterOfRearBonus,
+            Transform source = null)
         {
             if (fsmState == BossFSMState.Defeated)
             {
@@ -2006,7 +2008,7 @@ namespace RaidRogue
             }
 
             int finalDamage = Mathf.RoundToInt(damageCalc * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage);
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string popupText;
             Color popupColor;
@@ -2049,7 +2051,7 @@ namespace RaidRogue
         /// <summary>
         /// Step 5: [4]번 '질풍 찌르기' 등 oGCD 끼워넣기 어빌리티 즉발 추가 피해 처리
         /// </summary>
-        public void ReceiveOGcdAbilityAttack(string abilityName, int baseDamage)
+        public void ReceiveOGcdAbilityAttack(string abilityName, int baseDamage, Transform source = null)
         {
             if (fsmState == BossFSMState.Defeated)
             {
@@ -2057,7 +2059,7 @@ namespace RaidRogue
             }
 
             int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage);
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string popupText = $"oGCD [{abilityName}]!! - {finalDamage}";
             if (addSpawner != null && addSpawner.HasLivingPowerSupplier)
@@ -2084,7 +2086,8 @@ namespace RaidRogue
             int baseDamage,
             Color popupColor,
             bool isBigHighlight = false,
-            string extraNote = "")
+            string extraNote = "",
+            Transform source = null)
         {
             if (fsmState == BossFSMState.Defeated)
             {
@@ -2092,7 +2095,7 @@ namespace RaidRogue
             }
 
             int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage);
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string stagePrefix = comboStage > 0 ? $"{comboStage}단 " : "";
             string popupText = $"[{roleTag}] {stagePrefix}{skillName}!! - {finalDamage}";
@@ -2118,7 +2121,7 @@ namespace RaidRogue
             return finalDamage;
         }
 
-        public void ReceiveBotAttackDamage(int baseDamage, bool isRanged)
+        public void ReceiveBotAttackDamage(int baseDamage, bool isRanged, Transform source)
         {
             if (fsmState == BossFSMState.Defeated)
             {
@@ -2126,7 +2129,7 @@ namespace RaidRogue
             }
 
             int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage);
+            ApplyBossHpDamage(finalDamage, source);
 
             if (isRanged)
             {
@@ -2139,14 +2142,19 @@ namespace RaidRogue
         /// Step 6 핵심: 보스 체력 중간에는 절대 카드가 뜨지 않으며,
         /// 오직 보스를 완전히 처치(HP 0 도달)했을 때만 StageManager.NotifyBossDefeated()를 호출합니다!
         /// </summary>
-        private void ApplyBossHpDamage(float damage)
+        private void ApplyBossHpDamage(float damage, Transform source = null)
         {
             if (fsmState == BossFSMState.Defeated)
             {
                 return;
             }
 
+            float hpBefore = currentHp;
             currentHp = Mathf.Max(0f, currentHp - damage);
+            if (currentHp <= 0.1f) currentHp = 0f;
+            // Single accounting point for skills, projectiles, reflection and card damage.
+            // Debug instant-kill has no source and intentionally earns no party credit.
+            CombatMetricsManager.Damage(source, hpBefore, currentHp, false);
 
             if (currentHp <= 0.1f)
             {

@@ -459,13 +459,17 @@ namespace RaidRogue
             string skillName,
             int damage,
             Color popupColor,
-            bool isBigHighlight = false)
+            bool isBigHighlight = false,
+            Transform source = null)
         {
             if (isDead) return;
 
             float mult = ownerBoss != null ? ownerBoss.DamageTakenMultiplier : 1.0f;
             int finalDmg = Mathf.RoundToInt(damage * mult);
+            float hpBefore = currentHp;
             currentHp = Mathf.Max(0f, currentHp - finalDmg);
+            if (currentHp <= 0.1f) currentHp = 0f;
+            CombatMetricsManager.Damage(source != null ? source : (ownerBoss != null ? ownerBoss.targetPlayer : null), hpBefore, currentHp, true);
 
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * 2.35f,
@@ -490,11 +494,14 @@ namespace RaidRogue
             }
         }
 
-        public void ReceiveBotAttack(int damage)
+        public void ReceiveBotAttack(int damage, Transform source)
         {
             if (isDead) return;
 
+            float hpBefore = currentHp;
             currentHp = Mathf.Max(0f, currentHp - damage);
+            if (currentHp <= 0.1f) currentHp = 0f;
+            CombatMetricsManager.Damage(source, hpBefore, currentHp, true);
             if (currentHp <= 0.1f)
             {
                 KillAddMinion(silent: false);
