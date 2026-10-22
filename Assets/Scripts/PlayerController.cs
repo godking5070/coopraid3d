@@ -23,6 +23,8 @@ namespace RaidRogue
     /// </summary>
     public class PlayerController : MonoBehaviour
     {
+        [Header("Combat Body (world units, independent of visual scale)")]
+        [Min(0f)] public float combatRadius = 0.55f;
         [Header("Role Identity (Step 8)")]
         public PlayerRole currentRole = PlayerRole.Blade_MeleeDPS;
         public string playerRoleDisplayName = "ME (블레이드·근딜)";
@@ -561,7 +563,7 @@ namespace RaidRogue
                 return;
             }
 
-            if (targetBoss == null) return;
+            if (!CanUseLegacyMeleeAttack()) return;
             FaceBossImmediateXZ();
             PlaySlashVisual(new Color(0.25f, 1f, 0.55f, 1f));
             targetBoss.ReceiveSkillAttack(transform.position, PositionalRequirement.Flank_45_To_135, baseSkillDamage, false);
@@ -575,10 +577,20 @@ namespace RaidRogue
                 return;
             }
 
-            if (targetBoss == null) return;
+            if (!CanUseLegacyMeleeAttack()) return;
             FaceBossImmediateXZ();
             PlaySlashVisual(new Color(0.3f, 0.85f, 1f, 1f));
             targetBoss.ReceiveSkillAttack(transform.position, PositionalRequirement.Rear_135_To_180, baseSkillDamage, hasMasterOfRear);
+        }
+
+        private bool CanUseLegacyMeleeAttack()
+        {
+            if (targetBoss == null || !CombatRange.LivingEnemy(targetBoss.transform) || Time.timeScale <= 0.001f) return false;
+            var defaults = new MeleeRangeSettings();
+            float range = defaults.Get(currentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank);
+            if (CombatRange.InRange(transform, targetBoss.transform, range)) return true;
+            targetBoss.ShowExternalAlert("대상이 사거리 밖에 있습니다", Color.gray, 1.25f);
+            return false;
         }
 
         public void TriggerVampiricBladeHeal()

@@ -18,6 +18,7 @@ namespace RaidRogue
     /// </summary>
     public class BossAddMinion : MonoBehaviour
     {
+        [Min(0f)] public float combatRadius = 0.65f;
         [Header("Add Identity & Stats")]
         public AddMinionType addType = AddMinionType.PowerSupplier_BossTether;
         public string addDisplayName = "동력 공급체";
@@ -496,6 +497,8 @@ namespace RaidRogue
 
         public void ReceiveBotAttack(int damage, Transform source)
         {
+            var attacker = source != null ? source.GetComponent<PartyBotAI>() : null;
+            if (attacker != null && (attacker.role == PartyBotRole.Tank || attacker.role == PartyBotRole.MeleeDPS) && !attacker.CanMeleeHit(transform)) return;
             if (isDead) return;
 
             float hpBefore = currentHp;

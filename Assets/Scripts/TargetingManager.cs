@@ -174,6 +174,19 @@ namespace RaidRogue
             }
         }
 
+        public Transform GetLivingOffensiveTarget(BossController fallbackBoss)
+        {
+            if (currentTarget != null)
+            {
+                if (CombatRange.LivingEnemy(currentTarget)) return currentTarget;
+                if (!CombatRange.LivingPartyMember(currentTarget)) return null;
+                Transform enemy = GetTargetOfTarget(currentTarget);
+                if (CombatRange.LivingEnemy(enemy)) return enemy;
+            }
+            // Preserve Step 9's no-target / friendly-target boss fallback.
+            return fallbackBoss != null && CombatRange.LivingEnemy(fallbackBoss.transform) ? fallbackBoss.transform : null;
+        }
+
         public void AutoSwitchTargetAfterEnemyDeath()
         {
             // 살아있는 다른 쫄이 있으면 최우선 자동 타겟팅
@@ -796,7 +809,7 @@ namespace RaidRogue
                     if (c == null) continue;
 
                     float pickRadius = 1.65f;
-                    if (c.GetComponent<BossController>() != null) pickRadius = 3.1f;
+                    if (c.GetComponent<BossController>() != null) pickRadius = Mathf.Max(0.01f, CombatRange.Radius(c));
                     else if (c.GetComponent<BossAddMinion>() != null) pickRadius = 1.85f;
 
                     Vector2 cXZ = new Vector2(c.position.x, c.position.z);
@@ -973,9 +986,10 @@ namespace RaidRogue
 
             float baseRadius = 1.08f;
             float headHeight = 2.85f;
-            if (currentTarget.GetComponent<BossController>() != null)
+            BossController selectedBoss = currentTarget.GetComponent<BossController>();
+            if (selectedBoss != null)
             {
-                baseRadius = 2.45f;
+                baseRadius = selectedBoss.CombatRadius;
                 headHeight = 4.45f;
             }
             else if (currentTarget.GetComponent<BossAddMinion>() != null)
@@ -984,11 +998,16 @@ namespace RaidRogue
                 headHeight = 3.05f;
             }
 
-            float animatedRadius = baseRadius + Mathf.Sin(Time.unscaledTime * 6f) * 0.06f;
+            // Pulse only the color for bosses; the visible boundary must not change its hitbox size.
+            float animatedRadius = selectedBoss != null ? baseRadius : baseRadius + Mathf.Sin(Time.unscaledTime * 6f) * 0.06f;
 
             if (_outerSelectionRing != null)
             {
-                _outerSelectionRing.enabled = true;
+                // Preserve the boss's red/green/blue positional sectors instead of covering them in yellow.
+                // The overhead marker and target HUD still indicate selection; a ring is drawn as fallback.
+                bool hasBossPositionalRing = selectedBoss != null && selectedBoss.targetRing != null &&
+                    selectedBoss.targetRing.gameObject.activeInHierarchy;
+                _outerSelectionRing.enabled = !hasBossPositionalRing;
                 _outerSelectionRing.startColor = activeColor;
                 _outerSelectionRing.endColor = activeColor;
                 DrawCircleOnXZ(_outerSelectionRing, currentTarget.position, animatedRadius, 48, 0.07f);
@@ -996,7 +1015,7 @@ namespace RaidRogue
 
             if (_innerSelectionRing != null)
             {
-                _innerSelectionRing.enabled = true;
+                _innerSelectionRing.enabled = selectedBoss == null;
                 Color innerCol = new Color(baseColor.r, baseColor.g, baseColor.b, 0.55f);
                 _innerSelectionRing.startColor = innerCol;
                 _innerSelectionRing.endColor = innerCol;
@@ -1268,6 +1287,16 @@ namespace RaidRogue
             _targetHpText.text = $"{Mathf.CeilToInt(curHp):N0} / {Mathf.CeilToInt(maxHp):N0} ({Mathf.RoundToInt(ratio * 100f)}%){shieldStr}";
 
             _targetStatusText.text = GetUnitStatusSummary(currentTarget);
+            if (player != null && player.combatController != null && player.combatController.IsMeleeRole)
+            {
+                var combat = player.combatController;
+                Transform offensiveTarget = combat.GetOffensiveTarget();
+                string reach = offensiveTarget == null ? "유효한 공격 대상 없음" :
+                    CombatRange.InRange(player.transform, offensiveTarget, combat.PrimaryMeleeRange) ? "사거리 안" : "사거리 밖";
+                _targetStatusText.text = $"[1] {reach} | {_targetStatusText.text}";
+                _targetStatusText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                _targetStatusText.verticalOverflow = VerticalWrapMode.Truncate;
+            }
 
             Transform tot = GetTargetOfTarget(currentTarget);
             if (_totBoxRoot != null)
