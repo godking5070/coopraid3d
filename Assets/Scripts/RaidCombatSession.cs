@@ -142,7 +142,12 @@ namespace RaidRogue
                 member.Ready=false;SyncLobbyAvatar(member);avatar.RefreshJobLabel();ReconcileBots();return;
             }
             if(request.skill>=10 && (request.jobId!=character.Definition.id || request.skill==10&&!Enum.IsDefined(typeof(CharacterSlot),request.slot))) { ActionFailure(owner,"직업 또는 슬롯이 유효하지 않습니다");return; }
-            if(request.skill==11) { if(!character.Choose(request.ruleId,request.choiceId,out string reason))ActionFailure(owner,reason);return; }
+            if(request.skill==11)
+            {
+                if(!character.Choose(request.ruleId,request.choiceId,out string reason))ActionFailure(owner,reason);
+                else if(request.ruleId=="route"){var member=_roster.Members.Find(m=>m.Id==owner);if(member!=null){member.Ready=false;SyncLobbyAvatar(member);}}
+                return;
+            }
             if (request.skill == 7) { avatar.CombatTarget = CombatTarget(request.target); return; }
             if (request.skill == 9)
             {
@@ -191,6 +196,13 @@ namespace RaidRogue
         {
             if (Ending || !IsHost || (BattlePhase != RaidBattlePhase.Lobby && BattlePhase != RaidBattlePhase.Wiped && BattlePhase != RaidBattlePhase.Reward)) return;
             if (BattlePhase == RaidBattlePhase.Lobby && !CanStartLobby) return;
+            if(BattlePhase==RaidBattlePhase.Lobby)
+                foreach(var avatar in _avatars.Values)if(avatar.Automated&&!avatar.IsBot)
+                {
+                    var actor=CharacterActor.Ensure(avatar.gameObject);
+                    // A disconnected player who had not chosen an origin must not block departure.
+                    if(!actor.DepartureReady)actor.Choose("route",AegisRouteData.Bulwark,out _);
+                }
             if (!StageManager.Instance.PrepareNetworkEncounter(stage, retry)) return;
             BattleEpoch++; CountdownEnd = PhaseDeadline = 0;
             SetBattlePhase(RaidBattlePhase.Loading, retry ? "retry" : "prepare stage");

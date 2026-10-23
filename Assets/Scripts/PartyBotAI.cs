@@ -472,8 +472,9 @@ namespace RaidRogue
         /// <summary>
         /// Stage 3 복합 기믹: 보스 중심에서 외곽으로 강하게 밀쳐내는 넉백(Knockback)
         /// </summary>
-        public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f)
+        public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f, bool ignoreImmunity = false)
         {
+            if(RaidCombatAuthority.Replica||!CombatDamageRules.CanKnockback(GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0,ignoreImmunity))return;
             if (isDead || currentHp <= 0 || StageManager.CombatSuspended) return;
             if (isDead || _isBeingRescuedByPlayer)
             {
@@ -1173,7 +1174,7 @@ namespace RaidRogue
             }
         }
 
-        public void TakeDamage(float rawAmount, bool allowLethal = false)
+        public void TakeDamage(float rawAmount, bool allowLethal = false, CombatHitContext hit = default)
         {
             if (RaidCombatAuthority.Replica || isDead || currentHp <= 0 || rawAmount <= 0 || StageManager.CombatSuspended)
             {
@@ -1204,7 +1205,7 @@ namespace RaidRogue
                 absorbedByShield = Mathf.Min(currentShield, finalAmount);
                 currentShield -= absorbedByShield;
                 finalAmount -= absorbedByShield;
-                _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
+                _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit));
             }
 
             currentHp = Mathf.Max(0f, currentHp - finalAmount);
@@ -1258,6 +1259,7 @@ namespace RaidRogue
                 return;
             }
 
+            shieldAmount=CombatStatusEffects.ShieldAmount(shieldAmount,source!=null?source:transform);
             _metricsShields.Reconcile(currentShield);
             float shieldBefore = currentShield;
             currentShield = Mathf.Min(maxHp, currentShield + shieldAmount);

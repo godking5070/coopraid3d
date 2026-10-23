@@ -51,6 +51,8 @@ namespace RaidRogue
                 target.position.x, target.position.z), Radius(attacker), Radius(target), range);
         }
 
+        public static bool CircleTouches(Vector3 center,Transform target,float radius)=>target!=null&&CombatRangeMath.CircleTouches(CombatRangeMath.CenterDistance(center.x,center.z,target.position.x,target.position.z),Radius(target),radius);
+
         public static float RingRadius(Transform attacker, float range) => (float)CombatRangeMath.RingRadius(Radius(attacker), range);
 
         public static Vector3 AttackPosition(Transform attacker, Transform target, Vector3 direction, float range)

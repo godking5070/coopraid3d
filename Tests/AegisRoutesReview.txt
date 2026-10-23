@@ -1,0 +1,152 @@
+이지스 팔라딘 기원 3루트 / Z 구현 검토 보고
+
+1. 기준과 작업 위치
+- 기준: feature/aegis-paladin-basic / c4e99e25e9cb67e8b6dfecc5ff98548edd50e803.
+- 공통 기반: feature/character-framework / 9ed5788을 포함한 기본 스킬 최신 커밋에서 시작.
+- 작업: feature/aegis-paladin-routes.
+- worktree: C:/coopraid/coopraid3d-paladin-routes.
+- 원본 C:/coopraid/coopraid3d는 ingame-move-system / f80d0c5 유지. 시작 시 기록한 271개 파일 SHA-256 모두 일치, 사용자 미커밋 작업 보존.
+- 원본 적용, 병합, 원격 푸시를 하지 않음. worktree에서 Unity 실행, Library 생성/복사, 씬/프리팹 YAML 수정 없음. 패키지/프로젝트 설정 변경 없음.
+- 신규 코드의 .meta는 기본 스킬 브랜치의 기존 방식대로 원본 Unity import에서 생성. GUID를 임의로 작성하지 않음. 신규 코드는 런타임 생성되므로 인스펙터 참조 연결 불필요.
+
+2. 구현 구조
+- AegisRouteData: 안정된 기원/아이덴티티 ID, 초기 수치, 설명, 캐릭터별 효과 스냅샷, 가드/반사/추가 피해 정책.
+- CharacterRuntimeState: 출발 전 루트 변경, 이전 루트 해금 제거, 동적 사거리/GCD 배율을 검증/확정에 사용. 정의 데이터를 수정하지 않음.
+- AegisPaladin: 기존 스킬 처리기에 패시브와 Z 연결. 기존 보호막 장부, 적 HP 적용 지점, 전투 미터기를 재사용.
+- AegisRouteSelectionUI: 싱글/네트워크 대기실 공통 선택창. 현재 승인된 기원만 표시. 출발/준비 전에 선택 요구, 전투/보상 중 변경 거부. 변경 시 준비 해제.
+- 호스트의 기존 actor/sequence/epoch/lease 검증을 통과한 요청만 기존 공통 실행기로 전달. 피해/성공 여부를 클라이언트가 제출하지 않음.
+- 기존 jobState에 변신/가드/방향/반격 완료/반사 ICD를 포함. 자원/쿨타임/루트는 기존 character 스냅샷, 넉백 면역은 debuffs 스냅샷으로 복제. 수신은 상태 교체이며 효과 실행이 아님.
+- 네트워크 프로토콜 7 -> 8. 루트/아이덴티티 상태를 이해하지 못하는 이전 빌드와 접속하지 않도록 분리. 모든 참가자가 같은 빌드 필요.
+- 4Hz 핫바: 실제 키 바인딩, Z 이름/성광 비용/기본 CD/남은 CD/성광 부족/사망/효과 진행 구분. 현재 루트와 효과 남은 시간 표시.
+- 원래 3m 사거리 링은 변신 중 12m로 바뀌며, 대상 중심 3m 검기 범위는 별도 금색 링으로 표시. 방패가 보조 검으로 변하고, 가드 원뿔은 발동 때의 월드 방향을 유지.
+- 임시 대체 AI: 파티 방어 필요 시 성벽, 안전한 공격 기회에 집행관, 전방 직접 공격 임박 시 거울방패. 동일 자원/쿨타임 검증 적용. 검기 사거리가 늘어도 탱커 주차 위치는 기존 근접 위치 유지.
+- 선택 전에 연결이 끊긴 팔라딘을 호스트가 AI로 데리고 출발할 때만 불멸의 성벽을 기본 선택. 기존에 선택한 루트는 변경하지 않음.
+
+3. 실제 적용 수치 및 해석
+불멸의 성벽:
+- 최대 HP x1.2: 기본 3000 -> 3600. 루트 변경 시 현재 HP 비율 보존, 기본 스탯에서 재계산.
+- 생성 보호막 x1.5를 AddShield/AddTimedShield 공통 부여 지점에서 한 번만 적용.
+- GCD2 3타: 3600 x10% x1.5 = 540, 기존 5초.
+- E: 각 수신자 최대 HP x5% x1.5, 기존 반경 8m/6초. 기존 정화/도발 유지.
+- Z 아이기스의 성채: 성광 50, CD 1초. 시전자 최대 HP x20% x1.5 = 1080, 생존 파티 전원, 4초.
+- 기존 수신자 최대 HP 보호막 총량 상한 유지: 최대 HP 1000인 대상에게는 총 1000까지. 같은 제공자/스킬 보호막은 교체/갱신되며 무한 합산 안 됨.
+- 일반 넉백 면역 4초. 명시적 ignoreImmunity, 구출, 시스템 위치 설정은 영향을 받지 않음.
+
+태양의 집행관:
+- 기본 1/2/3/4의 실제 HP 감소분 x10% 태양 불꽃. 반사/추가/지속 피해를 통해 재발동하지 않음. 원 소유자/스킬 ID/피해 종류가 기존 미터기의 최근 확정 피해 기록에 남음.
+- Z 여명 각성 — 쌍성검: 성광 100, 지속 8초. 별도 CD는 명시되지 않아 중복 입력 방지용 1초로 설정. 변신 중 재사용 불가.
+- GCD1: 1.5/1.3 = 약 1.153846초, GCD2: 2.5/1.3 = 약 1.923077초. oGCD CD와 이미 진행 중인 GCD를 재설정하지 않음.
+- 두 콤보의 1/2/3타 모두 사거리 12m, 타겟 중심 반경 3m 광역 검기로 처리. 기존 위력/무력화 사용.
+- 3타 성광 +15, 해당 쿨타임 -1초, GCD2 보호막 등은 스킬 사용당 한 번. 각 적에게 발생한 실제 피해만 미터기에 집계.
+- 추가 피해는 이미 확정된 원 피해에서 산출하므로 취약/카드 배율을 두 번 곱하지 않음.
+
+응보의 거울방패:
+- 자신의 공급 보호막이 적 직접/장판 피해를 흡수하면 실제 공격자에게 흡수분 x25% 반사. 제공자별 ICD 1초, 1회 최대 HP x10% (기본 300).
+- 같은 공격에서 여러 보호막 조각이 흡수한 양을 제공자별 합산 후 반사. 보호막 생성/만료/제거는 발동하지 않음.
+- 실제 성공 카운터에 추가 무력화 60. 기본 카운터 40+100에 더해 총 200; 일반 타격은 기존 40 유지.
+- Z 절대 반사경 — 저스트 가드: 성광 30, CD 6초, 1.5초, 발동 방향 고정 전방 120도.
+- 가드 가능한 직접 공격을 0 피해로 막음. 보스/쫄 평타 및 탱크버스터를 직접 공격으로 연결. 장판/지속/반사/추가/지연/시스템 피해와 명시적 가드 무시는 차단하지 않음.
+- 첫 방어 피해의 50%, 최대 HP x20% (기본 600) 반격. 기준은 기존 방어 계산 후, 보호막/지연 분산 전의 직접 공격 피해.
+- 발동당 반격 한 번, 이후 직접 공격도 가드는 계속. 일반 반격 무력화 140 (기본 카운터 수준). 진짜 카운터 조건 충족 시 200/기존 성공 피드백.
+- 가드 성공만으로 COUNTER로 판정하지 않음. 현재 보스 패턴은 OpenWindow를 호출하지 않으므로 실제 카운터 성공 보너스는 후속 패턴 연결 때 사용됨. 신규 보스 패턴을 만들지 않음.
+
+공통 유지:
+- 기존 GCD/두 독립 콤보/3타 효과/성광 흡수 ICD/포션/2충전 대쉬/지연 피해 정책 유지.
+- 사망은 변신/가드/지연 피해를 정리하고 성광은 유지. 현재 보스 재도전/다음 스테이지는 기존 자원 초기화 정책 적용, 루트 유지. 새 런은 다시 선택.
+- AI/인간 제어 전환은 동일 개체의 상태를 이어받으며 재활성화하지 않음. 가드 반격 완료 플래그와 반사 ICD도 복원.
+- R/F/V, 다른 직업, 부활 코인/포션 수량/카드 종류/보스 패턴은 추가하지 않음.
+
+4. 검증 결과 / 수정 오류
+실행한 검사:
+- Tests/Run-SteamChecks.ps1 -OriginalProject C:/coopraid/coopraid3d
+- 총 107596 assertions 통과. 그중 신규 루트 전용 20262.
+- 공식 설치 SDK 관리 코드, 전체 Assembly-CSharp 및 Assembly-CSharp-Editor 컴파일 통과.
+- 기존 경고 CS0169 HealingSanctuaryZone._innerCross 한 건. 이번 변경의 컴파일 오류 없음.
+- git diff --check 통과. 원본 271개 파일의 시작/종료 해시 일치. worktree Library 없음.
+- 루트 단독 재실행: Tests/Run-AegisRouteChecks.ps1 (C# 9 이상 컴파일러/Visual Studio 필요, Unity 실행 불필요).
+
+검증 내용:
+- 루트 반복 변경 후 HP 비율/기본 스탯 유지, 다른 캐릭터와 상태 독립, 이전 Z 해금 제거.
+- 자원 부족/사망/행동 불가/쿨타임/효과 진행 중 요청의 무소모, GCD 중 Z, 재사용 중복 방지.
+- 보호막 보정/갱신/상한/흡수 제공자 합산/제거와 반사 ICD/상한/피해 분류.
+- 무작위 방향 5000개와 경계 각도의 가드, 지속 종료, 가드 무시, 한 번만 반격.
+- 변신 사거리와 GCD 복원, 진행 중 GCD 유지, 광역 실행 트랜잭션의 콤보/3타 효과 한 번 처리, 대형 적 판정 경계.
+- 재접속 스냅샷 복사/반복 수신/잘못된 상태 거부, 반격 완료/지연 피해/자원/쿨타임 유지, 사망/재도전/새 런 초기화.
+- 기존 네트워크 소유권/요청 중복/세션 전환/재접속/보상/설정/카메라/대쉬/미터기 회귀 검사.
+
+발견해서 수정한 문제:
+- 기본 공통 기반에서 루트 선택을 1회만 허용하던 제한을 출발 전 변경 가능하게 수정.
+- 기존 피해 입력에 공격자/종류가 없어 가드/반사 대상을 구분할 수 없던 경로 보완.
+- 보호막 조각별 콜백의 반사량 누락과 반응 중 전투 종료에 의한 장부 재진입 위험: 합산/소비 완료 후 콜백.
+- 공유 정의에 사거리/GCD를 바꾸는 대신 실행 컨텍스트로 주입하여 종료 후 원복/개체 간 누수를 방지.
+- 직업을 기존 탱커로 되돌릴 때 최대 HP 보정 및 공급한 보호 효과가 남는 경로 수정.
+- 초기 미선택 Z가 루트 기본 ID와 같을 때 유효한 복원 상태를 거부하던 새 검사 오류 수정.
+- 20% HP 보정의 float 오차로 UI에 3601이 보일 수 있어 최대 HP 계산 정밀도 정리.
+- 신규 광역 코드의 지역 변수 이름 중복 컴파일 오류 수정.
+- 대기실 팔라딘 버튼/Steam 상태 겹침, 긴 역할/루트 문구, 설정/ESC 아래 창 입력 전달 보완.
+- 가드한 직접 공격 뒤의 별도 평타 카드 피격 반응을 막고, 줄 탱크버스터 가드 성공에 큰 피해/실패 문구가 표시되던 안내 경로 보완.
+
+5. 실행하지 않은 확인 / 제한
+- Unity Play Mode, 실제 렌더링/글자 배치/2D·3D 외형, 물리 넉백, 실제 프레임 순서에서의 카운터/동시 보스 처치, 실제 LAN/Steam 왕복은 실행하지 않음.
+- 원본은 사용자 미커밋 작업을 보존하여 변경을 반영하지 않았고, 작업 worktree의 Unity 실행은 금지되어 있으므로 이 코드의 엔진 실행은 하지 않음.
+- 서로 다른 Steam 계정/동일 신규 빌드로 실행한 환경이 없음. 가짜 native 경계의 Transport 검사 성공을 실제 Steam 성공으로 간주하지 않음.
+- 기본 보스에는 명시적 카운터 가능 창이 없음. 일반 가드는 동작하도록 구현했지만 실제 보스의 COUNTER 성공 연출은 패턴 담당자의 OpenWindow 연결 후 확인 필요.
+- UI와 네트워크 기능은 코드/컴파일/순수 정책 검증을 통과한 상태이며 실제 다중 프로세스 플레이는 아래 절차로 확인 필요.
+
+6. 원본 Unity에서 확인할 순서
+- 현재 원본 미커밋 작업을 먼저 보존/검토하고, 기본 스킬 기준 커밋이 포함된 원본에 이번 변경을 통합한다. 이 작업에서는 자동 반영/병합하지 않았다. worktree를 Unity로 열지 않는다.
+- 원본에서 자동 import/.meta 생성과 컴파일을 확인한다. 씬/프리팹/인스펙터 연결 작업은 필요 없다.
+- 싱글플레이 -> 이지스 팔라딘 -> 세 기원을 번갈아 선택. HP 3000/3600 전환, 선택 전 출발 불가, 선택 후 출발 확인. 기원 변경 시 현재 HP 비율 유지.
+- 1/2 콤보와 E 보호막으로 성광을 모은다. 부족할 때 Z가 비용/CD를 쓰지 않는지, 키 변경 후 실제 바인딩으로 작동하는지 확인.
+- 성벽: 50 이상에서 Z, 생존 4명 보호막/4초 면역/잔여 표시, 일반 넉백 무시 후 만료 복구. GCD2/E와 보호막 갱신/상한 확인.
+- 집행관: 100에서 Z, 8초간 두 콤보/12m·3m 광역/보조 검/1.153846·1.923077 GCD 확인. 쫄 여러 마리 동시 적중에도 3타 성광 +15만 증가. 종료 뒤 3m/기본 GCD/방패 복원.
+- 거울방패: 보호막 흡수 시 실제 공격자에게 25% 반사/1초 ICD. 30에서 Z를 평타·탱크버스터 직전에 사용. 전방/후방, 가드 중 이동·회전, 여러 타격에 반격 한 번, 장판과 Q 지연 피해가 가드되지 않는지 확인.
+- 죽음/부활, 전멸/현재 보스 재도전, 다음 스테이지, 메뉴 복귀/새 런을 확인. 선택한 기원 유지 범위와 성광/쿨타임/임시 효과 초기화 확인.
+- 두 Steam 계정 또는 기존 다중 플레이어 실행/원본에서 만든 테스트 빌드로 호스트와 클라이언트를 실행. 모두 프로토콜 8 빌드 사용. 루트 선택 승인이 두 화면에 일치하고 변경 시 준비가 해제되는지 확인.
+- 클라이언트가 팔라딘일 때 각각의 Z를 사용하여 비용/피해/보호막/가드/쿨타임/미터기가 한 번만 적용되는지 확인. 호스트 팔라딘도 별도 확인.
+- 변신/가드/보호막/지연 피해 중 클라이언트 연결을 끊고 AI가 이어서 행동하는지, 60초 안에 같은 계정으로 복귀해 현재 남은 상태를 받는지 확인. 복귀로 재발동/치유/성광 환급이 없는지 확인.
+- 재도전/보상/다음 스테이지 중 복귀, 메뉴/호스트 종료 후 다시 접속을 확인. 모든 플레이어의 카메라/키 설정은 로컬로 유지되어야 한다.
+
+7. 다음 R/F 작업의 연결점
+- stable slot: CharacterSlot.Active / OffGcd2. CharacterDefinition.unlocks에 afterStage/choices를 정의하고 기존 호스트 CharacterActor.Choose 및 공통 스킬 실행기를 사용.
+- 패시브 보정은 공통 ShieldAmount/실행 컨텍스트, 반응 피해는 CombatHitContext/CombatDamageKind/CombatSecondaryDamage로 분류. 새 추가타가 Sun/Reflection으로 재귀하지 않도록 유지.
+- 스킬별 쿨타임 감소에는 stable skill ID 사용. 루트 공용 정의에 사용자별 값을 저장하지 않음.
+- 지속 상태를 추가하면 AegisStateSnapshot과 유효성 검사/스냅샷 복원/사망·재도전 정책/복귀 테스트를 함께 확장.
+- 실제 카운터 가능한 보스 패턴은 기존 CombatCounterTarget.OpenWindow와 직접 피해 분류를 명시적으로 연결. 이번 작업에서는 패턴을 추가하지 않음.
+
+변경 파일 목록
+Assets/Scripts/AegisPaladin.cs
+Assets/Scripts/AegisPaladinData.cs
+Assets/Scripts/AegisRouteData.cs
+Assets/Scripts/AegisRouteSelectionUI.cs
+Assets/Scripts/BossAddSpawner.cs
+Assets/Scripts/BossController.cs
+Assets/Scripts/CharacterActor.cs
+Assets/Scripts/CharacterFrameworkUI.cs
+Assets/Scripts/CharacterRuntimeState.cs
+Assets/Scripts/CombatHitContext.cs
+Assets/Scripts/CombatMetricsData.cs
+Assets/Scripts/CombatMetricsManager.cs
+Assets/Scripts/CombatRange.cs
+Assets/Scripts/CombatRangeMath.cs
+Assets/Scripts/CombatStatusEffects.cs
+Assets/Scripts/LocalCameraSettingsUI.cs
+Assets/Scripts/LocalGameplayInput.cs
+Assets/Scripts/PartyBotAI.cs
+Assets/Scripts/PartyListUI.cs
+Assets/Scripts/PlayerAttackRangeDisplay.cs
+Assets/Scripts/PlayerController.cs
+Assets/Scripts/RaidCombatSession.cs
+Assets/Scripts/RaidConnectionUI.cs
+Assets/Scripts/RaidLobbySession.cs
+Assets/Scripts/RaidNetworkProtocol.cs
+Assets/Scripts/RaidReplacementAI.cs
+Assets/Scripts/RoleSelectionManager.cs
+Assets/Scripts/StageManager.cs
+Tests/AegisPaladinTests.cs
+Tests/AegisRouteTests.cs
+Tests/AegisRoutesProgress.txt
+Tests/AegisRoutesReview.txt
+Tests/CharacterFrameworkTests.cs
+Tests/Run-AegisRouteChecks.ps1
+Tests/Run-SteamChecks.ps1

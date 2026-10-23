@@ -494,8 +494,9 @@ namespace RaidRogue
         /// <summary>
         /// Step 6 Stage 3 복합 기믹: 보스 중심에서 외곽 방향으로 강하게 밀쳐내는 넉백(Knockback) 발동
         /// </summary>
-        public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f)
+        public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f, bool ignoreImmunity = false)
         {
+            if(!CombatDamageRules.CanKnockback(GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0,ignoreImmunity))return;
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             if (_isBeingRescued)
             {
@@ -796,6 +797,7 @@ namespace RaidRogue
                 return;
             }
 
+            shieldAmount=CombatStatusEffects.ShieldAmount(shieldAmount,source!=null?source:transform);
             _metricsShields.Reconcile(currentShield);
             float shieldBefore = currentShield;
             currentShield = Mathf.Min(maxHp, currentShield + shieldAmount);
@@ -808,12 +810,16 @@ namespace RaidRogue
             );
         }
 
-        public void TakeDamage(float rawDamage)
+        public bool LastHitGuarded {get;private set;}
+        public void TakeDamage(float rawDamage, CombatHitContext hit = default)
         {
+            LastHitGuarded=false;
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
             if (Potion != null && Potion.HasRevivalProtection) return;
             ExpireTimedShields();
             float finalDamage = CalculateFinalDamageTaken(rawDamage);
+            var aegis = GetComponent<AegisPaladin>();
+            if(aegis!=null&&aegis.TryGuard(hit,finalDamage)){LastHitGuarded=true;return;}
             float absorbedByShield = 0f;
 
             if (currentShield > 0f && finalDamage > 0f)
@@ -822,15 +828,14 @@ namespace RaidRogue
                 absorbedByShield = Mathf.Min(currentShield, finalDamage);
                 currentShield -= absorbedByShield;
                 finalDamage -= absorbedByShield;
-                _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
+                _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit));
             }
 
-            var aegis = GetComponent<AegisPaladin>();
             if (aegis != null && aegis.IsActive) finalDamage = (float)aegis.DamageState.Split(finalDamage);
             currentHp = Mathf.Max(0f, currentHp - finalDamage);
 
             // 가디언(탱커) 또는 생존기 발동 중 [가시 갑옷] 카드 보유 시 피격 반사 피해
-            if (hasThornArmor && (IsDefensiveBuffActive || currentRole == PlayerRole.Guardian_Tank) && targetBoss != null)
+            if (CombatDamageRules.CanReact(hit.Kind) && hasThornArmor && (IsDefensiveBuffActive || currentRole == PlayerRole.Guardian_Tank) && targetBoss != null)
             {
                 int reflect = Mathf.RoundToInt(thornReflectDamage * (IsDefensiveBuffActive ? 0.6f : 0.25f));
                 if (reflect > 0)

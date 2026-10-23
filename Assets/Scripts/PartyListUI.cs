@@ -512,6 +512,7 @@ namespace RaidRogue
                     string suffix = state.dead ? " · 사망" : state.protection > 0 ? " · 부활 보호" : state.resurrecting ? " · 부활 시전" : state.casting ? " · " + state.castName : "";
                     if (!state.dead && state.defense > 0) suffix += " · 방어";
                     if (!state.dead && state.haste > 0) suffix += " · 가속";
+                    if(!state.dead)suffix+=RouteEffectLabel(row.boundTarget);
                     if (RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Reward) suffix = avatar.IsBot ? " · AI" : state.rewardChosen ? " · 선택 완료" : " · 카드 선택 중";
                     string connection = RaidNetworkSession.Instance.ConnectionLabel(state);
                     row.hpValueText.text = $"{state.hp:0}/{state.maxHp:0} (+{state.shield:0}){suffix}";
@@ -606,10 +607,21 @@ namespace RaidRogue
             if (row.hpValueText != null)
             {
                 string shieldTxt = curShield > 0.5f ? $" <color=#FFEE33>(+{Mathf.RoundToInt(curShield)})</color>" : "";
-                row.hpValueText.text = $"HP {Mathf.CeilToInt(curHp)}/{Mathf.CeilToInt(maxHp)}{shieldTxt}";
+                row.hpValueText.text = $"HP {Mathf.CeilToInt(curHp)}/{Mathf.CeilToInt(maxHp)}{shieldTxt}"+(!isDead?RouteEffectLabel(row.boundTarget):"");
             }
         }
 
+        private static string RouteEffectLabel(Transform member)
+        {
+            if(member==null)return "";
+            float protection=member.GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0;
+            var paladin=member.GetComponent<AegisPaladin>();
+            if(protection>0)return " · 성채 "+protection.ToString("0.0")+"s";
+            if(paladin?.IsActive!=true)return "";
+            if(paladin.DamageState.Route.Guard>0)return " · 가드 "+paladin.DamageState.Route.Guard.ToString("0.0")+"s";
+            if(paladin.Transformed)return " · 쌍성검 "+paladin.DamageState.Route.Transformation.ToString("0.0")+"s";
+            return "";
+        }
         private static void GetPlayerRoleBadge(PlayerRole role, out string badgeCode, out Color color)
         {
             switch (role)

@@ -96,7 +96,7 @@ internal static class CharacterFrameworkTests
     static void GrowthAndReset()
     {
         var a=new CharacterRuntimeState(Definition());
-        Check(!a.ChooseRoute("route.b",false)&&a.ChooseRoute("route.b",true)&&!a.ChooseRoute("route.a",true),"route only before departure once");
+        Check(!a.ChooseRoute("route.b",false)&&a.ChooseRoute("route.b",true)&&a.ChooseRoute("route.a",true)&&a.ChooseRoute("route.b",true),"route changes only before departure");
         Check(a.Unlocked(CharacterSlot.Identity)&&a.Selected(CharacterSlot.Identity).id=="identity.b","route unlocks and selects Z");
         Check(!a.ChooseSkill("s1","active"),"stage unlock before clear rejected");a.ClearedStage(1);
         Check(a.ChooseSkill("s1","active")&&!a.ChooseSkill("s1","active")&&!a.ChooseSkill("s2","off"),"stage1 one-time R");

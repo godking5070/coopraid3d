@@ -43,18 +43,19 @@ namespace RaidRogue
             _recover = ButtonAt(_start.transform, "이전 게임으로 복귀", new Vector2(0, -180), new Vector2(400, 42), () => RaidSteamRuntime.Instance?.RequestRecovery());
             Label(_start.transform, "Steam 친구 초대는 오버레이에서 수락 · LAN 테스트는 주소로 참가\n최대 4명 · 빈 역할은 호스트 AI가 담당", new Vector2(0, -245), new Vector2(820, 70), 18);
             _room = Rect(overlay, "RoomOptions", Vector2.zero, new Vector2(800, 380)).gameObject;
-            _roster = Label(_room.transform, "", new Vector2(0, 85), new Vector2(850, 160), 20);
+            _roster = Label(_room.transform, "", new Vector2(0, 80), new Vector2(850, 150), 18);
+            _roster.resizeTextForBestFit=true;_roster.resizeTextMinSize=12;_roster.resizeTextMaxSize=18;
             for (int i = 0; i < 4; i++)
             {
                 int role = i + 1;
                 _roles[i] = ButtonAt(_room.transform, CombatMetricsManager.RoleName(role), new Vector2(-285 + i * 190, -40), new Vector2(180, 62), () => _session.SelectRole(role));
             }
-            _aegis=ButtonAt(_room.transform,"이지스 팔라딘 · 기본 구현 탱커",new Vector2(0,200),new Vector2(540,46),()=>_session.RequestCharacterAction(12,AegisPaladinData.JobId,0));
-            _ready = ButtonAt(_room.transform, "준비", new Vector2(-170, -105), new Vector2(325, 45), _session.ToggleReady);
-            _invite = ButtonAt(_room.transform, "친구 초대", new Vector2(170, -105), new Vector2(325, 45), () => RaidSteamRuntime.Instance?.InviteFriends());
-            _beginBattle = ButtonAt(_room.transform, "전투 시작 (호스트)", new Vector2(-170, -165), new Vector2(325, 48), () => _session.RequestAction(9));
-            ButtonAt(_room.transform, "화면으로 돌아가기", new Vector2(170, -165), new Vector2(325, 48), () => _session.MenuOpen = false);
-            ButtonAt(_room.transform, "방 나가기 · 시작 화면", new Vector2(0, -225), new Vector2(470, 48), _session.Disconnect);
+            _aegis=ButtonAt(_room.transform,"이지스 팔라딘 · 직업 / 기원 선택",new Vector2(0,-105),new Vector2(540,46),AegisRouteSelectionUI.OpenNetwork);
+            _ready = ButtonAt(_room.transform, "준비", new Vector2(-170, -160), new Vector2(325, 45), _session.ToggleReady);
+            _invite = ButtonAt(_room.transform, "친구 초대", new Vector2(170, -160), new Vector2(325, 45), () => RaidSteamRuntime.Instance?.InviteFriends());
+            _beginBattle = ButtonAt(_room.transform, "전투 시작 (호스트)", new Vector2(-170, -215), new Vector2(325, 48), () => _session.RequestAction(9));
+            ButtonAt(_room.transform, "화면으로 돌아가기", new Vector2(170, -215), new Vector2(325, 48), () => _session.MenuOpen = false);
+            ButtonAt(_room.transform, "방 나가기 · 시작 화면", new Vector2(0, -275), new Vector2(470, 48), _session.Disconnect);
             var confirm = Box(canvas.transform, "SteamInviteConfirmation", Vector2.zero, Vector2.zero, new Color(.02f, .03f, .05f, .98f));
             confirm.anchorMin = Vector2.zero; confirm.anchorMax = Vector2.one; confirm.offsetMin = confirm.offsetMax = Vector2.zero;
             _confirmation = confirm.gameObject;
@@ -133,7 +134,7 @@ namespace RaidRogue
                 foreach (var avatar in _session.Avatars.Values)
                 {
                     if (avatar.IsBot && _session.CanChooseRole) continue;
-                    _roster.text += $"{avatar.DisplayName}{(avatar.Id == 1 ? " [호스트]" : "")}{(avatar.IsLocal ? " (나)" : "")} · {avatar.RoleName} · {(avatar.IsBot ? "AI" : avatar.Automated ? _session.ConnectionLabel(avatar.State) : avatar.Ready ? "준비 완료" : "준비 전")} · {(avatar.IsBot || avatar.Automated ? "" : avatar.Loaded ? "연결 완료" : "로딩 중")}\n";
+                    _roster.text += $"{avatar.DisplayName}{(avatar.Id == 1 ? " [호스트]" : "")}{(avatar.IsLocal ? " (나)" : "")} · {avatar.RoleName}{(avatar.GetComponent<AegisPaladin>()?.IsActive==true?" / "+avatar.GetComponent<AegisPaladin>().RouteName:"")} · {(avatar.IsBot ? "AI" : avatar.Automated ? _session.ConnectionLabel(avatar.State) : avatar.Ready ? "준비 완료" : "준비 전")} · {(avatar.IsBot || avatar.Automated ? "" : avatar.Loaded ? "연결 완료" : "로딩 중")}\n";
                 }
                 if (_session.UsesSteam && steam != null)
                     foreach (ulong id in steam.Members())

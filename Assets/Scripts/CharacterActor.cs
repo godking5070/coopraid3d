@@ -14,7 +14,11 @@ namespace RaidRogue
         private int _role; private int _preservedDashFrame = -1; private Transform _singleCastTarget;
         private Vector3 _previous;
         private readonly Dictionary<string, Func<CharacterSkillDefinition, Transform, bool>> _handlers = new Dictionary<string, Func<CharacterSkillDefinition, Transform, bool>>();
-        public float PrimaryRange => _state?.Selected(CharacterSlot.Gcd1)?.range ?? 0;
+        public float PrimaryRange => EffectiveRange(_state?.Selected(CharacterSlot.Gcd1));
+        public float EffectiveRange(CharacterSkillDefinition skill)=>GetComponent<AegisPaladin>()?.EffectiveRange(skill)??skill?.range??0;
+        public CharacterSkillDefinition Selected(CharacterSlot slot)=>_state?.Selected(slot);
+        public string RouteId=>_state?.RouteId??"";
+        public bool DepartureReady=>Definition!=null&&(Definition.id!=AegisPaladinData.JobId||!string.IsNullOrEmpty(RouteId));
         public CharacterDefinition Definition => _state?.Definition;
         public CharacterStateSnapshot Snapshot { get { SyncLegacy(); return _state?.Snapshot; } }
         public static CharacterActor Ensure(GameObject actor)
@@ -45,13 +49,17 @@ namespace RaidRogue
             if(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole)return false;
             if(definition.id==AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
             foreach(var skill in definition.skills) if(skill.implemented&&skill.legacyAction==0&&skill.handlerId!="legacy.dash"&&!_handlers.ContainsKey(skill.handlerId))return false;
+            GetComponent<AegisPaladin>()?.ReleaseRouteEffects();
             _state=new CharacterRuntimeState(definition); _role=definition.legacyRole;
             if(_player!=null){_player.maxHp=_player.currentHp=definition.baseHp;_player.combatRadius=definition.combatRadius;_player.moveSpeed=definition.moveSpeed;_player.playerRoleDisplayName=definition.name;_player.SetNetworkDisplayName(definition.name,NetworkRaidAvatar.RoleColor(1));}
             return true;
         }
         public void UseLegacyRole()
         {
-            if(RaidCombatAuthority.Replica)return;_state=null;_role=0;BindLegacy();GetComponent<AegisPaladin>()?.ClearTransient();
+            if(RaidCombatAuthority.Replica)return;
+            GetComponent<AegisPaladin>()?.ReleaseRouteEffects();
+            if(Definition?.legacyRole==0&&_player!=null)_player.ApplyRoleStatsAndVisuals(_player.currentRole,true);
+            _state=null;_role=0;BindLegacy();
         }
         public void ReduceCooldowns(string[] ids,float seconds){if(!RaidCombatAuthority.Replica)_state?.ReduceCooldowns(ids,seconds);}
         public void OnDeath()
@@ -73,8 +81,9 @@ namespace RaidRogue
             if(RaidCombatAuthority.Replica||_state==null)return false;
             bool lobby=RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Lobby:StageManager.Instance!=null&&StageManager.Instance.CanSelectInitialRole;
             bool reward=RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Reward:StageManager.Instance?.Progress.Phase==RaidBattlePhase.Reward;
+            string previousRoute=RouteId;
             bool ok=rule=="route"?_state.ChooseRoute(choice,lobby):reward&&_state.ChooseSkill(rule,choice);
-            if(ok)reason="";return ok;
+            if(ok){reason="";if(rule=="route"&&previousRoute!=RouteId)GetComponent<AegisPaladin>()?.ApplyRouteChoice();}return ok;
         }
         public void RequestChoice(string rule,string choice)
         {
@@ -94,6 +103,7 @@ namespace RaidRogue
             reason="호스트만 전투를 확정할 수 있습니다";
             if(RaidCombatAuthority.Replica||!Available(slot,out reason))return false;
             var skill=_state.Selected(slot);
+            if(slot==CharacterSlot.Identity&&GetComponent<AegisPaladin>()?.IdentityBlocked==true){reason="아이덴티티 효과가 이미 진행 중입니다";return false;}
             if(skill.legacyAction>0)
             {
                 if(_player==null){reason="이 캐릭터는 기존 AI 전투 처리기를 사용합니다";return false;}
@@ -121,7 +131,7 @@ namespace RaidRogue
             if(skill.target==SkillTargetRule.LivingAlly)valid=CombatRange.LivingPartyMember(target);
             if(skill.target==SkillTargetRule.DeadAlly)valid=target!=null&&PartyLife.OrderedMembers().Contains(target)&&target.GetComponent<PartyLife>()?.IsDead==true;
             float distance=valid&&target!=null&&skill.target!=SkillTargetRule.Self&&skill.target!=SkillTargetRule.None?CombatRange.BoundaryDistance(transform,target):0;
-            return new CharacterUseContext(alive,can,valid,distance,_player!=null&&_player.IsMovingXZ&&!PreservesCastWhileDashing);
+            return new CharacterUseContext(alive,can,valid,distance,_player!=null&&_player.IsMovingXZ&&!PreservesCastWhileDashing,EffectiveRange(skill),GetComponent<AegisPaladin>()?.GcdScale(skill)??1);
         }
         private void Update()
         {

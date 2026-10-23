@@ -113,7 +113,7 @@ namespace RaidRogue
 
         public void BeginSingleRun()
         {
-            if (!CanSelectInitialRole || !PrepareEncounter(1, false, true)) return;
+            if (!CanSelectInitialRole || player==null || !CharacterActor.Ensure(player.gameObject).DepartureReady || !PrepareEncounter(1, false, true)) return;
             StartCoroutine(PreparedCountdown(Progress.Revision));
         }
         private bool PrepareEncounter(int stage, bool retry, bool newRun = false)

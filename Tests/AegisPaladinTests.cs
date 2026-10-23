@@ -18,7 +18,7 @@ public static class AegisPaladinTests
         Check(!CharacterCatalog.Register(definition,out _,true),"duplicate registration rejected");
         Check(CharacterCatalog.All.Count(d=>!d.playable)==11,"only paladin newly playable");
         Check(CharacterSlots.Binding(CharacterSlot.Job1)=="Skill4"&&CharacterSlots.Binding(CharacterSlot.Potion)=="Potion","Q job and X potion use distinct existing binding actions");
-        Check(definition.skills.Count(s=>s.implemented)==8,"seven class skills plus existing potion");
+        Check(definition.slots.Count(s=>s.initiallyUnlocked&&definition.Skill(s.skillId).implemented)==8,"seven class skills plus existing potion");
         var a=new CharacterRuntimeState(definition);var b=new CharacterRuntimeState(definition);
         foreach(var slot in new[]{CharacterSlot.Identity,CharacterSlot.Active,CharacterSlot.OffGcd2,CharacterSlot.Ultimate})Check(!Use(a,slot),"future skill locked");
         Near(a.Resource(AegisPaladinData.Holy),0,"locked skills don't spend/gain resource");

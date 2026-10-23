@@ -365,7 +365,7 @@ namespace RaidRogue
             PlayerController pc = aggroTarget.GetComponent<PlayerController>();
             if (pc != null)
             {
-                pc.TakeDamage(attackDamage);
+                pc.TakeDamage(attackDamage,new CombatHitContext(transform,"add.direct",CombatDamageKind.Direct));
                 FloatingTextPopup.Spawn(
                     pc.transform.position + Vector3.up * 2.4f,
                     $"암살자 기습 피격! (-{Mathf.RoundToInt(attackDamage)})",
@@ -378,7 +378,7 @@ namespace RaidRogue
             PartyBotAI bot = aggroTarget.GetComponent<PartyBotAI>();
             if (bot != null && !bot.isDead)
             {
-                bot.TakeDamage(attackDamage);
+                bot.TakeDamage(attackDamage,hit:new CombatHitContext(transform,"add.direct",CombatDamageKind.Direct));
                 FloatingTextPopup.Spawn(
                     bot.transform.position + Vector3.up * 2.4f,
                     $"암살자 기습! ({bot.botDisplayName} 피격!)",
@@ -436,16 +436,13 @@ namespace RaidRogue
             int damage,
             Color popupColor,
             bool isBigHighlight = false,
-            Transform source = null)
+            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct)
         {
             if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             float mult = ownerBoss != null ? ownerBoss.DamageTakenMultiplier : 1.0f;
             int finalDmg = Mathf.RoundToInt(damage * mult);
-            float hpBefore = currentHp;
-            currentHp = Mathf.Max(0f, currentHp - finalDmg);
-            if (currentHp <= 0.1f) currentHp = 0f;
-            CombatMetricsManager.Damage(source != null ? source : (ownerBoss != null ? ownerBoss.targetPlayer : null), hpBefore, currentHp, true);
+            ApplyAddHpDamage(finalDmg,source != null ? source : (ownerBoss != null ? ownerBoss.targetPlayer : null),origin,kind);
 
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * 2.35f,
@@ -478,16 +475,25 @@ namespace RaidRogue
             if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
-            float hpBefore = currentHp;
-            currentHp = Mathf.Max(0f, currentHp - damage);
-            if (currentHp <= 0.1f) currentHp = 0f;
-            CombatMetricsManager.Damage(source, hpBefore, currentHp, true);
+            ApplyAddHpDamage(damage,source);
             if (currentHp <= 0.1f)
             {
                 KillAddMinion(silent: false);
             }
         }
 
+        private float ApplyAddHpDamage(float amount,Transform source,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
+        {
+            if(RaidCombatAuthority.Replica||isDead||StageManager.CombatSuspended||amount<=0)return 0;
+            float before=currentHp;currentHp=Mathf.Max(0,currentHp-amount);if(currentHp<=.1f)currentHp=0;
+            CombatMetricsManager.Damage(source,before,currentHp,true,origin,kind);return before-currentHp;
+        }
+        public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind)
+        {
+            float actual=ApplyAddHpDamage(amount,source,origin,kind);
+            if(actual>0)FloatingTextPopup.Spawn(transform.position+Vector3.up*2.6f,(kind==CombatDamageKind.Extra?"태양 불꽃 ":"반사 ")+actual.ToString("0.#"),Color.yellow,false);
+            if(currentHp<=0&&!isDead)KillAddMinion(false);return actual;
+        }
         public void KillAddMinion(bool silent)
         {
             if (isDead) return;

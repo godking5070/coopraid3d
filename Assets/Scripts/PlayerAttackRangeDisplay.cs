@@ -8,7 +8,7 @@ namespace RaidRogue
     {
         public bool showRange = true;
         private PlayerCombatController _combat;
-        private LineRenderer _ring;
+        private LineRenderer _ring,_aoe;
         private Material _material;
         private Text _feedback;
         private const int Segments = 96;
@@ -31,6 +31,8 @@ namespace RaidRogue
             _material = new Material(shader);
             _ring.sharedMaterial = _material;
             _ring.enabled = false;
+            var aoe=new GameObject("Aegis_TargetArea_Preview");aoe.transform.SetParent(transform,false);_aoe=aoe.AddComponent<LineRenderer>();
+            _aoe.useWorldSpace=true;_aoe.loop=true;_aoe.positionCount=Segments;_aoe.startWidth=_aoe.endWidth=.045f;_aoe.sharedMaterial=_material;_aoe.enabled=false;
         }
 
         private void LateUpdate()
@@ -54,6 +56,14 @@ namespace RaidRogue
                     _ring.SetPosition(i, new Vector3(transform.position.x + Mathf.Sin(radians) * radius, 0.08f,
                         transform.position.z + Mathf.Cos(radians) * radius));
                 }
+            }
+            var paladin=GetComponent<AegisPaladin>();var areaTarget=_combat.GetOffensiveTarget();
+            _aoe.enabled=_ring.enabled&&paladin?.Transformed==true&&CombatRange.LivingEnemy(areaTarget);
+            if(_aoe.enabled)
+            {
+                float radius=AegisRouteData.SunRadius;bool valid=CombatRange.InRange(transform,areaTarget,_combat.PrimaryMeleeRange);
+                _aoe.startColor=_aoe.endColor=valid?new Color(1,.8f,.3f,.55f):new Color(.6f,.55f,.4f,.3f);
+                for(int i=0;i<Segments;i++){float angle=i*Mathf.PI*2/Segments;_aoe.SetPosition(i,new Vector3(areaTarget.position.x+Mathf.Sin(angle)*radius,.10f,areaTarget.position.z+Mathf.Cos(angle)*radius));}
             }
             if (_feedback != null) _feedback.text = _combat.HasRangeFeedback ? _combat.RangeFeedback : "";
         }
@@ -87,7 +97,7 @@ namespace RaidRogue
             return text;
         }
 
-        private void OnDisable() { if (_ring != null) _ring.enabled = false; }
+        private void OnDisable() { if (_ring != null) _ring.enabled = false;if(_aoe!=null)_aoe.enabled=false; }
         private void OnDestroy()
         {
             if (_material != null) Destroy(_material);

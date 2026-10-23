@@ -30,9 +30,9 @@ namespace RaidRogue
     public readonly struct CharacterUseContext
     {
         public readonly bool Alive, CanAct, ValidTarget, Moving;
-        public readonly float BoundaryDistance;
-        public CharacterUseContext(bool alive,bool canAct,bool target,float distance,bool moving=false)
-        { Alive=alive;CanAct=canAct;ValidTarget=target;BoundaryDistance=distance;Moving=moving; }
+        public readonly float BoundaryDistance, EffectiveRange, GcdScale;
+        public CharacterUseContext(bool alive,bool canAct,bool target,float distance,bool moving=false,float effectiveRange=-1,float gcdScale=1)
+        { Alive=alive;CanAct=canAct;ValidTarget=target;BoundaryDistance=distance;Moving=moving;EffectiveRange=effectiveRange;GcdScale=gcdScale; }
     }
     // Mutable per actor, pure transaction state. Damage/healing/movement remain in existing effect handlers.
     public sealed class CharacterRuntimeState
@@ -40,6 +40,7 @@ namespace RaidRogue
         public CharacterDefinition Definition { get; }
         private CharacterStateSnapshot _data;
         public CharacterStateSnapshot Snapshot => _data.Copy();
+        public string RouteId=>_data.routeId;
         public CharacterRuntimeState(CharacterDefinition definition)
         {
             if (definition==null) throw new ArgumentNullException(nameof(definition));
@@ -66,7 +67,7 @@ namespace RaidRogue
             else if(skill==null||!Unlocked(slot))reason="잠긴 슬롯입니다";
             else if(!skill.implemented)reason="아직 구현되지 않은 스킬입니다";
             else if(!context.ValidTarget)reason="유효한 대상이 필요합니다";
-            else if(!CharacterDefinitionValidation.Finite(context.BoundaryDistance)||context.BoundaryDistance>skill.range+.0001f)reason="대상이 사거리 밖에 있습니다";
+            else if(!CharacterDefinitionValidation.Finite(context.BoundaryDistance)||context.BoundaryDistance>(context.EffectiveRange>=0?context.EffectiveRange:skill.range)+.0001f)reason="대상이 사거리 밖에 있습니다";
             else if(skill.usesGcd&&_data.gcd>0)reason="공유 GCD 중입니다";
             else if(!completing&&_data.castSkillId.Length>0&&(!skill.usableWhileCasting||skill.castTime>0))reason="시전 중입니다";
             else if(Array.Find(_data.skills,s=>s.id==skill.id).charges<1)reason="충전/쿨타임 대기 중입니다";
@@ -83,9 +84,9 @@ namespace RaidRogue
             if(!Validate(slot,context,out reason))return false;
             var skill=Selected(slot);
             if(skill.castTime>0){_data.castSkillId=skill.id;_data.castTarget=target;_data.castRemaining=_data.castTotal=skill.castTime;return true;}
-            return Commit(skill,apply,out reason);
+            return Commit(skill,context,apply,out reason);
         }
-        private bool Commit(CharacterSkillDefinition skill,Func<CharacterSkillDefinition,bool> apply,out string reason)
+        private bool Commit(CharacterSkillDefinition skill,CharacterUseContext context,Func<CharacterSkillDefinition,bool> apply,out string reason)
         {
             reason="";
             if(apply==null||!apply(skill)){reason="스킬 효과를 적용할 수 없습니다";return false;}
@@ -93,7 +94,7 @@ namespace RaidRogue
             var state=Array.Find(_data.skills,s=>s.id==skill.id);state.charges--;
             if(state.recharge<=0){state.recharge=state.rechargeTotal=skill.cooldown;}
             if(skill.cooldown==0)state.charges=skill.maximumCharges;
-            if(skill.usesGcd)_data.gcd=_data.gcdTotal=skill.gcd;
+            if(skill.usesGcd)_data.gcd=_data.gcdTotal=skill.gcd*(CharacterDefinitionValidation.Finite(context.GcdScale)&&context.GcdScale>0?context.GcdScale:1);
             if(skill.comboChain==1){_data.combo1=_data.combo1%3+1;_data.comboTime1=_data.combo1==1?0:skill.comboWindow;}
             if(skill.comboChain==2){_data.combo2=_data.combo2%3+1;_data.comboTime2=_data.combo2==1?0:skill.comboWindow;}
             return true;
@@ -122,7 +123,7 @@ namespace RaidRogue
             if(_data.castSkillId.Length==0||_data.castRemaining>0)return false;
             string id=_data.castSkillId;var slot=Array.Find(_data.selections,s=>s.skillId==id);var skill=Definition.Skill(id);
             bool valid=slot!=null&&Validate(slot.slot,context,out reason,true);CancelCast();
-            return valid&&Commit(skill,apply,out reason);
+            return valid&&Commit(skill,context,apply,out reason);
         }
         public void ClearOnDeath()
         {CancelCast();_data.combo1=_data.combo2=1;_data.comboTime1=_data.comboTime2=0;}
@@ -143,7 +144,17 @@ namespace RaidRogue
         public bool ChooseRoute(string routeId,bool beforeDeparture)
         {
             var route=Array.Find(Definition.routes,r=>r.id==routeId);
-            if(!beforeDeparture||!Definition.playable||route==null||_data.routeId.Length>0)return false;
+            if(!beforeDeparture||!Definition.playable||route==null)return false;
+            if(_data.routeId==routeId)return true;
+            var previous=Array.Find(Definition.routes,r=>r.id==_data.routeId);
+            if(previous!=null)
+            {
+                var removed=previous.unlockSkills.Concat(new[]{previous.identitySkillId});
+                var retained=Definition.slots.Where(s=>s.initiallyUnlocked).Select(s=>s.skillId)
+                    .Concat(Definition.unlocks.Where(r=>_data.chosenRules.Contains(r.id)).Select(r=>Selected(r.slot).id));
+                _data.unlocked=_data.unlocked.Except(removed.Except(retained)).ToArray();
+            }
+            CancelCast();
             _data.routeId=routeId;
             var identity=Array.Find(_data.selections,s=>s.slot==CharacterSlot.Identity);
             if(identity!=null&&!string.IsNullOrEmpty(route.identitySkillId))identity.skillId=route.identitySkillId;
@@ -185,6 +196,14 @@ namespace RaidRogue
             if(snapshot.unlocked.Any(s=>Definition.Skill(s)==null)||snapshot.effects.Any(e=>e==null||string.IsNullOrEmpty(e.id)||e.stacks<0||!CharacterDefinitionValidation.Finite(e.magnitude)))return false;
             if(snapshot.castSkillId==null||snapshot.castSkillId.Length>0&&Definition.Skill(snapshot.castSkillId)==null||snapshot.routeId==null||snapshot.routeId.Length>0&&!Definition.routes.Any(r=>r.id==snapshot.routeId))return false;
             if(!Nonnegative(snapshot.gcd)||!Nonnegative(snapshot.gcdTotal)||!Nonnegative(snapshot.comboTime1)||!Nonnegative(snapshot.comboTime2)||!Nonnegative(snapshot.castRemaining)||!Nonnegative(snapshot.castTotal)||snapshot.combo1<1||snapshot.combo1>3||snapshot.combo2<1||snapshot.combo2>3)return false;
+            var route=Array.Find(Definition.routes,r=>r.id==snapshot.routeId);
+            var identity=Array.Find(snapshot.selections,s=>s.slot==CharacterSlot.Identity);
+            if(route!=null&&identity?.skillId!=route.identitySkillId)return false;
+            if(route==null&&identity!=null&&Definition.routes.Any(r=>r.identitySkillId==identity.skillId))
+            {
+                var initial=Array.Find(Definition.slots,s=>s.slot==CharacterSlot.Identity);
+                if(initial==null||initial.skillId!=identity.skillId||!initial.initiallyUnlocked&&snapshot.unlocked.Contains(identity.skillId))return false;
+            }
             _data=snapshot.Copy();return true;
         }
         private static bool Nonnegative(float n)=>CharacterDefinitionValidation.Finite(n)&&n>=0;

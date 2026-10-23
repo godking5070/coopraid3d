@@ -37,7 +37,7 @@ namespace RaidRogue
                         if (corpse != null && BattleResurrection.FlatDistance(pc.transform.position, corpse.position) > resurrection.Settings.range)
                             PartyAiTactics.ResurrectionApproach(pc.transform, corpse, resurrection.Settings.range, arena, boss.ActiveTelegraph, out desired);
                     }
-                    else if (avatar.Role == 1) desired = PartyAiTactics.TankPosition(pc.transform, boss, range, 4.8f);
+                    else if (avatar.Role == 1) desired = PartyAiTactics.TankPosition(pc.transform, boss, aegis?AegisPaladinData.MeleeRange:range, 4.8f);
                     else if (avatar.Role == 3) desired = CombatRange.AttackPosition(pc.transform, enemy, enemy == boss.transform ? -boss.transform.forward : boss.transform.position - enemy.position, range);
                     else desired = boss.transform.position + (avatar.Role == 2 ? new Vector3(-6.8f, 0, -6.5f) : new Vector3(6.6f, 0, -6));
                 }
@@ -56,6 +56,12 @@ namespace RaidRogue
                 if (resurrection.IsCasting) continue;
                 if(aegis)
                 {
+                    var paladin=pc.GetComponent<AegisPaladin>();
+                    bool defenseNeeded=lowest<.65f||boss.IsCasting;
+                    Vector3 toward=boss.transform.position-pc.transform.position;toward.y=0;
+                    bool facing=Vector3.Dot(pc.transform.forward,toward.normalized)>=Mathf.Cos(AegisRouteData.GuardAngle*.5f*Mathf.Deg2Rad);
+                    bool identity=character.RouteId==AegisRouteData.Bulwark&&defenseNeeded||character.RouteId==AegisRouteData.Sun&&!mechanic&&CombatRange.InRange(pc.transform,enemy,AegisRouteData.SunRange)||character.RouteId==AegisRouteData.Mirror&&!danger&&facing&&boss.GuardableAttackImminent(pc.transform,AegisRouteData.GuardDuration*.8f);
+                    if(identity&&!paladin.IdentityBlocked)AutomaticCharacterAction(avatar,CharacterSlot.Identity,pc.transform);
                     if(pc.HpRatio<.75f||boss.IsCasting)AutomaticCharacterAction(avatar,CharacterSlot.Job1,pc.transform);
                     if(boss.ResolveLivingAggroTarget()!=pc.transform||pc.currentShield<pc.maxHp*.05f)AutomaticCharacterAction(avatar,CharacterSlot.Job2,enemy);
                     AutomaticCharacterAction(avatar,CharacterSlot.OffGcd1,enemy);
@@ -91,7 +97,8 @@ namespace RaidRogue
             var actor=CharacterActor.Ensure(avatar.gameObject);var state=actor.Snapshot;
             var skill=actor.Definition.Skill(System.Array.Find(state.selections,s=>s.slot==slot).skillId);
             var timing=System.Array.Find(state.skills,s=>s.id==skill.id);
-            if(!actor.Available(slot,out _)||timing.charges<1||skill.usesGcd&&state.gcd>0||skill.target==SkillTargetRule.LivingEnemy&&(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(avatar.transform,target,skill.range)))return;
+            if(!actor.Available(slot,out _)||timing.charges<1||skill.usesGcd&&state.gcd>0||skill.target==SkillTargetRule.LivingEnemy&&(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(avatar.transform,target,actor.EffectiveRange(skill))))return;
+            foreach(var cost in skill.costs)if((System.Array.Find(state.resources,r=>r.id==cost.resourceId)?.value??0)<cost.amount)return;
             ExecuteAction(avatar.Id,new RaidActionRequest{actor=avatar.Id,epoch=BattleEpoch,skill=10,slot=(int)slot,jobId=actor.Definition.id,target=CombatId(target)},true);
         }
         private void AutomaticAction(NetworkRaidAvatar avatar, int skill, Transform target)

@@ -60,6 +60,8 @@ namespace RaidRogue
         public static double BoundaryDistance(double distance, double attackerRadius, double targetRadius) =>
             Math.Max(0, distance - Math.Max(0, attackerRadius) - Math.Max(0, targetRadius));
 
+        public static bool CircleTouches(double distance,double targetRadius,double circleRadius)=>distance>=0&&circleRadius>=0&&distance<=circleRadius+Math.Max(0,targetRadius)+.0001;
+
         public static double RingRadius(double attackerRadius, double range) => Math.Max(0, attackerRadius) + Math.Max(0, range);
 
         public static double AttackCenterDistance(double attackerRadius, double targetRadius, double range) =>

@@ -9,7 +9,7 @@ namespace RaidRogue
         private float _loadingDeadline, _nextLoadedAck;
         private int _loadFrame;
         public bool LocalReady => _avatars.TryGetValue(_localId, out var avatar) && avatar.Ready;
-        public bool CanStartLobby => !Ending && IsHost && CanChooseRole && _roster.Members.TrueForAll(m => (_recovery.Actor(m.Id)?.Automated ?? false) || (m.Ready && m.Loaded)) && _peers.TrueForAll(p => p.Id != 0 && p.CloseAt == 0) &&
+        public bool CanStartLobby => !Ending && IsHost && CanChooseRole && _roster.Members.TrueForAll(m => (_recovery.Actor(m.Id)?.Automated ?? false) || (m.Ready && m.Loaded && _avatars.TryGetValue(m.Id,out var a) && CharacterActor.Ensure(a.gameObject).DepartureReady)) && _peers.TrueForAll(p => p.Id != 0 && p.CloseAt == 0) &&
             (!UsesSteam || !HasUnapprovedLobbyGuests(RaidSteamRuntime.Instance.Members()));
         private string HelloTag => SceneManager.GetActiveScene().name + (UsesSteam ? "|" + RaidSteamRuntime.Instance.Build + "|" + RaidSteamRuntime.Instance.LobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture) : "");
         public void ToggleReady()
@@ -20,7 +20,9 @@ namespace RaidRogue
         }
         private void SetReady(int id, bool ready)
         {
-            if (!IsHost || !CanChooseRole || !_roster.SetReady(id, ready)) return;
+            if(!IsHost||!CanChooseRole)return;
+            if(ready&&_avatars.TryGetValue(id,out var avatar)&&!CharacterActor.Ensure(avatar.gameObject).DepartureReady){ActionFailure(id,"출발 전에 이지스 팔라딘의 기원을 선택하세요");return;}
+            if (!_roster.SetReady(id, ready)) return;
             SyncLobbyAvatar(_roster.Members.Find(m => m.Id == id));
         }
         private void SetLoaded(int id, int epoch)

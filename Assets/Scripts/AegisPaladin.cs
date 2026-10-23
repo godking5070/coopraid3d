@@ -7,23 +7,91 @@ namespace RaidRogue
     {
         public readonly AegisDamageState DamageState=new AegisDamageState();
         private CharacterActor _actor;private PlayerController _player;private GameObject _gear;
+        private LineRenderer _guardLine;private Material _guardMaterial;
         private Material _metal;private float _debtTextTimer,_debtTextAmount;
         private static readonly Color HolyColor=new Color(1,.88f,.4f);
+        public string RouteId=>IsActive?_actor.RouteId:"";
+        public float OutgoingShieldScale=>AegisRouteData.ShieldScale(RouteId);
+        public bool Transformed=>RouteId==AegisRouteData.Sun&&DamageState.Route.Transformed;
+        public bool IdentityBlocked=>Transformed||RouteId==AegisRouteData.Mirror&&DamageState.Route.Guard>0;
+        public float EffectiveRange(CharacterSkillDefinition skill)=>skill==null?0:DamageState.Route.Range(RouteId,skill.comboChain>0,skill.range);
+        public float GcdScale(CharacterSkillDefinition skill)=>DamageState.Route.GcdScale(RouteId,skill!=null&&skill.comboChain>0);
+        public string RouteName=>Array.Find(_actor?.Definition?.routes??Array.Empty<CharacterRouteDefinition>(),r=>r.id==RouteId)?.name??"기원 선택 필요";
         public bool IsActive=>_actor?.Definition?.id==AegisPaladinData.JobId;
         public static AegisPaladin Ensure(GameObject go)=>go.GetComponent<AegisPaladin>()??go.AddComponent<AegisPaladin>();
         private void Awake()
         {
             _actor=GetComponent<CharacterActor>();_player=GetComponent<PlayerController>();
+            _actor.RegisterHandler("aegis.identity",(skill,target)=>Identity(skill));
             foreach(var slot in CharacterSlots.All)if(slot<CharacterSlot.Identity&&slot!=CharacterSlot.Movement)
             {var captured=slot;_actor.RegisterHandler("aegis."+slot,(skill,target)=>Execute(captured,skill,target));}
         }
-        public void ClearTransient(){DamageState.Clear();_debtTextAmount=_debtTextTimer=0;}
+        public void ClearTransient(){DamageState.Clear();_debtTextAmount=_debtTextTimer=0;if(_guardLine!=null)_guardLine.enabled=false;}
+        public void ReleaseRouteEffects()
+        {
+            ClearTransient();if(RaidCombatAuthority.Replica)return;
+            int source=CombatMetricsManager.SourceId(transform);
+            foreach(var member in PartyLife.OrderedMembers())
+            {
+                member.GetComponent<PlayerController>()?.RemoveShieldsFrom(source);
+                member.GetComponent<PartyBotAI>()?.RemoveShieldsFrom(source);
+                member.GetComponent<CombatStatusEffects>()?.RemoveProtectionFrom(source);
+            }
+        }
+        public void ApplyRouteChoice()
+        {
+            if(!IsActive||RaidCombatAuthority.Replica||_player==null)return;
+            ReleaseRouteEffects();
+            float maximum=AegisRouteData.MaximumHp(_actor.Definition.baseHp,RouteId);
+            _player.currentHp=AegisRouteData.PreserveHealthRatio(_player.currentHp,_player.maxHp,maximum);_player.maxHp=maximum;
+        }
+        private bool Identity(CharacterSkillDefinition skill)
+        {
+            if(!IsActive||RaidCombatAuthority.Replica||StageManager.CombatSuspended||_player==null||_player.IsDead||IdentityBlocked||skill.id!=AegisRouteData.Identity(RouteId))return false;
+            if(!DamageState.Route.Activate(RouteId,transform.eulerAngles.y))return false;
+            if(RouteId==AegisRouteData.Bulwark)
+            {
+                foreach(var member in PartyLife.OrderedMembers())if(CombatRange.LivingPartyMember(member))
+                {
+                    CombatStatusEffects.Shield(member,transform,skill.id,_player.maxHp*AegisRouteData.BulwarkShield,AegisRouteData.BulwarkDuration);
+                    CombatStatusEffects.Ensure(member.gameObject).GrantKnockbackImmunity(AegisRouteData.BulwarkDuration,transform);
+                }
+                Pulse(transform.position,3);
+            }
+            FloatingTextPopup.Spawn(transform.position+Vector3.up*2.8f,skill.name,HolyColor,true);return true;
+        }
+        public void ReflectAbsorption(double absorbed,CombatHitContext hit)
+        {
+            if(!IsActive||RaidCombatAuthority.Replica||_player==null||_player.IsDead||!CombatRange.LivingEnemy(hit.Attacker))return;
+            double reflected=DamageState.Route.Reflect(RouteId,hit.Kind,absorbed,_player.maxHp);
+            if(reflected>0)CombatSecondaryDamage.Apply(transform,hit.Attacker,reflected,AegisRouteData.Mirror+".shield-reflect/"+hit.SkillId,CombatDamageKind.Reflection);
+        }
+        public bool TryGuard(CombatHitContext hit,float confirmedIncoming)
+        {
+            if(!IsActive||RaidCombatAuthority.Replica||_player==null||_player.IsDead||!CombatRange.LivingEnemy(hit.Attacker))return false;
+            Vector3 direction=hit.Attacker.position-transform.position;direction.y=0;
+            Vector3 facing=Quaternion.Euler(0,DamageState.Route.GuardYaw,0)*Vector3.forward;
+            float dot=direction.sqrMagnitude<.00001f?1:Vector3.Dot(facing,direction.normalized);
+            if(!DamageState.Route.TryGuard(RouteId,hit.Kind,hit.IgnoreGuard,dot,confirmedIncoming,_player.maxHp,out double retaliation))return false;
+            FloatingTextPopup.Spawn(transform.position+Vector3.up*2.4f,"JUST GUARD · 피해 0",Color.cyan,true);
+            if(retaliation>0)
+            {
+                var counter=CombatCounterTarget.Ensure(hit.Attacker);
+                bool valid=counter.CanCounter(transform,AegisPaladinData.MeleeRange);
+                CombatSecondaryDamage.Apply(transform,hit.Attacker,retaliation,AegisRouteData.Identity(RouteId)+"/"+hit.SkillId,CombatDamageKind.Reflection);
+                if(!valid||!counter.TryCounter(transform,AegisPaladinData.MeleeRange,AegisPaladinData.CounterStagger+AegisRouteData.CounterExtraStagger))
+                    counter.AddStagger(AegisPaladinData.CounterStagger+AegisPaladinData.CounterBonusStagger);
+                _player.PlaySkillLineVisual(hit.Attacker.position,Color.cyan);
+            }
+            return true;
+        }
         public void ShieldAbsorbed(double amount)
         {if(!RaidCombatAuthority.Replica&&IsActive&&CombatRange.LivingPartyMember(transform)&&DamageState.ShieldAbsorbed(amount))_actor.GainResource(AegisPaladinData.Holy,AegisPaladinData.AbsorbHoly);}
         private void Update()
         {
             if(_gear!=null)_gear.SetActive(IsActive);
-            if(!IsActive)return;if(_gear==null)BuildGear();
+            if(!IsActive){if(_guardLine!=null)_guardLine.enabled=false;return;}if(_gear==null)BuildGear();
+            UpdateRouteVisuals();
             if(RaidCombatAuthority.Replica||StageManager.CombatSuspended||_player==null||_player.IsDead)return;
             float due=(float)DamageState.Advance(Time.deltaTime);
             if(due>0){_player.ApplyDeferredDamage(due);_debtTextAmount+=due;}
@@ -34,7 +102,7 @@ namespace RaidRogue
         {
             if(!IsActive||RaidCombatAuthority.Replica||_player==null||_player.IsDead||StageManager.CombatSuspended)return false;
             if(slot==CharacterSlot.Job1){DamageState.Activate();FloatingTextPopup.Spawn(transform.position+Vector3.up*2,"불굴의 신념 · 피해 분산",HolyColor,false);return true;}
-            if(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(transform,target,skill.range))return false;
+            if(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(transform,target,EffectiveRange(skill)))return false;
             if(slot==CharacterSlot.Job2)
             {
                 var boss=target.GetComponent<BossController>();if(boss!=null){boss.AddCombatThreat(transform,0,true);boss.SetAggroTarget(transform);}
@@ -54,25 +122,33 @@ namespace RaidRogue
                 Vector3 forwardTarget=target.position-transform.position;forwardTarget.y=0;
                 if(Vector3.Dot(transform.forward,forwardTarget.normalized)<0)return false;
                 bool counter=CombatCounterTarget.Ensure(target).CanCounter(transform,skill.range);
-                if(!Hit(target,skill.name,AegisPaladinData.CounterPower,0,1))return false;
-                if(!counter||!CombatCounterTarget.Ensure(target).TryCounter(transform,skill.range,AegisPaladinData.CounterStagger))
+                if(!Hit(target,skill.id,skill.name,AegisPaladinData.CounterPower,0,1))return false;
+                if(!counter||!CombatCounterTarget.Ensure(target).TryCounter(transform,skill.range,AegisPaladinData.CounterStagger+(RouteId==AegisRouteData.Mirror?AegisRouteData.CounterExtraStagger:0)))
                     CombatCounterTarget.Ensure(target).AddStagger(AegisPaladinData.CounterStagger);
                 return true;
             }
             if(slot==CharacterSlot.OffGcd1)
             {
                 Vector3 center=target.position;
-                if(!Hit(target,skill.name,AegisPaladinData.BurstPower,AegisPaladinData.BurstStagger,AegisPaladinData.BurstThreatMultiplier))return false;
+                if(!Hit(target,skill.id,skill.name,AegisPaladinData.BurstPower,AegisPaladinData.BurstStagger,AegisPaladinData.BurstThreatMultiplier))return false;
                 var boss=StageManager.Instance?.boss;
-                if(boss!=null&&boss.transform!=target&&InsideBurst(center,boss.transform))Hit(boss.transform,skill.name,AegisPaladinData.BurstPower,AegisPaladinData.BurstStagger,AegisPaladinData.BurstThreatMultiplier);
-                foreach(var add in FindObjectsByType<BossAddMinion>(FindObjectsSortMode.None))if(add.transform!=target&&InsideBurst(center,add.transform))Hit(add.transform,skill.name,AegisPaladinData.BurstPower,AegisPaladinData.BurstStagger,AegisPaladinData.BurstThreatMultiplier);
+                if(boss!=null&&boss.transform!=target&&InsideBurst(center,boss.transform))Hit(boss.transform,skill.id,skill.name,AegisPaladinData.BurstPower,AegisPaladinData.BurstStagger,AegisPaladinData.BurstThreatMultiplier);
+                foreach(var add in FindObjectsByType<BossAddMinion>(FindObjectsSortMode.None))if(add.transform!=target&&InsideBurst(center,add.transform))Hit(add.transform,skill.id,skill.name,AegisPaladinData.BurstPower,AegisPaladinData.BurstStagger,AegisPaladinData.BurstThreatMultiplier);
                 Pulse(center,AegisPaladinData.BurstRadius);return true;
             }
             var state=_actor.Snapshot;bool sword=slot==CharacterSlot.Gcd1;int stage=sword?state.combo1:state.combo2;
             string name=(sword?AegisPaladinData.SwordNames:AegisPaladinData.ShieldNames)[stage-1];
             int power=(sword?AegisPaladinData.SwordPower:AegisPaladinData.ShieldPower)[stage-1];
             float stagger=(sword?AegisPaladinData.SwordStagger:AegisPaladinData.ShieldStagger)[stage-1];
-            if(!Hit(target,name,power,stagger,1))return false;
+            Vector3 comboCenter=target.position;
+            if(!Hit(target,skill.id,name,power,stagger,1))return false;
+            if(Transformed)
+            {
+                var boss=StageManager.Instance?.boss;
+                if(boss!=null&&boss.transform!=target&&InsideBurst(comboCenter,boss.transform,AegisRouteData.SunRadius))Hit(boss.transform,skill.id,name,power,stagger,1);
+                foreach(var add in FindObjectsByType<BossAddMinion>(FindObjectsSortMode.None))if(add.transform!=target&&InsideBurst(comboCenter,add.transform,AegisRouteData.SunRadius))Hit(add.transform,skill.id,name,power,stagger,1);
+                Pulse(comboCenter,AegisRouteData.SunRadius);
+            }
             if(stage==3)
             {
                 if(sword){_actor.GainResource(AegisPaladinData.Holy,AegisPaladinData.FinisherHoly);_actor.ReduceCooldowns(AegisPaladinData.ReducedSkills,AegisPaladinData.CooldownReduction);}
@@ -80,16 +156,17 @@ namespace RaidRogue
             }
             return true;
         }
-        private bool InsideBurst(Vector3 center,Transform enemy)
-        {Vector3 delta=enemy.position-center;delta.y=0;return CombatRange.LivingEnemy(enemy)&&delta.magnitude<=AegisPaladinData.BurstRadius+CombatRange.Radius(enemy);}
-        private bool Hit(Transform enemy,string name,int power,float stagger,float threat)
+        private bool InsideBurst(Vector3 center,Transform enemy,float radius=AegisPaladinData.BurstRadius)
+        {return CombatRange.LivingEnemy(enemy)&&CombatRange.CircleTouches(center,enemy,radius);}
+        private bool Hit(Transform enemy,string origin,string name,int power,float stagger,float threat)
         {
             if(!CombatRange.LivingEnemy(enemy))return false;
             int damage=Mathf.RoundToInt(power*_player.combatController.GetPlayerDamageBuffMultiplier());
             float before,after;var boss=enemy.GetComponent<BossController>();
-            if(boss!=null){before=boss.currentHp;boss.ReceiveRoleSkillAttack("이지스 팔라딘",name,0,damage,HolyColor,false,source:transform);after=boss.currentHp;}
-            else {var add=enemy.GetComponent<BossAddMinion>();before=add.currentHp;add.ReceivePlayerAttack("이지스 팔라딘",name,damage,HolyColor,false,source:transform);after=add.currentHp;}
+            if(boss!=null){before=boss.currentHp;boss.ReceiveRoleSkillAttack("이지스 팔라딘",name,0,damage,HolyColor,false,source:transform,origin:origin);after=boss.currentHp;}
+            else {var add=enemy.GetComponent<BossAddMinion>();before=add.currentHp;add.ReceivePlayerAttack("이지스 팔라딘",name,damage,HolyColor,false,source:transform,origin:origin);after=add.currentHp;}
             float actual=Mathf.Max(0,before-after);if(actual<=0)return false;
+            if(RouteId==AegisRouteData.Sun)CombatSecondaryDamage.Apply(transform,enemy,CombatDamageRules.SunDamage(actual),origin,CombatDamageKind.Extra);
             if(boss!=null&&threat>1)boss.AddCombatThreat(transform,actual*(threat-1));
             if(stagger>0)CombatCounterTarget.Ensure(enemy).AddStagger(stagger);
             _player.FaceAttackTarget(enemy);_player.PlaySkillLineVisual(enemy.position,HolyColor);
@@ -103,6 +180,22 @@ namespace RaidRogue
                 var obj=new GameObject("DawnlightPulse");var line=obj.AddComponent<LineRenderer>();line.positionCount=2;line.SetPosition(0,p);line.SetPosition(1,q);line.startWidth=line.endWidth=.06f;line.startColor=line.endColor=HolyColor;line.sharedMaterial=new Material(Shader.Find("Sprites/Default"));obj.AddComponent<RaidTransientVisual>();
             }
         }
+        private void UpdateRouteVisuals()
+        {
+            var shield=_gear.transform.Find("GreatShield");
+            shield.localScale=Transformed?new Vector3(.12f,.14f,1.15f):new Vector3(.65f,1.1f,.16f);
+            shield.localPosition=Transformed?new Vector3(-.6f,.25f,.55f):new Vector3(-.6f,.1f,.35f);
+            bool guard=RouteId==AegisRouteData.Mirror&&DamageState.Route.Guard>0;
+            if(guard&&_guardLine==null)
+            {
+                var go=new GameObject("AegisGuardCone");go.transform.SetParent(transform,false);_guardLine=go.AddComponent<LineRenderer>();
+                _guardMaterial=new Material(Shader.Find("Sprites/Default"));_guardLine.sharedMaterial=_guardMaterial;_guardLine.useWorldSpace=true;_guardLine.startWidth=_guardLine.endWidth=.09f;_guardLine.positionCount=27;
+            }
+            if(_guardLine==null)return;_guardLine.enabled=guard;if(!guard)return;
+            Color color=DamageState.Route.GuardFeedback>0?Color.white:new Color(.3f,.85f,1,.65f);_guardLine.startColor=_guardLine.endColor=color;
+            Vector3 center=new Vector3(transform.position.x,.16f,transform.position.z);_guardLine.SetPosition(0,center);_guardLine.SetPosition(26,center);
+            for(int i=0;i<=24;i++){float angle=(DamageState.Route.GuardYaw-AegisRouteData.GuardAngle/2+AegisRouteData.GuardAngle*i/24)*Mathf.Deg2Rad;_guardLine.SetPosition(i+1,center+new Vector3(Mathf.Sin(angle),0,Mathf.Cos(angle))*(CombatRange.Radius(transform)+1.4f));}
+        }
         private void BuildGear()
         {
             _gear=new GameObject("AegisSwordAndShield");_gear.transform.SetParent(transform,false);
@@ -113,6 +206,6 @@ namespace RaidRogue
         }
         private void Piece(string name,Vector3 position,Vector3 size)
         {var p=GameObject.CreatePrimitive(PrimitiveType.Cube);p.name=name;p.transform.SetParent(_gear.transform,false);p.transform.localPosition=position;p.transform.localScale=size;Destroy(p.GetComponent<Collider>());p.GetComponent<Renderer>().sharedMaterial=_metal;}
-        private void OnDestroy(){if(_metal!=null)Destroy(_metal);}
+        private void OnDestroy(){if(_metal!=null)Destroy(_metal);if(_guardMaterial!=null)Destroy(_guardMaterial);}
     }
 }

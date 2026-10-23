@@ -217,6 +217,12 @@ namespace RaidRogue
             Remaining += actualAdded;
         }
 
+        public double RemoveSource(int source)
+        {
+            if(source==0)return 0;double removed=0;
+            for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Source==source){removed+=_slices[i].Remaining;_slices.RemoveAt(i);}
+            Remaining=Math.Max(0,Remaining-removed);return removed;
+        }
         public double Expire(double now)
         {
             double removed=0;
@@ -232,18 +238,20 @@ namespace RaidRogue
         }
         public void Absorb(double actualAbsorbed, Action<int, double> record)
         {
+            var grouped = new Dictionary<int,double>();
             double pending = Math.Min(Math.Max(0, actualAbsorbed), Remaining);
             while (pending > 0 && _slices.Count > 0)
             {
                 var slice = _slices[0];
                 double used = Math.Min(pending, slice.Remaining);
-                if (slice.Source != 0) record?.Invoke(slice.Source, used);
+                if(slice.Source!=0){grouped.TryGetValue(slice.Source,out double sum);grouped[slice.Source]=sum+used;}
                 pending -= used;
                 Remaining -= used;
                 slice.Remaining -= used;
                 if (slice.Remaining <= 0) _slices.RemoveAt(0);
             }
             if (_slices.Count == 0) Remaining = 0;
+            if(record!=null)foreach(var entry in grouped)record(entry.Key,entry.Value);
         }
     }
 }

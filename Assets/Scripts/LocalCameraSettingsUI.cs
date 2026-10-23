@@ -66,6 +66,8 @@ namespace RaidRogue
             if (escape) { Consume(); CloseTopWindow(); return; }
             if (LocalGameplayInput.IsTyping || !Application.isFocused || RaidNetworkSession.Instance?.Ending == true) return;
             if (LocalInputBindings.Pressed("Settings")) Open();
+            else if(AegisRouteSelectionUI.IsOpen)
+            {if(LocalInputBindings.Pressed("Menu")){Consume();AegisRouteSelectionUI.Close();}return;}
             else if (LocalInputBindings.Pressed("Menu")) { Consume(); ToggleMenu(); }
             else if (LocalInputBindings.Pressed("Results") && RaidNetworkSession.Instance?.MenuOpen != true)
             {
@@ -79,6 +81,7 @@ namespace RaidRogue
         private static void Consume() { LocalGameplayInput.ConsumeEscape(); LocalInputBindings.QuarantineHeld(); }
         private void CloseTopWindow()
         {
+            if(AegisRouteSelectionUI.IsOpen){AegisRouteSelectionUI.Close();return;}
             var session = RaidNetworkSession.Instance;
             if (session?.MenuOpen == true)
             {

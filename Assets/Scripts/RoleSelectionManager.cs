@@ -211,9 +211,18 @@ namespace RaidRogue
         public void SelectAegisPaladin()
         {
             if(!CanChangePartyRoles()||stageManager==null||!stageManager.CanSelectInitialRole)return;
-            ApplySelectedRole(PlayerRole.Guardian_Tank,true,false);
-            if(player==null||!CharacterActor.Ensure(player.gameObject).AssignDefinition(CharacterCatalog.Find(AegisPaladinData.JobId)))return;
-            _hasSelectedInitialRole=true;CloseRoleSelectionModal();stageManager?.BeginSingleRun();
+            if(player==null)return;
+            if(CharacterActor.Ensure(player.gameObject).Definition.id!=AegisPaladinData.JobId)
+            {
+                ApplySelectedRole(PlayerRole.Guardian_Tank,true,false);
+                if(!CharacterActor.Ensure(player.gameObject).AssignDefinition(CharacterCatalog.Find(AegisPaladinData.JobId)))return;
+            }
+            AegisRouteSelectionUI.Open(CharacterActor.Ensure(player.gameObject),false);
+        }
+        public void ConfirmAegisDeparture()
+        {
+            if(player==null||stageManager==null||!stageManager.CanSelectInitialRole||!CharacterActor.Ensure(player.gameObject).DepartureReady)return;
+            _hasSelectedInitialRole=true;CloseRoleSelectionModal();stageManager.BeginSingleRun();
         }
         public void SelectRoleByIndex(int roleNumber1To4)
         {

@@ -8,6 +8,13 @@ namespace RaidRogue
         public static CombatMetricsManager Instance { get; private set; }
         public CombatMetricsLedger Ledger { get; } = new CombatMetricsLedger();
         public static int EncounterId => Instance != null ? Instance.Ledger.Generation : -1;
+        public readonly struct DamageReceipt
+        {
+            public readonly int Owner,Encounter;public readonly string OriginalSkill;public readonly CombatDamageKind Kind;public readonly float Actual;
+            public DamageReceipt(int owner,int encounter,string skill,CombatDamageKind kind,float actual){Owner=owner;Encounter=encounter;OriginalSkill=skill;Kind=kind;Actual=actual;}
+        }
+        private readonly System.Collections.Generic.Queue<DamageReceipt> _recentDamage=new System.Collections.Generic.Queue<DamageReceipt>();
+        public DamageReceipt[] RecentDamage=>_recentDamage.ToArray();
         private StageManager _stage;
         private CombatMetricsUI _ui;
 
@@ -37,6 +44,7 @@ namespace RaidRogue
 
         public void BeginStage(int stage, bool resetRun)
         {
+            _recentDamage.Clear();
             if (resetRun) Ledger.ResetRun();
             if (RaidCombatAuthority.Active)
             {
@@ -80,10 +88,11 @@ namespace RaidRogue
         public static string RoleName(int role) => role == 1 ? "가디언" : role == 2 ? "오라클" : role == 3 ? "블레이드" : "아크메이지";
         public static int SourceId(Transform source) => Instance != null ? Instance.Register(source) : 0;
 
-        public static void Damage(Transform source, float before, float after, bool isAdd)
+        public static void Damage(Transform source, float before, float after, bool isAdd,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
         {
             if (RaidCombatAuthority.Replica || Instance == null || Time.timeScale <= 0.001f) return;
-            Instance.Ledger.RecordDamage(SourceId(source), before, after, isAdd);
+            int owner=SourceId(source);Instance.Ledger.RecordDamage(owner, before, after, isAdd);
+            if(owner!=0&&before>after){Instance._recentDamage.Enqueue(new DamageReceipt(owner,EncounterId,origin,kind,before-after));while(Instance._recentDamage.Count>256)Instance._recentDamage.Dequeue();}
         }
 
         public static void Healing(Transform source, float before, float after, HealingKind kind = HealingKind.Ability)
@@ -93,10 +102,11 @@ namespace RaidRogue
             RaidCombatAuthority.Threat(source, Mathf.Max(0, after - before) * .5f);
         }
 
-        public static void Absorption(int source, double amount)
+        public static void Absorption(int source, double amount,bool grantResource=true)
         {
             if (RaidCombatAuthority.Replica || amount <= 0 || Time.timeScale <= .001f) return;
             if (Instance != null) Instance.Ledger.RecordAbsorption(source, amount);
+            if(!grantResource)return;
             foreach(var member in PartyLife.OrderedMembers())
                 if(SourceId(member)==source){member.GetComponent<AegisPaladin>()?.ShieldAbsorbed(amount);break;}
         }

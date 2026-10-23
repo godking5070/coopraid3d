@@ -874,8 +874,8 @@ namespace RaidRogue
 
                 if (pc != null)
                 {
-                    pc.TakeDamage(autoAttackDamageToTank);
-                    if (pc.hasThornArmor && pc.IsDefensiveBuffActive)
+                    pc.TakeDamage(autoAttackDamageToTank,new CombatHitContext(transform,"boss.auto",CombatDamageKind.Direct));
+                    if (!pc.LastHitGuarded && pc.hasThornArmor && pc.IsDefensiveBuffActive)
                     {
                         int reflect = Mathf.RoundToInt(pc.thornReflectDamage * 0.35f);
                         ApplyBossHpDamage(reflect, pc.transform);
@@ -883,7 +883,7 @@ namespace RaidRogue
                 }
                 else if (bot != null && !bot.isDead)
                 {
-                    bot.TakeDamage(autoAttackDamageToTank);
+                    bot.TakeDamage(autoAttackDamageToTank,hit:new CombatHitContext(transform,"boss.auto",CombatDamageKind.Direct));
                 }
             }
         }
@@ -1245,7 +1245,7 @@ namespace RaidRogue
             _tetherTankTarget = ResolveLivingAggroTarget();
             if (_tetherTankTarget == null) return;
             _tetherInterceptingBot = null; _tetherInterceptingPlayer = null;
-            DamagePartyMember(_tetherTankTarget, _tetherTankTarget.GetComponent<PlayerController>() != null ? 420f : 550f);
+            DamagePartyMember(_tetherTankTarget, _tetherTankTarget.GetComponent<PlayerController>() != null ? 420f : 550f,CombatDamageKind.Direct);
             if (!CombatRange.LivingPartyMember(_tetherTankTarget))
             {
                 CleanupActiveTelegraphAndTether(); _activeSkill = null; _castRemainingTime = 0;
@@ -1455,7 +1455,7 @@ namespace RaidRogue
                     break;
 
                 case BossSkillId.SingleTankbuster:
-                    DamagePartyMember(ResolveLivingAggroTarget(), 680f);
+                    DamagePartyMember(ResolveLivingAggroTarget(), 680f,CombatDamageKind.Direct);
                     break;
 
                 case BossSkillId.DoubleTankbuster_Tether:
@@ -1607,7 +1607,7 @@ namespace RaidRogue
             bool defended = wasTetherIntercepted && (pc != null ? pc.IsDefensiveBuffActive : bot != null && bot.isTankDefensiveActive);
             if (wasTetherIntercepted)
             {
-                DamagePartyMember(victim, pc != null ? (defended ? 1500f : 950f) : 1200f);
+                DamagePartyMember(victim, pc != null ? (defended ? 1500f : 950f) : 1200f,CombatDamageKind.Direct);
                 // Preserve the protected tank's card proc when an ally takes the tether.
                 var protectedPlayer = primary != null && primary != victim ? primary.GetComponent<PlayerController>() : null;
                 if (protectedPlayer != null && !protectedPlayer.IsDead && protectedPlayer.hasThornArmor)
@@ -1619,10 +1619,11 @@ namespace RaidRogue
                 }
             }
             else if (bot != null) bot.KillTankByUninterceptedTether();
-            else DamagePartyMember(victim, 1100f);
-            SetMechanicAlert(defended ? "2연타 탱크버스터 가로채기 · 방어 성공!" : wasTetherIntercepted
+            else DamagePartyMember(victim, 1100f,CombatDamageKind.Direct);
+            bool guarded=pc!=null&&pc.LastHitGuarded;
+            SetMechanicAlert(guarded?"저스트 가드 · 탱크버스터 피해 0!":defended ? "2연타 탱크버스터 가로채기 · 방어 성공!" : wasTetherIntercepted
                 ? "줄은 가로챘지만 방어기가 없어 큰 피해를 입었습니다!" : "줄 가로채기 실패 · 탱크버스터 2타 직격!",
-                defended ? Color.green : new Color(1f, .35f, .2f), 4);
+                defended||guarded ? Color.green : new Color(1f, .35f, .2f), 4);
         }
 
         private void CheckPhaseTransition()
@@ -1953,7 +1954,7 @@ namespace RaidRogue
             Color popupColor,
             bool isBigHighlight = false,
             string extraNote = "",
-            Transform source = null)
+            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct)
         {
             if (fsmState == BossFSMState.Defeated)
             {
@@ -1961,7 +1962,7 @@ namespace RaidRogue
             }
 
             int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer,origin,kind);
 
             string stagePrefix = comboStage > 0 ? $"{comboStage}단 " : "";
             string popupText = $"[{roleTag}] {stagePrefix}{skillName}!! - {finalDamage}";
@@ -2012,7 +2013,20 @@ namespace RaidRogue
         /// Step 6 핵심: 보스 체력 중간에는 절대 카드가 뜨지 않으며,
         /// 오직 보스를 완전히 처치(HP 0 도달)했을 때만 StageManager.NotifyBossDefeated()를 호출합니다!
         /// </summary>
-        private void ApplyBossHpDamage(float damage, Transform source = null)
+        public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind)
+        {
+            float before=currentHp;ApplyBossHpDamage(amount,source,origin,kind);float actual=Mathf.Max(0,before-currentHp);
+            if(actual>0)FloatingTextPopup.Spawn(transform.position+Vector3.up*2.6f,(kind==CombatDamageKind.Extra?"태양 불꽃 ":"반사 ")+actual.ToString("0.#"),Color.yellow,false);
+            return actual;
+        }
+        public bool GuardableAttackImminent(Transform victim,float within)
+        {
+            if(!CombatRange.LivingPartyMember(victim)||StageManager.CombatSuspended)return false;
+            if(fsmState==BossFSMState.IdleChasing)return ResolveLivingAggroTarget()==victim&&autoAttackInterval-_autoAttackTimer<=within&&(!isMeleeBoss||CombatRange.InRange(transform,victim,MeleeAttackRange));
+            return fsmState==BossFSMState.CastingSkill&&_activeSkill!=null&&_castRemainingTime<=within&&
+                (_activeSkill.skillId==BossSkillId.SingleTankbuster&&ResolveLivingAggroTarget()==victim||_activeSkill.skillId==BossSkillId.DoubleTankbuster_Tether&&_tetherTankTarget==victim);
+        }
+        private void ApplyBossHpDamage(float damage, Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
         {
             if (RaidCombatAuthority.Replica || fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0)
             {
@@ -2024,7 +2038,7 @@ namespace RaidRogue
             if (currentHp <= 0.1f) currentHp = 0f;
             // Single accounting point for skills, projectiles, reflection and card damage.
             // Debug instant-kill has no source and intentionally earns no party credit.
-            CombatMetricsManager.Damage(source, hpBefore, currentHp, false);
+            CombatMetricsManager.Damage(source, hpBefore, currentHp, false,origin,kind);
             AddCombatThreat(source, hpBefore - currentHp);
 
             if (currentHp <= 0.1f)
@@ -2081,12 +2095,13 @@ namespace RaidRogue
             { _isTetherInterceptedByPlayer = false; _tetherInterceptingBot = null; }
         }
 
-        private static void DamagePartyMember(Transform member, float damage)
+        private void DamagePartyMember(Transform member, float damage,CombatDamageKind kind=CombatDamageKind.Area)
         {
             if (!CombatRange.LivingPartyMember(member)) return;
             var player = member.GetComponent<PlayerController>();
-            if (player != null) player.TakeDamage(damage);
-            else member.GetComponent<PartyBotAI>()?.TakeDamage(damage, true);
+            var hit=new CombatHitContext(transform,"boss.pattern",kind);
+            if (player != null) player.TakeDamage(damage,hit);
+            else member.GetComponent<PartyBotAI>()?.TakeDamage(damage,true,hit);
         }
 
         private PartyBotAI FindBotByRole(PartyBotRole targetRole)
