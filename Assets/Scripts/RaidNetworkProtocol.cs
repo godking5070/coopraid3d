@@ -103,7 +103,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 5, MaxBytes = 1100;
+        public const int Version = 6, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -119,7 +119,7 @@ namespace RaidRogue
                     w.Write(packet.Tick); w.Write(packet.Id); w.Write(packet.Role); w.Write((ushort)packet.Bytes.Length); w.Write(packet.Bytes); break;
                 case RaidPacketKind.Welcome:
                     w.Write(packet.Id); w.Write(packet.Tick); w.Write(packet.Role); w.Write(packet.Speed); w.Write(packet.Radius); w.Write(packet.Arena); w.Write(packet.TurnSpeed);
-                    w.Write(packet.Dash.distance); w.Write(packet.Dash.duration); w.Write(packet.Dash.cooldown); break;
+                    w.Write(packet.Dash.distance); w.Write(packet.Dash.duration); w.Write(packet.Dash.cooldown); w.Write(packet.Dash.maximumCharges); w.Write(packet.Dash.preserveCast); break;
                 case RaidPacketKind.Leave: break;
                 case RaidPacketKind.RestoreReady: case RaidPacketKind.RestoreComplete: w.Write(packet.Id); w.Write(packet.Tick); w.Write(packet.Role); break;
                 case RaidPacketKind.Ready: case RaidPacketKind.SceneReady: w.Write(packet.Id); break;
@@ -135,7 +135,7 @@ namespace RaidRogue
                         w.Write(pose.Id); w.Write(pose.Role); WriteText(w, pose.Name); w.Write(pose.Ack);
                         w.Write(pose.X); w.Write(pose.Z); w.Write(pose.Yaw); w.Write(pose.MovementLocked); w.Write(pose.MotionVersion); w.Write(pose.MoveSpeed); w.Write(pose.Bot); w.Write(pose.SteamId); w.Write(pose.Ready); w.Write(pose.Loaded);
                         w.Write(pose.Dash.Active); w.Write(pose.Dash.Cooldown); w.Write(pose.Dash.CooldownTotal);
-                        w.Write(pose.Dash.Time); w.Write(pose.Dash.Distance); w.Write(pose.Dash.Speed); w.Write(pose.Dash.X); w.Write(pose.Dash.Z);
+                        w.Write(pose.Dash.Time); w.Write(pose.Dash.Distance); w.Write(pose.Dash.Speed); w.Write(pose.Dash.X); w.Write(pose.Dash.Z); w.Write(pose.Dash.Charges); w.Write(pose.Dash.MaximumCharges); w.Write(pose.Dash.Recharge);
                     }
                     break;
                 default: throw new InvalidDataException();
@@ -163,8 +163,8 @@ namespace RaidRogue
                         p.Bytes = r.ReadBytes(length); if (p.Bytes.Length != length) return false; break;
                     case RaidPacketKind.Welcome:
                         p.Id = r.ReadInt32(); p.Tick = r.ReadUInt32(); p.Role = r.ReadInt32(); p.Speed = Number(r); p.Radius = Number(r); p.Arena = Number(r); p.TurnSpeed = Number(r);
-                        p.Dash.distance = Number(r); p.Dash.duration = Number(r); p.Dash.cooldown = Number(r);
-                        if (p.Id <= 0 || p.Role < 0 || p.Role > 1 || p.Speed <= 0 || p.Radius <= 0 || p.Arena <= 0 || p.TurnSpeed <= 0 || p.Dash.distance <= 0 || p.Dash.duration <= 0 || p.Dash.cooldown < 0) return false;
+                        p.Dash.distance = Number(r); p.Dash.duration = Number(r); p.Dash.cooldown = Number(r); p.Dash.maximumCharges = r.ReadInt32(); p.Dash.preserveCast = r.ReadBoolean();
+                        if (p.Id <= 0 || p.Role < 0 || p.Role > 1 || p.Speed <= 0 || p.Radius <= 0 || p.Arena <= 0 || p.TurnSpeed <= 0 || p.Dash.distance <= 0 || p.Dash.duration <= 0 || p.Dash.cooldown < 0 || p.Dash.maximumCharges < 1 || p.Dash.maximumCharges > 10) return false;
                         break;
                     case RaidPacketKind.Leave: break;
                     case RaidPacketKind.RestoreReady: case RaidPacketKind.RestoreComplete: p.Id = r.ReadInt32(); p.Tick = r.ReadUInt32(); p.Role = r.ReadInt32(); if (p.Id < 0 || p.Role < 0) return false; break;
@@ -185,7 +185,8 @@ namespace RaidRogue
                         {
                             var pose = new RaidPose { Id = r.ReadInt32(), Role = r.ReadInt32(), Name = ReadText(r), Ack = r.ReadUInt32(), X = Number(r), Z = Number(r), Yaw = Number(r), MovementLocked = r.ReadBoolean(), MotionVersion = r.ReadInt32(), MoveSpeed = Number(r), Bot = r.ReadBoolean(), SteamId = r.ReadUInt64(), Ready = r.ReadBoolean(), Loaded = r.ReadBoolean() };
                             if (pose.Id <= 0 || pose.Role < 1 || pose.Role > 4 || !ids.Add(pose.Id) || !roles.Add(pose.Role)) return false;
-                            pose.Dash = new DashMotion.Snapshot { Active = r.ReadBoolean(), Cooldown = Number(r), CooldownTotal = Number(r), Time = Number(r), Distance = Number(r), Speed = Number(r), X = Number(r), Z = Number(r) };
+                            pose.Dash = new DashMotion.Snapshot { Active = r.ReadBoolean(), Cooldown = Number(r), CooldownTotal = Number(r), Time = Number(r), Distance = Number(r), Speed = Number(r), X = Number(r), Z = Number(r), Charges = r.ReadInt32(), MaximumCharges = r.ReadInt32(), Recharge = Number(r) };
+                            if (pose.Dash.MaximumCharges < 0 || pose.Dash.MaximumCharges > 10 || pose.Dash.Charges < 0 || pose.Dash.Charges > pose.Dash.MaximumCharges || pose.Dash.Recharge < 0) return false;
                             p.Poses.Add(pose);
                         }
                         break;

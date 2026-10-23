@@ -26,9 +26,9 @@ internal static class LocalSettingsTests
         Check(LocalBindingRules.Conflicts(b, Row(b,"Settings"), 0, "digit1").Count == 2, "global key collides with both contexts");
         string before = Fingerprint(b);
         Check(!LocalBindingRules.TryBind(b, Row(b,"Settings"),0,"digit1",true) && before == Fingerprint(b), "ambiguous swap must be atomic");
-        Check(!LocalBindingRules.TryBind(b, Row(b,"Dash"),0,"q",false) && before == Fingerprint(b), "conflict needs explicit confirmation");
-        Check(LocalBindingRules.TryBind(b, Row(b,"Dash"),0,"q",true), "explicit swap accepted");
-        Check(b[Row(b,"Dash")].primary == "q" && b[Row(b,"Potion")].primary == "space", "swap both sides");
+        Check(!LocalBindingRules.TryBind(b, Row(b,"Dash"),0,"x",false) && before == Fingerprint(b), "conflict needs explicit confirmation");
+        Check(LocalBindingRules.TryBind(b, Row(b,"Dash"),0,"x",true), "explicit swap accepted");
+        Check(b[Row(b,"Dash")].primary == "x" && b[Row(b,"Potion")].primary == "space", "swap both sides");
         before = Fingerprint(b);
         Check(!LocalBindingRules.TryBind(b, Row(b,"Dash"),1,"space",true) && before == Fingerprint(b), "cannot empty essential primary via secondary swap");
         foreach (string key in new[]{"escape","enter","leftShift","rightCtrl","leftAlt","leftMeta","mouseLeft","",null,"<Keyboard>/w"})
@@ -58,6 +58,32 @@ internal static class LocalSettingsTests
         }
         ValidBindings(LocalBindingRules.Repair(null));
         ValidBindings(LocalBindingRules.Repair(new[]{new LocalKeyBinding { action="removed-action",primary="f10" }}));
+    }
+    private static LocalKeyBinding[] OldDefaults()
+    {
+        var old=LocalBindingRules.Defaults().Where(b=>Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate"},b.action)<0).ToArray();
+        old[Row(old,"Potion")].primary="q";old[Row(old,"Skill4")].primary="digit4";old[Row(old,"Skill4")].secondary="numpad4";old[Row(old,"View")].primary="v";return old;
+    }
+    private static void MigrationTests()
+    {
+        var data=new LocalSettingsData{version=1,bindings=OldDefaults()};data.Normalize();
+        Check(data.bindings[Row(data.bindings,"Potion")].primary=="x"&&data.bindings[Row(data.bindings,"Skill4")].primary=="q"&&data.bindings[Row(data.bindings,"View")].primary=="f12","factory Q potion/X and V view migration");
+        ValidBindings(data.bindings);string first=Fingerprint(data.bindings);data.Normalize();Check(Fingerprint(data.bindings)==first&&data.version==2,"migration is versioned and idempotent");
+        var custom=OldDefaults();custom[Row(custom,"Skill1")].primary="x";
+        data=new LocalSettingsData{version=1,bindings=custom};data.Normalize();
+        Check(data.bindingsNeedReview&&data.bindingNotice.Length>0,"ambiguous v1 settings request conflict review");
+        Check(data.bindings[Row(data.bindings,"Skill1")].primary=="x"&&data.bindings[Row(data.bindings,"Potion")].primary=="q","ambiguous/custom mappings not reset");
+        foreach(var original in custom) {var retained=data.bindings[Row(data.bindings,original.action)];Check(retained.primary==original.primary&&retained.secondary==original.secondary,"all legacy custom keys preserved");}
+        var b=data.bindings;
+        Check(LocalBindingRules.TryBind(b,Row(b,"Counter"),0,"h",false),"repair one collision while others pending");
+        Check(LocalBindingRules.TryBind(b,Row(b,"Counter"),1,"",false),"repair alternate collision");
+        Check(LocalBindingRules.TryBind(b,Row(b,"View"),0,"f12",false),"resolve view/ultimate conflict");
+        Check(!LocalBindingRules.TryBind(b,Row(b,"Potion"),0,"x",false),"custom X conflict requires explicit swap");
+        Check(LocalBindingRules.TryBind(b,Row(b,"Potion"),0,"x",true),"explicit user swap X accepted");
+        Check(b[Row(b,"Potion")].primary=="x"&&b[Row(b,"Skill1")].primary=="q"&&b[Row(b,"Potion")].customized,"provenance after explicit edit");
+        data.Normalize();Check(!data.bindingsNeedReview,"all conflicts resolved without full reset");
+        first=Fingerprint(data.bindings);data.version=2;data.Normalize();Check(first==Fingerprint(data.bindings),"v2 custom Q/X never migrated again");
+        foreach(var id in new[]{"Skill1","Skill2","Skill3","Counter","Skill4","JobSkill2","Dash","Identity","SelectedActive","SelectedOffGcd","Ultimate","Potion"})Check(LocalBindingRules.Find(id)!=null,"all actual slots present");
     }
     private static void DataTests()
     {
@@ -125,7 +151,7 @@ internal static class LocalSettingsTests
     }
     public static int Main(string[] args)
     {
-        BindingTests(); DataTests(); StorageTests();
+        BindingTests(); MigrationTests(); DataTests(); StorageTests();
         if (args.Length > 0) InstalledInputControls(args[0]);
         Console.WriteLine("PASS: " + _checks + " local settings, binding conflicts, display rollback and real file recovery checks (no Unity native/UI execution)."); return 0;
     }

@@ -39,6 +39,11 @@ namespace RaidRogue
             return bot != null && !bot.isDead && bot.currentHp > 0;
         }
 
+        public static float BoundaryDistance(Transform attacker, Transform target)
+        {
+            if(attacker==null||target==null)return float.PositiveInfinity;
+            return (float)CombatRangeMath.BoundaryDistance(CombatRangeMath.CenterDistance(attacker.position.x,attacker.position.z,target.position.x,target.position.z),Radius(attacker),Radius(target));
+        }
         public static bool InRange(Transform attacker, Transform target, float range)
         {
             if (attacker == null || target == null) return false;

@@ -313,6 +313,7 @@ namespace RaidRogue
                 _acquiredCardStacks[card.id] = 1;
             }
 
+            if (player != null) CharacterActor.Ensure(player.gameObject).RecordBuildEffect("legacy.card." + card.id, _acquiredCardStacks[card.id]);
             GetRoleAdaptedCardDisplay(card, out string roleTitle, out string roleCat, out _);
             _acquiredCardHistory.Add($"{roleTitle} ({roleCat})");
 

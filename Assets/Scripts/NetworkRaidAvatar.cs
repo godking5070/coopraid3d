@@ -29,7 +29,7 @@ namespace RaidRogue
         private bool _first = true;
         public static Color RoleColor(int role) => role == 1 ? new Color(0.18f, 0.55f, 1f) : role == 2
             ? new Color(0.18f, 0.90f, 0.38f) : role == 3 ? new Color(1f, 0.85f, 0.12f) : new Color(1f, 0.48f, 0.12f);
-        public string RoleName => CombatMetricsManager.RoleName(Role);
+        public string RoleName => GetComponent<CharacterActor>()?.Definition?.name ?? CombatMetricsManager.RoleName(Role);
         public void Configure(int id, bool local, float radius) { Id = id; IsLocal = local; CombatRadius = radius; }
         public void SetIdentity(int role, string displayName)
         {

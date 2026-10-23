@@ -92,7 +92,7 @@ namespace RaidRogue
             else motor.Step(input, pc.transform, _config, !locked);
             avatar.Display(motor.Position, motor.Yaw, motor.Dash.Active);
             pc.SetNetworkMoving((before - motor.Position).sqrMagnitude > .000001f);
-            if (!wasDashing && motor.Dash.Active) { pc.Potion?.EndRevivalProtection(); pc.GetComponent<BattleResurrection>()?.Cancel(); }
+            if (!wasDashing && motor.Dash.Active) { pc.Potion?.EndRevivalProtection(); var character = CharacterActor.Ensure(pc.gameObject); if (!character.MovementSettings(pc.dashSettings).preserveCast) { pc.GetComponent<BattleResurrection>()?.Cancel(); character.InterruptCast(); } }
             if (pc.IsMovingXZ) pc.targetBoss?.TryInterceptPlayerMovement(pc, before, motor.Position);
         }
         private void ReconcileBots()
@@ -118,11 +118,21 @@ namespace RaidRogue
             if (IsHost) ExecuteAction(_localId, request);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = JsonUtility.ToJson(request) }, true);
         }
+        public void RequestCharacterAction(int kind,string job,int slot,int target=0,string rule="",string choice="")
+        {
+            if(Ending||!HasLocalAvatar||!ControlsReady)return;
+            var request=new RaidActionRequest{actor=_localId,epoch=BattleEpoch,sequence=++_actionSequence,lease=_localLease,skill=kind,target=target,jobId=job,slot=slot,ruleId=rule,choiceId=choice};
+            if(IsHost)ExecuteAction(_localId,request);
+            else Send(_server,new RaidPacket{Kind=RaidPacketKind.CombatRequest,Text=JsonUtility.ToJson(request)},true);
+        }
         private void ExecuteAction(int owner, RaidActionRequest request, bool automatic = false)
         {
             if (Ending || request == null || !_avatars.TryGetValue(owner, out var avatar) || avatar.IsBot) return;
             var ownership = _recovery.Actor(owner);
             if (!automatic && (avatar.Automated || request.lease != (ownership?.Lease ?? 0) || !_actionGate.Accept(owner, BattleEpoch, request))) return;
+            var character=CharacterActor.Ensure(avatar.gameObject);
+            if(request.skill>=10 && (request.jobId!=character.Definition.id || request.skill==10&&!Enum.IsDefined(typeof(CharacterSlot),request.slot))) { ActionFailure(owner,"직업 또는 슬롯이 유효하지 않습니다");return; }
+            if(request.skill==11) { if(!character.Choose(request.ruleId,request.choiceId,out string reason))ActionFailure(owner,reason);return; }
             if (request.skill == 7) { avatar.CombatTarget = CombatTarget(request.target); return; }
             if (request.skill == 9)
             {
@@ -147,8 +157,10 @@ namespace RaidRogue
             try
             {
                 var combat = pc.combatController;
+                if(request.skill==10) { if(!character.Execute((CharacterSlot)request.slot,target,out string failure))ActionFailure(owner,failure);return; }
                 if (request.skill <= 4)
                 {
+                    if(character.Definition.legacyRole==0) { if(!character.Execute(CharacterSlots.LegacySlot(request.skill),target,out string failure))ActionFailure(owner,failure);return; }
                     if (!combat.ValidateCombatSkill(request.skill, out string reason)) { ActionFailure(owner, reason); return; }
                     if (request.skill == 1) combat.TryUseSkill1_FlankCombo();
                     if (request.skill == 2) combat.TryUseSkill2_RearCombo();
@@ -276,6 +288,12 @@ namespace RaidRogue
                 if (pc != null) pc.CaptureNetworkCombat(actor); else avatar.GetComponent<PartyBotAI>()?.CaptureNetworkCombat(actor);
                 avatar.GetComponent<CommonPotion>()?.CaptureNetworkCombat(actor); avatar.GetComponent<BattleResurrection>()?.CaptureNetworkCombat(actor);
                 if (avatar.IsBot) avatar.CombatTarget = CombatTarget(actor.target);
+                var character = CharacterActor.Ensure(avatar.gameObject); actor.character = character.Snapshot;
+                if(character.Definition.legacyRole==0)
+                {
+                    actor.casting=actor.character.castSkillId.Length>0; actor.castName=actor.casting?character.Definition.Skill(actor.character.castSkillId).name:"";
+                    actor.castRemaining=actor.character.castRemaining;actor.castTotal=actor.character.castTotal;
+                }
                 CaptureRecovery(actor); avatar.State = actor; actors.Add(actor);
             }
             var adds = new List<RaidCombatEnemy>();
@@ -351,6 +369,7 @@ namespace RaidRogue
                 if (!_avatars.TryGetValue(actor.id, out var avatar)) continue;
                 avatar.Automated = actor.controlState != 0; avatar.State = actor; avatar.CombatTarget = CombatTarget(actor.target);
                 avatar.GetComponent<PlayerController>()?.ApplyNetworkCombat(actor);
+                if(!CharacterActor.Ensure(avatar.gameObject).Restore(actor.character)) { UnexpectedClientLoss("직업 상태 복구 실패: 같은 빌드인지 확인하세요"); return; }
                 avatar.GetComponent<PlayerController>()?.cardManager?.ApplyNetworkCardStacks(actor.cards);
             }
             CombatMetricsManager.Instance.ApplyNetworkMetrics(frame);

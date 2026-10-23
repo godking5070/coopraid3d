@@ -10,6 +10,7 @@ namespace RaidRogue
     {
         public int Id { get; internal set; }
         public string Name { get; internal set; }
+        public string JobId { get; internal set; }
         public int Role { get; internal set; }
         public double BossDamage { get; internal set; }
         public double AddDamage { get; internal set; }
@@ -53,13 +54,13 @@ namespace RaidRogue
         public double Seconds { get; private set; }
         public IReadOnlyList<CombatEncounterResult> Stages => _stages.AsReadOnly();
 
-        public void Register(int id, string name, int role)
+        public void Register(int id, string name, int role, string jobId = "")
         {
             if (id == 0) return;
             if (!_members.TryGetValue(id, out var member))
                 _members.Add(id, member = new CombatMemberRecord { Id = id });
             member.Name = name;
-            member.Role = role;
+            member.Role = role; member.JobId = jobId;
         }
 
         public void ResetRun()
@@ -89,7 +90,7 @@ namespace RaidRogue
             _downMembers.Clear();
             var roster = new List<CombatMemberRecord>(_members.Values);
             _members.Clear();
-            foreach (var member in roster) Register(member.Id, member.Name, member.Role);
+            foreach (var member in roster) Register(member.Id, member.Name, member.Role, member.JobId);
         }
 
         // Wall-clock duration while gameplay is advancing; paused/reward time is excluded.
@@ -160,7 +161,7 @@ namespace RaidRogue
                     if (!totals.TryGetValue(member.Id, out var total))
                         totals.Add(member.Id, total = new CombatMemberRecord { Id = member.Id });
                     total.Name = member.Name;
-                    total.Role = member.Role;
+                    total.Role = member.Role; total.JobId = member.JobId;
                     total.BossDamage += member.BossDamage;
                     total.AddDamage += member.AddDamage;
                     total.Healing += member.Healing;

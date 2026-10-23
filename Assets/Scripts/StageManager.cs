@@ -131,6 +131,7 @@ namespace RaidRogue
             foreach (var member in PartyLife.OrderedMembers())
             {
                 PartyLife.Ensure(member.gameObject).ResetForEncounter();
+                CharacterActor.Ensure(member.gameObject).ResetEncounter(newRun ? CharacterReset.NewRun : retry ? CharacterReset.Retry : CharacterReset.NextStage);
                 member.GetComponent<PlayerController>()?.cardManager?.ResetTemporaryCombatState();
             }
             boss.SetupBossForStage(stage); UpdateStageHeaderUI(); TraceProgress(retry ? "retry prepared; cards retained" : "stage prepared");
@@ -181,6 +182,7 @@ namespace RaidRogue
             if (outcome == EncounterOutcome.Cleared)
             {
                 _pendingBossClear = false;
+                foreach (var member in members) CharacterActor.Ensure(member.gameObject).ClearedStage(currentStage);
                 CombatMetricsManager.Instance?.Ledger.EndStage();
                 CleanupAttempt();
                 if (RaidCombatAuthority.Host) { boss.PlayBossCollapseAnimation(); RaidNetworkSession.Instance.NetworkEncounterOutcome(true); }

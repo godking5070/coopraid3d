@@ -22,7 +22,7 @@ namespace RaidRogue
         public float Progress => Replicated != null ? 1f - Replicated.resurrection / Mathf.Max(0.001f, Replicated.resurrectionTotal) : _state.Duration > 0 ? 1f - (float)(_state.Remaining / _state.Duration) : 0;
         public bool IsHealer => _life != null && _life.IsHealer;
         public ResurrectionSettings Settings => _stage != null ? _stage.resurrectionSettings : Defaults;
-        private bool Moved => _player != null ? _player.IsMovingXZ || _player.IsDashing || _player.IsBeingRescued || _player.IsBeingKnockedBack
+        private bool Moved => _player != null ? _player.IsBeingRescued || _player.IsBeingKnockedBack || ((_player.IsMovingXZ || _player.IsDashing) && GetComponent<CharacterActor>()?.PreservesCastWhileDashing != true)
             : FlatDistance(transform.position, _lastPosition) > 0.001f;
 
         private void Awake()

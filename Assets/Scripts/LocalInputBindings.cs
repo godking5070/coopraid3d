@@ -21,12 +21,13 @@ namespace RaidRogue
         public static void Configure(LocalKeyBinding[] bindings)
         {
             QuarantineHeld(); _map?.Dispose(); _map = new InputActionMap("RaidLocal");
-            _bindings = LocalBindingRules.Repair(bindings);
+            _bindings = LocalBindingRules.Repair(bindings, true);
             foreach (var b in _bindings)
             {
                 var action = _map.AddAction(b.action, InputActionType.Button);
-                action.AddBinding("<Keyboard>/" + LocalBindingRules.ControlName(b.primary));
-                if (b.secondary.Length > 0) action.AddBinding("<Keyboard>/" + LocalBindingRules.ControlName(b.secondary));
+                int row = System.Array.IndexOf(_bindings, b);
+                if (LocalBindingRules.Conflicts(_bindings, row, 0, b.primary).Count == 0) action.AddBinding("<Keyboard>/" + LocalBindingRules.ControlName(b.primary));
+                if (b.secondary.Length > 0 && LocalBindingRules.Conflicts(_bindings, row, 1, b.secondary).Count == 0) action.AddBinding("<Keyboard>/" + LocalBindingRules.ControlName(b.secondary));
             }
             _map.Enable(); Revision++;
         }

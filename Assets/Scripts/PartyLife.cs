@@ -34,6 +34,7 @@ namespace RaidRogue
         public void Die()
         {
             if (RaidCombatAuthority.Replica || !_state.Die()) return;
+            GetComponent<CharacterActor>()?.InterruptCast();
             var visual = GetComponent<DualVisualController>();
             _body = visual != null && visual.visual3DRoot != null ? visual.visual3DRoot.transform : null;
             if (_body != null) { _upright = _body.localRotation; _body.localRotation = Quaternion.Euler(0, 0, 75) * _upright; }

@@ -58,19 +58,21 @@ namespace RaidRogue
         {
             if (source == null) return 0;
             int id = RaidCombatAuthority.Active ? RaidCombatAuthority.Id(source) : source.GetInstanceID();
+            if (source.GetComponent<PlayerController>() == null && source.GetComponent<PartyBotAI>() == null) return 0;
+            string jobId = CharacterActor.Ensure(source.gameObject).Definition?.id ?? "";
             var avatar = source.GetComponent<NetworkRaidAvatar>();
-            if (avatar != null) { Ledger.Register(id, avatar.DisplayName, avatar.Role); return id; }
+            if (avatar != null) { Ledger.Register(id, avatar.DisplayName, avatar.Role, jobId); return id; }
             var player = source.GetComponent<PlayerController>();
             if (player != null)
             {
-                Ledger.Register(id, "나 · " + RoleName((int)player.currentRole), (int)player.currentRole);
+                Ledger.Register(id, "나 · " + RoleName((int)player.currentRole), (int)player.currentRole, jobId);
                 return id;
             }
             var bot = source.GetComponent<PartyBotAI>();
             if (bot == null) return 0;
             int role = bot.role == PartyBotRole.Tank ? 1 : bot.role == PartyBotRole.Healer ? 2 :
                 bot.role == PartyBotRole.MeleeDPS ? 3 : 4;
-            Ledger.Register(id, bot.botDisplayName, role);
+            Ledger.Register(id, bot.botDisplayName, role, jobId);
             return id;
         }
 

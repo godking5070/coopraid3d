@@ -90,7 +90,7 @@ namespace RaidRogue
         public static RaidMetricResult CaptureNetworkResult(CombatEncounterResult result)
         {
             var members = new List<RaidMetricMember>();
-            foreach (var member in result.Members) members.Add(new RaidMetricMember { id = member.Id, name = member.Name, role = member.Role,
+            foreach (var member in result.Members) members.Add(new RaidMetricMember { id = member.Id, name = member.Name, role = member.Role, jobId = member.JobId,
                 bossDamage = member.BossDamage, addDamage = member.AddDamage, healing = member.Healing, selfHealing = member.SelfHealing, shield = member.ShieldAbsorbed, deaths = member.Deaths });
             return new RaidMetricResult { stage = result.Stage, seconds = result.Seconds, members = members.ToArray() };
         }
@@ -99,7 +99,7 @@ namespace RaidRogue
         private static CombatEncounterResult RestoreResult(RaidMetricResult result)
         {
             var members = new List<CombatMemberRecord>();
-            foreach (var member in result.members) members.Add(new CombatMemberRecord { Id = member.id, Name = member.name, Role = member.role,
+            foreach (var member in result.members) members.Add(new CombatMemberRecord { Id = member.id, Name = member.name, Role = member.role, JobId = member.jobId,
                 BossDamage = member.bossDamage, AddDamage = member.addDamage, Healing = member.healing, SelfHealing = member.selfHealing, ShieldAbsorbed = member.shield, Deaths = member.deaths });
             return new CombatEncounterResult(result.stage, result.seconds, members);
         }

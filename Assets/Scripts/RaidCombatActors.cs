@@ -13,6 +13,7 @@ namespace RaidRogue
         public bool ValidateCombatSkill(int skill, out string reason)
         {
             reason = "";
+            if (!CharacterActor.Ensure(gameObject).Available(CharacterSlots.LegacySlot(skill), out reason)) return false;
             if (!CanUseCombatAction || playerController.IsBeingRescued || playerController.IsBeingKnockedBack) reason = "현재 행동할 수 없습니다";
             else if (skill <= 2 && (IsOnGcd || _isCastingSpell)) reason = "글로벌 쿨타임 또는 시전 중입니다";
             else if ((skill == 3 && _skill3CooldownRemaining > 0) || (skill == 4 && _skill4CooldownRemaining > 0)) reason = "스킬 쿨타임 중입니다";
@@ -51,6 +52,7 @@ namespace RaidRogue
         }
         public void InterruptForConnectionLoss()
         {
+            GetComponent<CharacterActor>()?.InterruptCast();
             // A disconnect is neither death nor a new encounter: preserve combo, buffs and cooldowns.
             _isCastingSpell = false; _castElapsed = 0; _castingSpellName = "";
         }

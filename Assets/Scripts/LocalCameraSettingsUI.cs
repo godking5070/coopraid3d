@@ -32,7 +32,7 @@ namespace RaidRogue
         {
             if (_buttonRoot == null) Build();
             if (_buttonRoot == null || Settings == null) return;
-            _openLabel.text = "설정 [" + LocalInputBindings.Label("Settings") + "]";
+            _openLabel.text = "설정 [" + LocalInputBindings.Label("Settings") + "]" + (Settings.Applied.bindingsNeedReview ? " · 키 충돌 확인" : "");
             bool escape = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame && !LocalGameplayInput.EscapeConsumed;
             if (RaidSteamRuntime.Instance?.OverlayOpen == true)
             {
@@ -130,7 +130,7 @@ namespace RaidRogue
             _camera.ReleaseOrbit(); _open = IsOpen = true; LocalInputBindings.QuarantineHeld();
             _previousTimeScale = Time.timeScale; _pausedSingle = RaidNetworkSession.Instance?.Mode == RaidSessionMode.Single;
             if (_pausedSingle) Time.timeScale = 0;
-            _status.text = Settings.Notice; RebuildTabs(); SelectTab(_tab); _modal.SetActive(true);
+            _status.text = Settings.Notice; if (_draft.bindingsNeedReview) _tab = 2; RebuildTabs(); SelectTab(_tab); _modal.SetActive(true);
         }
         private void RebuildTabs()
         {
@@ -193,7 +193,7 @@ namespace RaidRogue
                 for (int slot = 0; slot < 2; slot++)
                 {
                     int captured = slot; var button = ButtonTop(parent, "", slot == 0 ? 35 : 225, y, 170, () => BeginCapture(row, captured));
-                    var label = button.GetComponentInChildren<Text>(); _refresh.Add(() => label.text = LocalInputBindings.KeyLabel(LocalBindingRules.Get(_draft.bindings[row], captured)));
+                    var label = button.GetComponentInChildren<Text>(); _refresh.Add(() => { string key = LocalBindingRules.Get(_draft.bindings[row], captured); bool conflict = LocalBindingRules.Conflicts(_draft.bindings, row, captured, key).Count > 0; label.text = LocalInputBindings.KeyLabel(key) + (conflict ? " ⚠ 충돌" : ""); label.color = conflict ? new Color(1f,.6f,.3f) : Color.white; });
                 }
                 ButtonTop(parent, "×", 355, y, 60, () => { LocalBindingRules.TryBind(_draft.bindings, row, 1, "", false); Refresh(); });
             }

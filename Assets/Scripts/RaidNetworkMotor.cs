@@ -15,10 +15,12 @@ namespace RaidRogue
             if (!allowed) { Dash.Cancel(); return; }
             Vector3 direction = Vector3.ClampMagnitude(new Vector3(input.X, 0, input.Z), 1f);
             Vector3 facing = Quaternion.Euler(0, Yaw, 0) * Vector3.forward;
-            if (input.Dash) Dash.TryStart(config.Dash, true, direction.x, direction.z, facing.x, facing.z);
+            var character = owner.GetComponent<CharacterActor>();
+            if (input.Dash) { if (character != null) character.StartMovement(Dash, config.Dash, true, direction.x, direction.z, facing.x, facing.z); else Dash.TryStart(config.Dash, true, direction.x, direction.z, facing.x, facing.z); }
             float distance;
             if (Dash.Active)
             {
+                character?.MarkDashMovement(character.MovementSettings(config.Dash).preserveCast);
                 direction = new Vector3((float)Dash.DirectionX, 0, (float)Dash.DirectionZ);
                 distance = (float)Dash.Step(RaidWire.Step);
             }

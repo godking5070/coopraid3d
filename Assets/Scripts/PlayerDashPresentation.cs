@@ -71,7 +71,9 @@ namespace RaidRogue
             _state.text = _player.IsDashing ? "대쉬 중" : _player.DashCooldownRemaining > 0
                 ? $"{_player.DashCooldownRemaining:0.0}s" : ready ? "사용 가능" : "사용 불가";
             _state.color = ready ? new Color(0.65f, 1f, 0.92f) : Color.white;
-            DashSettings settings = _player.dashSettings;
+            DashSettings settings = CharacterActor.Ensure(_player.gameObject).MovementSettings(_player.dashSettings);
+            var charges = _player.CaptureDash();
+            if (charges.MaximumCharges > 1) _state.text += $" · {charges.Charges}/{charges.MaximumCharges}";
             _details.text = settings != null ? $"{settings.distance:0.#}m / {settings.duration:0.##}초\nGCD 별도" : "설정 없음";
         }
 

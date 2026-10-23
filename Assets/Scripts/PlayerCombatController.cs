@@ -15,8 +15,9 @@ namespace RaidRogue
     {
         [Header("Melee Reach (combat boundary distance in world units)")]
         public MeleeRangeSettings meleeRanges = new MeleeRangeSettings();
-        public bool IsMeleeRole => CurrentRole == PlayerRole.Guardian_Tank || CurrentRole == PlayerRole.Blade_MeleeDPS;
-        public float PrimaryMeleeRange => meleeRanges.Get(CurrentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank, _combo1Stage);
+        private CharacterDefinition CommonDefinition => GetComponent<CharacterActor>()?.Definition;
+        public bool IsMeleeRole => CommonDefinition != null && CommonDefinition.legacyRole == 0 ? CommonDefinition.classification == AttackClassification.Melee : CurrentRole == PlayerRole.Guardian_Tank || CurrentRole == PlayerRole.Blade_MeleeDPS;
+        public float PrimaryMeleeRange => CommonDefinition != null && CommonDefinition.legacyRole == 0 ? GetComponent<CharacterActor>().PrimaryRange : meleeRanges.Get(CurrentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank, _combo1Stage);
         public string RangeFeedback { get; private set; }
         private float _rangeFeedbackUntil;
         public bool HasRangeFeedback => Time.unscaledTime < _rangeFeedbackUntil;
@@ -101,6 +102,7 @@ namespace RaidRogue
 
         public void InterruptForDeath()
         {
+            GetComponent<CharacterActor>()?.InterruptCast();
             _isCastingSpell = false; _castElapsed = 0; _triplecastBuffRemaining = 0;
             _combo1Stage = _combo2Stage = 1; _combo1Timer = _combo2Timer = 0;
             StopAllCoroutines(); _fxCoroutine = null;
@@ -136,6 +138,7 @@ namespace RaidRogue
 
             CreateCombatFxLines();
             OnPlayerRoleChanged(CurrentRole);
+            CharacterActor.Ensure(gameObject);
         }
 
         /// <summary>
@@ -270,7 +273,7 @@ namespace RaidRogue
             }
 
             // 캐스팅 도중 WASD로 이동하면 즉시 시전 취소!
-            if (playerController != null && playerController.IsMovingXZ)
+            if (playerController != null && playerController.IsMovingXZ && GetComponent<CharacterActor>()?.PreservesCastWhileDashing != true)
             {
                 CancelActiveSpellCastByMovement();
                 return;
@@ -352,6 +355,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill1_FlankCombo()
         {
+            if (CharacterActor.Ensure(gameObject).HandleLegacyInput(1)) return;
             if (RaidCombatAuthority.Route(this, 1)) return;
             if (!ValidateCombatSkill(1, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
@@ -385,6 +389,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill2_RearCombo()
         {
+            if (CharacterActor.Ensure(gameObject).HandleLegacyInput(2)) return;
             if (RaidCombatAuthority.Route(this, 2)) return;
             if (!ValidateCombatSkill(2, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
@@ -421,6 +426,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill3_PersonalDefensive_oGCD()
         {
+            if (CharacterActor.Ensure(gameObject).HandleLegacyInput(3)) return;
             if (RaidCombatAuthority.Route(this, 3)) return;
             if (!ValidateCombatSkill(3, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
@@ -473,6 +479,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill4_GaleThrust_oGCD()
         {
+            if (CharacterActor.Ensure(gameObject).HandleLegacyInput(4)) return;
             if (RaidCombatAuthority.Route(this, 4)) return;
             if (!ValidateCombatSkill(4, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
@@ -1164,7 +1171,7 @@ namespace RaidRogue
             }
 
             // 이미 이동 중일 때 누르면 즉시 경고 표시
-            if (playerController != null && playerController.IsMovingXZ)
+            if (playerController != null && playerController.IsMovingXZ && GetComponent<CharacterActor>()?.PreservesCastWhileDashing != true)
             {
                 _interruptAlertMessage = "CAST INTERRUPTED! (이동 중에는 화염 캐스팅 불가 — 멈춰 서거나 [2]냉기 / [4]삼연속 마법 사용!)";
                 _interruptAlertTimer = 1.6f;

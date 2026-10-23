@@ -97,6 +97,7 @@ namespace RaidRogue
         public bool HasTacticalRescueBuff => _tacticalRescueBuffTimer > 0f;
         public bool IsMovingXZ { get; private set; }
         public bool IsDashing => RaidNetworkSession.Multiplayer ? NetworkMotor?.Dash.Active == true : _dash.Active;
+        public DashMotion.Snapshot CaptureDash() => RaidNetworkSession.Multiplayer ? NetworkMotor?.Dash.Capture() ?? default : _dash.Capture();
         public float DashCooldownRemaining => (float)(RaidNetworkSession.Multiplayer ? NetworkMotor?.Dash.CooldownRemaining ?? 0 : _dash.CooldownRemaining);
         public float DashCooldownFraction => RaidNetworkSession.Multiplayer ? Mathf.Clamp01(DashCooldownRemaining / Mathf.Max(0.001f, (float)(NetworkMotor?.Dash.CooldownDuration ?? 0))) : _dash.CooldownDuration > 0
             ? Mathf.Clamp01((float)(_dash.CooldownRemaining / _dash.CooldownDuration)) : 0;
@@ -281,8 +282,10 @@ namespace RaidRogue
             if (RaidCombatAuthority.Active || RaidNetworkSession.CombatPreview) return false; // Multiplayer dash is consumed as a host-validated input command.
             Vector3 direction = GetMoveDirectionXZ(ReadMoveInput());
             Vector3 facing = transform.forward;
-            if (!_dash.TryStart(dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
-            GetComponent<BattleResurrection>()?.Cancel();
+            var character = CharacterActor.Ensure(gameObject);
+            if (!character.Available(CharacterSlot.Movement, out _)) return false;
+            if (!character.StartMovement(_dash, dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
+            if (!character.MovementSettings(dashSettings).preserveCast) { GetComponent<BattleResurrection>()?.Cancel(); character.InterruptCast(); }
             Potion?.EndRevivalProtection();
             if (_dashPresentation != null) _dashPresentation.BeginDash();
             return true;
@@ -290,6 +293,7 @@ namespace RaidRogue
 
         private void UpdateDashMovementXZ()
         {
+            var character = GetComponent<CharacterActor>(); character?.MarkDashMovement(character.MovementSettings(dashSettings).preserveCast);
             Vector3 direction = new Vector3((float)_dash.DirectionX, 0, (float)_dash.DirectionZ);
             Vector3 start = transform.position;
             float distance = (float)_dash.Step(Time.deltaTime);

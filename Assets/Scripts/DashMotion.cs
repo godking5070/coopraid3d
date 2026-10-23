@@ -9,6 +9,8 @@ namespace RaidRogue
         public float distance = 4f;
         public float duration = 0.2f;
         public float cooldown = 5f;
+        public int maximumCharges = 1;
+        public bool preserveCast;
     }
 
     // Pure state used by the actual movement controller and standalone regression checks.
@@ -19,20 +21,25 @@ namespace RaidRogue
         public struct Snapshot
         {
             public bool Active;
+            public int Charges, MaximumCharges; public float Recharge;
             public float Cooldown, CooldownTotal, Time, Distance, Speed, X, Z;
         }
         public Snapshot Capture() => new Snapshot { Active = Active, Cooldown = (float)CooldownRemaining,
-            CooldownTotal = (float)CooldownDuration, Time = (float)_timeRemaining, Distance = (float)_distanceRemaining,
+            CooldownTotal = (float)CooldownDuration, Charges = Charges, MaximumCharges = MaximumCharges, Recharge = (float)_recharge, Time = (float)_timeRemaining, Distance = (float)_distanceRemaining,
             Speed = (float)_speed, X = (float)DirectionX, Z = (float)DirectionZ };
         public void Restore(Snapshot state)
         {
-            Active = state.Active; CooldownRemaining = state.Cooldown; CooldownDuration = state.CooldownTotal;
+            Active = state.Active; MaximumCharges = Math.Max(1,state.MaximumCharges); Charges = state.MaximumCharges > 0 ? Math.Max(0,Math.Min(MaximumCharges,state.Charges)) : state.Cooldown > 0 ? 0 : 1; _recharge = state.MaximumCharges > 0 ? Math.Max(0,state.Recharge) : state.Cooldown; CooldownDuration = state.CooldownTotal;
             _timeRemaining = state.Time; _distanceRemaining = state.Distance; _speed = state.Speed;
             DirectionX = state.X; DirectionZ = state.Z;
         }
 
         public bool Active { get; private set; }
-        public double CooldownRemaining { get; private set; }
+        public int Charges { get; private set; } = 1;
+        public int MaximumCharges { get; private set; } = 1;
+        private double _recharge;
+        public double RechargeRemaining => _recharge;
+        public double CooldownRemaining => Charges > 0 ? 0 : _recharge;
         public double CooldownDuration { get; private set; }
         private double _timeRemaining;
         private double _distanceRemaining;
@@ -42,9 +49,11 @@ namespace RaidRogue
 
         public bool TryStart(DashSettings settings, bool allowed, double moveX, double moveZ, double facingX, double facingZ)
         {
-            if (!allowed || Active || CooldownRemaining > 0 || settings == null ||
+            if (!allowed || Active || settings == null || settings.maximumCharges < 1 || settings.maximumCharges > 10 ||
                 !PositiveFinite(settings.distance) || !PositiveFinite(settings.duration) ||
                 float.IsNaN(settings.cooldown) || float.IsInfinity(settings.cooldown) || settings.cooldown < 0) return false;
+            if (_recharge <= 0 && MaximumCharges != settings.maximumCharges) { MaximumCharges = settings.maximumCharges; Charges = MaximumCharges; }
+            if (Charges < 1) return false;
 
             double x = moveX, z = moveZ;
             if (x * x + z * z < 0.0001) { x = facingX; z = facingZ; }
@@ -55,12 +64,20 @@ namespace RaidRogue
             _distanceRemaining = settings.distance;
             _timeRemaining = settings.duration;
             _speed = _distanceRemaining / _timeRemaining;
-            CooldownDuration = CooldownRemaining = settings.cooldown;
+            CooldownDuration = settings.cooldown; Charges--;
+            if (_recharge <= 0) _recharge = settings.cooldown;
+            if (settings.cooldown == 0) Charges = MaximumCharges;
             Active = true;
             return true;
         }
 
-        public void TickCooldown(double deltaTime) => CooldownRemaining = Math.Max(0, CooldownRemaining - Math.Max(0, deltaTime));
+        public void TickCooldown(double deltaTime)
+        {
+            if(deltaTime<0||double.IsNaN(deltaTime)||double.IsInfinity(deltaTime)||Charges>=MaximumCharges)return;
+            _recharge-=deltaTime;
+            while(_recharge<=0&&Charges<MaximumCharges){Charges++;_recharge+=CooldownDuration;if(CooldownDuration<=0){Charges=MaximumCharges;break;}}
+            if(Charges==MaximumCharges)_recharge=0;
+        }
 
         public double Step(double deltaTime)
         {
@@ -75,7 +92,7 @@ namespace RaidRogue
 
         // Interruptions never refund or restart the cooldown.
         public void Cancel() { Active = false; _timeRemaining = _distanceRemaining = 0; }
-        public void ResetForRetry() { Cancel(); CooldownRemaining = CooldownDuration = 0; }
+        public void ResetForRetry() { Cancel(); _recharge = CooldownDuration = 0; Charges = MaximumCharges; }
         private static bool PositiveFinite(float value) => value > 0 && !float.IsInfinity(value) && !float.IsNaN(value);
     }
 

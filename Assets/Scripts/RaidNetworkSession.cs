@@ -112,7 +112,7 @@ namespace RaidRogue
                     Mode = RaidSessionMode.Host;
                     _config = new RaidPacket { Kind = RaidPacketKind.Welcome, Speed = _player.moveSpeed, Radius = _player.combatRadius,
                         Arena = _player.arenaBoundaryRadius, TurnSpeed = _player.rotationSmoothSpeed,
-                        Dash = new DashSettings { distance = _player.dashSettings.distance, duration = _player.dashSettings.duration, cooldown = _player.dashSettings.cooldown } };
+                        Dash = new DashSettings { distance = _player.dashSettings.distance, duration = _player.dashSettings.duration, cooldown = _player.dashSettings.cooldown, maximumCharges = _player.dashSettings.maximumCharges, preserveCast = _player.dashSettings.preserveCast } };
                     DisableBots(); _loadFrame = Time.frameCount; _loadingDeadline = Time.unscaledTime + StageManager.Instance.FlowSettings.loadingSeconds;
                     var member = _roster.Join(_playerName); _localId = member.Id; member.SteamId = steamId; member.Loaded = true;
                     AddAvatar(member.Id, member.Role, member.Name, SpawnPoint(member.Role)); ReconcileBots(); SyncLobbyAvatar(member);

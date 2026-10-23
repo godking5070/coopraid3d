@@ -8,12 +8,15 @@ namespace RaidRogue
     [Serializable] public sealed class LocalKeyBinding
     {
         public string action, primary, secondary;
+        public bool customized;
         public LocalKeyBinding Copy() => (LocalKeyBinding)MemberwiseClone();
     }
     [Serializable] public sealed class LocalSettingsData
     {
-        public const int CurrentVersion = 1;
+        public const int CurrentVersion = 2;
         public int version = CurrentVersion;
+        public bool bindingsNeedReview;
+        public string bindingNotice = "";
         public int width = 1280, height = 720, windowMode = 1; // 0 exclusive, 1 borderless, 2 windowed
         public bool vSync = true;
         public int frameLimit = 120;
@@ -29,6 +32,7 @@ namespace RaidRogue
         }
         public void Normalize()
         {
+            MigrateBindings();
             version = CurrentVersion;
             width = Math.Max(640, Math.Min(16384, width)); height = Math.Max(480, Math.Min(16384, height));
             if (windowMode < 0 || windowMode > 2) windowMode = 1;
@@ -37,7 +41,26 @@ namespace RaidRogue
             effects = Clamp(effects, 0, 1, 1); ui = Clamp(ui, 0, 1, .8f);
             rotationSensitivity = Clamp(rotationSensitivity, .03f, .6f, .16f);
             zoom3D = Clamp(zoom3D, .25f, 5, 2); zoom2D = Clamp(zoom2D, .25f, 5, 2);
-            bindings = LocalBindingRules.Repair(bindings);
+            bindings = LocalBindingRules.Repair(bindings, bindingsNeedReview);
+            bindingsNeedReview = LocalBindingRules.HasConflicts(bindings);
+        }
+        public void MigrateBindings()
+        {
+            if (version >= 2) return;
+            // v1 had no provenance: only a complete factory layout is unambiguous.
+            bool factory = LocalBindingRules.IsVersionOneFactory(bindings);
+            foreach (var b in bindings ?? Array.Empty<LocalKeyBinding>())
+            {
+                if (b == null) continue;
+                if (factory && b.action == "Potion") { b.primary = "x"; b.secondary = ""; }
+                if (factory && b.action == "Skill4") { b.primary = "q"; b.secondary = ""; }
+                if (factory && b.action == "View") { b.primary = "f12"; b.secondary = ""; }
+                b.customized = !factory;
+            }
+            bindingsNeedReview = true; // Fill new slots without silently relocating any custom key.
+            bindingNotice = factory ? "직업 슬롯 도입: Q 직업 스킬 1 · X 포션 · F12 뷰 전환으로 이전했습니다."
+                : "이전 설정에는 키 지정 이력이 없어 기존 키를 보존했습니다. 조작 탭에서 Q 직업 스킬 / X 포션 및 표시된 충돌을 확인하세요.";
+            version = CurrentVersion;
         }
         private static float Clamp(float v, float min, float max, float fallback) => float.IsNaN(v) || float.IsInfinity(v) ? fallback : Math.Max(min, Math.Min(max, v));
         public bool SameDisplay(LocalSettingsData b) => width == b.width && height == b.height && windowMode == b.windowMode;
@@ -59,12 +82,18 @@ namespace RaidRogue
             var a = new List<Definition> {
                 new Definition("Forward", "앞으로 이동", "w", "upArrow"), new Definition("Back", "뒤로 이동", "s", "downArrow"),
                 new Definition("Left", "왼쪽 이동", "a", "leftArrow"), new Definition("Right", "오른쪽 이동", "d", "rightArrow"),
-                new Definition("Dash", "대쉬", "space"), new Definition("Potion", "포션", "q") };
-            for (int i = 1; i <= 5; i++) a.Add(new Definition("Skill" + i, i == 5 ? "힐러 부활" : "스킬 " + i, "digit" + i, "numpad" + i));
+                new Definition("Dash", "대쉬", "space"), new Definition("Potion", "포션", "x") };
+            for (int i = 1; i <= 5; i++) a.Add(new Definition("Skill" + i, i == 5 ? "힐러 부활 (기존 유틸리티)" : i == 4 ? "직업 스킬 1" : "스킬 " + i, i == 4 ? "q" : "digit" + i, i == 4 ? "" : "numpad" + i));
+            a.Add(new Definition("Counter", "카운터", "digit4", "numpad4"));
+            a.Add(new Definition("JobSkill2", "직업 스킬 2", "e"));
+            a.Add(new Definition("Identity", "아이덴티티", "z"));
+            a.Add(new Definition("SelectedActive", "선택형 액티브", "r"));
+            a.Add(new Definition("SelectedOffGcd", "선택형 oGCD", "f"));
+            a.Add(new Definition("Ultimate", "궁극기", "v"));
             a.Add(new Definition("ClearTarget", "타겟 해제", "backspace"));
             a.Add(new Definition("CycleEnemy", "적 타겟 순환", "tab")); a.Add(new Definition("TargetOfTarget", "대상의 대상", "t"));
             for (int i = 1; i <= 8; i++) a.Add(new Definition("Party" + i, "파티원 " + i, "f" + i));
-            a.Add(new Definition("Roles", "역할 창", "p", "", 3)); a.Add(new Definition("View", "2D / 3D 전환", "v", "", 3));
+            a.Add(new Definition("Roles", "역할 창", "p", "", 3)); a.Add(new Definition("View", "2D / 3D 전환", "f12", "", 3));
             a.Add(new Definition("Settings", "설정 창", "f10", "", 3)); a.Add(new Definition("Menu", "게임 메뉴", "f9", "", 3));
             a.Add(new Definition("Results", "전투 기록", "f11", "", 3));
             for (int i = 1; i <= 4; i++) a.Add(new Definition("Choice" + i, "카드 / 직업 선택 " + i, "digit" + i, "numpad" + i, 2));
@@ -106,21 +135,51 @@ namespace RaidRogue
                 var c = collisions[0]; if (c.slot == 0 && previous == "") return false;
                 Set(copy[c.row], c.slot, previous);
             }
-            Set(copy[row], slot, key);
+            Set(copy[row], slot, key); copy[row].customized = true;
+            foreach (var c in collisions) copy[c.row].customized = true;
             for (int i = 0; i < copy.Length; i++)
-                if (!ValidKey(copy[i].primary) || Conflicts(copy, i, 0, copy[i].primary).Count > 0 || Conflicts(copy, i, 1, copy[i].secondary).Count > 0) return false;
-            for (int i = 0; i < all.Length; i++) { all[i].primary = copy[i].primary; all[i].secondary = copy[i].secondary; }
+                if (!ValidKey(copy[i].primary)) return false;
+            // Allow repairing one migration conflict at a time; never introduce another conflict.
+            for (int i = 0; i < copy.Length; i++) for (int k = 0; k < 2; k++)
+                if (Conflicts(copy, i, k, Get(copy[i], k)).Count > Conflicts(all, i, k, Get(all[i], k)).Count) return false;
+            if (Conflicts(copy, row, slot, key).Count > 0) return false;
+            for (int i = 0; i < all.Length; i++) { all[i].primary = copy[i].primary; all[i].secondary = copy[i].secondary; all[i].customized = copy[i].customized; }
             return true;
         }
-        public static LocalKeyBinding[] Repair(LocalKeyBinding[] incoming)
+        public static bool HasConflicts(LocalKeyBinding[] all)
+        {
+            for (int i = 0; i < all.Length; i++) for (int s = 0; s < 2; s++)
+                if (Conflicts(all, i, s, Get(all[i], s)).Count > 0) return true;
+            return false;
+        }
+        public static bool IsVersionOneFactory(LocalKeyBinding[] bindings)
+        {
+            var old = new List<LocalKeyBinding>();
+            foreach (var d in Actions)
+            {
+                if (Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate"}, d.Id) >= 0) continue;
+                old.Add(new LocalKeyBinding { action=d.Id, primary=d.Id=="Potion"?"q":d.Id=="Skill4"?"digit4":d.Id=="View"?"v":d.Key,
+                    secondary=d.Id=="Skill4"?"numpad4":d.Alternate });
+            }
+            if (bindings == null || bindings.Length != old.Count) return false;
+            foreach (var b in old)
+            {
+                var match=Array.Find(bindings,x=>x!=null&&x.action==b.action);
+                if(match==null||match.customized||match.primary!=b.primary||(match.secondary??"")!=b.secondary) return false;
+            }
+            return true;
+        }
+        public static LocalKeyBinding[] Repair(LocalKeyBinding[] incoming, bool preserveConflicts = false)
         {
             var result = Defaults();
             for (int i = 0; i < result.Length; i++)
             {
                 var old = incoming == null ? null : Array.Find(incoming, b => b != null && b.action == result[i].action);
+                result[i].customized = old != null && old.customized;
                 result[i].primary = old != null && ValidKey(old.primary) ? old.primary : result[i].primary;
                 result[i].secondary = old != null ? ValidKey(old.secondary) ? old.secondary : "" : result[i].secondary;
             }
+            if (preserveConflicts) return result;
             // Preserve valid custom mappings, repairing only later conflicting/invalid entries.
             for (int i = 0; i < result.Length; i++) for (int slot = 0; slot < 2; slot++)
             {

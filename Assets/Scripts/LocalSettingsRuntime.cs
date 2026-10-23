@@ -28,6 +28,12 @@ namespace RaidRogue
             Instance = this; DontDestroyOnLoad(gameObject);
             string json = LocalSettingsFile.Read(FilePath, ValidJson, out string notice); Notice = notice;
             Applied = Decode(json);
+            if (Applied.bindingNotice.Length > 0) Notice = (Notice + " " + Applied.bindingNotice).Trim();
+            if (json != null)
+            {
+                var old = new LocalSettingsData { version = 0 }; JsonUtility.FromJsonOverwrite(json, old);
+                if (old.version < LocalSettingsData.CurrentVersion && !LocalSettingsFile.Save(FilePath, JsonUtility.ToJson(Applied, true), ValidJson, out string migrationError)) Notice += " " + migrationError;
+            }
             if (json == null && PlayerPrefs.HasKey("RaidRogue.Camera.v1.local-player"))
             {
                 try
@@ -42,7 +48,7 @@ namespace RaidRogue
         private LocalSettingsData Decode(string text)
         {
             var data = Defaults();
-            if (text != null) JsonUtility.FromJsonOverwrite(text, data);
+            if (text != null) { data.version = 0; JsonUtility.FromJsonOverwrite(text, data); }
             data.Normalize(); return data;
         }
         private static bool ValidJson(string json)
@@ -98,6 +104,8 @@ namespace RaidRogue
         public bool Apply(LocalSettingsData draft)
         {
             if (Confirmation.Pending) return false;
+            if (LocalBindingRules.HasConflicts(draft.bindings)) { Notice = "조작 탭에서 충돌한 키를 교체하거나 다시 지정하세요. 기존 키 전체를 초기화하지 않습니다."; return false; }
+            draft.bindingsNeedReview = false; draft.bindingNotice = "";
             _candidate = draft.Copy(); _candidate.Normalize(); ResolveDisplay(_candidate);
             var actual = Applied.Copy(); CaptureCurrentDisplay(actual);
             if (CanChangeDisplay && !_candidate.SameDisplay(actual))

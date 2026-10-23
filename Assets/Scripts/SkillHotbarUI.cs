@@ -50,6 +50,7 @@ namespace RaidRogue
             EnsurePlayerCastBarUI();
             EnsureFillSprites();
             BindSlotClickButtons();
+            if (GetComponent<CharacterFrameworkUI>() == null) gameObject.AddComponent<CharacterFrameworkUI>();
         }
 
         private void EnsurePlayerCastBarUI()
@@ -201,6 +202,7 @@ namespace RaidRogue
                 return;
             }
 
+            if (UpdateCommonCharacter()) return;
             PlayerRole role = combatController.CurrentRole;
             UpdateSlot1(slots[0], role);
             UpdateSlot2(slots[1], role);
@@ -227,6 +229,44 @@ namespace RaidRogue
                 gcdSummaryText.text =
                     $"현재 GCD: <b>{combatController.currentGcdDuration:F1}s</b>  |  {LocalInputBindings.SkillText(roleGuide)}";
             }
+        }
+
+        private bool UpdateCommonCharacter()
+        {
+            var actor = combatController.GetComponent<CharacterActor>();
+            if (actor?.Definition == null || actor.Definition.legacyRole > 0) return false;
+            var state = actor.Snapshot;
+            for (int i = 0; i < 4; i++)
+            {
+                var slot = slots[i]; if (slot == null) continue;
+                var commonSlot = CharacterSlots.LegacySlot(i + 1);
+                var selection = System.Array.Find(state.selections, s => s.slot == commonSlot);
+                var skill = selection == null ? null : actor.Definition.Skill(selection.skillId);
+                bool available = skill != null && skill.implemented && System.Array.IndexOf(state.unlocked, skill.id) >= 0;
+                var timing = skill == null ? null : System.Array.Find(state.skills, s => s.id == skill.id);
+                float remaining = timing != null && timing.charges == 0 ? timing.recharge : 0;
+                float total = timing?.rechargeTotal ?? 0;
+                if (skill != null && skill.usesGcd && state.gcd > remaining) { remaining = state.gcd; total = state.gcdTotal; }
+                if (slot.keybindBadgeText != null) slot.keybindBadgeText.text = LocalInputBindings.Label(CharacterSlots.Binding(commonSlot));
+                if (slot.skillNameText != null) slot.skillNameText.text = skill?.name ?? "빈 슬롯";
+                if (slot.slotButton != null) slot.slotButton.interactable = available;
+                if (slot.cooldownOverlayImage != null) slot.cooldownOverlayImage.fillAmount = total > 0 ? Mathf.Clamp01(remaining / total) : 0;
+                if (slot.cooldownNumberText != null) slot.cooldownNumberText.text = !available ? "잠김 / 미구현" : remaining > 0 ? remaining.ToString("0.0") : skill.maximumCharges > 1 ? timing.charges + "/" + skill.maximumCharges : "";
+                int chain = skill?.comboChain ?? 0; float combo = chain == 1 ? state.comboTime1 : chain == 2 ? state.comboTime2 : 0;
+                if (slot.stageBadgeText != null) slot.stageBadgeText.text = chain == 0 ? "" : (chain == 1 ? state.combo1 : state.combo2) + "단";
+                if (slot.comboTimerBarRoot != null) slot.comboTimerBarRoot.SetActive(combo > 0);
+                if (slot.comboTimerFillImage != null) slot.comboTimerFillImage.fillAmount = skill != null && skill.comboWindow > 0 ? combo / skill.comboWindow : 0;
+                if (slot.comboTimerText != null) slot.comboTimerText.text = combo.ToString("0.0");
+            }
+            if (gcdSummaryText != null) gcdSummaryText.text = actor.Definition.name + " · 공유 GCD " + state.gcd.ToString("0.0") + "초";
+            bool casting = state.castSkillId.Length > 0;
+            if (playerCastBarRoot != null) playerCastBarRoot.SetActive(casting);
+            if (casting)
+            {
+                if (playerCastText != null) playerCastText.text = actor.Definition.Skill(state.castSkillId).name + " · " + state.castRemaining.ToString("0.0") + "초";
+                if (playerCastFillImage != null) playerCastFillImage.fillAmount = state.castTotal > 0 ? 1 - state.castRemaining / state.castTotal : 0;
+            }
+            return true;
         }
 
         private void UpdatePlayerCastBar(PlayerRole role)

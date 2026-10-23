@@ -1,0 +1,164 @@
+캐릭터 개발 1단계 — 공통 기반 및 입력 구조 검토
+
+작업 기준
+- 원본: C:/coopraid/coopraid3d, ingame-move-system, HEAD f80d0c5.
+- 원본 브랜치에는 최신 안정화/설정/네트워크 코드가 미커밋 상태로 존재했다.
+- 이 파일들을 별도 worktree에 보존한 기준 스냅샷: 3a0c763.
+- 실제 작업: feature/character-framework, C:/coopraid/coopraid3d-characters.
+- 이번 단계는 3a0c763 이후 변경만 검토한다. 원본으로 병합/복사하지 않았다.
+- 원본의 기준 파일 260개 SHA-256 일치. worktree Library 없음. Unity 실행 없음.
+- 씬/프리팹 YAML, 기존 .meta GUID, 프로젝트/패키지 설정 변경 없음.
+- 새 C# 파일의 .meta는 원본에 반영한 뒤 Unity가 생성하도록 남겼다.
+
+구조와 기존 코드 연결
+- CharacterFrameworkData: 명시적 슬롯 값과 안정적인 직업/스킬/자원/루트/해금 ID.
+  정의는 기본 HP/속도/전투 반경, 역할/공격 분류, 슬롯, 비용/거리/시전/GCD/충전,
+  이동 거리/시간/시전 유지, 루트/스테이지 해금, 외형/아이콘 정보를 담는다.
+- CharacterDefinitionSO / SkillDefinitionSO: 실행 상태 없는 저작 데이터.
+  Resources/Characters의 정의를 런타임 등록한다. 중복 ID, 누락된 참조, 잘못된 수치를 거부한다.
+  등록된 미구현 직업을 구현할 때 implementsRegisteredJob을 명시하면 같은 ID/역할/분류를
+  유지해 한 번 대체할 수 있다. 구현 자산이 중복되면 다시 거부한다.
+- CharacterRuntimeState: 캐릭터별 자원, 독립 3단 콤보 2개, GCD, 스킬별 충전/쿨타임,
+  시전, 루트/선택 스킬/해금, 빌드 효과. 스냅샷 배열은 복사하며 공유 실행 상태를 두지 않는다.
+  시전 시작에는 비용을 차감하지 않고 완료 시 대상/사거리/비용을 재검증한다.
+  실패/취소/실행기 거절에는 자원/쿨타임/콤보를 소비하지 않는다.
+- CharacterActor: 기존 컨트롤러와 정의/상태 사이 어댑터.
+  기존 네 테스트 캐릭터는 기존 전투 함수를 그대로 사용하고 확정된 타이머를 공통 상태에 반영한다.
+  기존 AI 봇의 실제 행동 주기와 힐러 구출 쿨타임도 반영한다.
+  신규 직업 실행기는 RegisterHandler로 연결하고 기존 피해/회복/사거리 함수를 호출한다.
+  실행기는 실패할 때 효과를 적용하지 않는 계약을 따른다. 별도 피해/어그로 계산기를 만들지 않았다.
+- 네트워크: 기존 소유권/lease/epoch/sequence 검증 경로에 공통 슬롯 및 성장 선택 요청을 추가.
+  클라이언트가 자원량/피해량/성공 여부를 보내는 API를 추가하지 않았다.
+  전체 전투 프레임에 CharacterStateSnapshot을 포함하고 기존 재접속 복구 장벽 안에서 적용한다.
+  AI 임시 대체는 기존 개체의 상태를 사용한다. 시전/입력만 정리하고 재접속으로 상태를 초기화하지 않는다.
+  이동 충전 상태도 기존 위치 스냅샷으로 전달한다. 프로토콜 버전은 5에서 6으로 변경했다.
+  호스트와 클라이언트는 반드시 같은 새 빌드를 사용한다.
+- 전투 기록: 기존 파티 개체 ID 집계를 유지하고 직업 ID만 메타데이터로 추가했다.
+  카드 효과는 안정적인 카드 ID와 스택 수로 공통 빌드 상태에 기록하며 효과를 재실행하지 않는다.
+- 초기화: 재도전은 쿨타임/충전/콤보/시전과 자원별 초기화 정책을 적용하고 루트/해금/빌드는 유지.
+  다음 스테이지는 자원별 resetOnStage 정책 적용. 새 런은 빌드/해금/진도를 초기화한다.
+  첫 출발 전에 선택한 루트는 최초 전투 준비에서 보존한다.
+- 성장: 출발 전 루트로 Z, Stage 1 R, Stage 2 F, Stage 3 V A/B를 데이터로 표현.
+  StageManager는 클리어 스테이지 번호만 알리고 규칙 데이터가 해금 조건을 판단한다.
+  Choose/RequestChoice API와 호스트 검증까지 연결했다. 직업별 선택지 콘텐츠/성장 선택 UI는
+  실제 직업 구현 단계에서 연결할 대상으로 남겼다. 기존 카드 보상 진행을 변경하지 않았다.
+- UI: 기존 1/2/3/Q 핫바, 이동기/포션, 힐러 5 부활을 유지하고 새 공통 슬롯 줄을 자동 생성.
+  확정된 자원 수치/게이지, 잠김/미구현, 충전/쿨타임을 표시한다.
+  단축키 표시는 저장된 실제 바인딩에서 가져온다. 역할 창에 미구현 12직업 목록을 표시한다.
+  신규 직업의 외형/아이콘 콘텐츠, 전용 AI 판단, 완성 스킬은 이번 단계에 추가하지 않았다.
+
+현재 선택 가능한 직업과 미구현 등록
+- 기존 테스트: test.guardian / test.oracle / test.blade / test.archmage. 이름을 새 직업으로 바꾸지 않았다.
+- 탱커: job.aegis-paladin 이지스 팔라딘, job.berserker 버서커, job.dragon-breaker 드래곤 브레이커.
+- 힐러: job.sylvan-oracle 실반 오라클, job.seraphic-bard 세라픽 바드, job.blood-apothecary 블러드 아포테카리.
+- 근딜: job.nightblade 나이트블레이드, job.tempest-lancer 템페스트 랜서.
+- 원거리 물리: job.gunslinger 건슬링어, job.spirit-ranger 스피릿 레인저.
+- 캐스터: job.astromancer 아스트로맨서, job.mirror-phantom 미러 팬텀.
+- 위 12개 신규 직업은 모두 playable=false. 스킬 내용이 없는 채 선택/공격되지 않는다.
+
+키 배치 및 이전
+- 실제 구성은 직업 액션 11개 + 공통 포션 1개.
+  1 GCD1 / 2 GCD2 / 3 oGCD1 / 4 카운터 / Q 직업1 / E 직업2 /
+  SPACE 이동기 / Z 아이덴티티 / R 선택 액티브 / F 선택 oGCD / V 궁극기 / X 포션.
+- 기존 4번 능력은 Q 직업1로 연결했다. 4번은 새 카운터 슬롯(현재 테스트 캐릭터에서 미구현).
+  기존 힐러 5 부활은 별도 유틸리티로 남겼다. 마우스 타겟팅/카메라 입력을 변경하지 않았다.
+- V 궁극기와 충돌하던 기본 뷰 전환 키는 F12로 옮겼다.
+- local-settings.json 버전 1 → 2. 이전 전체 키 배치가 공장 기본값과 일치하면 Q 포션을 X,
+  기존 4번 능력을 Q, 뷰 전환을 F12로 이전한다. 다음 실행에서 같은 이전을 반복하지 않는다.
+- v1에는 개별 사용자 지정 이력이 없었다. 전체 배치가 기본값과 다르면 기존 바인딩을 보존한다.
+  모호한 기본값도 임의로 바꾸지 않고 안내한다. 신규 슬롯과의 충돌을 조작 탭에 표시한다.
+  충돌한 키 입력만 실행하지 않으며 기존 교체/재지정 UI로 한 건씩 해결할 수 있다.
+  X를 이미 사용자 지정한 경우 자동 덮어쓰기/전체 초기화를 하지 않는다.
+- v2부터 명시적 키 변경 이력을 저장한다. 저장 위치는 기존
+  Application.persistentDataPath/local-settings.json, 원자적 저장/백업 로직도 그대로 사용한다.
+
+수행한 검증
+명령: powershell -NoProfile -ExecutionPolicy Bypass -File Tests/Run-SteamChecks.ps1 -OriginalProject C:/coopraid/coopraid3d
+- 전체 70,825 assertion 통과. 그중 새 공통 기반 493개, 설정/키/저장 41,486개.
+- 캐릭터 간 상태 독립, 중복 ID/누락 참조, 사거리/대상/GCD 실패 무소모,
+  독립 콤보, 복수 자원/정수 상한, 다중 충전, 시전 완료/이동/사망 취소,
+  스냅샷 재적용 무효과 및 오염된 상태 거부, 루트/해금/재도전/새 런 초기화 검증.
+- 기존 네트워크 소유권/중복 요청/재접속/보상 경계/강제 이동/대쉬/전투 기록 회귀 검사 통과.
+- 실제 설치된 Unity/패키지 참조로 Assembly-CSharp 및 Editor 전체 C# 컴파일 통과.
+- 기존 HealingSanctuaryZone._innerCross 미사용 필드 경고 1개는 그대로다.
+- git diff --check 통과. 작업 전 원본 파일 260개 해시 불변 및 worktree Library 없음 확인.
+
+실행하지 않은 검증
+- Unity Play Mode, 실제 화면 배치/문자 가독성, 물리 이동, 새로운 충전형 이동기 연출.
+- 실제 두 Steam 계정 접속/연결 끊김/AI 대체/복귀 및 다중 플레이 화면 동기화.
+- SO 자산을 Unity에서 직접 생성/직렬화/임포트하는 확인.
+- 따라서 관리 코드 컴파일/독립 로직 검사 결과를 실제 플레이 검증으로 간주하지 않는다.
+
+원본 Unity에서 확인 순서 (검토 후 이 변경만 원본에 반영한 다음)
+1. worktree를 열지 않고 C:/coopraid/coopraid3d만 사용한다. 원본 브랜치 임의 전환 없이
+   이번 단계 패치(기준 3a0c763)를 검토해 반영하고 Unity가 새 스크립트 .meta를 생성/컴파일하도록 한다.
+2. 싱글플레이 역할 창에서 기존 네 테스트 캐릭터가 선택되고 신규 12직업은 미구현 표시인지 확인한다.
+3. 기본 키로 1/2 콤보, 3 기존 능력, Q 기존 4번 능력, X 포션, SPACE 이동기를 사용한다.
+   4/E/Z/R/F/V 미구현/잠김 입력으로 피해/쿨타임/콤보가 바뀌지 않는지 확인한다.
+   좌클릭 타겟/우클릭 회전, F12 뷰 전환, 힐러 5 부활도 확인한다.
+4. 설정 조작 탭에서 Q/X 등 키를 바꾸고 실제 핫바/안내와 일치하는지 확인한다.
+   별도 테스트 사용자 설정의 v1 기본 배치 및 X 사용자 지정 배치로 이전/충돌 UI를 확인한다.
+   실제 사용자 설정을 지우지 말고 기존 백업을 보관한다.
+5. 각 기존 직업의 공격/힐/보호막/사거리/측후면/시전 취소, 포션 회복량/쿨타임,
+   부활, 전멸 재도전, 카드와 다음 스테이지, 새 런까지 기존 전투를 확인한다.
+6. 같은 프로토콜 6 테스트 빌드로 호스트/다른 계정 클라이언트를 접속한다.
+   스킬 사용 뒤 클라이언트를 예기치 않게 끊어 AI 대체 → 60초 내 복귀한다.
+   직업 ID, HP, 카드, 쿨타임, 콤보, 전투 기록이 같은 개체로 이어지는지 확인한다.
+   사망 상태/시전 도중/보상 및 스테이지 전환 중 복귀도 확인한다.
+7. 게이지/정수 스택/복수 자원/충전 UI는 향후 실제 직업 데이터를 연결한 뒤 실플레이 확인한다.
+   이번 단계에서는 새 플레이용 자원을 만들지 않았고 독립 fixture 데이터로 로직을 검증했다.
+
+다음 이지스 팔라딘 구현 작업
+- job.aegis-paladin ID를 유지한 CharacterDefinitionSO/SkillDefinitionSO와 실제 스탯/슬롯/자원 정의 작성.
+  Resources/Characters에 배치하고 implementsRegisteredJob을 명시한다.
+- 기존 피해/회복/보호막/어그로/사거리 API를 조합한 실행기를 RegisterHandler로 연결한다.
+  성공 시에만 true, 실패에는 효과 없는 false라는 계약을 유지한다.
+- 검증을 마친 정의만 playable로 전환한다. 실제 직업 선택 UI/RPC는 기존 호스트 역할 중복 검증과
+  AssignDefinition을 연결해야 한다. 현재 방의 선택지는 기존 네 테스트 역할뿐이다.
+- 데이터 기반 루트 및 R/F/V 선택 UI를 RequestChoice에 연결하고, 실제 콘텐츠가 생길 때
+  보상 완료 대기/AI 자동 선택 정책과 함께 확인한다. 이번 단계의 기존 카드 보상에는 대기자를 추가하지 않았다.
+- 전용 외형/아이콘 및 역할에 맞는 AI 행동을 연결하고 물리/시전/멀티플레이 실기 검증을 수행한다.
+- 부활 코인은 PartyLife/BattleResurrection/RaidCombatSession의 호스트 성공 처리와 별도 경제 상태로
+  후속 구현한다. 현재 부활/포션 회복 비율/수량 규칙은 변경하지 않았다.
+
+변경 파일 (이번 단계만)
+Assets/Scripts/BattleResurrection.cs
+Assets/Scripts/CharacterActor.cs
+Assets/Scripts/CharacterDefinitionSO.cs
+Assets/Scripts/CharacterDefinitions.cs
+Assets/Scripts/CharacterFrameworkData.cs
+Assets/Scripts/CharacterFrameworkUI.cs
+Assets/Scripts/CharacterRuntimeState.cs
+Assets/Scripts/CombatMetricsData.cs
+Assets/Scripts/CombatMetricsManager.cs
+Assets/Scripts/CombatRange.cs
+Assets/Scripts/CommonPotion.cs
+Assets/Scripts/DashMotion.cs
+Assets/Scripts/LocalCameraSettingsUI.cs
+Assets/Scripts/LocalInputBindings.cs
+Assets/Scripts/LocalSettingsData.cs
+Assets/Scripts/LocalSettingsRuntime.cs
+Assets/Scripts/NetworkRaidAvatar.cs
+Assets/Scripts/PartyLife.cs
+Assets/Scripts/PartyListUI.cs
+Assets/Scripts/PlayerCombatController.cs
+Assets/Scripts/PlayerController.cs
+Assets/Scripts/PlayerDashPresentation.cs
+Assets/Scripts/RaidCombatActors.cs
+Assets/Scripts/RaidCombatProgression.cs
+Assets/Scripts/RaidCombatProtocol.cs
+Assets/Scripts/RaidCombatSession.cs
+Assets/Scripts/RaidCombatWorld.cs
+Assets/Scripts/RaidNetworkMotor.cs
+Assets/Scripts/RaidNetworkProtocol.cs
+Assets/Scripts/RaidNetworkSession.cs
+Assets/Scripts/RoguelikeCardManager.cs
+Assets/Scripts/SkillDefinitionSO.cs
+Assets/Scripts/SkillHotbarUI.cs
+Assets/Scripts/StageManager.cs
+Tests/CharacterFrameworkTests.cs
+Tests/LocalSettingsTests.cs
+Tests/RaidCombatNetworkTests.cs
+Tests/Run-NetworkChecks.ps1
+Tests/Run-SteamChecks.ps1
+Tests/CharacterFrameworkReview.txt

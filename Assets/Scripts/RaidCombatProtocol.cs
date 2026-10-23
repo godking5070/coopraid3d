@@ -7,7 +7,8 @@ namespace RaidRogue
     [Serializable] public sealed class RaidActionRequest
     {
         public uint sequence, lease;
-        public int epoch, actor, skill, target; // 1..5 skills, 6 potion, 7 target, 8 reward, 9 start/retry.
+        public int epoch, actor, skill, target;
+        public string jobId, ruleId, choiceId; public int slot; // 1..5 skills, 6 potion, 7 target, 8 reward, 9 start/retry.
     }
     // Connection ownership and epoch are checked before invoking any existing gameplay method.
     public sealed class RaidActionGate
@@ -16,7 +17,7 @@ namespace RaidRogue
         public bool Accept(int connectionOwner, int epoch, RaidActionRequest request)
         {
             if (request == null || connectionOwner <= 0 || request.actor != connectionOwner || request.epoch != epoch ||
-                request.sequence == 0 || request.skill < 1 || request.skill > 9) return false;
+                request.sequence == 0 || request.skill < 1 || request.skill > 11) return false;
             if (_last.TryGetValue(connectionOwner, out uint last) && request.sequence <= last) return false;
             _last[connectionOwner] = request.sequence; return true;
         }
@@ -63,6 +64,7 @@ namespace RaidRogue
         public int id, role, target, combo1, combo2;
         public bool bot, dead, stunned, rooted, forced, casting, resurrecting, rewardChosen;
         public string name, castName;
+        public CharacterStateSnapshot character;
         public int controlState, autoRevision;
         public float returnDeadline;
         public int[] autoCards;
@@ -85,7 +87,7 @@ namespace RaidRogue
     }
     [Serializable] public sealed class RaidMetricMember
     {
-        public int id, role, deaths; public string name;
+        public int id, role, deaths; public string name, jobId;
         public double bossDamage, addDamage, healing, selfHealing, shield;
     }
     [Serializable] public sealed class RaidMetricResult
