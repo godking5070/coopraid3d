@@ -1175,7 +1175,7 @@ namespace RaidRogue
 
         public void TakeDamage(float rawAmount, bool allowLethal = false)
         {
-            if (isDead || currentHp <= 0 || rawAmount <= 0 || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || isDead || currentHp <= 0 || rawAmount <= 0 || StageManager.CombatSuspended)
             {
                 return;
             }
@@ -1193,6 +1193,7 @@ namespace RaidRogue
                 return;
             }
 
+            ExpireTimedShields();
             float finalAmount = isTankDefensiveActive ? rawAmount * 0.22f : rawAmount;
 
             // 노란색 보호막(Shield) 우선 차감

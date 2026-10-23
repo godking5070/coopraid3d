@@ -45,6 +45,11 @@ $taskCharacterExe = Join-Path $taskOutput 'CharacterFrameworkTests.exe'
 if ($LASTEXITCODE -ne 0) { throw 'Character framework test compilation failed.' }
 & $taskCharacterExe
 if ($LASTEXITCODE -ne 0) { throw 'Character framework tests failed.' }
+$taskAegisExe = Join-Path $taskOutput 'AegisPaladinTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskAegisExe" (Join-Path $taskRoot 'Assets/Scripts/CharacterFrameworkData.cs') (Join-Path $taskRoot 'Assets/Scripts/CharacterRuntimeState.cs') (Join-Path $taskRoot 'Assets/Scripts/AegisPaladinData.cs') (Join-Path $taskRoot 'Assets/Scripts/CombatMetricsData.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidCombatProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $PSScriptRoot 'AegisPaladinTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Aegis test compilation failed.' }
+& $taskAegisExe
+if ($LASTEXITCODE -ne 0) { throw 'Aegis tests failed.' }
 # Compile the actual pinned SDK, without loading native Steam or running Unity.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
 $taskDefines = $taskProject.SelectSingleNode("//*[local-name()='DefineConstants']").InnerText

@@ -430,6 +430,7 @@ namespace RaidRogue
         /// </summary>
         public void SetupBossForStage(int stageNumber)
         {
+            _counterGroggy=false; GetComponent<CombatCounterTarget>()?.ResetState();
             _combatThreat.Clear(); _tetherInterceptingPlayer = null;
             _isChasing = false;
             _pendingPositionedSkill = null;
@@ -1640,6 +1641,7 @@ namespace RaidRogue
 
         private void EnterGroggyTransition()
         {
+            _counterGroggy=false; GetComponent<CombatCounterTarget>()?.ResetState();
             CleanupActiveTelegraphAndTether();
             _isChasing = false;
             _pendingPositionedSkill = null;
@@ -1671,6 +1673,7 @@ namespace RaidRogue
             if (_groggyRemainingTime <= 0f)
             {
                 _groggyRemainingTime = 0f;
+                if (_counterGroggy) { _counterGroggy=false; fsmState=BossFSMState.IdleChasing; _patternWaitTimer=1; return; }
                 currentPhase = BossPhase.Phase2_50To0;
                 fsmState = BossFSMState.IdleChasing;
                 _patternWaitTimer = 1.0f;
@@ -2050,6 +2053,7 @@ namespace RaidRogue
 
         public void StopEncounterEffects()
         {
+            _counterGroggy=false; GetComponent<CombatCounterTarget>()?.ResetState();
             CleanupActiveTelegraphAndTether();
             StopAllCoroutines(); _collapseCoroutine = null;
             _isChasing = false; _pendingPositionedSkill = null; _activeSkill = null;

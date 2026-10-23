@@ -64,16 +64,25 @@ namespace RaidRogue
                 CreateSlot(hotbar.transform);
             }
 
-            _key.text = LocalInputBindings.Label("Dash") + " 대쉬";
+            var actor=_player.GetComponent<CharacterActor>();
+            var snapshot=actor?.Snapshot;var selection=snapshot==null?null:System.Array.Find(snapshot.selections,x=>x.slot==CharacterSlot.Movement);
+            var skill=selection==null?null:actor.Definition.Skill(selection.skillId);
+            _key.text = LocalInputBindings.Label("Dash") + " " + (actor?.Definition?.id==AegisPaladinData.JobId?"빛의 쇄도":"대쉬");
             bool ready = _player.CanDash;
             _background.color = ready ? new Color(0.13f, 0.32f, 0.38f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
             _overlay.anchorMax = new Vector2(1, _player.DashCooldownFraction);
             _state.text = _player.IsDashing ? "대쉬 중" : _player.DashCooldownRemaining > 0
                 ? $"{_player.DashCooldownRemaining:0.0}s" : ready ? "사용 가능" : "사용 불가";
+            if(skill!=null&&skill.maximumCharges>1)
+            {
+                var timing=System.Array.Find(snapshot.skills,x=>x.id==skill.id);
+                _state.text=timing.charges+"/"+skill.maximumCharges+(timing.recharge>0?" · "+timing.recharge.ToString("0.0")+"s":"");
+                _overlay.anchorMax=new Vector2(1,timing.charges==0&&timing.rechargeTotal>0?Mathf.Clamp01(timing.recharge/timing.rechargeTotal):0);
+            }
             _state.color = ready ? new Color(0.65f, 1f, 0.92f) : Color.white;
             DashSettings settings = CharacterActor.Ensure(_player.gameObject).MovementSettings(_player.dashSettings);
             var charges = _player.CaptureDash();
-            if (charges.MaximumCharges > 1) _state.text += $" · {charges.Charges}/{charges.MaximumCharges}";
+            if ((skill==null||skill.maximumCharges<=1) && charges.MaximumCharges > 1) _state.text += $" · {charges.Charges}/{charges.MaximumCharges}";
             _details.text = settings != null ? $"{settings.distance:0.#}m / {settings.duration:0.##}초\nGCD 별도" : "설정 없음";
         }
 

@@ -17,7 +17,7 @@ namespace RaidRogue
         public bool Accept(int connectionOwner, int epoch, RaidActionRequest request)
         {
             if (request == null || connectionOwner <= 0 || request.actor != connectionOwner || request.epoch != epoch ||
-                request.sequence == 0 || request.skill < 1 || request.skill > 11) return false;
+                request.sequence == 0 || request.skill < 1 || request.skill > 12) return false;
             if (_last.TryGetValue(connectionOwner, out uint last) && request.sequence <= last) return false;
             _last[connectionOwner] = request.sequence; return true;
         }
@@ -65,6 +65,7 @@ namespace RaidRogue
         public bool bot, dead, stunned, rooted, forced, casting, resurrecting, rewardChosen;
         public string name, castName;
         public CharacterStateSnapshot character;
+        public string jobState, debuffs; // Host-only payload, restored for presentation; never executes damage.
         public int controlState, autoRevision;
         public float returnDeadline;
         public int[] autoCards;
@@ -78,6 +79,7 @@ namespace RaidRogue
         public string name, castName, alert;
         public float x, y, z, yaw, hp, maxHp, radius, castRemaining, castTotal, groggy;
         public bool dead, casting;
+        public float stagger, counterWindowEnd;
     }
     [Serializable] public sealed class RaidCombatMechanic
     {

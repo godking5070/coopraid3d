@@ -43,9 +43,19 @@ namespace RaidRogue
         {
             if(RaidCombatAuthority.Replica||definition==null||CharacterCatalog.Find(definition.id)!=definition||!definition.playable)return false;
             if(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole)return false;
+            if(definition.id==AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
             foreach(var skill in definition.skills) if(skill.implemented&&skill.legacyAction==0&&skill.handlerId!="legacy.dash"&&!_handlers.ContainsKey(skill.handlerId))return false;
-            _state=new CharacterRuntimeState(definition); _role=definition.legacyRole; return true;
+            _state=new CharacterRuntimeState(definition); _role=definition.legacyRole;
+            if(_player!=null){_player.maxHp=_player.currentHp=definition.baseHp;_player.combatRadius=definition.combatRadius;_player.moveSpeed=definition.moveSpeed;_player.playerRoleDisplayName=definition.name;_player.SetNetworkDisplayName(definition.name,NetworkRaidAvatar.RoleColor(1));}
+            return true;
         }
+        public void UseLegacyRole()
+        {
+            if(RaidCombatAuthority.Replica)return;_state=null;_role=0;BindLegacy();GetComponent<AegisPaladin>()?.ClearTransient();
+        }
+        public void ReduceCooldowns(string[] ids,float seconds){if(!RaidCombatAuthority.Replica)_state?.ReduceCooldowns(ids,seconds);}
+        public void OnDeath()
+        {if(RaidCombatAuthority.Replica)return;_state?.ClearOnDeath();GetComponent<AegisPaladin>()?.ClearTransient();GetComponent<CombatStatusEffects>()?.Clear();}
         public bool GainResource(string id,float amount) => !RaidCombatAuthority.Replica&&_state!=null&&_state.Gain(id,amount);
         public void RecordBuildEffect(string id,int stacks,float magnitude=0) { if(!RaidCombatAuthority.Replica)_state?.SetBuildEffect(id,stacks,magnitude); }
         public void ClearedStage(int stage) { if(!RaidCombatAuthority.Replica)_state?.ClearedStage(stage); }
@@ -53,6 +63,7 @@ namespace RaidRogue
         {
             BindLegacy();if(RaidCombatAuthority.Replica||_state==null)return;
             string departureRoute=_state.Snapshot.routeId;_state.Reset(reason);
+            GetComponent<AegisPaladin>()?.ClearTransient();GetComponent<CombatStatusEffects>()?.Clear();
             if(reason==CharacterReset.NewRun&&departureRoute.Length>0)_state.ChooseRoute(departureRoute,true);
         }
         public void InterruptCast() { if(!RaidCombatAuthority.Replica)_state?.CancelCast(); }
@@ -174,6 +185,7 @@ namespace RaidRogue
         {
             if(!RaidCombatAuthority.Replica||snapshot==null)return false;
             var definition=CharacterCatalog.Find(snapshot.jobId);if(definition==null||!definition.playable)return false;
+            if(definition.id==AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
             if(_state==null||Definition.id!=definition.id){var candidate=new CharacterRuntimeState(definition);if(!candidate.Restore(snapshot))return false;_state=candidate;_role=definition.legacyRole;return true;}
             return _state.Restore(snapshot);
         }

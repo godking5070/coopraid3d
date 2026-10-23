@@ -208,6 +208,13 @@ namespace RaidRogue
             UpdateTopButtonLabel();
         }
 
+        public void SelectAegisPaladin()
+        {
+            if(!CanChangePartyRoles()||stageManager==null||!stageManager.CanSelectInitialRole)return;
+            ApplySelectedRole(PlayerRole.Guardian_Tank,true,false);
+            if(player==null||!CharacterActor.Ensure(player.gameObject).AssignDefinition(CharacterCatalog.Find(AegisPaladinData.JobId)))return;
+            _hasSelectedInitialRole=true;CloseRoleSelectionModal();stageManager?.BeginSingleRun();
+        }
         public void SelectRoleByIndex(int roleNumber1To4)
         {
             if (!CanChangePartyRoles()) return;
@@ -241,6 +248,7 @@ namespace RaidRogue
             if (player != null)
             {
                 player.ApplyRoleStatsAndVisuals(selectedRole, restoreFullHp: true);
+                CharacterActor.Ensure(player.gameObject).UseLegacyRole();
                 if (repositionParty)
                 {
                     Vector3 mySpawn = selectedRole switch

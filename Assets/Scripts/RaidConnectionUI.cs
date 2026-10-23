@@ -16,7 +16,7 @@ namespace RaidRogue
         private Button _beginBattle, _steamCreate, _invite, _ready, _cancelJoin, _single, _lanHost, _lanJoin;
         private Text _steamStatus;
         private GameObject _confirmation, _recoveryPanel;
-        private Button _recover, _retry, _cancelRecovery;
+        private Button _recover, _retry, _cancelRecovery, _aegis;
         private Text _recoveryStatus, _partyNotice;
         private void Start()
         {
@@ -49,6 +49,7 @@ namespace RaidRogue
                 int role = i + 1;
                 _roles[i] = ButtonAt(_room.transform, CombatMetricsManager.RoleName(role), new Vector2(-285 + i * 190, -40), new Vector2(180, 62), () => _session.SelectRole(role));
             }
+            _aegis=ButtonAt(_room.transform,"이지스 팔라딘 · 기본 구현 탱커",new Vector2(0,200),new Vector2(540,46),()=>_session.RequestCharacterAction(12,AegisPaladinData.JobId,0));
             _ready = ButtonAt(_room.transform, "준비", new Vector2(-170, -105), new Vector2(325, 45), _session.ToggleReady);
             _invite = ButtonAt(_room.transform, "친구 초대", new Vector2(170, -105), new Vector2(325, 45), () => RaidSteamRuntime.Instance?.InviteFriends());
             _beginBattle = ButtonAt(_room.transform, "전투 시작 (호스트)", new Vector2(-170, -165), new Vector2(325, 48), () => _session.RequestAction(9));
@@ -109,6 +110,7 @@ namespace RaidRogue
             _recoveryStatus.text = _session.Status + "\n" + (steam != null ? steam.Status : "Steam 사용 불가") + "\n상태 복구 완료 후 조작이 재개됩니다.";
             _partyNotice.text = _session.VisiblePartyNotice; _partyNotice.gameObject.SetActive(_partyNotice.text.Length > 0);
             _invite.gameObject.SetActive(_session.UsesSteam && _session.CanJoinBattle);
+            _aegis.gameObject.SetActive(_session.CanChooseRole); _aegis.interactable=_session.HasLocalAvatar&&_session.CanChooseRole;
             _ready.gameObject.SetActive(RaidNetworkSession.Multiplayer && _session.CanChooseRole);
             _ready.interactable = _session.HasLocalAvatar;
             _ready.GetComponentInChildren<Text>().text = _session.LocalReady ? "준비 완료 · 취소" : "준비";

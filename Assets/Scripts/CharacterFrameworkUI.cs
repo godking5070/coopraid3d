@@ -6,11 +6,11 @@ namespace RaidRogue
     // Extra common slots share the existing HUD canvas/input blockers. Existing 1/2/3/Q + movement/potion stay intact.
     public sealed class CharacterFrameworkUI : MonoBehaviour
     {
-        private SkillHotbarUI _hotbar;private RectTransform _root;private Text _resources;
+        private SkillHotbarUI _hotbar;private RectTransform _root;private Text _resources, _deferred;
         private readonly Dictionary<CharacterSlot,Text> _labels=new Dictionary<CharacterSlot,Text>();
         private readonly Dictionary<CharacterSlot,Button> _buttons=new Dictionary<CharacterSlot,Button>();
         private readonly Dictionary<string,Image> _gauges=new Dictionary<string,Image>();
-        private string _gaugeJob;
+        private string _gaugeJob; private readonly Dictionary<string,float> _lastValues=new Dictionary<string,float>(); private float _pulseUntil;
         private float _next;private bool _catalogBuilt;
         private void Start()
         {
@@ -26,6 +26,7 @@ namespace RaidRogue
                 _buttons[slot]=button;_labels[slot]=Label(r,"",Vector2.zero,new Vector2(106,60),12);
             }
             _resources=Label(_root,"",new Vector2(0,49),new Vector2(850,28),13);
+            _deferred=Label(_root,"",new Vector2(0,92),new Vector2(650,24),13);
         }
         private CharacterActor Actor()=>_hotbar?.combatController!=null?CharacterActor.Ensure(_hotbar.combatController.gameObject):null;
         private void Update()
@@ -35,7 +36,7 @@ namespace RaidRogue
             var state=actor.Snapshot;if(state==null)return;
             if(_gaugeJob!=actor.Definition.id)
             {
-                foreach(var fill in _gauges.Values)if(fill!=null)Destroy(fill.transform.parent.gameObject);_gauges.Clear();_gaugeJob=actor.Definition.id;
+                foreach(var fill in _gauges.Values)if(fill!=null)Destroy(fill.transform.parent.gameObject);_gauges.Clear();_lastValues.Clear();_gaugeJob=actor.Definition.id;
                 for(int i=0;i<actor.Definition.resources.Length;i++)
                 {
                     var d=actor.Definition.resources[i];var bar=Rect("Resource_"+d.id,_root,new Vector2(.5f,1),new Vector2(0,38+i*9),new Vector2(420,5));
@@ -44,27 +45,39 @@ namespace RaidRogue
                     var image=fill.gameObject.AddComponent<Image>();image.color=new Color(.25f,.8f,.75f,.8f);image.raycastTarget=false;_gauges[d.id]=image;
                 }
             }
-            foreach(var r in state.resources)if(_gauges.TryGetValue(r.id,out var fill)) { var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);fill.rectTransform.anchorMax=new Vector2(Mathf.Clamp01(r.value/d.maximum),1); }
+            foreach(var r in state.resources)if(_gauges.TryGetValue(r.id,out var fill))
+            {
+                var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);
+                if(_lastValues.TryGetValue(r.id,out float previous)&&r.value>previous)_pulseUntil=Time.unscaledTime+.6f;
+                _lastValues[r.id]=r.value;fill.rectTransform.anchorMax=new Vector2(Mathf.Clamp01(r.value/d.maximum),1);
+                fill.color=Time.unscaledTime<_pulseUntil?Color.white:r.value>=d.maximum?new Color(1,.85f,.2f):new Color(.85f,.73f,.3f);
+            }
             var resourceText=new List<string>();
-            foreach(var r in state.resources){var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);resourceText.Add(d.name+" "+r.value.ToString(d.integer?"0":"0.#")+" / "+d.maximum.ToString("0.#"));}
+            foreach(var r in state.resources){var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);resourceText.Add(d.name+" "+r.value.ToString(d.integer?"0":"0.#")+" / "+d.maximum.ToString("0.#")+(r.value>=d.maximum?" MAX":""));}
             _resources.text=actor.Definition.name+" · "+(resourceText.Count==0?"직업 전용 자원 없음":string.Join("   ",resourceText));
+            var aegis=actor.GetComponent<AegisPaladin>();
+            _deferred.text=aegis!=null&&aegis.IsActive?"남은 지연 피해 "+aegis.DamageState.Pending.ToString("0.#")+(aegis.DamageState.FaithRemaining>0?" · 불굴의 신념 "+aegis.DamageState.FaithRemaining.ToString("0.0")+"초":""):"";
             foreach(var slot in _labels.Keys)
             {
                 var selection=System.Array.Find(state.selections,s=>s.slot==slot);var skill=selection==null?null:actor.Definition.Skill(selection.skillId);
                 bool unlocked=skill!=null&&System.Array.IndexOf(state.unlocked,skill.id)>=0;bool ready=unlocked&&skill.implemented;
                 var timing=skill==null?null:System.Array.Find(state.skills,s=>s.id==skill.id);
                 string status=!unlocked?"잠김":!ready?"미구현":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
-                _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+CharacterSlots.Name(slot)+"\n"+status;
+                _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+(ready?skill.name:CharacterSlots.Name(slot))+"\n"+status;
                 _buttons[slot].interactable=ready&&!LocalGameplayInput.Blocked;
             }
         }
         private void BuildCatalog()
         {
             var role=RoleSelectionManager.Instance;if(_catalogBuilt||role?.roleModalRoot==null)return;_catalogBuilt=true;
+            var select=Rect("AegisBasicSelect",role.roleModalRoot.transform,new Vector2(.5f,.5f),new Vector2(0,390),new Vector2(1000,64));
+            var selectImage=select.gameObject.AddComponent<Image>();selectImage.color=new Color(.15f,.24f,.36f,.98f);
+            var selectButton=select.gameObject.AddComponent<Button>();selectButton.targetGraphic=selectImage;selectButton.onClick.AddListener(role.SelectAegisPaladin);
+            Label(select,"이지스 팔라딘 · 기본 스킬 테스트 시작 (근접 탱커)  |  Z / R / F / V 잠김",Vector2.zero,new Vector2(980,60),20);
             var panel=Rect("RegisteredClasses",role.roleModalRoot.transform,new Vector2(.5f,.5f),new Vector2(0,-370),new Vector2(1000,126));
             var image=panel.gameObject.AddComponent<Image>();image.color=new Color(.035f,.045f,.065f,.97f);
             var names=new List<string>();foreach(var job in CharacterCatalog.All)if(!job.playable)names.Add(job.name+" (미구현)");
-            string rows="12직업 식별 데이터 등록 · 아래 직업은 아직 전투 선택 불가\n";
+            string rows="등록 직업 · 아래 직업은 아직 전투 선택 불가\n";
             for(int i=0;i<names.Count;i++){rows+=names[i]+((i+1)%4==0?"\n":"   ·   ");}
             Label(panel,rows,Vector2.zero,new Vector2(980,118),15);
         }

@@ -8,6 +8,7 @@ namespace RaidRogue
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RegisterAssets()
         {
+            if(!CharacterCatalog.Register(AegisPaladinData.Build(),out string basicError,true)) Debug.LogError(basicError);
             // Optional definitions live in Resources/Characters. No inspector scene references required.
             foreach(var asset in Resources.LoadAll<CharacterDefinitionSO>("Characters"))
             {

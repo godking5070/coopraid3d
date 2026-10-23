@@ -1,0 +1,159 @@
+이지스 팔라딘 기본 구현 — 검토 및 원본 Unity 확인 안내
+
+1. 기준과 작업 위치
+- 기준 브랜치: feature/character-framework
+- 기준 커밋: 9ed5788537a98fbdb133f4701a19327ec3e9bfb1
+- 작업 브랜치: feature/aegis-paladin-basic
+- 작업 폴더: C:/coopraid/coopraid3d-paladin
+- 원본: C:/coopraid/coopraid3d, ingame-move-system, f80d0c5.
+- 공통 기반은 아직 원본에 미병합 상태이므로 그 최신 커밋에서 분기했다.
+- 원본 브랜치를 전환하지 않았다. 작업 중간에는 원본 기준 파일 260개 SHA-256이 일치했다.
+  최종 검사에서는 259개 일치, 원본 ProjectSettings/ProjectSettings.asset의 Standalone STEAMWORKS_NET
+  정의 추가가 확인됐다. 이번 작업이 수정한 파일이 아니므로 되돌리지 않고 그대로 보존했다.
+- Unity 실행, worktree Library 생성/복사, 씬/프리팹 YAML, 패키지/프로젝트 설정 변경 없음.
+- 기존 .meta 변경 없음. 공통 기반 작업과 동일하게 새 스크립트의 .meta는 원본 반영 후 Unity가 생성한다.
+- 병합하지 않은 로컬 커밋과 기준 커밋 대비 패치를 제공한다.
+  패치: C:/coopraid/coopraid3d-aegis-paladin-review.patch
+  패치는 공통 기반 9ed5788을 전제로 한다. 원본의 미커밋 작업에 바로 덮어쓰지 않는다.
+
+2. 구현
+- job.aegis-paladin을 실제 기본 스킬이 있는 플레이 가능 직업으로 등록.
+  표시 이름에 '(기본 구현)'을 포함. 기존 테스트 4직업은 유지하고 다른 등록 직업 11개는 선택 불가.
+- 싱글 역할 선택창 위의 팔라딘 버튼과 멀티 최초 로비의 팔라딘 선택 버튼.
+  멀티는 기존 탱커 자리 중복 검증을 사용하고 호스트가 승인. 직업 변경 시 준비 해제.
+- CharacterActor / CharacterRuntimeState의 성공 커밋, 공유 GCD, 독립 콤보, 자원, 충전을 사용.
+  실제 BossController / BossAddMinion HP 감소가 있어야 콤보와 3타 효과가 적용된다.
+  사거리 밖·죽은 대상·실패한 입력에는 피해/GCD/쿨타임/자원/콤보 변경 없음.
+- 기존 X 포션과 키 변경 시스템 유지. Q/E/Space/4 및 모든 안내는 기존 바인딩 액션 사용.
+- 보호막 원장에 출처+스킬 키 갱신과 만료 추가. 기존 무기한 보호막 정책은 유지.
+  생성/갱신/만료는 흡수 이벤트를 발생시키지 않는다. 실제 흡수만 제공자에게 귀속한다.
+- 불굴의 신념은 방어와 보호막 이후 확정된 피해를 나눈다. 각 타격별 남은 금액/기간을 보관.
+  상환은 직접 HP에서 차감하므로 재방어·보호막·재분산·반사·성광 획득이 다시 실행되지 않는다.
+  버프 종료 후에도 상환하고, 상환으로도 사망 가능. 사망/시도 종료/재도전/새 런에서 정리.
+- 성광은 호스트 상태만 변경. 보호막 제공자에게 1초 내부 쿨타임을 적용.
+  UI는 확정된 자원/남은 지연 피해/방어 버프 시간과 이동 충전을 표시. 성광 획득 강조와 MAX 표시.
+- 검/대방패는 코드로 만든 도형, 공격선과 얇은 성광 원은 연출 전용. 외부 에셋 없음.
+- 보스에 공통 무력화 누적과 명시적 카운터 구간 연결점 추가. 기존 그로기 FSM 재사용.
+  카운터/누적 무력화로 그로기 후 복귀할 때 HP 페이즈를 임의로 2페이즈로 변경하지 않는다.
+- 호스트 전투 프레임에 팔라딘 지연 피해/버프/흡수 ICD, 디버프, 적 무력화/카운터 구간 포함.
+  기존 CharacterStateSnapshot과 이동 스냅샷이 자원/콤보/쿨타임/충전, 기존 actor 프레임이 HP/보호막/어그로를 전달.
+  클라이언트 복원은 표시 상태만 적용하며 끝난 피해를 재실행하지 않는다.
+  재접속 호스트는 동일 개체/보호막 원장/지연 피해를 유지하고 기존 복구 장벽 후 입력을 넘긴다.
+- AI 임시 대체는 기존 탱커 주차/기믹 회피를 유지하면서 팔라딘 공격·Q·E·카운터·충전 이동기를 사용.
+  빈자리 기본 봇의 기존 테스트 직업은 변경하지 않았다.
+- 사망은 콤보/시전/임시 상태만 정리하고 성광과 스킬 쿨타임을 유지.
+  공통 자원 기본 정책대로 재도전/다음 스테이지/새 런에는 성광 0, 쿨타임과 이동 충전 초기화.
+- 호스트 승인 요청 kind 12(최초 로비 직업 선택)를 추가. 프로토콜 6 → 7.
+  호스트/클라이언트 모두 이번 빌드가 필요하며 별도 SDK/Transport 패키지 변경은 없다.
+
+3. 초기 수치 (Assets/Scripts/AegisPaladinData.cs)
+- 기본 HP 3000, 이동 속도 7.8, 전투 반경 0.55m. 기존 탱커 기본 방어 및 카드 계산 재사용.
+- 1: 섬광 베기 → 신성 교차베기 → 여명의 검격.
+  위력 100/150/220, 무력화 10/15/20, GCD 1.5초, 경계 사거리 3m.
+  3타 +15 성광, 성광 방출/불굴의 신념 남은 쿨타임 -1초. 공유 GCD/준비된 충전에는 영향 없음.
+- 2: 방패 강타 → 성스러운 내려찍기 → 단죄의 철퇴.
+  위력 120/180/300, 무력화 25/35/60, GCD 2.5초, 경계 사거리 3m.
+  3타 자신의 최대 HP 10% 보호막, 5초. 같은 출처/스킬은 갱신.
+- 두 콤보 유지 8초. 사용한 스킬의 GCD를 공유하고 콤보는 독립.
+- 3: 성광 방출. 위력 180, 무력화 20, CD 8초, 시전 대상 경계 거리 3m,
+  대상 중심 반경 3m 충격파(적 전투 반경을 포함한 원형 적중).
+  보스 기존 탱커 위협 5배에 추가 3배 배율. 쫄의 고유 추격/도발 정책은 기존대로 유지.
+- 4: 심판의 방패치기. 위력 160, 무력화 40, CD 10초, 경계 거리 3m.
+  공격자 전방 반평면 대상. 카운터는 명시적 열린 구간 + 보스 정면 120도 + 사거리로 추가 검증.
+  성공 시 추가 무력화 100 및 기존 FSM의 2초 그로기/COUNTER 피드백.
+- Q: 불굴의 신념. CD 24초, 8초 동안 확정 피해 50% 즉시/50%를 타격별 10초에 걸쳐 상환.
+- E: 여명의 부름. CD 20초, 도발 경계 거리 20m.
+  시전자 중심 XZ 8m 안의 생존 아군(자신 포함), 허용된 해제 가능 디버프 하나 정화,
+  각 수혜자 최대 HP 5% 보호막 6초. 허용 태그 poison/burn/slow/weakness.
+  dispellable=false인 기믹 상태나 알 수 없는 기존 상태 플래그는 제거하지 않는다.
+- Space: 빛의 쇄도. 4m/0.2초, 2회 충전, 충전당 순차 10초 회복. 무적 없음.
+  기존 이동 충돌/전장 경계/강제 이동/줄 경로 판정 사용.
+- X: 기존 최대 HP 50% 회복 포션 / CD 30초, 기존 제한 유지.
+- 성광 0..100. 검 3타 +15, 제공한 보호막의 실제 흡수 +5 / 내부 CD 1초.
+- 기존에 누적 무력화 수치/카운터 판정이 없어 최소 공통 연결점을 추가했다.
+  누적 무력화 임시 기준 1000 → 2초 그로기. 기존 그로기 피해 배율 사용.
+  명시되지 않은 위력/무력화/범위/보호막 수치는 위 값으로 설정했으며 같은 데이터 파일에서 조정 가능.
+
+4. 수행한 확인
+- Tests/Run-SteamChecks.ps1 -OriginalProject C:/coopraid/coopraid3d
+- 순수 로직/프로토콜/기존 회귀 검사 총 87,334개 통과. 팔라딘 전용 16,509개 포함.
+- 팔라딘 검사: 정의 참조/중복 등록, 잠긴 슬롯, 독립 상태, GCD 교대/독립 콤보,
+  실패 커밋, 사거리 경계, 3타/쿨타임 감소, 보호막 출처/갱신/만료/상한, 성광 ICD,
+  지연 피해 중첩/버프 종료/복원/정리, 무작위 200회 × 80타 총량 보존,
+  정화 허용/불가, 카운터 각도/거리/구간, 2충전과 복원, 소유권/중복 요청/epoch 검증.
+- 기존 이동·카메라·포션·사망/부활·재도전·성장/재접속·설정·네트워크/Steam 어댑터 회귀 통과.
+- 원본의 기존 참조 DLL을 읽어 전체 Assembly-CSharp 및 Editor 관리 코드 컴파일 통과.
+  기존 경고 1개: HealingSanctuaryZone._innerCross 미사용(CS0169). 새로운 오류 없음.
+- git diff --check 통과. 중간 원본 기준 260개 해시 일치, 최종 259개 일치 및 위 ProjectSettings 변경 보존. worktree Library 없음.
+
+5. 실행하지 못한 확인 및 현재 제한
+- Unity 플레이, 실제 화면 배치/도형/이펙트, 물리 장애물, 두 계정 Steam 접속은 실행하지 않았다.
+- 현재 보스 패턴은 카운터 가능 구간을 열지 않는다. 이번에는 신규 패턴을 만들지 않았다.
+  따라서 현재 실전의 4번은 일반 방패 타격이며, COUNTER 성공 조건은 순수 로직으로 검증했다.
+- 현재 패턴은 해제 가능한 구조화된 디버프를 등록하지 않는다. 정화의 허용/불가 로직은 검증했고,
+  실제 패턴 정화의 연출 확인은 해당 패턴이 CombatStatusEffects.Apply를 사용한 뒤 가능하다.
+- 기존 기본 탱커 AI와 네트워크 AI 대체 경로는 코드 검토/컴파일 확인. 실제 전투/복귀 타이밍은 아래 절차 필요.
+- 화면/접속 성공을 코드 컴파일이나 로컬 프로토콜 검사로 대신 검증했다고 간주하지 않는다.
+
+6. 원본 Unity에서 확인 순서
+1) 원본 변경사항을 보존하고 공통 기반 9ed5788 + 이번 브랜치를 검토하여 원본 프로젝트에 반영한다.
+   worktree를 Unity로 열지 않는다. 원본 Unity에서 새 스크립트 .meta 생성/컴파일을 기다린다.
+2) 기존 테스트 씬/SceneAutoBuilder 흐름으로 시작 → 싱글플레이 → 상단 팔라딘 기본 테스트 버튼.
+   검/방패, 이름, 1/2/3/4/Q/E/Space/X, 잠긴 Z/R/F/V, 성광/지연 피해 UI를 확인한다.
+3) 보스 경계 3m 밖에서 1/2/3/4 입력: HP/GCD/콤보/성광 불변. 가장자리 안에서 1↔2 교대:
+   1.5/2.5초 공유 GCD와 독립 단계/8초 만료, 각 3타 효과를 확인한다.
+4) 3과 Q를 사용한 뒤 검 3타로 남은 쿨타임이 1초 감소하는지 확인한다.
+   방패 3타 보호막을 흡수할 때만 성광이 +5, 연속 타격은 1초 제한되는지 확인한다.
+5) Q 활성화 후 여러 번 피격: 방어/보호막 이후 절반 즉시, 남은 지연 피해 표시/10초 상환.
+   8초 후에도 남은 지연 피해가 상환되는지, 사망/재도전에는 없어지는지 확인한다.
+6) E는 유효 적을 최우선 도발하고 8m 아군에게 5%/6초 보호막을 부여하는지 확인한다.
+   Space 2회 후 3회째 실패, 순차 10초 충전, 벽/경계/줄 통과, X 포션과 키 변경을 확인한다.
+7) 동일 빌드의 테스트 실행 파일과 원본 에디터 또는 원본 프로젝트의 다중 실행 기능으로 호스트/클라이언트 접속.
+   로비에서 탱커 중복 선택 거부/팔라딘 승인/준비 해제, 양쪽 수치·쿨타임·충전·HP·보호막 일치를 확인한다.
+8) 서로 다른 Steam 계정으로 팔라딘 사용 중 비정상 연결을 끊는다(방 나가기는 사용하지 않음).
+   생존/사망/Q 지연 피해/충전 대기/기믹 중 각각 AI 대체 후 60초 안에 복귀.
+   같은 위치/HP/카드/성광/남은 피해/충전이며 AI와 사용자 제어가 중복되지 않는지 확인한다.
+9) 재도전/다음 스테이지/새 런에서 초기화, 카드 유지, 예전 피해/이펙트가 다시 실행되지 않는지 확인한다.
+   2D/3D 전환과 각 사용자의 카메라/키 설정 독립도 확인한다.
+
+7. 다음 루트/Z 연결점
+- 안정 ID job.aegis-paladin 및 자원 aegis.dawnlight를 유지한다.
+- Identity/Z 슬롯은 이미 존재하지만 미구현/잠김이며 자원을 소비하지 않는다.
+- 다음 단계에서 CharacterDefinition.routes/unlocks에 실제 루트/스킬 선택지를 등록하고,
+  CharacterSkillDefinition.costs와 CharacterActor.RegisterHandler를 사용해 Z의 자원 검증/성공 커밋을 연결한다.
+- 기존 카드/루트/부활/포션 규칙을 이번 변경에서 확장하지 않았다.
+- 패턴이 필요해지는 단계에는 CombatCounterTarget.OpenWindow(seconds)를 호스트에서 호출하고,
+  해제 가능 효과는 CombatStatusEffects.Apply(id, tag, duration, dispellable, ...)로 명시한다.
+
+8. 변경 파일
+Assets/Scripts/AegisPaladin.cs
+Assets/Scripts/AegisPaladinData.cs
+Assets/Scripts/BossController.cs
+Assets/Scripts/CharacterActor.cs
+Assets/Scripts/CharacterDefinitions.cs
+Assets/Scripts/CharacterFrameworkUI.cs
+Assets/Scripts/CharacterRuntimeState.cs
+Assets/Scripts/CombatCounterTarget.cs
+Assets/Scripts/CombatMetricsData.cs
+Assets/Scripts/CombatMetricsManager.cs
+Assets/Scripts/CombatStatusEffects.cs
+Assets/Scripts/NetworkRaidAvatar.cs
+Assets/Scripts/PartyBotAI.cs
+Assets/Scripts/PartyLife.cs
+Assets/Scripts/PlayerCombatController.cs
+Assets/Scripts/PlayerController.cs
+Assets/Scripts/PlayerDashPresentation.cs
+Assets/Scripts/RaidCombatProtocol.cs
+Assets/Scripts/RaidCombatSession.cs
+Assets/Scripts/RaidCombatWorld.cs
+Assets/Scripts/RaidConnectionUI.cs
+Assets/Scripts/RaidNetworkProtocol.cs
+Assets/Scripts/RaidNetworkSession.cs
+Assets/Scripts/RaidReplacementAI.cs
+Assets/Scripts/RoleSelectionManager.cs
+Assets/Scripts/SkillHotbarUI.cs
+Assets/Scripts/StageManager.cs
+Tests/AegisPaladinReview.txt
+Tests/AegisPaladinTests.cs
+Tests/RaidCombatNetworkTests.cs
+Tests/Run-SteamChecks.ps1

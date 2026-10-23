@@ -124,6 +124,20 @@ namespace RaidRogue
             bool valid=slot!=null&&Validate(slot.slot,context,out reason,true);CancelCast();
             return valid&&Commit(skill,apply,out reason);
         }
+        public void ClearOnDeath()
+        {CancelCast();_data.combo1=_data.combo2=1;_data.comboTime1=_data.comboTime2=0;}
+        public void ReduceCooldowns(IEnumerable<string> skillIds,float seconds)
+        {
+            if(!CharacterDefinitionValidation.Finite(seconds)||seconds<=0)return;
+            foreach(var id in skillIds.Distinct())
+            {
+                var skill=Definition.Skill(id);var state=Array.Find(_data.skills,s=>s.id==id);
+                // Do not grant spare charges to an already ready skill; never touch the shared GCD.
+                if(skill==null||state==null||state.charges>0||state.recharge<=0)continue;
+                state.recharge=Math.Max(0,state.recharge-seconds);
+                if(state.recharge==0){state.charges=1;if(skill.maximumCharges>1)state.recharge=skill.cooldown;}
+            }
+        }
         public void CancelCast(){_data.castSkillId="";_data.castTarget=0;_data.castRemaining=_data.castTotal=0;}
         public void ClearedStage(int stage){if(stage>0)_data.clearedStage=Math.Max(_data.clearedStage,stage);}
         public bool ChooseRoute(string routeId,bool beforeDeparture)

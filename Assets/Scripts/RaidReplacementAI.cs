@@ -15,6 +15,7 @@ namespace RaidRogue
                 if (BattlePhase != RaidBattlePhase.Combat || pc.IsDead || pc.IsStunned || pc.IsMovementLocked || !CombatRange.LivingEnemy(boss.transform))
                 { StepHostAvatar(avatar, input); continue; }
                 if (pc.Potion != null && pc.HpRatio <= .4f && pc.Potion.CanUse) AutomaticAction(avatar, 6, avatar.transform);
+                var character=CharacterActor.Ensure(pc.gameObject); bool aegis=character.Definition.id==AegisPaladinData.JobId;
                 float range = combat.PrimaryMeleeRange;
                 float arena = Mathf.Max(0, pc.arenaBoundaryRadius - pc.combatRadius - .5f);
                 var add = BossAddSpawner.Instance?.GetPriorityAddForBot((PartyBotRole)(avatar.Role - 1));
@@ -47,11 +48,22 @@ namespace RaidRogue
                 Vector3 delta = desired - pc.transform.position; delta.y = 0;
                 Vector3 direction = delta.magnitude > .12f ? Vector3.ClampMagnitude(delta / Mathf.Max(.01f, pc.NetworkMoveSpeed * RaidWire.Step), 1) : Vector3.zero;
                 input.X = direction.x; input.Z = direction.z;
+                if(aegis&&delta.magnitude>AegisPaladinData.DashDistance&&(mechanic||CombatRange.BoundaryDistance(pc.transform,enemy)>range+4))input.Dash=true;
                 StepHostAvatar(avatar, input); // Collision, forced movement, facing, dash CD and tether swept path are shared.
                 if (pc.IsBeingRescued || pc.IsBeingKnockedBack) continue;
                 if (resurrect)
                 { if (corpse != null && !pc.IsMovingXZ && !resurrection.IsCasting && BattleResurrection.FlatDistance(pc.transform.position, corpse.position) <= resurrection.Settings.range) AutomaticAction(avatar, 5, corpse); continue; }
                 if (resurrection.IsCasting) continue;
+                if(aegis)
+                {
+                    if(pc.HpRatio<.75f||boss.IsCasting)AutomaticCharacterAction(avatar,CharacterSlot.Job1,pc.transform);
+                    if(boss.ResolveLivingAggroTarget()!=pc.transform||pc.currentShield<pc.maxHp*.05f)AutomaticCharacterAction(avatar,CharacterSlot.Job2,enemy);
+                    AutomaticCharacterAction(avatar,CharacterSlot.OffGcd1,enemy);
+                    if(enemy.GetComponent<CombatCounterTarget>()?.WindowOpen==true)AutomaticCharacterAction(avatar,CharacterSlot.Counter,enemy);
+                    var state=character.Snapshot;
+                    var slot=state.combo1>1?CharacterSlot.Gcd1:state.combo2>1?CharacterSlot.Gcd2:pc.currentShield<pc.maxHp*.1f?CharacterSlot.Gcd2:CharacterSlot.Gcd1;
+                    AutomaticCharacterAction(avatar,slot,enemy);continue;
+                }
                 if (avatar.Role == 2)
                 {
                     if (!danger && boss.CastProgress >= .8f && boss.ActiveTelegraph != null)
@@ -73,6 +85,14 @@ namespace RaidRogue
                     if (avatar.Role == 1 && !CombatRange.InRange(pc.transform, enemy, range)) AutomaticAction(avatar, 2, enemy);
                 }
             }
+        }
+        private void AutomaticCharacterAction(NetworkRaidAvatar avatar,CharacterSlot slot,Transform target)
+        {
+            var actor=CharacterActor.Ensure(avatar.gameObject);var state=actor.Snapshot;
+            var skill=actor.Definition.Skill(System.Array.Find(state.selections,s=>s.slot==slot).skillId);
+            var timing=System.Array.Find(state.skills,s=>s.id==skill.id);
+            if(!actor.Available(slot,out _)||timing.charges<1||skill.usesGcd&&state.gcd>0||skill.target==SkillTargetRule.LivingEnemy&&(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(avatar.transform,target,skill.range)))return;
+            ExecuteAction(avatar.Id,new RaidActionRequest{actor=avatar.Id,epoch=BattleEpoch,skill=10,slot=(int)slot,jobId=actor.Definition.id,target=CombatId(target)},true);
         }
         private void AutomaticAction(NetworkRaidAvatar avatar, int skill, Transform target)
         {

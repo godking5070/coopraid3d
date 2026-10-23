@@ -200,6 +200,8 @@ namespace RaidRogue
 
         private void CleanupAttempt()
         {
+            foreach(var paladin in FindObjectsByType<AegisPaladin>(FindObjectsSortMode.None))paladin.ClearTransient();
+            foreach(var status in FindObjectsByType<CombatStatusEffects>(FindObjectsSortMode.None))status.Clear();
             CombatMetricsManager.Instance?.Ledger.InvalidateEffects();
             boss?.StopEncounterEffects();
             boss?.addSpawner?.ResetWaveFlagsAndClearAdds();

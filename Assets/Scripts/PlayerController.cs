@@ -102,8 +102,10 @@ namespace RaidRogue
         public float DashCooldownFraction => RaidNetworkSession.Multiplayer ? Mathf.Clamp01(DashCooldownRemaining / Mathf.Max(0.001f, (float)(NetworkMotor?.Dash.CooldownDuration ?? 0))) : _dash.CooldownDuration > 0
             ? Mathf.Clamp01((float)(_dash.CooldownRemaining / _dash.CooldownDuration)) : 0;
         // Shared voluntary-movement gates for status effects; the current encounters do not apply stuns/roots yet.
-        public bool IsStunned { get; set; }
-        public bool IsMovementLocked { get; set; }
+        private bool _externalStun;
+        public bool IsStunned { get => _externalStun || GetComponent<CombatStatusEffects>()?.Stunned == true; set => _externalStun=value; }
+        private bool _externalRoot;
+        public bool IsMovementLocked { get => _externalRoot || GetComponent<CombatStatusEffects>()?.Rooted == true; set => _externalRoot=value; }
         public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer) && !IsStunned && !IsMovementLocked &&
             !IsBeingRescued && !IsBeingKnockedBack && !RaidCombatAuthority.InputBlocked(this);
         public bool CanDash => CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
@@ -810,10 +812,11 @@ namespace RaidRogue
         {
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
             if (Potion != null && Potion.HasRevivalProtection) return;
+            ExpireTimedShields();
             float finalDamage = CalculateFinalDamageTaken(rawDamage);
             float absorbedByShield = 0f;
 
-            if (currentShield > 0.1f && finalDamage > 0f)
+            if (currentShield > 0f && finalDamage > 0f)
             {
                 _metricsShields.Reconcile(currentShield);
                 absorbedByShield = Mathf.Min(currentShield, finalDamage);
@@ -822,6 +825,8 @@ namespace RaidRogue
                 _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
             }
 
+            var aegis = GetComponent<AegisPaladin>();
+            if (aegis != null && aegis.IsActive) finalDamage = (float)aegis.DamageState.Split(finalDamage);
             currentHp = Mathf.Max(0f, currentHp - finalDamage);
 
             // 가디언(탱커) 또는 생존기 발동 중 [가시 갑옷] 카드 보유 시 피격 반사 피해

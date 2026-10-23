@@ -194,7 +194,7 @@ namespace RaidRogue
     // Multiple providers are consumed FIFO. Unattributed legacy shield is never assigned to a healer.
     public sealed class CombatShieldLedger
     {
-        private sealed class Slice { public int Source; public double Remaining; }
+        private sealed class Slice { public int Source; public double Remaining, Expires; public string Key; }
         private readonly List<Slice> _slices = new List<Slice>();
         public double Remaining { get; private set; }
 
@@ -211,12 +211,25 @@ namespace RaidRogue
         public void Grant(int source, double actualAdded)
         {
             if (actualAdded <= 0 || double.IsNaN(actualAdded) || double.IsInfinity(actualAdded)) return;
-            if (_slices.Count > 0 && _slices[_slices.Count - 1].Source == source)
+            if (_slices.Count > 0 && _slices[_slices.Count - 1].Source == source && _slices[_slices.Count - 1].Key == null)
                 _slices[_slices.Count - 1].Remaining += actualAdded;
             else _slices.Add(new Slice { Source = source, Remaining = actualAdded });
             Remaining += actualAdded;
         }
 
+        public double Expire(double now)
+        {
+            double removed=0;
+            for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Key!=null&&_slices[i].Expires<=now){removed+=_slices[i].Remaining;_slices.RemoveAt(i);}
+            Remaining=Math.Max(0,Remaining-removed);return removed;
+        }
+        public void GrantTimed(int source,string key,double amount,double maximum,double expires)
+        {
+            if(string.IsNullOrEmpty(key)||amount<=0||double.IsNaN(amount)||double.IsInfinity(amount))return;
+            for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Source==source&&_slices[i].Key==key){Remaining-=_slices[i].Remaining;_slices.RemoveAt(i);}
+            double added=Math.Max(0,Math.Min(amount,maximum-Remaining));
+            if(added>0){_slices.Add(new Slice{Source=source,Key=key,Remaining=added,Expires=expires});Remaining+=added;}
+        }
         public void Absorb(double actualAbsorbed, Action<int, double> record)
         {
             double pending = Math.Min(Math.Max(0, actualAbsorbed), Remaining);

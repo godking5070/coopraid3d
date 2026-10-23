@@ -248,7 +248,8 @@ namespace RaidRogue
                 float total = timing?.rechargeTotal ?? 0;
                 if (skill != null && skill.usesGcd && state.gcd > remaining) { remaining = state.gcd; total = state.gcdTotal; }
                 if (slot.keybindBadgeText != null) slot.keybindBadgeText.text = LocalInputBindings.Label(CharacterSlots.Binding(commonSlot));
-                if (slot.skillNameText != null) slot.skillNameText.text = skill?.name ?? "빈 슬롯";
+                if (slot.skillNameText != null) slot.skillNameText.text = actor.Definition.id==AegisPaladinData.JobId && (i==0||i==1)
+                    ? (i==0?AegisPaladinData.SwordNames[state.combo1-1]:AegisPaladinData.ShieldNames[state.combo2-1]) : skill?.name ?? "빈 슬롯";
                 if (slot.slotButton != null) slot.slotButton.interactable = available;
                 if (slot.cooldownOverlayImage != null) slot.cooldownOverlayImage.fillAmount = total > 0 ? Mathf.Clamp01(remaining / total) : 0;
                 if (slot.cooldownNumberText != null) slot.cooldownNumberText.text = !available ? "잠김 / 미구현" : remaining > 0 ? remaining.ToString("0.0") : skill.maximumCharges > 1 ? timing.charges + "/" + skill.maximumCharges : "";

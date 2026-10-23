@@ -1329,7 +1329,7 @@ namespace RaidRogue
         // =====================================================================
         // 공통 헬퍼 (콤보 진화 / GCD / 역할별 스킬명 조회)
         // =====================================================================
-        private float GetPlayerDamageBuffMultiplier()
+        public float GetPlayerDamageBuffMultiplier()
         {
             float mult = (playerController != null && playerController.HasTacticalRescueBuff) ? 2.0f : 1.0f;
             if (playerController != null && playerController.hasMasterOfRear && CurrentRole != PlayerRole.Blade_MeleeDPS && CurrentRole != PlayerRole.Archmage_Caster)

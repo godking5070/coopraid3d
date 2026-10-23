@@ -387,7 +387,7 @@ namespace RaidRogue
             if (!CanChooseRole) { ActionFailure(id, "전투 시작 후에는 역할을 변경할 수 없습니다"); return; }
             bool success = _roster.SelectRole(id, role);
             string message = success ? "역할이 변경되었습니다." : "이미 다른 플레이어가 선택한 역할입니다.";
-            if (success) { var member = _roster.Members.Find(m => m.Id == id); _avatars[id].SetIdentity(role, member.Name); SyncLobbyAvatar(member); ReconcileBots(); }
+            if (success) { var member = _roster.Members.Find(m => m.Id == id); member.Ready=false; _avatars[id].SetIdentity(role, member.Name); CharacterActor.Ensure(_avatars[id].gameObject).UseLegacyRole(); _avatars[id].RefreshJobLabel(); SyncLobbyAvatar(member); ReconcileBots(); }
             if (id == _localId) Status = message; else Send(connection, new RaidPacket { Kind = RaidPacketKind.Notice, Text = message }, true);
         }
         private static Vector3 SpawnPoint(int role) => new Vector3((role - 2.5f) * 2.5f, 1, -7);

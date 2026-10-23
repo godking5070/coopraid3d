@@ -57,6 +57,13 @@ namespace RaidRogue
             }
             _name.text = DisplayName + " · " + RoleName; _name.color = RoleColor(role);
         }
+        public void RefreshJobLabel()
+        {
+            var player=GetComponent<PlayerController>();
+            if(player!=null)player.playerRoleDisplayName=RoleName;
+            GetComponent<PlayerController>()?.SetNetworkDisplayName(DisplayName+" · "+RoleName,RoleColor(Role));
+            if(_name!=null)_name.text=DisplayName+" · "+RoleName;
+        }
         public void Display(Vector3 position, float yaw, bool dashing)
         {
             _targetPosition = position; _targetYaw = yaw;

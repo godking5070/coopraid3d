@@ -65,7 +65,8 @@ namespace RaidRogue
             var player = source.GetComponent<PlayerController>();
             if (player != null)
             {
-                Ledger.Register(id, "나 · " + RoleName((int)player.currentRole), (int)player.currentRole, jobId);
+                var definition=CharacterActor.Ensure(source.gameObject).Definition;
+                Ledger.Register(id, "나 · " + (definition.legacyRole==0?definition.name:RoleName((int)player.currentRole)), (int)player.currentRole, jobId);
                 return id;
             }
             var bot = source.GetComponent<PartyBotAI>();
@@ -94,7 +95,10 @@ namespace RaidRogue
 
         public static void Absorption(int source, double amount)
         {
-            if (!RaidCombatAuthority.Replica && Instance != null && Time.timeScale > 0.001f) Instance.Ledger.RecordAbsorption(source, amount);
+            if (RaidCombatAuthority.Replica || amount <= 0 || Time.timeScale <= .001f) return;
+            if (Instance != null) Instance.Ledger.RecordAbsorption(source, amount);
+            foreach(var member in PartyLife.OrderedMembers())
+                if(SourceId(member)==source){member.GetComponent<AegisPaladin>()?.ShieldAbsorbed(amount);break;}
         }
 
         public static void SetDead(Transform member, bool dead)

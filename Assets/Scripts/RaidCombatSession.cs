@@ -131,6 +131,16 @@ namespace RaidRogue
             var ownership = _recovery.Actor(owner);
             if (!automatic && (avatar.Automated || request.lease != (ownership?.Lease ?? 0) || !_actionGate.Accept(owner, BattleEpoch, request))) return;
             var character=CharacterActor.Ensure(avatar.gameObject);
+            if(request.skill==12)
+            {
+                var definition=CharacterCatalog.Find(request.jobId);
+                if(!CanChooseRole||request.jobId!=AegisPaladinData.JobId||definition==null||!definition.playable){ActionFailure(owner,"최초 대기실에서 기본 구현 직업을 선택하세요");return;}
+                if(!_roster.SelectRole(owner,1)){ActionFailure(owner,"이미 다른 플레이어가 선택한 탱커 역할입니다");return;}
+                var member=_roster.Members.Find(m=>m.Id==owner);avatar.SetIdentity(1,member.Name);
+                character.UseLegacyRole();
+                if(!character.AssignDefinition(definition)){ActionFailure(owner,"직업 실행기 연결 실패");return;}
+                member.Ready=false;SyncLobbyAvatar(member);avatar.RefreshJobLabel();ReconcileBots();return;
+            }
             if(request.skill>=10 && (request.jobId!=character.Definition.id || request.skill==10&&!Enum.IsDefined(typeof(CharacterSlot),request.slot))) { ActionFailure(owner,"직업 또는 슬롯이 유효하지 않습니다");return; }
             if(request.skill==11) { if(!character.Choose(request.ruleId,request.choiceId,out string reason))ActionFailure(owner,reason);return; }
             if (request.skill == 7) { avatar.CombatTarget = CombatTarget(request.target); return; }
@@ -289,6 +299,8 @@ namespace RaidRogue
                 avatar.GetComponent<CommonPotion>()?.CaptureNetworkCombat(actor); avatar.GetComponent<BattleResurrection>()?.CaptureNetworkCombat(actor);
                 if (avatar.IsBot) avatar.CombatTarget = CombatTarget(actor.target);
                 var character = CharacterActor.Ensure(avatar.gameObject); actor.character = character.Snapshot;
+                actor.jobState=avatar.GetComponent<AegisPaladin>()?.IsActive==true?JsonUtility.ToJson(avatar.GetComponent<AegisPaladin>().DamageState.Capture()):"";
+                actor.debuffs=avatar.GetComponent<CombatStatusEffects>()?.Capture();
                 if(character.Definition.legacyRole==0)
                 {
                     actor.casting=actor.character.castSkillId.Length>0; actor.castName=actor.casting?character.Definition.Skill(actor.character.castSkillId).name:"";
@@ -370,6 +382,10 @@ namespace RaidRogue
                 avatar.Automated = actor.controlState != 0; avatar.State = actor; avatar.CombatTarget = CombatTarget(actor.target);
                 avatar.GetComponent<PlayerController>()?.ApplyNetworkCombat(actor);
                 if(!CharacterActor.Ensure(avatar.gameObject).Restore(actor.character)) { UnexpectedClientLoss("직업 상태 복구 실패: 같은 빌드인지 확인하세요"); return; }
+                if(actor.character.jobId==AegisPaladinData.JobId && (string.IsNullOrEmpty(actor.jobState)||!AegisPaladin.Ensure(avatar.gameObject).DamageState.Restore(JsonUtility.FromJson<AegisStateSnapshot>(actor.jobState))))
+                {UnexpectedClientLoss("팔라딘 상태 복구 실패: 같은 빌드인지 확인하세요");return;}
+                CombatStatusEffects.Ensure(avatar.gameObject).Restore(actor.debuffs);
+                avatar.RefreshJobLabel();
                 avatar.GetComponent<PlayerController>()?.cardManager?.ApplyNetworkCardStacks(actor.cards);
             }
             CombatMetricsManager.Instance.ApplyNetworkMetrics(frame);
