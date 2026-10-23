@@ -21,7 +21,12 @@ namespace RaidRogue
         {
             GameObject root = new GameObject($"Popup_{message}");
             // 연속 타격 시 겹치지 않도록 약간의 수평 랜덤 오프셋 부여
-            Vector3 jitter = new Vector3(Random.Range(-0.45f, 0.45f), Random.Range(-0.1f, 0.25f), Random.Range(-0.2f, 0.2f));
+            bool is2D = ViewModeManager.Is2DViewActive;
+            Vector3 jitter = new Vector3(
+                Random.Range(-0.45f, 0.45f),
+                Random.Range(-0.1f, 0.25f),
+                Random.Range(-0.2f, 0.2f) + (is2D ? 1.1f : 0f)
+            );
             root.transform.position = worldPosition + jitter;
 
             FloatingTextPopup popup = root.AddComponent<FloatingTextPopup>();
@@ -81,8 +86,11 @@ namespace RaidRogue
                 transform.rotation = cam.transform.rotation;
             }
 
-            // 위로 부유 및 스케일 탄성 복원
-            transform.position += Vector3.up * (floatSpeed * Time.deltaTime);
+            // 위로 부유 및 스케일 탄성 복원 (2D 직교 탑다운 뷰에서는 화면 위쪽(+Z)으로도 부유)
+            Vector3 floatDir = ViewModeManager.Is2DViewActive
+                ? new Vector3(0f, 0.5f, 1.0f)
+                : Vector3.up;
+            transform.position += floatDir * (floatSpeed * Time.deltaTime);
             transform.localScale = Vector3.Lerp(transform.localScale, _initialScale, Time.deltaTime * 10f);
 
             // 후반부 알파 페이드 아웃
