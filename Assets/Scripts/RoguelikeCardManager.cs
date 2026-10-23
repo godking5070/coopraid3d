@@ -33,7 +33,7 @@ namespace RaidRogue
     /// 보스를 완전히 처치(HP 0)했을 때만 클리어 보상으로 3장의 랜덤 로그라이크 카드 UI를 띄우고,
     /// 카드 선택 시 효과를 영구 중첩 적용한 뒤 다음 스테이지로 진행시키는 매니저 (Step 6).
     /// </summary>
-    public class RoguelikeCardManager : MonoBehaviour
+    public partial class RoguelikeCardManager : MonoBehaviour
     {
         [Header("References")]
         public BossController boss;
@@ -180,7 +180,7 @@ namespace RaidRogue
                 return;
             }
 
-            UpdateBerserkerShoutPassive();
+            if (!RaidCombatAuthority.Replica) UpdateBerserkerShoutPassive();
         }
 
         /// <summary>
@@ -188,6 +188,7 @@ namespace RaidRogue
         /// </summary>
         public void OpenStageClearCardReward(int clearedStageNumber, Action onCardChosenCallback)
         {
+            if (_isSelectionOpen || StageManager.Instance?.Progress.Phase != RaidBattlePhase.Reward) return;
             _onCardSelectedCallback = onCardChosenCallback;
             OpenCardSelection(
                 $"★ STAGE {clearedStageNumber} 보스 토벌 완료! ★\n다음 스테이지(STAGE {clearedStageNumber + 1}) 진입 전 보상 카드를 1장 선택하세요"
@@ -235,18 +236,19 @@ namespace RaidRogue
                 {
                     RoguelikeCardData data = _currentOfferedCards[i];
                     bool alreadyOwned = _acquiredCardStacks.TryGetValue(data.id, out int stackCount) && stackCount > 0;
+                    GetRoleAdaptedCardDisplay(data, out string roleTitle, out string roleCategory, out string roleDesc);
 
                     if (cardTitleTexts != null && i < cardTitleTexts.Length && cardTitleTexts[i] != null)
                     {
                         cardTitleTexts[i].text = alreadyOwned
-                            ? $"{data.title} ({stackCount + 1}중첩)\n<size=15><color=#DDDDDD>{data.categoryTag}</color></size>"
-                            : $"{data.title}\n<size=15><color=#DDDDDD>{data.categoryTag}</color></size>";
+                            ? $"{roleTitle} ({stackCount + 1}중첩)\n<size=15><color=#DDDDDD>{roleCategory}</color></size>"
+                            : $"{roleTitle}\n<size=15><color=#DDDDDD>{roleCategory}</color></size>";
                         cardTitleTexts[i].color = data.accentColor;
                     }
 
                     if (cardDescTexts != null && i < cardDescTexts.Length && cardDescTexts[i] != null)
                     {
-                        cardDescTexts[i].text = data.description + "\n\n<color=#FFE066>▶ 마우스 클릭하여 선택 & 다음 스테이지 진입</color>";
+                        LocalShortcutText.Set(cardDescTexts[i], roleDesc + "\n\n<color=#FFE066>▶ 클릭 또는 [{key:Choice" + (i + 1) + "}]키로 선택 & 다음 스테이지 진입</color>");
                     }
 
                     if (cardAccentBanners != null && i < cardAccentBanners.Length && cardAccentBanners[i] != null)
@@ -267,15 +269,21 @@ namespace RaidRogue
 
         public void OnCardButtonClicked(int slotIndex)
         {
+            if (LocalGameplayInput.ModalCovered) return;
+            if (RaidCombatAuthority.Active)
+            {
+                if (_isSelectionOpen && slotIndex >= 0 && slotIndex < _currentOfferedCards.Count) RaidNetworkSession.Instance.RequestAction(8, (int)_currentOfferedCards[slotIndex].id);
+                return;
+            }
             if (!_isSelectionOpen || slotIndex < 0 || slotIndex >= _currentOfferedCards.Count)
             {
                 return;
             }
 
+            if (StageManager.Instance == null || StageManager.Instance.Progress.Phase != RaidBattlePhase.Reward) return;
             RoguelikeCardData chosen = _currentOfferedCards[slotIndex];
+            _isSelectionOpen = false; // Consume before applying or invoking another state transition.
             ApplyCardEffect(chosen);
-
-            _isSelectionOpen = false;
             if (cardSelectionModalRoot != null)
             {
                 cardSelectionModalRoot.SetActive(false);
@@ -286,6 +294,12 @@ namespace RaidRogue
             Action callback = _onCardSelectedCallback;
             _onCardSelectedCallback = null;
             callback?.Invoke();
+        }
+
+        public void CancelPendingSelection()
+        {
+            _onCardSelectedCallback = null; _isSelectionOpen = false; _currentOfferedCards.Clear(); _networkOfferEpoch = -1;
+            if (cardSelectionModalRoot != null) cardSelectionModalRoot.SetActive(false);
         }
 
         private void ApplyCardEffect(RoguelikeCardData card)
@@ -299,14 +313,15 @@ namespace RaidRogue
                 _acquiredCardStacks[card.id] = 1;
             }
 
-            _acquiredCardHistory.Add($"{card.title} ({card.categoryTag})");
+            GetRoleAdaptedCardDisplay(card, out string roleTitle, out string roleCat, out _);
+            _acquiredCardHistory.Add($"{roleTitle} ({roleCat})");
 
             if (player != null)
             {
                 player.OnAcquireRoguelikeCard(card.id);
                 FloatingTextPopup.Spawn(
                     player.transform.position + Vector3.up * 2.6f,
-                    $"CARD GET! {card.title}",
+                    $"CARD GET! {roleTitle}",
                     card.accentColor,
                     true
                 );
@@ -319,8 +334,97 @@ namespace RaidRogue
             }
         }
 
+        /// <summary>
+        /// Step 8 요구사항 4: 내 현재 직업(탱커/힐러/근딜/캐스터)에 맞춰 카드 명칭과 효과 설명을 맞춤형으로 제공합니다.
+        /// </summary>
+        private void GetRoleAdaptedCardDisplay(
+            RoguelikeCardData baseCard,
+            out string title,
+            out string categoryTag,
+            out string description)
+        {
+            title = baseCard.title;
+            categoryTag = baseCard.categoryTag;
+            description = baseCard.description;
+
+            PlayerRole role = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
+
+            switch (baseCard.id)
+            {
+                case RoguelikeCardId.MasterOfRear:
+                    if (role == PlayerRole.Archmage_Caster)
+                    {
+                        title = "[대마도사의 화염 각성]";
+                        categoryTag = "캐스터 특화 / 화염 증폭";
+                        description = "[1]번 <b>화염 폭풍 3단 캐스팅 콤보</b>\n(파이어·파이가·플레어)의\n<b>최종 피해량 +35% 영구 증폭!</b>";
+                    }
+                    else if (role == PlayerRole.Oracle_Healer)
+                    {
+                        title = "[천벌의 대사제]";
+                        categoryTag = "힐러 특화 / 신성력 강화";
+                        description = "[1]번 <b>심판의 빛 3단 딜량</b> 및\n[2]·[3]번 <b>치유/보호막 효율 +25% 영구 증가!</b>";
+                    }
+                    else if (role == PlayerRole.Guardian_Tank)
+                    {
+                        title = "[수호자의 분노]";
+                        categoryTag = "탱커 특화 / 강타 강화";
+                        description = "[1]번 <b>방패 강타</b> 및 [2]번 <b>심판의 투창</b>\n3단 진화 콤보 <b>피해량 +25% 영구 증가!</b>";
+                    }
+                    break;
+
+                case RoguelikeCardId.ThornArmor:
+                    if (role == PlayerRole.Guardian_Tank)
+                    {
+                        title = "[철벽 가시 갑옷]";
+                        categoryTag = "탱커 특화 / 뎀감 반사";
+                        description = "탱커 기본 방어 및 <b>[3]번 '철벽 방어' 활성 중\n보스 평타·탱크버스터 방어 시 강력한 반사 피해(600)</b>를 입힘!";
+                    }
+                    break;
+
+                case RoguelikeCardId.TacticalRescue:
+                    if (role == PlayerRole.Oracle_Healer)
+                    {
+                        title = "[신속 구출 & 축복]";
+                        categoryTag = "힐러 특화 / 구출 강화";
+                        description = "[4]번 <b>'구출(Rescue)' 쿨타임 대폭 감소(20초→12초)</b> 및\n구출 발동 시 <b>5초간 내 모든 딜·힐량 2배 증가!</b>";
+                    }
+                    break;
+
+                case RoguelikeCardId.VampiricBlade:
+                    if (role == PlayerRole.Oracle_Healer)
+                    {
+                        title = "[성스러운 역류]";
+                        categoryTag = "힐러 특화 / 오버힐 딜 전환";
+                        description = "[2]번 <b>'구원의 치유 & 보호막' 시전 시마다</b>\n넘치는 치유 에너지가 보스에게 <b>성스러운 폭발 피해(220)로 전환!</b>";
+                    }
+                    else if (role == PlayerRole.Guardian_Tank)
+                    {
+                        title = "[수호의 피]";
+                        categoryTag = "탱커 특화 / 타격 자힐";
+                        description = "[1]번 <b>방패 강타 콤보 적중 시마다\n내 체력 30 즉시 추가 회복!</b>";
+                    }
+                    else if (role == PlayerRole.Archmage_Caster)
+                    {
+                        title = "[마력 흡수]";
+                        categoryTag = "캐스터 특화 / 주문 흡혈";
+                        description = "[1]번 <b>화염 캐스팅 마법 적중 시마다\n내 체력 15 즉시 회복!</b>";
+                    }
+                    break;
+
+                case RoguelikeCardId.SwiftAwakening:
+                    if (role == PlayerRole.Archmage_Caster)
+                    {
+                        title = "[신속의 마도서]";
+                        categoryTag = "캐스터 특화 / 캐스팅 속도 증가";
+                        description = "내 캐릭터의 <b>[1]번 화염 캐스팅 시전 시간 단축</b> 및\n<b>글로벌 쿨타임(GCD) 0.4초 영구 감소!</b>";
+                    }
+                    break;
+            }
+        }
+
         private void UpdateBerserkerShoutPassive()
         {
+            if (StageManager.CombatSuspended) return;
             if (_partyAttackSpeedBuffTimer > 0f)
             {
                 _partyAttackSpeedBuffTimer -= Time.deltaTime;
@@ -330,7 +434,7 @@ namespace RaidRogue
                 }
             }
 
-            if (!HasCard(RoguelikeCardId.BerserkerShout))
+            if (player == null || player.IsDead || !HasCard(RoguelikeCardId.BerserkerShout))
             {
                 return;
             }
@@ -343,9 +447,16 @@ namespace RaidRogue
             }
         }
 
+        public void ResetTemporaryCombatState()
+        {
+            _partyAttackSpeedBuffTimer = _berserkerShoutTimer = 0;
+        }
+
         private void TriggerBerserkerShoutPulse()
         {
             _partyAttackSpeedBuffTimer = 5.0f;
+            if (RaidCombatAuthority.Host) foreach (var member in PartyLife.OrderedMembers())
+            { var manager = member.GetComponent<PlayerController>()?.cardManager; if (manager != null) manager._partyAttackSpeedBuffTimer = 5; }
 
             if (player != null)
             {
@@ -369,37 +480,8 @@ namespace RaidRogue
 
         private void HandleUnscaledCardModalInput()
         {
-            bool mouseClicked = false;
-            Vector2 mousePos = Vector2.zero;
-
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-            {
-                mouseClicked = true;
-                mousePos = Mouse.current.position.ReadValue();
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (!mouseClicked && Input.GetMouseButtonDown(0))
-            {
-                mouseClicked = true;
-                mousePos = Input.mousePosition;
-            }
-#endif
-
-            if (mouseClicked && cardButtons != null)
-            {
-                for (int i = 0; i < cardButtons.Length; i++)
-                {
-                    if (cardButtons[i] == null) continue;
-                    RectTransform rt = cardButtons[i].GetComponent<RectTransform>();
-                    if (rt != null && RectTransformUtility.RectangleContainsScreenPoint(rt, mousePos, null))
-                    {
-                        OnCardButtonClicked(i);
-                        return;
-                    }
-                }
-            }
+            if (LocalGameplayInput.ModalCovered) return;
+            for (int i = 0; i < 3; i++) if (LocalInputBindings.Pressed("Choice" + (i + 1))) { OnCardButtonClicked(i); break; }
         }
 
         public bool HasCard(RoguelikeCardId id)
