@@ -30,6 +30,9 @@ namespace RaidRogue.Editor
         private const string Step4ScenePath = "Assets/Scenes/Step4_TestScene.unity";
         private const string Step5ScenePath = "Assets/Scenes/Step5_TestScene.unity";
         private const string Step6ScenePath = "Assets/Scenes/Step6_TestScene.unity";
+        private const string Step7ScenePath = "Assets/Scenes/Step7_TestScene.unity";
+        private const string Step8ScenePath = "Assets/Scenes/Step8_TestScene.unity";
+        private const string Step9ScenePath = "Assets/Scenes/Step9_TestScene.unity";
 
         static SceneAutoBuilder()
         {
@@ -43,8 +46,15 @@ namespace RaidRogue.Editor
             PlayerCombatController existingCombat = Object.FindFirstObjectByType<PlayerCombatController>();
             SkillHotbarUI existingHotbar = Object.FindFirstObjectByType<SkillHotbarUI>();
             StageManager existingStageMgr = Object.FindFirstObjectByType<StageManager>();
+            ViewModeManager existingViewMgr = Object.FindFirstObjectByType<ViewModeManager>();
+            DualVisualController existingDualVis = Object.FindFirstObjectByType<DualVisualController>();
+            RoleSelectionManager existingRoleMgr = Object.FindFirstObjectByType<RoleSelectionManager>();
+            PartyListUI existingPartyList = Object.FindFirstObjectByType<PartyListUI>();
+            TargetingManager existingTargetMgr = Object.FindFirstObjectByType<TargetingManager>();
+            EnemyListUI existingEnemyList = Object.FindFirstObjectByType<EnemyListUI>();
+            BossAddSpawner existingAddSpawner = Object.FindFirstObjectByType<BossAddSpawner>();
 
-            bool needsStep6Upgrade =
+            bool needsStep9Upgrade =
                 existingBoss == null ||
                 existingBoss.bossHpFillImage == null ||
                 existingCardMgr == null ||
@@ -54,10 +64,19 @@ namespace RaidRogue.Editor
                 existingStageMgr == null ||
                 existingStageMgr.stageHeaderText == null ||
                 existingStageMgr.victoryModalRoot == null ||
+                existingViewMgr == null ||
+                existingViewMgr.viewToggleButton == null ||
+                existingDualVis == null ||
+                existingRoleMgr == null ||
+                existingRoleMgr.roleModalRoot == null ||
+                existingPartyList == null ||
+                existingTargetMgr == null ||
+                existingEnemyList == null ||
+                existingAddSpawner == null ||
                 Object.FindFirstObjectByType<PlayerController>() == null ||
                 Object.FindFirstObjectByType<PartyBotAI>() == null;
 
-            if (!needsStep6Upgrade)
+            if (!needsStep9Upgrade)
             {
                 return;
             }
@@ -114,6 +133,24 @@ namespace RaidRogue.Editor
             RunSetupMenu();
         }
 
+        [MenuItem("Tools/RaidRogue/Setup Step 7 (2D/3D View Toggle)", false, 16)]
+        public static void SetupStep7Menu()
+        {
+            RunSetupMenu();
+        }
+
+        [MenuItem("Tools/RaidRogue/Setup Step 8 (4 Roles & Party List UI)", false, 17)]
+        public static void SetupStep8Menu()
+        {
+            RunSetupMenu();
+        }
+
+        [MenuItem("Tools/RaidRogue/Setup Step 9 (FF14 Targeting & Boss Adds)", false, 18)]
+        public static void SetupStep9Menu()
+        {
+            RunSetupMenu();
+        }
+
         private static void RunSetupMenu()
         {
             if (EditorApplication.isPlaying)
@@ -138,28 +175,28 @@ namespace RaidRogue.Editor
             ClearSceneRootObjects(activeScene);
 
             // 1. 조명 생성
-            CreateLighting();
+            Light dirLight = CreateLighting();
 
             // 2. 3D 전장 바닥 생성
             CreateBattlefieldArena();
 
-            // 3. 중앙 보스 + 파판14 스타일 4분할 타겟 링 생성
+            // 3. 중앙 보스 + [Visual_3D]/[Visual_2D] + 파판14 스타일 4분할 타겟 링 생성
             BossController boss = CreateBossWithTargetRing();
 
-            // 4. 내 캐릭터 (근거리 딜러 + PlayerCombatController [GCD/oGCD & 3단 진화 콤보])
+            // 4. 내 캐릭터 (4대 역할군 전환 지원 + [Visual_3D]/[Visual_2D] + PlayerCombatController)
             PlayerController player = CreatePlayer(boss);
 
-            // 5. 3명의 AI 파티원 봇 생성 (탱커 / 힐러(구출 포함) / 원딜 + 4인 산개 & 4인 쉐어 협동 AI)
+            // 5. 3명의 AI 파티원 봇 생성 (탱커 / 힐러 / 근딜 / 캐스터 동적 편성 지원)
             CreatePartyBots(boss, player);
 
-            // 6. X축 50도 쿼터뷰 카메라 생성
+            // 6. X축 50도(3D) <-> 90도(2D Orthographic) 실시간 전환 카메라 생성
             QuarterViewCamera quarterCam = CreateQuarterViewCamera(player.transform);
 
             // 7. UI EventSystem 생성
             CreateEventSystemIfNeeded();
 
-            // 8. 전체 UI 및 StageManager / RoguelikeCardManager 생성
-            CreateAllRaidStageAndCardUI(boss, player);
+            // 8. 전체 UI 및 ViewModeManager / StageManager / RoguelikeCardManager / PartyListUI / RoleSelectionManager 생성
+            CreateAllRaidStageAndCardUI(boss, player, quarterCam, dirLight);
 
             if (boss.targetRing != null)
             {
@@ -181,10 +218,13 @@ namespace RaidRogue.Editor
             EditorSceneManager.SaveScene(activeScene, Step4ScenePath, true);
             EditorSceneManager.SaveScene(activeScene, Step5ScenePath, true);
             EditorSceneManager.SaveScene(activeScene, Step6ScenePath, true);
+            EditorSceneManager.SaveScene(activeScene, Step7ScenePath, true);
+            EditorSceneManager.SaveScene(activeScene, Step8ScenePath, true);
+            EditorSceneManager.SaveScene(activeScene, Step9ScenePath, true);
             AssetDatabase.Refresh();
 
             Selection.activeGameObject = player.gameObject;
-            Debug.Log("[RaidRogue] Step 6 (보스 처치 시 카드 보상 지급 + Stage 1~3 다단계 보스 러시 루프 + 4인 산개/4인 쉐어/복합 기믹 + 최종 승리 결과창) 씬 자동 구축 완료! ▶(Play) 버튼을 눌러 테스트하세요.");
+            Debug.Log("[RaidRogue] Step 9 (파판14 스타일 통합 타겟팅[마우스 좌클릭/F1~F8/Tab/T/ESC] + 타겟 정보창 & 대상의 대상 UI + 좌측 적 목록 UI + 보스 쫄[동력 공급체/암살자] 소환 기믹) 씬 자동 구축 완료! ▶(Play) 버튼을 눌러 테스트하세요.");
         }
 
         private static void CreateEventSystemIfNeeded()
@@ -233,7 +273,7 @@ namespace RaidRogue.Editor
             }
         }
 
-        private static void CreateLighting()
+        private static Light CreateLighting()
         {
             GameObject lightObj = new GameObject("Directional Light");
             Light light = lightObj.AddComponent<Light>();
@@ -250,6 +290,7 @@ namespace RaidRogue.Editor
 
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
             RenderSettings.ambientLight = new Color(0.38f, 0.40f, 0.45f, 1f);
+            return light;
         }
 
         private static void CreateBattlefieldArena()
@@ -295,23 +336,49 @@ namespace RaidRogue.Editor
             bossRoot.transform.rotation = Quaternion.identity;
             bossRoot.transform.localScale = Vector3.one;
 
+            // [Visual_3D] 자식 생성 후 3D 실린더 & 바이저 배치
+            GameObject visual3D = new GameObject("[Visual_3D]");
+            visual3D.transform.SetParent(bossRoot.transform, false);
+            visual3D.transform.localPosition = Vector3.zero;
+            visual3D.transform.localRotation = Quaternion.identity;
+            visual3D.transform.localScale = Vector3.one;
+
+            Color bossPurple = new Color(0.50f, 0.16f, 0.76f, 1f);
+            Color visorRed = new Color(1f, 0.22f, 0.22f, 1f);
+
             GameObject bossBody = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             bossBody.name = "Boss_Body_Cylinder";
-            bossBody.transform.SetParent(bossRoot.transform, false);
+            bossBody.transform.SetParent(visual3D.transform, false);
             bossBody.transform.localPosition = new Vector3(0f, 1.8f, 0f);
             bossBody.transform.localScale = new Vector3(2.2f, 1.8f, 2.2f);
 
             Renderer bodyRenderer = bossBody.GetComponent<Renderer>();
-            bodyRenderer.sharedMaterial = GetOrCreateLitMaterialAsset("Mat_BossPurple", new Color(0.50f, 0.16f, 0.76f, 1f));
+            bodyRenderer.sharedMaterial = GetOrCreateLitMaterialAsset("Mat_BossPurple", bossPurple);
 
             GameObject bossVisor = GameObject.CreatePrimitive(PrimitiveType.Cube);
             bossVisor.name = "Boss_FrontVisor";
-            bossVisor.transform.SetParent(bossRoot.transform, false);
+            bossVisor.transform.SetParent(visual3D.transform, false);
             bossVisor.transform.localPosition = new Vector3(0f, 2.6f, 1.05f);
             bossVisor.transform.localScale = new Vector3(1.1f, 0.35f, 0.45f);
             Renderer visorRenderer = bossVisor.GetComponent<Renderer>();
-            visorRenderer.sharedMaterial = GetOrCreateLitMaterialAsset("Mat_BossVisor", new Color(1f, 0.22f, 0.22f, 1f));
+            visorRenderer.sharedMaterial = GetOrCreateLitMaterialAsset("Mat_BossVisor", visorRed);
 
+            // [Visual_2D] 및 DualVisualController 구성 (X축 90도 회전 2D 스프라이트)
+            DualVisualController dualVis = bossRoot.AddComponent<DualVisualController>();
+            dualVis.unitKind = VisualUnitKind.Boss;
+            dualVis.visual3DRoot = visual3D;
+            dualVis.primary3DRenderer = bodyRenderer;
+            dualVis.secondary3DRenderer = visorRenderer;
+            dualVis.primaryColor = bossPurple;
+            dualVis.accentColor = visorRed;
+            dualVis.base2DScale = 2.55f;
+            dualVis.currentScaleMultiplier = 1.0f;
+            dualVis.floorYOffset = 0.12f;
+            dualVis.EnsureDualVisualHierarchy();
+            dualVis.Refresh2DSpritesAndColors();
+            dualVis.ApplyViewMode(is2DMode: false);
+
+            // 바닥에 깔리는 보스 타겟 링은 2D와 3D 양쪽 모두에서 항상 보이도록 Boss 루트 직속으로 유지
             GameObject ringObj = new GameObject("Boss_TargetRing");
             ringObj.transform.SetParent(bossRoot.transform, false);
             ringObj.transform.localPosition = Vector3.zero;
@@ -326,32 +393,69 @@ namespace RaidRogue.Editor
 
             BossController bossController = bossRoot.AddComponent<BossController>();
             bossController.bodyRenderer = bodyRenderer;
+            bossController.dualVisual = dualVis;
             bossController.targetRing = ringRenderer;
             bossController.rotationSpeed = 90f;
             bossController.popupHeightOffset = 4.6f;
             bossController.maxHp = 3000f;
             bossController.currentHp = 3000f;
 
+            // Step 9: 보스 쫄 소환 스포너 및 마우스 클릭 타겟팅용 루트 콜라이더 부착
+            BossAddSpawner addSpawner = bossRoot.AddComponent<BossAddSpawner>();
+            addSpawner.boss = bossController;
+            bossController.addSpawner = addSpawner;
+
+            CapsuleCollider bossRootCol = bossRoot.AddComponent<CapsuleCollider>();
+            bossRootCol.radius = 1.65f;
+            bossRootCol.height = 3.8f;
+            bossRootCol.center = new Vector3(0f, 1.8f, 0f);
+
             return bossController;
         }
 
         private static PlayerController CreatePlayer(BossController boss)
         {
-            GameObject playerObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            playerObj.name = "Player_MeleeDPS";
+            GameObject playerObj = new GameObject("Player_MeleeDPS");
             playerObj.transform.position = new Vector3(0f, 1.0f, -4.0f);
             playerObj.transform.rotation = Quaternion.LookRotation(Vector3.forward, Vector3.up);
             playerObj.transform.localScale = Vector3.one;
 
+            // [Visual_3D] 자식 오브젝트 안에 3D 캡슐 및 눈 메쉬 배치
+            GameObject visual3D = new GameObject("[Visual_3D]");
+            visual3D.transform.SetParent(playerObj.transform, false);
+            visual3D.transform.localPosition = Vector3.zero;
+            visual3D.transform.localRotation = Quaternion.identity;
+            visual3D.transform.localScale = Vector3.one;
+
+            GameObject bodyCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            bodyCapsule.name = "Player_Body_Capsule";
+            bodyCapsule.transform.SetParent(visual3D.transform, false);
+            bodyCapsule.transform.localPosition = Vector3.zero;
+            bodyCapsule.transform.localRotation = Quaternion.identity;
+            bodyCapsule.transform.localScale = Vector3.one;
+
             Color yellowColor = new Color(1f, 0.85f, 0.12f, 1f);
-            Renderer playerRenderer = playerObj.GetComponent<Renderer>();
+            Renderer playerRenderer = bodyCapsule.GetComponent<Renderer>();
             playerRenderer.sharedMaterial = GetOrCreateLitMaterialAsset("Mat_PlayerYellow", yellowColor);
 
-            AttachFrontEyeCube(playerObj.transform, "Player_FrontEye_Cube");
+            AttachFrontEyeCube(visual3D.transform, "Player_FrontEye_Cube");
+
+            // [Visual_2D] 및 DualVisualController 구성 (X축 90도 회전 원형 2D 스프라이트 + 방향 화살표)
+            DualVisualController dualVis = playerObj.AddComponent<DualVisualController>();
+            dualVis.unitKind = VisualUnitKind.PlayerMelee;
+            dualVis.visual3DRoot = visual3D;
+            dualVis.primary3DRenderer = playerRenderer;
+            dualVis.primaryColor = yellowColor;
+            dualVis.base2DScale = 1.45f;
+            dualVis.floorYOffset = 0.15f;
+            dualVis.EnsureDualVisualHierarchy();
+            dualVis.Refresh2DSpritesAndColors();
+            dualVis.ApplyViewMode(is2DMode: false);
 
             PlayerController playerController = playerObj.AddComponent<PlayerController>();
             playerController.targetBoss = boss;
             playerController.bodyRenderer = playerRenderer;
+            playerController.dualVisual = dualVis;
             playerController.normalBodyColor = yellowColor;
             playerController.defensiveBodyColor = new Color(0.15f, 0.52f, 1f, 1f);
             playerController.moveSpeed = 7.8f;
@@ -361,8 +465,8 @@ namespace RaidRogue.Editor
             combatController.targetBoss = boss;
             combatController.baseGcdDuration = 2.0f;
             combatController.currentGcdDuration = 2.0f;
-            combatController.skill3DefensiveCooldown = 15.0f;
-            combatController.skill4GaleThrustCooldown = 8.0f;
+            combatController.skill3CooldownTotal = 15.0f;
+            combatController.skill4CooldownTotal = 8.0f;
             combatController.comboExpireDuration = 8.0f;
 
             playerController.combatController = combatController;
@@ -424,8 +528,7 @@ namespace RaidRogue.Editor
             PlayerController player,
             PartyBotAI tankBot)
         {
-            GameObject botObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            botObj.name = botName;
+            GameObject botObj = new GameObject(botName);
             botObj.transform.SetParent(parent, false);
             botObj.transform.position = startPos;
 
@@ -435,16 +538,48 @@ namespace RaidRogue.Editor
                 botObj.transform.rotation = Quaternion.LookRotation(toBossXZ.normalized, Vector3.up);
             }
 
-            Renderer r = botObj.GetComponent<Renderer>();
+            // [Visual_3D] 자식 오브젝트 생성 후 3D 캡슐 및 눈 메쉬 배치
+            GameObject visual3D = new GameObject("[Visual_3D]");
+            visual3D.transform.SetParent(botObj.transform, false);
+            visual3D.transform.localPosition = Vector3.zero;
+            visual3D.transform.localRotation = Quaternion.identity;
+            visual3D.transform.localScale = Vector3.one;
+
+            GameObject bodyCapsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            bodyCapsule.name = $"{botName}_Body_Capsule";
+            bodyCapsule.transform.SetParent(visual3D.transform, false);
+            bodyCapsule.transform.localPosition = Vector3.zero;
+            bodyCapsule.transform.localRotation = Quaternion.identity;
+            bodyCapsule.transform.localScale = Vector3.one;
+
+            Renderer r = bodyCapsule.GetComponent<Renderer>();
             r.sharedMaterial = GetOrCreateLitMaterialAsset(matName, bodyColor);
 
-            AttachFrontEyeCube(botObj.transform, $"{botName}_FrontEye");
+            AttachFrontEyeCube(visual3D.transform, $"{botName}_FrontEye");
+
+            // [Visual_2D] 및 DualVisualController 구성 (탱커=사각형, 힐러/원딜=원형 + 테두리 + 방향 화살표)
+            DualVisualController dualVis = botObj.AddComponent<DualVisualController>();
+            dualVis.unitKind = role switch
+            {
+                PartyBotRole.Tank => VisualUnitKind.BotTank,
+                PartyBotRole.Healer => VisualUnitKind.BotHealer,
+                _ => VisualUnitKind.BotRangedDPS
+            };
+            dualVis.visual3DRoot = visual3D;
+            dualVis.primary3DRenderer = r;
+            dualVis.primaryColor = bodyColor;
+            dualVis.base2DScale = role == PartyBotRole.Tank ? 1.50f : 1.40f;
+            dualVis.floorYOffset = 0.14f;
+            dualVis.EnsureDualVisualHierarchy();
+            dualVis.Refresh2DSpritesAndColors();
+            dualVis.ApplyViewMode(is2DMode: false);
 
             PartyBotAI botAi = botObj.AddComponent<PartyBotAI>();
             botAi.role = role;
             botAi.targetBoss = boss;
             botAi.humanPlayer = player;
             botAi.bodyRenderer = r;
+            botAi.dualVisual = dualVis;
             botAi.tankBotReference = tankBot != null ? tankBot : (role == PartyBotRole.Tank ? botAi : null);
 
             return botAi;
@@ -493,16 +628,21 @@ namespace RaidRogue.Editor
             qvCam.distance = 17f;
             qvCam.minDistance = 6f;
             qvCam.maxDistance = 30f;
-            qvCam.zoomSpeed = 8f;
+            qvCam.preferences.zoomSensitivity3D = 2f;
+            qvCam.preferences.zoomSensitivity2D = 2f;
             qvCam.SnapToTargetImmediate();
 
             return qvCam;
         }
 
         // =====================================================================
-        // Step 3 ~ Step 6 전체 UI 생성 (STAGE 1/3 상단 배지 + 보스바 + 핫바 + BOSS CLEAR 배너 + 카드 3택 + VICTORY 결과창)
+        // Step 3 ~ Step 7 전체 UI 생성 (STAGE 1/3 상단 배지 + 보스바 + 우측 상단 2D/3D 뷰 전환 버튼 + 핫바 + BOSS CLEAR 배너 + 카드 3택 + VICTORY 결과창)
         // =====================================================================
-        private static void CreateAllRaidStageAndCardUI(BossController boss, PlayerController player)
+        private static void CreateAllRaidStageAndCardUI(
+            BossController boss,
+            PlayerController player,
+            QuarterViewCamera quarterCam,
+            Light dirLight)
         {
             Font defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (defaultFont == null)
@@ -706,7 +846,7 @@ namespace RaidRogue.Editor
             alertRect.anchorMin = new Vector2(0.5f, 1f);
             alertRect.anchorMax = new Vector2(0.5f, 1f);
             alertRect.pivot = new Vector2(0.5f, 1f);
-            alertRect.anchoredPosition = new Vector2(0f, -172f);
+            alertRect.anchoredPosition = new Vector2(0f, -234f);
             alertRect.sizeDelta = new Vector2(1420f, 54f);
 
             boss.bossHpFillImage = hpFillImg;
@@ -811,6 +951,167 @@ namespace RaidRogue.Editor
                 clearBannerRoot,
                 clearBannerText
             );
+
+            // -----------------------------------------------------------------
+            // 9. Step 7 화면 우측 상단: [뷰 전환: 현재 3D (단축키 V)] 버튼 및 ViewModeManager 생성
+            // -----------------------------------------------------------------
+            CreateTopRightViewModeToggleUI(
+                canvasObj.transform,
+                defaultFont,
+                quarterCam,
+                dirLight,
+                player,
+                boss
+            );
+
+            // -----------------------------------------------------------------
+            // 10. Step 8 화면 좌측 중앙: 파판14 스타일 4인 파티 리스트 UI (PartyListUI) 생성
+            // -----------------------------------------------------------------
+            GameObject partyListObj = new GameObject("PartyList_LeftHUD");
+            partyListObj.transform.SetParent(canvasObj.transform, false);
+            RectTransform partyListRect = partyListObj.AddComponent<RectTransform>();
+            partyListRect.anchorMin = new Vector2(0f, 0.5f);
+            partyListRect.anchorMax = new Vector2(0f, 0.5f);
+            partyListRect.pivot = new Vector2(0f, 0.5f);
+            partyListRect.anchoredPosition = new Vector2(18f, 65f);
+            partyListRect.sizeDelta = new Vector2(335f, 316f);
+
+            Image partyListBg = partyListObj.AddComponent<Image>();
+            partyListBg.color = new Color(0.05f, 0.07f, 0.12f, 0.88f);
+            Outline partyListOutline = partyListObj.AddComponent<Outline>();
+            partyListOutline.effectColor = new Color(0.28f, 0.42f, 0.65f, 0.9f);
+            partyListOutline.effectDistance = new Vector2(2f, -2f);
+
+            GameObject partyHeaderObj = new GameObject("HeaderTitle");
+            partyHeaderObj.transform.SetParent(partyListObj.transform, false);
+            RectTransform partyHeaderRect = partyHeaderObj.AddComponent<RectTransform>();
+            partyHeaderRect.anchorMin = new Vector2(0f, 1f);
+            partyHeaderRect.anchorMax = new Vector2(1f, 1f);
+            partyHeaderRect.pivot = new Vector2(0.5f, 1f);
+            partyHeaderRect.anchoredPosition = new Vector2(0f, -6f);
+            partyHeaderRect.sizeDelta = new Vector2(-16f, 26f);
+
+            Text partyHeaderTxt = partyHeaderObj.AddComponent<Text>();
+            partyHeaderTxt.font = defaultFont;
+            partyHeaderTxt.fontSize = 13;
+            partyHeaderTxt.fontStyle = FontStyle.Bold;
+            partyHeaderTxt.alignment = TextAnchor.MiddleLeft;
+            partyHeaderTxt.color = new Color(0.85f, 0.92f, 1.0f, 1f);
+            partyHeaderTxt.text = "◆ PARTY LIST (클릭 또는 F1~F4 로 아군 타겟 지정)";
+            partyHeaderTxt.raycastTarget = false;
+
+            PartyListUI partyListUI = partyListObj.AddComponent<PartyListUI>();
+            partyListUI.player = player;
+            partyListUI.boss = boss;
+            partyListUI.panelRoot = partyListRect;
+            partyListUI.EnsureUI();
+
+            // -----------------------------------------------------------------
+            // 11. Step 8: 4대 역할군(탱/힐/근딜/캐스터) 선택 창 모달 & 상단 [직업 변경 (P)] 버튼 & RoleSelectionManager 생성
+            // -----------------------------------------------------------------
+            GameObject roleMgrObj = new GameObject("RoleSelectionManager");
+            RoleSelectionManager roleMgr = roleMgrObj.AddComponent<RoleSelectionManager>();
+            roleMgr.player = player;
+            roleMgr.combatController = player.combatController;
+            roleMgr.boss = boss;
+            roleMgr.stageManager = player.stageManager;
+            roleMgr.partyListUI = partyListUI;
+            roleMgr.skillHotbarUI = player.combatController != null ? player.combatController.hotbarUI : null;
+            roleMgr.RefreshSceneReferences();
+            roleMgr.EnsureUI();
+
+            // -----------------------------------------------------------------
+            // 12. Step 9: 파판14 스타일 통합 타겟팅 매니저 (TargetingManager) & 좌측 적 목록 UI (EnemyListUI) 생성
+            // -----------------------------------------------------------------
+            GameObject targetMgrObj = new GameObject("TargetingManager");
+            TargetingManager targetMgr = targetMgrObj.AddComponent<TargetingManager>();
+            targetMgr.player = player;
+            targetMgr.boss = boss;
+            targetMgr.roleManager = roleMgr;
+            targetMgr.partyListUI = partyListUI;
+
+            GameObject enemyListMgrObj = new GameObject("EnemyListUI");
+            enemyListMgrObj.transform.SetParent(canvasObj.transform, false);
+            EnemyListUI enemyListUI = enemyListMgrObj.AddComponent<EnemyListUI>();
+            enemyListUI.boss = boss;
+            enemyListUI.player = player;
+            enemyListUI.BuildEnemyListHUD();
+        }
+
+        private static void CreateTopRightViewModeToggleUI(
+            Transform canvasTransform,
+            Font font,
+            QuarterViewCamera quarterCam,
+            Light dirLight,
+            PlayerController player,
+            BossController boss)
+        {
+            GameObject viewMgrObj = new GameObject("ViewModeManager");
+            ViewModeManager viewMgr = viewMgrObj.AddComponent<ViewModeManager>();
+            viewMgr.quarterViewCamera = quarterCam;
+            viewMgr.directionalLight = dirLight;
+            viewMgr.playerController = player;
+            viewMgr.bossController = boss;
+            viewMgr.currentViewMode = CameraViewMode.View3D_Quarter;
+
+            GameObject btnObj = new GameObject("TopRight_ViewModeToggle_Button");
+            btnObj.transform.SetParent(canvasTransform, false);
+            Image btnBg = btnObj.AddComponent<Image>();
+            btnBg.color = new Color(0.14f, 0.18f, 0.30f, 0.95f);
+
+            Button btn = btnObj.AddComponent<Button>();
+            ColorBlock cb = btn.colors;
+            cb.normalColor = Color.white;
+            cb.highlightedColor = new Color(1.18f, 1.18f, 1.18f, 1f);
+            cb.pressedColor = new Color(0.86f, 0.86f, 0.86f, 1f);
+            btn.colors = cb;
+
+            Outline btnOutline = btnObj.AddComponent<Outline>();
+            btnOutline.effectColor = new Color(1.0f, 0.86f, 0.28f, 0.92f);
+            btnOutline.effectDistance = new Vector2(2f, -2f);
+
+            RectTransform btnRect = btnObj.GetComponent<RectTransform>();
+            btnRect.anchorMin = new Vector2(1f, 1f);
+            btnRect.anchorMax = new Vector2(1f, 1f);
+            btnRect.pivot = new Vector2(1f, 1f);
+            btnRect.anchoredPosition = new Vector2(-18f, -14f);
+            btnRect.sizeDelta = new Vector2(410f, 64f);
+
+            GameObject mainTxtObj = new GameObject("ViewToggle_MainText");
+            mainTxtObj.transform.SetParent(btnObj.transform, false);
+            Text mainTxt = mainTxtObj.AddComponent<Text>();
+            mainTxt.font = font;
+            mainTxt.fontSize = 20;
+            mainTxt.fontStyle = FontStyle.Bold;
+            mainTxt.alignment = TextAnchor.MiddleCenter;
+            mainTxt.color = new Color(1.0f, 0.94f, 0.45f, 1f);
+            mainTxt.text = "[뷰 전환: 현재 3D (단축키 V)]";
+
+            RectTransform mainTxtRect = mainTxtObj.GetComponent<RectTransform>();
+            mainTxtRect.anchorMin = new Vector2(0f, 0.38f);
+            mainTxtRect.anchorMax = new Vector2(1f, 1f);
+            mainTxtRect.offsetMin = new Vector2(8f, 0f);
+            mainTxtRect.offsetMax = new Vector2(-8f, -4f);
+
+            GameObject subTxtObj = new GameObject("ViewToggle_SubHintText");
+            subTxtObj.transform.SetParent(btnObj.transform, false);
+            Text subTxt = subTxtObj.AddComponent<Text>();
+            subTxt.font = font;
+            subTxt.fontSize = 12;
+            subTxt.alignment = TextAnchor.MiddleCenter;
+            subTxt.color = new Color(0.82f, 0.90f, 1.0f, 0.92f);
+            subTxt.text = "입체 3D 원근(Perspective) 50° 쿼터뷰  |  클릭 또는 [V] 키로 즉시 전환";
+
+            RectTransform subTxtRect = subTxtObj.GetComponent<RectTransform>();
+            subTxtRect.anchorMin = new Vector2(0f, 0f);
+            subTxtRect.anchorMax = new Vector2(1f, 0.42f);
+            subTxtRect.offsetMin = new Vector2(8f, 4f);
+            subTxtRect.offsetMax = new Vector2(-8f, 0f);
+
+            viewMgr.viewToggleButton = btn;
+            viewMgr.viewToggleButtonBg = btnBg;
+            viewMgr.viewToggleButtonText = mainTxt;
+            viewMgr.viewToggleSubHintText = subTxt;
         }
 
         private static void CreateStageManagerAndVictoryModalUI(

@@ -537,7 +537,7 @@ namespace RaidRogue
 
         private void LateUpdate()
         {
-            if (followTarget == null)
+            if (followTarget == null || !CombatRange.LivingPartyMember(followTarget) || StageManager.CombatSuspended)
             {
                 Destroy(gameObject);
                 return;
@@ -548,7 +548,15 @@ namespace RaidRogue
             if (_overheadArrow != null)
             {
                 float bounce = Mathf.Sin(Time.time * 10f) * 0.22f;
-                _overheadArrow.localPosition = new Vector3(0f, 3.1f + bounce, 0f);
+                if (ViewModeManager.Is2DViewActive)
+                {
+                    _overheadArrow.localPosition = new Vector3(0f, 2.2f, 1.35f + bounce);
+                }
+                else
+                {
+                    _overheadArrow.localPosition = new Vector3(0f, 3.1f + bounce, 0f);
+                }
+
                 Camera cam = Camera.main;
                 if (cam != null)
                 {
