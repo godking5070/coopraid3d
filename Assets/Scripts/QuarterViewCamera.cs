@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -5,121 +6,294 @@ using UnityEngine.InputSystem;
 
 namespace RaidRogue
 {
-    /// <summary>
-    /// 플레이어를 X축 50도 각도 위에서 내려다보는 3D 쿼터뷰 카메라.
-    /// 마우스 휠로 줌인/줌아웃이 가능합니다.
-    /// </summary>
+    public enum CameraViewMode { View3D_Quarter = 0, View2D_TopDown = 1 }
+
+    [Serializable]
+    public sealed class LocalCameraPreferences
+    {
+        public float rotationSensitivity = 0.16f;
+        public bool invertVertical;
+        public float zoomSensitivity3D = 2f;
+        public float zoomSensitivity2D = 2f;
+        public float distance3D = 17f;
+        public float yaw3D;
+        public float pitch3D = 50f;
+        public float zoom2D;
+        public CameraViewMode viewMode;
+    }
+
+    // Camera input precedes movement: held movement uses this frame's view and yaw.
+    [DefaultExecutionOrder(-200)]
+    [RequireComponent(typeof(Camera))]
     public class QuarterViewCamera : MonoBehaviour
     {
-        [Header("Target")]
+        public static QuarterViewCamera LocalCamera { get; private set; }
         public Transform target;
-
-        [Header("Quarter-View Angle & Follow")]
-        [Tooltip("X축 내려다보는 각도 (기본 50도)")]
+        public CameraViewMode currentViewMode = CameraViewMode.View3D_Quarter;
+        public float pitchAngle3D = 50f;
         public float pitchAngle = 50f;
-
-        [Tooltip("Y축 회전 각도 (기본 0도 = 북쪽(+Z)을 바라봄)")]
-        public float yawAngle = 0f;
-
-        [Tooltip("타겟 추적 부드러움 정도")]
+        public float yawAngle;
         public float followSmoothSpeed = 12f;
-
-        [Tooltip("타겟 기준 시선 높이 오프셋")]
-        public Vector3 targetOffset = new Vector3(0f, 0.8f, 0f);
-
-        [Header("Zoom Settings")]
-        [Tooltip("현재 카메라 거리")]
-        public float distance = 15f;
-
-        [Tooltip("최소 줌 거리")]
+        public Vector3 targetOffset = new Vector3(0, 0.8f, 0);
+        public float distance = 17f;
         public float minDistance = 6f;
+        public float maxDistance = 30f;
+        [Header("Local camera preferences")]
+        public string localProfileId = "local-player";
+        public LocalCameraPreferences preferences = new LocalCameraPreferences();
+        [Header("2D arena framing")]
+        public float minimumOrthoSize = 5f;
+        public float arenaPadding = 2f;
 
-        [Tooltip("최대 줌 거리")]
-        public float maxDistance = 28f;
-
-        [Tooltip("마우스 휠 줌 속도")]
-        public float zoomSpeed = 8f;
-
+        private Camera _cam;
+        private PlayerController _player;
+        private bool _initialized;
         private float _targetDistance;
+        private float _zoom2D;
+        private float _orthoSize;
+        private float _lastAspect;
+        private Vector3 _focus;
+        private readonly CameraDragState _drag = new CameraDragState();
+        private Vector2 _cursorBeforeDrag;
+        private bool _ownsCursor;
+        private bool _restoreCursorPending;
+
+        public Camera UnityCamera => _cam != null ? _cam : (_cam = GetComponent<Camera>());
+        public bool Is2DMode => currentViewMode == CameraViewMode.View2D_TopDown;
+        public bool IsOrbitDragging => _drag.Active;
+        public float MovementYaw => (float)CameraControlMath.MovementYaw(Is2DMode, yawAngle);
+        private string PreferencesKey => "RaidRogue.Camera.v1." + localProfileId;
+        private float ArenaRadius => _player != null ? _player.arenaBoundaryRadius : 18f;
+        public float DefaultOrthoSize => (float)CameraControlMath.ArenaOrthoSize(ArenaRadius, UnityCamera.aspect, arenaPadding);
 
         private void Awake()
         {
-            _targetDistance = Mathf.Clamp(distance, minDistance, maxDistance);
-            distance = _targetDistance;
+            LocalCamera = this;
+            EnsureInitialized();
+        }
+
+        private void OnEnable()
+        {
+            LocalCamera = this;
+            EnsureInitialized();
+        }
+
+        private void EnsureInitialized()
+        {
+            if (_initialized) return;
+            _initialized = true;
+            _cam = GetComponent<Camera>();
+            _player = target != null ? target.GetComponent<PlayerController>() : FindFirstObjectByType<PlayerController>();
+            if (target == null && _player != null) target = _player.transform;
+            if (Application.isPlaying && PlayerPrefs.HasKey(PreferencesKey))
+            {
+                try { preferences = JsonUtility.FromJson<LocalCameraPreferences>(PlayerPrefs.GetString(PreferencesKey)) ?? new LocalCameraPreferences(); }
+                catch (ArgumentException) { preferences = new LocalCameraPreferences(); }
+                currentViewMode = preferences.viewMode == CameraViewMode.View2D_TopDown ? CameraViewMode.View2D_TopDown : CameraViewMode.View3D_Quarter;
+                distance = preferences.distance3D;
+                yawAngle = preferences.yaw3D;
+                pitchAngle3D = preferences.pitch3D;
+            }
+            _targetDistance = distance = Mathf.Clamp(distance, minDistance, maxDistance);
+            yawAngle = (float)CameraControlMath.WrapYaw(yawAngle);
+            pitchAngle3D = (float)CameraControlMath.ClampPitch(pitchAngle3D);
+            _zoom2D = Mathf.Clamp01(preferences.zoom2D);
+            _orthoSize = DesiredOrthoSize();
+            _lastAspect = UnityCamera.aspect;
         }
 
         private void Start()
         {
-            if (target == null)
-            {
-                PlayerController player = FindFirstObjectByType<PlayerController>();
-                if (player != null)
-                {
-                    target = player.transform;
-                }
-            }
-
+            if (GetComponent<LocalCameraSettingsUI>() == null) gameObject.AddComponent<LocalCameraSettingsUI>();
             SnapToTargetImmediate();
+        }
+
+        public Vector3 GetMovementDirection(Vector2 input)
+        {
+            CameraControlMath.MovementXZ(input.x, input.y, MovementYaw, out double x, out double z);
+            return new Vector3((float)x, 0, (float)z);
+        }
+
+        public void SetViewMode(CameraViewMode mode, bool immediate = false)
+        {
+            EnsureInitialized();
+            ReleaseOrbit();
+            currentViewMode = mode;
+            // Change projection and orientation together; 3D yaw never leaks into 2D.
+            SnapToTargetImmediate();
+            SaveLocalPreferences();
+        }
+
+        private void Update()
+        {
+            bool blocked = LocalGameplayInput.Blocked;
+            bool overUI = !_drag.Active && LocalGameplayInput.PointerOverUI(LocalGameplayInput.MousePosition);
+            ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape);
+            if (_drag.Active && (escape || Cursor.lockState != CursorLockMode.Locked))
+            {
+                if (escape) LocalGameplayInput.ConsumeEscape();
+                ReleaseOrbit();
+            }
+            bool wasDragging = _drag.Active;
+            _drag.Step(pressed, held, blocked, Is2DMode, overUI);
+            if (_drag.Active && !wasDragging)
+            {
+                _cursorBeforeDrag = LocalGameplayInput.MousePosition;
+                _ownsCursor = true;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                delta = Vector2.zero;
+            }
+            else if (!_drag.Active && wasDragging) ReleaseOrbit(requireRightRelease: held || blocked || Is2DMode);
+            if (_drag.Active)
+            {
+                float sensitivity = Mathf.Clamp(preferences.rotationSensitivity, 0.03f, 0.6f);
+                yawAngle = (float)CameraControlMath.WrapYaw(yawAngle + delta.x * sensitivity);
+                pitchAngle3D = (float)CameraControlMath.ClampPitch(pitchAngle3D + delta.y * sensitivity * (preferences.invertVertical ? 1 : -1));
+            }
+            if (!blocked && (!overUI || _drag.Active) && Mathf.Abs(scroll) > 0.0001f)
+            {
+                if (Is2DMode)
+                {
+                    float wide = DefaultOrthoSize;
+                    float desired = (float)CameraControlMath.Zoom(DesiredOrthoSize(), scroll, Mathf.Clamp(preferences.zoomSensitivity2D, 0.25f, 5f), minimumOrthoSize, wide);
+                    _zoom2D = Mathf.InverseLerp(wide, minimumOrthoSize, desired);
+                }
+                else _targetDistance = (float)CameraControlMath.Zoom(_targetDistance, scroll, Mathf.Clamp(preferences.zoomSensitivity3D, 0.25f, 5f), minDistance, maxDistance);
+                SaveLocalPreferences();
+            }
+            transform.rotation = DesiredRotation();
         }
 
         private void LateUpdate()
         {
-            HandleZoomInput();
-
-            if (target == null)
+            // A menu can open after this camera's Update, including on a UI click.
+            if (LocalGameplayInput.Blocked) ReleaseOrbit();
+            float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+            float blend = 1f - Mathf.Exp(-followSmoothSpeed * dt);
+            distance = Mathf.Lerp(distance, _targetDistance, blend);
+            // Refit immediately on a window/aspect change so the default arena view never crops.
+            if (!Mathf.Approximately(_lastAspect, UnityCamera.aspect))
             {
-                return;
+                _lastAspect = UnityCamera.aspect;
+                _orthoSize = DesiredOrthoSize();
             }
-
-            distance = Mathf.Lerp(distance, _targetDistance, Time.deltaTime * 12f);
-
-            Quaternion desiredRotation = Quaternion.Euler(pitchAngle, yawAngle, 0f);
-            Vector3 focusPoint = target.position + targetOffset;
-            Vector3 desiredPosition = focusPoint - (desiredRotation * Vector3.forward * distance);
-
-            transform.rotation = desiredRotation;
-            transform.position = Vector3.Lerp(transform.position, desiredPosition, Time.deltaTime * followSmoothSpeed);
+            else _orthoSize = Mathf.Lerp(_orthoSize, DesiredOrthoSize(), blend);
+            if (Mathf.Abs(_orthoSize - DesiredOrthoSize()) < 0.001f) _orthoSize = DesiredOrthoSize();
+            _focus = Vector3.Lerp(_focus, DesiredFocus(), blend);
+            if (Is2DMode) _focus = ClampTopDownFocus(_focus);
+            ApplyCameraPose();
         }
 
+        private float DesiredOrthoSize() => Mathf.Lerp(DefaultOrthoSize, minimumOrthoSize, _zoom2D);
+        private Quaternion DesiredRotation()
+        {
+            pitchAngle = Is2DMode ? 90 : pitchAngle3D;
+            return Quaternion.Euler(pitchAngle, Is2DMode ? 0 : yawAngle, 0);
+        }
+        private Vector3 DesiredFocus()
+        {
+            Vector3 playerPosition = target != null ? target.position : Vector3.zero;
+            if (!Is2DMode) return playerPosition + targetOffset;
+            float visibleZoom = Mathf.InverseLerp(DefaultOrthoSize, minimumOrthoSize, _orthoSize);
+            float follow = (float)CameraControlMath.FollowBlend(visibleZoom);
+            return ClampTopDownFocus(new Vector3(playerPosition.x * follow, 0, playerPosition.z * follow));
+        }
+        private Vector3 ClampTopDownFocus(Vector3 point) => new Vector3(
+            (float)CameraControlMath.ClampFocusAxis(point.x, ArenaRadius + arenaPadding, _orthoSize * UnityCamera.aspect), 0,
+            (float)CameraControlMath.ClampFocusAxis(point.z, ArenaRadius + arenaPadding, _orthoSize));
+        private void ApplyCameraPose()
+        {
+            UnityCamera.orthographic = Is2DMode;
+            if (Is2DMode) UnityCamera.orthographicSize = _orthoSize;
+            transform.rotation = DesiredRotation();
+            transform.position = _focus - transform.forward * (Is2DMode ? 45f : distance);
+        }
         public void SnapToTargetImmediate()
         {
-            Quaternion desiredRotation = Quaternion.Euler(pitchAngle, yawAngle, 0f);
-            transform.rotation = desiredRotation;
-
-            if (target != null)
-            {
-                Vector3 focusPoint = target.position + targetOffset;
-                transform.position = focusPoint - (desiredRotation * Vector3.forward * distance);
-            }
+            EnsureInitialized();
+            distance = _targetDistance;
+            _orthoSize = DesiredOrthoSize();
+            _focus = DesiredFocus();
+            ApplyCameraPose();
         }
-
-        private void HandleZoomInput()
+        public void BeginCombat(bool newRun)
         {
-            float scrollDelta = 0f;
+            EnsureInitialized();
+            if (newRun) _zoom2D = 0;
+            if (Is2DMode) SnapToTargetImmediate();
+        }
+        public void ResetCameraDefaults()
+        {
+            ReleaseOrbit();
+            preferences = new LocalCameraPreferences();
+            yawAngle = 0; pitchAngle3D = 50;
+            _targetDistance = Mathf.Clamp(17, minDistance, maxDistance);
+            _zoom2D = 0;
+            SnapToTargetImmediate();
+            SaveLocalPreferences();
+        }
+        public void SaveLocalPreferences()
+        {
+            if (!Application.isPlaying || !_initialized) return;
+            preferences.distance3D = _targetDistance;
+            preferences.pitch3D = pitchAngle3D;
+            preferences.yaw3D = yawAngle;
+            preferences.zoom2D = _zoom2D;
+            preferences.viewMode = currentViewMode;
+            PlayerPrefs.SetString(PreferencesKey, JsonUtility.ToJson(preferences));
+        }
+        public void ReleaseOrbit(bool restorePosition = true, bool requireRightRelease = true)
+        {
+            if (!_ownsCursor) return;
+            _drag.Cancel(requireRightRelease);
+            _ownsCursor = false;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            _restoreCursorPending = true;
+            if (restorePosition) RestoreCursor();
+            LocalGameplayInput.SuppressPointerThisFrame();
+            SaveLocalPreferences();
+        }
+        private void RestoreCursor()
+        {
+            if (!_restoreCursorPending || !Application.isFocused) return;
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null) Mouse.current.WarpCursorPosition(new Vector2(
+                Mathf.Clamp(_cursorBeforeDrag.x, 0, Mathf.Max(0, Screen.width - 1)),
+                Mathf.Clamp(_cursorBeforeDrag.y, 0, Mathf.Max(0, Screen.height - 1))));
+#endif
+            _restoreCursorPending = false;
+        }
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused) { ReleaseOrbit(false); LocalGameplayInput.SuppressThisFrame(); }
+            else RestoreCursor();
+        }
+        private void OnApplicationPause(bool paused) { if (paused) ReleaseOrbit(false); }
+        private void OnDisable() { ReleaseOrbit(); SaveLocalPreferences(); }
+        private void OnDestroy() { ReleaseOrbit(); if (LocalCamera == this) LocalCamera = null; }
+        private void OnApplicationQuit() { ReleaseOrbit(); SaveLocalPreferences(); PlayerPrefs.Save(); }
 
+        private static void ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape)
+        {
+            pressed = held = escape = false; delta = Vector2.zero; scroll = 0;
 #if ENABLE_INPUT_SYSTEM
             if (Mouse.current != null)
             {
-                // New Input System scroll.y is typically around +/-120 per notch on Windows
-                float rawScroll = Mouse.current.scroll.ReadValue().y;
-                if (Mathf.Abs(rawScroll) > 0.01f)
-                {
-                    scrollDelta = Mathf.Sign(rawScroll) * (Mathf.Abs(rawScroll) > 10f ? rawScroll / 120f : rawScroll);
-                }
+                pressed = Mouse.current.rightButton.wasPressedThisFrame;
+                held = Mouse.current.rightButton.isPressed;
+                delta = Mouse.current.delta.ReadValue();
+                float raw = Mouse.current.scroll.ReadValue().y;
+                scroll = Mathf.Abs(raw) > 10f ? raw / 120f : raw;
             }
+            escape = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            pressed = Input.GetMouseButtonDown(1); held = Input.GetMouseButton(1);
+            delta = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * 10;
+            scroll = Input.GetAxis("Mouse ScrollWheel") * 10;
+            escape = Input.GetKeyDown(KeyCode.Escape);
 #endif
-
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Mathf.Approximately(scrollDelta, 0f))
-            {
-                scrollDelta = Input.GetAxis("Mouse ScrollWheel") * 10f;
-            }
-#endif
-
-            if (Mathf.Abs(scrollDelta) > 0.0001f)
-            {
-                _targetDistance = Mathf.Clamp(_targetDistance - scrollDelta * zoomSpeed * 0.25f, minDistance, maxDistance);
-            }
         }
     }
 }
