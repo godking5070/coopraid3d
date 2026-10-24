@@ -28,14 +28,15 @@ namespace RaidRogue
             _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             _root = Rect(canvas.transform, "Character training panel");
             _root.anchorMin = new Vector2(1, .24f); _root.anchorMax = Vector2.one; _root.pivot = Vector2.one;
-            _root.offsetMin = new Vector2(-464, 8); _root.offsetMax = new Vector2(-12, -70);
+            // Leave the existing view/settings controls above the training panel.
+            _root.offsetMin = new Vector2(-464, 8); _root.offsetMax = new Vector2(-12, -228);
             _root.gameObject.AddComponent<Image>().color = new Color(.025f, .045f, .07f, .97f);
-            var column = _root.gameObject.AddComponent<VerticalLayoutGroup>(); column.padding = new RectOffset(10, 10, 8, 8); column.spacing = 5; column.childControlHeight = true; column.childForceExpandHeight = false;
+            var column = _root.gameObject.AddComponent<VerticalLayoutGroup>(); column.padding = new RectOffset(10, 10, 8, 8); column.spacing = 5; column.childControlHeight = column.childControlWidth = true; column.childForceExpandHeight = false;
             var header = Row(_root);
-            Button(header, "훈련장 패널 접기 / 펼치기", () => { _folded = !_folded; _body.SetActive(!_folded); _root.anchorMin = new Vector2(1, _folded ? 1 : .24f); _root.offsetMin = new Vector2(-464, _folded ? -115 : 8); });
+            Button(header, "훈련장 패널 접기 / 펼치기", () => { _folded = !_folded; _body.SetActive(!_folded); _root.anchorMin = new Vector2(1, _folded ? 1 : .24f); _root.offsetMin = new Vector2(-464, _folded ? -282 : 8); });
             Button(header, "메인 메뉴", () => { _session.StopAttacks(); RaidNetworkSession.Instance.Disconnect(); });
             _body = Rect(_root, "Training body").gameObject;
-            var bodyLayout = _body.AddComponent<VerticalLayoutGroup>(); bodyLayout.spacing = 6; bodyLayout.childControlHeight = true; bodyLayout.childForceExpandHeight = false;
+            var bodyLayout = _body.AddComponent<VerticalLayoutGroup>(); bodyLayout.spacing = 6; bodyLayout.childControlHeight = bodyLayout.childControlWidth = true; bodyLayout.childForceExpandHeight = false;
             _body.AddComponent<LayoutElement>().flexibleHeight = 1;
             var tabs = Row(_body.transform);
             Button(tabs, "구성", () => { _tab = 0; Rebuild(); }); Button(tabs, "시험 / 초기화", () => { _tab = 1; Rebuild(); }); Button(tabs, "실제 수치 / 기록", () => { _tab = 2; Rebuild(); });
@@ -45,7 +46,7 @@ namespace RaidRogue
             var scroll = scrollRoot.gameObject.AddComponent<ScrollRect>(); scroll.horizontal = false; scroll.movementType = ScrollRect.MovementType.Clamped; scroll.scrollSensitivity = 28;
             var viewport = Rect(scrollRoot, "Viewport"); Stretch(viewport); viewport.gameObject.AddComponent<RectMask2D>(); scroll.viewport = viewport;
             _content = Rect(viewport, "Contents"); _content.anchorMin = new Vector2(0, 1); _content.anchorMax = Vector2.one; _content.pivot = new Vector2(.5f, 1); _content.sizeDelta = Vector2.zero;
-            var layout = _content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.padding = new RectOffset(6, 6, 6, 12); layout.childControlHeight = true; layout.childForceExpandHeight = false;
+            var layout = _content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.padding = new RectOffset(6, 6, 6, 12); layout.childControlHeight = layout.childControlWidth = true; layout.childForceExpandHeight = false;
             _content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize; scroll.content = _content;
             Rebuild();
         }
@@ -186,7 +187,8 @@ namespace RaidRogue
         private void Field(string title, float value, float min, float max, Action<float> changed)
         {
             var row = Row(_content); Label(row, title, 15, 36);
-            var rect = Rect(row, "Value"); rect.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            var rect = Rect(row, "Value"); var sizing = rect.gameObject.AddComponent<LayoutElement>();
+            sizing.flexibleWidth = 1; sizing.minHeight = sizing.preferredHeight = 36;
             rect.gameObject.AddComponent<Image>().color = new Color(.15f, .18f, .23f);
             var field = rect.gameObject.AddComponent<InputField>();
             var text = Label(rect, "", 16); Stretch(text.rectTransform); text.supportRichText = false;
@@ -198,7 +200,16 @@ namespace RaidRogue
         { var r = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>(); r.SetParent(parent, false); return r; }
         private static void Stretch(RectTransform r) { r.anchorMin = Vector2.zero; r.anchorMax = Vector2.one; r.offsetMin = r.offsetMax = Vector2.zero; }
         private Transform Row(Transform parent)
-        { var row = Rect(parent, "Row"); var l = row.gameObject.AddComponent<HorizontalLayoutGroup>(); l.spacing = 4; l.childControlHeight = l.childControlWidth = true; l.childForceExpandWidth = true; row.gameObject.AddComponent<LayoutElement>().preferredHeight = 38; return row; }
+        {
+            var row = Rect(parent, "Row");
+            var l = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+            l.spacing = 4; l.childControlHeight = l.childControlWidth = true;
+            l.childForceExpandWidth = true; l.childForceExpandHeight = false;
+            // Horizontal rows must not claim flexible vertical space from the scroll viewport.
+            var sizing = row.gameObject.AddComponent<LayoutElement>();
+            sizing.minHeight = sizing.preferredHeight = 38; sizing.flexibleHeight = 0;
+            return row;
+        }
         private Text Label(Transform parent, string value, int size, float height = -1)
         {
             var r = Rect(parent, "Text"); var t = r.gameObject.AddComponent<Text>(); t.font = _font; t.fontSize = size; t.color = Color.white; t.text = value; t.raycastTarget = false; t.supportRichText = false; t.alignment = TextAnchor.MiddleLeft;

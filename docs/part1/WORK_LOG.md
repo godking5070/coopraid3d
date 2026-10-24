@@ -81,3 +81,37 @@
 - 원본 `Run-AegisRouteChecks.ps1` 실제 실행: **21,565개 통과**. 기존 사용자 시험 도구/선택/자원/회복 상태 테스트를 포함한 계산 검사이며 Unity 실행은 아님.
 - diff 검사에서 일시적으로 core.autocrlf=false 옵션을 사용해 CRLF를 공백 오류로 표시한 검사 호출이 있었음. 소스는 변경하지 않고 저장소 기본 설정으로 다시 실행하여 `git diff --check` 통과 확인.
 - 원본 Unity 로그는 반영 이후 새 컴파일 완료 기록 없음. 작업 worktree Library 없음. 빌드/Play는 미실행이며 다음 단계에서 원본 재컴파일부터 확인한다.
+
+## 원본 Unity 빌드 시작
+
+- 첫 컴퓨터 조작 시 사용자의 Esc 입력으로 중단. 이후 사용자의 재개 요청을 받아 원본 Unity 창을 다시 선택함.
+- Unity 6000.3.26f1에서 Refresh, Console 확대 확인: 오류 0/경고 0. 원본 ScriptAssemblies의 런타임/Editor DLL은 최신 소스 반영 이후 재컴파일됨. 열린 SampleScene은 미저장 변경 표시 없음.
+- 원본과 worktree 소스 사전 비교 0개 차이. 기존 씬/재료/설정 65개 파일을 `.git/codex-backups/part1-build-20261024T121709Z`에 백업.
+- 원본 메뉴 `Raid Rogue/Build Part 1 Playable (Windows)` 실행. 자동 생성 Part1_Playable 씬으로 전환 후 Compiling Scripts 진행 확인. 결과 확인 전이며 빌드 성공으로 간주하지 않음.
+
+## Windows 빌드 성공 / 화면 확인 재개
+
+- 2026-10-24 21:19:48 KST 원본 Unity Windows Development 빌드 성공. 출력 Builds/Part1Windows/RaidPart1.exe, BUILD_INFO.txt, UnityBuild.log, BUILD_VERIFY.json. exe/UnityPlayer/Player 어셈블리 존재 및 PE 헤더 확인. Console 오류 0.
+- 경고 1개는 com.unity.pipeline의 선택적 개발용 코드 리로드 RuntimePipelineConfig 부재로, URP 렌더러 실패가 아니다. 프로젝트에서 이 API를 사용하지 않아 별도 활성화하지 않음.
+- 실제 실행에서 훈련장·캐릭터·표적·핫바 렌더링 확인. 훈련장 패널 행 높이/폭 배치 이상 발견. 재관찰 도중 Esc로 중단해 입력을 멈췄으며 전체 완주/재접속 검증으로 간주하지 않는다.
+- 재개 당시 게임은 정상 종료된 로그와 프로세스 부재 확인, 원본 Unity만 실행 중. 최신 빌드 성공을 반영하지 못한 HANDOFF를 수정. 다음 수정 대상은 CharacterTrainingUI의 자동 레이아웃이다.
+- Unity가 빌드 중 재료/설정과 새 씬/meta를 기록했다. 기존 씬은 변경되지 않았고 빌드 전 65개 파일 백업은 보존 중. 원본의 새 변경을 임의 초기화하지 않는다.
+
+## 훈련장 레이아웃 수정 및 실제 재확인
+
+- 메뉴에서 훈련장에 직접 진입해 상단/탭이 수백 픽셀로 늘어나는 문제 재현. HorizontalLayoutGroup의 수직 확장 전달을 차단하고 행 높이를 38로 고정, 설정 버튼 아래에 패널을 배치했다. 실제 전투 규칙/밸런스/입력 바인딩은 변경하지 않음.
+- 21:30:50 KST 수정본 Windows 빌드 성공. 1920×1080 실행에서 12직업 목록, 궁극기 후보까지 스크롤, 시험 탭, 실제 수치 줄바꿈, 패널 접기/펼치기 확인.
+- 고정 행 변경 후 수치 입력란의 클릭 영역이 18px로 작아진 것을 발견해 명시적 36px 높이를 추가. 이 마지막 보완은 재빌드 및 입력 확인이 남아 있음.
+
+## 종료 로그에서 실제 결함 발견
+
+- 21:35:06 KST 입력 영역 보완 빌드 성공. 앞선 실행 로그(PlayerSmoke-layout-first.log)의 예외 필터에서 종료 시 NullReferenceException 1건 확인. Stack: StageManager.OnDestroy → EndSessionProgress → CleanupAttempt → BossController.StopEncounterEffects/GetComponent.
+- 원인: C# ?.는 파괴된 UnityEngine.Object의 native 생존 상태를 검사하지 않으므로 먼저 파괴된 보스 wrapper를 호출함. 새 실행 전에 정리 경로의 보스/스포너/카드/UI 참조와 종료 수신 객체 생존을 확인하도록 수정. 완료 판정은 종료 후 로그 재확인까지 보류.
+
+## 이번 재개 완료
+
+- 2026-10-24 21:37:28 KST 최종 Windows Development 빌드 성공. 실제 BuildPipeline/패키징 수행, 최신 BUILD_INFO.txt 및 Player 어셈블리 해시 보관. 선택적 Pipeline 개발 서버 설정 경고 1건 유지, 컴파일 오류 없음.
+- 최종 exe에서 메뉴→훈련장→시험 탭→피해량 입력 300→450 확정→메뉴 복귀→Alt+F4 종료 실행. 36px 입력란 정상 표시, 숫자 입력 중 전투 행동/타겟 변경 없음. 종료 후 프로세스 소멸 및 PlayerSmoke-final.log의 예외 0건/정상 종료 확인. 앞서 재현한 StageManager 종료 예외 해결.
+- 검토 대상 소스는 CharacterTrainingUI.cs(행 확장/설정 겹침/입력 높이)와 StageManager.cs(Unity 파괴 객체 정리) 2개, 문서는 HANDOFF/ROADMAP/WORK_LOG/PLAYTEST 4개. 원본 반영 직전 이전 내용/해시 비교 및 백업 후 두 소스만 갱신. meta/GUID 및 사용자 원본 브랜치 전환 없음.
+- 기존 광범위 계산 검사는 다시 반복하지 않았다. 이번 검증은 실제 Unity 컴파일/Windows 빌드/훈련 UI/종료 로그와 소스 일치/diff 검사이다. Stage 1~6 완주·사망 관전·저장/이어하기·재접속·LAN/Steam·장시간 반복은 미확인.
+- 출력/증거: 원본 Builds/Part1Windows/RaidPart1.exe, BUILD_INFO.txt, UnityBuild-final.log, BUILD_VERIFY-final.json, PlayerSmoke-final.log. 초기 성공 및 오류 재현 로그도 같은 Git 제외 폴더에 보존. 원본 Unity가 만든 씬/재료/설정 변경은 백업과 함께 미커밋 검토 대상으로 유지.

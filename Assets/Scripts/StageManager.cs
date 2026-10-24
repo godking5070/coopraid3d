@@ -226,8 +226,13 @@ namespace RaidRogue
             foreach(var kit in FindObjectsByType<CharacterKit>(FindObjectsSortMode.None))kit.Clear();
             foreach(var status in FindObjectsByType<CombatStatusEffects>(FindObjectsSortMode.None))status.Clear();
             CombatMetricsManager.Instance?.Ledger.InvalidateEffects();
-            boss?.StopEncounterEffects();
-            boss?.addSpawner?.ResetWaveFlagsAndClearAdds();
+            // Scene/application teardown may destroy these native objects before this manager.
+            // C# null-conditional calls do not respect Unity's destroyed-object null check.
+            if (boss != null)
+            {
+                boss.StopEncounterEffects();
+                if (boss.addSpawner != null) boss.addSpawner.ResetWaveFlagsAndClearAdds();
+            }
             foreach (var effect in FindObjectsByType<AoETelegraph>(FindObjectsSortMode.None)) { effect.gameObject.SetActive(false); Destroy(effect.gameObject); }
             foreach (var effect in FindObjectsByType<HealingSanctuaryZone>(FindObjectsSortMode.None)) { effect.gameObject.SetActive(false); Destroy(effect.gameObject); }
             foreach (var effect in FindObjectsByType<RangedBotProjectile>(FindObjectsSortMode.None)) { effect.gameObject.SetActive(false); Destroy(effect.gameObject); }
@@ -327,9 +332,12 @@ namespace RaidRogue
         }
         public void EndSessionProgress()
         {
-            if (!Progress.End()) return;
+            if (this == null || !Progress.End()) return;
             StopAllCoroutines(); CancelInvoke(); CleanupAttempt();
-            cardManager?.CancelPendingSelection(); GetComponent<CombatMetricsUI>()?.CloseResults(); _wipeUI?.Hide();
+            if (cardManager != null) cardManager.CancelPendingSelection();
+            var metricsUI = GetComponent<CombatMetricsUI>();
+            if (metricsUI != null) metricsUI.CloseResults();
+            if (_wipeUI != null) _wipeUI.Hide();
             if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
             if (victoryModalRoot != null) victoryModalRoot.SetActive(false);
             TraceProgress("session ended");
