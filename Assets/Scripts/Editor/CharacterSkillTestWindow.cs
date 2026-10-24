@@ -59,7 +59,7 @@ namespace RaidRogue.EditorTools
                     if(!actor.CanEditSkillTest(out _message)||!CombatRange.LivingEnemy(target))
                     {_message="살아 있는 적을 선택하세요. 호스트 자신의 캐릭터만 테스트할 수 있습니다.";_failed=true;}
                     else
-                    {CombatCounterTarget.Ensure(target).OpenWindow(3);_message="적 정면에서 카운터를 적중시키면 파티 이동기 충전이 모두 복구됩니다. 이 창은 테스트 전용입니다.";_failed=false;}
+                    {CampaignRuntime.Instance?.MarkDevelopmentUse();CombatCounterTarget.Ensure(target).OpenWindow(3);_message="적 정면에서 카운터를 적중시키면 파티 이동기 충전이 모두 복구됩니다. 이 창은 테스트 전용입니다.";_failed=false;}
                     ReleaseGameInput();
                 }
             }
@@ -90,9 +90,9 @@ namespace RaidRogue.EditorTools
                 EditorGUILayout.LabelField("직업 진화 카드 효과 미리 보기",EditorStyles.boldLabel);
                 using(new EditorGUI.DisabledScope(!allowed))
                 {
-                    if(GUILayout.Button("극복 카드 효과 적용")){actor.RecordBuildEffect("evolution.overcome",1);actor.RecordBuildEffect("evolution.maximize",0);ReleaseGameInput();}
-                    if(GUILayout.Button("극대화 카드 효과 적용")){actor.RecordBuildEffect("evolution.overcome",0);actor.RecordBuildEffect("evolution.maximize",1);ReleaseGameInput();}
-                    if(GUILayout.Button("진화 카드 미리 보기 제거")){actor.RecordBuildEffect("evolution.overcome",0);actor.RecordBuildEffect("evolution.maximize",0);ReleaseGameInput();}
+                    if(GUILayout.Button("극복 카드 효과 적용")){CampaignRuntime.Instance?.MarkDevelopmentUse();actor.RecordBuildEffect("evolution.overcome",1);actor.RecordBuildEffect("evolution.maximize",0);ReleaseGameInput();}
+                    if(GUILayout.Button("극대화 카드 효과 적용")){CampaignRuntime.Instance?.MarkDevelopmentUse();actor.RecordBuildEffect("evolution.overcome",0);actor.RecordBuildEffect("evolution.maximize",1);ReleaseGameInput();}
+                    if(GUILayout.Button("진화 카드 미리 보기 제거")){CampaignRuntime.Instance?.MarkDevelopmentUse();actor.RecordBuildEffect("evolution.overcome",0);actor.RecordBuildEffect("evolution.maximize",0);ReleaseGameInput();}
                 }
             }
             foreach(var slot in CharacterSlots.All)

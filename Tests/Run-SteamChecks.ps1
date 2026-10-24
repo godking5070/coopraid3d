@@ -54,6 +54,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Aegis tests failed.' }
 & (Join-Path $PSScriptRoot 'Run-AegisExtensionChecks.ps1') -Compiler $Compiler
 & (Join-Path $PSScriptRoot 'Run-CharacterRosterChecks.ps1') -Compiler $Compiler
 & (Join-Path $PSScriptRoot 'Run-CharacterTrainingChecks.ps1') -Compiler $Compiler
+& (Join-Path $PSScriptRoot 'Run-CampaignSaveChecks.ps1') -Compiler $Compiler
 # Compile the actual pinned SDK, without loading native Steam or running Unity.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
 $taskDefines = $taskProject.SelectSingleNode("//*[local-name()='DefineConstants']").InnerText

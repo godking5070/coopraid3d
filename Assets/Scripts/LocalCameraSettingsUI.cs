@@ -41,6 +41,8 @@ namespace RaidRogue
             }
             if (_overlayWasOpen) { _overlayWasOpen = false; LocalInputBindings.QuarantineHeld(); return; }
             if (!Application.isFocused) return;
+            if (RaidConnectionUI.CampaignDialogOpen)
+            { if (escape) { Consume(); FindFirstObjectByType<RaidConnectionUI>()?.CloseCampaignDialog(); } return; }
             if (RaidSteamRuntime.Instance?.ConfirmInvite == true)
             { if (escape) { Consume(); RaidSteamRuntime.Instance.AnswerInvite(false); } return; }
             if (_open)

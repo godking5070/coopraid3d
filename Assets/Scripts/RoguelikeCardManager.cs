@@ -221,7 +221,7 @@ namespace RaidRogue
 
             for (int i = 0; i < 3 && candidatePool.Count > 0; i++)
             {
-                int pickIdx = UnityEngine.Random.Range(0, candidatePool.Count);
+                int pickIdx = CampaignRuntime.Instance?.RewardRandom(candidatePool.Count) ?? UnityEngine.Random.Range(0, candidatePool.Count);
                 _currentOfferedCards.Add(candidatePool[pickIdx]);
                 candidatePool.RemoveAt(pickIdx);
             }
@@ -292,6 +292,7 @@ namespace RaidRogue
             if (StageManager.Instance == null || StageManager.Instance.Progress.Phase != RaidBattlePhase.Reward) return;
             RoguelikeCardData chosen = _currentOfferedCards[slotIndex];
             _isSelectionOpen = false; // Consume before applying or invoking another state transition.
+            CampaignRuntime.Instance?.CardChosen(player, (int)chosen.id, _currentOfferedCards.ConvertAll(c => (int)c.id));
             ApplyCardEffect(chosen);
             if (cardSelectionModalRoot != null)
             {
@@ -324,7 +325,7 @@ namespace RaidRogue
 
             if(player!=null&&(int)card.id>=CharacterEvolutionCards.First)
                 CharacterActor.Ensure(player.gameObject).RecordBuildEffect(((int)card.id-CharacterEvolutionCards.First)%2==0?"evolution.overcome":"evolution.maximize",1);
-            if (player != null) CharacterActor.Ensure(player.gameObject).RecordBuildEffect("legacy.card." + card.id, _acquiredCardStacks[card.id]);
+            if (player != null) CharacterActor.Ensure(player.gameObject).RecordBuildEffect(CampaignCardIds.Id((int)card.id), _acquiredCardStacks[card.id]);
             GetRoleAdaptedCardDisplay(card, out string roleTitle, out string roleCat, out _);
             _acquiredCardHistory.Add($"{roleTitle} ({roleCat})");
 

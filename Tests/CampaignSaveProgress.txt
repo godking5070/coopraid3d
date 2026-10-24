@@ -1,0 +1,19 @@
+Campaign save/checkpoint work
+Base: c44f746443902c031f0eed51bdec248e4cc546a8 (feature/character-training-validation)
+Work: feature/campaign-save-checkpoint; C:/coopraid/coopraid3d-campaign
+Original project branch and dirty files must remain untouched. Never run Unity or create Library here.
+Findings: executable content is main/3 stages/4 players, not campaign part1/6 or part2/8.
+No difficulty/practice unlock system or chapter-2 departure skill policy exists.
+StageManager owns clear -> rewards -> preparation/countdown. Boundary resets HP, cooldowns,
+potions, Iris and transient effects; job resource reset flags are data-driven.
+Steam reconnect uses authenticated Steam IDs and reservation leases. Disk resume must create
+a fresh lobby and restore saved builds on fresh actors, then reuse that live reconnect path.
+Implementation complete for the available main/3-stage prototype: versioned account-specific
+data, atomic storage/backup, normalized boundary snapshots, authenticated Steam resume lobby,
+menu/exit/delete UI, personal clear delivery outbox, development/training exclusion.
+Part1/Part2 unlock rules are implemented and tested, but their actual content/departure paths
+remain unavailable because this repository has no 6-stage/8-stage or 8-player implementation.
+Validation: existing 115843 checks passed; campaign checks 16570 passed; final runtime and Editor
+managed compilations passed. No Unity/Steam runtime verification. Original 309-file baseline
+comparison unchanged, original branch unchanged, no worktree Library or scene/prefab edits.
+Review and original-project play checklist: Tests/CampaignSaveReview.txt.

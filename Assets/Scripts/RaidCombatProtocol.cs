@@ -98,6 +98,10 @@ namespace RaidRogue
     }
     [Serializable] public sealed class RaidCombatFrame
     {
+        public bool campaignResume;
+        public int campaignSavedStage;
+        public string campaignSavedUtc;
+        public bool campaignCompleted, campaignSaveFailed;
         public int epoch, stage, retries, irisCoins;
         public string runId,chapterId;
         public uint serial, ownerLease, effectWatermark, poseTick;

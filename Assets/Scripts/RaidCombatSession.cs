@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -31,6 +32,7 @@ namespace RaidRogue
         public bool CombatRunning => !Ending && Multiplayer && BattlePhase == RaidBattlePhase.Combat;
         public bool CanJoinBattle => !Ending && BattlePhase == RaidBattlePhase.Lobby;
         public bool CanChooseRole => !Ending && BattlePhase == RaidBattlePhase.Lobby;
+        public bool CanEditLobbyBuild => CanChooseRole && !CampaignBuildLocked;
         private readonly RaidActionGate _actionGate = new RaidActionGate();
         private readonly RaidRewardRound _rewards = new RaidRewardRound();
         private readonly RaidFrameAssembler _combatAssembler = new RaidFrameAssembler();
@@ -143,7 +145,7 @@ namespace RaidRogue
             if(request.skill==12)
             {
                 var definition=CharacterCatalog.Find(request.jobId);
-                if(!CanChooseRole||definition==null||!definition.playable||definition.legacyRole!=0){ActionFailure(owner,"최초 대기실에서 기본 구현 직업을 선택하세요");return;}
+                if(!CanEditLobbyBuild||definition==null||!definition.playable||definition.legacyRole!=0){ActionFailure(owner,"최초 대기실에서 직업을 선택하세요. 이어하기의 빌드는 고정입니다.");return;}
                 int selectedRole=CharacterRosterData.Role(definition);
                 if(!_roster.SelectRole(owner,selectedRole)){ActionFailure(owner,"이미 다른 플레이어가 선택한 역할입니다");return;}
                 var member=_roster.Members.Find(m=>m.Id==owner);avatar.SetIdentity(selectedRole,member.Name);
@@ -155,6 +157,7 @@ namespace RaidRogue
             if(request.skill==13){avatar.GetComponent<CharacterKit>()?.CancelChannel();return;}
             if(request.skill==11)
             {
+                if (request.ruleId == "route" && CampaignBuildLocked) { ActionFailure(owner, "저장된 기원은 이어하기 대기실에서 변경할 수 없습니다"); return; }
                 if(request.ruleId!="route"&&request.rewardKey!=character.ChoiceKey(request.ruleId)){ActionFailure(owner,"이전 런/스테이지의 스킬 보상 요청입니다");return;}
                 if(!character.Choose(request.ruleId,request.choiceId,out string reason,request.ruleId=="route"?null:request.rewardKey))ActionFailure(owner,reason);
                 else if(request.ruleId=="route"){var member=_roster.Members.Find(m=>m.Id==owner);if(member!=null){member.Ready=false;SyncLobbyAvatar(member);}}
@@ -172,6 +175,7 @@ namespace RaidRogue
             if (request.skill == 8)
             {
                 if (BattlePhase != RaidBattlePhase.Reward || !_rewards.Choose(request.epoch, owner, request.target)) { ActionFailure(owner, "유효하지 않거나 이미 선택한 보상입니다"); return; }
+                CampaignRuntime.Instance?.CardChosen(avatar.GetComponent<PlayerController>(), request.target, _rewards.Cards(owner));
                 avatar.GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)request.target);
                 FinishRewardsIfReady(); return;
             }
@@ -217,12 +221,16 @@ namespace RaidRogue
                     // A disconnected player who had not chosen an origin must not block departure.
                     if(!actor.DepartureReady)actor.Choose("route",actor.Definition.routes[0].id,out _);
                 }
-            if (!StageManager.Instance.PrepareNetworkEncounter(stage, retry)) return;
+            bool resume = CampaignRuntime.Instance?.Resume != null;
+            if (!(resume ? StageManager.Instance.PrepareCampaignEncounter() : StageManager.Instance.PrepareNetworkEncounter(stage, retry))) return;
             BattleEpoch++; CountdownEnd = PhaseDeadline = 0;
             SetBattlePhase(RaidBattlePhase.Loading, retry ? "retry" : "prepare stage");
             BeginLoadingBarrier();
             MenuOpen = false;
             ResetNetworkMotors();
+            CampaignRuntime.Instance?.Prepared(retry, StageManager.Instance.LastPreparationNewRun);
+            if (Ending) return;
+            if (resume) { BeginCampaignReservations(); CampaignRuntime.Instance.RestoreFinished(); }
         }
         private void ResetNetworkMotors()
         {
@@ -230,6 +238,7 @@ namespace RaidRogue
             {
                 var motor = _motors[pair.Key]; motor.Position = pair.Value.transform.position; motor.Yaw = pair.Value.transform.eulerAngles.y; motor.Dash.ResetForRetry();
                 pair.Value.MotionVersion++; pair.Value.MovementLocked = true;
+                pair.Value.GetComponent<PlayerController>()?.RefillMovementCharges();
             }
             foreach (var peer in _peers) peer.Inputs.DiscardPending();
             _prediction.Clear();
@@ -247,9 +256,9 @@ namespace RaidRogue
             var stage = StageManager.Instance;
             if (!stage.FinishNetworkClear()) return;
             if (stage.Progress.Phase==RaidBattlePhase.Victory)
-            { PhaseDeadline = 0; SetBattlePhase(RaidBattlePhase.Victory, "final clear"); return; }
+            { CampaignRuntime.Instance?.Completed(); PhaseDeadline = 0; SetBattlePhase(RaidBattlePhase.Victory, "final clear"); return; }
             _rewards.Begin(BattleEpoch);
-            if(stage.currentStage<stage.maxStage)foreach (var member in _roster.Members)
+            if(stage.currentStage<stage.maxStage)foreach (var member in _roster.Members.OrderBy(m => m.Role))
                 if (_avatars.TryGetValue(member.Id, out var actor)) _rewards.Offer(member.Id, actor.GetComponent<PlayerController>().cardManager.GenerateNetworkOffer());
             PhaseDeadline = ServerTime + stage.FlowSettings.rewardSeconds;
             SetBattlePhase(RaidBattlePhase.Reward, "offers generated once");
@@ -262,6 +271,7 @@ namespace RaidRogue
                 int[] cards = _rewards.Cards(member.Id);
                 if (cards.Length>0&&_rewards.Choose(BattleEpoch, member.Id, cards[0]))
                 {
+                    CampaignRuntime.Instance?.CardChosen(_avatars[member.Id].GetComponent<PlayerController>(), cards[0], cards);
                     _avatars[member.Id].GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)cards[0]);
                     var slot = _recovery.Actor(member.Id); if (slot != null) _recovery.AutoSelected(slot, cards[0]);
                     BroadcastPartyNotice(member.Name + " 카드 선택 시간 초과 · 첫 번째 카드 자동 선택");
@@ -275,7 +285,7 @@ namespace RaidRogue
             if(Ending||!IsHost||BattlePhase!=RaidBattlePhase.Reward||!_roster.Members.TrueForAll(m=>RewardComplete(m.Id)))return;
             var stage=StageManager.Instance;
             if(stage.currentStage>=stage.maxStage)
-            {if(stage.Progress.FinishFinalRewards(stage.Progress.Revision,stage.maxStage)){PhaseDeadline=0;SetBattlePhase(RaidBattlePhase.Victory,"final skill choices complete");}return;}
+            {if(stage.Progress.FinishFinalRewards(stage.Progress.Revision,stage.maxStage)){CampaignRuntime.Instance?.Completed();PhaseDeadline=0;SetBattlePhase(RaidBattlePhase.Victory,"final skill choices complete");}return;}
             BeginNetworkEncounter(stage.currentStage+1,false);
         }
         private bool CardComplete(int id)=>StageManager.Instance.currentStage>=StageManager.Instance.maxStage||_rewards.Chosen(id);
@@ -303,6 +313,7 @@ namespace RaidRogue
         {
             if (Ending || !Multiplayer) return;
             UpdateRecoveryHost();
+            SendCampaignReceipts();
             if (IsHost) { FinishNetworkClearPresentation(); UpdateRewardDeadline(); }
             if (Mode == RaidSessionMode.Disconnected) return;
             UpdateLoadingBarrier();
@@ -355,7 +366,11 @@ namespace RaidRogue
             if (stage.boss.addSpawner != null) foreach (var add in stage.boss.addSpawner.activeAdds)
                 if (add != null && !add.isDead) adds.Add(add.CaptureNetworkCombat(CombatId(add.transform)));
             var ledger = CombatMetricsManager.Instance.Ledger;
-            return new RaidCombatFrame { epoch = BattleEpoch, stage = stage.currentStage, irisCoins=stage.Iris.Coins,runId=stage.RunId,chapterId=stage.ChapterId, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
+            var checkpoint = CampaignRuntime.Instance?.Saved;
+            bool currentSave = checkpoint != null && checkpoint.runId == stage.RunId;
+            return new RaidCombatFrame { campaignResume = _campaignResumed, campaignSavedStage = currentSave ? checkpoint.nextStage : 0,
+                campaignSavedUtc = currentSave ? checkpoint.savedUtc : "", campaignCompleted = currentSave && checkpoint.completed,
+                campaignSaveFailed = CampaignRuntime.Instance?.HasSaveFailure == true, epoch = BattleEpoch, stage = stage.currentStage, irisCoins=stage.Iris.Coins,runId=stage.RunId,chapterId=stage.ChapterId, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
                 countdownEnd = CountdownEnd, phaseDeadline = PhaseDeadline, runTime = stage.NetworkRunTime, party = actors.ToArray(), boss = stage.boss.CaptureNetworkCombat(), adds = adds.ToArray(), mechanics = CaptureMechanics(),
                 current = CombatMetricsManager.CaptureNetworkResult(ledger.Snapshot()), clears = CombatMetricsManager.CaptureNetworkResults(ledger.Stages), failures = CombatMetricsManager.CaptureNetworkResults(ledger.FailedAttempts) };
         }
@@ -404,6 +419,7 @@ namespace RaidRogue
         }
         private void ApplyCombatFrame(RaidCombatFrame frame)
         {
+            _campaignResumed = frame.campaignResume;
             if (Mode == RaidSessionMode.Restoring && frame.recoveryPoses != null && frame.poseTick >= _lastSnapshot)
             {
                 var snapshot = new RaidPacket { Kind = RaidPacketKind.Snapshot, Tick = frame.poseTick }; snapshot.Poses.AddRange(frame.recoveryPoses);

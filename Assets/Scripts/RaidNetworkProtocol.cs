@@ -72,7 +72,7 @@ namespace RaidRogue
         }
     }
 
-    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong, Ready, SceneReady, ResumeHello, RestoreReady, RestoreComplete, Leave, PartyNotice }
+    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong, Ready, SceneReady, ResumeHello, RestoreReady, RestoreComplete, Leave, PartyNotice, CampaignClear, CampaignAck }
     [Serializable]
     public sealed class RaidPose
     {
@@ -103,7 +103,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 11, MaxBytes = 1100;
+        public const int Version = 12, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -111,7 +111,7 @@ namespace RaidRogue
             w.Write((byte)Version); w.Write((byte)packet.Kind);
             switch (packet.Kind)
             {
-                case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: WriteText(w, packet.Text); break;
+                case RaidPacketKind.CampaignClear: case RaidPacketKind.CampaignAck: case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: WriteText(w, packet.Text); break;
                 case RaidPacketKind.Ping: case RaidPacketKind.Pong:
                     w.Write(packet.Speed); w.Write(packet.Radius); break;
                 case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
@@ -154,7 +154,7 @@ namespace RaidRogue
                 var p = new RaidPacket { Kind = (RaidPacketKind)r.ReadByte() };
                 switch (p.Kind)
                 {
-                    case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: p.Text = ReadText(r); break;
+                    case RaidPacketKind.CampaignClear: case RaidPacketKind.CampaignAck: case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: p.Text = ReadText(r); break;
                     case RaidPacketKind.Ping: case RaidPacketKind.Pong:
                         p.Speed = Number(r); p.Radius = Number(r); break;
                     case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:

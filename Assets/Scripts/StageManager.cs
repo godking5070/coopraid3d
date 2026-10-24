@@ -32,7 +32,7 @@ namespace RaidRogue
         internal readonly RaidRunFlow Progress = new RaidRunFlow();
         public readonly RaidFlowSettings FlowSettings = new RaidFlowSettings();
         public bool EncounterActive => RaidCombatAuthority.Replica ? RaidNetworkSession.Instance.CombatRunning : Progress.Phase == RaidBattlePhase.Combat;
-        public bool CanSelectInitialRole => !_hasStartedEncounter && Progress.Phase == RaidBattlePhase.Lobby && RaidNetworkSession.Instance?.Mode == RaidSessionMode.Single;
+        public bool CanSelectInitialRole => CampaignRuntime.Instance?.BuildLocked != true && !_hasStartedEncounter && Progress.Phase == RaidBattlePhase.Lobby && RaidNetworkSession.Instance?.Mode == RaidSessionMode.Single;
         private bool _pendingBossClear;
         private PartyWipeUI _wipeUI;
 
@@ -59,6 +59,7 @@ namespace RaidRogue
         private bool _isStageTransitioning;
         private bool _isAllStagesCleared;
         private bool _hasStartedEncounter;
+        internal bool LastPreparationNewRun { get; private set; }
 
         public bool IsStageTransitioning => _isStageTransitioning || IsWiped || IsPreparing;
         public float TotalPlayTime => _totalPlayTime;
@@ -69,6 +70,7 @@ namespace RaidRogue
         private void Start()
         {
             RaidNetworkSession.Ensure(this);
+            CampaignRuntime.Ensure(this);
             _wipeUI = GetComponent<PartyWipeUI>() ?? gameObject.AddComponent<PartyWipeUI>();
             if(GetComponent<CharacterRewardUI>()==null)gameObject.AddComponent<CharacterRewardUI>();
             if (boss == null) boss = FindFirstObjectByType<BossController>();
@@ -127,12 +129,12 @@ namespace RaidRogue
             if (!CanSelectInitialRole || player==null || !CharacterActor.Ensure(player.gameObject).DepartureReady || !PrepareEncounter(1, false, true)) return;
             StartCoroutine(PreparedCountdown(Progress.Revision));
         }
-        private bool PrepareEncounter(int stage, bool retry, bool newRun = false)
+        private bool PrepareEncounter(int stage, bool retry, bool newRun = false, bool resume = false)
         {
             if (CharacterTrainingSession.Active) return false;
             if (boss == null || player == null || cardManager == null || cardManager.cardSelectionModalRoot == null)
             { RaidNetworkSession.Instance?.FailSession("전투/보상 참조가 누락되었습니다. 원본 프로젝트의 SceneAutoBuilder 구성을 확인하세요."); return false; }
-            if (!Progress.TryPrepare(stage, maxStage, retry)) return false;
+            if (!(resume ? Progress.TryResume(stage, maxStage) : Progress.TryPrepare(stage, maxStage, retry))) return false;
             var metrics = CombatMetricsManager.Ensure(this);
             if (newRun) { metrics.Ledger.ResetRun(); _totalPlayTime = 0; }
             if (retry) metrics.Ledger.RegisterRetry();
@@ -145,9 +147,12 @@ namespace RaidRogue
             {
                 PartyLife.Ensure(member.gameObject).ResetForEncounter();
                 CharacterActor.Ensure(member.gameObject).ResetEncounter(newRun ? CharacterReset.NewRun : retry ? CharacterReset.Retry : CharacterReset.NextStage);
+                member.GetComponent<PlayerController>()?.RefillMovementCharges();
                 member.GetComponent<PlayerController>()?.cardManager?.ResetTemporaryCombatState();
             }
             boss.SetupBossForStage(stage); UpdateStageHeaderUI(); TraceProgress(retry ? "retry prepared; cards retained" : "stage prepared");
+            LastPreparationNewRun = newRun;
+            if (!RaidCombatAuthority.Host) CampaignRuntime.Instance?.Prepared(retry, newRun);
             return true;
         }
         internal bool BeginPreparedCountdown()
@@ -198,6 +203,7 @@ namespace RaidRogue
                 _pendingBossClear = false;
                 foreach (var member in members) CharacterActor.Ensure(member.gameObject).ClearedStage(currentStage);
                 CombatMetricsManager.Instance?.Ledger.EndStage();
+                CampaignRuntime.Instance?.Cleared(currentStage);
                 CleanupAttempt();
                 if (RaidCombatAuthority.Host) { boss.PlayBossCollapseAnimation(); RaidNetworkSession.Instance.NetworkEncounterOutcome(true); }
                 else StartCoroutine(BossDefeatedSequenceRoutine(Progress.Revision));
@@ -361,6 +367,7 @@ namespace RaidRogue
 
         private void ShowAllStagesClearVictoryScreen()
         {
+            CampaignRuntime.Instance?.Completed();
             _isAllStagesCleared = true;
             _isStageTransitioning = false;
             if (!RaidCombatAuthority.Active) Time.timeScale = 0f;

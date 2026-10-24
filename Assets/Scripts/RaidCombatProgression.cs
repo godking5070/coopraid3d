@@ -46,7 +46,7 @@ namespace RaidRogue
             var candidates = _cardPool.FindAll(c => EligibleRosterCard(c)&&(!_acquiredCardStacks.ContainsKey(c.id) || c.id == RoguelikeCardId.SwiftAwakening));
             if (candidates.Count < 3) candidates = _cardPool.FindAll(EligibleRosterCard);
             var result = new int[3];
-            for (int i = 0; i < 3; i++) { int index = UnityEngine.Random.Range(0, candidates.Count); result[i] = (int)candidates[index].id; candidates.RemoveAt(index); }
+            for (int i = 0; i < 3; i++) { int index = CampaignRuntime.Instance?.RewardRandom(candidates.Count) ?? UnityEngine.Random.Range(0, candidates.Count); result[i] = (int)candidates[index].id; candidates.RemoveAt(index); }
             return result;
         }
         public void ApplyNetworkCard(RoguelikeCardId id)

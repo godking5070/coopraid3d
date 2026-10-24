@@ -33,12 +33,13 @@ namespace RaidRogue
         {
             if (peer.Id == 0) return;
             Debug.Log($"[Raid {SessionTag}] epoch={BattleEpoch} actor={peer.Id} disconnected; voluntary={peer.Voluntary} phase={BattlePhase}");
-            if (UsesSteam && !peer.Voluntary && _recovery.Actor(peer.Id) != null)
+            if (UsesSteam && (!peer.Voluntary || CampaignRuntime.Instance?.RunStarted == true || _campaignResumed) && _recovery.Actor(peer.Id) != null)
             {
                 bool wasHuman = _recovery.Actor(peer.Id).State == RaidControlState.Connected;
                 bool changed = _recovery.Reserve(peer.Id, ServerTime, BattlePhase == RaidBattlePhase.Reward ? BattleEpoch : -1);
                 if (changed && _avatars.TryGetValue(peer.Id, out var avatar))
                 {
+                    if (CampaignBuildLocked) _recovery.Actor(peer.Id).Deadline = float.MaxValue;
                     avatar.Automated = true; avatar.MotionVersion++;
                     if (wasHuman)
                     {
@@ -113,7 +114,7 @@ namespace RaidRogue
                 int[] cards = _rewards.Cards(slot.Actor);
                 if (!_recovery.RewardDue(slot, BattleEpoch, ServerTime)) continue;
                 if(cards.Length>0&&_rewards.Choose(BattleEpoch, slot.Actor, cards[0]))
-                {_avatars[slot.Actor].GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)cards[0]);_recovery.AutoSelected(slot, cards[0]);}
+                {CampaignRuntime.Instance?.CardChosen(_avatars[slot.Actor].GetComponent<PlayerController>(), cards[0], cards);_avatars[slot.Actor].GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)cards[0]);_recovery.AutoSelected(slot, cards[0]);}
                 AutoChooseSkillRewards(slot.Actor);
             }
             FinishRewardsIfReady();

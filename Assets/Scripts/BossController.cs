@@ -758,6 +758,8 @@ namespace RaidRogue
             }
 #endif
 
+            if (toggleRot || instantKillBoss || forceTether || forceSpread || forceStack || forceStage3Combo || forceSummonAdds)
+                CampaignRuntime.Instance?.MarkDevelopmentUse();
             if (toggleRot)
             {
                 enableRotation = !enableRotation;

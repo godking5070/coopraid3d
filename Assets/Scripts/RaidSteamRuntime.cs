@@ -139,8 +139,9 @@ namespace RaidRogue
             if (!_invites.NeedsConfirmation) return;
             if (!accept) { _invites.Decline(); return; }
             _invites.Confirm();
+            CampaignRuntime.Instance?.CancelResumeIntent();
             LeaveLobby(); // Keeps the explicitly confirmed pending invite across the menu reload.
-            if (Session != null && Session.Mode != RaidSessionMode.Menu) Session.Disconnect();
+            if (Session != null && Session.Mode != RaidSessionMode.Menu) Session.DisconnectConfirmed(); // The invite dialog already confirmed leaving.
         }
         private void JoinPending()
         {
@@ -185,7 +186,7 @@ namespace RaidRogue
         }
         public bool Admit(ulong remote)
         {
-            return Available && LobbyId != 0 && HostId == UserId && Session != null && !Session.Ending && (Session.KnowsSteamMember(remote) || (Session.CanJoinBattle && IsMember(remote) && LobbyCount <= 4)) &&
+            return Available && LobbyId != 0 && HostId == UserId && Session != null && !Session.Ending && Session.AcceptsCampaignUser(remote) && (Session.KnowsSteamMember(remote) || (Session.CanJoinBattle && IsMember(remote) && LobbyCount <= 4)) &&
                 SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID == HostId && remote != UserId;
         }
         public int LobbyCount => Available && LobbyId != 0 ? SteamMatchmaking.GetNumLobbyMembers(new CSteamID(LobbyId)) : 0;
@@ -219,6 +220,7 @@ namespace RaidRogue
         private void Fail(string reason)
         {
             Status = reason; LeaveLobby();
+            CampaignRuntime.Instance?.CancelResumeIntent();
             if (Session != null) Session.EndSteamSession(reason);
         }
         public void LeaveLobby()

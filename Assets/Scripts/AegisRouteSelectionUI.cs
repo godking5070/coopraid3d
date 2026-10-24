@@ -20,6 +20,7 @@ namespace RaidRogue
         private readonly string[] _routes=new string[12];
         public static void Open(CharacterActor actor,bool network)
         {
+            if (CampaignRuntime.Instance?.BuildLocked == true || RaidNetworkSession.Instance?.CampaignBuildLocked == true) return;
             var canvas=FindFirstObjectByType<SkillHotbarUI>()?.GetComponentInParent<Canvas>()??FindFirstObjectByType<Canvas>();
             if(canvas==null)return;
             if(_instance==null)
@@ -35,7 +36,7 @@ namespace RaidRogue
         }
         public static void OpenNetwork()
         {
-            var session=RaidNetworkSession.Instance;if(session==null||!session.CanChooseRole||!session.HasLocalAvatar)return;
+            var session=RaidNetworkSession.Instance;if(session==null||!session.CanEditLobbyBuild||!session.HasLocalAvatar)return;
             foreach(var avatar in session.Avatars.Values)if(avatar.IsLocal)
             {
                 var actor=CharacterActor.Ensure(avatar.gameObject);
@@ -66,7 +67,7 @@ namespace RaidRogue
         }
         private void Update()
         {
-            bool lobby=_network?RaidNetworkSession.Instance?.CanChooseRole==true:StageManager.Instance?.CanSelectInitialRole==true;
+            bool lobby=_network?RaidNetworkSession.Instance?.CanEditLobbyBuild==true:StageManager.Instance?.CanSelectInitialRole==true;
             if(!lobby||_actor==null||RaidNetworkSession.Instance?.Ending==true){Close();return;}
             bool assigned=_pendingJob==null||_actor.Definition.id==_pendingJob;
             if(!_jobs&&assigned&&_routes[0]!=_actor.Definition.routes.FirstOrDefault()?.id)RefreshChoices();

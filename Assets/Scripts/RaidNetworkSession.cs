@@ -126,6 +126,7 @@ namespace RaidRogue
                     var member = _roster.Join(_playerName); _localId = member.Id; member.SteamId = steamId; member.Loaded = true;
                     AddAvatar(member.Id, member.Role, member.Name, SpawnPoint(member.Role)); ReconcileBots(); SyncLobbyAvatar(member);
                     Status = UsesSteam ? "Steam 호스트 · 역할 선택 후 준비하세요" : "LAN 호스트 · 같은 빌드/씬으로 참가하세요";
+                    RestoreCampaignLobby();
                 }
                 else
                 {
@@ -203,6 +204,12 @@ namespace RaidRogue
                     {
                         string[] hello = packet.Text.Split('\n');
                         if (hello.Length != 2 || hello[0] != HelloTag) { Reject(peer, "호스트와 같은 씬/테스트 빌드를 사용하세요."); continue; }
+                        if (UsesSteam && _campaignResumed)
+                        {
+                            ulong originalUser = _transport.RemoteSteamId(peer.Connection);
+                            if (!AcceptsCampaignUser(originalUser)) { Reject(peer, "저장된 원래 참가자만 이 런에 복귀할 수 있습니다."); continue; }
+                            TryResumePeer(peer); continue;
+                        }
                         if (packet.Kind == RaidPacketKind.ResumeHello) { TryResumePeer(peer); continue; }
                         if (UsesSteam && _recovery.Find(_transport.RemoteSteamId(peer.Connection)) != null) { Reject(peer, "이미 배정된 자리입니다. 이전 게임으로 복귀를 사용하세요."); continue; }
                         if (!CanJoinBattle) { Reject(peer, "현재 런에는 참가할 수 없습니다. 최초 대기실에서만 참가할 수 있습니다."); continue; }
@@ -220,6 +227,7 @@ namespace RaidRogue
                     }
                     else if (peer.Id != 0 && packet.Kind == RaidPacketKind.Leave) { peer.Voluntary = true; _transport.Disconnect(peer.Connection); remove = true; break; }
                     else if (peer.Id != 0 && packet.Kind == RaidPacketKind.RestoreReady) AcceptRestore(peer, packet);
+                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.CampaignAck) AcknowledgeCampaign(peer, packet.Text);
                     else if (peer.Id != 0 && packet.Kind == RaidPacketKind.RestoreComplete && (uint)packet.Role == peer.Lease && PeerControls(peer)) peer.RecoveryFrame = false;
                     else if (PeerControls(peer) && packet.Kind == RaidPacketKind.Ready) SetReady(peer.Id, packet.Id != 0);
                     else if (PeerControls(peer) && packet.Kind == RaidPacketKind.SceneReady) SetLoaded(peer.Id, packet.Id);
@@ -273,6 +281,7 @@ namespace RaidRogue
                     { _lastSnapshot = packet.Tick; ApplySnapshot(packet); }
                     else if ((Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Restoring) && (packet.Kind == RaidPacketKind.CombatFrame || packet.Kind == RaidPacketKind.CombatEffect || packet.Kind == RaidPacketKind.Pong)) ReceiveCombatPacket(packet);
                     else if (packet.Kind == RaidPacketKind.PartyNotice) ShowPartyNotice(packet.Text);
+                    else if (packet.Kind == RaidPacketKind.CampaignClear) ReceiveCampaignReceipt(packet.Text);
                     else if (packet.Kind == RaidPacketKind.Notice)
                     {
                         if (packet.Text.StartsWith("재접속:")) { UnexpectedClientLoss(packet.Text.Substring(4)); return; }
@@ -393,7 +402,7 @@ namespace RaidRogue
         }
         private void ChooseRole(int id, int role, int connection)
         {
-            if (!CanChooseRole) { ActionFailure(id, "전투 시작 후에는 역할을 변경할 수 없습니다"); return; }
+            if (!CanEditLobbyBuild) { ActionFailure(id, "전투 시작 후 또는 이어하기 대기실에서는 역할을 변경할 수 없습니다"); return; }
             bool success = _roster.SelectRole(id, role);
             string message = success ? "역할이 변경되었습니다." : "이미 다른 플레이어가 선택한 역할입니다.";
             if (success) { var member = _roster.Members.Find(m => m.Id == id); member.Ready=false; _avatars[id].SetIdentity(role, member.Name); CharacterActor.Ensure(_avatars[id].gameObject).UseLegacyRole(); _avatars[id].RefreshJobLabel(); SyncLobbyAvatar(member); ReconcileBots(); }
@@ -412,6 +421,12 @@ namespace RaidRogue
             _transport.Send(connection, RaidWire.Encode(packet), reliable);
         }
         public void Disconnect()
+        {
+            if (!Ending && Mode != RaidSessionMode.Menu && Mode != RaidSessionMode.Training && GetComponent<RaidConnectionUI>() is RaidConnectionUI ui)
+            { ui.ConfirmCampaignExit(false); return; }
+            DisconnectConfirmed();
+        }
+        internal void DisconnectConfirmed()
         {
             if (Ending) return;
             if (IsHost)

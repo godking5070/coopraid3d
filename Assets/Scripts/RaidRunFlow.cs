@@ -21,6 +21,11 @@ namespace RaidRogue
         public int Stage { get; private set; }
         public int Revision { get; private set; }
         public bool IsCurrent(int revision, RaidBattlePhase phase) => Revision == revision && Phase == phase;
+        public bool TryResume(int stage, int maximum)
+        {
+            if (Phase != RaidBattlePhase.Lobby || stage < 1 || stage > maximum) return false;
+            Stage = stage; Revision++; Phase = RaidBattlePhase.Loading; return true;
+        }
         public bool TryPrepare(int stage, int maximum, bool retry)
         {
             if (stage < 1 || stage > maximum) return false;

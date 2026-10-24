@@ -226,18 +226,18 @@ namespace RaidRogue
             }
             return null;
         }
-        public static bool Save(string path, string text, Func<string, bool> valid, out string error)
+        public static bool Save(string path, string text, Func<string, bool> valid, out string error, int maximumBytes = 262144)
         {
             error = ""; string temporary = path + ".tmp-" + Guid.NewGuid().ToString("N");
             try
             {
-                if (!valid(text)) throw new IOException("유효하지 않은 설정 데이터");
+                if (Encoding.UTF8.GetByteCount(text) > maximumBytes || !valid(text)) throw new IOException("유효하지 않거나 너무 큰 저장 데이터");
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 byte[] bytes = Encoding.UTF8.GetBytes(text);
                 using (var file = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None)) { file.Write(bytes, 0, bytes.Length); file.Flush(true); }
                 if (File.Exists(path))
                 {
-                    bool oldValid = new FileInfo(path).Length <= 262144 && valid(File.ReadAllText(path, Encoding.UTF8));
+                    bool oldValid = new FileInfo(path).Length <= maximumBytes && valid(File.ReadAllText(path, Encoding.UTF8));
                     File.Replace(temporary, path, oldValid ? path + ".bak" : null);
                 }
                 else File.Move(temporary, path);

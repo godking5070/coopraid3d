@@ -55,6 +55,7 @@ namespace RaidRogue
         {
             if(!CanEditSkillTest(out reason))return false;
             if(!_state.PreviewSkillChoice(skillId)){reason="시전 중이거나 제공되지 않은 후보입니다";return false;}
+            CampaignRuntime.Instance?.MarkDevelopmentUse();
             GetComponent<AegisPaladin>()?.ClearTransient();
             reason="테스트 장착: "+Definition.Skill(skillId).name+" (실제 클리어/카드/선택 완료 기록은 변경하지 않음)";
             return true;
@@ -80,6 +81,7 @@ namespace RaidRogue
                 : operation==SkillTestOperation.FillResources?"직업 자원을 최대치로 채웠습니다."
                 : "직업 스킬 쿨타임과 GCD를 초기화했습니다. 대쉬·포션·진행 중 효과는 유지됩니다.";
             Debug.Log($"[Skill Test] actor={RaidCombatAuthority.Id(transform)} job={Definition.id} operation={operation} affected={affected}",this);
+            CampaignRuntime.Instance?.MarkDevelopmentUse();
             return true;
         }
 #endif
@@ -88,6 +90,7 @@ namespace RaidRogue
         public void RegisterHandler(string id,Func<CharacterSkillDefinition,Transform,bool> handler) { if(!string.IsNullOrEmpty(id)&&handler!=null)_handlers[id]=handler; }
         public bool AssignDefinition(CharacterDefinition definition)
         {
+            if (CampaignRuntime.Instance?.BuildLocked == true || RaidNetworkSession.Instance?.CampaignBuildLocked == true) return false;
             if(RaidCombatAuthority.Replica||definition==null||CharacterCatalog.Find(definition.id)!=definition||!definition.playable)return false;
             if(!CharacterTrainingSession.CanEdit(this)&&(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole))return false;
             if(definition.id==AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
@@ -155,6 +158,7 @@ namespace RaidRogue
         public bool Choose(string rule,string choice,out string reason,string rewardKey=null,bool automatic=false)
         {
             reason="루트/스킬 선택 조건을 충족하지 않습니다";
+            if (rule == "route" && (CampaignRuntime.Instance?.BuildLocked == true || RaidNetworkSession.Instance?.CampaignBuildLocked == true)) return false;
             if(RaidCombatAuthority.Replica||_state==null)return false;
             bool lobby=RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Lobby:StageManager.Instance!=null&&StageManager.Instance.CanSelectInitialRole;
             bool reward=RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Reward:StageManager.Instance?.Progress.Phase==RaidBattlePhase.Reward;

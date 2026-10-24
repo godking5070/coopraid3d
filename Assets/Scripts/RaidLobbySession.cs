@@ -9,7 +9,8 @@ namespace RaidRogue
         private float _loadingDeadline, _nextLoadedAck;
         private int _loadFrame;
         public bool LocalReady => _avatars.TryGetValue(_localId, out var avatar) && avatar.Ready;
-        public bool CanStartLobby => !Ending && IsHost && CanChooseRole && _roster.Members.TrueForAll(m => (_recovery.Actor(m.Id)?.Automated ?? false) || (m.Ready && m.Loaded && _avatars.TryGetValue(m.Id,out var a) && CharacterActor.Ensure(a.gameObject).DepartureReady)) && _peers.TrueForAll(p => p.Id != 0 && p.CloseAt == 0) &&
+        private bool WaitingAsAI(int id) => _recovery.Actor(id)?.State == RaidControlState.Reserved || _recovery.Actor(id)?.State == RaidControlState.PermanentAI;
+        public bool CanStartLobby => !Ending && IsHost && CanChooseRole && _roster.Members.TrueForAll(m => WaitingAsAI(m.Id) || (m.Ready && m.Loaded && _avatars.TryGetValue(m.Id,out var a) && CharacterActor.Ensure(a.gameObject).DepartureReady)) && _peers.TrueForAll(p => p.Id != 0 && p.CloseAt == 0) &&
             (!UsesSteam || !HasUnapprovedLobbyGuests(RaidSteamRuntime.Instance.Members()));
         private string HelloTag => SceneManager.GetActiveScene().name + (UsesSteam ? "|" + RaidSteamRuntime.Instance.Build + "|" + RaidSteamRuntime.Instance.LobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture) : "");
         public void ToggleReady()
