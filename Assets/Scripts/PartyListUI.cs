@@ -38,6 +38,7 @@ namespace RaidRogue
         public PartyMemberRowUI[] memberRows = new PartyMemberRowUI[4];
 
         private Sprite _whiteSprite;
+        private Text _revivalBudget;
 
         private void Start()
         {
@@ -426,6 +427,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            UpdateRevivalBudget();
             if (RaidNetworkSession.Multiplayer) { UpdateNetworkParty(); return; }
             if (player == null || partyBots.Count == 0)
             {
@@ -491,6 +493,26 @@ namespace RaidRogue
                     );
                 }
             }
+        }
+
+        private void UpdateRevivalBudget()
+        {
+            if (panelRoot == null) return;
+            if (_revivalBudget == null)
+            {
+                var label = new GameObject("AttemptRevivalBudget", typeof(RectTransform), typeof(Text));
+                label.transform.SetParent(panelRoot, false);
+                _revivalBudget = label.GetComponent<Text>();
+                var rect = _revivalBudget.rectTransform;
+                rect.anchorMin = new Vector2(0, 1); rect.anchorMax = Vector2.one; rect.pivot = new Vector2(.5f, 0);
+                rect.anchoredPosition = new Vector2(0, 4); rect.sizeDelta = new Vector2(0, 42);
+                _revivalBudget.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                _revivalBudget.fontSize = 16; _revivalBudget.alignment = TextAnchor.LowerLeft;
+                _revivalBudget.color = new Color(.9f, .85f, 1); _revivalBudget.raycastTarget = false;
+            }
+            var stage = StageManager.Instance;
+            _revivalBudget.gameObject.SetActive(stage != null && !CharacterTrainingSession.Active);
+            if (stage != null) _revivalBudget.text = $"이번 도전 부활 {stage.IrisCoins} / {IrisRescueState.DefaultCoins} · 이리스\n런 누적 사용 {stage.TotalRevives}회";
         }
 
         private void UpdateNetworkParty()

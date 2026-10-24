@@ -59,7 +59,11 @@ namespace RaidRogue
         private void RestoreCampaignLobby()
         {
             var c = CampaignRuntime.Instance; var saved = c?.Resume;
-            if (saved == null || !IsHost || !UsesSteam) return;
+            if (!IsHost || !UsesSteam) return;
+            // A completed run cannot be continued. Its undelivered confirmations still reach
+            // the original authenticated recipient in a later lobby hosted by the same account.
+            if (c?.Personal != null) foreach (var receipt in c.Personal.deliveries) QueueCampaignReceipt(receipt);
+            if (saved == null) return;
             if (saved.owner != CampaignRuntime.CurrentOwner || saved.transport != "steam") throw new InvalidOperationException("같은 Steam 호스트만 저장을 재개할 수 있습니다");
             _campaignResumed = true;
             // Discard only freshly-created menu previews; never transfer live actors/IDs from disk.
@@ -102,6 +106,11 @@ namespace RaidRogue
         {
             if (!IsHost || !UsesSteam || !CampaignValidation.Receipt(receipt, receipt?.userId)) return;
             _campaignReceipts[receipt.userId + "/" + receipt.Key] = receipt;
+            // Send confirmed clears immediately, including the terminal stage. The periodic
+            // outbox remains responsible for retransmission until the recipient's disk ACK.
+            var member = _roster.Members.Find(m => m.SteamId == CampaignIdentity.Steam(receipt.userId));
+            var peer = member == null ? null : _peers.Find(p => p.Id == member.Id && PeerControls(p));
+            if (peer != null) Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.CampaignClear, Text = JsonUtility.ToJson(receipt) }, true);
         }
         private void SendCampaignReceipts()
         {
@@ -122,7 +131,10 @@ namespace RaidRogue
             try
             {
                 var r = JsonUtility.FromJson<CampaignClearReceipt>(json);
-                if (r == null || r.runId != StageManager.Instance.RunId || r.chapterId != StageManager.Instance.ChapterId || r.stage > StageManager.Instance.currentStage) return;
+                // Only the authenticated server sends this packet. A durable outbox may refer
+                // to a previous run; recipient ID and stable receipt validation still apply.
+                if (r == null || !CampaignValidation.Receipt(r, CampaignRuntime.CurrentOwner) || !r.eligible ||
+                    !CampaignCatalog.Available(r.chapterId)) return;
                 if (CampaignRuntime.Instance?.AcceptReceipt(r) == true)
                     Send(_server, new RaidPacket { Kind = RaidPacketKind.CampaignAck, Text = r.Key }, true);
             }

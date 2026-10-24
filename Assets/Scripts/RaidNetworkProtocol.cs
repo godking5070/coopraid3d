@@ -103,7 +103,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 12, MaxBytes = 1100;
+        public const int Version = 13, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -111,7 +111,8 @@ namespace RaidRogue
             w.Write((byte)Version); w.Write((byte)packet.Kind);
             switch (packet.Kind)
             {
-                case RaidPacketKind.CampaignClear: case RaidPacketKind.CampaignAck: case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: WriteText(w, packet.Text); break;
+                case RaidPacketKind.CampaignClear: case RaidPacketKind.CampaignAck: case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: WriteText(w, packet.Text); break;
+                case RaidPacketKind.CombatRequest: WriteActionText(w, packet.Text); break;
                 case RaidPacketKind.Ping: case RaidPacketKind.Pong:
                     w.Write(packet.Speed); w.Write(packet.Radius); break;
                 case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
@@ -154,7 +155,8 @@ namespace RaidRogue
                 var p = new RaidPacket { Kind = (RaidPacketKind)r.ReadByte() };
                 switch (p.Kind)
                 {
-                    case RaidPacketKind.CampaignClear: case RaidPacketKind.CampaignAck: case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: p.Text = ReadText(r); break;
+                    case RaidPacketKind.CampaignClear: case RaidPacketKind.CampaignAck: case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: p.Text = ReadText(r); break;
+                    case RaidPacketKind.CombatRequest: p.Text = ReadActionText(r); break;
                     case RaidPacketKind.Ping: case RaidPacketKind.Pong:
                         p.Speed = Number(r); p.Radius = Number(r); break;
                     case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
@@ -199,6 +201,20 @@ namespace RaidRogue
             catch (ArgumentException) { return false; }
         }
         private static float Number(BinaryReader r) { float f = r.ReadSingle(); if (!RaidMoveInput.Finite(f)) throw new InvalidDataException(); return f; }
+        // A selection request carries stable run/chapter/rule IDs. It does not fit the short
+        // display-name envelope. Keep the 1100-byte packet bound and all other text limits.
+        private static void WriteActionText(BinaryWriter w, string text)
+        {
+            var bytes = Encoding.UTF8.GetBytes(text ?? "");
+            if (bytes.Length > 1000) throw new InvalidDataException("Action too large");
+            w.Write((ushort)bytes.Length); w.Write(bytes);
+        }
+        private static string ReadActionText(BinaryReader r)
+        {
+            int count = r.ReadUInt16(); if (count > 1000) throw new InvalidDataException();
+            var bytes = r.ReadBytes(count); if (bytes.Length != count) throw new EndOfStreamException();
+            return new UTF8Encoding(false, true).GetString(bytes);
+        }
         private static void WriteText(BinaryWriter w, string text)
         {
             var data = Encoding.UTF8.GetBytes(text ?? ""); if (data.Length > 240) throw new InvalidDataException();

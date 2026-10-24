@@ -125,6 +125,7 @@ namespace RaidRogue
         {
             if (Ending || !HasLocalAvatar || !ControlsReady) return;
             var request = new RaidActionRequest { actor = _localId, epoch = BattleEpoch, sequence = ++_actionSequence, lease = _localLease, skill = skill, target = target };
+            if (skill == 5) StampRescueRequest(request, target == 0 ? _player.transform : CombatTarget(target));
             if (IsHost) ExecuteAction(_localId, request);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = JsonUtility.ToJson(request) }, true);
         }
@@ -181,7 +182,7 @@ namespace RaidRogue
             }
             if (BattlePhase != RaidBattlePhase.Combat) { ActionFailure(owner, "현재 전투 중이 아닙니다"); return; }
             var pc = avatar.GetComponent<PlayerController>();
-            if(request.skill==5){var rescueTarget=request.target==0&&pc!=null&&pc.IsDead?pc.transform:CombatTarget(request.target);if(!IrisRescue.TryUse(avatar.transform,rescueTarget))ActionFailure(owner,"이리스 구조 실패: 사망한 아군과 남은 공용 코인을 확인하세요");return;}
+            if(request.skill==5){var rescueTarget=request.target==0&&pc!=null&&pc.IsDead?pc.transform:CombatTarget(request.target);if(!IrisRescue.TryUse(avatar.transform,rescueTarget,request.attemptId,request.deathGeneration))ActionFailure(owner,"이리스 구조 실패: 현재 도전·사망 대상·공유 부활 횟수를 확인하세요");return;}
             if (pc == null || pc.IsDead || pc.IsStunned || pc.IsBeingRescued || pc.IsBeingKnockedBack) { ActionFailure(owner, "현재 행동할 수 없습니다"); return; }
             Transform target = CombatTarget(request.target);
             if (request.target != 0 && target == null) { ActionFailure(owner, "대상이 더 이상 존재하지 않습니다"); return; }
@@ -200,7 +201,6 @@ namespace RaidRogue
                     if (request.skill == 3) combat.TryUseSkill3_PersonalDefensive_oGCD();
                     if (request.skill == 4) combat.TryUseSkill4_GaleThrust_oGCD();
                 }
-                else if (request.skill == 5 && !pc.GetComponent<BattleResurrection>().TryBegin(target)) ActionFailure(owner, "부활 실패: 사망한 아군·20m 사거리·쿨타임·이동 상태를 확인하세요");
                 else if (request.skill == 6 && !pc.Potion.TryUse()) ActionFailure(owner, "포션을 사용할 수 없습니다: HP·쿨타임·아이템 차단 상태를 확인하세요");
             }
             finally { RaidCombatAuthority.ExecutingActor = 0; }
@@ -209,6 +209,11 @@ namespace RaidRogue
         {
             if (owner == _localId) { Status = reason; _player.combatController.ReportNetworkFailure(reason); }
             else { var peer = _peers.Find(p => p.Id == owner); if (peer != null) Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.Notice, Text = reason }, true); }
+        }
+        private void StampRescueRequest(RaidActionRequest request, Transform target)
+        {
+            request.attemptId = StageManager.Instance.AttemptId;
+            request.deathGeneration = target != null ? target.GetComponent<PartyLife>()?.DeathGeneration ?? 0 : 0;
         }
         public void BeginNetworkEncounter(int stage, bool retry)
         {
@@ -334,7 +339,7 @@ namespace RaidRogue
             if (IsHost && Time.unscaledTime >= _nextCombatFrame)
             {
                 _nextCombatFrame = Time.unscaledTime + .1f;
-                var frame = CaptureCombatFrame(); _latestCombatFrame = frame; StageManager.Instance.RestoreIris(frame.irisCoins);
+                var frame = CaptureCombatFrame(); _latestCombatFrame = frame; StageManager.Instance.RestoreIris(frame.irisCoins, frame.attemptId, frame.totalRevives);
                 foreach (var peer in _peers) if (peer.Id != 0 && peer.CloseAt == 0) SendCombatFrame(peer, frame, false);
                 PresentBattleState(frame);
             }
@@ -346,7 +351,7 @@ namespace RaidRogue
             foreach (var avatar in _avatars.Values)
             {
                 var actor = new RaidCombatActor { id = avatar.Id, role = avatar.Role, name = avatar.DisplayName, bot = avatar.IsBot, target = CombatId(avatar.CombatTarget),
-                    rewardChosen = RewardComplete(avatar.Id), cardChosen=CardComplete(avatar.Id), offer = _rewards.Cards(avatar.Id) };
+                    deathGeneration = avatar.GetComponent<PartyLife>()?.DeathGeneration ?? 0, rewardChosen = RewardComplete(avatar.Id), cardChosen=CardComplete(avatar.Id), offer = _rewards.Cards(avatar.Id) };
                 var pc = avatar.GetComponent<PlayerController>();
                 if (pc != null) pc.CaptureNetworkCombat(actor); else avatar.GetComponent<PartyBotAI>()?.CaptureNetworkCombat(actor);
                 avatar.GetComponent<CommonPotion>()?.CaptureNetworkCombat(actor); avatar.GetComponent<BattleResurrection>()?.CaptureNetworkCombat(actor);
@@ -370,7 +375,7 @@ namespace RaidRogue
             bool currentSave = checkpoint != null && checkpoint.runId == stage.RunId;
             return new RaidCombatFrame { campaignResume = _campaignResumed, campaignSavedStage = currentSave ? checkpoint.nextStage : 0,
                 campaignSavedUtc = currentSave ? checkpoint.savedUtc : "", campaignCompleted = currentSave && checkpoint.completed,
-                campaignSaveFailed = CampaignRuntime.Instance?.HasSaveFailure == true, epoch = BattleEpoch, stage = stage.currentStage, irisCoins=stage.Iris.Coins,runId=stage.RunId,chapterId=stage.ChapterId, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
+                campaignSaveFailed = CampaignRuntime.Instance?.HasSaveFailure == true, epoch = BattleEpoch, stage = stage.currentStage, irisCoins=stage.Iris.Coins,attemptId=stage.AttemptId,totalRevives=stage.TotalRevives,runId=stage.RunId,chapterId=stage.ChapterId, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
                 countdownEnd = CountdownEnd, phaseDeadline = PhaseDeadline, runTime = stage.NetworkRunTime, party = actors.ToArray(), boss = stage.boss.CaptureNetworkCombat(), adds = adds.ToArray(), mechanics = CaptureMechanics(),
                 current = CombatMetricsManager.CaptureNetworkResult(ledger.Snapshot()), clears = CombatMetricsManager.CaptureNetworkResults(ledger.Stages), failures = CombatMetricsManager.CaptureNetworkResults(ledger.FailedAttempts) };
         }
@@ -431,7 +436,7 @@ namespace RaidRogue
                 StageManager.Instance.boss.SetupBossForStage(frame.stage); // Also reset collapse/casting on a same-stage retry.
             }
             if (frame.phase != BattlePhase && Mode != RaidSessionMode.Restoring) MenuOpen = false;
-            BattleEpoch = frame.epoch; SetBattlePhase(frame.phase, "host snapshot"); CountdownEnd = frame.countdownEnd; PhaseDeadline = frame.phaseDeadline; _latestCombatFrame = frame; StageManager.Instance.RestoreIris(frame.irisCoins);
+            BattleEpoch = frame.epoch; SetBattlePhase(frame.phase, "host snapshot"); CountdownEnd = frame.countdownEnd; PhaseDeadline = frame.phaseDeadline; _latestCombatFrame = frame; StageManager.Instance.RestoreIris(frame.irisCoins, frame.attemptId, frame.totalRevives);
             var stage = StageManager.Instance; stage.ApplyNetworkStage(frame);
             stage.boss.ApplyNetworkCombat(frame.boss, frame.time);
             ApplyNetworkAdds(frame.adds);

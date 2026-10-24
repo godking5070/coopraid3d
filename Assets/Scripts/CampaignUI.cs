@@ -24,8 +24,8 @@ namespace RaidRogue
             ButtonAt(_campaignMenu.transform, "저장 정보 확인", new Vector2(0, -2), new Vector2(390, 46), () => CampaignDialog(CampaignRuntime.Instance.SaveDescription, null));
             ButtonAt(_campaignMenu.transform, "런 체크포인트 삭제", new Vector2(0, -56), new Vector2(390, 46), () => CampaignDialog("이 계정의 런 체크포인트와 최근 백업을 삭제합니다.\n개인 클리어 기록·챕터 해금·설정은 유지됩니다.\n\n" + CampaignRuntime.Instance.LastSaveLabel, () => CampaignRuntime.Instance.DeleteSelected(false)));
             ButtonAt(_campaignMenu.transform, "개인 진행도 / 챕터 해금", new Vector2(0, -110), new Vector2(390, 46), ShowPersonalProgress);
-            ButtonAt(_campaignMenu.transform, "개인 진행도 삭제", new Vector2(0, -164), new Vector2(390, 46), () => CampaignDialog("이 계정의 개인 스테이지 클리어·챕터 해금과 백업을 삭제합니다.\n런 체크포인트·설정·키 배치는 유지됩니다.\n기존 런의 완료 영수증을 다시 받으면 해당 기록은 복구될 수 있습니다.", () => CampaignRuntime.Instance.DeleteSelected(true)));
-            Label(_campaignMenu.transform, "1부/2부 정식 콘텐츠는 현재 빌드에 미포함", new Vector2(0, -218), new Vector2(414, 40), 16);
+            ButtonAt(_campaignMenu.transform, "개인 진행도 삭제", new Vector2(0, -164), new Vector2(390, 46), () => CampaignDialog("이 계정의 개인 스테이지 클리어·챕터 해금·미전달 클리어 확정 알림과 백업을 삭제합니다.\n런 체크포인트·설정·키 배치는 유지됩니다.\n기존 런의 완료 영수증을 다시 받으면 해당 기록은 복구될 수 있습니다.", () => CampaignRuntime.Instance.DeleteSelected(true)));
+            Label(_campaignMenu.transform, "1부 4인 · 6스테이지 / 2부 준비 중", new Vector2(0, -218), new Vector2(414, 40), 16);
             _campaignNotice = Label(overlay, "", new Vector2(0, -380), new Vector2(1400, 75), 16);
             _campaignHudNotice = Label(canvas, "", new Vector2(0, 180), new Vector2(1000, 90), 19);
             _campaignHudNotice.color = new Color(1, .7f, .35f);
@@ -44,8 +44,8 @@ namespace RaidRogue
         private void ShowPersonalProgress()
         {
             var c = CampaignRuntime.Instance;
-            string text = "개인 계정: " + c.Owner + "\n확정된 스테이지 클리어: " + c.Personal.clears.Length + "건\n1부 완료: " + (c.Personal.PartOneComplete ? "완료" : "미완료") + "\n2부: " + (c.Personal.PartTwoUnlocked ? "영구 해금됨" : "1부 필수 6스테이지와 최종 클리어 필요") +
-                "\n\n현재 실행 가능한 콘텐츠는 4인·3스테이지 프로토타입입니다.\n프로토타입 클리어는 1부 완료로 인정하지 않습니다.\n정식 1부(4인·6스테이지), 2부(8인·8스테이지) 데이터가 없어 출발할 수 없습니다.\n" + CampaignCatalog.DepartureRequirement(CampaignCatalog.PartTwo) + "\n훈련장·개발 기능은 개인 클리어와 저장에서 제외됩니다.";
+            string text = "개인 계정: " + c.Owner + "\n확정된 스테이지 클리어: " + c.Personal.clears.Length + "건\n1부 완료: " + (c.Personal.PartOneComplete ? "완료" : "미완료") + "\n2부: " + (c.Personal.PartTwoUnlocked ? "후속 해금 조건 충족 · 현재 진입 불가" : "준비 중 · 1부 완료 기록 필요") +
+                "\n\n1부 4인·6스테이지 진행을 지원합니다.\nStage 4~6은 기존 Stage 1~3 보스 구성을 재사용합니다.\n2부는 준비 중이며 진입할 수 없습니다.\n구버전 프로토타입 기록은 1부 완료로 인정하지 않습니다.\n훈련장·개발 기능은 개인 클리어와 저장에서 제외됩니다.";
             CampaignDialog(text, null);
         }
         private void RequestNewCampaign(Action start)
@@ -58,7 +58,7 @@ namespace RaidRogue
         {
             var c = CampaignRuntime.Instance;
             CampaignDialog((quit ? "게임을 종료합니다." : "현재 세션을 종료하고 메인 메뉴로 돌아갑니다.") + "\n\n" + _session.CampaignExitSaveLabel +
-                "\n\n현재 전투와 완료하지 않은 보상 선택은 저장되지 않습니다.\n이어하기는 마지막 저장 스테이지 시작부터 재개합니다." +
+                "\n\n현재 전투와 완료하지 않은 보상 선택은 저장되지 않습니다.\n이어하기는 마지막 저장 스테이지 시작부터 새 도전으로 재개하며 공유 부활은 4회입니다.\n진행 중 세션 재접속은 현재 상태와 남은 부활을 유지합니다." +
                 (_session.Mode == RaidSessionMode.Client ? "\n런 체크포인트는 호스트만 보관합니다. 내 개인 클리어 기록은 내 계정에 저장됩니다." : "") +
                 (RaidNetworkSession.Multiplayer && !_session.UsesSteam ? "\nLAN 테스트 세션은 영구 저장 대상이 아닙니다. 표시된 이전 저장은 이 세션의 진행이 아닐 수 있습니다." : "") +
                 (_session.CampaignRemoteSaveFailed ? "\n호스트의 저장 실패가 보고되었습니다. 호스트가 저장을 재시도해야 합니다." : "") +

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace RaidRogue
 {
     /// <summary>
-    /// 다단계 스테이지(Stage 1 -> Stage 2 -> Stage 3 최종 보스) 보스 러시 루프 및
+    /// 1부 Stage 1~6 보스 러시 루프 및
     /// 보스 처치 연출 -> 1.5초 뒤 로그라이크 카드 3택 보상 -> 파티 정비/재배치 -> 다음 보스 등장을 총괄하는 매니저 (Step 6).
     /// </summary>
     [DefaultExecutionOrder(1000)]
@@ -13,7 +13,7 @@ namespace RaidRogue
     {
         [Header("Stage Progression")]
         public int currentStage = 1;
-        public int maxStage = 3;
+        public int maxStage = 6;
         public string RunId {get;private set;}=System.Guid.NewGuid().ToString("N");
         public string ChapterId=>CharacterRewardKey.CurrentChapter;
         private int _singleRewardRevision=-1;
@@ -64,7 +64,7 @@ namespace RaidRogue
         public bool IsStageTransitioning => _isStageTransitioning || IsWiped || IsPreparing;
         public float TotalPlayTime => _totalPlayTime;
 
-        private void Awake() { Instance = this; }
+        private void Awake() { Instance = this; maxStage = CampaignCatalog.StageCount(ChapterId); }
         private void OnDestroy() { EndSessionProgress(); if (Instance == this) Instance = null; }
 
         private void Start()
@@ -138,7 +138,8 @@ namespace RaidRogue
             var metrics = CombatMetricsManager.Ensure(this);
             if (newRun) { metrics.Ledger.ResetRun(); _totalPlayTime = 0; }
             if (retry) metrics.Ledger.RegisterRetry();
-            Iris.Reset();
+            var saved = resume ? CampaignRuntime.Instance?.Resume : null;
+            Iris.BeginAttempt(newRun ? 0 : saved?.totalRevives, newRun ? 0 : saved?.attemptsStarted);
             currentStage = stage; IsPreparing = true; IsWiped = false;
             _isStageTransitioning = _isAllStagesCleared = _pendingBossClear = false;
             CleanupAttempt(); GetComponent<CombatMetricsUI>()?.CloseResults(); cardManager?.CancelPendingSelection();
@@ -196,6 +197,7 @@ namespace RaidRogue
             int living = 0;
             var members = PartyLife.OrderedMembers();
             foreach (var member in members) if (CombatRange.LivingPartyMember(member)) living++;
+            if (living == 0 && Iris.Pending > 0 && !_pendingBossClear && boss.currentHp > 0) return;
             var outcome = Progress.Resolve(Progress.Revision, _pendingBossClear || boss.currentHp <= 0, living, RaidCombatAuthority.Active ? Mathf.Max(4, members.Count) : members.Count);
             if (outcome != EncounterOutcome.None) TraceProgress(outcome.ToString());
             if (outcome == EncounterOutcome.Cleared)
@@ -236,7 +238,7 @@ namespace RaidRogue
         /// <summary>
         /// 보스 HP가 0이 되었을 때 BossController에서 호출됩니다.
         /// 1) 보스가 쓰러지는 연출 + "BOSS CLEAR!" 표시
-        /// 2) 1.5초 뒤 로그라이크 카드 3택 UI 팝업 (Stage 3 클리어 시 최종 승리 결과창 팝업)
+        /// 2) 연출 후 카드/스킬 선택 UI (Stage 6은 최종 승리 결과창)
         /// </summary>
         public void NotifyBossDefeated()
         {
@@ -279,14 +281,14 @@ namespace RaidRogue
                 bossClearBannerRoot.SetActive(false);
             }
 
-            // Stage 3 최종 보스까지 처치한 경우 -> 최종 승리 결과창 표시!
+            // 최종 스테이지는 다음 전투용 보상을 요구하지 않는다.
             if (Progress.Phase==RaidBattlePhase.Victory)
             {
                 ShowAllStagesClearVictoryScreen();
                 yield break;
             }
 
-            // Stage 1 또는 Stage 2 클리어 시 -> 로그라이크 카드 3택 보상 UI 팝업!
+            // Stage 1~5는 기존 카드 보상을 유지한다.
             _singleRewardRevision=revision;_singleCardChosen=currentStage>=maxStage;
             _singleRewardDeadline=Time.unscaledTime+FlowSettings.rewardSeconds;
             if (!_singleCardChosen&&cardManager != null)
@@ -302,7 +304,7 @@ namespace RaidRogue
         /// <summary>
         /// 3) 플레이어가 보상 카드 1장을 선택하면 호출됩니다:
         /// - 4인 파티원 전원 체력 100% 회복 및 초기 위치로 재배치
-        /// - 즉시 다음 스테이지(Stage 2 / Stage 3) 보스 등장 및 전투 시작!
+        /// - 필요한 선택 완료 후 다음 스테이지 준비/저장/카운트다운
         /// </summary>
         private void OnRewardCardChosenAdvanceToNextStage(int revision)
         {
@@ -386,6 +388,7 @@ namespace RaidRogue
                     "<size=42><color=#FFE044><b>★ ALL STAGES CLEAR! VICTORY! ★</b></color></size>\n\n" +
                     $"<size=24><b>총 플레이 타임 :</b> <color=#55EEFF>{timeFormatted}</color></size>\n\n" +
                     $"<size=22>전체 런 재도전: {CombatMetricsManager.Instance?.Ledger.RetryCount ?? 0}회</size>\n" +
+                    $"<size=22>1부 완료 · 누적 공유 부활 사용: {TotalRevives}회</size>\n" +
                     "<size=22><color=#FFCC66><b>[최종 보유 로그라이크 카드 빌드 요약]</b></color></size>\n" +
                     $"<size=20>{cardsList}</size>";
             }
@@ -410,15 +413,17 @@ namespace RaidRogue
                 return;
             }
 
-            string stageSubtitle = currentStage switch
+            int template = CampaignCatalog.EncounterTemplate(currentStage);
+            string stageSubtitle = template switch
             {
                 1 => "공허의 파수꾼 (입문 - 보라색 / HP 3,000)",
                 2 => "심연의 집행자 (중급 - 청록색 1.2배 / HP 6,000 / 4인 산개 & 4인 쉐어)",
-                3 => "종말의 황제 (최종 보스 - 적금색 1.5배 / HP 10,000 / 시전 +25% 가속 & 복합 기믹)",
+                3 => "종말의 황제 (적금색 1.5배 / HP 10,000 / 시전시간 25% 단축 & 복합 기믹)",
                 _ => ""
             };
 
-            Color stageColor = currentStage switch
+            if (currentStage > 3) stageSubtitle += $" · 기존 Stage {template} 구성 재사용";
+            Color stageColor = template switch
             {
                 1 => new Color(0.85f, 0.65f, 1.0f, 1f),
                 2 => new Color(0.30f, 0.95f, 1.0f, 1f),
@@ -426,7 +431,7 @@ namespace RaidRogue
                 _ => Color.white
             };
 
-            stageHeaderText.text = $"STAGE {currentStage} / {maxStage}  —  {stageSubtitle}";
+            stageHeaderText.text = $"1부 STAGE {currentStage} / {maxStage}  —  {stageSubtitle}";
             stageHeaderText.color = stageColor;
         }
     }

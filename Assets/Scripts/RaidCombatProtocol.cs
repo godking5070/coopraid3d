@@ -8,6 +8,8 @@ namespace RaidRogue
     {
         public uint sequence, lease;
         public int epoch, actor, skill, target;
+        public string attemptId;
+        public int deathGeneration;
         public string jobId, ruleId, choiceId, rewardKey; public int slot; // 1..5 skills, 6 potion, 7 target, 8 reward, 9 start/retry.
     }
     // Connection ownership and epoch are checked before invoking any existing gameplay method.
@@ -61,7 +63,7 @@ namespace RaidRogue
     }
     [Serializable] public sealed class RaidCombatActor
     {
-        public int id, role, target, combo1, combo2;
+        public int id, role, target, combo1, combo2, deathGeneration;
         public bool bot, dead, stunned, rooted, forced, casting, resurrecting, rewardChosen, cardChosen;
         public string name, castName;
         public CharacterStateSnapshot character;
@@ -102,7 +104,8 @@ namespace RaidRogue
         public int campaignSavedStage;
         public string campaignSavedUtc;
         public bool campaignCompleted, campaignSaveFailed;
-        public int epoch, stage, retries, irisCoins;
+        public int epoch, stage, retries, irisCoins, totalRevives;
+        public string attemptId;
         public string runId,chapterId;
         public uint serial, ownerLease, effectWatermark, poseTick;
         public bool controlGranted;

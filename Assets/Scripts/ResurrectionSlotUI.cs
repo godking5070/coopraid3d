@@ -18,7 +18,7 @@ namespace RaidRogue
                 _root = new GameObject("Healer_ResurrectionSlot", typeof(RectTransform), typeof(Image));
                 var rect = _root.GetComponent<RectTransform>(); rect.SetParent(hotbar.transform, false);
                 rect.anchorMin = rect.anchorMax = new Vector2(1, 1); rect.pivot = new Vector2(0, 0);
-                rect.anchoredPosition = new Vector2(12, 8); rect.sizeDelta = new Vector2(126, 70);
+                rect.anchoredPosition = new Vector2(12, 8); rect.sizeDelta = new Vector2(180, 70);
                 _root.GetComponent<Image>().color = new Color(0.08f, 0.24f, 0.22f, 0.95f);
                 var bar = new GameObject("CastProgress", typeof(RectTransform), typeof(Image)); bar.transform.SetParent(rect, false);
                 _fill = bar.GetComponent<Image>(); _fill.color = new Color(0.3f, 0.8f, 0.6f, 0.45f); _fill.raycastTarget = false;
@@ -29,8 +29,7 @@ namespace RaidRogue
                 var button = _root.AddComponent<Button>(); button.targetGraphic = _root.GetComponent<Image>(); button.onClick.AddListener(() => _skill.TryBegin(TargetingManager.Instance?.CurrentTarget));
             }
             _root.SetActive(true);
-            string status = _skill.IsCasting ? $"시전 {_skill.Remaining:0.0}s" : _skill.Cooldown > 0 ? $"{_skill.Cooldown:0.0}s" : "사망한 아군 선택";
-            _label.text = $"[{LocalInputBindings.Label("Skill5")}] 이리스의 구원\n공용 코인 {StageManager.Instance?.IrisCoins??0} · 사망 아군 선택";
+            _label.text = $"[{LocalInputBindings.Label("Skill5")}] 이리스의 구원\n이번 도전 부활 {StageManager.Instance?.IrisCoins??0} / {IrisRescueState.DefaultCoins}";
             var fill = _fill.rectTransform; fill.anchorMin = Vector2.zero;
             fill.anchorMax = new Vector2(_skill.IsCasting ? _skill.Progress : 0, 1); fill.offsetMin = fill.offsetMax = Vector2.zero;
         }

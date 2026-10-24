@@ -43,7 +43,10 @@ namespace RaidRogue
             }
             Owner = CurrentOwner;
             var personal = CampaignStorage.Read(PersonalPath, InspectPersonal);
-            Personal = personal.text != null ? JsonUtility.FromJson<CampaignPersonalProgress>(personal.text) : new CampaignPersonalProgress { owner = Owner };
+            Personal = new CampaignPersonalProgress { owner = Owner };
+            // Explicit initialization preserves optional fields in supported older personal v1
+            // files; Unity's FromJson does not reliably run constructors for missing fields.
+            if (personal.text != null) JsonUtility.FromJsonOverwrite(personal.text, Personal);
             RunFile = CampaignStorage.Read(RunPath, InspectRun);
             Saved = RunFile.text != null ? JsonUtility.FromJson<CampaignCheckpoint>(RunFile.text) : null;
             Notice = string.Join(" ", new[] { personal.notice, RunFile.notice }.Where(x => !string.IsNullOrEmpty(x)));
@@ -64,11 +67,11 @@ namespace RaidRogue
         {
             try
             {
-                var c = new CampaignCheckpoint { version = 0, content = null, nextStage = 0, irisCoins = -1, eligible = false,
+                var c = new CampaignCheckpoint { version = 0, content = null, nextStage = 0, irisCoins = -1, totalRevives = -1, attemptsStarted = 0, eligible = false,
                     party = null, processedStages = null, rewards = null, receipts = null, clears = null, failures = null, runSeconds = float.NaN };
                 JsonUtility.FromJsonOverwrite(text, c);
                 if (c.version == 0 || c.content == null) return CampaignFileState.Corrupt;
-                if (c.version != 1 || c.content != CampaignCatalog.ContentRevision) return CampaignFileState.Incompatible;
+                if (c.version != CampaignCatalog.SaveVersion || c.content != CampaignCatalog.ContentRevision) return CampaignFileState.Incompatible;
                 return CampaignValidation.Checkpoint(c, Owner, CharacterCatalog.Find) == null ? CampaignFileState.Valid : CampaignFileState.Corrupt;
             }
             catch (Exception e) when (e is ArgumentException || e is NullReferenceException || e is InvalidOperationException) { return CampaignFileState.Corrupt; }
@@ -160,14 +163,19 @@ namespace RaidRogue
                 {
                     // Durable delivery outbox, not a history to replay on loading a save.
                     _working.receipts = _working.receipts.Concat(new[] { receipt }).ToArray();
+                    if (Personal.Enqueue(receipt)) { _personalDirty = true; SavePersonal(); }
                     RaidNetworkSession.Instance.QueueCampaignReceipt(receipt);
                 }
             }
+            // Terminal clear has no next-fight reward. Persist completion before the banner's
+            // delayed callback, so quitting during the final presentation cannot replay this run.
+            if (stage == CampaignCatalog.StageCount(_working.chapterId) && !StageManager.Instance.HasPendingSkillChoices) Completed();
         }
         internal void AcknowledgeReceipt(string userId, string key)
         {
-            if (_working == null) return;
-            _working.receipts = _working.receipts.Where(r => r.userId != userId || r.Key != key).ToArray();
+            if (Owner != CurrentOwner) return;
+            if (Personal.Acknowledge(userId, key)) { _personalDirty = true; SavePersonal(); }
+            if (_working != null) _working.receipts = _working.receipts.Where(r => r.userId != userId || r.Key != key).ToArray();
             // Never rewrite a combat checkpoint just to acknowledge delivery. The next boundary
             // persists the smaller outbox; a crash can redeliver, and personal Record deduplicates.
         }
@@ -207,6 +215,8 @@ namespace RaidRogue
             _working.nextStage = stage.currentStage; _working.completed = completed;
             _working.savedUtc = DateTimeOffset.UtcNow.ToString("O"); _working.runSeconds = stage.TotalPlayTime;
             _working.retries = CombatMetricsManager.Instance.Ledger.RetryCount;
+            _working.totalRevives = stage.Iris.TotalUsed; _working.attemptsStarted = stage.Iris.AttemptsStarted;
+            _working.irisCoins = IrisRescueState.DefaultCoins;
             _working.clears = CaptureMetrics(CombatMetricsManager.Instance.Ledger.Stages);
             _working.failures = CaptureMetrics(CombatMetricsManager.Instance.Ledger.FailedAttempts);
             _pending = JsonUtility.FromJson<CampaignCheckpoint>(JsonUtility.ToJson(_working));
@@ -234,7 +244,7 @@ namespace RaidRogue
             get
             {
                 if (Saved == null) return LastSaveLabel + "\n" + RunFile?.notice;
-                return LastSaveLabel + "\n난이도: " + Saved.difficultyId + " · " + Saved.transport + " · 계정: " + Owner + "\n" +
+                return LastSaveLabel + "\n난이도: " + Saved.difficultyId + " · " + Saved.transport + " · 계정: " + Owner + "\n누적 부활 " + Saved.totalRevives + "회 · 재도전 " + Saved.retries + "회 · 이어하기는 새 도전 부활 4회\n" +
                     string.Join("\n", Saved.party.Select(p => p.name + (p.bot ? " [AI]" : p.userId == Owner ? " [나]" : " [원래 참가자]") + " · " + (CharacterCatalog.Find(p.character.jobId)?.name ?? p.character.jobId) + " / " + (CharacterCatalog.Find(p.character.jobId)?.routes.FirstOrDefault(r => r.id == p.character.routeId)?.name ?? "기본")));
             }
         }

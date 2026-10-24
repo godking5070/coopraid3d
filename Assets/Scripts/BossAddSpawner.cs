@@ -748,7 +748,7 @@ namespace RaidRogue
                 if (m.addType == AddMinionType.Assassin_HealerHunter) hasAssassin = true;
             }
 
-            int stageNum = boss.currentStageNumber;
+            int stageNum = boss.EncounterTemplate;
 
             if (!hasSupplier)
             {

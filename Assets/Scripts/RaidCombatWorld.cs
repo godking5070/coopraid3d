@@ -146,7 +146,7 @@ namespace RaidRogue
                 if (!_combatAdds.TryGetValue(state.id, out var add) || add == null)
                 {
                     var obj = new GameObject("NetworkAdd_" + state.id); add = obj.AddComponent<BossAddMinion>();
-                    add.InitializeAdd((AddMinionType)state.type, StageManager.Instance.boss, spawner, new Vector3(state.x, state.y, state.z), StageManager.Instance.currentStage);
+                    add.InitializeAdd((AddMinionType)state.type, StageManager.Instance.boss, spawner, new Vector3(state.x, state.y, state.z), StageManager.Instance.boss.EncounterTemplate);
                     _combatAdds[state.id] = add; spawner.activeAdds.Add(add);
                 }
                 add.ApplyNetworkCombat(state);

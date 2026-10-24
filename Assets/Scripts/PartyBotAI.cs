@@ -881,7 +881,7 @@ namespace RaidRogue
             if (resetCooldowns) { _rescueCooldownTimer = 0; _lastRescuedTelegraph = null; }
         }
 
-        public void ReviveBot() => PartyLife.Ensure(gameObject).TryRevive(0.4f);
+        public void ReviveBot() => IrisRescue.TryUse(transform, transform, StageManager.Instance?.AttemptId, PartyLife.Ensure(gameObject).DeathGeneration);
 
         private void UpdateHealerAI()
         {
@@ -922,7 +922,7 @@ namespace RaidRogue
 
         private bool TryHandleResurrection(AoETelegraph hazard)
         {
-            if (Resurrection == null) return false;
+            if (Resurrection == null || StageManager.Instance == null || StageManager.Instance.IrisCoins <= 0) return false;
             if (Resurrection.IsCasting) return true;
             if (Resurrection.Cooldown > 0) return false;
             Transform corpse = Resurrection.ChooseBotTarget();

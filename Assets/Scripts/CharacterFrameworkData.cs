@@ -172,7 +172,7 @@ namespace RaidRogue
     }
     public static class CharacterRewardKey
     {
-        public const string CurrentChapter="main";
+        public const string CurrentChapter="campaign.part1";
         public static string Stage(string run,string chapter,int stage)=>run+"/"+chapter+"/"+stage;
         public static string Choice(string run,string chapter,int stage,string rule)=>Stage(run,chapter,stage)+"/"+rule;
         public static bool ValidId(string id)=>!string.IsNullOrWhiteSpace(id)&&id.Length<=100&&!id.Contains("/");

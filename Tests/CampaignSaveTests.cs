@@ -14,25 +14,25 @@ static class CampaignSaveTests
     static CampaignCheckpoint Build(CharacterDefinition job, int route, int finished, int variant = 0)
     {
         string run = Guid.NewGuid().ToString("N");
-        var data = new CampaignCheckpoint { owner = Owner, runId = run, savedUtc = DateTimeOffset.UtcNow.ToString("O"), randomState = 123, seed = 123, nextStage = Math.Min(3, finished + 1), completed = finished == 3 };
+        var data = new CampaignCheckpoint { owner = Owner, runId = run, savedUtc = DateTimeOffset.UtcNow.ToString("O"), randomState = 123, seed = 123, nextStage = Math.Min(6, finished + 1), attemptsStarted = Math.Min(6, finished + 1), completed = finished == 6 };
         int jobRole = job.legacyRole > 0 ? job.legacyRole : job.id == AegisPaladinData.JobId ? 1 : CharacterRosterData.Find(job.id).Role;
         data.party = Enumerable.Range(1, 4).Select(role => {
             bool local = role == jobRole; var definition = local ? job : CharacterCatalog.Legacy(role);
-            var state = new CharacterRuntimeState(definition); state.BeginRun(run, "main");
+            var state = new CharacterRuntimeState(definition); state.BeginRun(run, CampaignCatalog.PartOne);
             if (definition.routes.Length > 0) Check(state.ChooseRoute(definition.routes[route].id, true), "choose origin");
             for (int n = 1; n <= finished; n++)
             {
-                Check(state.ClearedStage(run, "main", n), "first clear");
+                Check(state.ClearedStage(run, CampaignCatalog.PartOne, n), "first clear");
                 foreach (var rule in state.PendingChoices()) Check(state.ChooseSkill(rule.id, rule.choices[variant % rule.choices.Length], state.RewardKey(rule)), "choose extension");
             }
             state.Reset(CharacterReset.NextStage);
             return new CampaignPartySlot { slotId = Guid.NewGuid().ToString("N"), userId = local ? Owner : "", name = local ? "Player" : "AI", role = role, bot = !local, character = state.Snapshot,
-                cards = local && finished > 0 ? new[] { new CampaignCardStack { id = CampaignCardIds.Id(6), stacks = Math.Min(finished, 2) } } : Array.Empty<CampaignCardStack>() };
+                cards = local && finished > 0 ? new[] { new CampaignCardStack { id = CampaignCardIds.Id(6), stacks = Math.Min(finished, 5) } } : Array.Empty<CampaignCardStack>() };
         }).ToArray();
-        data.processedStages = Enumerable.Range(1, finished).Select(n => CharacterRewardKey.Stage(run, "main", n)).ToArray();
+        data.processedStages = Enumerable.Range(1, finished).Select(n => CharacterRewardKey.Stage(run, CampaignCatalog.PartOne, n)).ToArray();
         var human = data.party.Single(p => !p.bot);
         foreach (var p in data.party) p.character.effects = CampaignCardIds.Effects(p.cards);
-        data.rewards = Enumerable.Range(1, Math.Min(2, finished)).Select(n => new CampaignRewardRecord { key = CharacterRewardKey.Stage(run, "main", n) + "/card/" + human.slotId, slotId = human.slotId,
+        data.rewards = Enumerable.Range(1, Math.Min(5, finished)).Select(n => new CampaignRewardRecord { key = CharacterRewardKey.Stage(run, CampaignCatalog.PartOne, n) + "/card/" + human.slotId, slotId = human.slotId,
             offeredIds = new[] { CampaignCardIds.Id(6), CampaignCardIds.Id(0), CampaignCardIds.Id(1) }, selectedId = CampaignCardIds.Id(6) }).ToArray();
         data.clears = Enumerable.Range(1, finished).Select(n => new CampaignMetricRecord { stage = n, seconds = 35, members = data.party.Select(p => new CampaignMetricMember { slotId = p.slotId, name = p.name, jobId = p.character.jobId, role = p.role, bossDamage = 120 }).ToArray() }).ToArray();
         return data;
@@ -40,18 +40,37 @@ static class CampaignSaveTests
     static bool Valid(CampaignCheckpoint c) => CampaignValidation.Checkpoint(c, Owner, CharacterCatalog.Find) == null;
     static CampaignFileState Inspect(string s)
     {
-        try { var c = Json.Deserialize<CampaignCheckpoint>(s); return c == null ? CampaignFileState.Corrupt : c.version != 1 || c.content != CampaignCatalog.ContentRevision ? CampaignFileState.Incompatible : Valid(c) ? CampaignFileState.Valid : CampaignFileState.Corrupt; }
+        try { var c = Json.Deserialize<CampaignCheckpoint>(s); return c == null ? CampaignFileState.Corrupt : c.version != CampaignCatalog.SaveVersion || c.content != CampaignCatalog.ContentRevision ? CampaignFileState.Incompatible : Valid(c) ? CampaignFileState.Valid : CampaignFileState.Corrupt; }
         catch { return CampaignFileState.Corrupt; }
     }
     static CampaignClearReceipt Receipt(string chapter, int stage, bool eligible = true) => new CampaignClearReceipt { runId = Guid.NewGuid().ToString("N"), chapterId = chapter, difficultyId = "normal", stage = stage, final = stage == CampaignCatalog.StageCount(chapter), eligible = eligible, userId = Owner };
     static void Main()
     {
+        Part1SaveTests.Run(Check);
         CharacterCatalog.Register(AegisPaladinData.Build(), out _, true);
         foreach (var job in CharacterRosterData.Jobs) CharacterCatalog.Register(CharacterRosterData.Definition(job), out _, true);
         var definitions = CharacterCatalog.All.Where(d => d.playable).ToArray();
         foreach (var job in definitions)
+        foreach (var rule in job.unlocks)
+        foreach (string choice in rule.choices)
+        {
+            var request = new RaidActionRequest { actor = 1, epoch = 6, sequence = uint.MaxValue, lease = uint.MaxValue,
+                skill = 11, jobId = job.id, ruleId = rule.id, choiceId = choice, slot = (int)rule.slot,
+                rewardKey = CharacterRewardKey.Choice(Guid.NewGuid().ToString("N"), CampaignCatalog.PartOne, rule.afterStage, rule.id) };
+            string payload = Json.Serialize(request);
+            Check(RaidWire.Decode(RaidWire.Encode(new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = payload }), out var decoded) && decoded.Text == payload,
+                "complete stable selection request survives bounded wire: " + choice);
+        }
+        string rescuePayload = Json.Serialize(new RaidActionRequest { actor = 1, epoch = 6, sequence = uint.MaxValue, lease = uint.MaxValue,
+            skill = 5, target = 4, attemptId = Guid.NewGuid().ToString("N"), deathGeneration = int.MaxValue });
+        Check(RaidWire.Decode(RaidWire.Encode(new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = rescuePayload }), out var rescuePacket) && rescuePacket.Text == rescuePayload, "rescue identity survives wire");
+        bool rejectedLarge = false;
+        try { RaidWire.Encode(new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = new string('a', 1001) }); }
+        catch (InvalidDataException) { rejectedLarge = true; }
+        Check(rejectedLarge, "oversized action rejected");
+        foreach (var job in definitions)
         for (int route = 0; route < Math.Max(1, job.routes.Length); route++)
-        for (int finished = 0; finished <= 3; finished++)
+        for (int finished = 0; finished <= 6; finished++)
         for (int option = 0; option < 3; option++)
         {
             var c = Build(job, route, finished, option);
@@ -63,17 +82,22 @@ static class CampaignSaveTests
                 var state = new CharacterRuntimeState(CharacterCatalog.Find(slot.character.jobId));
                 Check(state.Restore(slot.character), "restore independently of object IDs");
                 foreach (var rule in state.Definition.unlocks.Where(r => r.afterStage <= finished)) Check(!state.ChooseSkill(rule.id, rule.choices[0], state.RewardKey(rule)), "no reward replay");
-                if (finished > 0) Check(!state.ClearedStage(c.runId, "main", 1), "no clear replay");
+                if (finished > 0) Check(!state.ClearedStage(c.runId, CampaignCatalog.PartOne, 1), "no clear replay");
                 state.Reset(CharacterReset.Retry); Check(state.Snapshot.chosenRewardKeys.SequenceEqual(slot.character.chosenRewardKeys), "retry keeps choices");
             }
         }
         var sample = Build(AegisPaladinData.Build(), 1, 2);
         void Reject(Action<CampaignCheckpoint> change, string reason) { var c = Copy(sample); change(c); Check(!Valid(c), reason); }
         Reject(c => c.owner = "offline-local", "cross account");
-        Reject(c => c.version = 2, "future version");
+        Reject(c => c.version = 99, "future version");
         Reject(c => c.content = "different-balance", "unknown content");
-        Reject(c => c.chapterId = CampaignCatalog.PartOne, "missing campaign content");
-        Reject(c => c.nextStage = 4, "out of range stage");
+        Reject(c => c.chapterId = CampaignCatalog.PartTwo, "missing campaign content");
+        Reject(c => c.nextStage = 7, "out of range stage");
+        Reject(c => c.irisCoins = 3, "boundary must start with four shared revivals");
+        Reject(c => c.totalRevives = -1, "missing/negative cumulative usage");
+        Reject(c => c.totalRevives = 100, "impossible cumulative usage");
+        Reject(c => c.attemptsStarted = 0, "missing attempt count");
+        Reject(c => c.retries = 1, "retry ledger must match failed attempts");
         Reject(c => c.processedStages = new[] { c.processedStages[1] }, "skipped stage");
         Reject(c => c.party[0].slotId = c.party[1].slotId, "duplicate stable slot");
         Reject(c => c.party[0].healthFraction = .5f, "mid-combat health");
@@ -98,8 +122,8 @@ static class CampaignSaveTests
             var rule = CharacterCatalog.Find(c.party[0].character.jobId).unlocks.Single(r => r.afterStage == 3);
             c.party[0].character.selections.Single(s => s.slot == rule.slot).skillId = rule.choices[1];
         }, "locked choice cannot silently change");
-        Reject(c => { var r = Receipt("main", 1); r.runId = c.runId; c.receipts = new[] { r, r }; }, "duplicate confirmed receipts");
-        Reject(c => { var r = Receipt("main", 1, false); r.runId = c.runId; c.receipts = new[] { r }; }, "ineligible checkpoint receipt");
+        Reject(c => { var r = Receipt(CampaignCatalog.PartOne, 1); r.runId = c.runId; c.receipts = new[] { r, r }; }, "duplicate confirmed receipts");
+        Reject(c => { var r = Receipt(CampaignCatalog.PartOne, 1, false); r.runId = c.runId; c.receipts = new[] { r }; }, "ineligible checkpoint receipt");
         // Original human slots survive a new lobby with different ephemeral actor IDs.
         var multiplayer = Copy(sample); multiplayer.transport = "steam";
         var guest = multiplayer.party.Single(p => p.role == 2); guest.bot = false;
@@ -108,7 +132,7 @@ static class CampaignSaveTests
         multiplayer.rewards = multiplayer.rewards.Concat(multiplayer.rewards.Select(r => new CampaignRewardRecord {
             slotId = guest.slotId, key = r.key.Replace(multiplayer.party[0].slotId, guest.slotId), selectedId = r.selectedId, offeredIds = r.offeredIds }).ToArray()).ToArray();
         Check(Valid(multiplayer), "distinct authenticated saved human builds");
-        var pendingReceipt = Receipt("main", 2); pendingReceipt.runId = multiplayer.runId; pendingReceipt.userId = guest.userId;
+        var pendingReceipt = Receipt(CampaignCatalog.PartOne, 2); pendingReceipt.runId = multiplayer.runId; pendingReceipt.userId = guest.userId;
         multiplayer.receipts = new[] { pendingReceipt };
         Check(Valid(multiplayer), "durable pending delivery belongs to original remote owner");
         var invalidOutbox = Copy(multiplayer); invalidOutbox.receipts = new[] { pendingReceipt, pendingReceipt };
@@ -118,6 +142,16 @@ static class CampaignSaveTests
         var guestProgress = new CampaignPersonalProgress { owner = guest.userId };
         Check(guestProgress.Record(pendingReceipt) && !guestProgress.Record(Copy(pendingReceipt)), "redelivered pending event grants personal progress once");
         Check(!new CampaignPersonalProgress { owner = Owner }.Record(pendingReceipt), "outbox never grants host another player's clear");
+        var senderProgress = new CampaignPersonalProgress { owner = Owner };
+        Check(senderProgress.Enqueue(pendingReceipt) && !senderProgress.Enqueue(Copy(pendingReceipt)), "durable delivery queued once independently of checkpoint");
+        Check(senderProgress.clears.Length == 0 && CampaignValidation.Personal(senderProgress, Owner), "remote delivery cannot grant host progress");
+        var terminalReceipt = Copy(pendingReceipt); terminalReceipt.stage = 6; terminalReceipt.final = true;
+        Check(senderProgress.Enqueue(terminalReceipt), "terminal event survives without a resumable run");
+        Check(!senderProgress.Acknowledge("steam-1", terminalReceipt.Key) && senderProgress.deliveries.Length == 2, "another account cannot acknowledge a delivery");
+        var restartedHost = Copy(senderProgress);
+        var recipientProgress = new CampaignPersonalProgress { owner = guest.userId };
+        Check(recipientProgress.Record(restartedHost.deliveries[1]) && !recipientProgress.Record(restartedHost.deliveries[1]), "later authenticated session consumes final receipt exactly once");
+        Check(restartedHost.Acknowledge(guest.userId, terminalReceipt.Key) && !restartedHost.Acknowledge(guest.userId, terminalReceipt.Key), "disk ACK idempotently retires only that delivery");
         var loadedParty = Copy(multiplayer).party;
         var lobby = new RaidRoster(); var oldPreview = lobby.Join("preview"); lobby.Remove(oldPreview.Id);
         var recovery = new RaidRecoverySlots(new RaidRecoverySettings());
@@ -137,7 +171,7 @@ static class CampaignSaveTests
         var recoveredBuild = loadedParty.Single(p => CampaignIdentity.Steam(p.userId) == returning.SteamId);
         Check(recoveredBuild.slotId == guest.slotId && recoveredBuild.cards[0].stacks == guest.cards[0].stacks && recoveredBuild.character.jobId == guest.character.jobId, "authenticated stable slot owns exact saved build");
         var absentProgress = new CampaignPersonalProgress { owner = guest.userId };
-        Check(!absentProgress.Record(Receipt("main", 2)), "host personal receipt cannot credit absent AI owner");
+        Check(!absentProgress.Record(Receipt(CampaignCatalog.PartOne, 2)), "host personal receipt cannot credit absent AI owner");
         var random = new CampaignRandom(19234);
         for (int i = 0; i < 300; i++)
         {
@@ -145,7 +179,7 @@ static class CampaignSaveTests
             for (int j = 0; j < 17; j++) Check(random.Next(31) == restart.Next(31), "deterministic reward continuation");
         }
         var progress = new CampaignPersonalProgress { owner = Owner };
-        for (int n = 1; n <= 3; n++) Check(progress.Record(Receipt("main", n)), "prototype records");
+        for (int n = 1; n <= 3; n++) Check(progress.Record(Receipt(CampaignCatalog.Prototype, n)), "prototype records");
         Check(!progress.PartTwoUnlocked, "prototype cannot unlock part2");
         for (int n = 1; n <= 6; n++) Check(!progress.Record(Receipt(CampaignCatalog.PartOne, n, false)), "training/dev/mocks excluded");
         var other = Receipt(CampaignCatalog.PartOne, 6); other.userId = "offline-local";
@@ -166,7 +200,7 @@ static class CampaignSaveTests
         Check(!flow.TryResume(1, 3), "no combat load");
         foreach (var kind in new[] { RaidPacketKind.CampaignClear, RaidPacketKind.CampaignAck })
         { string text = "verified-owner/run/main/1"; Check(RaidWire.Decode(RaidWire.Encode(new RaidPacket { Kind = kind, Text = text }), out var decoded) && decoded.Kind == kind && decoded.Text == text, "receipt wire round trip"); }
-        foreach (string chapter in new[] { "main", CampaignCatalog.PartOne, CampaignCatalog.PartTwo })
+        foreach (string chapter in new[] { CampaignCatalog.Prototype, CampaignCatalog.PartOne, CampaignCatalog.PartTwo })
         {
             var r = Receipt(chapter, CampaignCatalog.StageCount(chapter));
             // Fields only, as Unity JsonUtility serializes. Exercise the actual bounded packet.
@@ -175,6 +209,36 @@ static class CampaignSaveTests
         }
         string directory = Path.Combine(Path.GetTempPath(), "RaidRogue-Campaign-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory); string path = Path.Combine(directory, "checkpoint.json");
+        string deliveryPath = Path.Combine(directory, "progress.json");
+        CampaignFileState InspectProgress(string json)
+        {
+            try { return CampaignValidation.Personal(Json.Deserialize<CampaignPersonalProgress>(json), Owner) ? CampaignFileState.Valid : CampaignFileState.Corrupt; }
+            catch { return CampaignFileState.Corrupt; }
+        }
+        Check(CampaignStorage.Save(deliveryPath, Json.Serialize(senderProgress), InspectProgress, out _), "host delivery journal written atomically");
+        var deliveryReload = Json.Deserialize<CampaignPersonalProgress>(CampaignStorage.Read(deliveryPath, InspectProgress).text);
+        Check(deliveryReload.deliveries.Length == 2 && deliveryReload.clears.Length == 0, "disk delivery reload never replays host clears");
+        string boundaries = Path.Combine(directory, "six-boundaries.json");
+        for (int next = 1; next <= 6; next++)
+        {
+            var boundary = Build(AegisPaladinData.Build(), 0, next - 1);
+            boundary.attemptsStarted += 2; boundary.totalRevives = 5;
+            string bytes = Json.Serialize(boundary);
+            Check(CampaignStorage.Save(boundaries, bytes, Inspect, out _), "write stage-start boundary " + next);
+            var read = Json.Deserialize<CampaignCheckpoint>(CampaignStorage.Read(boundaries, Inspect).text);
+            Check(read.nextStage == next && !read.completed && read.totalRevives == 5, "disk stage/usage restoration " + next);
+            var live = new CharacterRuntimeState(CharacterCatalog.Find(read.party[0].character.jobId));
+            Check(live.Restore(read.party[0].character), "disk build restore " + next);
+            live.Gain(AegisPaladinData.Holy, 100); live.Reset(CharacterReset.Retry);
+            var resumedAttempt = new IrisRescueState(); resumedAttempt.BeginAttempt(read.totalRevives, read.attemptsStarted);
+            resumedAttempt.TryRescue(resumedAttempt.AttemptId, "runtime-death", () => true, () => true);
+            Check(File.ReadAllText(boundaries) == bytes && read.irisCoins == 4 && resumedAttempt.Coins == 3, "combat/AI/retry activity never overwrites disk boundary " + next);
+        }
+        var completed = Build(AegisPaladinData.Build(), 0, 6);
+        Check(CampaignStorage.Save(boundaries, Json.Serialize(completed), Inspect, out _) &&
+            Json.Deserialize<CampaignCheckpoint>(CampaignStorage.Read(boundaries, Inspect).text).completed, "terminal completion survives disk IO");
+        Check(CampaignStorage.Save(boundaries, Json.Serialize(Build(AegisPaladinData.Build(), 0, 0)), Inspect, out _) &&
+            Json.Deserialize<CampaignPersonalProgress>(CampaignStorage.Read(deliveryPath, InspectProgress).text).deliveries.Length == 2, "new run cannot erase undelivered terminal confirmations");
         string first = Json.Serialize(Build(AegisPaladinData.Build(), 0, 0)), second = Json.Serialize(sample);
         Check(CampaignStorage.Read(path, Inspect).state == CampaignFileState.Missing, "missing save normal");
         Check(CampaignStorage.Save(path, first, Inspect, out _), "first atomic write");
@@ -187,9 +251,12 @@ static class CampaignSaveTests
         var selectedRule = reloadedActor.Definition.unlocks.First(r => r.afterStage == 1);
         Check(!reloadedActor.ChooseSkill(selectedRule.id, selectedRule.choices[0], reloadedActor.RewardKey(selectedRule)), "disk resume cannot reroll chosen skill");
         Check(reloadedActor.PendingChoices().Length == 0 && checkpointReload.nextStage == 3 && checkpointReload.party[0].cards[0].stacks == 2, "boundary has all rewards and exact next stage");
-        var future = Copy(sample); future.version = 2; File.WriteAllText(path, Json.Serialize(future));
+        var future = Copy(sample); future.version = 99; File.WriteAllText(path, Json.Serialize(future));
         Check(CampaignStorage.Read(path, Inspect).state == CampaignFileState.Incompatible, "future primary never downgraded to backup");
         Check(!CampaignStorage.Save(path, second, Inspect, out _) && Inspect(File.ReadAllText(path)) == CampaignFileState.Incompatible, "future file never overwritten");
+        var prototype = Copy(sample); prototype.version = 1; prototype.content = "prototype-3-roster12-v1"; prototype.chapterId = CampaignCatalog.Prototype;
+        string prototypeBytes = Json.Serialize(prototype); File.WriteAllText(path, prototypeBytes);
+        Check(CampaignStorage.Read(path, Inspect).state == CampaignFileState.Incompatible && !CampaignStorage.Save(path, second, Inspect, out _) && File.ReadAllText(path) == prototypeBytes, "prototype v1 never becomes part1 or gets overwritten");
         File.WriteAllText(path, second); File.WriteAllText(path + ".bak", Json.Serialize(future));
         Check(!CampaignStorage.Save(path, first, Inspect, out _) && File.ReadAllText(path) == second && Inspect(File.ReadAllText(path + ".bak")) == CampaignFileState.Incompatible, "future backup never overwritten");
         File.WriteAllText(path + ".bak", first);

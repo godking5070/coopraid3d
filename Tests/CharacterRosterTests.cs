@@ -57,12 +57,12 @@ class CharacterRosterTests
             Check(first.Snapshot.combo1 == 2 && first.Snapshot.combo2 == 2, "two chain state");
             Check(second.Restore(first.Snapshot), "reconnect state");
             Near(second.Snapshot.gcd, first.Snapshot.gcd, "reconnect GCD");
-            first.BeginRun("run-a", "main");
+            first.BeginRun("run-a", CharacterRewardKey.CurrentChapter);
             for (int stage = 1; stage <= 3; stage++)
             {
                 var rule = d.unlocks[stage - 1];
-                Check(first.ClearedStage("run-a", "main", stage), "clear");
-                Check(!first.ClearedStage("run-a", "main", stage), "duplicate clear");
+                Check(first.ClearedStage("run-a", CharacterRewardKey.CurrentChapter, stage), "clear");
+                Check(!first.ClearedStage("run-a", CharacterRewardKey.CurrentChapter, stage), "duplicate clear");
                 Check(first.PendingChoices().Length == 1, "pending exact stage");
                 Check(!first.ChooseSkill(rule.id, d.Skill(job.SkillId("a")).id), "foreign choice rejected");
                 Check(first.ChooseSkill(rule.id, rule.choices[stage % rule.choices.Length]), "confirm");
@@ -124,26 +124,27 @@ class CharacterRosterTests
         Check(!new CharacterEffectState().Restore(new CharacterKitSnapshot { effects = new[] { new CharacterTimedEffect { id = "bad", interval = float.NaN } } }), "corrupt timers");
         // Stateful one-shot effects: all callbacks are host side and resources remain owned by one actor.
         var iris = new IrisRescueState();
+        iris.BeginAttempt();
         int revives = 0;
-        Check(!iris.TryRescue(false, () =>
+        Check(!iris.TryRescue(iris.AttemptId, "invalid", () => false, () =>
         {
             revives++;
             return true;
         }), "invalid NPC rescue never invokes revival");
-        Check(!iris.TryRescue(true, () => false) && iris.Coins == 3, "failed revival does not spend a coin");
-        for (int i = 0; i < 3; i++)
-            Check(iris.TryRescue(true, () =>
+        Check(!iris.TryRescue(iris.AttemptId, "failed", () => true, () => false) && iris.Coins == 4, "failed revival does not spend a coin");
+        for (int i = 0; i < 4; i++)
+            Check(iris.TryRescue(iris.AttemptId, "death-" + i, () => true, () =>
             {
                 revives++;
                 return true;
             }), "valid coin rescue");
-        Check(!iris.TryRescue(true, () =>
+        Check(!iris.TryRescue(iris.AttemptId, "empty", () => true, () =>
         {
             revives++;
             return true;
-        }) && revives == 3, "coins bound successful revivals");
-        iris.Reset();
-        Check(iris.Coins == 3, "retry coin allowance");
+        }) && revives == 4, "coins bound successful revivals");
+        iris.BeginAttempt();
+        Check(iris.Coins == 4 && iris.TotalUsed == 4, "retry coin allowance, cumulative usage retained");
         var shield = new CombatShieldLedger();
         shield.GrantTimed(1, "bard", 100, 1000, 10);
         shield.GrantTimed(2, "oracle", 200, 1000, 20);

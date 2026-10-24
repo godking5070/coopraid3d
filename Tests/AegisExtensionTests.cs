@@ -20,20 +20,20 @@ public static class AegisExtensionTests
     }
     static void SelectionTransactions()
     {
-        var a=Actor();a.BeginRun("run-a","main");var b=Actor();b.BeginRun("run-b","main");
+        var a=Actor();a.BeginRun("run-a",CharacterRewardKey.CurrentChapter);var b=Actor();b.BeginRun("run-b",CharacterRewardKey.CurrentChapter);
         Check(CharacterDefinitionValidation.Check(new[]{a.Definition}).Length==0,"definitions validate");
         Check(a.Definition.unlocks.Select(r=>r.choices.Length).SequenceEqual(new[]{3,3,2}),"all deterministic candidates present");
         Check(a.Definition.unlocks.SelectMany(r=>r.choices).Distinct().Count()==8,"eight stable candidate IDs");
         foreach(var slot in Slots)Check(!Use(a,slot)&&!a.Unlocked(slot),"unselected slot cannot execute");
-        Check(!a.ClearedStage("run-b","main",1)&&!a.ClearedStage("run-a","other",1),"other run/chapter cannot grant");
+        Check(!a.ClearedStage("run-b",CharacterRewardKey.CurrentChapter,1)&&!a.ClearedStage("run-a","other",1),"other run/chapter cannot grant");
         Check(a.PendingChoices().Length==0,"no pending before clear");
         for(int stage=1;stage<=3;stage++)
         {
             var rule=a.Definition.unlocks[stage-1];
             Check(!a.ChooseSkill(rule.id,rule.choices[0]),"cannot choose before exact clear");
-            Check(a.ClearedStage("run-a","main",stage)&&!a.ClearedStage("run-a","main",stage),"clear consumed once");
+            Check(a.ClearedStage("run-a",CharacterRewardKey.CurrentChapter,stage)&&!a.ClearedStage("run-a",CharacterRewardKey.CurrentChapter,stage),"clear consumed once");
             Check(a.PendingChoices().Length==1&&a.PendingChoices()[0].choices.SequenceEqual(rule.choices),"full choices waiting");
-            Check(!a.ChooseSkill(rule.id,"invented")&&!a.ChooseSkill(rule.id,rule.choices[0],CharacterRewardKey.Choice("run-b","main",stage,rule.id)),"unoffered and stale run rejected");
+            Check(!a.ChooseSkill(rule.id,"invented")&&!a.ChooseSkill(rule.id,rule.choices[0],CharacterRewardKey.Choice("run-b",CharacterRewardKey.CurrentChapter,stage,rule.id)),"unoffered and stale run rejected");
             Check(a.ChooseSkill(rule.id,rule.choices[1],a.RewardKey(rule)),"one candidate confirmed");
             Check(!a.ChooseSkill(rule.id,rule.choices[0],a.RewardKey(rule),true),"auto cannot overwrite human choice");
             Check(!a.ChooseSkill(rule.id,rule.choices[1],a.RewardKey(rule)),"replay is side-effect free rejection");
@@ -51,7 +51,7 @@ public static class AegisExtensionTests
         snapshot.chosenRewardKeys[0]="other/main/1/wrong";Check(!remote.Restore(snapshot),"bad reward identity rejected atomically");Near(Timing(remote,CharacterSlot.Ultimate).recharge,120,"invalid restore retains live CD");
         clone.Reset(CharacterReset.Retry);Check(clone.Snapshot.chosenRules.Length==3&&clone.PendingChoices().Length==0,"retry retains choices without reward replay");
         Check(Timing(clone,CharacterSlot.Ultimate).charges==1,"retry common cooldown reset");
-        clone.Reset(CharacterReset.NewRun);clone.BeginRun("new","main");Check(clone.Snapshot.chosenRules.Length==0&&clone.Snapshot.clearedEncounters.Length==0,"new run clears rewards");
+        clone.Reset(CharacterReset.NewRun);clone.BeginRun("new",CharacterRewardKey.CurrentChapter);Check(clone.Snapshot.chosenRules.Length==0&&clone.Snapshot.clearedEncounters.Length==0,"new run clears rewards");
         foreach(var slot in Slots)Check(!clone.Unlocked(slot),"new run locks extension");
         var skip=Actor();skip.ClearedStage(3);Check(skip.PendingChoices().Length==1&&skip.PendingChoices()[0].slot==CharacterSlot.Ultimate,"same high-water stage is not proof of previous stage clear");
         var chapter=Actor();chapter.BeginRun("run","second");chapter.ClearedStage(1);Check(chapter.PendingChoices().Length==0,"another chapter's Stage1 does not unlock main-stage rule");
@@ -128,7 +128,7 @@ public static class AegisExtensionTests
     }
     static void RewardsAndRecovery()
     {
-        var flow=new RaidRunFlow();var actor=Actor();actor.BeginRun("run","main");var cards=new RaidRewardRound();
+        var flow=new RaidRunFlow();var actor=Actor();actor.BeginRun("run",CharacterRewardKey.CurrentChapter);var cards=new RaidRewardRound();
         for(int stage=1;stage<=3;stage++)
         {
             Check(flow.TryPrepare(stage,3,false)&&flow.TryCountdown(flow.Revision)&&flow.TryStart(flow.Revision),"prepare once");

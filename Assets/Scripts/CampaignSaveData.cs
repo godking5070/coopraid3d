@@ -4,15 +4,17 @@ using System.Linq;
 
 namespace RaidRogue
 {
-    // Content availability is intentionally separate from the authored campaign unlock rules.
-    // The shipped three-boss prototype must never masquerade as the six-stage first chapter.
+    // Six-stage progression reuses the three existing encounters. No new patterns or balance.
     public static class CampaignCatalog
     {
         public const string Prototype = "main", PartOne = "campaign.part1", PartTwo = "campaign.part2";
-        public const string Normal = "normal", ContentRevision = "prototype-3-roster12-v1";
+        public const string Normal = "normal", ContentRevision = "part1-6-reused-encounters-v2";
+        public const int SaveVersion = 2;
+        public static int[] Stages(string chapter) => Enumerable.Range(1, StageCount(chapter)).ToArray();
+        public static int EncounterTemplate(int stage) => stage >= 1 && stage <= 6 ? (stage - 1) % 3 + 1 : 0;
         public static int StageCount(string chapter) => chapter == Prototype ? 3 : chapter == PartOne ? 6 : chapter == PartTwo ? 8 : 0;
         public static int PartySize(string chapter) => chapter == PartTwo ? 8 : StageCount(chapter) > 0 ? 4 : 0;
-        public static bool Available(string chapter) => chapter == Prototype;
+        public static bool Available(string chapter) => chapter == PartOne;
         public static string Name(string chapter) => chapter == Prototype ? "프로토타입 · 3스테이지" : chapter == PartOne ? "1부 · 6스테이지" : chapter == PartTwo ? "2부 · 8스테이지" : chapter;
         public static string DepartureRequirement(string chapter) => chapter == PartTwo ? "2부 콘텐츠·8인 파티 및 직접 출발 R/F/V 선택 정책 연결 필요" : "기원 선택 후 출발";
     }
@@ -30,6 +32,9 @@ namespace RaidRogue
         public string owner;
         public CampaignClearReceipt[] clears = Array.Empty<CampaignClearReceipt>();
         public string[] unlocks = Array.Empty<string>();
+        // Optional v1 additive field: confirmed remote clear deliveries survive completion and
+        // replacement of a run checkpoint. They never grant this host personal progress.
+        public CampaignClearReceipt[] deliveries = Array.Empty<CampaignClearReceipt>();
         public bool PartOneComplete => Enumerable.Range(1, 6).All(n => clears.Any(c => c.eligible && c.chapterId == CampaignCatalog.PartOne && c.stage == n && (n != 6 || c.final)));
         public bool PartTwoUnlocked => PartOneComplete;
         public bool Record(CampaignClearReceipt receipt)
@@ -38,6 +43,18 @@ namespace RaidRogue
             clears = clears.Concat(new[] { receipt }).ToArray();
             if (PartTwoUnlocked) unlocks = unlocks.Union(new[] { CampaignCatalog.PartTwo }).ToArray();
             return true;
+        }
+        public bool Enqueue(CampaignClearReceipt receipt)
+        {
+            if (CampaignIdentity.Steam(owner) == 0 || !CampaignValidation.Receipt(receipt, receipt?.userId) || !receipt.eligible ||
+                CampaignIdentity.Steam(receipt.userId) == 0 || receipt.userId == owner || deliveries.Any(r => r.userId == receipt.userId && r.Key == receipt.Key)) return false;
+            deliveries = deliveries.Concat(new[] { receipt }).ToArray(); return true;
+        }
+        public bool Acknowledge(string user, string key)
+        {
+            var keep = deliveries.Where(r => r.userId != user || r.Key != key).ToArray();
+            if (keep.Length == deliveries.Length) return false;
+            deliveries = keep; return true;
         }
     }
     [Serializable] public sealed class CampaignCardStack { public string id; public int stacks; }
@@ -69,10 +86,12 @@ namespace RaidRogue
     }
     [Serializable] public sealed class CampaignCheckpoint
     {
-        public int version = 1;
-        public string content = CampaignCatalog.ContentRevision, owner, runId, chapterId = CampaignCatalog.Prototype, difficultyId = CampaignCatalog.Normal;
+        public int version = CampaignCatalog.SaveVersion;
+        public string content = CampaignCatalog.ContentRevision, owner, runId, chapterId = CampaignCatalog.PartOne, difficultyId = CampaignCatalog.Normal;
         public string savedUtc, transport = "single";
-        public int nextStage = 1, retries, irisCoins = 3, seed;
+        public int nextStage = 1, retries, irisCoins = IrisRescueState.DefaultCoins, seed;
+        // Boundary allowance is always four. Live attempt ID/remaining coins are replicated only.
+        public int totalRevives, attemptsStarted = 1;
         public uint randomState;
         public float runSeconds;
         public bool completed, eligible = true;
@@ -128,14 +147,17 @@ namespace RaidRogue
         public static bool Receipt(CampaignClearReceipt r, string owner) => r != null && CampaignIdentity.Valid(owner) && r.userId == owner &&
             Guid.TryParseExact(r.runId, "N", out _) && r.difficultyId == CampaignCatalog.Normal && r.stage > 0 && r.stage <= CampaignCatalog.StageCount(r.chapterId) && r.final == (r.stage == CampaignCatalog.StageCount(r.chapterId));
         public static bool Personal(CampaignPersonalProgress p, string owner) => p != null && p.version == 1 && p.owner == owner && CampaignIdentity.Valid(owner) && p.clears != null && p.clears.Length <= 50000 &&
-            p.clears.All(c => Receipt(c, owner) && c.eligible) && p.clears.Select(c => c.Key).Distinct().Count() == p.clears.Length && p.unlocks != null && p.unlocks.All(u => u == CampaignCatalog.PartTwo && p.PartOneComplete);
+            p.clears.All(c => Receipt(c, owner) && c.eligible) && p.clears.Select(c => c.Key).Distinct().Count() == p.clears.Length && p.unlocks != null && p.unlocks.All(u => u == CampaignCatalog.PartTwo && p.PartOneComplete) &&
+            p.deliveries != null && p.deliveries.Length <= 50000 && p.deliveries.All(r => CampaignIdentity.Steam(owner) != 0 && Receipt(r, r?.userId) && r.eligible && CampaignIdentity.Steam(r.userId) != 0 && r.userId != owner) &&
+            p.deliveries.Select(r => r.userId + "/" + r.Key).Distinct().Count() == p.deliveries.Length;
         public static string Checkpoint(CampaignCheckpoint c, string owner, Func<string, CharacterDefinition> find)
         {
-            if (c == null || c.version != 1 || c.content != CampaignCatalog.ContentRevision) return "지원하지 않는 저장 버전 또는 콘텐츠입니다";
+            if (c == null || c.version != CampaignCatalog.SaveVersion || c.content != CampaignCatalog.ContentRevision) return "지원하지 않는 저장 버전 또는 콘텐츠입니다";
             if (!CampaignIdentity.Valid(owner) || c.owner != owner || !Guid.TryParseExact(c.runId, "N", out _) || !DateTimeOffset.TryParse(c.savedUtc, out _) ||
                 !CampaignCatalog.Available(c.chapterId) || c.difficultyId != CampaignCatalog.Normal || c.transport != "single" && c.transport != "steam") return "계정/런/챕터/난이도 정보가 유효하지 않습니다";
             int last = CampaignCatalog.StageCount(c.chapterId);
-            if (!c.eligible || c.nextStage < 1 || c.nextStage > last || c.completed && c.nextStage != last || c.retries < 0 || c.retries > 100000 || !Finite(c.runSeconds) || c.runSeconds < 0 || c.randomState == 0 || c.irisCoins != 3) return "스테이지 경계 상태가 유효하지 않습니다";
+            if (!c.eligible || c.nextStage < 1 || c.nextStage > last || c.completed && c.nextStage != last || c.retries < 0 || c.retries > 100000 || !Finite(c.runSeconds) || c.runSeconds < 0 || c.randomState == 0 || c.irisCoins != IrisRescueState.DefaultCoins ||
+                c.attemptsStarted < c.nextStage + c.retries || c.attemptsStarted > 1000000 || c.totalRevives < 0 || c.totalRevives > (long)c.attemptsStarted * IrisRescueState.DefaultCoins) return "스테이지 경계 상태가 유효하지 않습니다";
             if (c.party == null || c.party.Length != CampaignCatalog.PartySize(c.chapterId) || c.party.Any(p => p == null) || c.party.Select(p => p.slotId).Distinct().Count() != c.party.Length || c.party.Select(p => p.role).Distinct().Count() != c.party.Length || c.party.Count(p => p.userId == owner && !p.bot) != 1) return "원래 파티 구성 정보가 유효하지 않습니다";
             var people = c.party.Where(p => !p.bot).ToArray();
             if (people.Select(p => p.userId).Distinct().Count() != people.Length || c.transport == "single" && people.Length != 1 || c.transport == "steam" && people.Any(p => CampaignIdentity.Steam(p.userId) == 0)) return "사용자 식별 정보가 유효하지 않습니다";
@@ -169,10 +191,10 @@ namespace RaidRogue
                 var records = c.rewards.Where(r => r.slotId == p.slotId).ToArray();
                 if (records.Length != Math.Min(finished, last - 1) || p.cards.Any(k => records.Count(r => r.selectedId == k.id) != k.stacks)) return "선택 카드와 보상 원장이 다릅니다";
             }
-            if (!Metrics(c.clears, c.party) || !Metrics(c.failures, c.party) || c.clears.Length != finished || !c.clears.Select(r => r.stage).SequenceEqual(Enumerable.Range(1, finished))) return "런 전투 기록이 유효하지 않습니다";
+            if (!Metrics(c.clears, c.party, last) || !Metrics(c.failures, c.party, last) || c.failures.Length != c.retries || c.clears.Length != finished || !c.clears.Select(r => r.stage).SequenceEqual(Enumerable.Range(1, finished))) return "런 전투 기록이 유효하지 않습니다";
             return null;
         }
-        private static bool Metrics(CampaignMetricRecord[] records, CampaignPartySlot[] slots) => records != null && records.Length <= 100000 && records.All(r => r != null && r.stage >= 1 && r.stage <= 3 && !double.IsNaN(r.seconds) && !double.IsInfinity(r.seconds) && r.seconds >= 0 && r.members != null && r.members.Length <= 4 && r.members.All(m => m != null && slots.Any(p => p.slotId == m.slotId && p.role == m.role && p.character.jobId == m.jobId) && m.deaths >= 0 && new[] { m.bossDamage, m.addDamage, m.healing, m.selfHealing, m.shield }.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && v >= 0)) && r.members.Select(m => m.slotId).Distinct().Count() == r.members.Length);
+        private static bool Metrics(CampaignMetricRecord[] records, CampaignPartySlot[] slots, int last) => records != null && records.Length <= 100000 && records.All(r => r != null && r.stage >= 1 && r.stage <= last && !double.IsNaN(r.seconds) && !double.IsInfinity(r.seconds) && r.seconds >= 0 && r.members != null && r.members.Length <= slots.Length && r.members.All(m => m != null && slots.Any(p => p.slotId == m.slotId && p.role == m.role && p.character.jobId == m.jobId) && m.deaths >= 0 && new[] { m.bossDamage, m.addDamage, m.healing, m.selfHealing, m.shield }.All(v => !double.IsNaN(v) && !double.IsInfinity(v) && v >= 0)) && r.members.Select(m => m.slotId).Distinct().Count() == r.members.Length);
         private static bool Finite(float n) => !float.IsNaN(n) && !float.IsInfinity(n);
     }
 }

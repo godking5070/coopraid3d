@@ -87,13 +87,14 @@ namespace RaidRogue
         public bool centerBeforePartyMechanics;
         private bool _isChasing;
         private BossSkillEntry _pendingPositionedSkill;
-        public float CombatRadius => CombatRangeMath.ResolveBossCombatRadius(currentStageNumber,
-            currentStageNumber == 1 ? stage1CombatRadius : currentStageNumber == 2 ? stage2CombatRadius : stage3CombatRadius);
+        public float CombatRadius => CombatRangeMath.ResolveBossCombatRadius(EncounterTemplate,
+            EncounterTemplate == 1 ? stage1CombatRadius : EncounterTemplate == 2 ? stage2CombatRadius : stage3CombatRadius);
         public bool CanPursue => isMeleeBoss && fsmState == BossFSMState.IdleChasing &&
             currentHp > 0 && !IsTetherActive && !IsSpreadMechanicActive && !IsStackMechanicActive &&
             (stageManager == null || !stageManager.IsStageTransitioning);
         [Header("Stage & Boss Identity (Step 6)")]
         public int currentStageNumber = 1;
+        public int EncounterTemplate => CampaignCatalog.EncounterTemplate(currentStageNumber);
         public string currentBossTitle = "STAGE 1 : 공허의 파수꾼";
         public float stageCastSpeedMultiplier = 1.0f; // Stage 3에서 1.25배 가속 (시전시간 * 0.8)
 
@@ -442,16 +443,16 @@ namespace RaidRogue
                 _collapseCoroutine = null;
             }
 
-            currentStageNumber = Mathf.Clamp(stageNumber, 1, 3);
+            currentStageNumber = Mathf.Clamp(stageNumber, 1, CampaignCatalog.StageCount(CampaignCatalog.PartOne));
             InitializeDefaultSkillTable();
 
             float scaleMultiplier = 1.0f;
 
-            switch (currentStageNumber)
+            switch (EncounterTemplate)
             {
                 case 1:
                     // Stage 1 보스 (보라색, 크기 1.0배, HP 3,000 - 입문용)
-                    currentBossTitle = "STAGE 1 : 공허의 파수꾼 (입문)";
+                    currentBossTitle = $"STAGE {currentStageNumber} : 공허의 파수꾼";
                     maxHp = 3000f;
                     scaleMultiplier = 1.0f;
                     stageCastSpeedMultiplier = 1.0f;
@@ -461,7 +462,7 @@ namespace RaidRogue
 
                 case 2:
                     // Stage 2 보스 (청록색, 크기 1.2배, HP 6,000 - 중급 기믹: 4인 산개 & 4인 쉐어 추가)
-                    currentBossTitle = "STAGE 2 : 심연의 집행자 (중급 - 산개 & 쉐어)";
+                    currentBossTitle = $"STAGE {currentStageNumber} : 심연의 집행자 (산개 & 쉐어)";
                     maxHp = 6000f;
                     scaleMultiplier = 1.2f;
                     stageCastSpeedMultiplier = 1.0f;
@@ -472,7 +473,7 @@ namespace RaidRogue
                 case 3:
                 default:
                     // Stage 3 최종 보스 (적금색, 크기 1.5배, HP 10,000 - 시전 25% 가속 & 복합 기믹)
-                    currentBossTitle = "STAGE 3 : 종말의 황제 (최종 보스 - 복합 기믹)";
+                    currentBossTitle = $"STAGE {currentStageNumber} : 종말의 황제 (복합 기믹)";
                     maxHp = 10000f;
                     scaleMultiplier = 1.5f;
                     stageCastSpeedMultiplier = 0.75f; // 시전 시간 25% 단축!
@@ -485,7 +486,7 @@ namespace RaidRogue
             currentPhase = BossPhase.Phase1_100To50;
             fsmState = BossFSMState.IdleChasing;
             _hasTriggeredGroggy = false;
-            _forceSignatureMechanicNext = currentStageNumber >= 2;
+            _forceSignatureMechanicNext = EncounterTemplate >= 2;
             _patternWaitTimer = 1.6f;
 
             transform.position = Vector3.zero;
@@ -505,7 +506,7 @@ namespace RaidRogue
             }
 
             Transform visorTr = GetBossVisorTransform();
-            Color visorColor = currentStageNumber == 3
+            Color visorColor = EncounterTemplate == 3
                 ? new Color(1.0f, 0.85f, 0.15f, 1f) // Stage 3 적금색 보스는 황금빛 바이저
                 : new Color(1.0f, 0.22f, 0.22f, 1f);
             if (visorTr != null)
@@ -559,14 +560,8 @@ namespace RaidRogue
                 aggroTarget = targetPlayer;
             }
 
-            string stageIntroMsg = currentStageNumber switch
-            {
-                1 => "★ STAGE 1 전투 시작! (HP 3,000) 보스를 처치하면 클리어 보상 로그라이크 카드 3택이 열립니다! ★",
-                2 => "★ STAGE 2 보스 등장! (청록색 1.2배 / HP 6,000) 신규 파티 기믹 [4인 산개] & [4인 쉐어]가 추가됩니다! ★",
-                3 => "★ FINAL STAGE 3 최종 보스 등장!! (적금색 1.5배 / HP 10,000) 시전 속도 +25% 가속 & [도넛+산개 / 넉백+쉐어] 복합 기믹 발동! ★",
-                _ => ""
-            };
-
+            string stageIntroMsg = $"★ 1부 STAGE {currentStageNumber} / 6 · {currentBossTitle}" +
+                (currentStageNumber > 3 ? $" · 기존 Stage {EncounterTemplate} 구성 재사용" : "") + " ★";
             SetMechanicAlert(stageIntroMsg, new Color(1f, 0.9f, 0.3f, 1f), 4.5f);
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * popupHeightOffset,
@@ -956,13 +951,13 @@ namespace RaidRogue
             if (_forceSignatureMechanicNext)
             {
                 _forceSignatureMechanicNext = false;
-                if (currentStageNumber == 2)
+                if (EncounterTemplate == 2)
                 {
                     BossSkillId sigId = UnityEngine.Random.value < 0.5f ? BossSkillId.PartySpread_4P : BossSkillId.PartyStack_4P;
                     BossSkillEntry sig = skillTable.Find(s => s.skillId == sigId);
                     if (sig != null) return sig;
                 }
-                else if (currentStageNumber >= 3)
+                else if (EncounterTemplate >= 3)
                 {
                     BossSkillId sigId = UnityEngine.Random.value < 0.5f ? BossSkillId.Combo_DonutPlusSpread : BossSkillId.Combo_KnockbackIntoStack;
                     BossSkillEntry sig = skillTable.Find(s => s.skillId == sigId);
@@ -981,7 +976,7 @@ namespace RaidRogue
 
             foreach (BossSkillEntry entry in skillTable)
             {
-                if (entry.minStage > currentStageNumber)
+                if (entry.minStage > EncounterTemplate)
                 {
                     continue;
                 }
@@ -1015,7 +1010,7 @@ namespace RaidRogue
                 float earliestTime = float.MaxValue;
                 foreach (BossSkillEntry entry in skillTable)
                 {
-                    if (entry.minStage > currentStageNumber) continue;
+                    if (entry.minStage > EncounterTemplate) continue;
                     if (entry.phase2Only && currentPhase != BossPhase.Phase2_50To0) continue;
 
                     if (entry.nextAvailableTime < earliestTime)
@@ -1062,7 +1057,7 @@ namespace RaidRogue
 
             // Stage 3에서는 시전 속도가 25% 빨라짐 (단, 4인 산개 3초 / 4인 쉐어 4초도 Stage 3에서는 긴박하게 가속)
             float effectiveDuration = skill.castDuration;
-            if (currentStageNumber >= 3 &&
+            if (EncounterTemplate >= 3 &&
                 skill.skillId != BossSkillId.PartySpread_4P &&
                 skill.skillId != BossSkillId.PartyStack_4P)
             {
@@ -2200,11 +2195,11 @@ namespace RaidRogue
                 }
                 else
                 {
-                    string stageMechanicHint = currentStageNumber switch
+                    string stageMechanicHint = EncounterTemplate switch
                     {
                         1 => "입문 기믹: 원형/부채꼴/탱버 (2페이즈: 도넛 장판 & 줄 가로채기)",
                         2 => "중급 기믹 추가: ① [4인 산개(분홍 원)] & ② [4인 쉐어(노란 화살표)]",
-                        3 => "최종 보스 (시전 +25% 가속): [도넛+4인 산개 동시] & [외곽 넉백+4인 쉐어]",
+                        3 => "복합 기믹 (시전시간 25% 단축): [도넛+4인 산개 동시] & [외곽 넉백+4인 쉐어]",
                         _ => ""
                     };
 
@@ -2306,7 +2301,7 @@ namespace RaidRogue
                 return;
             }
 
-            float scaleMult = currentStageNumber == 3 ? 1.5f : (currentStageNumber == 2 ? 1.2f : 1.0f);
+            float scaleMult = EncounterTemplate == 3 ? 1.5f : (EncounterTemplate == 2 ? 1.2f : 1.0f);
             bool is2D = ViewModeManager.Is2DViewActive;
             _castBannerRoot.position = transform.position + (is2D
                 ? new Vector3(0f, 3.8f, 2.5f * scaleMult)

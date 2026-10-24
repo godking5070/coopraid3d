@@ -28,7 +28,7 @@ namespace RaidRogue
                 if(mechanic)extensions?.CancelChannel();
                 var resurrection = pc.GetComponent<BattleResurrection>();
                 Transform wounded = PartyAiTactics.LowestHealth(out float lowest);
-                Transform corpse = avatar.Role == 2 && resurrection.Cooldown <= 0 ? resurrection.ChooseBotTarget() : null;
+                Transform corpse = avatar.Role == 2 && StageManager.Instance.IrisCoins > 0 && resurrection.Cooldown <= 0 ? resurrection.ChooseBotTarget() : null;
                 bool danger = boss.ActiveTelegraph != null && boss.ActiveTelegraph.IsPointInsideXZ(pc.transform.position);
                 bool resurrect = avatar.Role == 2 && !roster && !mechanic && lowest > .25f && (corpse != null || resurrection.IsCasting);
                 if (!mechanic)
@@ -156,7 +156,12 @@ namespace RaidRogue
             bool valid;
             try { valid = skill > 4 || avatar.GetComponent<PlayerCombatController>().ValidateCombatSkill(skill, out _); }
             finally { RaidCombatAuthority.ExecutingActor = 0; }
-            if (valid) ExecuteAction(avatar.Id, new RaidActionRequest { actor = avatar.Id, epoch = BattleEpoch, skill = skill, target = CombatId(target) }, true);
+            if (valid)
+            {
+                var request = new RaidActionRequest { actor = avatar.Id, epoch = BattleEpoch, skill = skill, target = CombatId(target) };
+                if (skill == 5) StampRescueRequest(request, target);
+                ExecuteAction(avatar.Id, request, true);
+            }
         }
     }
 }

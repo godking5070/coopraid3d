@@ -14,6 +14,7 @@ namespace RaidRogue
         private Transform _body;
         private Quaternion _upright;
         public bool IsDead => _state.Dead;
+        public int DeathGeneration => RaidCombatAuthority.Replica ? GetComponent<NetworkRaidAvatar>()?.State?.deathGeneration ?? 0 : _state.DeathGeneration;
         public float Hp => _player != null ? _player.currentHp : _bot != null ? _bot.currentHp : 0;
         public bool IsTank => _player != null ? _player.currentRole == PlayerRole.Guardian_Tank : _bot != null && _bot.role == PartyBotRole.Tank;
         public bool IsHealer => _player != null ? _player.currentRole == PlayerRole.Oracle_Healer : _bot != null && _bot.role == PartyBotRole.Healer;

@@ -68,7 +68,7 @@ namespace RaidRogue
         {
             if(target==null&&_life.IsDead)target=transform;
             if (RaidCombatAuthority.Route(this, 5, target)) return false;
-            return IrisRescue.TryUse(transform,target);
+            return IrisRescue.TryUse(transform, target, StageManager.Instance?.AttemptId, target != null ? target.GetComponent<PartyLife>()?.DeathGeneration ?? 0 : 0);
         }
         private bool TryBeginLegacy(Transform target)
         {
