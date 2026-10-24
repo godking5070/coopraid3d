@@ -1199,6 +1199,7 @@ namespace RaidRogue
             ExpireTimedShields();
             float finalAmount = hit.Kind!=CombatDamageKind.Transfer&&isTankDefensiveActive ? rawAmount * 0.22f : rawAmount;
             finalAmount*=AegisExtensions.IncomingScale(transform,hit.Kind);
+            finalAmount=CharacterKit.Incoming(transform,finalAmount,hit);
             finalAmount=AegisExtensions.SharedDamage(transform,finalAmount,hit);
 
             // 노란색 보호막(Shield) 우선 차감
@@ -1212,7 +1213,7 @@ namespace RaidRogue
                 _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit));
             }
 
-            currentHp = Mathf.Max(0f, currentHp - finalAmount);
+            currentHp = Mathf.Max(0f,CharacterKit.PreserveLife(transform,currentHp-finalAmount,hit.Kind));
 
             string msg = isTankDefensiveActive
                 ? $"-{Mathf.RoundToInt(finalAmount)} (생존기 방어!)"
@@ -1239,9 +1240,11 @@ namespace RaidRogue
                 return 0;
             }
 
+            amount*=CharacterKit.HealingScale(source,transform);
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + amount);
             float actualHealed = currentHp - before;
+            CharacterKit.AfterHeal(source,transform,actualHealed,amount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 
             if (actualHealed > 0.5f || (kind == HealingKind.Potion && actualHealed > 0))

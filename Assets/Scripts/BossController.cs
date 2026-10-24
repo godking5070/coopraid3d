@@ -813,6 +813,8 @@ namespace RaidRogue
             LastHitColor = color;
         }
 
+        public void ClearCharacterThreat(Transform unit){if(!RaidCombatAuthority.Replica)_combatThreat.Remove(unit);}
+
         public void SetAggroTarget(Transform newAggroTarget)
         {
             if (CombatRange.LivingPartyMember(newAggroTarget))
@@ -2039,6 +2041,7 @@ namespace RaidRogue
             // Single accounting point for skills, projectiles, reflection and card damage.
             // Debug instant-kill has no source and intentionally earns no party credit.
             CombatMetricsManager.Damage(source, hpBefore, currentHp, false,origin,kind);
+            CharacterKit.AfterAttack(source,transform,hpBefore-currentHp,origin,kind);
             AddCombatThreat(source, hpBefore - currentHp);
 
             if (currentHp <= 0.1f)

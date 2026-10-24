@@ -501,6 +501,7 @@ namespace RaidRogue
         /// </summary>
         public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f, bool ignoreImmunity = false)
         {
+            if(!ignoreImmunity&&CharacterEvolutionCards.StationaryBulwark(transform))return;
             if(!CombatDamageRules.CanKnockback(GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0,ignoreImmunity))return;
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             if (_isBeingRescued)
@@ -651,7 +652,7 @@ namespace RaidRogue
 
         private void HandleMovementXZ()
         {
-            Vector2 moveInput = CanMoveVoluntarily&&GetComponent<AegisExtensions>()?.Channeling!=true ? ReadMoveInput() : Vector2.zero;
+            Vector2 moveInput = CanMoveVoluntarily&&GetComponent<AegisExtensions>()?.Channeling!=true&&GetComponent<CharacterKit>()?.MovementBlocked!=true ? ReadMoveInput() : Vector2.zero;
             Vector3 moveDirXZ = GetMoveDirectionXZ(moveInput);
 
             if (moveDirXZ.sqrMagnitude > 1f)
@@ -788,6 +789,8 @@ namespace RaidRogue
             var paladin=GetComponent<AegisPaladin>();
             if(paladin?.IsActive==true&&defense!=CombatDefenseType.Bypass)
                 damage=AegisRouteData.Mitigate(damage,defense==CombatDefenseType.Magic?paladin.MagicDefense:paladin.PhysicalDefense);
+            else if(GetComponent<CharacterKit>()?.Active==true&&defense!=CombatDefenseType.Bypass)
+                damage=AegisRouteData.Mitigate(damage,GetComponent<CharacterKit>().Defense);
             else if (currentRole == PlayerRole.Guardian_Tank&&defense!=CombatDefenseType.Bypass)
             {
                 damage *= (1f - tankPassiveDefenseRate);
@@ -808,7 +811,7 @@ namespace RaidRogue
                 return;
             }
 
-            shieldAmount=CombatStatusEffects.ShieldAmount(shieldAmount,source!=null?source:transform);
+            shieldAmount=CombatStatusEffects.ShieldAmount(shieldAmount,source!=null?source:transform)*CharacterKit.ShieldScale(source,transform);
             _metricsShields.Reconcile(currentShield);
             float shieldBefore = currentShield;
             currentShield = Mathf.Min(maxHp, currentShield + shieldAmount);
@@ -832,6 +835,7 @@ namespace RaidRogue
             ExpireTimedShields();
             float finalDamage = hit.Kind==CombatDamageKind.Transfer?rawDamage:CalculateFinalDamageTaken(rawDamage,hit.Kind==CombatDamageKind.System?CombatDefenseType.Bypass:hit.Defense);
             finalDamage*=AegisExtensions.IncomingScale(transform,hit.Kind);
+            finalDamage=CharacterKit.Incoming(transform,finalDamage,hit);
             var aegis = GetComponent<AegisPaladin>();
             if(aegis!=null&&aegis.TryGuard(hit,finalDamage)){LastHitGuarded=true;return;}
             finalDamage=AegisExtensions.SharedDamage(transform,finalDamage,hit);
@@ -847,7 +851,8 @@ namespace RaidRogue
             }
 
             if (aegis != null && aegis.IsActive) finalDamage = (float)aegis.DamageState.Split(finalDamage);
-            currentHp = Mathf.Max(0f, currentHp - finalDamage);
+            GetComponent<CharacterKit>()?.OnDamaged(finalDamage,hit.Kind);
+            currentHp = Mathf.Max(0f,CharacterKit.PreserveLife(transform,currentHp-finalDamage,hit.Kind));
 
             // 가디언(탱커) 또는 생존기 발동 중 [가시 갑옷] 카드 보유 시 피격 반사 피해
             if (CombatDamageRules.CanReact(hit.Kind) && hasThornArmor && (IsDefensiveBuffActive || currentRole == PlayerRole.Guardian_Tank) && targetBoss != null)
@@ -884,9 +889,11 @@ namespace RaidRogue
                 return 0;
             }
 
+            healAmount*=CharacterKit.HealingScale(source,transform);
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + healAmount);
             float actualHealed = currentHp - before;
+            CharacterKit.AfterHeal(source,transform,actualHealed,healAmount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 
             if (actualHealed > 0.5f || (kind == HealingKind.Potion && actualHealed > 0))
@@ -1212,7 +1219,7 @@ namespace RaidRogue
             hudStatusText.text =
                 $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [{LocalInputBindings.Label("Roles")}] | 뷰: {viewModeLabel} [{LocalInputBindings.Label("View")}])]</b>\n" +
                 $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[{LocalInputBindings.PartyLabels()}]</b> 파티원 1~4번 | <b>[{LocalInputBindings.Label("CycleEnemy")}]</b> 적(보스·쫄) 순환 | <b>[{LocalInputBindings.Label("TargetOfTarget")}]</b> 대상의 대상 | <b>[{LocalInputBindings.Label("ClearTarget")}]</b> 타겟 해제 | <b>[ESC]</b> 창 닫기 / 메뉴\n" +
-                $"• <b>이동/카메라</b> : {movementHint} · {LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션{(currentRole == PlayerRole.Oracle_Healer ? $" · {LocalInputBindings.Label("Skill5")} 부활(사망 아군 선택)" : "")} | [{LocalInputBindings.Label("Settings")}] 설정\n" +
+                $"• <b>이동/카메라</b> : {movementHint} · {LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션 · {LocalInputBindings.Label("Skill5")} 이리스 코인(사망 아군 선택) | [{LocalInputBindings.Label("Settings")}] 설정\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
                 $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {LocalInputBindings.SkillText(targetBoss.LastHitMessage)}\n" +

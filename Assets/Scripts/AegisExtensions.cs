@@ -210,8 +210,8 @@ namespace RaidRogue
             bool primary=kind==CombatDamageKind.Direct||kind==CombatDamageKind.Periodic||kind==CombatDamageKind.Unclassified;
             float scale=primary&&scaleAttack&&source!=null&&source.GetComponent<CombatStatusEffects>()?.MorningActive==true?1+AegisExtensionData.MorningAttack:1;
             bool marked=target!=null&&target.GetComponent<CombatStatusEffects>()?.BrandActive==true;
-            bool crit=!RaidCombatAuthority.Replica&&primary&&marked&&CombatRange.LivingPartyMember(source)&&UnityEngine.Random.value<AegisExtensionData.CriticalChance(0,true);
-            return Mathf.RoundToInt(AegisExtensionData.AttackAmount(power,scale,crit));
+            bool crit=source?.GetComponent<CharacterKit>()?.Active!=true&&!RaidCombatAuthority.Replica&&primary&&marked&&CombatRange.LivingPartyMember(source)&&UnityEngine.Random.value<AegisExtensionData.CriticalChance(0,true);
+            return Mathf.RoundToInt(AegisExtensionData.AttackAmount(power,scale,crit)*CharacterKit.AttackScale(source,target,kind,scaleAttack));
         }
     }
 }

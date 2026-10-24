@@ -7,13 +7,14 @@ namespace RaidRogue
         public readonly string SkillId;
         public readonly CombatDamageKind Kind;
         public readonly bool IgnoreGuard;
+        public readonly bool Projectile;
         public readonly CombatDefenseType Defense;
         public readonly ulong EventId;
         private static ulong _nextEvent;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetEvents()=>_nextEvent=0;
-        public CombatHitContext(Transform attacker,string skillId,CombatDamageKind kind,bool ignoreGuard=false,CombatDefenseType defense=CombatDefenseType.Physical,ulong eventId=0)
-        {Attacker=attacker;SkillId=skillId;Kind=kind;IgnoreGuard=ignoreGuard;Defense=defense;EventId=eventId!=0?eventId:++_nextEvent;}
+        public CombatHitContext(Transform attacker,string skillId,CombatDamageKind kind,bool ignoreGuard=false,CombatDefenseType defense=CombatDefenseType.Physical,ulong eventId=0,bool projectile=false)
+        {Projectile=projectile;Attacker=attacker;SkillId=skillId;Kind=kind;IgnoreGuard=ignoreGuard;Defense=defense;EventId=eventId!=0?eventId:++_nextEvent;}
     }
     public static class CombatSecondaryDamage
     {

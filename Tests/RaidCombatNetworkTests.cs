@@ -24,7 +24,7 @@ internal static class RaidCombatNetworkTests
         Check(!gate.Accept(0, 3, Request(0, 3, 1)), "unadmitted peer cannot act");
         Check(!gate.Accept(2, 3, Request(2, 2, 1)), "previous attempt request cannot apply");
         Check(!gate.Accept(2, 3, Request(2, 4, 1)), "future attempt request cannot apply");
-        Check(!gate.Accept(2, 3, Request(2, 3, 1, 13)), "unknown skill rejected");
+        Check(!gate.Accept(2, 3, Request(2, 3, 1, 14)), "unknown skill rejected");
         Check(!gate.Accept(2, 3, Request(2, 3, 0)), "zero sequence rejected");
         Check(gate.Accept(2, 3, Request(2, 3, 1)), "invalid requests did not consume valid sequence");
         for (int i = 0; i < 10; i++) Check(!gate.Accept(2, 3, Request(2, 3, 1)), "retry cannot repeat damage or cooldown");

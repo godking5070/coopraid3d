@@ -250,6 +250,9 @@ namespace RaidRogue
                 if (slot.keybindBadgeText != null) slot.keybindBadgeText.text = LocalInputBindings.Label(CharacterSlots.Binding(commonSlot));
                 if (slot.skillNameText != null) slot.skillNameText.text = actor.Definition.id==AegisPaladinData.JobId && (i==0||i==1)
                     ? (i==0?AegisPaladinData.SwordNames[state.combo1-1]:AegisPaladinData.ShieldNames[state.combo2-1]) : skill?.name ?? "빈 슬롯";
+                var job=CharacterRosterData.Find(actor.Definition.id);
+                if(job!=null&&i<2&&slot.skillNameText!=null)slot.skillNameText.text=i==0?job.combo1[state.combo1-1]:job.combo2[state.combo2-1];
+                if(job?.index==6&&i<3&&actor.GetComponent<CharacterKit>()?.Has("ninjutsu")==true&&slot.skillNameText!=null)slot.skillNameText.text=CharacterRosterData.Ninjutsu(i==0?"g1":i==1?"g2":"a").name;
                 if (slot.slotButton != null) slot.slotButton.interactable = available;
                 if (slot.cooldownOverlayImage != null) slot.cooldownOverlayImage.fillAmount = total > 0 ? Mathf.Clamp01(remaining / total) : 0;
                 if (slot.cooldownNumberText != null) slot.cooldownNumberText.text = !available ? "잠김 / 미구현" : remaining > 0 ? remaining.ToString("0.0") : skill.maximumCharges > 1 ? timing.charges + "/" + skill.maximumCharges : "";

@@ -69,7 +69,7 @@ public static class AegisExtensionTests
             Check(Use(trial,CharacterSlot.Gcd1)&&Use(trial,rule.slot),"extension usable during shared GCD");
             Near(trial.Snapshot.gcd,1.5,"extension does not reset shared GCD");Check(!Use(trial,rule.slot),"cooldown blocks replay");
             float cd=Timing(trial,rule.slot).recharge;trial.ReduceCooldowns(AegisPaladinData.ReducedSkills,1);Near(Timing(trial,rule.slot).recharge,cd,"basic finisher doesn't silently reduce R/F/V");
-            Check(!AegisExtensionData.TriggersSun(choice),"existing Sun basic-only policy explicit");
+            Check(AegisExtensionData.TriggersSun(choice)==(choice==AegisExtensionData.Spear||choice==AegisExtensionData.Brand||choice==AegisExtensionData.Retribution||choice==AegisExtensionData.Excalibur||choice==AegisExtensionData.Morning),"Sun direct extension whitelist, periodic and support excluded");
         }
         var preview=Actor();Check(preview.PreviewSkillChoice(AegisExtensionData.Excalibur)&&Use(preview,CharacterSlot.Ultimate),"editor preview can test final ultimate before Stage3");
         Check(preview.Snapshot.clearedEncounters.Length==0&&preview.Snapshot.chosenRules.Length==0,"preview does not fake card/clear progression");

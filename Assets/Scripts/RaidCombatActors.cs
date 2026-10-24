@@ -88,8 +88,8 @@ namespace RaidRogue
             state.hp = currentHp; state.maxHp = maxHp; state.shield = currentShield; state.dead = IsDead;
             state.defense = _defensiveRemainingTime; state.tactical = _tacticalRescueBuffTimer; state.speedBoost = _rescueSpeedBoostTimer; state.speed = NetworkMoveSpeed;
             state.haste = cardManager != null ? cardManager.NetworkHaste : 0;
-            state.stunned = IsStunned; state.rooted = IsMovementLocked; state.forced = IsBeingRescued || IsBeingKnockedBack || IsSkillRushing;
-            state.cards = new[] { masterOfRearStacks, ghostStepStacks, thornArmorStacks, tacticalRescueStacks, berserkerShoutStacks, vampiricBladeStacks, swiftAwakeningStacks };
+            state.stunned = IsStunned; state.rooted = IsMovementLocked || GetComponent<CharacterKit>()?.DashBlocked==true; state.forced = IsBeingRescued || IsBeingKnockedBack || IsSkillRushing;
+            state.cards = cardManager!=null?cardManager.CaptureCardStacks():new[] { masterOfRearStacks, ghostStepStacks, thornArmorStacks, tacticalRescueStacks, berserkerShoutStacks, vampiricBladeStacks, swiftAwakeningStacks };
             combatController?.CaptureNetworkCombat(state);
         }
         public void ApplyNetworkCombat(RaidCombatActor state)
@@ -99,7 +99,7 @@ namespace RaidRogue
             _defensiveRemainingTime = state.defense; _tacticalRescueBuffTimer = state.tactical; _rescueSpeedBoostTimer = state.speedBoost;
             IsStunned = state.stunned; IsMovementLocked = state.rooted; _isBeingRescued = state.forced; _isBeingKnockedBack = false;
             moveSpeed = state.speed; ApplyBodyColor(IsDefensiveBuffActive ? defensiveBodyColor : normalBodyColor);
-            if (state.cards != null && state.cards.Length == 7)
+            if (state.cards != null && state.cards.Length >= 7)
             {
                 masterOfRearStacks = state.cards[0]; ghostStepStacks = state.cards[1]; thornArmorStacks = state.cards[2]; tacticalRescueStacks = state.cards[3];
                 berserkerShoutStacks = state.cards[4]; vampiricBladeStacks = state.cards[5]; swiftAwakeningStacks = state.cards[6];

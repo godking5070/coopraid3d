@@ -43,8 +43,8 @@ namespace RaidRogue
         public float NetworkHaste { get => _partyAttackSpeedBuffTimer; set => _partyAttackSpeedBuffTimer = value; }
         public int[] GenerateNetworkOffer()
         {
-            var candidates = _cardPool.FindAll(c => !_acquiredCardStacks.ContainsKey(c.id) || c.id == RoguelikeCardId.SwiftAwakening);
-            if (candidates.Count < 3) candidates = new List<RoguelikeCardData>(_cardPool);
+            var candidates = _cardPool.FindAll(c => EligibleRosterCard(c)&&(!_acquiredCardStacks.ContainsKey(c.id) || c.id == RoguelikeCardId.SwiftAwakening));
+            if (candidates.Count < 3) candidates = _cardPool.FindAll(EligibleRosterCard);
             var result = new int[3];
             for (int i = 0; i < 3; i++) { int index = UnityEngine.Random.Range(0, candidates.Count); result[i] = (int)candidates[index].id; candidates.RemoveAt(index); }
             return result;
@@ -76,7 +76,7 @@ namespace RaidRogue
         }
         public void ApplyNetworkCardStacks(int[] stacks)
         {
-            if (stacks == null || stacks.Length != 7) return;
+            if (stacks == null || stacks.Length != 7 && stacks.Length!=CharacterEvolutionCards.Count) return;
             _acquiredCardStacks.Clear(); _acquiredCardHistory.Clear();
             for (int i = 0; i < stacks.Length; i++) if (stacks[i] > 0)
             {

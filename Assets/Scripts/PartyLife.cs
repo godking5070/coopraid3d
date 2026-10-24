@@ -44,7 +44,7 @@ namespace RaidRogue
             CommonPotion.Ensure(gameObject).EndRevivalProtection();
             CombatMetricsManager.SetDead(transform, true);
             FindFirstObjectByType<BossController>()?.OnPartyMemberDied(transform);
-            FloatingTextPopup.Spawn(transform.position + Vector3.up * 2f, "전투 불능 · 힐러 부활 대기", Color.gray, true);
+            FloatingTextPopup.Spawn(transform.position + Vector3.up * 2f, "전투 불능 · 이리스의 코인으로 구조 가능", Color.gray, true);
         }
 
         public bool TryRevive(float hpFraction)

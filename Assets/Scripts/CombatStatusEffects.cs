@@ -35,8 +35,11 @@ namespace RaidRogue
         public void Apply(string id,string tag,float duration,bool dispellable,bool stun=false,bool root=false,bool ignoreImmunity=false)
         {
             if(RaidCombatAuthority.Replica||!CombatRange.LivingPartyMember(transform)||duration<=0||!CharacterDefinitionValidation.Finite(duration)||string.IsNullOrEmpty(id))return;
+            if(!ignoreImmunity&&CharacterKit.Bonus(transform,"debuffImmunity")>0)return;
+            if(!ignoreImmunity&&CharacterKit.Bonus(transform,"debuffBlock")>0){var block=System.Linq.Enumerable.First(CharacterKit.Buffs(transform,"debuffBlock"));block.owner.State.Remove(block.effect.id);return;}
+            if((stun||root)&&!ignoreImmunity&&CharacterKit.ShieldControlImmune(transform))return;
             if((stun||root)&&!CombatDamageRules.CanApplyControl(ControlImmunity,ignoreImmunity))return;
-            if(stun||root)duration=AegisRouteData.ControlDuration(duration,GetComponent<AegisPaladin>()?.Tenacity??0);
+            if(stun||root)duration=AegisRouteData.ControlDuration(duration,GetComponent<CharacterKit>()?.Active==true?GetComponent<CharacterActor>().Definition.tenacity:GetComponent<AegisPaladin>()?.Tenacity??0);
             _debuffs.RemoveAll(d=>d.id==id);_debuffs.Add(new CombatDebuff{id=id,tag=tag,remaining=duration,dispellable=dispellable,stun=stun,root=root});
         }
         public bool CleanseOne(string[] tags)
@@ -107,6 +110,7 @@ namespace RaidRogue
             if(blocked){CancelSkillRush();GetComponent<CharacterActor>()?.InterruptCast();}
             if(_dashPresentation!=null)_dashPresentation.RecordMovement(before,transform.position);
         }
+        public void ReduceMovementRecharge(float seconds){if(RaidCombatAuthority.Replica||IsDead||seconds<=0)return;if(RaidCombatAuthority.Active)NetworkMotor?.Dash.TickCooldown(seconds);else _dash.TickCooldown(seconds);}
         public void RefillMovementCharges()
         {
             if(RaidCombatAuthority.Replica||IsDead)return;
@@ -116,11 +120,13 @@ namespace RaidRogue
         public void RemoveShieldsFrom(int source)
         {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.RemoveSource(source));}}
         public void ExpireTimedShields()
-        {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.Expire(Time.time));}}
+        {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);var expired=new List<(int source,double amount)>();currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.Expire(Time.time,(id,value)=>expired.Add((id,value))));foreach(var e in expired)CharacterKit.OnShieldExpired(e.source,transform,(float)e.amount);}}
+        public float ShieldsFrom(int source){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFrom(source);}
+        public float ShieldFor(int source,string key){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFor(source,key);}
         public void AddTimedShield(float amount,Transform source,string key,float duration)
         {
             if(RaidCombatAuthority.Replica||IsDead||StageManager.CombatSuspended||duration<=0)return;
-            amount=CombatStatusEffects.ShieldAmount(amount,source);
+            amount=CombatStatusEffects.ShieldAmount(amount,source)*CharacterKit.ShieldScale(source,transform);
             ExpireTimedShields();_metricsShields.GrantTimed(CombatMetricsManager.SourceId(source),key,amount,maxHp,Time.time+duration);currentShield=(float)_metricsShields.Remaining;
             FloatingTextPopup.Spawn(transform.position+Vector3.up*2.3f,"보호막 "+Mathf.RoundToInt(amount),Color.yellow,false);
         }
@@ -139,11 +145,13 @@ namespace RaidRogue
         public void RemoveShieldsFrom(int source)
         {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.RemoveSource(source));}}
         public void ExpireTimedShields()
-        {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.Expire(Time.time));}}
+        {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);var expired=new List<(int source,double amount)>();currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.Expire(Time.time,(id,value)=>expired.Add((id,value))));foreach(var e in expired)CharacterKit.OnShieldExpired(e.source,transform,(float)e.amount);}}
+        public float ShieldsFrom(int source){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFrom(source);}
+        public float ShieldFor(int source,string key){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFor(source,key);}
         public void AddTimedShield(float amount,Transform source,string key,float duration)
         {
             if(RaidCombatAuthority.Replica||isDead||StageManager.CombatSuspended||duration<=0)return;
-            amount=CombatStatusEffects.ShieldAmount(amount,source);
+            amount=CombatStatusEffects.ShieldAmount(amount,source)*CharacterKit.ShieldScale(source,transform);
             ExpireTimedShields();_metricsShields.GrantTimed(CombatMetricsManager.SourceId(source),key,amount,maxHp,Time.time+duration);currentShield=(float)_metricsShields.Remaining;
             FloatingTextPopup.Spawn(transform.position+Vector3.up*2.3f,"보호막 "+Mathf.RoundToInt(amount),Color.yellow,false);
         }

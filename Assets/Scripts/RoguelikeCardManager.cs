@@ -89,6 +89,7 @@ namespace RaidRogue
         private void InitializeCardPool()
         {
             _cardPool.Clear();
+            _cardPool.AddRange(CharacterEvolutionCards.Build());
 
             _cardPool.Add(new RoguelikeCardData
             {
@@ -207,7 +208,7 @@ namespace RaidRogue
             List<RoguelikeCardData> candidatePool = new List<RoguelikeCardData>();
             foreach (RoguelikeCardData card in _cardPool)
             {
-                if (!_acquiredCardStacks.ContainsKey(card.id) || card.id == RoguelikeCardId.SwiftAwakening)
+                if (EligibleRosterCard(card)&&(!_acquiredCardStacks.ContainsKey(card.id) || card.id == RoguelikeCardId.SwiftAwakening))
                 {
                     candidatePool.Add(card);
                 }
@@ -215,7 +216,7 @@ namespace RaidRogue
 
             if (candidatePool.Count < 3)
             {
-                candidatePool = new List<RoguelikeCardData>(_cardPool);
+                candidatePool = _cardPool.FindAll(EligibleRosterCard);
             }
 
             for (int i = 0; i < 3 && candidatePool.Count > 0; i++)
@@ -321,6 +322,8 @@ namespace RaidRogue
                 _acquiredCardStacks[card.id] = 1;
             }
 
+            if(player!=null&&(int)card.id>=CharacterEvolutionCards.First)
+                CharacterActor.Ensure(player.gameObject).RecordBuildEffect(((int)card.id-CharacterEvolutionCards.First)%2==0?"evolution.overcome":"evolution.maximize",1);
             if (player != null) CharacterActor.Ensure(player.gameObject).RecordBuildEffect("legacy.card." + card.id, _acquiredCardStacks[card.id]);
             GetRoleAdaptedCardDisplay(card, out string roleTitle, out string roleCat, out _);
             _acquiredCardHistory.Add($"{roleTitle} ({roleCat})");

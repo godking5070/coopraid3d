@@ -28,10 +28,9 @@ namespace RaidRogue
                 _label.fontSize = 14; _label.alignment = TextAnchor.MiddleCenter; _label.color = Color.white; _label.raycastTarget = false;
                 var button = _root.AddComponent<Button>(); button.targetGraphic = _root.GetComponent<Image>(); button.onClick.AddListener(() => _skill.TryBegin(TargetingManager.Instance?.CurrentTarget));
             }
-            _root.SetActive(_skill.IsHealer);
-            if (!_skill.IsHealer) return;
+            _root.SetActive(true);
             string status = _skill.IsCasting ? $"시전 {_skill.Remaining:0.0}s" : _skill.Cooldown > 0 ? $"{_skill.Cooldown:0.0}s" : "사망한 아군 선택";
-            _label.text = $"[{LocalInputBindings.Label("Skill5")}] 부활 · {status}\n{_skill.Settings.castTime:0.#}초 / {_skill.Settings.range:0.#}m";
+            _label.text = $"[{LocalInputBindings.Label("Skill5")}] 이리스의 구원\n공용 코인 {StageManager.Instance?.IrisCoins??0} · 사망 아군 선택";
             var fill = _fill.rectTransform; fill.anchorMin = Vector2.zero;
             fill.anchorMax = new Vector2(_skill.IsCasting ? _skill.Progress : 0, 1); fill.offsetMin = fill.offsetMax = Vector2.zero;
         }

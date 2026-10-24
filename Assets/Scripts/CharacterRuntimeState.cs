@@ -13,6 +13,7 @@ namespace RaidRogue
         public int version=1, clearedStage, combo1=1, combo2=1;
         public string jobId, routeId="", castSkillId=""; public int castTarget;
         public float gcd, gcdTotal, comboTime1, comboTime2, castRemaining, castTotal;
+        public bool castAllowsMovement; public float castCostScale=1;
         public JobResourceValue[] resources=Array.Empty<JobResourceValue>();
         public JobSkillState[] skills=Array.Empty<JobSkillState>();
         public JobSlotSelection[] selections=Array.Empty<JobSlotSelection>();
@@ -34,9 +35,10 @@ namespace RaidRogue
     public readonly struct CharacterUseContext
     {
         public readonly bool Alive, CanAct, ValidTarget, Moving;
-        public readonly float BoundaryDistance, EffectiveRange, GcdScale;
-        public CharacterUseContext(bool alive,bool canAct,bool target,float distance,bool moving=false,float effectiveRange=-1,float gcdScale=1)
-        { Alive=alive;CanAct=canAct;ValidTarget=target;BoundaryDistance=distance;Moving=moving;EffectiveRange=effectiveRange;GcdScale=gcdScale; }
+        public readonly float BoundaryDistance, EffectiveRange, GcdScale, CastTime, CostScale, CooldownScale;
+        public readonly bool AllowMovingCast;
+        public CharacterUseContext(bool alive,bool canAct,bool target,float distance,bool moving=false,float effectiveRange=-1,float gcdScale=1,float castTime=-1,float costScale=1,bool allowMovingCast=false,float cooldownScale=1)
+        { Alive=alive;CanAct=canAct;ValidTarget=target;BoundaryDistance=distance;Moving=moving;EffectiveRange=effectiveRange;GcdScale=gcdScale;CastTime=castTime;CostScale=costScale;AllowMovingCast=allowMovingCast;CooldownScale=cooldownScale; }
     }
     // Mutable per actor, pure transaction state. Damage/healing/movement remain in existing effect handlers.
     public sealed class CharacterRuntimeState
@@ -45,6 +47,10 @@ namespace RaidRogue
         private CharacterStateSnapshot _data;
         public CharacterStateSnapshot Snapshot => _data.Copy();
         public string RouteId=>_data.routeId;
+        public float CommittingCostScale{get;private set;}=1;
+        public bool CompletingCast{get;private set;}
+        public float Maximum(string id)
+        {var route=Array.Find(Definition.routes,r=>r.id==RouteId);var change=route?.capacityOverrides?.FirstOrDefault(c=>c.resourceId==id);return change?.amount??Array.Find(Definition.resources,r=>r.id==id)?.maximum??0;}
         public CharacterRuntimeState(CharacterDefinition definition)
         {
             if (definition==null) throw new ArgumentNullException(nameof(definition));
@@ -55,11 +61,21 @@ namespace RaidRogue
         { var selected=Array.Find(_data.selections,s=>s.slot==slot);return selected==null?null:Definition.Skill(selected.skillId); }
         public bool Unlocked(CharacterSlot slot) { var skill=Selected(slot);return skill!=null&&Array.IndexOf(_data.unlocked,skill.id)>=0; }
         public float Resource(string id) => Array.Find(_data.resources,r=>r.id==id)?.value??0;
+        public bool Spend(string id,float amount)
+        {
+            if(!CharacterDefinitionValidation.Finite(amount)||amount<0||Resource(id)<amount||Array.Find(Definition.resources,r=>r.id==id)?.integer==true&&amount!=Math.Floor(amount))return false;
+            var value=Array.Find(_data.resources,r=>r.id==id);if(value==null)return false;value.value-=amount;return true;
+        }
+        public void RestoreCharge(string id,int count=1)
+        {
+            var skill=Definition.Skill(id);var state=Array.Find(_data.skills,s=>s.id==id);if(skill==null||state==null||count<1)return;
+            state.charges=Math.Min(skill.maximumCharges,state.charges+count);if(state.charges==skill.maximumCharges)state.recharge=0;
+        }
         public bool Gain(string id,float amount)
         {
             var definition=Array.Find(Definition.resources,r=>r.id==id);var state=Array.Find(_data.resources,r=>r.id==id);
             if(definition==null||state==null||!CharacterDefinitionValidation.Finite(amount)||amount<0||definition.integer&&amount!=Math.Floor(amount))return false;
-            state.value=Math.Min(definition.maximum,state.value+amount);return true;
+            state.value=Math.Min(Maximum(id),state.value+amount);return true;
         }
         // The only live caller is CharacterActor's editor-only, local-authority gate.
         // Edit actor state, never shared definitions, progression, or combat effects.
@@ -84,7 +100,7 @@ namespace RaidRogue
                 case SkillTestOperation.FillResources:
                     foreach(var resource in _data.resources)
                     {
-                        float maximum=Array.Find(Definition.resources,r=>r.id==resource.id).maximum;
+                        float maximum=Maximum(resource.id);
                         if(resource.value<maximum){resource.value=maximum;affected++;}
                     }
                     return true;
@@ -110,6 +126,7 @@ namespace RaidRogue
         public bool Validate(CharacterSlot slot,CharacterUseContext context,out string reason,bool completing=false)
         {
             reason=""; var skill=Selected(slot);
+            if(!CharacterDefinitionValidation.Finite(context.CostScale)||context.CostScale<0||!CharacterDefinitionValidation.Finite(context.CastTime)){reason="잘못된 실행 보정";return false;}
             if(!Definition.playable)reason="미구현 직업입니다";
             else if(!context.Alive||!context.CanAct)reason="현재 행동할 수 없습니다";
             else if(skill==null)reason="잠긴 슬롯입니다";
@@ -120,11 +137,11 @@ namespace RaidRogue
             else if(skill.usesGcd&&_data.gcd>0)reason="공유 GCD 중입니다";
             else if(!completing&&_data.castSkillId.Length>0&&(!skill.usableWhileCasting||skill.castTime>0))reason="시전 중입니다";
             else if(Array.Find(_data.skills,s=>s.id==skill.id).charges<1)reason="충전/쿨타임 대기 중입니다";
-            else if(skill.castTime>0&&skill.cancelOnMovement&&context.Moving)reason="이동 중 시전할 수 없습니다";
+            else if((context.CastTime>=0?context.CastTime:skill.castTime)>0&&skill.cancelOnMovement&&!context.AllowMovingCast&&context.Moving)reason="이동 중 시전할 수 없습니다";
             else foreach(var cost in Costs(skill))
             {
                 var resource=Array.Find(Definition.resources,r=>r.id==cost.Key);
-                if(resource==null||!CharacterDefinitionValidation.Finite(cost.Value)||cost.Value<0||resource.integer&&cost.Value!=Math.Floor(cost.Value)||Resource(cost.Key)<cost.Value){reason="직업 자원이 부족하거나 비용이 잘못되었습니다";break;}
+                if(resource==null||!CharacterDefinitionValidation.Finite(cost.Value)||cost.Value<0||resource.integer&&cost.Value!=Math.Floor(cost.Value)||Resource(cost.Key)<cost.Value*context.CostScale){reason="직업 자원이 부족하거나 비용이 잘못되었습니다";break;}
             }
             return reason.Length==0;
         }
@@ -132,16 +149,17 @@ namespace RaidRogue
         {
             if(!Validate(slot,context,out reason))return false;
             var skill=Selected(slot);
-            if(skill.castTime>0){_data.castSkillId=skill.id;_data.castTarget=target;_data.castRemaining=_data.castTotal=skill.castTime;return true;}
+            float cast=context.CastTime>=0?context.CastTime:skill.castTime;
+            if(cast>0){_data.castAllowsMovement=context.AllowMovingCast;_data.castCostScale=context.CostScale;_data.castSkillId=skill.id;_data.castTarget=target;_data.castRemaining=_data.castTotal=cast;return true;}
             return Commit(skill,context,apply,out reason);
         }
         private bool Commit(CharacterSkillDefinition skill,CharacterUseContext context,Func<CharacterSkillDefinition,bool> apply,out string reason)
         {
-            reason="";
+            reason="";CommittingCostScale=context.CostScale;
             if(apply==null||!apply(skill)){reason="스킬 효과를 적용할 수 없습니다";return false;}
-            foreach(var c in Costs(skill)) Array.Find(_data.resources,r=>r.id==c.Key).value-=c.Value;
+            foreach(var c in Costs(skill)) Array.Find(_data.resources,r=>r.id==c.Key).value-=c.Value*context.CostScale;
             var state=Array.Find(_data.skills,s=>s.id==skill.id);state.charges--;
-            if(state.recharge<=0){state.recharge=state.rechargeTotal=skill.cooldown;}
+            if(state.recharge<=0){state.recharge=state.rechargeTotal=skill.cooldown*(CharacterDefinitionValidation.Finite(context.CooldownScale)&&context.CooldownScale>0?context.CooldownScale:1);}
             if(skill.cooldown==0)state.charges=skill.maximumCharges;
             if(skill.usesGcd)_data.gcd=_data.gcdTotal=skill.gcd*(CharacterDefinitionValidation.Finite(context.GcdScale)&&context.GcdScale>0?context.GcdScale:1);
             if(skill.comboChain==1){_data.combo1=_data.combo1%3+1;_data.comboTime1=_data.combo1==1?0:skill.comboWindow;}
@@ -159,12 +177,12 @@ namespace RaidRogue
             {
                 var skill=Definition.Skill(state.id); if(state.charges>=skill.maximumCharges)continue;
                 state.recharge-=seconds;
-                while(state.recharge<=0&&state.charges<skill.maximumCharges){state.charges++;state.recharge+=skill.cooldown;if(skill.cooldown<=0){state.charges=skill.maximumCharges;break;}}
+                while(state.recharge<=0&&state.charges<skill.maximumCharges){state.charges++;state.recharge+=state.rechargeTotal;if(skill.cooldown<=0){state.charges=skill.maximumCharges;break;}}
                 if(state.charges==skill.maximumCharges)state.recharge=0;
             }
             if(_data.castSkillId.Length==0)return;
             var cast=Definition.Skill(_data.castSkillId);
-            if(!alive||moved&&cast.cancelOnMovement){CancelCast();return;}
+            if(!alive||moved&&cast.cancelOnMovement&&!_data.castAllowsMovement){CancelCast();return;}
             _data.castRemaining=Math.Max(0,_data.castRemaining-seconds);
         }
         public bool FinishCast(CharacterUseContext context,Func<CharacterSkillDefinition,bool> apply,out string reason)
@@ -172,8 +190,9 @@ namespace RaidRogue
             reason="시전 완료 전입니다";
             if(_data.castSkillId.Length==0||_data.castRemaining>0)return false;
             string id=_data.castSkillId;var slot=Array.Find(_data.selections,s=>s.skillId==id);var skill=Definition.Skill(id);
+            context=new CharacterUseContext(context.Alive,context.CanAct,context.ValidTarget,context.BoundaryDistance,context.Moving,context.EffectiveRange,context.GcdScale,0,_data.castCostScale,_data.castAllowsMovement,context.CooldownScale);
             bool valid=slot!=null&&Validate(slot.slot,context,out reason,true);CancelCast();
-            return valid&&Commit(skill,context,apply,out reason);
+            CompletingCast=true;try{return valid&&Commit(skill,context,apply,out reason);}finally{CompletingCast=false;}
         }
         public void ClearOnDeath()
         {CancelCast();_data.combo1=_data.combo2=1;_data.comboTime1=_data.comboTime2=0;}
@@ -225,6 +244,7 @@ namespace RaidRogue
             }
             CancelCast();
             _data.routeId=routeId;
+            foreach(var resource in _data.resources)resource.value=Math.Min(resource.value,Maximum(resource.id));
             var identity=Array.Find(_data.selections,s=>s.slot==CharacterSlot.Identity);
             if(identity!=null&&!string.IsNullOrEmpty(route.identitySkillId))identity.skillId=route.identitySkillId;
             _data.unlocked=_data.unlocked.Union(route.unlockSkills).Union(string.IsNullOrEmpty(route.identitySkillId)?Array.Empty<string>():new[]{route.identitySkillId}).ToArray();return true;
@@ -238,6 +258,7 @@ namespace RaidRogue
             _data.chosenRewardKeys=_data.chosenRewardKeys.Concat(new[]{RewardKey(rule)}).ToArray();
             if(automatic)_data.automaticChoices=_data.automaticChoices.Concat(new[]{skillId}).ToArray();return true;
         }
+        public bool HasBuildEffect(string id)=>_data.effects.Any(e=>e.id==id&&e.stacks>0);
         public void SetBuildEffect(string id,int stacks,float magnitude)
         {
             if(string.IsNullOrWhiteSpace(id)||stacks<0||!CharacterDefinitionValidation.Finite(magnitude))return;
@@ -272,12 +293,12 @@ namespace RaidRogue
             if(snapshot.chosenRules.Any(id=>!Definition.unlocks.Any(r=>r.id==id)))return false;
             if(snapshot.resources.Length!=Definition.resources.Length||snapshot.skills.Length!=Definition.skills.Length||snapshot.selections.Length!=Definition.slots.Length)return false;
             if(snapshot.resources.Select(r=>r?.id).Distinct().Count()!=snapshot.resources.Length||snapshot.skills.Select(s=>s?.id).Distinct().Count()!=snapshot.skills.Length||snapshot.selections.Select(s=>s?.slot).Distinct().Count()!=snapshot.selections.Length)return false;
-            foreach(var r in snapshot.resources){var d=Array.Find(Definition.resources,v=>v.id==r?.id);if(d==null||!CharacterDefinitionValidation.Finite(r.value)||r.value<0||r.value>d.maximum||d.integer&&r.value!=Math.Floor(r.value))return false;}
+            foreach(var r in snapshot.resources){var d=Array.Find(Definition.resources,v=>v.id==r?.id);if(d==null||!CharacterDefinitionValidation.Finite(r.value)||r.value<0||r.value>(Array.Find(Definition.routes,v=>v.id==snapshot.routeId)?.capacityOverrides?.FirstOrDefault(c=>c.resourceId==r.id)?.amount??d.maximum)||d.integer&&r.value!=Math.Floor(r.value))return false;}
             foreach(var s in snapshot.skills){var d=Definition.Skill(s?.id);if(d==null||s.charges<0||s.charges>d.maximumCharges||!Nonnegative(s.recharge)||!Nonnegative(s.rechargeTotal))return false;}
             foreach(var s in snapshot.selections)if(s==null||Definition.Skill(s.skillId)==null||!Definition.slots.Any(d=>d.slot==s.slot&&d.skillId==s.skillId)&&!Definition.unlocks.Any(r=>r.slot==s.slot&&Array.IndexOf(r.choices,s.skillId)>=0)&&!(s.slot==CharacterSlot.Identity&&Definition.routes.Any(r=>r.identitySkillId==s.skillId)))return false;
             if(snapshot.unlocked.Any(s=>Definition.Skill(s)==null)||snapshot.effects.Any(e=>e==null||string.IsNullOrEmpty(e.id)||e.stacks<0||!CharacterDefinitionValidation.Finite(e.magnitude)))return false;
             if(snapshot.castSkillId==null||snapshot.castSkillId.Length>0&&Definition.Skill(snapshot.castSkillId)==null||snapshot.routeId==null||snapshot.routeId.Length>0&&!Definition.routes.Any(r=>r.id==snapshot.routeId))return false;
-            if(!Nonnegative(snapshot.gcd)||!Nonnegative(snapshot.gcdTotal)||!Nonnegative(snapshot.comboTime1)||!Nonnegative(snapshot.comboTime2)||!Nonnegative(snapshot.castRemaining)||!Nonnegative(snapshot.castTotal)||snapshot.combo1<1||snapshot.combo1>3||snapshot.combo2<1||snapshot.combo2>3)return false;
+            if(!Nonnegative(snapshot.castCostScale)||!Nonnegative(snapshot.gcd)||!Nonnegative(snapshot.gcdTotal)||!Nonnegative(snapshot.comboTime1)||!Nonnegative(snapshot.comboTime2)||!Nonnegative(snapshot.castRemaining)||!Nonnegative(snapshot.castTotal)||snapshot.combo1<1||snapshot.combo1>3||snapshot.combo2<1||snapshot.combo2>3)return false;
             var route=Array.Find(Definition.routes,r=>r.id==snapshot.routeId);
             var identity=Array.Find(snapshot.selections,s=>s.slot==CharacterSlot.Identity);
             if(route!=null&&identity?.skillId!=route.identitySkillId)return false;

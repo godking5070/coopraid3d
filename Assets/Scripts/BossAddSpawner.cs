@@ -486,7 +486,7 @@ namespace RaidRogue
         {
             if(RaidCombatAuthority.Replica||isDead||StageManager.CombatSuspended||amount<=0)return 0;
             float before=currentHp;currentHp=Mathf.Max(0,currentHp-amount);if(currentHp<=.1f)currentHp=0;
-            CombatMetricsManager.Damage(source,before,currentHp,true,origin,kind);return before-currentHp;
+            float actual=before-currentHp;CombatMetricsManager.Damage(source,before,currentHp,true,origin,kind);CharacterKit.AfterAttack(source,transform,actual,origin,kind);return actual;
         }
         public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind)
         {

@@ -32,7 +32,7 @@ namespace RaidRogue
     [Serializable] public sealed class CharacterSlotDefinition
     { public CharacterSlot slot; public string skillId; public bool initiallyUnlocked=true; }
     [Serializable] public sealed class CharacterRouteDefinition
-    { public string id, name, identitySkillId; public string[] unlockSkills=Array.Empty<string>(); }
+    { public string id, name, identitySkillId; public string[] unlockSkills=Array.Empty<string>(); public ResourceCost[] capacityOverrides=Array.Empty<ResourceCost>(); }
     [Serializable] public sealed class CharacterUnlockDefinition
     { public string id; public string chapterId=CharacterRewardKey.CurrentChapter; public CharacterSlot slot; public int afterStage; public string[] choices=Array.Empty<string>(); }
     [Serializable] public sealed class CharacterDefinition
@@ -89,6 +89,15 @@ namespace RaidRogue
                 var options = new HashSet<string>();
                 foreach (var route in d.routes ?? Array.Empty<CharacterRouteDefinition>())
                     if (route == null || route.unlockSkills == null || string.IsNullOrEmpty(route.id) || !options.Add(route.id) || (!string.IsNullOrEmpty(route.identitySkillId) && (!skills.Contains(route.identitySkillId)||!slots.Contains(CharacterSlot.Identity))) || (route.unlockSkills ?? Array.Empty<string>()).Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 루트 참조");
+                foreach(var route in d.routes??Array.Empty<CharacterRouteDefinition>())if(route?.capacityOverrides!=null)
+                {
+                    var seenCaps=new HashSet<string>();
+                    foreach(var cap in route.capacityOverrides)
+                    {
+                        var resource=Array.Find(d.resources??Array.Empty<JobResourceDefinition>(),v=>v?.id==cap?.resourceId);
+                        if(cap==null||resource==null||!seenCaps.Add(cap.resourceId)||!Finite(cap.amount)||cap.amount<=0||resource.integer&&cap.amount!=Math.Floor(cap.amount))errors.Add(d.id+": 잘못된 루트 자원 상한");
+                    }
+                }
                 options.Clear();
                 foreach (var rule in d.unlocks ?? Array.Empty<CharacterUnlockDefinition>())
                     if (rule == null || string.IsNullOrEmpty(rule.id) || !CharacterRewardKey.ValidId(rule.chapterId) || !options.Add(rule.id) || rule.afterStage < 1 || !slots.Contains(rule.slot) || rule.choices == null || rule.choices.Length == 0 || rule.choices.Distinct().Count()!=rule.choices.Length || rule.choices.Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 성장 참조");

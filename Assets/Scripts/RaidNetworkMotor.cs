@@ -13,6 +13,7 @@ namespace RaidRogue
         {
             Dash.TickCooldown(RaidWire.Step);
             if (!allowed) { Dash.Cancel(); return; }
+            var kit=owner.GetComponent<CharacterKit>();
             Vector3 direction = Vector3.ClampMagnitude(new Vector3(input.X, 0, input.Z), 1f);
             Vector3 facing = Quaternion.Euler(0, Yaw, 0) * Vector3.forward;
             var character = owner.GetComponent<CharacterActor>();
@@ -26,12 +27,13 @@ namespace RaidRogue
                 direction = new Vector3((float)Dash.DirectionX, 0, (float)Dash.DirectionZ);
                 distance = (float)Dash.Step(RaidWire.Step);
             }
+            else if(kit?.MovementBlocked==true)distance=0;
             else distance = config.Speed * RaidWire.Step * direction.magnitude;
             if (distance <= 0) return;
             Vector3 before = Position;
             Position = _collision.Move(owner, Position, config.Radius, config.Arena, direction, distance, out bool blocked);
             if (blocked) Dash.Cancel();
-            if ((Position - before).sqrMagnitude > 0.000001f)
+            if ((Position - before).sqrMagnitude > 0.000001f && kit?.Has("aimLock")!=true)
                 Yaw = Mathf.MoveTowardsAngle(Yaw, Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg, config.TurnSpeed * RaidWire.Step);
         }
         public void Restore(RaidPose pose) { Position = new Vector3(pose.X, 1, pose.Z); Yaw = pose.Yaw; Dash.Restore(pose.Dash); }

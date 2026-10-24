@@ -32,11 +32,11 @@ namespace RaidRogue
             if(route==Mirror)return $"고정 전방 {GuardAngle:0}° 직접 공격 가드 {GuardDuration:0.#}초 · 첫 타격 반경 {RetaliationRadius:0.#}m 충격파";
             return "대기실에서 기원을 선택하세요";
         }
-        public static string PassiveSummary(string route)=>route==Bulwark?"HP·방어 스탯 +20% / 생성 보호막 +50%":route==Sun?"기본 공격 태양 불꽃 +10%":route==Mirror?"가드·보호막 흡수 25% 반사 / 카운터 무력화 +60":"기원 미선택";
+        public static string PassiveSummary(string route)=>route==Bulwark?"HP·방어 스탯 +20% / 생성 보호막 +50%":route==Sun?"직접 공격 태양 불꽃 +10%":route==Mirror?"가드·보호막 흡수 25% 반사 / 카운터 무력화 +60":"기원 미선택";
         public static string Description(string route)
         {
             if(route==Bulwark)return $"불멸의 성벽 — 파티 보호\n상시: 최대 HP +{(HpMultiplier-1)*100:0}%, 물리·마법 방어 스탯 +20%, 생성 보호막 +{(ShieldMultiplier-1)*100:0}%\n아이기스의 성채: 생존 파티 전원에게 시전자 최대 HP {BulwarkShield*100:0}% 보호막 (보정 1회), 피격 이상·넉백 면역 {BulwarkDuration:0.#}초\n성광 {BulwarkCost:0} · 쿨타임 {BulwarkCooldown:0.#}초";
-            if(route==Sun)return $"태양의 집행관 — 검술과 변신\n상시: 기본 공격 1~4 확정 피해의 {SunExtra*100:0}% 태양 불꽃\n여명 각성 — 쌍성검: {EffectSummary(route)}\n성광 {SunCost:0} · 쿨타임 {SunCooldown:0.#}초 · 변신 중 재사용 불가";
+            if(route==Sun)return $"태양의 집행관 — 검술과 변신\n상시: 직접 공격 확정 피해의 {SunExtra*100:0}% 태양 불꽃\n여명 각성 — 쌍성검: {EffectSummary(route)}\n성광 {SunCost:0} · 쿨타임 {SunCooldown:0.#}초 · 변신 중 재사용 불가";
             if(route==Mirror)return $"응보의 거울방패 — 반사와 저스트 가드\n상시: 가드·자기 보호막 흡수의 {ReflectRatio*100:0}% 반사 ({ReflectInterval:0.#}초 간격, 최대 HP {ReflectCap*100:0}% 상한), 카운터 추가 무력화 {CounterExtraStagger:0}\n절대 반사경: {EffectSummary(route)}, 첫 공격의 {RetaliationRatio*100:0}% (최대 HP {RetaliationCap*100:0}% 상한)\n성광 {MirrorCost:0} · 쿨타임 {MirrorCooldown:0.#}초";
             return "기원 선택 필요";
         }

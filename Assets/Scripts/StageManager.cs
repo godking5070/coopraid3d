@@ -133,6 +133,7 @@ namespace RaidRogue
             var metrics = CombatMetricsManager.Ensure(this);
             if (newRun) { metrics.Ledger.ResetRun(); _totalPlayTime = 0; }
             if (retry) metrics.Ledger.RegisterRetry();
+            Iris.Reset();
             currentStage = stage; IsPreparing = true; IsWiped = false;
             _isStageTransitioning = _isAllStagesCleared = _pendingBossClear = false;
             CleanupAttempt(); GetComponent<CombatMetricsUI>()?.CloseResults(); cardManager?.CancelPendingSelection();

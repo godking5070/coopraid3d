@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RaidRogue
 {
@@ -223,10 +224,12 @@ namespace RaidRogue
             for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Source==source){removed+=_slices[i].Remaining;_slices.RemoveAt(i);}
             Remaining=Math.Max(0,Remaining-removed);return removed;
         }
-        public double Expire(double now)
+        public double RemainingFrom(int source) => _slices.Where(s=>s.Source==source).Sum(s=>s.Remaining);
+        public double RemainingFor(int source,string key) => _slices.Where(s=>s.Source==source&&s.Key==key).Sum(s=>s.Remaining);
+        public double Expire(double now,Action<int,double> expired=null)
         {
             double removed=0;
-            for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Key!=null&&_slices[i].Expires<=now){removed+=_slices[i].Remaining;_slices.RemoveAt(i);}
+            for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Key!=null&&_slices[i].Expires<=now){var slice=_slices[i];removed+=slice.Remaining;_slices.RemoveAt(i);expired?.Invoke(slice.Source,slice.Remaining);}
             Remaining=Math.Max(0,Remaining-removed);return removed;
         }
         public void GrantTimed(int source,string key,double amount,double maximum,double expires)

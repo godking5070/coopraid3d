@@ -85,7 +85,7 @@ namespace RaidRogue
             var pc = avatar.GetComponent<PlayerController>(); var motor = _motors[avatar.Id];
             if (pc == null) return;
             bool forced = pc.IsBeingRescued || pc.IsBeingKnockedBack || pc.IsSkillRushing;
-            bool locked = pc.IsDead || pc.IsStunned || pc.IsMovementLocked || forced || (BattlePhase != RaidBattlePhase.Combat && BattlePhase != RaidBattlePhase.Lobby);
+            bool locked = pc.IsDead || pc.IsStunned || pc.IsMovementLocked || pc.GetComponent<CharacterKit>()?.DashBlocked==true || forced || (BattlePhase != RaidBattlePhase.Combat && BattlePhase != RaidBattlePhase.Lobby);
             if (locked != avatar.MovementLocked || (forced && !avatar.ForcedLast)) avatar.MotionVersion++;
             avatar.ForcedLast = forced; avatar.MovementLocked = locked;
             if (input.MotionVersion != avatar.MotionVersion) { input.X = input.Z = 0; input.Dash = false; }
@@ -97,7 +97,7 @@ namespace RaidRogue
                 motor.Dash.Cancel(); pc.StepNetworkForcedMovement(RaidWire.Step); motor.Position = pc.transform.position;
                 motor.Dash.TickCooldown(RaidWire.Step);
             }
-            else motor.Step(input, pc.transform, _config, !locked);
+            else {if(pc.GetComponent<CharacterKit>()?.MovementBlocked==true){input.X=input.Z=0;}motor.Step(input, pc.transform, _config, !locked);}
             avatar.Display(motor.Position, motor.Yaw, motor.Dash.Active);
             pc.SetNetworkMoving((before - motor.Position).sqrMagnitude > .000001f);
             if (!wasDashing && motor.Dash.Active) { pc.Potion?.EndRevivalProtection(); var character = CharacterActor.Ensure(pc.gameObject); if (!character.MovementSettings(pc.dashSettings).preserveCast) { pc.GetComponent<BattleResurrection>()?.Cancel(); character.InterruptCast(); } }
@@ -143,14 +143,16 @@ namespace RaidRogue
             if(request.skill==12)
             {
                 var definition=CharacterCatalog.Find(request.jobId);
-                if(!CanChooseRole||request.jobId!=AegisPaladinData.JobId||definition==null||!definition.playable){ActionFailure(owner,"최초 대기실에서 기본 구현 직업을 선택하세요");return;}
-                if(!_roster.SelectRole(owner,1)){ActionFailure(owner,"이미 다른 플레이어가 선택한 탱커 역할입니다");return;}
-                var member=_roster.Members.Find(m=>m.Id==owner);avatar.SetIdentity(1,member.Name);
+                if(!CanChooseRole||definition==null||!definition.playable||definition.legacyRole!=0){ActionFailure(owner,"최초 대기실에서 기본 구현 직업을 선택하세요");return;}
+                int selectedRole=CharacterRosterData.Role(definition);
+                if(!_roster.SelectRole(owner,selectedRole)){ActionFailure(owner,"이미 다른 플레이어가 선택한 역할입니다");return;}
+                var member=_roster.Members.Find(m=>m.Id==owner);avatar.SetIdentity(selectedRole,member.Name);
                 character.UseLegacyRole();
                 if(!character.AssignDefinition(definition)){ActionFailure(owner,"직업 실행기 연결 실패");return;}
                 member.Ready=false;SyncLobbyAvatar(member);avatar.RefreshJobLabel();ReconcileBots();return;
             }
             if(request.skill>=10 && (request.jobId!=character.Definition.id || request.skill==10&&!Enum.IsDefined(typeof(CharacterSlot),request.slot))) { ActionFailure(owner,"직업 또는 슬롯이 유효하지 않습니다");return; }
+            if(request.skill==13){avatar.GetComponent<CharacterKit>()?.CancelChannel();return;}
             if(request.skill==11)
             {
                 if(request.ruleId!="route"&&request.rewardKey!=character.ChoiceKey(request.ruleId)){ActionFailure(owner,"이전 런/스테이지의 스킬 보상 요청입니다");return;}
@@ -175,6 +177,7 @@ namespace RaidRogue
             }
             if (BattlePhase != RaidBattlePhase.Combat) { ActionFailure(owner, "현재 전투 중이 아닙니다"); return; }
             var pc = avatar.GetComponent<PlayerController>();
+            if(request.skill==5){var rescueTarget=request.target==0&&pc!=null&&pc.IsDead?pc.transform:CombatTarget(request.target);if(!IrisRescue.TryUse(avatar.transform,rescueTarget))ActionFailure(owner,"이리스 구조 실패: 사망한 아군과 남은 공용 코인을 확인하세요");return;}
             if (pc == null || pc.IsDead || pc.IsStunned || pc.IsBeingRescued || pc.IsBeingKnockedBack) { ActionFailure(owner, "현재 행동할 수 없습니다"); return; }
             Transform target = CombatTarget(request.target);
             if (request.target != 0 && target == null) { ActionFailure(owner, "대상이 더 이상 존재하지 않습니다"); return; }
@@ -212,7 +215,7 @@ namespace RaidRogue
                 {
                     var actor=CharacterActor.Ensure(avatar.gameObject);
                     // A disconnected player who had not chosen an origin must not block departure.
-                    if(!actor.DepartureReady)actor.Choose("route",AegisRouteData.Bulwark,out _);
+                    if(!actor.DepartureReady)actor.Choose("route",actor.Definition.routes[0].id,out _);
                 }
             if (!StageManager.Instance.PrepareNetworkEncounter(stage, retry)) return;
             BattleEpoch++; CountdownEnd = PhaseDeadline = 0;
@@ -320,7 +323,7 @@ namespace RaidRogue
             if (IsHost && Time.unscaledTime >= _nextCombatFrame)
             {
                 _nextCombatFrame = Time.unscaledTime + .1f;
-                var frame = CaptureCombatFrame(); _latestCombatFrame = frame;
+                var frame = CaptureCombatFrame(); _latestCombatFrame = frame; StageManager.Instance.RestoreIris(frame.irisCoins);
                 foreach (var peer in _peers) if (peer.Id != 0 && peer.CloseAt == 0) SendCombatFrame(peer, frame, false);
                 PresentBattleState(frame);
             }
@@ -339,6 +342,7 @@ namespace RaidRogue
                 if (avatar.IsBot) avatar.CombatTarget = CombatTarget(actor.target);
                 var character = CharacterActor.Ensure(avatar.gameObject); actor.character = character.Snapshot;
                 actor.jobState=avatar.GetComponent<AegisPaladin>()?.IsActive==true?JsonUtility.ToJson(avatar.GetComponent<AegisPaladin>().DamageState.Capture()):"";
+                if(avatar.GetComponent<CharacterKit>()?.Active==true)actor.jobState=avatar.GetComponent<CharacterKit>().Capture();
                 actor.debuffs=avatar.GetComponent<CombatStatusEffects>()?.Capture();
                 if(character.Definition.legacyRole==0)
                 {
@@ -351,7 +355,7 @@ namespace RaidRogue
             if (stage.boss.addSpawner != null) foreach (var add in stage.boss.addSpawner.activeAdds)
                 if (add != null && !add.isDead) adds.Add(add.CaptureNetworkCombat(CombatId(add.transform)));
             var ledger = CombatMetricsManager.Instance.Ledger;
-            return new RaidCombatFrame { epoch = BattleEpoch, stage = stage.currentStage,runId=stage.RunId,chapterId=stage.ChapterId, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
+            return new RaidCombatFrame { epoch = BattleEpoch, stage = stage.currentStage, irisCoins=stage.Iris.Coins,runId=stage.RunId,chapterId=stage.ChapterId, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
                 countdownEnd = CountdownEnd, phaseDeadline = PhaseDeadline, runTime = stage.NetworkRunTime, party = actors.ToArray(), boss = stage.boss.CaptureNetworkCombat(), adds = adds.ToArray(), mechanics = CaptureMechanics(),
                 current = CombatMetricsManager.CaptureNetworkResult(ledger.Snapshot()), clears = CombatMetricsManager.CaptureNetworkResults(ledger.Stages), failures = CombatMetricsManager.CaptureNetworkResults(ledger.FailedAttempts) };
         }
@@ -411,7 +415,7 @@ namespace RaidRogue
                 StageManager.Instance.boss.SetupBossForStage(frame.stage); // Also reset collapse/casting on a same-stage retry.
             }
             if (frame.phase != BattlePhase && Mode != RaidSessionMode.Restoring) MenuOpen = false;
-            BattleEpoch = frame.epoch; SetBattlePhase(frame.phase, "host snapshot"); CountdownEnd = frame.countdownEnd; PhaseDeadline = frame.phaseDeadline; _latestCombatFrame = frame;
+            BattleEpoch = frame.epoch; SetBattlePhase(frame.phase, "host snapshot"); CountdownEnd = frame.countdownEnd; PhaseDeadline = frame.phaseDeadline; _latestCombatFrame = frame; StageManager.Instance.RestoreIris(frame.irisCoins);
             var stage = StageManager.Instance; stage.ApplyNetworkStage(frame);
             stage.boss.ApplyNetworkCombat(frame.boss, frame.time);
             ApplyNetworkAdds(frame.adds);
@@ -421,6 +425,7 @@ namespace RaidRogue
                 avatar.Automated = actor.controlState != 0; avatar.State = actor; avatar.CombatTarget = CombatTarget(actor.target);
                 avatar.GetComponent<PlayerController>()?.ApplyNetworkCombat(actor);
                 if(!CharacterActor.Ensure(avatar.gameObject).Restore(actor.character)) { UnexpectedClientLoss("직업 상태 복구 실패: 같은 빌드인지 확인하세요"); return; }
+                if(CharacterRosterData.Find(actor.character.jobId)!=null&&!CharacterKit.Ensure(avatar.gameObject).Restore(actor.jobState)){UnexpectedClientLoss("직업 효과 복구 실패");return;}
                 if(actor.character.jobId==AegisPaladinData.JobId && (string.IsNullOrEmpty(actor.jobState)||!AegisPaladin.Ensure(avatar.gameObject).DamageState.Restore(JsonUtility.FromJson<AegisStateSnapshot>(actor.jobState))))
                 {UnexpectedClientLoss("팔라딘 상태 복구 실패: 같은 빌드인지 확인하세요");return;}
                 CombatStatusEffects.Ensure(avatar.gameObject).Restore(actor.debuffs);

@@ -36,7 +36,7 @@ namespace RaidRogue.EditorTools
 
         private void OnGUI()
         {
-            EditorGUILayout.HelpBox("Play → 이지스 팔라딘과 기원 선택 → 전투 시작 후 사용하세요.\n"+
+            EditorGUILayout.HelpBox("Play → 직업과 기원 선택 → 전투 시작 후 사용하세요.\n"+
                 "R/F/V 후보를 테스트 장착할 수 있습니다. 이미 런 보상으로 확정한 슬롯은 교체할 수 없습니다.\n"+
                 "멀티플레이는 호스트 자신의 캐릭터만 지원합니다. 설정 파일이나 직업 원본에는 저장하지 않습니다.",MessageType.Info);
             var actor=LocalActor();
@@ -45,7 +45,7 @@ namespace RaidRogue.EditorTools
             if(actor==null||actor.Definition==null)
             {EditorGUILayout.HelpBox(reason,MessageType.Info);return;}
             EditorGUILayout.LabelField(actor.Definition.name,EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("현재 기원",actor.GetComponent<AegisPaladin>()?.RouteName??"기원 없음");
+            EditorGUILayout.LabelField("현재 기원",Array.Find(actor.Definition.routes,r=>r.id==actor.RouteId)?.name??"기원 없음");
             if(!allowed)EditorGUILayout.HelpBox(reason,MessageType.Warning);
             using(new EditorGUI.DisabledScope(!allowed))
             {
@@ -73,10 +73,10 @@ namespace RaidRogue.EditorTools
             foreach(var resource in snapshot.resources)
             {
                 var definition=Array.Find(actor.Definition.resources,r=>r.id==resource.id);
-                EditorGUILayout.LabelField(definition.name,$"{resource.value:0.#} / {definition.maximum:0.#}");
+                EditorGUILayout.LabelField(definition.name,$"{resource.value:0.#} / {actor.ResourceMaximum(definition.id):0.#}");
             }
             _scroll=EditorGUILayout.BeginScrollView(_scroll);
-            if(actor.Definition.id==AegisPaladinData.JobId)
+            if(actor.Definition.legacyRole==0)
             {
                 EditorGUILayout.LabelField("R/F/V 후보 테스트 (실제 해금 보상과 별도)",EditorStyles.boldLabel);
                 using(new EditorGUI.DisabledScope(!allowed))
@@ -84,6 +84,16 @@ namespace RaidRogue.EditorTools
                         foreach(var id in rule.choices)
                             if(GUILayout.Button(CharacterSlots.Name(rule.slot)+" · "+actor.Definition.Skill(id).name))
                             {_failed=!actor.PreviewExtension(id,out _message);ReleaseGameInput();}
+            }
+            if(actor.Definition.legacyRole==0)
+            {
+                EditorGUILayout.LabelField("직업 진화 카드 효과 미리 보기",EditorStyles.boldLabel);
+                using(new EditorGUI.DisabledScope(!allowed))
+                {
+                    if(GUILayout.Button("극복 카드 효과 적용")){actor.RecordBuildEffect("evolution.overcome",1);actor.RecordBuildEffect("evolution.maximize",0);ReleaseGameInput();}
+                    if(GUILayout.Button("극대화 카드 효과 적용")){actor.RecordBuildEffect("evolution.overcome",0);actor.RecordBuildEffect("evolution.maximize",1);ReleaseGameInput();}
+                    if(GUILayout.Button("진화 카드 미리 보기 제거")){actor.RecordBuildEffect("evolution.overcome",0);actor.RecordBuildEffect("evolution.maximize",0);ReleaseGameInput();}
+                }
             }
             foreach(var slot in CharacterSlots.All)
             {

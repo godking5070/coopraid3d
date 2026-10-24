@@ -17,7 +17,7 @@ namespace RaidRogue
         public bool Accept(int connectionOwner, int epoch, RaidActionRequest request)
         {
             if (request == null || connectionOwner <= 0 || request.actor != connectionOwner || request.epoch != epoch ||
-                request.sequence == 0 || request.skill < 1 || request.skill > 12) return false;
+                request.sequence == 0 || request.skill < 1 || request.skill > 13) return false;
             if (_last.TryGetValue(connectionOwner, out uint last) && request.sequence <= last) return false;
             _last[connectionOwner] = request.sequence; return true;
         }
@@ -98,7 +98,7 @@ namespace RaidRogue
     }
     [Serializable] public sealed class RaidCombatFrame
     {
-        public int epoch, stage, retries;
+        public int epoch, stage, retries, irisCoins;
         public string runId,chapterId;
         public uint serial, ownerLease, effectWatermark, poseTick;
         public bool controlGranted;

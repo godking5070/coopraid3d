@@ -67,7 +67,7 @@ namespace RaidRogue
             var actor=_player.GetComponent<CharacterActor>();
             var snapshot=actor?.Snapshot;var selection=snapshot==null?null:System.Array.Find(snapshot.selections,x=>x.slot==CharacterSlot.Movement);
             var skill=selection==null?null:actor.Definition.Skill(selection.skillId);
-            _key.text = LocalInputBindings.Label("Dash") + " " + (actor?.Definition?.id==AegisPaladinData.JobId?"빛의 쇄도":"대쉬");
+            _key.text = LocalInputBindings.Label("Dash") + " " + (actor?.Selected(CharacterSlot.Movement)?.name??"대쉬");
             bool ready = _player.CanDash;
             _background.color = ready ? new Color(0.13f, 0.32f, 0.38f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
             _overlay.anchorMax = new Vector2(1, _player.DashCooldownFraction);

@@ -59,9 +59,10 @@ namespace RaidRogue
         public void RecalculateStats()
         {
             if(!IsActive||RaidCombatAuthority.Replica||_player==null)return;
-            float maximum=AegisRouteData.MaximumHp(_actor.Definition.baseHp,RouteId);
+            float maximum=AegisRouteData.MaximumHp(_actor.Definition.baseHp,RouteId)*(1+CharacterKit.Bonus(transform,"maxHp"));
             _player.currentHp=AegisRouteData.PreserveHealthRatio(_player.currentHp,_player.maxHp,maximum);_player.maxHp=maximum;
-            _player.moveSpeed=AegisRouteData.MoveSpeed(_actor.Definition,_player.ghostStepStacks);
+            float weight=CharacterRosterRules.HeavyArmorSpeed(_player.currentShield>0,CharacterEvolutionCards.Has(_actor,false),CharacterEvolutionCards.Has(_actor,true));
+            _player.moveSpeed=AegisRouteData.MoveSpeed(_actor.Definition,_player.ghostStepStacks)*(weight/_actor.Definition.moveSpeedMultiplier)*(1+CharacterKit.Bonus(transform,"speed"));
         }
         private bool Identity(CharacterSkillDefinition skill)
         {

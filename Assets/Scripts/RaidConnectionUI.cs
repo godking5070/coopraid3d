@@ -50,7 +50,7 @@ namespace RaidRogue
                 int role = i + 1;
                 _roles[i] = ButtonAt(_room.transform, CombatMetricsManager.RoleName(role), new Vector2(-285 + i * 190, -40), new Vector2(180, 62), () => _session.SelectRole(role));
             }
-            _aegis=ButtonAt(_room.transform,"이지스 팔라딘 · 직업 / 기원 선택",new Vector2(0,-105),new Vector2(540,46),AegisRouteSelectionUI.OpenNetwork);
+            _aegis=ButtonAt(_room.transform,"12직업 · 직업 / 기원 선택",new Vector2(0,-105),new Vector2(540,46),AegisRouteSelectionUI.OpenNetwork);
             _ready = ButtonAt(_room.transform, "준비", new Vector2(-170, -160), new Vector2(325, 45), _session.ToggleReady);
             _invite = ButtonAt(_room.transform, "친구 초대", new Vector2(170, -160), new Vector2(325, 45), () => RaidSteamRuntime.Instance?.InviteFriends());
             _beginBattle = ButtonAt(_room.transform, "전투 시작 (호스트)", new Vector2(-170, -215), new Vector2(325, 48), () => _session.RequestAction(9));

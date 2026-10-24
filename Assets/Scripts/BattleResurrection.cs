@@ -20,7 +20,7 @@ namespace RaidRogue
         public float Remaining => Replicated != null ? Replicated.resurrection : (float)_state.Remaining;
         public float Cooldown => Replicated != null ? Replicated.resurrectionCooldown : (float)_state.Cooldown;
         public float Progress => Replicated != null ? 1f - Replicated.resurrection / Mathf.Max(0.001f, Replicated.resurrectionTotal) : _state.Duration > 0 ? 1f - (float)(_state.Remaining / _state.Duration) : 0;
-        public bool IsHealer => _life != null && _life.IsHealer;
+        public bool IsHealer => false; // Resurrection is provided by Iris, never by a playable healer.
         public ResurrectionSettings Settings => _stage != null ? _stage.resurrectionSettings : Defaults;
         private bool Moved => _player != null ? _player.IsBeingRescued || _player.IsBeingKnockedBack || ((_player.IsMovingXZ || _player.IsDashing) && GetComponent<CharacterActor>()?.PreservesCastWhileDashing != true)
             : FlatDistance(transform.position, _lastPosition) > 0.001f;
@@ -44,7 +44,7 @@ namespace RaidRogue
                 held = LocalInputBindings.Held("Skill5");
             }
             bool began = false;
-            if (pressed && !_fiveHeld && !LocalGameplayInput.Blocked && IsHealer)
+            if (pressed && !_fiveHeld && !LocalGameplayInput.Blocked  )
                 began = TryBegin(TargetingManager.Instance != null ? TargetingManager.Instance.CurrentTarget : null);
             _fiveHeld = held;
             if (!RaidCombatAuthority.Replica && IsCasting && !began)
@@ -66,7 +66,12 @@ namespace RaidRogue
 
         public bool TryBegin(Transform target)
         {
+            if(target==null&&_life.IsDead)target=transform;
             if (RaidCombatAuthority.Route(this, 5, target)) return false;
+            return IrisRescue.TryUse(transform,target);
+        }
+        private bool TryBeginLegacy(Transform target)
+        {
             if (!IsHealer || _life.IsDead || StageManager.CombatSuspended || IsCasting || Cooldown > 0 ||
                 (_player != null && (RaidCombatAuthority.InputBlocked(this) || _player.IsStunned || (_player.combatController != null && _player.combatController.IsCastingSpell)))) return false;
             var life = target != null ? target.GetComponent<PartyLife>() : null;

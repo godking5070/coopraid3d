@@ -45,7 +45,7 @@ namespace RaidRogue
             =>new CharacterSkillDefinition{id=id,name=name,implemented=true,handlerId="aegis.extension",cooldown=cooldown,range=range,target=target,
                 description=text+$"\n쿨타임 {cooldown:0.#}초 · GCD 독립"};
         // Existing basic-only Sun policy and cooldown-reduction list remain explicit. No new skill is silently added.
-        public static bool TriggersSun(string id)=>id==AegisPaladinData.Id(CharacterSlot.Gcd1)||id==AegisPaladinData.Id(CharacterSlot.Gcd2)||id==AegisPaladinData.Id(CharacterSlot.OffGcd1)||id==AegisPaladinData.Id(CharacterSlot.Counter);
+        public static bool TriggersSun(string id)=>id==AegisPaladinData.Id(CharacterSlot.Gcd1)||id==AegisPaladinData.Id(CharacterSlot.Gcd2)||id==AegisPaladinData.Id(CharacterSlot.OffGcd1)||id==AegisPaladinData.Id(CharacterSlot.Counter)||id==Spear||id==Brand||id==Retribution||id==Excalibur||id==Morning;
         public static bool InCone(double dx,double dz,double radius,double yaw,double angle)
         {
             double length=Math.Sqrt(dx*dx+dz*dz);if(length>radius+.00001)return false;if(length<.00001)return true;

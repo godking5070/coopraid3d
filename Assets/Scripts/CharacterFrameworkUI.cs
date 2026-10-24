@@ -63,11 +63,11 @@ namespace RaidRogue
             {
                 var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);
                 if(_lastValues.TryGetValue(r.id,out float previous)&&r.value>previous)_pulseUntil=Time.unscaledTime+.6f;
-                _lastValues[r.id]=r.value;fill.rectTransform.anchorMax=new Vector2(Mathf.Clamp01(r.value/d.maximum),1);
-                fill.color=Time.unscaledTime<_pulseUntil?Color.white:r.value>=d.maximum?new Color(1,.85f,.2f):new Color(.85f,.73f,.3f);
+                _lastValues[r.id]=r.value;fill.rectTransform.anchorMax=new Vector2(Mathf.Clamp01(r.value/actor.ResourceMaximum(r.id)),1);
+                fill.color=Time.unscaledTime<_pulseUntil?Color.white:r.value>=actor.ResourceMaximum(r.id)?new Color(1,.85f,.2f):new Color(.85f,.73f,.3f);
             }
             var resourceText=new List<string>();
-            foreach(var r in state.resources){var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);resourceText.Add(d.name+" "+r.value.ToString(d.integer?"0":"0.#")+" / "+d.maximum.ToString("0.#")+(r.value>=d.maximum?" MAX":""));}
+            foreach(var r in state.resources){var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);resourceText.Add(d.name+" "+r.value.ToString(d.integer?"0":"0.#")+" / "+actor.ResourceMaximum(r.id).ToString("0.#")+(r.value>=actor.ResourceMaximum(r.id)?" MAX":""));}
             _resources.text=actor.Definition.name+" · "+(resourceText.Count==0?"직업 전용 자원 없음":string.Join("   ",resourceText));
             var aegis=actor.GetComponent<AegisPaladin>();
             _deferred.text=aegis!=null&&aegis.IsActive?"남은 지연 피해 "+aegis.DamageState.Pending.ToString("0.#")+(aegis.DamageState.FaithRemaining>0?" · 불굴의 신념 "+aegis.DamageState.FaithRemaining.ToString("0.0")+"초":""):"";
@@ -94,6 +94,14 @@ namespace RaidRogue
                         $"최대 HP {player.maxHp:0} · 물리 방어 {aegis.PhysicalDefense:0} / 마법 방어 {aegis.MagicDefense:0} · 강인함 {aegis.Tenacity:0} · 기본 공격 사거리 {actor.PrimaryRange:0.#}m";
                 }
             }
+            var kit=actor.GetComponent<CharacterKit>();
+            if(kit?.Active==true)
+            {
+                var route=System.Array.Find(actor.Definition.routes,r=>r.id==actor.RouteId);var identity=actor.Selected(CharacterSlot.Identity);
+                _identity.text=(route?.name??"기원 선택 필요")+" · ["+LocalInputBindings.Label("Identity")+"] "+identity.name+"\n"+(kit.Route>0?kit.Job.passives[kit.Route-1]:"");
+                _stats.text=actor.Definition.description+" · 사거리 "+actor.PrimaryRange.ToString("0.#")+"m · 방어 "+kit.Defense.ToString("0")+" · HP "+(kit.GetComponent<PlayerController>()?.maxHp??0).ToString("0")+" · 이동 "+(kit.GetComponent<PlayerController>()?.moveSpeed??0).ToString("0.##")+"m/s";
+                _deferred.text=kit.StatusText();if(kit.Job.index==4){string notes="";for(int i=2;i>=0;i--){int note=(kit.State.Data.notes>>(i*2))&3;notes+=note==1?" ♩":note==2?" ♪":note==3?" ♫":" ·";}_resources.text+=notes;}
+            }
             float immunity=actor.GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0;
             if(immunity>0)_deferred.text+=" · 성채 보호 "+immunity.ToString("0.0")+"초";
             if((actor.GetComponent<CombatStatusEffects>()?.ControlImmunity??0)>0)_deferred.text+=" · 피격 이상 면역";
@@ -104,16 +112,17 @@ namespace RaidRogue
                 bool unlocked=skill!=null&&System.Array.IndexOf(state.unlocked,skill.id)>=0;bool ready=unlocked&&skill.implemented;
                 var timing=skill==null?null:System.Array.Find(state.skills,s=>s.id==skill.id);
                 bool alive=CombatRange.LivingPartyMember(actor.transform);
-                bool affordable=skill!=null&&System.Array.TrueForAll(skill.costs,c=>(System.Array.Find(state.resources,r=>r.id==c.resourceId)?.value??0)>=c.amount);
+                bool affordable=skill!=null&&System.Array.TrueForAll(skill.costs,c=>(System.Array.Find(state.resources,r=>r.id==c.resourceId)?.value??0)>=c.amount*(kit?.Active==true?kit.CostScale(skill):1));
                 string blocked=skill?.handlerId=="aegis.extension"?actor.GetComponent<AegisExtensions>()?.Unavailable(skill,TargetingManager.Instance?.CurrentTarget)??"":"";
+                if(kit?.Active==true&&skill!=null)blocked=kit.Unavailable(skill,TargetingManager.Instance?.CurrentTarget);
                 if(skill!=null&&(skill.target==SkillTargetRule.LivingEnemy||skill.target==SkillTargetRule.LivingAlly))
                 {
                     var target=TargetingManager.Instance?.CurrentTarget;
                     if(!(skill.target==SkillTargetRule.LivingEnemy?CombatRange.LivingEnemy(target):CombatRange.LivingPartyMember(target)))blocked="유효한 대상 필요";
                     else if(!CombatRange.InRange(actor.transform,target,actor.EffectiveRange(skill)))blocked="사거리 밖";
                 }
-                string status=!unlocked?actor.SlotUnlockStatus(slot):skill!=null&&!skill.implemented?"미구현":!alive?"사망":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"성광 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":blocked.Length>0?blocked:timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
-                _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+(ready?skill.name:CharacterSlots.Name(slot))+"\n"+status+(slot==CharacterSlot.Identity&&ready&&skill.costs.Length>0?" · 성광 "+skill.costs[0].amount.ToString("0")+" / CD "+skill.cooldown.ToString("0.#")+"초":"");
+                string status=!unlocked?actor.SlotUnlockStatus(slot):skill!=null&&!skill.implemented?"미구현":!alive?"사망":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"자원 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":blocked.Length>0?blocked:timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
+                _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+(ready?skill.name:CharacterSlots.Name(slot))+"\n"+status+(slot==CharacterSlot.Identity&&ready&&skill.costs.Length>0?" · 비용 "+skill.costs[0].amount.ToString("0")+" / CD "+skill.cooldown.ToString("0.#")+"초":"");
                 _labels[slot].resizeTextForBestFit=true;_labels[slot].resizeTextMinSize=9;_labels[slot].resizeTextMaxSize=12;
                 _buttons[slot].interactable=alive&&ready&&affordable&&timing!=null&&timing.charges>0&&blocked.Length==0&&!(slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true)&&!LocalGameplayInput.Blocked;
                 if(_hover==slot)_tooltip.text=ready?$"[{LocalInputBindings.Label(CharacterSlots.Binding(slot))}] {skill.name}\n{skill.description}\n{status}":CharacterSlots.Name(slot)+" · "+status;

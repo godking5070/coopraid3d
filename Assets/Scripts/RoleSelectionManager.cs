@@ -185,7 +185,7 @@ namespace RaidRogue
             if (roleModalSubtitleText != null)
             {
                 LocalShortcutText.Set(roleModalSubtitleText,
-                    $"현재 직업: <color=#FFE055>{currentName}</color> · 팔라딘은 아래 금색 버튼 → 기원 선택 → 출발\n" +
+                    $"현재 직업: <color=#FFE055>{currentName}</color> · 아래 금색 버튼 → 12직업 → 기원 선택 → 출발\n" +
                     "기존 테스트 직업은 아래 카드 또는 <b>[{key:Choice1}] · [{key:Choice2}] · [{key:Choice3}] · [{key:Choice4}]</b>로 선택 · 남은 역할은 AI 봇이 담당합니다.");
             }
 
@@ -217,12 +217,14 @@ namespace RaidRogue
         {
             if(!CanChangePartyRoles()||stageManager==null||!stageManager.CanSelectInitialRole)return;
             if(player==null)return;
-            if(CharacterActor.Ensure(player.gameObject).Definition.id!=AegisPaladinData.JobId)
-            {
-                ApplySelectedRole(PlayerRole.Guardian_Tank,true,false);
-                if(!CharacterActor.Ensure(player.gameObject).AssignDefinition(CharacterCatalog.Find(AegisPaladinData.JobId)))return;
-            }
             AegisRouteSelectionUI.Open(CharacterActor.Ensure(player.gameObject),false);
+        }
+        public bool SelectRosterJob(string id)
+        {
+            if(!CanChangePartyRoles()||!stageManager.CanSelectInitialRole||player==null)return false;
+            var definition=CharacterCatalog.Find(id);if(definition==null||!definition.playable||definition.legacyRole!=0)return false;
+            ApplySelectedRole((PlayerRole)CharacterRosterData.Role(definition),true,false);
+            return CharacterActor.Ensure(player.gameObject).AssignDefinition(definition);
         }
         public void ConfirmAegisDeparture()
         {
@@ -611,7 +613,7 @@ namespace RaidRogue
             catalog.anchoredPosition = new Vector2(0, -385); catalog.sizeDelta = new Vector2(1400, 80);
             var names = new List<string>();
             foreach (var job in CharacterCatalog.All) if (!job.playable) names.Add(job.name);
-            ChoiceLabel(catalog, font, 16).text = "등록만 된 직업 · 아직 선택 불가\n" + string.Join(" · ", names);
+            ChoiceLabel(catalog, font, 16).text = "미구현 직업 목록\n" + string.Join(" · ", names);
             RefreshCharacterChoiceLayout();
         }
 
@@ -647,8 +649,8 @@ namespace RaidRogue
             bool canSelect = stageManager != null && stageManager.CanSelectInitialRole && CharacterCatalog.Find(AegisPaladinData.JobId)?.playable == true;
             _aegisSelect.interactable = canSelect && !LocalGameplayInput.ModalCovered;
             _aegisSelectText.text = canSelect
-                ? "▶ 이지스 팔라딘 선택 · 근접 탱커 · 검과 대방패\n기본 스킬 + 기원 3루트 / Z 플레이 가능 · R / F / V 미구현"
-                : "이지스 팔라딘 · 새 런 출발 전에 선택할 수 있습니다";
+                ? "▶ 12직업 선택 · 탱커 / 힐러 / 근딜 / 원딜 / 캐스터\n기본기 · 기원 3루트 / Z · 스테이지별 R/F/V 선택"
+                : "12직업 · 새 런 출발 전에 선택할 수 있습니다";
         }
 
         private void BuildRoleSelectionModalUI(Transform canvasTransform, Font font)
