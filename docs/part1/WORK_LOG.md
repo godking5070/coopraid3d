@@ -52,3 +52,15 @@
 - `Editor/SceneAutoBuilder`, `Editor/RaidMultiplayerBuild`: 기존 자동 구성 재사용, 전용 진입 씬/참조 검사/원본 전용 빌드/출력 고정.
 - `Tests/CameraControlTests.cs`, `Tests/Build-Part1Windows.ps1`: 관전 경계 검사, 읽기 전용 빌드 사전 검사 및 배치 실행.
 - `docs/part1/ROADMAP.md`, `WORK_LOG.md`, `HANDOFF.md`, `PLAYTEST.md`: 상태·근거·외부 조건·재개 순서.
+
+## 재개: 기록과 실제 상태 대조 (2026-10-24)
+
+- AGENTS.md와 3개 기록 문서 확인. 기존 worktree/브랜치의 HEAD는 `c6fbc5b78292e1817d856c50966cf41a9cbeb98c`, 재개 당시 미커밋 변경 없음. 이전 구현이 커밋되어 있어 새 브랜치/worktree를 만들지 않음.
+- 원본은 `feature/aegis-paladin-routes` / `7c57e36`, 사용자 미커밋 변경 유지. 원본 Unity PID 32372 실행 중, 남아 있는 별도 빌드/csc/MSBuild/플레이 실행 프로세스 없음.
+- 기록의 관전 누락/자기 부활 결함/임의 씬 빌드 위험은 c6fbc5b 실제 코드에서 이미 수정됨. ROADMAP의 해당 조사 행을 현재 상태로 갱신.
+- 빌드 사전 검사의 87개 차이 중 10개는 CRLF/LF 차이뿐인 오탐. 읽기 시 줄바꿈과 BOM을 정규화하여 비교하고 디스크 내용은 변경하지 않도록 수정. 대소문자·공백·실제 내용 차이는 계속 차단.
+- Scripts 폴더 밖 C#, asmdef/asmref/rsp 및 원본에만 있는 추가 컴파일 입력도 검사. 추가 파일은 삭제하지 않고 검토 필요로 표시.
+- `Run-Part1BuildChecks.ps1`: 실제 임시 파일 I/O 검사 **13개 통과**. 줄바꿈/BOM, 대소문자/공백, 누락/추가 코드, 어셈블리/컴파일 옵션, Unity 버전, 원본 파일/meta 비수정 확인. 고유 임시 시험 폴더만 경로 검증 후 정리.
+- 수정 후 `Build-Part1Windows.ps1 -CheckOnly` 실제 실행: **누락 24개/내용 변경 53개/추가 컴파일 입력 0개**, 원본 에디터 실행 중으로 정상 차단. Unity/BuildPipeline 실행 및 exe 생성 없음.
+- 원본 사용자 변경과 겹치는 5개 파일을 PLAYTEST에 명시. 이 단계 이후 필요한 작업은 최신 소스 원본 반영 및 Unity/네트워크 실제 실행이며, 이전의 광범위 게임 검사를 이유 없이 반복하지 않음.
+- 재개 종료 확인: PowerShell 3개 구문 및 `git diff --check` 통과. 원본 기준 309개 파일 SHA256 차이 0. 원본 브랜치/미커밋 변경 유지. worktree Library/Builds, 원본 RaidPart1.exe 없음. 원본 Unity만 실행 중이며 빌드/플레이 검사를 중복 실행하지 않음. 이번 변경은 Tests 아래 PowerShell 3개와 기록 문서 4개이며 게임 C#/씬/meta는 변경하지 않음.

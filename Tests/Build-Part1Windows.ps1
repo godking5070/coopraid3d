@@ -17,23 +17,14 @@ $taskVersion = [regex]::Match($taskVersionText, 'm_EditorVersion: (\S+)').Groups
 if (!$Unity) { $Unity = Join-Path ${env:ProgramFiles} "Unity/Hub/Editor/$taskVersion/Editor/Unity.exe" }
 $taskProblems = [System.Collections.Generic.List[string]]::new()
 if (!(Test-Path -LiteralPath $Unity)) { $taskProblems.Add("Unity editor not found: $Unity") }
-$taskDifferent = [System.Collections.Generic.List[string]]::new()
 # Read-only comparison. Never copy, stash, reset, switch branches, or alter user source files.
-$taskFiles = @(& rg --files (Join-Path $taskSource 'Assets/Scripts') -g '*.cs')
-$taskFiles += Join-Path $taskSource 'Assets/Resources/RaidSteamSettings.json'
-$taskFiles += Join-Path $taskSource 'Packages/manifest.json'
-$taskFiles += Join-Path $taskSource 'Packages/packages-lock.json'
-foreach ($taskFile in $taskFiles) {
-    $taskRelative = $taskFile.Substring($taskSource.Length + 1)
-    $taskTarget = Join-Path $taskOriginal $taskRelative
-    if (!(Test-Path -LiteralPath $taskTarget) -or
-        (Get-FileHash -LiteralPath $taskFile -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $taskTarget -Algorithm SHA256).Hash) {
-        $taskDifferent.Add($taskRelative)
-    }
-}
-if ($taskDifferent.Count -gt 0) {
-    $taskProblems.Add("Original source differs in $($taskDifferent.Count) required files. Review/apply the playable branch before building. No source was changed.")
-    $taskDifferent | Select-Object -First 8 | ForEach-Object { Write-Output "Different: $_" }
+. (Join-Path $PSScriptRoot 'Part1BuildPreflight.ps1')
+$taskDifference = Get-Part1SourceDifferences -SourceProject $taskSource -OriginalProject $taskOriginal
+if ($taskDifference.Count -gt 0) {
+    $taskProblems.Add("Original source: $($taskDifference.Missing.Count) missing, $($taskDifference.Changed.Count) changed, $($taskDifference.Unexpected.Count) additional compile inputs. Review/apply the playable branch before building. No source was changed.")
+    $taskDifference.Missing | Select-Object -First 8 | ForEach-Object { Write-Output "Missing: $_" }
+    $taskDifference.Changed | Select-Object -First 8 | ForEach-Object { Write-Output "Changed: $_" }
+    $taskDifference.Unexpected | Select-Object -First 8 | ForEach-Object { Write-Output "Additional (preserved; needs review): $_" }
 }
 $taskEditors = @(Get-CimInstance Win32_Process -Filter "name = 'Unity.exe'" | Where-Object {
     $_.CommandLine -and $_.CommandLine.Replace('/', '\').IndexOf($taskOriginal.Replace('/', '\'), [StringComparison]::OrdinalIgnoreCase) -ge 0

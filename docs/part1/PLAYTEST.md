@@ -14,7 +14,23 @@
 & C:/coopraid/coopraid3d-playable/Tests/Build-Part1Windows.ps1 -OriginalProject C:/coopraid/coopraid3d
 ```
 
-사전 검사는 원본과 작업 소스를 비교하고, 다르거나 원본 에디터가 열려 있으면 Unity를 실행하지 않는다. 빌드 성공은 플레이 성공을 뜻하지 않는다.
+사전 검사는 원본과 작업 소스를 비교하고, 다르거나 원본 에디터가 열려 있으면 Unity를 실행하지 않는다. CRLF/LF·UTF-8 BOM 차이는 허용하되 실제 텍스트 차이와 추가 컴파일 입력은 검토를 요구한다. 파일을 복사하거나 수정하지 않는다. 빌드 성공은 플레이 성공을 뜻하지 않는다.
+
+사전 검사 자체의 회귀 검사는 `Tests/Run-Part1BuildChecks.ps1`로 실행한다. 실제 임시 파일만 사용하며 Unity/Library를 실행·생성하지 않는다.
+
+### 원본 반영 전 검토 지점
+
+2026-10-24 재개 시 실제 차이: 원본에 없는 파일 24개, 내용이 다른 파일 53개. 다음 5개는 원본 미커밋 수정과 겹치므로 전체 덮어쓰기로 처리하지 않는다.
+
+| 파일 (Assets/Scripts 아래) | 검토할 내용 |
+|---|---|
+| AegisRouteSelectionUI.cs | 원본의 R/F/V 미구현 안내와 최신 확장 선택 흐름을 대조 |
+| CharacterActor.cs | 원본 시험용 API를 유지하면서 최신 12직업/개발 시험 기록 제외 처리 반영 |
+| CharacterFrameworkUI.cs | 원본 직업 설명 수정과 최신 12직업 UI/공통 데이터 연결 대조 |
+| CharacterRuntimeState.cs | 원본 시험 상태 조작과 최신 선택·보상 상태 처리 대조 |
+| RoleSelectionManager.cs | 원본 선택 UI 변경과 최신 12직업/저장된 빌드 고정 정책 대조 |
+
+원본의 ProjectSettings, Tests/AegisRouteTests.cs, 미추적 .meta 및 Editor/CharacterSkillTestWindow.cs도 보존한다. 최신 브랜치에는 시험 창과 관련 API가 이미 있으므로 원본 미추적 파일을 중복 추가하거나 GUID를 다시 만들지 않는다. 이 작업에서는 원본 통합/복사/브랜치 전환을 수행하지 않았다. 반영 후 원본 Unity 컴파일을 먼저 확인하고, 에디터 메뉴 빌드 또는 원본 에디터 종료 후 배치 빌드를 선택한다.
 
 현재 Steam App ID는 0이다. 오프라인/AI/LAN은 사용 가능하다. Steam 테스트는 기존 Configuration 메뉴에서 실제 앱 설정 또는 명시적인 개발 환경 설정을 사용한다. 임의 ID 설정·배포는 하지 않는다.
 

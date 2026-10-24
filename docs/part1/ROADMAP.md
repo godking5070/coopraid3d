@@ -28,9 +28,9 @@
 | Stage 1~5 → 카드 + R/F/V → 다음 전투 | StageManager.UpdateSingleRewards / RaidCombatSession.FinishRewardsIfReady | 구현됨, 기존 순수 상태 검증 있음 |
 | 다음 스테이지 정리/저장/로딩/카운트다운 | PrepareEncounter, CleanupAttempt, CampaignRuntime.Prepared, RaidLobbySession | 구현됨, 실제 개체/물리 확인 필요 |
 | Stage 6 → 최종 기록/결과 → 메뉴 | CampaignRuntime.Cleared/Completed, StageManager, RaidNetworkSession | 구현됨, 즉시 종료 경계 실기 확인 필요 |
-| 사망 시 관전 전환 | QuarterViewCamera에 없음 | 구현 누락 → 3단계 |
-| 사망 중 보스 선택 상태에서 자기 부활 | BattleResurrection.TryBegin이 선택 보스를 우선 | 사용 흐름 결함 → 3단계 |
-| Windows 진입 씬 | 빌드 설정 SampleScene, 기존 빌더는 임의 활성 씬 빌드 | 잘못된 씬 빌드 위험 → 7단계 |
+| 사망 시 관전 전환 | QuarterViewCamera의 별도 관전 대상 + ResurrectionSlotUI | c6fbc5b에서 구현/컴파일 완료, 화면 확인 필요 |
+| 사망 중 보스 선택 상태에서 자기 부활 | BattleResurrection.TryBegin이 사망한 로컬 사용자를 우선 | c6fbc5b에서 수정 완료, 실제 부활 확인 필요 |
+| Windows 진입 씬 | 전용 Part1_Playable 자동 구성 + BuildPartOne 참조 검증 | c6fbc5b에서 수정 완료, 실제 빌드 필요 |
 | Stage 4~6 고유 콘텐츠 | 데이터/문서 추가 없음, 템플릿 1/2/3 반복 | 콘텐츠 자료 필요 |
 
 ## 종료 시 판정
@@ -38,9 +38,11 @@
 **코드 준비 완료, Unity 실행 확인 필요.** 실행 빌드 및 실기 완주 완료로 간주하지 않는다.
 
 우선순위:
-1. 실행 검증 차단: 원본의 미커밋 사용자 변경과 최신 작업의 87개 필수 파일 차이. 검토하여 원본에 통합한 후 컴파일/빌드 필요. 이번 작업에서는 병합/전환/복사하지 않는다.
+1. 실행 검증 차단: 원본의 미커밋 사용자 변경과 최신 작업의 77개 필수 파일 차이(누락 24/내용 변경 53, 사용자 수정과 겹치는 파일 5개). 검토하여 원본에 통합한 후 컴파일/빌드 필요. 이번 작업에서는 병합/전환/복사하지 않는다. 기존 87개 판정 중 줄바꿈만 다른 10개 오탐은 재개 후 수정 완료.
 2. 실기 미확인: UI 관전·부활/물리·Stage 1~6 완주·종료/이어하기·장시간 반복·LAN/Steam 연결. PLAYTEST.md 순서로 기록.
 3. Steam 환경: App ID 0, 실제 다중 계정 환경 필요. 배포/호스트 이전 범위 제외.
 4. 콘텐츠 부족: Stage 4~6 고유 보스 명세/데이터 필요. 현재 경로는 기존 3종을 반복하는 6스테이지 진행 테스트다.
 
 이번 소스 검증에서 남은 컴파일 오류나 실패한 자동 검사는 없다. 화면·물리·네이티브 네트워크 결함 유무는 아직 판정할 수 없다.
+
+재개 후 7단계 보완: 소스 사전 검사는 CRLF/LF·UTF-8 BOM 차이를 허용하고 실제 텍스트 차이, 추가 스크립트·어셈블리 정의·컴파일 옵션을 구분한다. 실제 임시 파일 검사 13개 통과. 실제 빌드는 아직 대기 상태다.
