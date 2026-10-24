@@ -9,7 +9,7 @@ $taskRoot = Split-Path $PSScriptRoot -Parent
 $taskOutput = Join-Path ([IO.Path]::GetTempPath()) ('RaidRogue-Origins-' + [Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($taskOutput) | Out-Null
 $taskExe = Join-Path $taskOutput 'AegisRouteTests.exe'
-$taskSources = @('CharacterFrameworkData.cs', 'CharacterRuntimeState.cs', 'AegisPaladinData.cs', 'AegisRouteData.cs', 'CombatMetricsData.cs', 'CombatRangeMath.cs', 'DashMotion.cs') | ForEach-Object { Join-Path $taskRoot ('Assets/Scripts/' + $_) }
+$taskSources = @('CharacterFrameworkData.cs', 'CharacterRuntimeState.cs', 'AegisPaladinData.cs', 'AegisRouteData.cs', 'AegisExtensionData.cs', 'CombatMetricsData.cs', 'CombatRangeMath.cs', 'DashMotion.cs') | ForEach-Object { Join-Path $taskRoot ('Assets/Scripts/' + $_) }
 & $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskExe" $taskSources (Join-Path $PSScriptRoot 'AegisRouteTests.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Aegis route tests failed to compile.' }
 & $taskExe

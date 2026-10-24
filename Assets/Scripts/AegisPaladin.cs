@@ -33,6 +33,7 @@ namespace RaidRogue
         private void Awake()
         {
             _actor=GetComponent<CharacterActor>();_player=GetComponent<PlayerController>();
+            AegisExtensions.Ensure(gameObject);
             _actor.RegisterHandler("aegis.identity",(skill,target)=>Identity(skill));
             foreach(var slot in CharacterSlots.All)if(slot<CharacterSlot.Identity&&slot!=CharacterSlot.Movement)
             {var captured=slot;_actor.RegisterHandler("aegis."+slot,(skill,target)=>Execute(captured,skill,target));}
@@ -188,19 +189,22 @@ namespace RaidRogue
         private bool InsideBurst(Vector3 center,Transform enemy,float radius=AegisPaladinData.BurstRadius)
         {return CombatRange.LivingEnemy(enemy)&&CombatRange.CircleTouches(center,enemy,radius);}
         private bool Hit(Transform enemy,string origin,string name,int power,float stagger,float threat)
+            =>DealAttack(enemy,origin,name,power,stagger,threat)>0;
+        public float DealAttack(Transform enemy,string origin,string name,float power,float stagger,float threat,CombatDamageKind kind=CombatDamageKind.Direct,bool scaleAttack=true)
         {
-            if(!CombatRange.LivingEnemy(enemy))return false;
+            if(RaidCombatAuthority.Replica||StageManager.CombatSuspended||!CombatRange.LivingPartyMember(transform)||!CombatRange.LivingEnemy(enemy))return 0;
             int damage=Mathf.RoundToInt(power*_player.combatController.GetPlayerDamageBuffMultiplier());
             float before,after;var boss=enemy.GetComponent<BossController>();
-            if(boss!=null){before=boss.currentHp;boss.ReceiveRoleSkillAttack("이지스 팔라딘",name,0,damage,HolyColor,false,source:transform,origin:origin);after=boss.currentHp;}
-            else {var add=enemy.GetComponent<BossAddMinion>();before=add.currentHp;add.ReceivePlayerAttack("이지스 팔라딘",name,damage,HolyColor,false,source:transform,origin:origin);after=add.currentHp;}
-            float actual=Mathf.Max(0,before-after);if(actual<=0)return false;
-            if(RouteId==AegisRouteData.Sun)CombatSecondaryDamage.Apply(transform,enemy,CombatDamageRules.SunDamage(actual),origin,CombatDamageKind.Extra);
+            if(boss!=null){before=boss.currentHp;boss.ReceiveRoleSkillAttack("이지스 팔라딘",name,0,damage,HolyColor,false,source:transform,origin:origin,kind:kind,scaleAttack:scaleAttack);after=boss.currentHp;}
+            else {var add=enemy.GetComponent<BossAddMinion>();before=add.currentHp;add.ReceivePlayerAttack("이지스 팔라딘",name,damage,HolyColor,false,source:transform,origin:origin,kind:kind,scaleAttack:scaleAttack);after=add.currentHp;}
+            float actual=Mathf.Max(0,before-after);if(actual<=0)return 0;
+            if(RouteId==AegisRouteData.Sun&&kind==CombatDamageKind.Direct&&AegisExtensionData.TriggersSun(origin))CombatSecondaryDamage.Apply(transform,enemy,CombatDamageRules.SunDamage(actual),origin,CombatDamageKind.Extra);
             if(boss!=null&&threat>1)boss.AddCombatThreat(transform,actual*(threat-1));
             if(stagger>0)CombatCounterTarget.Ensure(enemy).AddStagger(stagger);
-            _player.FaceAttackTarget(enemy);_player.PlaySkillLineVisual(enemy.position,HolyColor);
-            if(_player.hasVampiricBlade)_player.TriggerVampiricBladeHeal();return true;
+            if(kind==CombatDamageKind.Direct){_player.FaceAttackTarget(enemy);_player.PlaySkillLineVisual(enemy.position,HolyColor);
+                if(_player.hasVampiricBlade)_player.TriggerVampiricBladeHeal();}return actual;
         }
+        public void ShowPulse(Vector3 center,float radius)=>Pulse(center,radius);
         private void Pulse(Vector3 center,float radius)
         {
             // Cosmetic lines only. Host relay preserves exactly-once damage separation.

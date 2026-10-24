@@ -1200,6 +1200,8 @@ namespace RaidRogue
             _targetHpText.text = $"{Mathf.CeilToInt(curHp):N0} / {Mathf.CeilToInt(maxHp):N0} ({Mathf.RoundToInt(ratio * 100f)}%){shieldStr}";
 
             _targetStatusText.text = GetUnitStatusSummary(currentTarget);
+            string extension=currentTarget.GetComponent<CombatStatusEffects>()?.ExtensionLabel()??"";
+            if(extension.Length>0)_targetStatusText.text=extension+" | "+_targetStatusText.text;
             if (player != null && player.combatController != null && player.combatController.IsMeleeRole)
             {
                 var combat = player.combatController;

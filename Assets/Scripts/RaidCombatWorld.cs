@@ -18,7 +18,7 @@ namespace RaidRogue
         }
         public RaidCombatEnemy CaptureNetworkCombat() => new RaidCombatEnemy
         {
-            stagger=GetComponent<CombatCounterTarget>()?.Stagger??0, counterWindowEnd=GetComponent<CombatCounterTarget>()?.WindowEnd??0,
+            brandEnd=GetComponent<CombatStatusEffects>()?.BrandEnd??0, stagger=GetComponent<CombatCounterTarget>()?.Stagger??0, counterWindowEnd=GetComponent<CombatCounterTarget>()?.WindowEnd??0,
             id = -1, stage = currentStageNumber, phase = (int)currentPhase, state = (int)fsmState,
             target = RaidCombatAuthority.Id(aggroTarget), name = name, x = transform.position.x, y = transform.position.y, z = transform.position.z,
             yaw = transform.eulerAngles.y, hp = currentHp, maxHp = maxHp, radius = CombatRadius, dead = currentHp <= 0,
@@ -29,6 +29,7 @@ namespace RaidRogue
         {
             if (state == null) return;
             CombatCounterTarget.Ensure(transform).Restore(state.stagger,state.counterWindowEnd);
+            CombatStatusEffects.Ensure(gameObject).RestoreBrand(state.brandEnd);
             if (currentStageNumber != state.stage) SetupBossForStage(state.stage);
             bool collapse = state.dead && !IsBossDefeatedCollapse;
             currentHp = state.hp; maxHp = state.maxHp; currentPhase = (BossPhase)state.phase; fsmState = (BossFSMState)state.state;
@@ -69,12 +70,13 @@ namespace RaidRogue
     {
         private Vector3 _replicaPosition;
         private float _replicaYaw;
-        public RaidCombatEnemy CaptureNetworkCombat(int id) => new RaidCombatEnemy { id = id, stagger=GetComponent<CombatCounterTarget>()?.Stagger??0,counterWindowEnd=GetComponent<CombatCounterTarget>()?.WindowEnd??0,type = (int)addType, name = addDisplayName,
+        public RaidCombatEnemy CaptureNetworkCombat(int id) => new RaidCombatEnemy { id = id, brandEnd=GetComponent<CombatStatusEffects>()?.BrandEnd??0, stagger=GetComponent<CombatCounterTarget>()?.Stagger??0,counterWindowEnd=GetComponent<CombatCounterTarget>()?.WindowEnd??0,type = (int)addType, name = addDisplayName,
             x = transform.position.x, y = transform.position.y, z = transform.position.z, yaw = transform.eulerAngles.y, hp = currentHp, maxHp = maxHp, radius = combatRadius,
             dead = isDead, casting = _isCastingHeavyStrike, castName = _currentCastSkillName, castRemaining = 1 - _castProgress, castTotal = 1, target = RaidCombatAuthority.Id(aggroTarget) };
         public void ApplyNetworkCombat(RaidCombatEnemy state)
         {
             CombatCounterTarget.Ensure(transform).Restore(state.stagger,state.counterWindowEnd);
+            CombatStatusEffects.Ensure(gameObject).RestoreBrand(state.brandEnd);
             currentHp = state.hp; maxHp = state.maxHp; isDead = state.dead; _isCastingHeavyStrike = state.casting; _currentCastSkillName = state.castName;
             _castProgress = 1 - state.castRemaining; aggroTarget = RaidCombatAuthority.Resolve(state.target);
             _replicaPosition = new Vector3(state.x, state.y, state.z); _replicaYaw = state.yaw;

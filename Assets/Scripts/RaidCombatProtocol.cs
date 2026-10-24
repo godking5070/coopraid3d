@@ -8,7 +8,7 @@ namespace RaidRogue
     {
         public uint sequence, lease;
         public int epoch, actor, skill, target;
-        public string jobId, ruleId, choiceId; public int slot; // 1..5 skills, 6 potion, 7 target, 8 reward, 9 start/retry.
+        public string jobId, ruleId, choiceId, rewardKey; public int slot; // 1..5 skills, 6 potion, 7 target, 8 reward, 9 start/retry.
     }
     // Connection ownership and epoch are checked before invoking any existing gameplay method.
     public sealed class RaidActionGate
@@ -62,7 +62,7 @@ namespace RaidRogue
     [Serializable] public sealed class RaidCombatActor
     {
         public int id, role, target, combo1, combo2;
-        public bool bot, dead, stunned, rooted, forced, casting, resurrecting, rewardChosen;
+        public bool bot, dead, stunned, rooted, forced, casting, resurrecting, rewardChosen, cardChosen;
         public string name, castName;
         public CharacterStateSnapshot character;
         public string jobState, debuffs; // Host-only payload, restored for presentation; never executes damage.
@@ -79,7 +79,7 @@ namespace RaidRogue
         public string name, castName, alert;
         public float x, y, z, yaw, hp, maxHp, radius, castRemaining, castTotal, groggy;
         public bool dead, casting;
-        public float stagger, counterWindowEnd;
+        public float stagger, counterWindowEnd, brandEnd;
     }
     [Serializable] public sealed class RaidCombatMechanic
     {
@@ -99,6 +99,7 @@ namespace RaidRogue
     [Serializable] public sealed class RaidCombatFrame
     {
         public int epoch, stage, retries;
+        public string runId,chapterId;
         public uint serial, ownerLease, effectWatermark, poseTick;
         public bool controlGranted;
         public RaidPose[] recoveryPoses;

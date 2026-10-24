@@ -1183,6 +1183,7 @@ namespace RaidRogue
 
             if(!_resolvedCombatHits.Accept(hit.EventId))return;
             if (Potion != null && Potion.HasRevivalProtection) return;
+            if(hit.Kind!=CombatDamageKind.System&&GetComponent<CombatStatusEffects>()?.CombatInvulnerable==true)return;
 
             if (IsInvulnerable)
             {
@@ -1196,7 +1197,9 @@ namespace RaidRogue
             }
 
             ExpireTimedShields();
-            float finalAmount = isTankDefensiveActive ? rawAmount * 0.22f : rawAmount;
+            float finalAmount = hit.Kind!=CombatDamageKind.Transfer&&isTankDefensiveActive ? rawAmount * 0.22f : rawAmount;
+            finalAmount*=AegisExtensions.IncomingScale(transform,hit.Kind);
+            finalAmount=AegisExtensions.SharedDamage(transform,finalAmount,hit);
 
             // 노란색 보호막(Shield) 우선 차감
             float absorbedByShield = 0f;

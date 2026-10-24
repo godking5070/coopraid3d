@@ -18,6 +18,13 @@ namespace RaidRogue
         public float EffectiveRange(CharacterSkillDefinition skill)=>GetComponent<AegisPaladin>()?.EffectiveRange(skill)??skill?.range??0;
         public CharacterSkillDefinition Selected(CharacterSlot slot)=>_state?.Selected(slot);
         public string RouteId=>_state?.RouteId??"";
+        public CharacterUnlockDefinition[] PendingChoices=>_state?.PendingChoices()??Array.Empty<CharacterUnlockDefinition>();
+        public string ChoiceKey(string rule)=>Array.Find(Definition.unlocks,r=>r.id==rule) is CharacterUnlockDefinition value?_state.RewardKey(value):"";
+        public string SlotUnlockStatus(CharacterSlot slot)
+        {
+            var rule=Array.Find(Definition.unlocks,r=>r.slot==slot);if(rule==null)return "잠김";
+            return Array.Exists(PendingChoices,r=>r.id==rule.id)?"선택 대기":"Stage "+rule.afterStage+" 클리어 후 선택";
+        }
         public bool DepartureReady=>Definition!=null&&(Definition.id!=AegisPaladinData.JobId||!string.IsNullOrEmpty(RouteId));
         public CharacterDefinition Definition => _state?.Definition;
         public CharacterStateSnapshot Snapshot { get { SyncLegacy(); return _state?.Snapshot; } }
@@ -37,11 +44,19 @@ namespace RaidRogue
             BindLegacy();reason="";
             if(_state==null||!Definition.playable)reason="미구현 직업은 전투에서 선택할 수 없습니다";
             else if(_state.Selected(slot)==null)reason="잠긴 슬롯입니다";
+            else if(!_state.Unlocked(slot))reason=SlotUnlockStatus(slot);
             else if(!_state.Selected(slot).implemented)reason="아직 구현되지 않은 스킬입니다";
-            else if(!_state.Unlocked(slot))reason="잠긴 슬롯입니다";
             return reason.Length==0;
         }
 #if UNITY_EDITOR
+        public bool PreviewExtension(string skillId,out string reason)
+        {
+            if(!CanEditSkillTest(out reason))return false;
+            if(!_state.PreviewSkillChoice(skillId)){reason="시전 중이거나 제공되지 않은 후보입니다";return false;}
+            GetComponent<AegisPaladin>()?.ClearTransient();
+            reason="테스트 장착: "+Definition.Skill(skillId).name+" (실제 클리어/카드/선택 완료 기록은 변경하지 않음)";
+            return true;
+        }
         public bool CanEditSkillTest(out string reason)
         {
             reason="";
@@ -94,24 +109,25 @@ namespace RaidRogue
         {if(RaidCombatAuthority.Replica)return;_state?.ClearOnDeath();GetComponent<AegisPaladin>()?.ClearTransient();GetComponent<CombatStatusEffects>()?.Clear();}
         public bool GainResource(string id,float amount) => !RaidCombatAuthority.Replica&&_state!=null&&_state.Gain(id,amount);
         public void RecordBuildEffect(string id,int stacks,float magnitude=0) { if(!RaidCombatAuthority.Replica)_state?.SetBuildEffect(id,stacks,magnitude); }
-        public void ClearedStage(int stage) { if(!RaidCombatAuthority.Replica)_state?.ClearedStage(stage); }
+        public void ClearedStage(int stage) { if(!RaidCombatAuthority.Replica&&StageManager.Instance!=null)_state?.ClearedStage(StageManager.Instance.RunId,StageManager.Instance.ChapterId,stage); }
         public void ResetEncounter(CharacterReset reason)
         {
             BindLegacy();if(RaidCombatAuthority.Replica||_state==null)return;
             string departureRoute=_state.Snapshot.routeId;_state.Reset(reason);
             GetComponent<AegisPaladin>()?.ClearTransient();GetComponent<CombatStatusEffects>()?.Clear();
             if(reason==CharacterReset.NewRun&&departureRoute.Length>0)_state.ChooseRoute(departureRoute,true);
+            if(reason==CharacterReset.NewRun&&StageManager.Instance!=null)_state.BeginRun(StageManager.Instance.RunId,StageManager.Instance.ChapterId);
             _player?.ClearResolvedCombatHits();_bot?.ClearResolvedCombatHits();GetComponent<AegisPaladin>()?.RecalculateStats();
         }
-        public void InterruptCast() { if(!RaidCombatAuthority.Replica){_state?.CancelCast();_player?.CancelSkillRush();} }
-        public bool Choose(string rule,string choice,out string reason)
+        public void InterruptCast() { if(!RaidCombatAuthority.Replica){_state?.CancelCast();_player?.CancelSkillRush();GetComponent<AegisExtensions>()?.CancelChannel();} }
+        public bool Choose(string rule,string choice,out string reason,string rewardKey=null,bool automatic=false)
         {
             reason="루트/스킬 선택 조건을 충족하지 않습니다";
             if(RaidCombatAuthority.Replica||_state==null)return false;
             bool lobby=RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Lobby:StageManager.Instance!=null&&StageManager.Instance.CanSelectInitialRole;
             bool reward=RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Reward:StageManager.Instance?.Progress.Phase==RaidBattlePhase.Reward;
             string previousRoute=RouteId;
-            bool ok=rule=="route"?_state.ChooseRoute(choice,lobby):reward&&_state.ChooseSkill(rule,choice);
+            bool ok=rule=="route"?_state.ChooseRoute(choice,lobby):reward&&_state.ChooseSkill(rule,choice,rewardKey,automatic);
             if(ok){reason="";if(rule=="route"&&previousRoute!=RouteId)GetComponent<AegisPaladin>()?.ApplyRouteChoice();}return ok;
         }
         public void RequestChoice(string rule,string choice)
@@ -132,6 +148,9 @@ namespace RaidRogue
             reason="호스트만 전투를 확정할 수 있습니다";
             if(RaidCombatAuthority.Replica||!Available(slot,out reason))return false;
             var skill=_state.Selected(slot);
+            if(skill.handlerId=="aegis.extension")
+            {reason=GetComponent<AegisExtensions>()?.Unavailable(skill,target)??"스킬 실행기가 아직 연결되지 않았습니다";if(reason.Length>0)return false;}
+            if(GetComponent<AegisExtensions>()?.Channeling==true&&slot!=CharacterSlot.Movement&&slot!=CharacterSlot.Potion){reason="결계의 날개 수호 중입니다. 대쉬로 종료할 수 있습니다";return false;}
             if(slot==CharacterSlot.Identity&&GetComponent<AegisPaladin>()?.IdentityBlocked==true){reason="아이덴티티 효과가 이미 진행 중입니다";return false;}
             if(skill.legacyAction>0)
             {

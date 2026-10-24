@@ -14,6 +14,13 @@ namespace RaidRogue
         [Header("Stage Progression")]
         public int currentStage = 1;
         public int maxStage = 3;
+        public string RunId {get;private set;}=System.Guid.NewGuid().ToString("N");
+        public string ChapterId=>CharacterRewardKey.CurrentChapter;
+        private int _singleRewardRevision=-1;
+        private bool _singleCardChosen;
+        private float _singleRewardDeadline;
+        public float SkillRewardSecondsRemaining=>Mathf.Max(0,(RaidCombatAuthority.Active?RaidNetworkSession.Instance.PhaseDeadline-RaidCombatAuthority.ServerTime:_singleRewardDeadline-Time.unscaledTime));
+        public bool HasPendingSkillChoices=>PartyLife.OrderedMembers().Exists(m=>CharacterActor.Ensure(m.gameObject).PendingChoices.Length>0);
 
         [Header("Common Potion (shared by all four party members)")]
         public PotionSettings potionSettings = new PotionSettings();
@@ -63,6 +70,7 @@ namespace RaidRogue
         {
             RaidNetworkSession.Ensure(this);
             _wipeUI = GetComponent<PartyWipeUI>() ?? gameObject.AddComponent<PartyWipeUI>();
+            if(GetComponent<CharacterRewardUI>()==null)gameObject.AddComponent<CharacterRewardUI>();
             if (boss == null) boss = FindFirstObjectByType<BossController>();
             if (player == null) player = FindFirstObjectByType<PlayerController>();
             if (cardManager == null) cardManager = FindFirstObjectByType<RoguelikeCardManager>();
@@ -84,6 +92,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            UpdateSingleRewards();
             if (_isAllStagesCleared)
             {
                 return;
@@ -250,7 +259,7 @@ namespace RaidRogue
 
             // 2) 1.5초 대기
             yield return new WaitForSeconds(FlowSettings.clearSeconds);
-            if (!Progress.FinishClear(revision, maxStage)) yield break;
+            if (!Progress.FinishClear(revision, maxStage,HasPendingSkillChoices)) yield break;
             TraceProgress("clear presentation completed");
 
             if (bossClearBannerRoot != null)
@@ -259,18 +268,20 @@ namespace RaidRogue
             }
 
             // Stage 3 최종 보스까지 처치한 경우 -> 최종 승리 결과창 표시!
-            if (currentStage >= maxStage)
+            if (Progress.Phase==RaidBattlePhase.Victory)
             {
                 ShowAllStagesClearVictoryScreen();
                 yield break;
             }
 
             // Stage 1 또는 Stage 2 클리어 시 -> 로그라이크 카드 3택 보상 UI 팝업!
-            if (cardManager != null)
+            _singleRewardRevision=revision;_singleCardChosen=currentStage>=maxStage;
+            _singleRewardDeadline=Time.unscaledTime+FlowSettings.rewardSeconds;
+            if (!_singleCardChosen&&cardManager != null)
             {
                 cardManager.OpenStageClearCardReward(currentStage, () => OnRewardCardChosenAdvanceToNextStage(revision));
             }
-            else
+            else if(!_singleCardChosen)
             {
                 RaidNetworkSession.Instance?.FailSession("카드 보상 UI를 찾을 수 없습니다. 원본 씬의 자동 구성을 확인하세요.");
             }
@@ -283,8 +294,22 @@ namespace RaidRogue
         /// </summary>
         private void OnRewardCardChosenAdvanceToNextStage(int revision)
         {
-            if (!Progress.IsCurrent(revision, RaidBattlePhase.Reward) || !PrepareEncounter(currentStage + 1, false)) return;
-            StartCoroutine(PreparedCountdown(Progress.Revision));
+            if(Progress.IsCurrent(revision,RaidBattlePhase.Reward)&&revision==_singleRewardRevision)_singleCardChosen=true;
+        }
+        private void UpdateSingleRewards()
+        {
+            if(RaidCombatAuthority.Active||!Progress.IsCurrent(_singleRewardRevision,RaidBattlePhase.Reward))return;
+            bool expired=Time.unscaledTime>=_singleRewardDeadline;
+            if(expired&&!_singleCardChosen)cardManager?.AutoChooseSingleCard();
+            foreach(var member in PartyLife.OrderedMembers())
+            {
+                var actor=CharacterActor.Ensure(member.gameObject);
+                if(member.GetComponent<PartyBotAI>()!=null||expired)foreach(var choice in actor.PendingChoices)actor.Choose(choice.id,choice.choices[0],out _,actor.ChoiceKey(choice.id),true);
+            }
+            if(!_singleCardChosen||HasPendingSkillChoices)return;
+            _singleRewardRevision=-1;Time.timeScale=1;
+            if(currentStage>=maxStage){if(Progress.FinishFinalRewards(Progress.Revision,maxStage))ShowAllStagesClearVictoryScreen();return;}
+            if(PrepareEncounter(currentStage+1,false))StartCoroutine(PreparedCountdown(Progress.Revision));
         }
         public void EndSessionProgress()
         {

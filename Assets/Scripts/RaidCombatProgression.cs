@@ -12,12 +12,13 @@ namespace RaidRogue
         { return RaidCombatAuthority.Host && PrepareEncounter(stage, retry, !_hasStartedEncounter); }
         internal bool FinishNetworkClear()
         {
-            if (!RaidCombatAuthority.Host || !Progress.FinishClear(Progress.Revision, maxStage)) return false;
+            if (!RaidCombatAuthority.Host || !Progress.FinishClear(Progress.Revision, maxStage,HasPendingSkillChoices)) return false;
             TraceProgress("clear presentation completed"); return true;
         }
         public void ApplyNetworkStage(RaidCombatFrame frame)
         {
             _totalPlayTime = frame.runTime;
+            RunId=frame.runId;
             currentStage = frame.stage; IsWiped = frame.phase == RaidBattlePhase.Wiped; IsPreparing = frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Loading;
             _isAllStagesCleared = frame.phase == RaidBattlePhase.Victory; _isStageTransitioning = frame.phase == RaidBattlePhase.Reward || frame.phase == RaidBattlePhase.BossClear;
             UpdateStageHeaderUI();

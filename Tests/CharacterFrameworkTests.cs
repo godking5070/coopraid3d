@@ -100,7 +100,7 @@ internal static class CharacterFrameworkTests
         Check(a.Unlocked(CharacterSlot.Identity)&&a.Selected(CharacterSlot.Identity).id=="identity.b","route unlocks and selects Z");
         Check(!a.ChooseSkill("s1","active"),"stage unlock before clear rejected");a.ClearedStage(1);
         Check(a.ChooseSkill("s1","active")&&!a.ChooseSkill("s1","active")&&!a.ChooseSkill("s2","off"),"stage1 one-time R");
-        a.ClearedStage(3);Check(a.ChooseSkill("s2","off")&&!a.ChooseSkill("s3","unoffered")&&a.ChooseSkill("s3","ultimate.b"),"stage2 F and stage3 V choice");
+        a.ClearedStage(2);a.ClearedStage(3);Check(a.ChooseSkill("s2","off")&&!a.ChooseSkill("s3","unoffered")&&a.ChooseSkill("s3","ultimate.b"),"stage2 F and stage3 V choice");
         a.SetBuildEffect("card.stable-id",2,1.2f);a.Gain("ammo",2);a.TryUse(CharacterSlot.Gcd1,Ready(),0,s=>true,out _);
         var b=new CharacterRuntimeState(Definition());Check(b.Restore(a.Snapshot)&&b.Snapshot.effects[0].stacks==2&&b.Selected(CharacterSlot.Ultimate).id=="ultimate.b","route/cards/unlocks restore");
         a.Reset(CharacterReset.NextStage);Check(a.Resource("gauge")==50&&a.Resource("ammo")==5&&a.Unlocked(CharacterSlot.Ultimate)&&a.Snapshot.effects.Length==1&&a.Snapshot.combo1==1,"stage resource policies plus build retained");

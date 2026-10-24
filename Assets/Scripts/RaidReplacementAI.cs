@@ -24,6 +24,8 @@ namespace RaidRogue
                 if (!mechanic) mechanic = PartyAiTactics.HazardDestination(pc.transform, boss, range, out desired);
                 bool intercept = avatar.Role == 3 && boss.IsTetherActive && CombatRange.LivingPartyMember(boss.TetherPrimaryTarget) && boss.TetherPrimaryTarget != avatar.transform;
                 if (intercept) { desired = Vector3.Lerp(boss.transform.position, boss.TetherPrimaryTarget.position, .52f); mechanic = true; }
+                var extensions=aegis?pc.GetComponent<AegisExtensions>():null;
+                if(mechanic)extensions?.CancelChannel();
                 var resurrection = pc.GetComponent<BattleResurrection>();
                 Transform wounded = PartyAiTactics.LowestHealth(out float lowest);
                 Transform corpse = avatar.Role == 2 && resurrection.Cooldown <= 0 ? resurrection.ChooseBotTarget() : null;
@@ -44,6 +46,7 @@ namespace RaidRogue
                 if (resurrection.IsCasting && (!resurrect || danger)) resurrection.Cancel();
                 // Ordinary casting stays still; mechanic avoidance retains priority and cancels through real movement.
                 if ((!mechanic && combat.IsCastingSpell) || (resurrect && resurrection.IsCasting)) desired = pc.transform.position;
+                if(!mechanic&&extensions?.Channeling==true)desired=pc.transform.position;
                 desired = CombatRange.ClampToArena(desired, arena);
                 Vector3 delta = desired - pc.transform.position; delta.y = 0;
                 Vector3 direction = delta.magnitude > .12f ? Vector3.ClampMagnitude(delta / Mathf.Max(.01f, pc.NetworkMoveSpeed * RaidWire.Step), 1) : Vector3.zero;
@@ -56,6 +59,9 @@ namespace RaidRogue
                 if (resurrection.IsCasting) continue;
                 if(aegis)
                 {
+                    if(extensions?.Channeling==true)continue;
+                    if(!mechanic)UsePaladinExtensions(avatar,character,enemy,boss,wounded,lowest,danger);
+                    if(extensions?.Channeling==true)continue;
                     var paladin=pc.GetComponent<AegisPaladin>();
                     bool defenseNeeded=lowest<.65f||boss.IsCasting;
                     Vector3 toward=boss.transform.position-pc.transform.position;toward.y=0;
@@ -92,12 +98,31 @@ namespace RaidRogue
                 }
             }
         }
+        private void UsePaladinExtensions(NetworkRaidAvatar avatar,CharacterActor actor,Transform enemy,BossController boss,Transform wounded,float lowest,bool danger)
+        {
+            var pc=avatar.GetComponent<PlayerController>();var r=actor.Selected(CharacterSlot.Active);var f=actor.Selected(CharacterSlot.OffGcd2);
+            if(r?.id==AegisExtensionData.Spear)AutomaticCharacterAction(avatar,CharacterSlot.Active,enemy);
+            else if(r?.id==AegisExtensionData.Ground&&!danger&&(Vector3.Distance(pc.transform.position,enemy.position)<=AegisExtensionData.GroundRadius||lowest<.75f))
+                AutomaticCharacterAction(avatar,CharacterSlot.Active,pc.transform);
+            else if(r?.id==AegisExtensionData.Wings&&!danger&&boss.IsCasting)
+            {
+                bool covered=PartyLife.OrderedMembers().Exists(m=>m!=pc.transform&&CombatRange.LivingPartyMember(m)&&AegisExtensionData.InCone(m.position.x-pc.transform.position.x,m.position.z-pc.transform.position.z,AegisExtensionData.WingsRadius,pc.transform.eulerAngles.y+180,AegisExtensionData.WingsAngle));
+                if(covered){AutomaticCharacterAction(avatar,CharacterSlot.Active,pc.transform);if(pc.GetComponent<AegisExtensions>().Channeling)return;}
+            }
+            if(f?.id==AegisExtensionData.Intervention&&wounded!=null&&wounded!=pc.transform&&lowest<.55f&&pc.HpRatio>.55f&&!(boss.ActiveTelegraph?.IsPointInsideXZ(wounded.position)??false))
+                AutomaticCharacterAction(avatar,CharacterSlot.OffGcd2,wounded);
+            else if(f?.id==AegisExtensionData.Brand||f?.id==AegisExtensionData.Retribution&&pc.currentShield>0)
+                AutomaticCharacterAction(avatar,CharacterSlot.OffGcd2,enemy);
+            if(!danger)AutomaticCharacterAction(avatar,CharacterSlot.Ultimate,enemy);
+        }
         private void AutomaticCharacterAction(NetworkRaidAvatar avatar,CharacterSlot slot,Transform target)
         {
             var actor=CharacterActor.Ensure(avatar.gameObject);var state=actor.Snapshot;
             var skill=actor.Definition.Skill(System.Array.Find(state.selections,s=>s.slot==slot).skillId);
             var timing=System.Array.Find(state.skills,s=>s.id==skill.id);
             if(!actor.Available(slot,out _)||timing.charges<1||skill.usesGcd&&state.gcd>0||skill.target==SkillTargetRule.LivingEnemy&&(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(avatar.transform,target,actor.EffectiveRange(skill))))return;
+            if(skill.target==SkillTargetRule.LivingAlly&&(!CombatRange.LivingPartyMember(target)||!CombatRange.InRange(avatar.transform,target,actor.EffectiveRange(skill))))return;
+            if(skill.handlerId=="aegis.extension"&&actor.GetComponent<AegisExtensions>()?.Unavailable(skill,target)!="")return;
             foreach(var cost in skill.costs)if((System.Array.Find(state.resources,r=>r.id==cost.resourceId)?.value??0)<cost.amount)return;
             ExecuteAction(avatar.Id,new RaidActionRequest{actor=avatar.Id,epoch=BattleEpoch,skill=10,slot=(int)slot,jobId=actor.Definition.id,target=CombatId(target)},true);
         }

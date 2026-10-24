@@ -1805,7 +1805,7 @@ namespace RaidRogue
                 damageCalc *= 1.5f;
             }
 
-            int finalDamage = Mathf.RoundToInt(damageCalc * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,damageCalc,CombatDamageKind.Direct) * DamageTakenMultiplier);
             ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string popupText = isPositionalCrit
@@ -1874,7 +1874,7 @@ namespace RaidRogue
                 damageCalc *= 1.5f;
             }
 
-            int finalDamage = Mathf.RoundToInt(damageCalc * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,damageCalc,CombatDamageKind.Direct) * DamageTakenMultiplier);
             ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string popupText;
@@ -1925,7 +1925,7 @@ namespace RaidRogue
                 return;
             }
 
-            int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,CombatDamageKind.Direct) * DamageTakenMultiplier);
             ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
 
             string popupText = $"oGCD [{abilityName}]!! - {finalDamage}";
@@ -1954,14 +1954,14 @@ namespace RaidRogue
             Color popupColor,
             bool isBigHighlight = false,
             string extraNote = "",
-            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct)
+            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct,bool scaleAttack=true)
         {
             if (fsmState == BossFSMState.Defeated)
             {
                 return 0;
             }
 
-            int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,kind,scaleAttack) * DamageTakenMultiplier);
             ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer,origin,kind);
 
             string stagePrefix = comboStage > 0 ? $"{comboStage}단 " : "";
@@ -1999,7 +1999,7 @@ namespace RaidRogue
             }
 
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
-            int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,CombatDamageKind.Direct) * DamageTakenMultiplier);
             ApplyBossHpDamage(finalDamage, source);
 
             if (isRanged)

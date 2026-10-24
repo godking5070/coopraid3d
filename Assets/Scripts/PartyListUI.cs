@@ -513,7 +513,7 @@ namespace RaidRogue
                     if (!state.dead && state.defense > 0) suffix += " · 방어";
                     if (!state.dead && state.haste > 0) suffix += " · 가속";
                     if(!state.dead)suffix+=RouteEffectLabel(row.boundTarget);
-                    if (RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Reward) suffix = avatar.IsBot ? " · AI" : state.rewardChosen ? " · 선택 완료" : " · 카드 선택 중";
+                    if (RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Reward) suffix = avatar.IsBot ? " · AI" : state.rewardChosen ? " · 선택 완료" : state.cardChosen ? " · 스킬 선택 중" : " · 카드 선택 중";
                     string connection = RaidNetworkSession.Instance.ConnectionLabel(state);
                     row.hpValueText.text = $"{state.hp:0}/{state.maxHp:0} (+{state.shield:0}){suffix}";
                     if (row.memberNameText != null)
@@ -614,6 +614,14 @@ namespace RaidRogue
         private static string RouteEffectLabel(Transform member)
         {
             if(member==null)return "";
+            string extension=member.GetComponent<CombatStatusEffects>()?.ExtensionLabel()??"";
+            if(extension.Length>0)return " · "+extension;
+            foreach(var protector in PartyLife.OrderedMembers())
+            {
+                var effect=protector.GetComponent<AegisExtensions>();
+                if(effect!=null&&effect.Protects(member))return " · 날개 보호 60%";
+                if(effect!=null&&effect.LinkedTarget==member)return " · 개입 보호 50%";
+            }
             float protection=member.GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0;
             var paladin=member.GetComponent<AegisPaladin>();
             if(protection>0)return " · 성채 "+protection.ToString("0.0")+"s";

@@ -17,6 +17,8 @@ namespace RaidRogue
         public JobSkillState[] skills=Array.Empty<JobSkillState>();
         public JobSlotSelection[] selections=Array.Empty<JobSlotSelection>();
         public string[] unlocked=Array.Empty<string>(), chosenRules=Array.Empty<string>();
+        public string runId="local", chapterId=CharacterRewardKey.CurrentChapter;
+        public string[] clearedEncounters=Array.Empty<string>(), chosenRewardKeys=Array.Empty<string>(), automaticChoices=Array.Empty<string>();
         public JobBuildEffect[] effects=Array.Empty<JobBuildEffect>();
         public CharacterStateSnapshot Copy()
         {
@@ -25,7 +27,8 @@ namespace RaidRogue
             c.skills=Array.ConvertAll(skills,x=>new JobSkillState {id=x.id,charges=x.charges,recharge=x.recharge,rechargeTotal=x.rechargeTotal});
             c.selections=Array.ConvertAll(selections,x=>new JobSlotSelection {slot=x.slot,skillId=x.skillId});
             c.effects=Array.ConvertAll(effects,x=>new JobBuildEffect {id=x.id,stacks=x.stacks,magnitude=x.magnitude});
-            c.unlocked=(string[])unlocked.Clone();c.chosenRules=(string[])chosenRules.Clone();return c;
+            c.unlocked=(string[])unlocked.Clone();c.chosenRules=(string[])chosenRules.Clone();
+            c.clearedEncounters=(string[])clearedEncounters.Clone();c.chosenRewardKeys=(string[])chosenRewardKeys.Clone();c.automaticChoices=(string[])automaticChoices.Clone();return c;
         }
     }
     public readonly struct CharacterUseContext
@@ -187,7 +190,26 @@ namespace RaidRogue
             }
         }
         public void CancelCast(){_data.castSkillId="";_data.castTarget=0;_data.castRemaining=_data.castTotal=0;}
-        public void ClearedStage(int stage){if(stage>0)_data.clearedStage=Math.Max(_data.clearedStage,stage);}
+        // Called only by the editor test window; does not fake stage clears, card rewards or confirmed choices.
+        public bool PreviewSkillChoice(string skillId)
+        {
+            var rule=Array.Find(Definition.unlocks,r=>r.choices.Contains(skillId));
+            if(rule==null||!Definition.playable||Definition.Skill(skillId)?.implemented!=true||_data.castSkillId.Length>0||_data.chosenRules.Contains(rule.id))return false;
+            Array.Find(_data.selections,s=>s.slot==rule.slot).skillId=skillId;
+            _data.unlocked=_data.unlocked.Except(rule.choices).Union(new[]{skillId}).ToArray();return true;
+        }
+        public void BeginRun(string run,string chapter)
+        {if(!CharacterRewardKey.ValidId(run)||!CharacterRewardKey.ValidId(chapter))throw new ArgumentException("Invalid run/chapter identity");_data.runId=run;_data.chapterId=chapter;}
+        public void ClearedStage(int stage)=>ClearedStage(_data.runId,_data.chapterId,stage);
+        public bool ClearedStage(string run,string chapter,int stage)
+        {
+            if(run!=_data.runId||chapter!=_data.chapterId||stage<1)return false;
+            string key=CharacterRewardKey.Stage(run,chapter,stage);if(_data.clearedEncounters.Contains(key))return false;
+            _data.clearedEncounters=_data.clearedEncounters.Concat(new[]{key}).ToArray();_data.clearedStage=Math.Max(_data.clearedStage,stage);return true;
+        }
+        public string RewardKey(CharacterUnlockDefinition rule)=>CharacterRewardKey.Choice(_data.runId,rule.chapterId,rule.afterStage,rule.id);
+        public bool Eligible(CharacterUnlockDefinition rule)=>rule!=null&&rule.chapterId==_data.chapterId&&_data.clearedEncounters.Contains(CharacterRewardKey.Stage(_data.runId,rule.chapterId,rule.afterStage));
+        public CharacterUnlockDefinition[] PendingChoices()=>Definition.unlocks.Where(r=>Eligible(r)&&!_data.chosenRules.Contains(r.id)&&r.choices.All(id=>Definition.Skill(id)?.implemented==true)).ToArray();
         public bool ChooseRoute(string routeId,bool beforeDeparture)
         {
             var route=Array.Find(Definition.routes,r=>r.id==routeId);
@@ -207,12 +229,14 @@ namespace RaidRogue
             if(identity!=null&&!string.IsNullOrEmpty(route.identitySkillId))identity.skillId=route.identitySkillId;
             _data.unlocked=_data.unlocked.Union(route.unlockSkills).Union(string.IsNullOrEmpty(route.identitySkillId)?Array.Empty<string>():new[]{route.identitySkillId}).ToArray();return true;
         }
-        public bool ChooseSkill(string ruleId,string skillId)
+        public bool ChooseSkill(string ruleId,string skillId,string rewardKey=null,bool automatic=false)
         {
             var rule=Array.Find(Definition.unlocks,r=>r.id==ruleId);
-            if(!Definition.playable||rule==null||_data.clearedStage<rule.afterStage||Array.IndexOf(rule.choices,skillId)<0||Array.IndexOf(_data.chosenRules,ruleId)>=0)return false;
+            if(!Definition.playable||!Eligible(rule)||Array.IndexOf(rule.choices,skillId)<0||Definition.Skill(skillId)?.implemented!=true||Array.IndexOf(_data.chosenRules,ruleId)>=0||rewardKey!=null&&rewardKey!=RewardKey(rule))return false;
             Array.Find(_data.selections,s=>s.slot==rule.slot).skillId=skillId;
-            _data.unlocked=_data.unlocked.Union(new[]{skillId}).ToArray();_data.chosenRules=_data.chosenRules.Concat(new[]{ruleId}).ToArray();return true;
+            _data.unlocked=_data.unlocked.Except(rule.choices).Union(new[]{skillId}).ToArray();_data.chosenRules=_data.chosenRules.Concat(new[]{ruleId}).ToArray();
+            _data.chosenRewardKeys=_data.chosenRewardKeys.Concat(new[]{RewardKey(rule)}).ToArray();
+            if(automatic)_data.automaticChoices=_data.automaticChoices.Concat(new[]{skillId}).ToArray();return true;
         }
         public void SetBuildEffect(string id,int stacks,float magnitude)
         {
@@ -233,6 +257,17 @@ namespace RaidRogue
         public bool Restore(CharacterStateSnapshot snapshot)
         {
             if(snapshot==null||snapshot.version!=1||snapshot.jobId!=Definition.id||snapshot.resources==null||snapshot.skills==null||snapshot.selections==null||snapshot.effects==null||snapshot.unlocked==null||snapshot.chosenRules==null)return false;
+            if(!CharacterRewardKey.ValidId(snapshot.runId)||!CharacterRewardKey.ValidId(snapshot.chapterId)||snapshot.clearedEncounters==null||snapshot.chosenRewardKeys==null||snapshot.automaticChoices==null)return false;
+            if(snapshot.clearedEncounters.Distinct().Count()!=snapshot.clearedEncounters.Length||snapshot.chosenRewardKeys.Length!=snapshot.chosenRules.Length||snapshot.automaticChoices.Any(id=>Definition.Skill(id)?.implemented!=true))return false;
+            foreach(string key in snapshot.clearedEncounters)
+            {string prefix=snapshot.runId+"/"+snapshot.chapterId+"/";if(key==null||!key.StartsWith(prefix,StringComparison.Ordinal)||!int.TryParse(key.Substring(prefix.Length),out int n)||n<1)return false;}
+            for(int i=0;i<snapshot.chosenRules.Length;i++)
+            {
+                var rule=Array.Find(Definition.unlocks,r=>r.id==snapshot.chosenRules[i]);
+                if(rule==null||rule.chapterId!=snapshot.chapterId||snapshot.chosenRewardKeys[i]!=CharacterRewardKey.Choice(snapshot.runId,rule.chapterId,rule.afterStage,rule.id)||!snapshot.clearedEncounters.Contains(CharacterRewardKey.Stage(snapshot.runId,rule.chapterId,rule.afterStage)))return false;
+                var selected=Array.Find(snapshot.selections,s=>s?.slot==rule.slot);
+                if(selected==null||!rule.choices.Contains(selected.skillId)||!snapshot.unlocked.Contains(selected.skillId))return false;
+            }
             if(snapshot.clearedStage<0||snapshot.unlocked.Distinct().Count()!=snapshot.unlocked.Length||snapshot.chosenRules.Distinct().Count()!=snapshot.chosenRules.Length||snapshot.effects.Select(e=>e?.id).Distinct().Count()!=snapshot.effects.Length)return false;
             if(snapshot.chosenRules.Any(id=>!Definition.unlocks.Any(r=>r.id==id)))return false;
             if(snapshot.resources.Length!=Definition.resources.Length||snapshot.skills.Length!=Definition.skills.Length||snapshot.selections.Length!=Definition.slots.Length)return false;

@@ -40,8 +40,10 @@ namespace RaidRogue
             if (outcome != EncounterOutcome.None) Phase = outcome == EncounterOutcome.Cleared ? RaidBattlePhase.BossClear : RaidBattlePhase.Wiped;
             return outcome;
         }
-        public bool FinishClear(int revision, int maximum)
-        { if (!IsCurrent(revision, RaidBattlePhase.BossClear)) return false; Phase = Stage >= maximum ? RaidBattlePhase.Victory : RaidBattlePhase.Reward; return true; }
+        public bool FinishClear(int revision, int maximum,bool finalChoicePending=false)
+        { if (!IsCurrent(revision, RaidBattlePhase.BossClear)) return false; Phase = Stage >= maximum&&!finalChoicePending ? RaidBattlePhase.Victory : RaidBattlePhase.Reward; return true; }
+        public bool FinishFinalRewards(int revision,int maximum)
+        {if(!IsCurrent(revision,RaidBattlePhase.Reward)||Stage<maximum)return false;Phase=RaidBattlePhase.Victory;return true;}
         public bool End()
         { if (Phase == RaidBattlePhase.Closed) return false; Revision++; Phase = RaidBattlePhase.Closed; return true; }
     }

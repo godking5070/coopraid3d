@@ -55,7 +55,7 @@ namespace RaidRogue
         }
     }
     // Unknown/system damage is deliberately not guardable. Secondary damage never triggers reactions.
-    public enum CombatDamageKind { Unclassified, Direct, Area, Periodic, Reflection, Extra, Deferred, System }
+    public enum CombatDamageKind { Unclassified, Direct, Area, Periodic, Reflection, Extra, Deferred, System, Transfer }
     public enum CombatDefenseType { Physical, Magic, Bypass }
     // IDs are allocated when the host resolves a hit, shared by all callbacks for that hit.
     // Each recipient remembers resolved IDs until the encounter reset; replicas never apply hits.

@@ -651,7 +651,7 @@ namespace RaidRogue
 
         private void HandleMovementXZ()
         {
-            Vector2 moveInput = CanMoveVoluntarily ? ReadMoveInput() : Vector2.zero;
+            Vector2 moveInput = CanMoveVoluntarily&&GetComponent<AegisExtensions>()?.Channeling!=true ? ReadMoveInput() : Vector2.zero;
             Vector3 moveDirXZ = GetMoveDirectionXZ(moveInput);
 
             if (moveDirXZ.sqrMagnitude > 1f)
@@ -828,10 +828,13 @@ namespace RaidRogue
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
             if(!_resolvedCombatHits.Accept(hit.EventId))return;
             if (Potion != null && Potion.HasRevivalProtection) return;
+            if(hit.Kind!=CombatDamageKind.System&&GetComponent<CombatStatusEffects>()?.CombatInvulnerable==true)return;
             ExpireTimedShields();
-            float finalDamage = CalculateFinalDamageTaken(rawDamage,hit.Kind==CombatDamageKind.System?CombatDefenseType.Bypass:hit.Defense);
+            float finalDamage = hit.Kind==CombatDamageKind.Transfer?rawDamage:CalculateFinalDamageTaken(rawDamage,hit.Kind==CombatDamageKind.System?CombatDefenseType.Bypass:hit.Defense);
+            finalDamage*=AegisExtensions.IncomingScale(transform,hit.Kind);
             var aegis = GetComponent<AegisPaladin>();
             if(aegis!=null&&aegis.TryGuard(hit,finalDamage)){LastHitGuarded=true;return;}
+            finalDamage=AegisExtensions.SharedDamage(transform,finalDamage,hit);
             float absorbedByShield = 0f;
 
             if (currentShield > 0f && finalDamage > 0f)
@@ -852,7 +855,7 @@ namespace RaidRogue
                 int reflect = Mathf.RoundToInt(thornReflectDamage * (IsDefensiveBuffActive ? 0.6f : 0.25f));
                 if (reflect > 0)
                 {
-                    targetBoss.ReceiveRoleSkillAttack("가시반사", "철벽 가시 갑옷", 0, reflect, new Color(0.35f, 1f, 0.55f, 1f), false, source: transform);
+                    targetBoss.ReceiveRoleSkillAttack("가시반사", "철벽 가시 갑옷", 0, reflect, new Color(0.35f, 1f, 0.55f, 1f), false, source: transform,kind:CombatDamageKind.Reflection);
                 }
             }
 

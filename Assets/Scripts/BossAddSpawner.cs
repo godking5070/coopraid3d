@@ -436,12 +436,12 @@ namespace RaidRogue
             int damage,
             Color popupColor,
             bool isBigHighlight = false,
-            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct)
+            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct,bool scaleAttack=true)
         {
             if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             float mult = ownerBoss != null ? ownerBoss.DamageTakenMultiplier : 1.0f;
-            int finalDmg = Mathf.RoundToInt(damage * mult);
+            int finalDmg = Mathf.RoundToInt(CombatAttackModifiers.Apply(source,transform,damage,kind,scaleAttack) * mult);
             ApplyAddHpDamage(finalDmg,source != null ? source : (ownerBoss != null ? ownerBoss.targetPlayer : null),origin,kind);
 
             FloatingTextPopup.Spawn(
@@ -475,7 +475,7 @@ namespace RaidRogue
             if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
-            ApplyAddHpDamage(damage,source);
+            ApplyAddHpDamage(CombatAttackModifiers.Apply(source,transform,damage,CombatDamageKind.Direct),source);
             if (currentHp <= 0.1f)
             {
                 KillAddMinion(silent: false);

@@ -37,7 +37,7 @@ namespace RaidRogue.EditorTools
         private void OnGUI()
         {
             EditorGUILayout.HelpBox("Play → 이지스 팔라딘과 기원 선택 → 전투 시작 후 사용하세요.\n"+
-                "현재 캐릭터의 구현된 스킬만 해금합니다. R/F/V는 실행 코드가 없어 해금할 수 없습니다.\n"+
+                "R/F/V 후보를 테스트 장착할 수 있습니다. 이미 런 보상으로 확정한 슬롯은 교체할 수 없습니다.\n"+
                 "멀티플레이는 호스트 자신의 캐릭터만 지원합니다. 설정 파일이나 직업 원본에는 저장하지 않습니다.",MessageType.Info);
             var actor=LocalActor();
             string reason="Play 모드에서 캐릭터가 생성되면 사용할 수 있습니다.";
@@ -76,6 +76,15 @@ namespace RaidRogue.EditorTools
                 EditorGUILayout.LabelField(definition.name,$"{resource.value:0.#} / {definition.maximum:0.#}");
             }
             _scroll=EditorGUILayout.BeginScrollView(_scroll);
+            if(actor.Definition.id==AegisPaladinData.JobId)
+            {
+                EditorGUILayout.LabelField("R/F/V 후보 테스트 (실제 해금 보상과 별도)",EditorStyles.boldLabel);
+                using(new EditorGUI.DisabledScope(!allowed))
+                    foreach(var rule in actor.Definition.unlocks)
+                        foreach(var id in rule.choices)
+                            if(GUILayout.Button(CharacterSlots.Name(rule.slot)+" · "+actor.Definition.Skill(id).name))
+                            {_failed=!actor.PreviewExtension(id,out _message);ReleaseGameInput();}
+            }
             foreach(var slot in CharacterSlots.All)
             {
                 var skill=actor.Selected(slot);

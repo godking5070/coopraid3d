@@ -1,9 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 namespace RaidRogue
 {
     // Extra common slots share the existing HUD canvas/input blockers. Existing 1/2/3/Q + movement/potion stay intact.
+    public sealed class CharacterSlotHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    {
+        public System.Action enter,leave;
+        public void OnPointerEnter(PointerEventData e)=>enter?.Invoke();
+        public void OnPointerExit(PointerEventData e)=>leave?.Invoke();
+        private void OnDisable()=>leave?.Invoke();
+    }
     public sealed class CharacterFrameworkUI : MonoBehaviour
     {
         private SkillHotbarUI _hotbar;private RectTransform _root;private Text _resources, _deferred, _identity, _stats;
@@ -12,6 +20,7 @@ namespace RaidRogue
         private readonly Dictionary<string,Image> _gauges=new Dictionary<string,Image>();
         private string _gaugeJob; private readonly Dictionary<string,float> _lastValues=new Dictionary<string,float>(); private float _pulseUntil;
         private float _next;
+        private Text _tooltip;private CharacterSlot? _hover;
         private void Start()
         {
             _hotbar=GetComponent<SkillHotbarUI>();
@@ -23,8 +32,11 @@ namespace RaidRogue
                 var slot=extra[i];var r=Rect(slot.ToString(),_root,new Vector2(.5f,.5f),new Vector2(-290+i*116,0),new Vector2(110,62));
                 var image=r.gameObject.AddComponent<Image>();image.color=new Color(.12f,.17f,.22f,.95f);
                 var button=r.gameObject.AddComponent<Button>();button.targetGraphic=image;button.onClick.AddListener(()=>Actor()?.RequestSlot(slot));
+                var hover=r.gameObject.AddComponent<CharacterSlotHover>();hover.enter=()=>_hover=slot;hover.leave=()=>_hover=null;
                 _buttons[slot]=button;_labels[slot]=Label(r,"",Vector2.zero,new Vector2(106,60),12);
             }
+            _tooltip=Label(_root,"",new Vector2(0,260),new Vector2(900,100),16);
+            _tooltip.gameObject.AddComponent<CanvasGroup>().blocksRaycasts=false;
             _resources=Label(_root,"",new Vector2(0,49),new Vector2(850,28),13);
             _deferred=Label(_root,"",new Vector2(0,95),new Vector2(900,24),13);
             _identity=Label(_root,"",new Vector2(0,134),new Vector2(900,54),14);
@@ -59,6 +71,11 @@ namespace RaidRogue
             _resources.text=actor.Definition.name+" · "+(resourceText.Count==0?"직업 전용 자원 없음":string.Join("   ",resourceText));
             var aegis=actor.GetComponent<AegisPaladin>();
             _deferred.text=aegis!=null&&aegis.IsActive?"남은 지연 피해 "+aegis.DamageState.Pending.ToString("0.#")+(aegis.DamageState.FaithRemaining>0?" · 불굴의 신념 "+aegis.DamageState.FaithRemaining.ToString("0.0")+"초":""):"";
+            string extensionStatus=actor.GetComponent<AegisExtensions>()?.StatusText()??"";
+            if(extensionStatus.Length>0)_deferred.text+=" · "+extensionStatus;
+            var statusEffects=actor.GetComponent<CombatStatusEffects>();
+            if(statusEffects?.MorningActive==true)_deferred.text+=$" · 아침의 성역 {statusEffects.MorningEnd-RaidCombatAuthority.ServerTime:0.0}초 (공격력 +10% / 피해 -20%)";
+            if(statusEffects?.CombatInvulnerable==true)_deferred.text+=$" · 엑스칼리버 무적 {statusEffects.InvulnerabilityEnd-RaidCombatAuthority.ServerTime:0.0}초";
             _identity.text="";
             _stats.text="";
             if(aegis!=null&&aegis.IsActive)
@@ -80,6 +97,7 @@ namespace RaidRogue
             float immunity=actor.GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0;
             if(immunity>0)_deferred.text+=" · 성채 보호 "+immunity.ToString("0.0")+"초";
             if((actor.GetComponent<CombatStatusEffects>()?.ControlImmunity??0)>0)_deferred.text+=" · 피격 이상 면역";
+            _tooltip.gameObject.SetActive(_hover.HasValue&&!LocalGameplayInput.Blocked);
             foreach(var slot in _labels.Keys)
             {
                 var selection=System.Array.Find(state.selections,s=>s.slot==slot);var skill=selection==null?null:actor.Definition.Skill(selection.skillId);
@@ -87,10 +105,19 @@ namespace RaidRogue
                 var timing=skill==null?null:System.Array.Find(state.skills,s=>s.id==skill.id);
                 bool alive=CombatRange.LivingPartyMember(actor.transform);
                 bool affordable=skill!=null&&System.Array.TrueForAll(skill.costs,c=>(System.Array.Find(state.resources,r=>r.id==c.resourceId)?.value??0)>=c.amount);
-                string status=skill!=null&&!skill.implemented?"미구현":!alive?"사망":!unlocked?"잠김":!ready?"미구현":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"성광 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
+                string blocked=skill?.handlerId=="aegis.extension"?actor.GetComponent<AegisExtensions>()?.Unavailable(skill,TargetingManager.Instance?.CurrentTarget)??"":"";
+                if(skill!=null&&(skill.target==SkillTargetRule.LivingEnemy||skill.target==SkillTargetRule.LivingAlly))
+                {
+                    var target=TargetingManager.Instance?.CurrentTarget;
+                    if(!(skill.target==SkillTargetRule.LivingEnemy?CombatRange.LivingEnemy(target):CombatRange.LivingPartyMember(target)))blocked="유효한 대상 필요";
+                    else if(!CombatRange.InRange(actor.transform,target,actor.EffectiveRange(skill)))blocked="사거리 밖";
+                }
+                string status=!unlocked?actor.SlotUnlockStatus(slot):skill!=null&&!skill.implemented?"미구현":!alive?"사망":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"성광 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":blocked.Length>0?blocked:timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
                 _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+(ready?skill.name:CharacterSlots.Name(slot))+"\n"+status+(slot==CharacterSlot.Identity&&ready&&skill.costs.Length>0?" · 성광 "+skill.costs[0].amount.ToString("0")+" / CD "+skill.cooldown.ToString("0.#")+"초":"");
                 _labels[slot].resizeTextForBestFit=true;_labels[slot].resizeTextMinSize=9;_labels[slot].resizeTextMaxSize=12;
-                _buttons[slot].interactable=alive&&ready&&affordable&&timing.charges>0&&!(slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true)&&!LocalGameplayInput.Blocked;
+                _buttons[slot].interactable=alive&&ready&&affordable&&timing!=null&&timing.charges>0&&blocked.Length==0&&!(slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true)&&!LocalGameplayInput.Blocked;
+                if(_hover==slot)_tooltip.text=ready?$"[{LocalInputBindings.Label(CharacterSlots.Binding(slot))}] {skill.name}\n{skill.description}\n{status}":CharacterSlots.Name(slot)+" · "+status;
+
             }
         }
         private static RectTransform Rect(string name,Transform parent,Vector2 anchor,Vector2 position,Vector2 size)

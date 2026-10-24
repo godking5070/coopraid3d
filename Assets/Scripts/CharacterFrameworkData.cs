@@ -34,7 +34,7 @@ namespace RaidRogue
     [Serializable] public sealed class CharacterRouteDefinition
     { public string id, name, identitySkillId; public string[] unlockSkills=Array.Empty<string>(); }
     [Serializable] public sealed class CharacterUnlockDefinition
-    { public string id; public CharacterSlot slot; public int afterStage; public string[] choices=Array.Empty<string>(); }
+    { public string id; public string chapterId=CharacterRewardKey.CurrentChapter; public CharacterSlot slot; public int afterStage; public string[] choices=Array.Empty<string>(); }
     [Serializable] public sealed class CharacterDefinition
     {
         public string id, name, description, visualKey, iconKey;
@@ -91,7 +91,7 @@ namespace RaidRogue
                     if (route == null || route.unlockSkills == null || string.IsNullOrEmpty(route.id) || !options.Add(route.id) || (!string.IsNullOrEmpty(route.identitySkillId) && (!skills.Contains(route.identitySkillId)||!slots.Contains(CharacterSlot.Identity))) || (route.unlockSkills ?? Array.Empty<string>()).Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 루트 참조");
                 options.Clear();
                 foreach (var rule in d.unlocks ?? Array.Empty<CharacterUnlockDefinition>())
-                    if (rule == null || string.IsNullOrEmpty(rule.id) || !options.Add(rule.id) || rule.afterStage < 0 || !slots.Contains(rule.slot) || rule.choices == null || rule.choices.Length == 0 || rule.choices.Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 성장 참조");
+                    if (rule == null || string.IsNullOrEmpty(rule.id) || !CharacterRewardKey.ValidId(rule.chapterId) || !options.Add(rule.id) || rule.afterStage < 1 || !slots.Contains(rule.slot) || rule.choices == null || rule.choices.Length == 0 || rule.choices.Distinct().Count()!=rule.choices.Length || rule.choices.Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 성장 참조");
                 if (!Finite(d.combatRadius) || d.combatRadius <= 0 || !Finite(d.baseHp) || d.baseHp <= 0 || !Finite(d.moveSpeed) || d.moveSpeed <= 0) errors.Add(d.id+": 잘못된 기본 스탯");
                 if(!Finite(d.moveSpeedMultiplier)||d.moveSpeedMultiplier<=0||!Finite(d.physicalDefense)||d.physicalDefense<0||!Finite(d.magicDefense)||d.magicDefense<0||!Finite(d.tenacity)||d.tenacity<0)errors.Add(d.id+": 잘못된 방어/이동 보정");
             }
@@ -160,5 +160,12 @@ namespace RaidRogue
             }
             return d;
         }
+    }
+    public static class CharacterRewardKey
+    {
+        public const string CurrentChapter="main";
+        public static string Stage(string run,string chapter,int stage)=>run+"/"+chapter+"/"+stage;
+        public static string Choice(string run,string chapter,int stage,string rule)=>Stage(run,chapter,stage)+"/"+rule;
+        public static bool ValidId(string id)=>!string.IsNullOrWhiteSpace(id)&&id.Length<=100&&!id.Contains("/");
     }
 }

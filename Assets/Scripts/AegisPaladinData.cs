@@ -29,7 +29,7 @@ namespace RaidRogue
         public static string Id(CharacterSlot slot)=>JobId+".slot."+slot.ToString().ToLowerInvariant();
         public static CharacterDefinition Build()
         {
-            var d=new CharacterDefinition{id=JobId,name="이지스 팔라딘",description="백금 판금 · 검과 대방패 · 이동 90% / 이동기 거리 70% · 기원/Z 구현 · R/F/V 준비 중",playable=true,role=CharacterRole.Tank,classification=AttackClassification.Melee,baseHp=3000,combatRadius=.55f,moveSpeed=7.8f,moveSpeedMultiplier=MovePenalty,physicalDefense=BaseDefense,magicDefense=BaseDefense,tenacity=BaseTenacity,visualKey="aegis.primitives"};
+            var d=new CharacterDefinition{id=JobId,name="이지스 팔라딘",description="백금 판금 · 검과 대방패 · 이동 90% / 이동기 거리 70% · 기원/Z · Stage 1 R / Stage 2 F / Stage 3 V 확정 선택",playable=true,role=CharacterRole.Tank,classification=AttackClassification.Melee,baseHp=3000,combatRadius=.55f,moveSpeed=7.8f,moveSpeedMultiplier=MovePenalty,physicalDefense=BaseDefense,magicDefense=BaseDefense,tenacity=BaseTenacity,visualKey="aegis.primitives"};
             var skills=new List<CharacterSkillDefinition>();var slots=new List<CharacterSlotDefinition>();
             foreach(var slot in CharacterSlots.All)
             {
@@ -48,7 +48,7 @@ namespace RaidRogue
                 }
                 skills.Add(s);slots.Add(new CharacterSlotDefinition{slot=slot,skillId=s.id,initiallyUnlocked=implemented});
             }
-            AegisRouteData.Attach(d,skills);d.skills=skills.ToArray();d.slots=slots.ToArray();
+            AegisRouteData.Attach(d,skills);AegisExtensionData.Attach(d,skills);d.skills=skills.ToArray();d.slots=slots.ToArray();
             d.resources=new[]{new JobResourceDefinition{id=Holy,name="여명의 성광",maximum=HolyMaximum,initial=0,integer=true}};
             // Origin identities are unlocked only by the host-confirmed departure choice.
             return d;
@@ -59,11 +59,13 @@ namespace RaidRogue
     {
         public float faith, absorbLock;
         public AegisRouteSnapshot route=new AegisRouteSnapshot();
+        public AegisExtensionSnapshot extensions=new AegisExtensionSnapshot();
         public DeferredHit[] hits=Array.Empty<DeferredHit>();
     }
     public sealed class AegisDamageState
     {
         public readonly AegisRouteState Route=new AegisRouteState();
+        public readonly AegisExtensionState Extensions=new AegisExtensionState();
         private readonly List<DeferredHit> _hits=new List<DeferredHit>();
         public float FaithRemaining{get;private set;}
         public float AbsorbLock{get;private set;}
@@ -90,17 +92,18 @@ namespace RaidRogue
             for(int i=_hits.Count-1;i>=0;i--){var h=_hits[i];double pay=h.seconds<=seconds?h.remaining:h.remaining*seconds/h.seconds;due+=pay;h.remaining-=pay;h.seconds-=seconds;if(h.seconds<=0)_hits.RemoveAt(i);}
             return due;
         }
-        public void Clear(){_hits.Clear();FaithRemaining=AbsorbLock=0;Route.Clear();}
-        public AegisStateSnapshot Capture()=>new AegisStateSnapshot{faith=FaithRemaining,absorbLock=AbsorbLock,route=Route.Capture(),hits=_hits.Select(h=>new DeferredHit{remaining=h.remaining,seconds=h.seconds}).ToArray()};
+        public void Clear(){_hits.Clear();FaithRemaining=AbsorbLock=0;Route.Clear();Extensions.Clear();}
+        public AegisStateSnapshot Capture()=>new AegisStateSnapshot{faith=FaithRemaining,absorbLock=AbsorbLock,route=Route.Capture(),extensions=Extensions.Data.Copy(),hits=_hits.Select(h=>new DeferredHit{remaining=h.remaining,seconds=h.seconds}).ToArray()};
         public bool Restore(AegisStateSnapshot s)
         {
             if(s==null||!AegisRouteState.Valid(s.route)||s.hits==null||!CharacterDefinitionValidation.Finite(s.faith)||s.faith<0||!CharacterDefinitionValidation.Finite(s.absorbLock)||s.absorbLock<0||s.hits.Any(h=>h==null||double.IsNaN(h.remaining)||double.IsInfinity(h.remaining)||h.remaining<0||double.IsNaN(h.seconds)||double.IsInfinity(h.seconds)||h.seconds<=0))return false;
-            Clear();Route.Restore(s.route);FaithRemaining=s.faith;AbsorbLock=s.absorbLock;_hits.AddRange(s.hits.Select(h=>new DeferredHit{remaining=h.remaining,seconds=h.seconds}));return true;
+            if(!new AegisExtensionState().Restore(s.extensions))return false;
+            Clear();Route.Restore(s.route);Extensions.Restore(s.extensions);FaithRemaining=s.faith;AbsorbLock=s.absorbLock;_hits.AddRange(s.hits.Select(h=>new DeferredHit{remaining=h.remaining,seconds=h.seconds}));return true;
         }
     }
     [Serializable] public sealed class CombatDebuff
     { public string id, tag; public bool dispellable, stun, root; public float remaining; }
-    [Serializable] public sealed class CombatDebuffSnapshot { public float knockbackImmunity, controlImmunity; public int knockbackSource, controlSource; public CombatDebuff[] entries=Array.Empty<CombatDebuff>(); }
+    [Serializable] public sealed class CombatDebuffSnapshot { public float knockbackImmunity, controlImmunity, morningEnd,invulnerabilityEnd; public int knockbackSource, controlSource; public CombatDebuff[] entries=Array.Empty<CombatDebuff>(); }
     public static class CombatDispel
     {
         public static int FirstAllowed(IList<CombatDebuff> entries,string[] tags)

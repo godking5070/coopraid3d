@@ -275,6 +275,14 @@ namespace RaidRogue
                 if (_isSelectionOpen && slotIndex >= 0 && slotIndex < _currentOfferedCards.Count) RaidNetworkSession.Instance.RequestAction(8, (int)_currentOfferedCards[slotIndex].id);
                 return;
             }
+            CommitSingleCard(slotIndex);
+        }
+        internal void AutoChooseSingleCard()
+        {
+            if(!RaidCombatAuthority.Active)CommitSingleCard(0);
+        }
+        private void CommitSingleCard(int slotIndex)
+        {
             if (!_isSelectionOpen || slotIndex < 0 || slotIndex >= _currentOfferedCards.Count)
             {
                 return;

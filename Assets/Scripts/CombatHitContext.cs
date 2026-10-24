@@ -26,7 +26,7 @@ namespace RaidRogue
         }
         public static void Absorption(int source,double amount,CombatHitContext hit)
         {
-            CombatMetricsManager.Absorption(source,amount,hit.Kind!=CombatDamageKind.Reflection&&hit.Kind!=CombatDamageKind.Extra&&hit.Kind!=CombatDamageKind.Deferred&&hit.Kind!=CombatDamageKind.System);
+            CombatMetricsManager.Absorption(source,amount,hit.Kind!=CombatDamageKind.Reflection&&hit.Kind!=CombatDamageKind.Extra&&hit.Kind!=CombatDamageKind.Deferred&&hit.Kind!=CombatDamageKind.System&&hit.Kind!=CombatDamageKind.Transfer);
             if(!CombatDamageRules.CanReact(hit.Kind)||!CombatRange.LivingEnemy(hit.Attacker))return;
             foreach(var member in PartyLife.OrderedMembers())
                 if(CombatMetricsManager.SourceId(member)==source){member.GetComponent<AegisPaladin>()?.ReflectAbsorption(amount,hit);break;}

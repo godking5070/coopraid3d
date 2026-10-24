@@ -17,6 +17,8 @@ namespace RaidRogue
             Vector3 facing = Quaternion.Euler(0, Yaw, 0) * Vector3.forward;
             var character = owner.GetComponent<CharacterActor>();
             if (input.Dash) { if (character != null) character.StartMovement(Dash, config.Dash, true, direction.x, direction.z, facing.x, facing.z); else Dash.TryStart(config.Dash, true, direction.x, direction.z, facing.x, facing.z); }
+            var extensions=owner.GetComponent<AegisExtensions>();
+            if(Dash.Active)extensions?.CancelChannel();else if(extensions?.Channeling==true)direction=Vector3.zero;
             float distance;
             if (Dash.Active)
             {
