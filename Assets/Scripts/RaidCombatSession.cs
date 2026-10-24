@@ -8,6 +8,7 @@ namespace RaidRogue
     public sealed partial class RaidNetworkSession
     {
         public bool IsHostAuthority => IsHost;
+        public DashSettings CommonDashSettings=>_config?.Dash;
         public RaidBattlePhase BattlePhase { get; private set; } = RaidBattlePhase.Lobby;
         public int BattleEpoch { get; private set; }
         public float CountdownEnd { get; private set; }
@@ -76,7 +77,7 @@ namespace RaidRogue
         {
             var pc = avatar.GetComponent<PlayerController>(); var motor = _motors[avatar.Id];
             if (pc == null) return;
-            bool forced = pc.IsBeingRescued || pc.IsBeingKnockedBack;
+            bool forced = pc.IsBeingRescued || pc.IsBeingKnockedBack || pc.IsSkillRushing;
             bool locked = pc.IsDead || pc.IsStunned || pc.IsMovementLocked || forced || (BattlePhase != RaidBattlePhase.Combat && BattlePhase != RaidBattlePhase.Lobby);
             if (locked != avatar.MovementLocked || (forced && !avatar.ForcedLast)) avatar.MotionVersion++;
             avatar.ForcedLast = forced; avatar.MovementLocked = locked;

@@ -53,6 +53,15 @@ namespace RaidRogue.EditorTools
                 if(GUILayout.Button("성광 / 직업 자원 최대치 채우기",GUILayout.Height(30)))Apply(actor,SkillTestOperation.FillResources);
                 using(new EditorGUI.DisabledScope(actor.Definition.legacyRole>0))
                     if(GUILayout.Button("직업 스킬 쿨타임 + GCD 초기화",GUILayout.Height(30)))Apply(actor,SkillTestOperation.RefreshJobCooldowns);
+                if(GUILayout.Button("선택한 적의 카운터 테스트 창 열기 (3초)",GUILayout.Height(30)))
+                {
+                    var target=TargetingManager.Instance?.CurrentTarget;
+                    if(!actor.CanEditSkillTest(out _message)||!CombatRange.LivingEnemy(target))
+                    {_message="살아 있는 적을 선택하세요. 호스트 자신의 캐릭터만 테스트할 수 있습니다.";_failed=true;}
+                    else
+                    {CombatCounterTarget.Ensure(target).OpenWindow(3);_message="적 정면에서 카운터를 적중시키면 파티 이동기 충전이 모두 복구됩니다. 이 창은 테스트 전용입니다.";_failed=false;}
+                    ReleaseGameInput();
+                }
             }
             EditorGUILayout.HelpBox("쿨타임 초기화는 대쉬·포션·콤보·현재 변신/가드에 영향을 주지 않습니다. 시전 중에는 거부됩니다.\n"+
                 "Z의 성광 비용, 사거리, 생존 조건과 효과 중 재사용 제한은 그대로 적용됩니다.\n"+
@@ -82,6 +91,10 @@ namespace RaidRogue.EditorTools
         private void Apply(CharacterActor actor,SkillTestOperation operation)
         {
             _failed=!actor.ApplyEditorSkillTest(operation,out _message);
+            ReleaseGameInput();
+        }
+        private static void ReleaseGameInput()
+        {
             // Clicking back into Game must not resume a held skill or camera drag.
             QuarterViewCamera.LocalCamera?.ReleaseOrbit();
             LocalInputBindings.QuarantineHeld();

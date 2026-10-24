@@ -78,6 +78,7 @@ namespace RaidRogue
             GetComponent<AegisPaladin>()?.ReleaseRouteEffects();
             _state=new CharacterRuntimeState(definition); _role=definition.legacyRole;
             if(_player!=null){_player.maxHp=_player.currentHp=definition.baseHp;_player.combatRadius=definition.combatRadius;_player.moveSpeed=definition.moveSpeed;_player.playerRoleDisplayName=definition.name;_player.SetNetworkDisplayName(definition.name,NetworkRaidAvatar.RoleColor(1));}
+            GetComponent<AegisPaladin>()?.RecalculateStats();
             return true;
         }
         public void UseLegacyRole()
@@ -86,6 +87,7 @@ namespace RaidRogue
             GetComponent<AegisPaladin>()?.ReleaseRouteEffects();
             if(Definition?.legacyRole==0&&_player!=null)_player.ApplyRoleStatsAndVisuals(_player.currentRole,true);
             _state=null;_role=0;BindLegacy();
+            if(_player!=null&&Definition!=null)_player.moveSpeed=Definition.moveSpeed*Mathf.Pow(1.3f,_player.ghostStepStacks);
         }
         public void ReduceCooldowns(string[] ids,float seconds){if(!RaidCombatAuthority.Replica)_state?.ReduceCooldowns(ids,seconds);}
         public void OnDeath()
@@ -99,8 +101,9 @@ namespace RaidRogue
             string departureRoute=_state.Snapshot.routeId;_state.Reset(reason);
             GetComponent<AegisPaladin>()?.ClearTransient();GetComponent<CombatStatusEffects>()?.Clear();
             if(reason==CharacterReset.NewRun&&departureRoute.Length>0)_state.ChooseRoute(departureRoute,true);
+            _player?.ClearResolvedCombatHits();_bot?.ClearResolvedCombatHits();GetComponent<AegisPaladin>()?.RecalculateStats();
         }
-        public void InterruptCast() { if(!RaidCombatAuthority.Replica)_state?.CancelCast(); }
+        public void InterruptCast() { if(!RaidCombatAuthority.Replica){_state?.CancelCast();_player?.CancelSkillRush();} }
         public bool Choose(string rule,string choice,out string reason)
         {
             reason="루트/스킬 선택 조건을 충족하지 않습니다";
@@ -140,8 +143,15 @@ namespace RaidRogue
                 SyncLegacy();return true;
             }
             if(!_handlers.ContainsKey(skill.handlerId)){reason="스킬 실행기가 아직 연결되지 않았습니다";return false;}
+            Vector3 rushEnd=transform.position;
+            bool rushing=slot==CharacterSlot.Counter&&Definition.id==AegisPaladinData.JobId;
+            if(rushing)
+            {
+                if(!_state.Validate(slot,Context(skill,target),out reason))return false;
+                if(_player==null||!_player.PlanSkillRush(target,skill.movement.distance,out rushEnd)){reason="전방 돌진 경로 또는 이동 상태가 유효하지 않습니다";return false;}
+            }
             bool accepted=_state.TryUse(slot,Context(skill,target),RaidCombatAuthority.Id(target),s=>Apply(s,target),out reason);
-            if(accepted&&skill.castTime>0)_singleCastTarget=target;return accepted;
+            if(accepted&&skill.castTime>0){_singleCastTarget=target;if(rushing)_player.BeginSkillRush(rushEnd,skill.castTime);}return accepted;
         }
         private bool Apply(CharacterSkillDefinition skill,Transform target)
         {
@@ -170,9 +180,14 @@ namespace RaidRogue
             bool moved=(transform.position-_previous).sqrMagnitude>.000001f && !PreservesCastWhileDashing;_previous=transform.position;
             if(Definition.legacyRole>0){SyncLegacy();return;}
             if(StageManager.CombatSuspended)return;
-            _state.Tick(Time.deltaTime,moved,_player!=null?!_player.IsDead:_bot!=null&&!_bot.isDead);
+            // Reuse the existing party attack-speed buff without accelerating oGCD/debt/combo timers.
+            float gcdRate=_player?.cardManager?.HasPartyAttackSpeedBuff==true?1.35f:1;
+            _state.Tick(Time.deltaTime,moved,_player!=null?!_player.IsDead:_bot!=null&&!_bot.isDead,gcdRate);
             var snapshot=_state.Snapshot;
-            if(snapshot.castSkillId.Length>0&&snapshot.castRemaining<=0)
+            if(snapshot.castSkillId.Length==0)_player?.CancelSkillRush();
+            // Network movement advances at fixed server steps, while casts use the frame clock.
+            // Never resolve a lunge hit until its swept movement has actually completed.
+            if(snapshot.castSkillId.Length>0&&snapshot.castRemaining<=0&&_player?.IsSkillRushing!=true)
             {
                 Transform target=RaidCombatAuthority.Active?RaidNetworkSession.Instance.CombatTarget(snapshot.castTarget):_singleCastTarget;
                 var skill=Definition.Skill(snapshot.castSkillId);
@@ -199,9 +214,16 @@ namespace RaidRogue
         public bool PreservesCastWhileDashing => _preservedDashFrame==Time.frameCount || _player!=null&&_player.IsDashing&&MovementSettings(_player.dashSettings).preserveCast;
         public DashSettings MovementSettings(DashSettings fallback)
         {
+            if(RaidCombatAuthority.Active&&RaidNetworkSession.Instance.CommonDashSettings!=null)fallback=RaidNetworkSession.Instance.CommonDashSettings;
             if(Definition==null||Definition.legacyRole>0)return fallback;
             var skill=_state.Selected(CharacterSlot.Movement);var movement=skill?.movement;
-            return movement==null?fallback:new DashSettings{distance=movement.distance,duration=movement.duration,cooldown=skill.cooldown,maximumCharges=skill.maximumCharges,preserveCast=movement.preserveCast};
+            return movement==null?fallback:new DashSettings{distance=movement.ResolveDistance(fallback.distance),duration=movement.duration,cooldown=skill.cooldown,maximumCharges=skill.maximumCharges,preserveCast=movement.preserveCast};
+        }
+        public void RefreshMovementCharges()
+        {
+            if(RaidCombatAuthority.Replica||!CombatRange.LivingPartyMember(transform))return;
+            if(_player!=null)_player.RefillMovementCharges();
+            else {var skill=Selected(CharacterSlot.Movement);if(skill!=null)_state.MirrorCharges(CharacterSlot.Movement,skill.maximumCharges,0,skill.cooldown);}
         }
         private void Report(string reason) { if(RaidCombatAuthority.Local(this))_player?.combatController?.ReportNetworkFailure(reason); }
         private void SyncLegacy()

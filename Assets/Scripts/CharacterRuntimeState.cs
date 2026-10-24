@@ -145,10 +145,11 @@ namespace RaidRogue
             if(skill.comboChain==2){_data.combo2=_data.combo2%3+1;_data.comboTime2=_data.combo2==1?0:skill.comboWindow;}
             return true;
         }
-        public void Tick(float seconds,bool moved=false,bool alive=true)
+        public void Tick(float seconds,bool moved=false,bool alive=true,float gcdRate=1)
         {
             if(!CharacterDefinitionValidation.Finite(seconds)||seconds<0)return;
-            _data.gcd=Math.Max(0,_data.gcd-seconds);
+            if(!CharacterDefinitionValidation.Finite(gcdRate)||gcdRate<=0)gcdRate=1;
+            _data.gcd=Math.Max(0,_data.gcd-seconds*gcdRate);
             _data.comboTime1=Math.Max(0,_data.comboTime1-seconds);if(_data.comboTime1==0)_data.combo1=1;
             _data.comboTime2=Math.Max(0,_data.comboTime2-seconds);if(_data.comboTime2==0)_data.combo2=1;
             foreach(var state in _data.skills)

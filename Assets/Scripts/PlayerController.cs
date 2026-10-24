@@ -107,7 +107,7 @@ namespace RaidRogue
         private bool _externalRoot;
         public bool IsMovementLocked { get => _externalRoot || GetComponent<CombatStatusEffects>()?.Rooted == true; set => _externalRoot=value; }
         public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer) && !IsStunned && !IsMovementLocked &&
-            !IsBeingRescued && !IsBeingKnockedBack && !RaidCombatAuthority.InputBlocked(this);
+            !IsBeingRescued && !IsBeingKnockedBack && !IsSkillRushing && !RaidCombatAuthority.InputBlocked(this);
         public bool CanDash => CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
         public bool HasMovementIntent => RaidCombatAuthority.Active ? IsMovingXZ : !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
         public bool IsCastInterruptImmune => currentRole == PlayerRole.Archmage_Caster && IsDefensiveBuffActive;
@@ -257,6 +257,10 @@ namespace RaidRogue
             {
                 UpdateKnockbackMovementXZ();
             }
+            else if(IsSkillRushing)
+            {
+                StepSkillRush(Time.deltaTime);
+            }
             else if (IsDashing)
             {
                 UpdateDashMovementXZ();
@@ -315,6 +319,7 @@ namespace RaidRogue
 
         private void OnDisable()
         {
+            CancelSkillRush();
             _dash.Cancel();
             _dashPress.RequireRelease();
             IsMovingXZ = false;
@@ -503,7 +508,8 @@ namespace RaidRogue
                 return;
             }
 
-            _dash.Cancel(); // Rescue > knockback > dash > WASD; only one movement branch runs each frame.
+            GetComponent<CharacterActor>()?.InterruptCast();
+            _dash.Cancel(); // Rescue > knockback > skill rush > dash > WASD.
 
             Vector3 dirXZ = new Vector3(
                 transform.position.x - originXZ.x,
@@ -557,6 +563,7 @@ namespace RaidRogue
         public void StartPulledByHealerRescue(Vector3 safeDestinationXZ)
         {
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
+            GetComponent<CharacterActor>()?.InterruptCast();
             _dash.Cancel();
             _isBeingKnockedBack = false;
             _isBeingRescued = true;
@@ -602,7 +609,8 @@ namespace RaidRogue
                 case RoguelikeCardId.GhostStep:
                     hasGhostStep = true;
                     ghostStepStacks++;
-                    moveSpeed *= 1.30f;
+                    var paladin=GetComponent<AegisPaladin>();
+                    if(paladin?.IsActive==true)paladin.RecalculateStats();else moveSpeed *= 1.30f;
                     positionalAngleBonusDeg += 15f;
                     if (targetBoss != null && !RaidCombatAuthority.Active)
                     {
@@ -773,11 +781,14 @@ namespace RaidRogue
             );
         }
 
-        public float CalculateFinalDamageTaken(float incomingDamage)
+        public float CalculateFinalDamageTaken(float incomingDamage,CombatDefenseType defense=CombatDefenseType.Physical)
         {
             float damage = incomingDamage;
             // 가디언(탱커) 기본 패시브 방어력 적용
-            if (currentRole == PlayerRole.Guardian_Tank)
+            var paladin=GetComponent<AegisPaladin>();
+            if(paladin?.IsActive==true&&defense!=CombatDefenseType.Bypass)
+                damage=AegisRouteData.Mitigate(damage,defense==CombatDefenseType.Magic?paladin.MagicDefense:paladin.PhysicalDefense);
+            else if (currentRole == PlayerRole.Guardian_Tank&&defense!=CombatDefenseType.Bypass)
             {
                 damage *= (1f - tankPassiveDefenseRate);
             }
@@ -815,9 +826,10 @@ namespace RaidRogue
         {
             LastHitGuarded=false;
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
+            if(!_resolvedCombatHits.Accept(hit.EventId))return;
             if (Potion != null && Potion.HasRevivalProtection) return;
             ExpireTimedShields();
-            float finalDamage = CalculateFinalDamageTaken(rawDamage);
+            float finalDamage = CalculateFinalDamageTaken(rawDamage,hit.Kind==CombatDamageKind.System?CombatDefenseType.Bypass:hit.Defense);
             var aegis = GetComponent<AegisPaladin>();
             if(aegis!=null&&aegis.TryGuard(hit,finalDamage)){LastHitGuarded=true;return;}
             float absorbedByShield = 0f;
@@ -910,6 +922,7 @@ namespace RaidRogue
 
         private void ClearInterruptedActions()
         {
+            CancelSkillRush();
             _dash.Cancel(); _dashPress.RequireRelease();
             _isBeingRescued = _isBeingKnockedBack = IsMovingXZ = false;
             IsStunned = IsMovementLocked = false;

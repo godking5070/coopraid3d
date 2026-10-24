@@ -93,6 +93,12 @@ namespace RaidRogue
         // Interruptions never refund or restart the cooldown.
         public void Cancel() { Active = false; _timeRemaining = _distanceRemaining = 0; }
         public void ResetForRetry() { Cancel(); _recharge = CooldownDuration = 0; Charges = MaximumCharges; }
+        // Counter rewards restore all charges without changing a dash already in progress.
+        public void RefillCharges(DashSettings settings)
+        {
+            if(settings==null||settings.maximumCharges<1||settings.maximumCharges>10||settings.cooldown<0||float.IsNaN(settings.cooldown)||float.IsInfinity(settings.cooldown))return;
+            MaximumCharges=Charges=settings.maximumCharges;_recharge=0;CooldownDuration=settings.cooldown;
+        }
         private static bool PositiveFinite(float value) => value > 0 && !float.IsInfinity(value) && !float.IsNaN(value);
     }
 

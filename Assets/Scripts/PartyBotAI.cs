@@ -1181,6 +1181,7 @@ namespace RaidRogue
                 return;
             }
 
+            if(!_resolvedCombatHits.Accept(hit.EventId))return;
             if (Potion != null && Potion.HasRevivalProtection) return;
 
             if (IsInvulnerable)

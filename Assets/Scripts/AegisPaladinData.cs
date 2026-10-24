@@ -20,13 +20,16 @@ namespace RaidRogue
         public const float FaithCooldown=24, FaithDuration=8, DeferredFraction=.5f, DeferredDuration=10;
         public const float CallCooldown=20, CallRange=20, CallRadius=8, CallShieldRatio=.05f, CallShieldDuration=6;
         public const float DashDistance=4, DashDuration=.2f, DashRecharge=10;
+        // Ratings preserve the previous tank's 25% base mitigation: 100 / (300 + 100).
+        public const float BaseDefense=100, BaseTenacity=100, DefenseCurve=300, TenacityCurve=300;
+        public const float MovePenalty=.9f, DashPenalty=.7f, CounterRushDistance=2, CounterRushDuration=.12f;
         public const int DashCharges=2;
         public static readonly string[] DispelTags={"poison","burn","slow","weakness"};
         public static readonly string[] ReducedSkills={Id(CharacterSlot.OffGcd1),Id(CharacterSlot.Job1)};
         public static string Id(CharacterSlot slot)=>JobId+".slot."+slot.ToString().ToLowerInvariant();
         public static CharacterDefinition Build()
         {
-            var d=new CharacterDefinition{id=JobId,name="이지스 팔라딘",description="검과 대방패 · 근접 탱커 · 기원/Z 구현 · R/F/V 준비 중",playable=true,role=CharacterRole.Tank,classification=AttackClassification.Melee,baseHp=3000,combatRadius=.55f,moveSpeed=7.8f,visualKey="aegis.primitives"};
+            var d=new CharacterDefinition{id=JobId,name="이지스 팔라딘",description="백금 판금 · 검과 대방패 · 이동 90% / 이동기 거리 70% · 기원/Z 구현 · R/F/V 준비 중",playable=true,role=CharacterRole.Tank,classification=AttackClassification.Melee,baseHp=3000,combatRadius=.55f,moveSpeed=7.8f,moveSpeedMultiplier=MovePenalty,physicalDefense=BaseDefense,magicDefense=BaseDefense,tenacity=BaseTenacity,visualKey="aegis.primitives"};
             var skills=new List<CharacterSkillDefinition>();var slots=new List<CharacterSlotDefinition>();
             foreach(var slot in CharacterSlots.All)
             {
@@ -37,10 +40,10 @@ namespace RaidRogue
                     case CharacterSlot.Gcd1:s.name=SwordNames[0];s.usesGcd=true;s.gcd=SwordGcd;s.comboChain=1;s.target=SkillTargetRule.LivingEnemy;break;
                     case CharacterSlot.Gcd2:s.name=ShieldNames[0];s.usesGcd=true;s.gcd=ShieldGcd;s.comboChain=2;s.target=SkillTargetRule.LivingEnemy;break;
                     case CharacterSlot.OffGcd1:s.name="성광 방출";s.cooldown=BurstCooldown;s.target=SkillTargetRule.LivingEnemy;break;
-                    case CharacterSlot.Counter:s.name="심판의 방패치기";s.cooldown=CounterCooldown;s.target=SkillTargetRule.LivingEnemy;break;
+                    case CharacterSlot.Counter:s.name="심판의 방패치기";s.cooldown=CounterCooldown;s.target=SkillTargetRule.LivingEnemy;s.castTime=CounterRushDuration;s.cancelOnMovement=false;s.movement=new JobMovementDefinition{distance=CounterRushDistance,duration=CounterRushDuration};break;
                     case CharacterSlot.Job1:s.name="불굴의 신념";s.cooldown=FaithCooldown;break;
                     case CharacterSlot.Job2:s.name="여명의 부름";s.cooldown=CallCooldown;s.range=CallRange;s.target=SkillTargetRule.LivingEnemy;break;
-                    case CharacterSlot.Movement:s.name="빛의 쇄도";s.cooldown=DashRecharge;s.maximumCharges=DashCharges;s.handlerId="legacy.dash";s.usableWhileCasting=true;s.movement=new JobMovementDefinition{distance=DashDistance,duration=DashDuration,preserveCast=false};break;
+                    case CharacterSlot.Movement:s.name="빛의 쇄도";s.cooldown=DashRecharge;s.maximumCharges=DashCharges;s.handlerId="legacy.dash";s.usableWhileCasting=true;s.movement=new JobMovementDefinition{distance=DashDistance,duration=DashDuration,useCommonDistance=true,commonDistanceMultiplier=DashPenalty,preserveCast=false};break;
                     case CharacterSlot.Potion:s.name="공통 포션";s.cooldown=30;s.legacyAction=6;s.handlerId="legacy.action.6";s.usableWhileCasting=true;break;
                 }
                 skills.Add(s);slots.Add(new CharacterSlotDefinition{slot=slot,skillId=s.id,initiallyUnlocked=implemented});
@@ -97,7 +100,7 @@ namespace RaidRogue
     }
     [Serializable] public sealed class CombatDebuff
     { public string id, tag; public bool dispellable, stun, root; public float remaining; }
-    [Serializable] public sealed class CombatDebuffSnapshot { public float knockbackImmunity; public int knockbackSource; public CombatDebuff[] entries=Array.Empty<CombatDebuff>(); }
+    [Serializable] public sealed class CombatDebuffSnapshot { public float knockbackImmunity, controlImmunity; public int knockbackSource, controlSource; public CombatDebuff[] entries=Array.Empty<CombatDebuff>(); }
     public static class CombatDispel
     {
         public static int FirstAllowed(IList<CombatDebuff> entries,string[] tags)

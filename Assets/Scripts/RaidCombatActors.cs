@@ -80,6 +80,7 @@ namespace RaidRogue
         {
             if (_isBeingRescued) UpdateRescuePullMovementXZ(seconds);
             else if (_isBeingKnockedBack) UpdateKnockbackMovementXZ(seconds);
+            else if(IsSkillRushing)StepSkillRush(seconds);
         }
         public float NetworkMoveSpeed => moveSpeed * (!RaidCombatAuthority.Replica && _rescueSpeedBoostTimer > 0 ? 1.35f : 1);
         public void CaptureNetworkCombat(RaidCombatActor state)
@@ -87,7 +88,7 @@ namespace RaidRogue
             state.hp = currentHp; state.maxHp = maxHp; state.shield = currentShield; state.dead = IsDead;
             state.defense = _defensiveRemainingTime; state.tactical = _tacticalRescueBuffTimer; state.speedBoost = _rescueSpeedBoostTimer; state.speed = NetworkMoveSpeed;
             state.haste = cardManager != null ? cardManager.NetworkHaste : 0;
-            state.stunned = IsStunned; state.rooted = IsMovementLocked; state.forced = IsBeingRescued || IsBeingKnockedBack;
+            state.stunned = IsStunned; state.rooted = IsMovementLocked; state.forced = IsBeingRescued || IsBeingKnockedBack || IsSkillRushing;
             state.cards = new[] { masterOfRearStacks, ghostStepStacks, thornArmorStacks, tacticalRescueStacks, berserkerShoutStacks, vampiricBladeStacks, swiftAwakeningStacks };
             combatController?.CaptureNetworkCombat(state);
         }

@@ -13,7 +13,7 @@ public static class AegisRouteTests
     private static bool UseZ(CharacterRuntimeState actor,AegisRouteState effects,CharacterUseContext? context=null)=>actor.TryUse(CharacterSlot.Identity,context??Ready,0,s=>effects.Activate(actor.Snapshot.routeId,0),out _);
     public static void Main()
     {
-        try {SelectionAndStats();CostsAndGcd();ShieldAndReflection();Guard();Sun();RecoveryAndLifecycle();SkillTestTools();}
+        try {SelectionAndStats();CostsAndGcd();ShieldAndReflection();Guard();Sun();RecoveryAndLifecycle();SkillTestTools();LatestSpecification();}
         catch(Exception ex){Console.WriteLine("FAIL after "+checks+": "+ex.Message);Environment.Exit(1);}
         Console.WriteLine("PASS: "+checks+" Aegis origin selection, transaction, shield, guard classification, secondary damage, GCD, geometry and recovery checks (no Unity/Steam execution).");
     }
@@ -207,5 +207,88 @@ public static class AegisRouteTests
         foreach(SkillTestOperation command in Enum.GetValues(typeof(SkillTestOperation)))
             Check(!unavailable.ApplySkillTest(command,out count),"test tools do not enable unimplemented jobs");
         Check(!new CharacterRuntimeState(CharacterCatalog.Legacy(1)).ApplySkillTest(SkillTestOperation.RefreshJobCooldowns,out count),"legacy timing owner is not bypassed");
+    }
+    private static void LatestSpecification()
+    {
+        var definition=AegisPaladinData.Build();
+        var movement=definition.Skill(AegisPaladinData.Id(CharacterSlot.Movement));
+        Near(AegisRouteData.MoveSpeed(definition,0),7.02,"90% movement base");
+        Near(movement.movement.ResolveDistance(4),2.8,"common dash relationship 70%");
+        Near(movement.movement.ResolveDistance(6),4.2,"common dash tuning propagates");
+        Near(AegisRouteData.MoveSpeed(definition,1,1.35f),7.8*.9*1.3*1.35,"separate job/card/temporary layers");
+        Near(AegisRouteData.GcdDuration(1.5f,.4f,.6f,1/1.3f),1.1/1.3,"existing card reduction before transformation haste");
+        Near(AegisRouteData.GcdDuration(1.5f,1.4f,.6f,1),.6,"existing minimum GCD applied before route");
+        var hasteActor=new CharacterRuntimeState(definition);
+        hasteActor.TryUse(CharacterSlot.Gcd2,Ready,1,s=>true,out _);hasteActor.TryUse(CharacterSlot.OffGcd1,Ready,1,s=>true,out _);
+        hasteActor.Tick(1,false,true,1.35f);
+        Near(hasteActor.Snapshot.gcd,1.15,"existing party haste accelerates shared GCD only");
+        Near(Timing(hasteActor,CharacterSlot.OffGcd1).recharge,7,"party haste does not accelerate oGCD");
+        Near(hasteActor.Snapshot.comboTime2,7,"combo expiry retains real combat seconds");
+        hasteActor.Tick(.25f,false,true,float.NaN);Near(hasteActor.Snapshot.gcd,.9,"invalid haste cannot poison runtime state");
+        Check(movement.maximumCharges==2&&movement.cooldown==10,"two sequential 10s charges");
+        Near(AegisRouteData.Mitigate(1000,definition.physicalDefense),750,"base tank mitigation unchanged");
+        Near(AegisRouteData.DefenseRating(definition.magicDefense,AegisRouteData.Bulwark),120,"magic defense 120%");
+        Near(AegisRouteData.Mitigate(1000,AegisRouteData.DefenseRating(definition.physicalDefense,AegisRouteData.Bulwark)),1000*300.0/420,"defense rating, not 20% damage reduction");
+        Near(AegisRouteData.ControlDuration(4,definition.tenacity),3,"tenacity reduces ordinary control duration");
+        Check(!CombatDamageRules.CanApplyControl(4,false)&&CombatDamageRules.CanApplyControl(4,true)&&CombatDamageRules.CanApplyControl(0,false),"control immunity expiry and bypass");
+        for(int i=0;i<300;i++)
+        {
+            string route=definition.routes[i%3].id;
+            Near(AegisRouteData.MaximumHp(definition.baseHp,route),route==AegisRouteData.Bulwark?3600:3000,"origin recalculation maxHP stable");
+            Near(AegisRouteData.DefenseRating(definition.physicalDefense,route),route==AegisRouteData.Bulwark?120:100,"origin recalculation defense stable");
+            Near(AegisRouteData.MoveSpeed(definition,1),7.8*.9*1.3,"origin cannot compound movement");
+            Near(movement.movement.ResolveDistance(4),2.8,"movement penalty does not compound dash");
+        }
+        var settings=new DashSettings{distance=movement.movement.ResolveDistance(4),duration=.2f,cooldown=10,maximumCharges=2};
+        var dash=new DashMotion();Check(dash.TryStart(settings,true,1,1,0,1),"begin dash before counter reward");
+        Near(dash.Step(.1),1.4,"first half of diagonal dash");dash.RefillCharges(settings);
+        Check(dash.Active&&dash.Charges==2&&dash.RechargeRemaining==0,"counter refill preserves active trajectory");
+        Near(dash.Step(.1),1.4,"counter refill does not extend dash");
+        Check(!dash.Active,"dash ends at original time");
+        dash.TryStart(settings,true,0,1,0,1);dash.Step(.2);dash.TryStart(settings,true,0,1,0,1);dash.Step(.2);
+        Check(dash.Charges==0,"empty dash before opportunity");
+        var opportunity=new CounterOpportunity();opportunity.Open(10,3);int id=opportunity.Id,refills=0;
+        Check(!opportunity.Consume(id,11,false),"normal hit cannot consume counter window");
+        for(int i=0;i<8;i++)if(opportunity.Consume(id,11,true)){dash.RefillCharges(settings);refills++;}
+        Check(refills==1&&dash.Charges==2,"one opportunity gives exactly one complete refill");
+        opportunity.Open(12,3);Check(!opportunity.Consume(id,13,true),"old opportunity callback cannot consume newer window");
+        Check(!opportunity.Consume(opportunity.Id,float.NaN,true),"invalid server time rejected");
+        Check(!opportunity.Consume(opportunity.Id,-1,true),"negative time cannot claim an opportunity");
+        Check(!opportunity.Consume(opportunity.Id,15,true),"counter at expired window rejected");
+        opportunity.Open(16,3);id=opportunity.Id;opportunity.Clear();Check(!opportunity.Consume(id,17,true),"retry/phase clears counter opportunity");
+        var replicaDash=new DashMotion();replicaDash.Restore(dash.Capture());Check(replicaDash.Charges==2&&replicaDash.RechargeRemaining==0,"full counter charges replicate");
+
+        var caster=new CharacterRuntimeState(definition);int hits=0;
+        Check(!caster.TryUse(CharacterSlot.Counter,new CharacterUseContext(true,true,true,3.1f),1,s=>{hits++;return true;},out _),"invalid counter range does not start rush cast");
+        Check(caster.Snapshot.castSkillId==""&&Timing(caster,CharacterSlot.Counter).charges==1,"failed rush costs nothing");
+        Check(caster.TryUse(CharacterSlot.Counter,Ready,1,s=>{hits++;return true;},out _),"counter starts short rush cast");
+        Check(hits==0&&Timing(caster,CharacterSlot.Counter).charges==1,"counter hit and cooldown wait for arrival");
+        caster.Tick(AegisPaladinData.CounterRushDuration,true);Check(caster.FinishCast(Ready,s=>{hits++;return true;},out _),"own rush movement does not cancel counter");
+        Check(hits==1&&Timing(caster,CharacterSlot.Counter).charges==0,"counter completion commits once");
+        Check(!caster.FinishCast(Ready,s=>{hits++;return true;},out _)&&hits==1,"completion callback cannot replay");
+        caster.Reset(CharacterReset.Retry);caster.TryUse(CharacterSlot.Counter,Ready,1,s=>true,out _);caster.CancelCast();
+        Check(!caster.FinishCast(Ready,s=>true,out _)&&Timing(caster,CharacterSlot.Counter).charges==1,"interrupted rush no attack or cooldown");
+
+        var gate=new CombatEventGate();var damage=new AegisDamageState();damage.Route.Activate(AegisRouteData.Mirror,0);
+        int blocked=0,holy=0,retaliations=0;double passiveReflection=0;
+        for(int i=0;i<5;i++)if(gate.Accept(12)&&damage.Route.TryGuard(AegisRouteData.Mirror,CombatDamageKind.Direct,false,1,400,3000,out double reflected))
+        {blocked++;if(damage.ShieldAbsorbed(400))holy+=5;if(reflected>0)retaliations++;passiveReflection+=damage.Route.Reflect(AegisRouteData.Mirror,CombatDamageKind.Direct,400,3000);}
+        Check(blocked==1&&holy==5&&retaliations==1,"one hit cannot duplicate guard, resource or retaliation");
+        Near(passiveReflection,100,"actual guard grants one capped passive reflection");
+        Near(damage.Route.Reflect(AegisRouteData.Mirror,CombatDamageKind.Direct,200,3000),0,"guard and shield reflection share ICD");
+        Check(!damage.ShieldAbsorbed(100),"guard and shield paths share resource ICD");
+        damage.Advance(1.1f);
+        Check(gate.Accept(13)&&damage.Route.TryGuard(AegisRouteData.Mirror,CombatDamageKind.Direct,false,1,200,3000,out double repeated)&&repeated==0,"second attack blocked but no second shockwave");
+        Check(damage.ShieldAbsorbed(200),"next real block after ICD gives resource");
+        Near(damage.Route.Reflect(AegisRouteData.Mirror,CombatDamageKind.Direct,200,3000),50,"second block may reflect after ICD without repeating Z wave");
+        var copyDamage=new AegisDamageState();Check(copyDamage.Restore(damage.Capture()),"reconnect replaces guard and passive ICD state");
+        Near(copyDamage.Route.Reflect(AegisRouteData.Mirror,CombatDamageKind.Direct,200,3000),0,"reconnect cannot reset reflection ICD");
+        damage.Advance(1);Check(!gate.Accept(12),"old callback after guard expiry cannot apply original damage");
+        gate.Clear();Check(gate.Accept(12),"new encounter resets recipient event history");
+        foreach(var kind in new[]{CombatDamageKind.Deferred,CombatDamageKind.Reflection,CombatDamageKind.Extra,CombatDamageKind.System})
+            Check(!CombatDamageRules.CanGuard(kind,false)&&!CombatDamageRules.CanReact(kind),"no recursive secondary defense proc");
+        var debt=new AegisDamageState();debt.Activate();
+        double confirmed=AegisRouteData.Mitigate(1000,120)-200;
+        double immediate=debt.Split(confirmed);Near(immediate+debt.Advance(10),confirmed,"armor then shield then Q conserves confirmed damage");
     }
 }

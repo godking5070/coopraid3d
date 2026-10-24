@@ -6,7 +6,7 @@ namespace RaidRogue
     // Extra common slots share the existing HUD canvas/input blockers. Existing 1/2/3/Q + movement/potion stay intact.
     public sealed class CharacterFrameworkUI : MonoBehaviour
     {
-        private SkillHotbarUI _hotbar;private RectTransform _root;private Text _resources, _deferred, _identity;
+        private SkillHotbarUI _hotbar;private RectTransform _root;private Text _resources, _deferred, _identity, _stats;
         private readonly Dictionary<CharacterSlot,Text> _labels=new Dictionary<CharacterSlot,Text>();
         private readonly Dictionary<CharacterSlot,Button> _buttons=new Dictionary<CharacterSlot,Button>();
         private readonly Dictionary<string,Image> _gauges=new Dictionary<string,Image>();
@@ -28,6 +28,7 @@ namespace RaidRogue
             _resources=Label(_root,"",new Vector2(0,49),new Vector2(850,28),13);
             _deferred=Label(_root,"",new Vector2(0,95),new Vector2(900,24),13);
             _identity=Label(_root,"",new Vector2(0,134),new Vector2(900,54),14);
+            _stats=Label(_root,"",new Vector2(0,185),new Vector2(1000,44),12);
         }
         private CharacterActor Actor()=>_hotbar?.combatController!=null?CharacterActor.Ensure(_hotbar.combatController.gameObject):null;
         private void Update()
@@ -59,16 +60,26 @@ namespace RaidRogue
             var aegis=actor.GetComponent<AegisPaladin>();
             _deferred.text=aegis!=null&&aegis.IsActive?"남은 지연 피해 "+aegis.DamageState.Pending.ToString("0.#")+(aegis.DamageState.FaithRemaining>0?" · 불굴의 신념 "+aegis.DamageState.FaithRemaining.ToString("0.0")+"초":""):"";
             _identity.text="";
+            _stats.text="";
             if(aegis!=null&&aegis.IsActive)
             {
                 var identity=actor.Selected(CharacterSlot.Identity);
                 string effect=AegisRouteData.EffectSummary(actor.RouteId);
-                _identity.text=aegis.RouteName+" · ["+LocalInputBindings.Label(CharacterSlots.Binding(CharacterSlot.Identity))+"] "+identity.name+"\n"+effect;
+                _identity.text=aegis.RouteName+" · "+AegisRouteData.PassiveSummary(actor.RouteId)+"\n["+LocalInputBindings.Label(CharacterSlots.Binding(CharacterSlot.Identity))+"] "+identity.name+" · "+effect;
                 if(aegis.DamageState.Route.Transformation>0)_deferred.text+=" · 쌍성검 "+aegis.DamageState.Route.Transformation.ToString("0.0")+"초";
                 if(aegis.DamageState.Route.Guard>0)_deferred.text+=" · 가드 "+aegis.DamageState.Route.Guard.ToString("0.0")+"초";
+                var player=actor.GetComponent<PlayerController>();
+                if(player!=null)
+                {
+                    var movement=actor.MovementSettings(player.dashSettings);
+                    var jobMovement=actor.Selected(CharacterSlot.Movement).movement;
+                    _stats.text=$"중갑의 무게: 기본 이동 ×{actor.Definition.moveSpeedMultiplier*100:0}% / 대쉬 거리 ×{jobMovement.commonDistanceMultiplier*100:0}% · 최종 이동 {player.NetworkMoveSpeed:0.##}m/s · [{LocalInputBindings.Label("Dash")}] {movement.distance:0.##}m / {movement.maximumCharges}충전\n"+
+                        $"최대 HP {player.maxHp:0} · 물리 방어 {aegis.PhysicalDefense:0} / 마법 방어 {aegis.MagicDefense:0} · 강인함 {aegis.Tenacity:0} · 기본 공격 사거리 {actor.PrimaryRange:0.#}m";
+                }
             }
             float immunity=actor.GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0;
             if(immunity>0)_deferred.text+=" · 성채 보호 "+immunity.ToString("0.0")+"초";
+            if((actor.GetComponent<CombatStatusEffects>()?.ControlImmunity??0)>0)_deferred.text+=" · 피격 이상 면역";
             foreach(var slot in _labels.Keys)
             {
                 var selection=System.Array.Find(state.selections,s=>s.slot==slot);var skill=selection==null?null:actor.Definition.Skill(selection.skillId);

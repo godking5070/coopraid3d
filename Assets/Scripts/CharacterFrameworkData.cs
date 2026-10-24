@@ -14,7 +14,11 @@ namespace RaidRogue
     { public string id, name; public float maximum=100, initial; public bool integer, resetOnRetry=true, resetOnStage=true; }
     [Serializable] public sealed class ResourceCost { public string resourceId; public float amount; }
     [Serializable] public sealed class JobMovementDefinition
-    { public float distance=4, duration=.2f; public bool preserveCast; }
+    {
+        public float distance=4, duration=.2f, commonDistanceMultiplier=1;
+        public bool preserveCast, useCommonDistance;
+        public float ResolveDistance(float commonDistance)=>(useCommonDistance?commonDistance:distance)*commonDistanceMultiplier;
+    }
     [Serializable] public sealed class CharacterSkillDefinition
     {
         public string id, name, description, handlerId, iconKey;
@@ -37,6 +41,7 @@ namespace RaidRogue
         public bool playable; public int legacyRole;
         public CharacterRole role; public AttackClassification classification;
         public float baseHp=1000, moveSpeed=7.8f, combatRadius=.55f;
+        public float moveSpeedMultiplier=1, physicalDefense, magicDefense, tenacity;
         public CharacterSlotDefinition[] slots=Array.Empty<CharacterSlotDefinition>();
         public CharacterSkillDefinition[] skills=Array.Empty<CharacterSkillDefinition>();
         public JobResourceDefinition[] resources=Array.Empty<JobResourceDefinition>();
@@ -77,7 +82,7 @@ namespace RaidRogue
                     if (s.legacyAction < 0 || s.legacyAction > 6 || s.legacyAction == 5 || d.legacyRole == 0 && s.legacyAction > 0 && s.legacyAction != 6) errors.Add(d.id+": 기존 테스트 전용 실행기는 테스트 직업에서만 사용합니다");
                     if (s.implemented && string.IsNullOrWhiteSpace(s.handlerId)) errors.Add(d.id+": 실행 처리기 누락");
                     foreach (var c in s.costs ?? Array.Empty<ResourceCost>()) if (c == null || !resources.Contains(c.resourceId) || !Finite(c.amount) || c.amount < 0) errors.Add(d.id+": 잘못된 자원 비용");
-                    if (s.movement != null && (!Finite(s.movement.distance) || s.movement.distance <= 0 || !Finite(s.movement.duration) || s.movement.duration <= 0)) errors.Add(d.id+": 잘못된 이동기");
+                    if (s.movement != null && (!Finite(s.movement.distance) || s.movement.distance <= 0 || !Finite(s.movement.duration) || s.movement.duration <= 0 || !Finite(s.movement.commonDistanceMultiplier) || s.movement.commonDistanceMultiplier<=0)) errors.Add(d.id+": 잘못된 이동기");
                 }
                 foreach (var slot in d.slots ?? Array.Empty<CharacterSlotDefinition>())
                     if (slot == null || !Enum.IsDefined(typeof(CharacterSlot),slot.slot) || !slots.Add(slot.slot) || !skills.Contains(slot.skillId)) errors.Add(d.id+": 중복 슬롯/누락 스킬 참조");
@@ -88,6 +93,7 @@ namespace RaidRogue
                 foreach (var rule in d.unlocks ?? Array.Empty<CharacterUnlockDefinition>())
                     if (rule == null || string.IsNullOrEmpty(rule.id) || !options.Add(rule.id) || rule.afterStage < 0 || !slots.Contains(rule.slot) || rule.choices == null || rule.choices.Length == 0 || rule.choices.Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 성장 참조");
                 if (!Finite(d.combatRadius) || d.combatRadius <= 0 || !Finite(d.baseHp) || d.baseHp <= 0 || !Finite(d.moveSpeed) || d.moveSpeed <= 0) errors.Add(d.id+": 잘못된 기본 스탯");
+                if(!Finite(d.moveSpeedMultiplier)||d.moveSpeedMultiplier<=0||!Finite(d.physicalDefense)||d.physicalDefense<0||!Finite(d.magicDefense)||d.magicDefense<0||!Finite(d.tenacity)||d.tenacity<0)errors.Add(d.id+": 잘못된 방어/이동 보정");
             }
             return errors.ToArray();
         }
