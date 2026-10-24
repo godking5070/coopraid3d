@@ -64,3 +64,20 @@
 - 수정 후 `Build-Part1Windows.ps1 -CheckOnly` 실제 실행: **누락 24개/내용 변경 53개/추가 컴파일 입력 0개**, 원본 에디터 실행 중으로 정상 차단. Unity/BuildPipeline 실행 및 exe 생성 없음.
 - 원본 사용자 변경과 겹치는 5개 파일을 PLAYTEST에 명시. 이 단계 이후 필요한 작업은 최신 소스 원본 반영 및 Unity/네트워크 실제 실행이며, 이전의 광범위 게임 검사를 이유 없이 반복하지 않음.
 - 재개 종료 확인: PowerShell 3개 구문 및 `git diff --check` 통과. 원본 기준 309개 파일 SHA256 차이 0. 원본 브랜치/미커밋 변경 유지. worktree Library/Builds, 원본 RaidPart1.exe 없음. 원본 Unity만 실행 중이며 빌드/플레이 검사를 중복 실행하지 않음. 이번 변경은 Tests 아래 PowerShell 3개와 기록 문서 4개이며 게임 C#/씬/meta는 변경하지 않음.
+
+## 원본 소스 반영 시작 (사용자 요청: 진행 요약의 1번)
+
+- 원본 브랜치 `feature/aegis-paladin-routes` / `7c57e36`, 작업 소스 `feature/part1-playable-build` / `b5de65a` 확인. 브랜치 전환/Git 병합 없이 작업 파일에 반영한다.
+- 원본 미커밋 7개 파일과 미추적 CharacterSkillTestWindow.cs의 내용이 보존 선행 커밋 `cd86fa2`와 모두 일치함을 확인. 사용자 수정은 최신 브랜치의 조상에 포함되어 있으며 이후 독립적인 원본 코드 변경 없음. 스킬 테스트 API·시험 창·관련 테스트와 직업 선택 UI의 후속 구현 확인.
+- 기존 미추적 .meta 26개의 GUID가 최신 소스와 일치. 원본 ProjectSettings.asset도 최신 내용과 일치하므로 해당 파일과 기존 meta는 복사하지 않는다.
+- 다음: 원본에 적용할 파일 목록과 원본 바이트 백업을 .git 아래에 기록 → 해시 재확인 후 소스/테스트/문서 반영 → 소스 일치 및 보호 대상 검증. Unity 빌드/플레이는 이번 단계에 포함하지 않는다.
+
+## 원본 반영 완료 및 검증
+
+- 백업 경로: `C:/coopraid/coopraid3d/.git/codex-backups/part1-apply-20261024T113825Z`. original/에 기존 파일 바이트, user-changes.patch, status-before.txt, index-before.txt, manifest.json에 전후 해시와 적용 목록 기록.
+- 검토된 파일 113개 반영(기존 60개 갱신/53개 추가). 적용 직전 원본/소스 해시를 재확인하고 준비한 파일을 교체. 기존 meta/씬/프리팹/ProjectSettings에 쓰기 없음. 보호 대상 249개 해시와 원본 Git 인덱스 동일.
+- 원본 브랜치 `feature/aegis-paladin-routes` / HEAD `7c57e36` 유지, 변경은 미커밋 상태. 사용자 변경은 cd86fa2를 포함하는 최신 버전으로 계승. Git 병합/전환/푸시/배포 없음.
+- 작업 소스와 원본의 컴파일 입력 비교: 누락 0/내용 차이 0/추가 입력 0. 빌드 사전 검사는 원본 에디터 실행 중이라는 조건만 남음.
+- 원본 `Run-AegisRouteChecks.ps1` 실제 실행: **21,565개 통과**. 기존 사용자 시험 도구/선택/자원/회복 상태 테스트를 포함한 계산 검사이며 Unity 실행은 아님.
+- diff 검사에서 일시적으로 core.autocrlf=false 옵션을 사용해 CRLF를 공백 오류로 표시한 검사 호출이 있었음. 소스는 변경하지 않고 저장소 기본 설정으로 다시 실행하여 `git diff --check` 통과 확인.
+- 원본 Unity 로그는 반영 이후 새 컴파일 완료 기록 없음. 작업 worktree Library 없음. 빌드/Play는 미실행이며 다음 단계에서 원본 재컴파일부터 확인한다.

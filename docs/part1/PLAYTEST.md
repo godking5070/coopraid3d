@@ -2,7 +2,7 @@
 
 ## 빌드 전제
 
-- 최신 변경을 검토하여 **원본** `C:/coopraid/coopraid3d`에 반영해야 한다. 현재 원본은 이전 팔라딘 브랜치와 사용자 변경을 유지하고 있다. 이번 작업은 자동 병합/소스 복사/브랜치 전환을 하지 않는다.
+- 최신 변경은 사용자 승인 후 **원본** `C:/coopraid/coopraid3d`에 반영 완료했다. 원본은 기존 팔라딘 브랜치/HEAD를 유지하며 최신 파일이 미커밋 변경으로 존재한다. Git 병합·브랜치 전환은 수행하지 않았다. 이후 사용자 수정이 생기면 사전 검사에서 다시 대조한다.
 - worktree에서 Unity를 열거나 Library를 만들지 않는다.
 - Unity 6000.3.26f1 및 Windows Build Support. 원본에서 컴파일을 마치고 열린 씬의 사용자 변경을 저장한다.
 - 원본 메뉴 `Raid Rogue > Build Part 1 Playable (Windows)` 실행. 기존 SceneAutoBuilder로 전용 `Assets/Scenes/Part1_Playable.unity`를 구성하고 이 씬만 빌드한다. 참조 누락/중복 플레이어/잘못된 챕터를 사전 거절한다. 기존 테스트 씬은 다시 쓰지 않는다.
@@ -18,9 +18,9 @@
 
 사전 검사 자체의 회귀 검사는 `Tests/Run-Part1BuildChecks.ps1`로 실행한다. 실제 임시 파일만 사용하며 Unity/Library를 실행·생성하지 않는다.
 
-### 원본 반영 전 검토 지점
+### 원본 반영 시 확인한 보존 지점
 
-2026-10-24 재개 시 실제 차이: 원본에 없는 파일 24개, 내용이 다른 파일 53개. 다음 5개는 원본 미커밋 수정과 겹치므로 전체 덮어쓰기로 처리하지 않는다.
+2026-10-24 반영 전 실제 차이: 원본에 없는 파일 24개, 내용이 다른 파일 53개. 아래 5개를 포함한 원본 미커밋 코드/설정/테스트와 시험 창이 모두 보존 선행 커밋 `cd86fa2`와 일치함을 확인했다. 최신 소스는 해당 커밋을 포함하며 관련 기능을 이어서 구현한 버전이다. 원본 바이트 백업 후 반영했으며 현재 소스 차이는 0개다.
 
 | 파일 (Assets/Scripts 아래) | 검토할 내용 |
 |---|---|
@@ -30,7 +30,7 @@
 | CharacterRuntimeState.cs | 원본 시험 상태 조작과 최신 선택·보상 상태 처리 대조 |
 | RoleSelectionManager.cs | 원본 선택 UI 변경과 최신 12직업/저장된 빌드 고정 정책 대조 |
 
-원본의 ProjectSettings, Tests/AegisRouteTests.cs, 미추적 .meta 및 Editor/CharacterSkillTestWindow.cs도 보존한다. 최신 브랜치에는 시험 창과 관련 API가 이미 있으므로 원본 미추적 파일을 중복 추가하거나 GUID를 다시 만들지 않는다. 이 작업에서는 원본 통합/복사/브랜치 전환을 수행하지 않았다. 반영 후 원본 Unity 컴파일을 먼저 확인하고, 에디터 메뉴 빌드 또는 원본 에디터 종료 후 배치 빌드를 선택한다.
+원본 ProjectSettings와 기존 .meta/씬은 바이트 그대로 보존했다. AegisRouteTests와 CharacterSkillTestWindow는 원본 사용자 기능을 계승한 최신 버전을 반영했으며 원본에서 관련 검사 21,565개가 통과했다. 기존 GUID를 바꾸거나 중복 시험 창을 생성하지 않았다. 반영 전 백업과 파일별 해시는 `.git/codex-backups/part1-apply-20261024T113825Z`에 있다. 원본 Unity 컴파일을 먼저 확인하고, 에디터 메뉴 빌드 또는 원본 에디터 종료 후 배치 빌드를 선택한다.
 
 현재 Steam App ID는 0이다. 오프라인/AI/LAN은 사용 가능하다. Steam 테스트는 기존 Configuration 메뉴에서 실제 앱 설정 또는 명시적인 개발 환경 설정을 사용한다. 임의 ID 설정·배포는 하지 않는다.
 
