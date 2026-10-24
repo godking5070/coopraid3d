@@ -57,6 +57,18 @@ namespace RaidRogue
         private Vector2 _cursorBeforeDrag;
         private bool _ownsCursor;
         private bool _restoreCursorPending;
+        private Transform _spectatorTarget;
+        public Transform SpectatorTarget => _spectatorTarget;
+
+        // Presentation only: never replace target, the controlled player or the combat selection.
+        public void Spectate(Transform member)
+        {
+            if (_player == null || !_player.IsDead || !CombatRange.LivingPartyMember(member)) member = null;
+            if (_spectatorTarget == member) return;
+            _spectatorTarget = member;
+            ReleaseOrbit();
+            SnapToTargetImmediate();
+        }
 
         public Camera UnityCamera => _cam != null ? _cam : (_cam = GetComponent<Camera>());
         public bool Is2DMode => currentViewMode == CameraViewMode.View2D_TopDown;
@@ -158,6 +170,8 @@ namespace RaidRogue
 
         private void LateUpdate()
         {
+            if (_spectatorTarget != null && (_player == null || !_player.IsDead || !CombatRange.LivingPartyMember(_spectatorTarget) || StageManager.CombatSuspended))
+                Spectate(null);
             // A menu can open after this camera's Update, including on a UI click.
             if (LocalGameplayInput.Blocked) ReleaseOrbit();
             float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
@@ -184,7 +198,8 @@ namespace RaidRogue
         }
         private Vector3 DesiredFocus()
         {
-            Vector3 playerPosition = target != null ? target.position : Vector3.zero;
+            var focusTarget = _spectatorTarget != null ? _spectatorTarget : target;
+            Vector3 playerPosition = focusTarget != null ? focusTarget.position : Vector3.zero;
             if (!Is2DMode) return playerPosition + targetOffset;
             float visibleZoom = Mathf.InverseLerp(DefaultOrthoSize, minimumOrthoSize, _orthoSize);
             float follow = (float)CameraControlMath.FollowBlend(visibleZoom);

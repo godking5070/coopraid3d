@@ -18,6 +18,7 @@ namespace RaidRogue
         private GameObject _confirmation, _recoveryPanel;
         private Button _recover, _retry, _cancelRecovery, _aegis;
         private Text _recoveryStatus, _partyNotice;
+        private float _nextRosterRefresh;
         private void Start()
         {
             _session = GetComponent<RaidNetworkSession>();
@@ -135,7 +136,10 @@ namespace RaidRogue
                 foreach (var role in _roles) role.gameObject.SetActive(false);
                 return;
             }
-            if (starting) return;
+            // The hidden lobby used to rebuild strings and query native Steam members every frame.
+            // Admission/control validation remains in the host simulation, independent of UI refresh.
+            if (starting || !_session.MenuOpen || Time.unscaledTime < _nextRosterRefresh) return;
+            _nextRosterRefresh = Time.unscaledTime + .2f;
             if (_session.Mode == RaidSessionMode.Single)
                 _roster.text = "싱글플레이 진행 중\n연결 종료를 누르면 시작 화면으로 돌아갑니다.";
             else

@@ -182,7 +182,12 @@ namespace RaidRogue
             }
             if (BattlePhase != RaidBattlePhase.Combat) { ActionFailure(owner, "현재 전투 중이 아닙니다"); return; }
             var pc = avatar.GetComponent<PlayerController>();
-            if(request.skill==5){var rescueTarget=request.target==0&&pc!=null&&pc.IsDead?pc.transform:CombatTarget(request.target);if(!IrisRescue.TryUse(avatar.transform,rescueTarget,request.attemptId,request.deathGeneration))ActionFailure(owner,"이리스 구조 실패: 현재 도전·사망 대상·공유 부활 횟수를 확인하세요");return;}
+            if (request.skill == 5)
+            {
+                var rescueTarget = request.target == 0 && pc != null && pc.IsDead ? pc.transform : CombatTarget(request.target);
+                IrisRescue.TryUse(avatar.transform, rescueTarget, request.attemptId, request.deathGeneration, out string result);
+                ActionNotice(owner, result); return;
+            }
             if (pc == null || pc.IsDead || pc.IsStunned || pc.IsBeingRescued || pc.IsBeingKnockedBack) { ActionFailure(owner, "현재 행동할 수 없습니다"); return; }
             Transform target = CombatTarget(request.target);
             if (request.target != 0 && target == null) { ActionFailure(owner, "대상이 더 이상 존재하지 않습니다"); return; }
@@ -206,6 +211,8 @@ namespace RaidRogue
             finally { RaidCombatAuthority.ExecutingActor = 0; }
         }
         private void ActionFailure(int owner, string reason)
+            => ActionNotice(owner, reason);
+        private void ActionNotice(int owner, string reason)
         {
             if (owner == _localId) { Status = reason; _player.combatController.ReportNetworkFailure(reason); }
             else { var peer = _peers.Find(p => p.Id == owner); if (peer != null) Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.Notice, Text = reason }, true); }

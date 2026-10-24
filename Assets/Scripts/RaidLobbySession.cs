@@ -22,7 +22,7 @@ namespace RaidRogue
         private void SetReady(int id, bool ready)
         {
             if(!IsHost||!CanChooseRole)return;
-            if(ready&&_avatars.TryGetValue(id,out var avatar)&&!CharacterActor.Ensure(avatar.gameObject).DepartureReady){ActionFailure(id,"출발 전에 이지스 팔라딘의 기원을 선택하세요");return;}
+            if(ready&&_avatars.TryGetValue(id,out var avatar)&&!CharacterActor.Ensure(avatar.gameObject).DepartureReady){ActionFailure(id,"출발 전에 선택한 직업의 기원을 선택하세요");return;}
             if (!_roster.SetReady(id, ready)) return;
             SyncLobbyAvatar(_roster.Members.Find(m => m.Id == id));
         }

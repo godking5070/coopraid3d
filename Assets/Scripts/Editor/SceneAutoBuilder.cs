@@ -41,6 +41,8 @@ namespace RaidRogue.Editor
 
         private static void AutoSetupIfNeeded()
         {
+            // Batch builds generate their own explicit entry scene. Never rewrite an arbitrary scene on import.
+            if (Application.isBatchMode) return;
             BossController existingBoss = Object.FindFirstObjectByType<BossController>();
             RoguelikeCardManager existingCardMgr = Object.FindFirstObjectByType<RoguelikeCardManager>();
             PlayerCombatController existingCombat = Object.FindFirstObjectByType<PlayerCombatController>();
@@ -163,6 +165,19 @@ namespace RaidRogue.Editor
         }
 
         public static void BuildRaidScene()
+            => BuildRaidScene(true);
+
+        public static void BuildPartOneScene()
+        {
+            if (System.IO.File.Exists(System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName, ".git")))
+                throw new System.InvalidOperationException("Codex worktree에서는 Unity 씬 생성/빌드를 실행하지 마세요.");
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            BuildRaidScene(false);
+            if (!EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), "Assets/Scenes/Part1_Playable.unity"))
+                throw new System.IO.IOException("1부 빌드 씬 저장에 실패했습니다.");
+        }
+
+        private static void BuildRaidScene(bool writeTestCopies)
         {
             if (EditorApplication.isPlaying)
             {
@@ -212,6 +227,8 @@ namespace RaidRogue.Editor
             {
                 EditorSceneManager.SaveScene(activeScene);
             }
+            if (writeTestCopies)
+            {
             EditorSceneManager.SaveScene(activeScene, Step1ScenePath, true);
             EditorSceneManager.SaveScene(activeScene, Step2ScenePath, true);
             EditorSceneManager.SaveScene(activeScene, Step3ScenePath, true);
@@ -221,6 +238,7 @@ namespace RaidRogue.Editor
             EditorSceneManager.SaveScene(activeScene, Step7ScenePath, true);
             EditorSceneManager.SaveScene(activeScene, Step8ScenePath, true);
             EditorSceneManager.SaveScene(activeScene, Step9ScenePath, true);
+            }
             AssetDatabase.Refresh();
 
             Selection.activeGameObject = player.gameObject;

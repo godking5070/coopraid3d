@@ -66,9 +66,13 @@ namespace RaidRogue
 
         public bool TryBegin(Transform target)
         {
-            if(target==null&&_life.IsDead)target=transform;
+            if (_player != null && RaidCombatAuthority.Local(this) && LocalGameplayInput.Blocked) return false;
+            if (_life.IsDead) target = transform;
             if (RaidCombatAuthority.Route(this, 5, target)) return false;
-            return IrisRescue.TryUse(transform, target, StageManager.Instance?.AttemptId, target != null ? target.GetComponent<PartyLife>()?.DeathGeneration ?? 0 : 0);
+            bool revived = IrisRescue.TryUse(transform, target, StageManager.Instance?.AttemptId,
+                target != null ? target.GetComponent<PartyLife>()?.DeathGeneration ?? 0 : 0, out string reason);
+            if (_player != null && RaidCombatAuthority.Local(this)) _player.combatController?.ReportNetworkFailure(reason);
+            return revived;
         }
         private bool TryBeginLegacy(Transform target)
         {

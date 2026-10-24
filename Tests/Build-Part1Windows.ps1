@@ -1,0 +1,66 @@
+param(
+    [string]$OriginalProject = 'C:/coopraid/coopraid3d',
+    [string]$Unity,
+    [switch]$CheckOnly
+)
+$ErrorActionPreference = 'Stop'
+$taskSource = (Resolve-Path (Split-Path $PSScriptRoot -Parent)).Path
+$taskOriginal = (Resolve-Path -LiteralPath $OriginalProject).Path
+if (Test-Path -LiteralPath (Join-Path $taskOriginal '.git') -PathType Leaf) {
+    throw 'Unity must never run in a worktree. Pass the original Unity project.'
+}
+if (!(Test-Path -LiteralPath (Join-Path $taskOriginal '.git') -PathType Container)) {
+    throw 'The original Git project directory is required.'
+}
+$taskVersionText = Get-Content -LiteralPath (Join-Path $taskOriginal 'ProjectSettings/ProjectVersion.txt') -Raw
+$taskVersion = [regex]::Match($taskVersionText, 'm_EditorVersion: (\S+)').Groups[1].Value
+if (!$Unity) { $Unity = Join-Path ${env:ProgramFiles} "Unity/Hub/Editor/$taskVersion/Editor/Unity.exe" }
+$taskProblems = [System.Collections.Generic.List[string]]::new()
+if (!(Test-Path -LiteralPath $Unity)) { $taskProblems.Add("Unity editor not found: $Unity") }
+$taskDifferent = [System.Collections.Generic.List[string]]::new()
+# Read-only comparison. Never copy, stash, reset, switch branches, or alter user source files.
+$taskFiles = @(& rg --files (Join-Path $taskSource 'Assets/Scripts') -g '*.cs')
+$taskFiles += Join-Path $taskSource 'Assets/Resources/RaidSteamSettings.json'
+$taskFiles += Join-Path $taskSource 'Packages/manifest.json'
+$taskFiles += Join-Path $taskSource 'Packages/packages-lock.json'
+foreach ($taskFile in $taskFiles) {
+    $taskRelative = $taskFile.Substring($taskSource.Length + 1)
+    $taskTarget = Join-Path $taskOriginal $taskRelative
+    if (!(Test-Path -LiteralPath $taskTarget) -or
+        (Get-FileHash -LiteralPath $taskFile -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $taskTarget -Algorithm SHA256).Hash) {
+        $taskDifferent.Add($taskRelative)
+    }
+}
+if ($taskDifferent.Count -gt 0) {
+    $taskProblems.Add("Original source differs in $($taskDifferent.Count) required files. Review/apply the playable branch before building. No source was changed.")
+    $taskDifferent | Select-Object -First 8 | ForEach-Object { Write-Output "Different: $_" }
+}
+$taskEditors = @(Get-CimInstance Win32_Process -Filter "name = 'Unity.exe'" | Where-Object {
+    $_.CommandLine -and $_.CommandLine.Replace('/', '\').IndexOf($taskOriginal.Replace('/', '\'), [StringComparison]::OrdinalIgnoreCase) -ge 0
+})
+if ($taskEditors.Count -gt 0) { $taskProblems.Add('Original Unity editor is open. Use its build menu after source review, or close it before this batch command.') }
+$taskOutput = Join-Path $taskOriginal 'Builds/Part1Windows'
+Write-Output "Original: $taskOriginal"
+Write-Output "Unity: $Unity"
+Write-Output "Output: $(Join-Path $taskOutput 'RaidPart1.exe')"
+if ($taskProblems.Count -gt 0) {
+    foreach ($taskProblem in $taskProblems) { Write-Output "BLOCKED: $taskProblem" }
+    if ($CheckOnly) { exit 2 }
+    throw 'Preflight failed; Unity was not launched.'
+}
+if ($CheckOnly) { Write-Output 'PASS: read-only preflight. No build or gameplay executed.'; exit 0 }
+[IO.Directory]::CreateDirectory($taskOutput) | Out-Null
+$taskLog = Join-Path $taskOutput 'UnityBuild.log'
+if ($taskOriginal.Contains('"') -or $taskLog.Contains('"')) { throw 'Unsupported quote in path.' }
+$taskArguments = '-batchmode -quit -projectPath "' + $taskOriginal + '" -executeMethod RaidRogue.EditorTools.RaidMultiplayerBuild.BuildPartOne -logFile "' + $taskLog + '"'
+$taskStarted = [DateTime]::UtcNow
+$taskProcess = Start-Process -FilePath $Unity -ArgumentList $taskArguments -WindowStyle Hidden -PassThru
+$taskProcess.WaitForExit()
+if ($taskProcess.ExitCode -ne 0) { throw "Unity build failed ($($taskProcess.ExitCode)); inspect $taskLog" }
+if (!(Test-Path -LiteralPath (Join-Path $taskOutput 'RaidPart1.exe')) -or !(Test-Path -LiteralPath (Join-Path $taskOutput 'BUILD_INFO.txt'))) {
+    throw "Unity did not produce the expected executable and build receipt. Inspect $taskLog"
+}
+if ((Get-Item -LiteralPath (Join-Path $taskOutput 'BUILD_INFO.txt')).LastWriteTimeUtc -lt $taskStarted) {
+    throw 'The build receipt is from an older build. Do not report the old executable as this build result.'
+}
+Write-Output "PASS: Windows executable built at $taskOutput. Gameplay and Steam connections still require the manual checklist."

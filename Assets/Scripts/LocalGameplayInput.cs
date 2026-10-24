@@ -18,12 +18,15 @@ namespace RaidRogue
         private static RoguelikeCardManager _cards;
         private static StageManager _stages;
         private static readonly List<RaycastResult> Hits = new List<RaycastResult>();
+        private static EventSystem _pointerSystem;
+        private static PointerEventData _pointer;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset()
         {
             _blockedFrame = _pointerFrame = _escapeFrame = -1;
             _roles = null; _cards = null; _stages = null; Hits.Clear();
+            _pointerSystem = null; _pointer = null;
         }
 
         public static void ResetSession()
@@ -91,8 +94,11 @@ namespace RaidRogue
             if (_pointerFrame == Time.frameCount) return true;
             if (CombatMetricsUI.BlocksPointer(position)) { SuppressPointerThisFrame(); return true; }
             if (EventSystem.current == null) return false;
+            if (_pointer == null || _pointerSystem != EventSystem.current)
+            { _pointerSystem = EventSystem.current; _pointer = new PointerEventData(_pointerSystem); }
             Hits.Clear();
-            EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = position }, Hits);
+            _pointer.Reset(); _pointer.position = position;
+            EventSystem.current.RaycastAll(_pointer, Hits);
             foreach (var hit in Hits)
             {
                 if (hit.module is GraphicRaycaster)

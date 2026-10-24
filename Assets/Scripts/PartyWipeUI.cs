@@ -26,7 +26,7 @@ namespace RaidRogue
             _buttons.transform.SetParent(overlay, false);
             ButtonAt(_buttons.transform, "이번 시도 전투 기록", new Vector2(-175, -100), () => GetComponent<CombatMetricsUI>()?.ShowFailedResult());
             _retry = ButtonAt(_buttons.transform, "현재 보스 재도전", new Vector2(175, -100), _stage.RetryCurrentBoss);
-            _connection = ButtonAt(_buttons.transform, "방 / 연결", new Vector2(0, -180), () => { if (RaidNetworkSession.Instance != null) RaidNetworkSession.Instance.MenuOpen = true; }).gameObject;
+            _connection = ButtonAt(_buttons.transform, "메인 메뉴로", new Vector2(0, -180), () => RaidNetworkSession.Instance?.Disconnect()).gameObject;
             return true;
         }
         public void ShowWipe()
@@ -38,7 +38,7 @@ namespace RaidRogue
             _connection.SetActive(true);
             _title.text = "PARTY WIPED";
             _title.color = new Color(1f, 0.4f, 0.4f);
-            _details.text = $"STAGE {_stage.currentStage} · 파티 전멸\n재도전 시 현재 스테이지와 획득한 카드 성장은 유지됩니다.";
+            _details.text = $"STAGE {_stage.currentStage} / {_stage.maxStage} · 파티 전멸\n재도전: 현재 빌드 유지 · 공유 부활 4회. 이번 시도 전투 기록에서 피해를 확인하세요.";
         }
         public void ShowCountdown(int seconds)
         {
