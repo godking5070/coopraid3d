@@ -12,7 +12,7 @@ namespace RaidRogue
     public class TargetRingRenderer : MonoBehaviour
     {
         [Header("Ring Dimensions (XZ Plane)")]
-        [Tooltip("타겟 링 외곽 반지름")]
+        [Tooltip("타겟 링 외곽 반지름. 보스에 연결되면 CombatRadius와 자동으로 일치합니다.")]
         public float outerRadius = 3.2f;
 
         [Tooltip("타겟 링 내측 반지름 (경계선 시작점)")]
@@ -31,15 +31,29 @@ namespace RaidRogue
 
         private readonly List<LineRenderer> _lineRenderers = new List<LineRenderer>();
         private static Material _sharedLineMaterial;
+        private BossController _owner;
 
         private void Awake()
         {
             BuildTargetRing();
         }
 
+        private void LateUpdate()
+        {
+            if (_owner == null) _owner = GetComponentInParent<BossController>();
+            if (_owner != null && !Mathf.Approximately(outerRadius, _owner.CombatRadius))
+                BuildTargetRing();
+        }
+
         [ContextMenu("Rebuild Target Ring")]
         public void BuildTargetRing()
         {
+            _owner = GetComponentInParent<BossController>();
+            if (_owner != null)
+            {
+                outerRadius = _owner.CombatRadius;
+                innerRadius = outerRadius * (1.4f / 3.2f);
+            }
             ClearExistingLines();
 
             // 1. 외곽 메인 링 (파판14 스타일: 정면~측면 -135° ~ +135° 구간은 굵은 메인 링)
@@ -59,7 +73,7 @@ namespace RaidRogue
             // 후면 (+135° ~ +225° [= -135°])
             CreateArc("Sector_Rear", sectorArcRadius, 136f, 224f, 32, 0.08f, rearArcColor, false);
 
-            // 4. 내측 코어 원 (보스 히트박스 중심 링)
+            // 4. 내측 장식 가이드. 실제 피격 경계는 외곽 링(outerRadius)입니다.
             CreateArc("Ring_InnerCore", innerRadius, 0f, 360f, 64, 0.05f, new Color(0.85f, 0.75f, 1f, 0.55f), true);
 
             // 5. 4분할 경계선 (정면 0~45도 / 측면 45~135도 / 후면 135~180도 구분선)
