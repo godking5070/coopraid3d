@@ -22,7 +22,7 @@ namespace RaidRogue
             var combat=_player?.combatController;
             float reduction=combat!=null?combat.baseGcdDuration-combat.currentGcdDuration:0;
             float minimum=combat!=null?combat.minGcdDuration:.6f;
-            return AegisRouteData.GcdDuration(skill.gcd,reduction,minimum,DamageState.Route.GcdScale(RouteId,skill.comboChain>0))/skill.gcd;
+            return AegisRouteData.GcdDuration(skill.gcd,reduction,minimum,DamageState.Route.GcdScale(RouteId,skill.comboChain>0))/skill.gcd/Mathf.Max(.25f,1+CharacterKit.Bonus(transform,"haste"));
         }
         public string RouteName=>Array.Find(_actor?.Definition?.routes??Array.Empty<CharacterRouteDefinition>(),r=>r.id==RouteId)?.name??"기원 선택 필요";
         public bool IsActive=>_actor?.Definition?.id==AegisPaladinData.JobId;

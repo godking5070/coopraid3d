@@ -94,6 +94,13 @@ namespace RaidRogue
             foreach (var member in roster) Register(member.Id, member.Name, member.Role, member.JobId);
         }
 
+        // A display reset keeps the active generation and death flags, so live effects retain ownership.
+        public void ResetCurrentCounters()
+        {
+            Seconds = 0;
+            foreach (var m in _members.Values) { m.BossDamage = m.AddDamage = m.Healing = m.SelfHealing = m.ShieldAbsorbed = 0; m.Deaths = 0; }
+        }
+
         // Wall-clock duration while gameplay is advancing; paused/reward time is excluded.
         public void Advance(double unscaledSeconds, bool gameplayAdvancing)
         {

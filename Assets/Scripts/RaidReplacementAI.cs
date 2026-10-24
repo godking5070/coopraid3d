@@ -140,7 +140,7 @@ namespace RaidRogue
         private void AutomaticCharacterAction(NetworkRaidAvatar avatar,CharacterSlot slot,Transform target)
         {
             var actor=CharacterActor.Ensure(avatar.gameObject);var state=actor.Snapshot;
-            var skill=actor.Definition.Skill(System.Array.Find(state.selections,s=>s.slot==slot).skillId);
+            var skill=actor.Selected(slot); if(skill==null)return;
             var timing=System.Array.Find(state.skills,s=>s.id==skill.id);
             if(!actor.Available(slot,out _)||timing.charges<1||skill.usesGcd&&state.gcd>0||skill.target==SkillTargetRule.LivingEnemy&&(!CombatRange.LivingEnemy(target)||!CombatRange.InRange(avatar.transform,target,actor.EffectiveRange(skill))))return;
             if(skill.target==SkillTargetRule.LivingAlly&&(!CombatRange.LivingPartyMember(target)||!CombatRange.InRange(avatar.transform,target,actor.EffectiveRange(skill))))return;

@@ -13,7 +13,7 @@ namespace RaidRogue
         private InputField _name, _address;
         private readonly Button[] _roles = new Button[4];
         private Font _font;
-        private Button _beginBattle, _steamCreate, _invite, _ready, _cancelJoin, _single, _lanHost, _lanJoin;
+        private Button _beginBattle, _steamCreate, _invite, _ready, _cancelJoin, _single, _lanHost, _lanJoin, _training;
         private Text _steamStatus;
         private GameObject _confirmation, _recoveryPanel;
         private Button _recover, _retry, _cancelRecovery, _aegis;
@@ -36,6 +36,7 @@ namespace RaidRogue
             Label(_start.transform, "호스트 주소 : 포트", new Vector2(-260, 60), new Vector2(220, 40), 20);
             _address = Field(_start.transform, new Vector2(130, 60), PlayerPrefs.GetString("Raid.LAN.Address", "127.0.0.1:7777"), 40);
             _single = ButtonAt(_start.transform, "싱글플레이 · AI 파티", new Vector2(0, 0), new Vector2(560, 48), _session.SinglePlay);
+            _training = ButtonAt(_start.transform, "훈련장 · 12직업 자유 구성", new Vector2(0, -300), new Vector2(560, 48), _session.EnterTraining);
             _lanHost = ButtonAt(_start.transform, "LAN 방 만들기", new Vector2(-150, -60), new Vector2(280, 48), () => Connect(true));
             _lanJoin = ButtonAt(_start.transform, "LAN 주소로 참가", new Vector2(150, -60), new Vector2(280, 48), () => Connect(false));
             _steamCreate = ButtonAt(_start.transform, "Steam 방 만들기 · 친구 전용", new Vector2(0, -120), new Vector2(560, 48), () => RaidSteamRuntime.Instance?.CreateRoom());
@@ -99,7 +100,7 @@ namespace RaidRogue
             if (_confirmation.activeSelf) _confirmation.transform.SetAsLastSibling();
             _steamStatus.text = steam != null ? steam.Status : "Steam 사용 불가 · 싱글/LAN 사용 가능";
             _steamCreate.interactable = steam != null && steam.Available && !busy;
-            _single.interactable = _lanHost.interactable = _lanJoin.interactable = !busy;
+            _training.interactable = _single.interactable = _lanHost.interactable = _lanJoin.interactable = !busy;
             _cancelJoin.gameObject.SetActive(busy && !_session.IsRecovering);
             _recover.gameObject.SetActive(steam != null && steam.PreviousLobby != 0 && !busy && _session.Mode == RaidSessionMode.Menu);
             _recover.interactable = steam != null && steam.CanRecover;
@@ -125,6 +126,13 @@ namespace RaidRogue
             _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanJoinBattle);
             _beginBattle.interactable = _session.CanStartLobby;
             _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\n{LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션";
+            if (_session.Mode == RaidSessionMode.Training)
+            {
+                _bar.SetActive(false); _flowBar.SetActive(false);
+                _roster.text = "로컬 훈련장 · 진행도와 보상 저장 없음\n화면으로 돌아가거나 메인 메뉴로 종료할 수 있습니다.";
+                foreach (var role in _roles) role.gameObject.SetActive(false);
+                return;
+            }
             if (starting) return;
             if (_session.Mode == RaidSessionMode.Single)
                 _roster.text = "싱글플레이 진행 중\n연결 종료를 누르면 시작 화면으로 돌아갑니다.";

@@ -9,6 +9,7 @@ namespace RaidRogue
     {
         public string key, name, description;
         public string shape = "target";
+        public int hits = 1;
         public float angle = 90;
         public float cooldown, range = 15, power = 200, stagger = 25, duration, radius = 3, interval = 1, cast;
         public SkillTargetRule target = SkillTargetRule.LivingEnemy;
@@ -27,7 +28,7 @@ namespace RaidRogue
 
     public sealed class RosterJob
     {
-        public string slug, name, theme, weapon, resource;
+        public string slug, name, theme, weapon, resource, disadvantage;
         public int index, capacity = 100;
         public float hp = 1200, defense = 30, speed = 1, range = 3, gcd1 = 1.5f, gcd2 = 2.5f, dashCooldown = 8, dashDistance = 4;
         public int dashCharges = 1;
@@ -281,6 +282,20 @@ namespace RaidRogue
             jobs.Add(new RosterJob { index = 11, slug = "mirror-phantom", name = "미러 팬텀", theme = "회귀 · 과거의 거울상", weapon = "수정 거울 · 환영 대낫", resource = "거울상 파편", capacity = 3, hp = 1150, defense = 20, range = 15, dashCooldown = 9, combo1 = new[] { "유리 파편", "프리즘 광선", "크리스탈 스피어" }, combo2 = new[] { "환영 낫 베기", "그림자 단두대", "차원 절단: 유리꽃" }, origins = new[] { "환영의 군단장", "사신의 대낫", "프리즘 아키텍트" }, passives = new[] { "분신 최대 3체 유지 · 협공", "왕복 페널티 제거 · 근접 낫 가속/범위", "근접 대신 원거리 거울 레이저" }, identityCosts = new[] { 3f, 3, 2 }, abilities = new[] { S("g1", "유리 파편", 0, "15m 수정 마법 · 3타 파편/다음 근접 +30%", 180, 15), S("g2", "환영 낫 베기", 0, "근접 광역 · 3타 파편/다음 원거리 +30%", 260, 3, 0, 4), S("a", "거울상 복제", 10, "직전 GCD 또는 R 공격을 분신이 한 번 복제", 0, 20), S("c", "반사의 거울벽", 10, "전방 마법 거울 카운터", 220, 8), Self(S("q", "유리 분신 교대", 22, "6초 받는 피해 -40%", 0, 0, 6)), Self(S("e", "프리즘 굴절 결계", 20, "10초 파티 치명 +10%p · 타격에 5% 추가 피해", 0, 0, 10)), Self(S("m", "거울 속으로", 9, "거울 속 무적 이동", 0)), S("r1", "레퀴엠 오브 글래스", 16, "대상에게 접근 · 거대 환영 낫", 700, 15), S("r2", "프리즘 레이저 포격", 15, "6개 수정 거울 광선", 130, 20), S("r3", "거울 감옥 봉인", 18, "수정 감옥 파쇄 · 최상 무력화", 650, 20), Self(S("f1", "데자뷔", 14, "자신의 거울상 위치와 교환 · 파편 폭발", 320)), S("f2", "샤터드 블레이드", 12, "즉발 파편 · 거울상 파편 +1", 300, 15), Self(S("f3", "환영 방패 투영", 16, "자신과 가까운 아군 2명에게 5초 보호막", 0, 0, 5)), S("v1", "만화경 거울 지옥", 120, "분신 대낫 난무 · 거울 파쇄", 2200, 20), S("v2", "영웅들의 그림자 투영", 120, "10초 파티 공격에 12% 환영 추가타", 1100, 20, 10), S("z1", "그랜드 피날레: 일제 절단", 1, "본체와 남은 모든 분신의 합동 참격", 650, 20), Self(S("z2", "사신 빙의", 1, "6초 GCD 1.2초 · 대낫 연격 강화", 0, 0, 6)), S("z3", "만화경 프리즘 캐논", 1, "8각 거울 진 굴절 포격", 1800, 25) } });
             foreach (var j in jobs)
             {
+                j.disadvantage = j.index switch {
+                    1 => "혈기 과열: 탱커 중 낮은 기본 방어력 · 유효 공격이 없으면 피흡 불가",
+                    2 => "포격 반동: 제자리 후딜레이 · 탄창을 모두 쓰면 과열 중 장전 불가",
+                    3 => "연약한 체질: 낮은 HP·방어 · 치유 각성이 없으면 Q/E 시전과 마나 필요",
+                    4 => "낮은 순수 회복량 · 음파 거리 밖 아군에게 치유와 버프 전달 불가",
+                    5 => "중근거리 공격 · 공격할 대상이 없으면 혈류 치유와 자원 수급 단절",
+                    6 => "측·후면 의존: 잘못된 방향 타격은 피해와 인장 수급 감소",
+                    7 => "체공 경직: 점프 중 Space로 취소할 수 없음",
+                    8 => "쌍권총은 낮은 무력화 · 장총 조준 중 일반 이동 제한",
+                    9 => "영거리 사격 피해 감소 · 받는 회복과 보호막 효율 감소 · 소환수 없음",
+                    10 => "낮은 이동 속도 · 일반 이동 시 시전 취소 · 전용 워프는 시전 유지",
+                    11 => "굴절 피로: 같은 거리 콤보 반복 시 피해 감소 · 원근 교차 필요",
+                    _ => ""
+                };
                 var movement = j.Ability("m");
                 movement.cooldown = j.dashCooldown;
                 if (j.index == 2)
@@ -315,7 +330,16 @@ namespace RaidRogue
                 if (j.index == 8)
                     j.Ability("r3").shape = "self";
                 if (j.index == 9)
+                {
                     j.Ability("r1").shape = "line";
+                    j.Ability("z1").shape = "line";
+                    j.Ability("z1").hits = 4;
+                }
+                if (j.index == 11)
+                {
+                    j.Ability("z3").hits = 8;
+                    j.Ability("z2").description += " · 종료 시 마지막 유효 대상에 GCD 2의 3타 위력 피니시";
+                }
                 if (j.index == 10)
                     j.Ability("r3").shape = "line";
                 j.Ability("g1").stagger = j.index == 8 ? 0 : 15;

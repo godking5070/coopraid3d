@@ -7,6 +7,8 @@ namespace RaidRogue
 {
     public sealed partial class CharacterKit
     {
+        private bool _attackSequence, _sequenceCritical, _sequenceConsumed;
+        private float _sequenceDamage, _sequenceChance;
         private float _primaryDamage;
         private readonly Dictionary<int, float> _recordedHits = new Dictionary<int, float>();
         public bool ForceCritical { get; private set; }
@@ -116,7 +118,7 @@ namespace RaidRogue
             value *= CharacterRosterRules.ArmorFactor(Bonus(target, "armorDown"), penetration);
             if (source?.GetComponent<CharacterActor>()?.Definition?.classification == AttackClassification.Caster)
                 value *= 1 + Bonus(target, "magicVulnerability");
-            float crit = (source?.GetComponent<CharacterKit>()?.Effect("nextChance")?.value ?? 0) + Bonus(source, "crit") + Bonus(target, "critTaken") + (target?.GetComponent<CombatStatusEffects>()?.BrandActive == true ? .1f : 0);
+            float crit = (kind == CombatDamageKind.Direct && attackerKit?._attackSequence == true ? attackerKit._sequenceChance : 0) + Bonus(source, "crit") + Bonus(target, "critTaken") + (target?.GetComponent<CombatStatusEffects>()?.BrandActive == true ? .1f : 0);
             if (Buffs(target, "windMark").Any(b => b.owner.transform == source))
                 crit += .15f;
             var kit = source?.GetComponent<CharacterKit>();
@@ -181,12 +183,13 @@ namespace RaidRogue
 
         private void Leech(float amount)
         {
+            float attempted = amount * HealingScale(transform, transform);
             float actual = Heal(transform, amount);
-            if (Overcome && Job.index == 1 && amount > actual && Hp(transform) >= MaxHp(transform) - .01f)
+            if (Overcome && Job.index == 1 && attempted > actual && Hp(transform) >= MaxHp(transform) - .01f)
             {
                 string key = Job.Id + ".overheal";
                 float present = _player.ShieldFor(CombatMetricsManager.SourceId(transform), key);
-                CombatStatusEffects.Shield(transform, transform, key, Mathf.Min(MaxHp(transform) * .3f, present + amount - actual), 3600);
+                CombatStatusEffects.Shield(transform, transform, key, Mathf.Min(MaxHp(transform) * .3f, present + attempted - actual), 3600);
             }
 
             if (actual > 0)
@@ -224,28 +227,37 @@ namespace RaidRogue
             return Vector3.Dot(f.normalized, v.normalized);
         }
 
-        private bool Back(Transform target) => target != null && (Bonus(transform, "allBack") > 0 || Job.index == 6 && Route == 2 || FacingDot(target) < -.5f);
-        private bool Flank(Transform target) => target != null && (Bonus(transform, "allBack") > 0 || Job.index == 6 && Route == 2 || Mathf.Abs(FacingDot(target)) <= .5f);
-        private float Attack(Transform target, RosterSkill a, float multiplier = 1, CombatDamageKind kind = CombatDamageKind.Direct, bool guaranteedCrit = false)
+        private PositionalZone Position(Transform target)
+        {
+            if (target == null) return PositionalZone.Front;
+            var boss = target.GetComponent<BossController>();
+            if (boss != null) return boss.GetPositionalZone(transform.position, out _);
+            return (PositionalZone)CharacterRosterRules.PositionalZoneFromDot(FacingDot(target));
+        }
+        private float StaggerPower(Transform target, RosterSkill a)
+        {
+            float stagger = (Job.index == 8 && a.key == "g1" ? 0 : a.stagger) * (1 + Bonus(target, "staggerTaken"));
+            if (Job.index == 8 && Route == 2 || Job.index == 4 && Route == 3)
+                stagger *= 1.5f;
+            if (Job.index == 2 && Route == 1 || Job.index == 5 && Route == 2 || Job.index == 10 && Route == 3)
+                stagger *= 1.5f;
+            if (Job.index == 7 && Route == 3)
+                stagger *= 1.4f;
+            if (Job.index == 9 && Route == 3)
+                stagger *= 1.5f;
+            return stagger;
+        }
+        private bool Back(Transform target) => target != null && (Bonus(transform, "allBack") > 0 || Job.index == 6 && Route == 2 || Position(target) == PositionalZone.Rear);
+        private bool Flank(Transform target) => target != null && (Bonus(transform, "allBack") > 0 || Job.index == 6 && Route == 2 || Position(target) == PositionalZone.Flank);
+        private float Attack(Transform target, RosterSkill a, float multiplier = 1, CombatDamageKind kind = CombatDamageKind.Direct, bool guaranteedCrit = false, bool applyStagger = true)
         {
             if (!CombatRange.LivingEnemy(target) || RaidCombatAuthority.Replica)
                 return 0;
             float power = a.power * multiplier;
             if (Job.index == 2 && CharacterRosterRules.IsCannon(a.key))
                 power *= 1 + (Effect("cannonDamage")?.value ?? 0);
-            bool consumeNext = kind == CombatDamageKind.Direct && (Job.index != 10 || a.key == "g2" || a.cast > 0);
-            ForceCritical = guaranteedCrit || consumeNext && Has("nextCrit");
-            if (consumeNext && Has("nextCrit"))
-            {
-                State.Remove("nextCrit");
-                State.Remove("nextInstant");
-            }
-
-            if (kind == CombatDamageKind.Direct && Has("nextDamage"))
-            {
-                power *= 1 + Effect("nextDamage").value;
-                State.Remove("nextDamage");
-            }
+            ForceCritical = guaranteedCrit || kind == CombatDamageKind.Direct && _attackSequence && _sequenceCritical;
+            if (kind == CombatDamageKind.Direct && _attackSequence) power *= 1 + _sequenceDamage;
 
             if (Job.index == 9)
             {
@@ -265,7 +277,7 @@ namespace RaidRogue
                 power *= 1.8f;
             if (Job.index == 3 && Maximize || Job.index == 10 && Maximize)
                 power *= Job.index == 3 ? 1.4f : 1.6f;
-            if (Job.index == 6 && Maximize && FacingDot(target) > .5f)
+            if (Job.index == 6 && Maximize && Position(target) == PositionalZone.Front)
                 power *= .5f;
             if (Job.index == 7 && (a.key == "a" || a.key == "r2" || a.key == "z1" || a.key == "v1"))
             {
@@ -299,21 +311,17 @@ namespace RaidRogue
             }
 
             ForceCritical = false;
-            if (kind == CombatDamageKind.Direct)
-                State.Remove("nextChance");
             float actual = kind == CombatDamageKind.Extra ? Mathf.Max(0, before - after) : _primaryDamage;
             if (actual <= 0)
                 return 0;
-            float stagger = (Job.index == 8 && a.key == "g1" ? 0 : a.stagger) * (1 + Bonus(target, "staggerTaken"));
-            if (Job.index == 8 && Route == 2 || Job.index == 4 && Route == 3)
-                stagger *= 1.5f;
-            if (Job.index == 2 && Route == 1 || Job.index == 5 && Route == 2 || Job.index == 10 && Route == 3)
-                stagger *= 1.5f;
-            if (Job.index == 7 && Route == 3)
-                stagger *= 1.4f;
-            if (Job.index == 9 && Route == 3)
-                stagger *= 1.5f;
-            CombatCounterTarget.Ensure(target).AddStagger(stagger);
+            if (kind == CombatDamageKind.Direct && _attackSequence && !_sequenceConsumed)
+            {
+                if (_sequenceCritical) { State.Remove("nextCrit"); State.Remove("nextInstant"); }
+                if (_sequenceDamage > 0) State.Remove("nextDamage");
+                if (_sequenceChance > 0) State.Remove("nextChance");
+                _sequenceConsumed = true;
+            }
+            if (applyStagger) CombatCounterTarget.Ensure(target).AddStagger(StaggerPower(target, a));
             if (kind == CombatDamageKind.Direct)
             {
                 _recordedHits.TryGetValue(Id(target), out float recorded);
@@ -325,7 +333,7 @@ namespace RaidRogue
 
             if (kind == CombatDamageKind.Direct)
             {
-                if (Job.index == 11 && Data.clones > 0 && Route == 1)
+                if (Job.index == 11 && Data.clones > 0 && Route == 1 && a.key != "z1")
                     CombatSecondaryDamage.Apply(transform, target, actual * .3f * Data.clones, Job.SkillId(a.key) + ".clone", CombatDamageKind.Extra);
                 if (Job.index == 6 && Has("identity"))
                     CombatSecondaryDamage.Apply(transform, target, actual * .3f, Job.SkillId(a.key) + ".shadow", CombatDamageKind.Extra);
@@ -372,7 +380,7 @@ namespace RaidRogue
             if (CombatRange.LivingEnemy(target))
                 _player.FaceAttackTarget(target);
             Self("channel", a.name, seconds, 1, moving ? 1 : 0);
-            State.Put(new CharacterTimedEffect { id = "channel." + a.key, kind = "channel", skill = a.key, target = Id(target), end = Now + seconds, next = Now + interval, interval = interval, value = power, x = transform.position.x, y = transform.position.y, z = transform.position.z, yaw = transform.eulerAngles.y, radius = a.radius });
+            State.Put(new CharacterTimedEffect { id = "channel." + a.key, kind = "channel", skill = a.key, target = Id(target), end = Now + seconds, next = Now + interval, interval = interval, value = power, x = transform.position.x, y = transform.position.y, z = transform.position.z, yaw = transform.eulerAngles.y, radius = Job.index == 4 ? PartyRadius : a.radius });
         }
 
         private void TickEffect(CharacterTimedEffect e)
@@ -416,10 +424,11 @@ namespace RaidRogue
                 }
 
                 : Array.Empty<Transform>()) : Enemies().Where(t => CombatRange.CircleTouches(center, t, e.radius));
+            bool hitAny = false;
             foreach (var enemy in targets)
                 if (e.value > 0)
                 {
-                    Attack(enemy, a, e.value / Mathf.Max(1, a.power), CombatDamageKind.Periodic);
+                    hitAny |= Attack(enemy, a, e.value / Mathf.Max(1, a.power), CombatDamageKind.Periodic) > 0;
                     if (Job.index == 1 && e.skill == "r2")
                         Heal(transform, (_player.maxHp - _player.currentHp) * .05f);
                 }
@@ -430,8 +439,7 @@ namespace RaidRogue
                     if (e.aux > 0)
                         Heal(ally, MaxHp(ally) * e.aux);
                     // Ground protection is queried spatially by Incoming; no lingering aura after exit.
-                    if (Job.index == 5 && e.skill == "g2")
-                        Heal(ally, MaxHp(ally) * .02f);
+
                 }
 
             if (Job.index == 4 && e.skill == "r3")
@@ -450,7 +458,7 @@ namespace RaidRogue
 
             if (Job.index == 2 && e.skill == "z2")
                 _actor.RestoreCharge(Job.SkillId("a"));
-            if (Job.index == 9 && e.skill == "r3")
+            if (Job.index == 9 && e.skill == "r3" && hitAny)
                 Gain(5);
         }
 

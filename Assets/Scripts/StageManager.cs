@@ -26,7 +26,7 @@ namespace RaidRogue
         public PotionSettings potionSettings = new PotionSettings();
         public ResurrectionSettings resurrectionSettings = new ResurrectionSettings();
         public static StageManager Instance { get; private set; }
-        public static bool CombatSuspended => RaidNetworkSession.CombatPreview || Instance != null && (!Instance.EncounterActive || Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared);
+        public static bool CombatSuspended => !CharacterTrainingSession.Active && (RaidNetworkSession.CombatPreview || Instance != null && (!Instance.EncounterActive || Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared));
         public bool IsWiped { get; private set; }
         public bool IsPreparing { get; private set; }
         internal readonly RaidRunFlow Progress = new RaidRunFlow();
@@ -92,6 +92,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (CharacterTrainingSession.Active) return;
             UpdateSingleRewards();
             if (_isAllStagesCleared)
             {
@@ -109,6 +110,7 @@ namespace RaidRogue
         /// </summary>
         public void StartStage(int stageNumber)
         {
+            if (CharacterTrainingSession.Active) return;
             if (stageNumber != Progress.Stage || !Progress.TryStart(Progress.Revision)) return;
             IsWiped = IsPreparing = _pendingBossClear = _isStageTransitioning = _isAllStagesCleared = false;
             _hasStartedEncounter = true;
@@ -127,6 +129,7 @@ namespace RaidRogue
         }
         private bool PrepareEncounter(int stage, bool retry, bool newRun = false)
         {
+            if (CharacterTrainingSession.Active) return false;
             if (boss == null || player == null || cardManager == null || cardManager.cardSelectionModalRoot == null)
             { RaidNetworkSession.Instance?.FailSession("전투/보상 참조가 누락되었습니다. 원본 프로젝트의 SceneAutoBuilder 구성을 확인하세요."); return false; }
             if (!Progress.TryPrepare(stage, maxStage, retry)) return false;
@@ -182,6 +185,7 @@ namespace RaidRogue
         // Resolve after all combat Updates. A kill and a wipe in one frame always award the clear once.
         private void LateUpdate()
         {
+            if (CharacterTrainingSession.Active) return;
             if (RaidCombatAuthority.Replica) return;
             if (!_hasStartedEncounter || CombatSuspended || boss == null) return;
             int living = 0;
@@ -211,6 +215,7 @@ namespace RaidRogue
         private void CleanupAttempt()
         {
             foreach(var paladin in FindObjectsByType<AegisPaladin>(FindObjectsSortMode.None))paladin.ClearTransient();
+            foreach(var kit in FindObjectsByType<CharacterKit>(FindObjectsSortMode.None))kit.Clear();
             foreach(var status in FindObjectsByType<CombatStatusEffects>(FindObjectsSortMode.None))status.Clear();
             CombatMetricsManager.Instance?.Ledger.InvalidateEffects();
             boss?.StopEncounterEffects();

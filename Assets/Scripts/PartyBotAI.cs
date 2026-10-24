@@ -216,6 +216,7 @@ namespace RaidRogue
 
         private void ApplyRoleStatsAndColors(PartyBotRole targetRole)
         {
+            GetComponent<CharacterPartyStats>()?.ResetHealthFactor();
             _defaultBodyColor = GetRoleColor(targetRole);
 
             switch (targetRole)
@@ -381,6 +382,7 @@ namespace RaidRogue
                 return;
             }
 
+            if (CharacterTrainingSession.Active) { UpdateOverheadHpBar(); return; }
             switch (role)
             {
                 case PartyBotRole.Tank:
@@ -1244,6 +1246,7 @@ namespace RaidRogue
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + amount);
             float actualHealed = currentHp - before;
+            CharacterTrainingSession.Instance?.RecordOverheal(amount - actualHealed);
             CharacterKit.AfterHeal(source,transform,actualHealed,amount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 

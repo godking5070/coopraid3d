@@ -7,7 +7,7 @@ namespace RaidRogue
 {
     // One actor-owned state; never attached to a shared ScriptableObject or a connection ID.
     [DefaultExecutionOrder(500)]
-    public sealed class CharacterActor : MonoBehaviour
+    public sealed partial class CharacterActor : MonoBehaviour
     {
         private CharacterRuntimeState _state;
         private PlayerController _player;
@@ -88,15 +88,15 @@ namespace RaidRogue
         public void RegisterHandler(string id,Func<CharacterSkillDefinition,Transform,bool> handler) { if(!string.IsNullOrEmpty(id)&&handler!=null)_handlers[id]=handler; }
         public bool AssignDefinition(CharacterDefinition definition)
         {
-            GetComponent<CharacterPartyStats>()?.ResetFactors();
             if(RaidCombatAuthority.Replica||definition==null||CharacterCatalog.Find(definition.id)!=definition||!definition.playable)return false;
-            if(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole)return false;
+            if(!CharacterTrainingSession.CanEdit(this)&&(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole))return false;
             if(definition.id==AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
             if(CharacterRosterData.Find(definition.id)!=null)CharacterKit.Ensure(gameObject);
             foreach(var skill in definition.skills) if(skill.implemented&&skill.legacyAction==0&&skill.handlerId!="legacy.dash"&&!_handlers.ContainsKey(skill.handlerId))return false;
+            GetComponent<CharacterPartyStats>()?.ResetFactors();
             GetComponent<CharacterKit>()?.Clear();
             GetComponent<AegisPaladin>()?.ReleaseRouteEffects();
-            _state=new CharacterRuntimeState(definition); _role=definition.legacyRole;
+            _state=new CharacterRuntimeState(definition); ObserveResources(); _role=definition.legacyRole;
             if(_player!=null){_player.maxHp=_player.currentHp=definition.baseHp;_player.combatRadius=definition.combatRadius;_player.moveSpeed=definition.moveSpeed;_player.playerRoleDisplayName=definition.name;_player.SetNetworkDisplayName(definition.name,NetworkRaidAvatar.RoleColor(CharacterRosterData.Role(definition)));}
             GetComponent<AegisPaladin>()?.RecalculateStats();GetComponent<CharacterKit>()?.Recalculate();
             return true;
@@ -109,6 +109,19 @@ namespace RaidRogue
             if(Definition?.legacyRole==0&&_player!=null)_player.ApplyRoleStatsAndVisuals(_player.currentRole,true);
             _state=null;_role=0;BindLegacy();
             if(_player!=null&&Definition!=null)_player.moveSpeed=Definition.moveSpeed*Mathf.Pow(1.3f,_player.ghostStepStacks);
+        }
+        private void ObserveResources()
+        {
+            _state.ResourceChanged += (id, delta) => {
+                GetComponent<CharacterKit>()?.OnResourceChanged(id, delta);
+                if (CharacterTrainingSession.CanEdit(this)) CharacterTrainingSession.Instance.RecordResource(id, delta);
+            };
+        }
+        public void RefreshSkillCooldowns(System.Collections.Generic.IEnumerable<string> ids)
+        {
+            if (RaidCombatAuthority.Replica || _state == null || ids == null) return;
+            var chosen=ids.ToArray(); _state.RefreshSkillCooldowns(chosen);
+            if(chosen.Contains(Selected(CharacterSlot.Movement)?.id)) RefreshMovementCharges();
         }
         public bool CompletingCast=>_state?.CompletingCast==true;
         public float CommittingCostScale=>_state?.CommittingCostScale??1;
@@ -128,7 +141,7 @@ namespace RaidRogue
         public bool GainResource(string id,float amount) => !RaidCombatAuthority.Replica&&_state!=null&&_state.Gain(id,amount);
         public bool HasBuildEffect(string id)=>_state!=null&&_state.HasBuildEffect(id);
         public void RecordBuildEffect(string id,int stacks,float magnitude=0) { if(!RaidCombatAuthority.Replica)_state?.SetBuildEffect(id,stacks,magnitude); }
-        public void ClearedStage(int stage) { if(!RaidCombatAuthority.Replica&&StageManager.Instance!=null)_state?.ClearedStage(StageManager.Instance.RunId,StageManager.Instance.ChapterId,stage); }
+        public void ClearedStage(int stage) { if(!CharacterTrainingSession.Active&&!RaidCombatAuthority.Replica&&StageManager.Instance!=null)_state?.ClearedStage(StageManager.Instance.RunId,StageManager.Instance.ChapterId,stage); }
         public void ResetEncounter(CharacterReset reason)
         {
             BindLegacy();if(RaidCombatAuthority.Replica||_state==null)return;

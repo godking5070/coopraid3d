@@ -672,6 +672,11 @@ namespace RaidRogue
                 return;
             }
 
+            if (CharacterTrainingSession.Active)
+            {
+                if (IsGroggy) UpdateGroggyState();
+                UpdateAlertBannerTimer(); UpdateTopBossUI(); return;
+            }
             HandleDebugShortcuts();
             UpdateAlertBannerTimer();
 

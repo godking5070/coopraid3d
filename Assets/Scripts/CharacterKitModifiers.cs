@@ -252,6 +252,7 @@ namespace RaidRogue
             _lastSpeed = speed;
         }
 
+        public void ResetHealthFactor() => _lastHp = 1;
         public void ResetFactors()
         {
             _lastHp = _lastSpeed = 1;

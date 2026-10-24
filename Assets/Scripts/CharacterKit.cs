@@ -147,6 +147,11 @@ namespace RaidRogue
 
         public static float Bonus(Transform t, string key) => Buffs(t, key).Select(b => b.effect.value).DefaultIfEmpty(0).Max();
         public static bool Protected(Transform t) => Bonus(t, "invulnerable") > 0;
+        public void OnResourceChanged(string id, float delta)
+        {
+            if (Active && Job.index == 2 && id == Job.Resource && delta < 0 && Resource <= 0)
+                Self("overheat", "총열 과열", CharacterRosterRules.OverheatSeconds(Overcome, Maximize));
+        }
         public void Gain(float amount)
         {
             if (!Active || RaidCombatAuthority.Replica)
@@ -159,6 +164,7 @@ namespace RaidRogue
             if (s == null || !Active)
                 return s?.range ?? 0;
             string k = CharacterRosterData.Key(s.id);
+            if (Job.index == 4 && s.target == SkillTargetRule.LivingAlly) return PartyRadius;
             if (Job.index == 6 && Has("ninjutsu") && (k == "g1" || k == "g2" || k == "a"))
                 return 15;
             if (Job.index == 5 && s.target == SkillTargetRule.LivingEnemy)
@@ -438,6 +444,20 @@ namespace RaidRogue
 
         private void Expire(CharacterTimedEffect e)
         {
+            if (e.id == "identity" && Job.index == 11 && Route == 2)
+            {
+                // Natural expiry only: Clear/death/retry never invokes a finisher. Use the last
+                // confirmed target and existing third-combo potency, with a fresh live range check.
+                var enemy = Resolve(Data.lastTarget);
+                var combo = Job.Ability("g2");
+                if (!_player.IsStunned && CombatRange.LivingEnemy(enemy) &&
+                    CombatRange.InRange(transform, enemy, _actor.EffectiveRange(_actor.Selected(CharacterSlot.Gcd2))))
+                {
+                    var finisher = new RosterSkill("z2", "사신 빙의 · 유리꽃 피니시", 0, "", combo.power * CharacterRosterRules.ComboThirdMultiplier, combo.range, 0, combo.radius)
+                        { shape = combo.shape, angle = combo.angle, stagger = combo.stagger };
+                    AttackArea(enemy, finisher, 1, true);
+                }
+            }
             if (e.id.StartsWith("layers@"))
             {
                 var ally = Resolve(e.target);

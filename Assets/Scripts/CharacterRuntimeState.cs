@@ -43,6 +43,7 @@ namespace RaidRogue
     // Mutable per actor, pure transaction state. Damage/healing/movement remain in existing effect handlers.
     public sealed class CharacterRuntimeState
     {
+        public event Action<string,float> ResourceChanged;
         public CharacterDefinition Definition { get; }
         private CharacterStateSnapshot _data;
         public CharacterStateSnapshot Snapshot => _data.Copy();
@@ -64,7 +65,7 @@ namespace RaidRogue
         public bool Spend(string id,float amount)
         {
             if(!CharacterDefinitionValidation.Finite(amount)||amount<0||Resource(id)<amount||Array.Find(Definition.resources,r=>r.id==id)?.integer==true&&amount!=Math.Floor(amount))return false;
-            var value=Array.Find(_data.resources,r=>r.id==id);if(value==null)return false;value.value-=amount;return true;
+            var value=Array.Find(_data.resources,r=>r.id==id);if(value==null)return false;value.value-=amount;ResourceChanged?.Invoke(id,-amount);return true;
         }
         public void RestoreCharge(string id,int count=1)
         {
@@ -75,9 +76,9 @@ namespace RaidRogue
         {
             var definition=Array.Find(Definition.resources,r=>r.id==id);var state=Array.Find(_data.resources,r=>r.id==id);
             if(definition==null||state==null||!CharacterDefinitionValidation.Finite(amount)||amount<0||definition.integer&&amount!=Math.Floor(amount))return false;
-            state.value=Math.Min(Maximum(id),state.value+amount);return true;
+            float before=state.value;state.value=Math.Min(Maximum(id),state.value+amount);ResourceChanged?.Invoke(id,state.value-before);return true;
         }
-        // The only live caller is CharacterActor's editor-only, local-authority gate.
+        // Called by the editor's authority gate or the isolated local training session.
         // Edit actor state, never shared definitions, progression, or combat effects.
         public bool ApplySkillTest(SkillTestOperation operation,out int affected)
         {
@@ -157,7 +158,7 @@ namespace RaidRogue
         {
             reason="";CommittingCostScale=context.CostScale;
             if(apply==null||!apply(skill)){reason="스킬 효과를 적용할 수 없습니다";return false;}
-            foreach(var c in Costs(skill)) Array.Find(_data.resources,r=>r.id==c.Key).value-=c.Value*context.CostScale;
+            foreach(var c in Costs(skill)) { float amount=c.Value*context.CostScale;Array.Find(_data.resources,r=>r.id==c.Key).value-=amount;ResourceChanged?.Invoke(c.Key,-amount); }
             var state=Array.Find(_data.skills,s=>s.id==skill.id);state.charges--;
             if(state.recharge<=0){state.recharge=state.rechargeTotal=skill.cooldown*(CharacterDefinitionValidation.Finite(context.CooldownScale)&&context.CooldownScale>0?context.CooldownScale:1);}
             if(skill.cooldown==0)state.charges=skill.maximumCharges;
@@ -196,6 +197,16 @@ namespace RaidRogue
         }
         public void ClearOnDeath()
         {CancelCast();_data.combo1=_data.combo2=1;_data.comboTime1=_data.comboTime2=0;}
+        public void RefreshSkillCooldowns(IEnumerable<string> skillIds)
+        {
+            foreach (var id in skillIds.Distinct())
+            {
+                var skill=Definition.Skill(id);var state=Array.Find(_data.skills,s=>s.id==id);
+                if (skill==null||state==null) continue;
+                state.charges=skill.maximumCharges;state.recharge=0;
+                if(skill.usesGcd)_data.gcd=_data.gcdTotal=0;
+            }
+        }
         public void ReduceCooldowns(IEnumerable<string> skillIds,float seconds)
         {
             if(!CharacterDefinitionValidation.Finite(seconds)||seconds<=0)return;
@@ -203,13 +214,13 @@ namespace RaidRogue
             {
                 var skill=Definition.Skill(id);var state=Array.Find(_data.skills,s=>s.id==id);
                 // Do not grant spare charges to an already ready skill; never touch the shared GCD.
-                if(skill==null||state==null||state.charges>0||state.recharge<=0)continue;
+                if(skill==null||state==null||state.charges>=skill.maximumCharges||state.recharge<=0)continue;
                 state.recharge=Math.Max(0,state.recharge-seconds);
-                if(state.recharge==0){state.charges=1;if(skill.maximumCharges>1)state.recharge=skill.cooldown;}
+                if(state.recharge==0){state.charges++;if(state.charges<skill.maximumCharges)state.recharge=state.rechargeTotal>0?state.rechargeTotal:skill.cooldown;}
             }
         }
         public void CancelCast(){_data.castSkillId="";_data.castTarget=0;_data.castRemaining=_data.castTotal=0;}
-        // Called only by the editor test window; does not fake stage clears, card rewards or confirmed choices.
+        // Preview loadout for editor/training; never fabricates stage clears or confirmed reward choices.
         public bool PreviewSkillChoice(string skillId)
         {
             var rule=Array.Find(Definition.unlocks,r=>r.choices.Contains(skillId));

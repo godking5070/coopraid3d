@@ -108,6 +108,7 @@ namespace RaidRogue
             }
 
             _gear.SetActive(CombatRange.LivingPartyMember(transform));
+            if (Job.index == 8) _gear.transform.Find("HuntingRifle")?.gameObject.SetActive(Route != 1);
             var air = Effect("air");
             if (air != null)
             {

@@ -8,6 +8,16 @@ namespace RaidRogue
     {
         private bool Execute(CharacterSkillDefinition s, Transform target)
         {
+            _attackSequence = true; _sequenceConsumed = false;
+            bool criticalEligible = Job?.index != 10 || s.comboChain == 2 || s.castTime > 0;
+            _sequenceCritical = criticalEligible && Has("nextCrit");
+            _sequenceDamage = Effect("nextDamage")?.value ?? 0;
+            _sequenceChance = Effect("nextChance")?.value ?? 0;
+            try { return ExecuteSkill(s, target); }
+            finally { _attackSequence = false; _sequenceCritical = false; _sequenceDamage = _sequenceChance = 0; ForceCritical = false; }
+        }
+        private bool ExecuteSkill(CharacterSkillDefinition s, Transform target)
+        {
             if (!Active || RaidCombatAuthority.Replica || _player == null || _player.IsDead || Unavailable(s, target).Length > 0)
                 return false;
             string key = CharacterRosterData.Key(s.id);
@@ -39,9 +49,12 @@ namespace RaidRogue
                     return false;
                 if (!CombatRange.LivingEnemy(target) || !CombatRange.InRange(transform, target, s.range))
                     return false;
-                if (Attack(target, a) <= 0)
-                    return false;
-                CombatCounterTarget.Ensure(target).TryCounter(transform, s.range, 60);
+                var counter = CombatCounterTarget.Ensure(target);
+                int opportunity = counter.OpportunityId;
+                bool validCounter = counter.CanCounter(transform, s.range);
+                if (Attack(target, a, applyStagger: false) <= 0) return false;
+                if (!validCounter || !counter.TryCounter(transform, s.range, StaggerPower(target, a), opportunity))
+                    counter.AddStagger(StaggerPower(target, a));
                 if (Job.index == 1)
                     GrantSuperArmor(transform,.5f);
                 return true;
@@ -62,7 +75,7 @@ namespace RaidRogue
         private bool ComboAttack(CharacterSkillDefinition s, RosterSkill a, Transform target)
         {
             int step = Combo(s), chain = s.comboChain;
-            float mult = step == 1 ? 1 : step == 2 ? 1.5f : 2.2f;
+            float mult = step == 1 ? 1 : step == 2 ? 1.5f : CharacterRosterRules.ComboThirdMultiplier;
             bool third = step == 3, back = Back(target), flank = Flank(target);
             if (Job.index == 11 && chain == 2 && Has("meleeLeap") && Route != 3 && !Overcome && !CombatRange.InRange(transform, target, 3))
             {
@@ -221,7 +234,7 @@ namespace RaidRogue
                         Self("starHaste", "별의 가속", 10);
                     break;
                 case 11:
-                    Gain(1);
+                    if (Route == 2 || Route == 3 || Data.lastCombo == 0 || CharacterEffectState.Alternating(Data.lastCombo, chain)) Gain(1);
                     if (chain == 1)
                         Self("meleeLeap", "근접 도약", 10);
                     Self(chain == 1 ? "next2" : "next1", "거울 교차", 10);
@@ -317,7 +330,7 @@ namespace RaidRogue
         {
             if (Job.Role == 2)
             {
-                if (q && !CombatRange.LivingPartyMember(target))
+                if (q && (!CombatRange.LivingPartyMember(target) || !CombatRange.InRange(transform, target, EffectiveRange(s))))
                     return false;
                 bool awakened = echo == 1 && _actor.CommittingCostScale == 0 && _actor.Resource(Job.Id + ".awakening") >= 1;
                 float scale = echo * (awakened ? 1.3f : 1);
@@ -689,7 +702,10 @@ namespace RaidRogue
                     if (a.key == "f2")
                     {
                         foreach (var ally in Party())
-                            ally.GetComponent<PlayerController>()?.ReduceMovementRecharge(5);
+                        {
+                            var actor = CharacterActor.Ensure(ally.gameObject);
+                            actor.ReduceCooldowns(new[] { actor.Selected(CharacterSlot.Movement).id }, 5);
+                        }
                         return true;
                     }
 
@@ -856,7 +872,7 @@ namespace RaidRogue
                     AttackArea(target, a, 1, true);
                 if (Job.index == 2)
                 {
-                    _actor.ReduceCooldowns(_actor.Definition.skills.Where(s => !s.id.EndsWith("v1") && !s.id.EndsWith("v2")).Select(s => s.id), 1000);
+                    _actor.RefreshSkillCooldowns(_actor.Definition.skills.Where(s => !s.id.EndsWith("v1") && !s.id.EndsWith("v2") && s.legacyAction == 0).Select(s => s.id));
                     Gain(_actor.ResourceMaximum(Job.Resource));
                     State.Remove("overheat");
                 }
@@ -1100,8 +1116,7 @@ namespace RaidRogue
                         Ground(a, target.position, 4, 7, a.power);
                         return true;
                     }
-
-                    break;
+                    return IdentityBurst(target, a, a.hits);
                 case 10:
                     if (route == 2)
                     {
@@ -1122,10 +1137,21 @@ namespace RaidRogue
                         return true;
                     }
 
-                    break;
+                    return IdentityBurst(target, a, a.hits);
             }
 
             return AttackArea(target, a, 1, true) > 0;
+        }
+
+        // Preserve the existing total potency/stagger while giving the piercing arrow and prism
+        // their specified multiple hits. Derived damage remains excluded from proc recursion.
+        private bool IdentityBurst(Transform target, RosterSkill a, int hits)
+        {
+            var pulse = new RosterSkill(a.key, a.name, a.cooldown, a.description, a.power / hits, a.range, a.duration, a.radius)
+                { shape = a.shape, angle = a.angle, stagger = a.stagger / hits };
+            float total = 0;
+            for (int i = 0; i < hits; i++) total += AttackArea(target, pulse, 1, true);
+            return total > 0;
         }
 
         private bool CastNinjutsu(string trigger, Transform target)
