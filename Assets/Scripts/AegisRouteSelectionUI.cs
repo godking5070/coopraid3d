@@ -50,7 +50,7 @@ namespace RaidRogue
         {
             _panel=Rect(transform,"Panel",Vector2.zero,new Vector2(960,600));
             Label(_panel,"이지스 팔라딘 · 기원 선택",new Vector2(0,255),new Vector2(900,55),28);
-            Label(_panel,"출발 전 변경 가능 · 재도전/재접속에는 유지 · R/F/V는 아직 잠김",new Vector2(0,207),new Vector2(920,45),17);
+            Label(_panel,"출발 전 변경 가능 · 재도전/재접속에는 유지 · R/F/V는 아직 미구현",new Vector2(0,207),new Vector2(920,45),17);
             for(int i=0;i<3;i++)
             {
                 string route=_routes[i];var r=Rect(_panel,route,new Vector2((i-1)*310,5),new Vector2(298,340));

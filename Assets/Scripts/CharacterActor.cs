@@ -36,10 +36,36 @@ namespace RaidRogue
         {
             BindLegacy();reason="";
             if(_state==null||!Definition.playable)reason="미구현 직업은 전투에서 선택할 수 없습니다";
-            else if(!_state.Unlocked(slot))reason="잠긴 슬롯입니다";
+            else if(_state.Selected(slot)==null)reason="잠긴 슬롯입니다";
             else if(!_state.Selected(slot).implemented)reason="아직 구현되지 않은 스킬입니다";
+            else if(!_state.Unlocked(slot))reason="잠긴 슬롯입니다";
             return reason.Length==0;
         }
+#if UNITY_EDITOR
+        public bool CanEditSkillTest(out string reason)
+        {
+            reason="";
+            var avatar=GetComponent<NetworkRaidAvatar>();
+            if(!Application.isPlaying||_state==null||_player==null)reason="Play 모드에서 자신의 캐릭터를 선택하세요.";
+            else if(RaidNetworkSession.Instance?.Ending==true)reason="세션 종료 중에는 사용할 수 없습니다.";
+            else if(RaidCombatAuthority.Active&&(!RaidCombatAuthority.Host||avatar==null||!avatar.IsLocal))reason="멀티플레이에서는 호스트가 자신의 캐릭터에만 적용할 수 있습니다.";
+            else if(!Definition.playable)reason="미구현 직업은 테스트 해금할 수 없습니다.";
+            else if(_player.IsDead)reason="사망 중에는 사용할 수 없습니다. 부활 또는 재도전 후 사용하세요.";
+            return reason.Length==0;
+        }
+        public bool ApplyEditorSkillTest(SkillTestOperation operation,out string message)
+        {
+            if(!CanEditSkillTest(out message))return false;
+            if(!_state.ApplySkillTest(operation,out int affected))
+            {message="시전 중이거나 기존 테스트 직업에서는 직업 스킬 쿨타임을 초기화할 수 없습니다.";return false;}
+            message=operation==SkillTestOperation.UnlockImplemented
+                ? $"구현된 현재 슬롯 {affected}개 해금. 미구현 스킬은 제외하며 Z는 출발 전 루트 선택이 필요합니다."
+                : operation==SkillTestOperation.FillResources?"직업 자원을 최대치로 채웠습니다."
+                : "직업 스킬 쿨타임과 GCD를 초기화했습니다. 대쉬·포션·진행 중 효과는 유지됩니다.";
+            Debug.Log($"[Skill Test] actor={RaidCombatAuthority.Id(transform)} job={Definition.id} operation={operation} affected={affected}",this);
+            return true;
+        }
+#endif
         // Register a small effect adapter; the common state handles resources, casting, charges and combos.
         // A handler must validate before mutation and return false without side effects on failure.
         public void RegisterHandler(string id,Func<CharacterSkillDefinition,Transform,bool> handler) { if(!string.IsNullOrEmpty(id)&&handler!=null)_handlers[id]=handler; }

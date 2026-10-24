@@ -13,7 +13,7 @@ public static class AegisRouteTests
     private static bool UseZ(CharacterRuntimeState actor,AegisRouteState effects,CharacterUseContext? context=null)=>actor.TryUse(CharacterSlot.Identity,context??Ready,0,s=>effects.Activate(actor.Snapshot.routeId,0),out _);
     public static void Main()
     {
-        try {SelectionAndStats();CostsAndGcd();ShieldAndReflection();Guard();Sun();RecoveryAndLifecycle();}
+        try {SelectionAndStats();CostsAndGcd();ShieldAndReflection();Guard();Sun();RecoveryAndLifecycle();SkillTestTools();}
         catch(Exception ex){Console.WriteLine("FAIL after "+checks+": "+ex.Message);Environment.Exit(1);}
         Console.WriteLine("PASS: "+checks+" Aegis origin selection, transaction, shield, guard classification, secondary damage, GCD, geometry and recovery checks (no Unity/Steam execution).");
     }
@@ -150,5 +150,62 @@ public static class AegisRouteTests
         var guard=new AegisRouteState();guard.Activate(AegisRouteData.Mirror,38);guard.TryGuard(AegisRouteData.Mirror,CombatDamageKind.Direct,false,1,400,3000,out _);
         var replica=new AegisRouteState();Check(replica.Restore(guard.Capture()),"restore spent retaliation flag");Check(replica.TryGuard(AegisRouteData.Mirror,CombatDamageKind.Direct,false,1,400,3000,out double retal)&&retal==0,"reconnect cannot repeat retaliation");
         var invalid=guard.Capture();invalid.guard=float.NaN;Check(!guard.Restore(invalid),"invalid effect snapshot refused");Near(guard.Guard,1.5,"rejected restore is atomic");
+    }
+    private static void SkillTestTools()
+    {
+        var definition=AegisPaladinData.Build();var actor=new CharacterRuntimeState(definition);
+        Check(actor.ApplySkillTest(SkillTestOperation.UnlockImplemented,out int count)&&count==0,"implemented base skills already available");
+        Check(!actor.Unlocked(CharacterSlot.Identity),"test unlock cannot silently pick an origin");
+        Check(new CharacterRuntimeState(definition).Restore(actor.Snapshot),"pre-origin test snapshot remains valid");
+        Check(actor.ApplySkillTest(SkillTestOperation.FillResources,out count)&&count==1,"test fills one resource");
+        Near(actor.Resource(AegisPaladinData.Holy),100,"test holy maximum");
+        Check(!actor.TryUse(CharacterSlot.Identity,Ready,0,s=>true,out _),"holy alone does not bypass locked origin");
+        Check(actor.ApplySkillTest(SkillTestOperation.FillResources,out count)&&count==0,"repeated fill cannot exceed maximum");
+        foreach(var slot in new[]{CharacterSlot.Active,CharacterSlot.OffGcd2,CharacterSlot.Ultimate})
+        {
+            Check(!actor.Unlocked(slot),"missing R/F/V stays unavailable");
+            Check(!actor.Validate(slot,Ready,out string reason)&&reason.Contains("구현"),"missing content gives accurate reason");
+        }
+        actor.ChooseRoute(AegisRouteData.Mirror,true);
+        Check(actor.ApplySkillTest(SkillTestOperation.UnlockImplemented,out count)&&count==0,"only selected origin remains unlocked");
+        Check(!actor.Snapshot.unlocked.Contains(AegisRouteData.Identity(AegisRouteData.Sun)),"other Z never unlocked by test");
+        Check(actor.TryUse(CharacterSlot.Identity,Ready,0,s=>true,out _),"normal Z transaction after test fill");
+        Near(actor.Resource(AegisPaladinData.Holy),70,"test mode retains actual cost");
+        Check(!actor.TryUse(CharacterSlot.Identity,Ready,0,s=>true,out _),"test mode retains cooldown enforcement");
+        Check(actor.TryUse(CharacterSlot.Gcd1,Ready,1,s=>true,out _),"start combo before test reset");
+        Check(actor.TryUse(CharacterSlot.Movement,Ready,0,s=>true,out _),"spend dash charge before test reset");
+        Check(actor.TryUse(CharacterSlot.Potion,Ready,0,s=>true,out _),"spend potion before test reset");
+        var before=actor.Snapshot;var dash=Timing(actor,CharacterSlot.Movement);var potion=Timing(actor,CharacterSlot.Potion);
+        Check(actor.ApplySkillTest(SkillTestOperation.RefreshJobCooldowns,out count)&&count>=2,"refresh Z and shared GCD");
+        Check(Timing(actor,CharacterSlot.Identity).charges==1&&actor.Snapshot.gcd==0,"Z available after explicit refresh");
+        Near(actor.Resource(AegisPaladinData.Holy),70,"refresh never grants resource");
+        Check(Timing(actor,CharacterSlot.Movement).charges==dash.charges,"refresh leaves actual dash charges alone");
+        Near(Timing(actor,CharacterSlot.Movement).recharge,dash.recharge,"refresh leaves dash timer");
+        Check(Timing(actor,CharacterSlot.Potion).charges==potion.charges,"refresh leaves potion");
+        Near(Timing(actor,CharacterSlot.Potion).recharge,potion.recharge,"refresh leaves potion timer");
+        Check(actor.Snapshot.combo1==before.combo1&&actor.Snapshot.comboTime1==before.comboTime1,"refresh retains combo state");
+        Check(actor.Snapshot.routeId==before.routeId&&actor.Snapshot.clearedStage==0,"test does not advance progression");
+        Check(!actor.ApplySkillTest((SkillTestOperation)999,out count)&&count==0,"invalid test command rejected");
+        var casting=actor.Snapshot;casting.castSkillId=actor.Selected(CharacterSlot.Gcd1).id;casting.castRemaining=casting.castTotal=3;
+        Check(actor.Restore(casting),"casting fixture");
+        Check(!actor.ApplySkillTest(SkillTestOperation.RefreshJobCooldowns,out count),"refresh during cast rejected");
+        Check(actor.Snapshot.castRemaining==3&&actor.Snapshot.castSkillId==casting.castSkillId,"failed refresh does not cancel cast");
+
+        // A future implemented progression skill may be tested without pretending a stage was cleared.
+        var future=AegisPaladinData.Build();var active=future.Skill(AegisPaladinData.Id(CharacterSlot.Active));
+        active.implemented=true;active.handlerId="fixture.active";active.cooldown=10;
+        var tester=new CharacterRuntimeState(future);var peer=new CharacterRuntimeState(future);
+        Check(tester.ApplySkillTest(SkillTestOperation.UnlockImplemented,out count)&&count==1,"implemented locked selection can be tested");
+        Check(tester.Unlocked(CharacterSlot.Active)&&!peer.Unlocked(CharacterSlot.Active),"actor-only unlock, no shared state");
+        Check(!future.slots.Single(s=>s.slot==CharacterSlot.Active).initiallyUnlocked,"definition is unchanged");
+        Check(tester.Snapshot.chosenRules.Length==0&&tester.Snapshot.clearedStage==0,"unlock does not award cards or stages");
+        Check(peer.Restore(tester.Snapshot)&&peer.Unlocked(CharacterSlot.Active),"reconnect snapshot retains test unlock");
+        tester.Reset(CharacterReset.Retry);Check(tester.Unlocked(CharacterSlot.Active),"retry keeps unlocked skills under existing rules");
+        tester.Reset(CharacterReset.NewRun);Check(!tester.Unlocked(CharacterSlot.Active),"new run clears test unlock");
+        Near(tester.Resource(AegisPaladinData.Holy),0,"new run resets test resource");
+        var unavailable=new CharacterRuntimeState(CharacterCatalog.Find("job.berserker"));
+        foreach(SkillTestOperation command in Enum.GetValues(typeof(SkillTestOperation)))
+            Check(!unavailable.ApplySkillTest(command,out count),"test tools do not enable unimplemented jobs");
+        Check(!new CharacterRuntimeState(CharacterCatalog.Legacy(1)).ApplySkillTest(SkillTestOperation.RefreshJobCooldowns,out count),"legacy timing owner is not bypassed");
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace RaidRogue
 {
+    public enum SkillTestOperation { UnlockImplemented, FillResources, RefreshJobCooldowns }
     [Serializable] public sealed class JobResourceValue { public string id; public float value; }
     [Serializable] public sealed class JobSkillState { public string id; public int charges; public float recharge, rechargeTotal; }
     [Serializable] public sealed class JobSlotSelection { public CharacterSlot slot; public string skillId; }
@@ -57,6 +58,50 @@ namespace RaidRogue
             if(definition==null||state==null||!CharacterDefinitionValidation.Finite(amount)||amount<0||definition.integer&&amount!=Math.Floor(amount))return false;
             state.value=Math.Min(definition.maximum,state.value+amount);return true;
         }
+        // The only live caller is CharacterActor's editor-only, local-authority gate.
+        // Edit actor state, never shared definitions, progression, or combat effects.
+        public bool ApplySkillTest(SkillTestOperation operation,out int affected)
+        {
+            affected=0;
+            if(!Definition.playable)return false;
+            switch(operation)
+            {
+                case SkillTestOperation.UnlockImplemented:
+                    var unlocked=new HashSet<string>(_data.unlocked);
+                    foreach(var selection in _data.selections)
+                    {
+                        var skill=Definition.Skill(selection.skillId);
+                        if(skill==null||!skill.implemented||string.IsNullOrEmpty(skill.handlerId))continue;
+                        // A route identity must still belong to the confirmed departure route.
+                        if(selection.slot==CharacterSlot.Identity&&Definition.routes.Length>0&&
+                            !Definition.routes.Any(r=>r.id==_data.routeId&&r.identitySkillId==skill.id))continue;
+                        if(unlocked.Add(skill.id))affected++;
+                    }
+                    _data.unlocked=unlocked.ToArray();return true;
+                case SkillTestOperation.FillResources:
+                    foreach(var resource in _data.resources)
+                    {
+                        float maximum=Array.Find(Definition.resources,r=>r.id==resource.id).maximum;
+                        if(resource.value<maximum){resource.value=maximum;affected++;}
+                    }
+                    return true;
+                case SkillTestOperation.RefreshJobCooldowns:
+                    // Legacy controllers and movement/potion components own their own timers.
+                    // Never cancel a cast or reset active transformation/guard/deferred damage.
+                    if(Definition.legacyRole>0||_data.castSkillId.Length>0)return false;
+                    string movement=Selected(CharacterSlot.Movement)?.id,potion=Selected(CharacterSlot.Potion)?.id;
+                    foreach(var state in _data.skills)
+                    {
+                        var skill=Definition.Skill(state.id);
+                        if(!skill.implemented||state.id==movement||state.id==potion)continue;
+                        if(state.charges<skill.maximumCharges||state.recharge>0)affected++;
+                        state.charges=skill.maximumCharges;state.recharge=0;state.rechargeTotal=skill.cooldown;
+                    }
+                    if(_data.gcd>0)affected++;
+                    _data.gcd=_data.gcdTotal=0;return true;
+                default:return false;
+            }
+        }
         private Dictionary<string,float> Costs(CharacterSkillDefinition skill)
         { var result=new Dictionary<string,float>(); foreach(var c in skill.costs){result.TryGetValue(c.resourceId,out float v);result[c.resourceId]=v+c.amount;}return result; }
         public bool Validate(CharacterSlot slot,CharacterUseContext context,out string reason,bool completing=false)
@@ -64,8 +109,9 @@ namespace RaidRogue
             reason=""; var skill=Selected(slot);
             if(!Definition.playable)reason="미구현 직업입니다";
             else if(!context.Alive||!context.CanAct)reason="현재 행동할 수 없습니다";
-            else if(skill==null||!Unlocked(slot))reason="잠긴 슬롯입니다";
+            else if(skill==null)reason="잠긴 슬롯입니다";
             else if(!skill.implemented)reason="아직 구현되지 않은 스킬입니다";
+            else if(!Unlocked(slot))reason="잠긴 슬롯입니다";
             else if(!context.ValidTarget)reason="유효한 대상이 필요합니다";
             else if(!CharacterDefinitionValidation.Finite(context.BoundaryDistance)||context.BoundaryDistance>(context.EffectiveRange>=0?context.EffectiveRange:skill.range)+.0001f)reason="대상이 사거리 밖에 있습니다";
             else if(skill.usesGcd&&_data.gcd>0)reason="공유 GCD 중입니다";

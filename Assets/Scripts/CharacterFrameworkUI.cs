@@ -11,7 +11,7 @@ namespace RaidRogue
         private readonly Dictionary<CharacterSlot,Button> _buttons=new Dictionary<CharacterSlot,Button>();
         private readonly Dictionary<string,Image> _gauges=new Dictionary<string,Image>();
         private string _gaugeJob; private readonly Dictionary<string,float> _lastValues=new Dictionary<string,float>(); private float _pulseUntil;
-        private float _next;private bool _catalogBuilt;
+        private float _next;
         private void Start()
         {
             _hotbar=GetComponent<SkillHotbarUI>();
@@ -33,7 +33,7 @@ namespace RaidRogue
         private void Update()
         {
             if(Time.unscaledTime<_next)return;_next=Time.unscaledTime+.25f;
-            BuildCatalog();var actor=Actor();if(actor==null)return;
+            var actor=Actor();if(actor==null)return;
             var state=actor.Snapshot;if(state==null)return;
             if(_gaugeJob!=actor.Definition.id)
             {
@@ -76,25 +76,11 @@ namespace RaidRogue
                 var timing=skill==null?null:System.Array.Find(state.skills,s=>s.id==skill.id);
                 bool alive=CombatRange.LivingPartyMember(actor.transform);
                 bool affordable=skill!=null&&System.Array.TrueForAll(skill.costs,c=>(System.Array.Find(state.resources,r=>r.id==c.resourceId)?.value??0)>=c.amount);
-                string status=!alive?"사망":!unlocked?"잠김":!ready?"미구현":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"성광 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
+                string status=skill!=null&&!skill.implemented?"미구현":!alive?"사망":!unlocked?"잠김":!ready?"미구현":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"성광 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
                 _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+(ready?skill.name:CharacterSlots.Name(slot))+"\n"+status+(slot==CharacterSlot.Identity&&ready&&skill.costs.Length>0?" · 성광 "+skill.costs[0].amount.ToString("0")+" / CD "+skill.cooldown.ToString("0.#")+"초":"");
                 _labels[slot].resizeTextForBestFit=true;_labels[slot].resizeTextMinSize=9;_labels[slot].resizeTextMaxSize=12;
                 _buttons[slot].interactable=alive&&ready&&affordable&&timing.charges>0&&!(slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true)&&!LocalGameplayInput.Blocked;
             }
-        }
-        private void BuildCatalog()
-        {
-            var role=RoleSelectionManager.Instance;if(_catalogBuilt||role?.roleModalRoot==null)return;_catalogBuilt=true;
-            var select=Rect("AegisBasicSelect",role.roleModalRoot.transform,new Vector2(.5f,.5f),new Vector2(0,390),new Vector2(1000,64));
-            var selectImage=select.gameObject.AddComponent<Image>();selectImage.color=new Color(.15f,.24f,.36f,.98f);
-            var selectButton=select.gameObject.AddComponent<Button>();selectButton.targetGraphic=selectImage;selectButton.onClick.AddListener(role.SelectAegisPaladin);
-            Label(select,"이지스 팔라딘 · 기본 스킬 + 기원 3루트 선택 (근접 탱커)  |  R / F / V 잠김",Vector2.zero,new Vector2(980,60),20);
-            var panel=Rect("RegisteredClasses",role.roleModalRoot.transform,new Vector2(.5f,.5f),new Vector2(0,-370),new Vector2(1000,126));
-            var image=panel.gameObject.AddComponent<Image>();image.color=new Color(.035f,.045f,.065f,.97f);
-            var names=new List<string>();foreach(var job in CharacterCatalog.All)if(!job.playable)names.Add(job.name+" (미구현)");
-            string rows="등록 직업 · 아래 직업은 아직 전투 선택 불가\n";
-            for(int i=0;i<names.Count;i++){rows+=names[i]+((i+1)%4==0?"\n":"   ·   ");}
-            Label(panel,rows,Vector2.zero,new Vector2(980,118),15);
         }
         private static RectTransform Rect(string name,Transform parent,Vector2 anchor,Vector2 position,Vector2 size)
         {var go=new GameObject(name,typeof(RectTransform));var r=go.GetComponent<RectTransform>();r.SetParent(parent,false);r.anchorMin=r.anchorMax=anchor;r.anchoredPosition=position;r.sizeDelta=size;return r;}

@@ -45,6 +45,9 @@ namespace RaidRogue
 
         private bool _isModalOpen;
         private bool _hasSelectedInitialRole;
+        private RectTransform _selectionPanel;
+        private Button _aegisSelect;
+        private Text _aegisSelectText;
 
         public bool IsRoleModalOpen => _isModalOpen;
 
@@ -177,11 +180,13 @@ namespace RaidRogue
             }
 
             PlayerRole curRole = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
+            var character = player != null ? player.GetComponent<CharacterActor>() : null;
+            string currentName = character?.Definition?.legacyRole == 0 ? character.Definition.name : GetRoleTitleKor(curRole);
             if (roleModalSubtitleText != null)
             {
                 LocalShortcutText.Set(roleModalSubtitleText,
-                    $"현재 선택된 직업: <color=#FFE055>{GetRoleTitleKor(curRole)}</color>  |  " +
-                    "원하는 직업 카드를 마우스로 클릭하거나 키보드 <b>[{key:Choice1}] · [{key:Choice2}] · [{key:Choice3}] · [{key:Choice4}]</b> 키를 눌러 즉시 플레이하세요! (나머지 3자리는 AI 봇이 자동 편성됩니다)");
+                    $"현재 직업: <color=#FFE055>{currentName}</color> · 팔라딘은 아래 금색 버튼 → 기원 선택 → 출발\n" +
+                    "기존 테스트 직업은 아래 카드 또는 <b>[{key:Choice1}] · [{key:Choice2}] · [{key:Choice3}] · [{key:Choice4}]</b>로 선택 · 남은 역할은 AI 봇이 담당합니다.");
             }
 
             _isModalOpen = true;
@@ -455,7 +460,9 @@ namespace RaidRogue
             }
 
             PlayerRole cur = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
-            topOpenRoleModalButtonText.text = $"[직업 변경: {GetRoleShortKor(cur)} ({LocalInputBindings.Label("Roles")})]";
+            var character = player != null ? player.GetComponent<CharacterActor>() : null;
+            string currentName = character?.Definition?.legacyRole == 0 ? character.Definition.name : GetRoleShortKor(cur);
+            topOpenRoleModalButtonText.text = $"[직업 변경: {currentName} ({LocalInputBindings.Label("Roles")})]";
         }
 
         public static string GetRoleTitleKor(PlayerRole role)
@@ -554,6 +561,94 @@ namespace RaidRogue
                     BuildRoleSelectionModalUI(canvas.transform, font);
                 }
             }
+            // Runtime upgrade also covers previously generated scenes and does not depend on the hotbar being visible.
+            if (Application.isPlaying) EnsureCharacterChoices(font);
+        }
+
+        private void EnsureCharacterChoices(Font font)
+        {
+            if (roleModalRoot == null) return;
+            _selectionPanel = roleModalRoot.transform.Find("RoleSelection_CenterWindow") as RectTransform;
+            if (_selectionPanel == null) return;
+            _selectionPanel.sizeDelta = new Vector2(1480, 900);
+            var title = _selectionPanel.Find("ModalTitle")?.GetComponent<Text>();
+            if (title != null) title.text = "직업 선택 · 이지스 팔라딘 / 기존 테스트 직업";
+            if (roleModalSubtitleText != null) roleModalSubtitleText.rectTransform.sizeDelta = new Vector2(1400, 52);
+            for (int i = 0; i < roleCardButtons.Length; i++)
+                if (roleCardButtons[i] != null)
+                {
+                    var card = roleCardButtons[i].GetComponent<RectTransform>();
+                    card.anchoredPosition = new Vector2(card.anchoredPosition.x, -62);
+                }
+
+            var choice = _selectionPanel.Find("AegisBasicSelect") as RectTransform;
+            if (choice == null)
+            {
+                // Reuse an existing runtime choice when scripts reload during Play.
+                choice = roleModalRoot.transform.Find("AegisBasicSelect") as RectTransform;
+                if (choice == null) choice = new GameObject("AegisBasicSelect", typeof(RectTransform)).GetComponent<RectTransform>();
+                choice.SetParent(_selectionPanel, false);
+            }
+            choice.anchorMin = choice.anchorMax = choice.pivot = new Vector2(.5f, .5f);
+            choice.anchoredPosition = new Vector2(0, 254); choice.sizeDelta = new Vector2(1400, 76);
+            var image = choice.GetComponent<Image>() ?? choice.gameObject.AddComponent<Image>();
+            image.color = new Color(.32f, .24f, .09f, 1);
+            _aegisSelect = choice.GetComponent<Button>() ?? choice.gameObject.AddComponent<Button>();
+            _aegisSelect.targetGraphic = image;
+            _aegisSelect.onClick.RemoveAllListeners();
+            _aegisSelect.onClick.AddListener(SelectAegisPaladin);
+            _aegisSelectText = ChoiceLabel(choice, font, 24);
+            _aegisSelectText.color = new Color(1, .9f, .5f);
+
+            var catalog = _selectionPanel.Find("RegisteredClasses") as RectTransform;
+            if (catalog == null)
+            {
+                catalog = roleModalRoot.transform.Find("RegisteredClasses") as RectTransform;
+                if (catalog == null) catalog = new GameObject("RegisteredClasses", typeof(RectTransform)).GetComponent<RectTransform>();
+                catalog.SetParent(_selectionPanel, false);
+            }
+            catalog.anchorMin = catalog.anchorMax = catalog.pivot = new Vector2(.5f, .5f);
+            catalog.anchoredPosition = new Vector2(0, -385); catalog.sizeDelta = new Vector2(1400, 80);
+            var names = new List<string>();
+            foreach (var job in CharacterCatalog.All) if (!job.playable) names.Add(job.name);
+            ChoiceLabel(catalog, font, 16).text = "등록만 된 직업 · 아직 선택 불가\n" + string.Join(" · ", names);
+            RefreshCharacterChoiceLayout();
+        }
+
+        private static Text ChoiceLabel(RectTransform parent, Font font, int size)
+        {
+            var text = parent.GetComponentInChildren<Text>(true);
+            if (text == null)
+            {
+                var label = new GameObject("Label", typeof(RectTransform));
+                label.transform.SetParent(parent, false);
+                text = label.AddComponent<Text>();
+            }
+            var rect = text.rectTransform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(14, 4); rect.offsetMax = new Vector2(-14, -4);
+            text.font = font; text.fontSize = size; text.alignment = TextAnchor.MiddleCenter;
+            text.color = Color.white; text.raycastTarget = false;
+            return text;
+        }
+
+        private void LateUpdate()
+        {
+            if (_isModalOpen) RefreshCharacterChoiceLayout();
+        }
+
+        private void RefreshCharacterChoiceLayout()
+        {
+            if (_selectionPanel == null || roleModalRoot == null) return;
+            var available = ((RectTransform)roleModalRoot.transform).rect.size;
+            if (available.x > 0 && available.y > 0)
+                _selectionPanel.localScale = Vector3.one * Mathf.Clamp(Mathf.Min((available.x - 24) / 1480, (available.y - 24) / 900), .01f, 1);
+            if (_aegisSelect == null) return;
+            bool canSelect = stageManager != null && stageManager.CanSelectInitialRole && CharacterCatalog.Find(AegisPaladinData.JobId)?.playable == true;
+            _aegisSelect.interactable = canSelect && !LocalGameplayInput.ModalCovered;
+            _aegisSelectText.text = canSelect
+                ? "▶ 이지스 팔라딘 선택 · 근접 탱커 · 검과 대방패\n기본 스킬 + 기원 3루트 / Z 플레이 가능 · R / F / V 미구현"
+                : "이지스 팔라딘 · 새 런 출발 전에 선택할 수 있습니다";
         }
 
         private void BuildRoleSelectionModalUI(Transform canvasTransform, Font font)
