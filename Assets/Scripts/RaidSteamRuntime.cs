@@ -241,6 +241,7 @@ namespace RaidRogue
         }
         private void SetOverlay(bool open)
         {
+            if (OverlayOpen != open) LocalInputBindings.QuarantineHeld();
             OverlayOpen = open;
             if (open)
             {

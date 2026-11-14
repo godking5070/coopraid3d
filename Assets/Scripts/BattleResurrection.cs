@@ -40,13 +40,8 @@ namespace RaidRogue
             bool pressed = false, held = false;
             if (_player != null && RaidCombatAuthority.Local(this))
             {
-#if ENABLE_INPUT_SYSTEM
-                pressed = Keyboard.current != null && (Keyboard.current.digit5Key.wasPressedThisFrame || Keyboard.current.numpad5Key.wasPressedThisFrame);
-                held = Keyboard.current != null && (Keyboard.current.digit5Key.isPressed || Keyboard.current.numpad5Key.isPressed);
-#elif ENABLE_LEGACY_INPUT_MANAGER
-                pressed = Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5);
-                held = Input.GetKey(KeyCode.Alpha5) || Input.GetKey(KeyCode.Keypad5);
-#endif
+                pressed = LocalInputBindings.Pressed("Skill5");
+                held = LocalInputBindings.Held("Skill5");
             }
             bool began = false;
             if (pressed && !_fiveHeld && !LocalGameplayInput.Blocked && IsHealer)

@@ -82,6 +82,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            UpdateViewToggleUI(currentViewMode == CameraViewMode.View2D_TopDown);
             if (LocalGameplayInput.Blocked) return;
             if (WasToggleShortcutPressed())
             {
@@ -173,8 +174,8 @@ namespace RaidRogue
             if (viewToggleButtonText != null)
             {
                 viewToggleButtonText.text = is2D
-                    ? "[뷰 전환: 현재 2D (단축키 V)]"
-                    : "[뷰 전환: 현재 3D (단축키 V)]";
+                    ? $"[뷰 전환: 현재 2D ({LocalInputBindings.Label("View")})]"
+                    : $"[뷰 전환: 현재 3D ({LocalInputBindings.Label("View")})]";
                 viewToggleButtonText.color = is2D
                     ? new Color(0.35f, 1.0f, 0.88f, 1f)
                     : new Color(1.0f, 0.94f, 0.45f, 1f);
@@ -183,8 +184,8 @@ namespace RaidRogue
             if (viewToggleSubHintText != null)
             {
                 viewToggleSubHintText.text = is2D
-                    ? "WASD 화면 기준 이동 | 휠 줌 | 확대 시 플레이어 추적"
-                    : "WASD 카메라 기준 이동 | 우클릭 회전 | 휠 줌";
+                    ? $"{LocalInputBindings.MovementLabels} 화면 기준 이동 | 휠 줌 | 확대 시 플레이어 추적"
+                    : $"{LocalInputBindings.MovementLabels} 카메라 기준 이동 | 우클릭 회전 | 휠 줌";
             }
 
             if (viewToggleButtonBg != null)
@@ -195,22 +196,7 @@ namespace RaidRogue
             }
         }
 
-        private static bool WasToggleShortcutPressed()
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.vKey.wasPressedThisFrame)
-            {
-                return true;
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.V))
-            {
-                return true;
-            }
-#endif
-            return false;
-        }
+        private static bool WasToggleShortcutPressed() => LocalInputBindings.Pressed("View");
 
         private void OnDestroy() { if (Instance == this) Instance = null; }
     }

@@ -454,86 +454,10 @@ namespace RaidRogue
 
         private void HandleKeyboardShortcuts()
         {
-            // Shift 조합키는 디버그 단축키(Shift + F1~F6)에 양보하여 F1~F8 단독 입력과 충돌하지 않게 분리
-            bool shiftHeld = IsShiftHeld();
-
-            if (!shiftHeld)
-            {
-                if (WasKeyPressed(KeyCode.F1)) SelectPartyMemberByIndex(0);
-                else if (WasKeyPressed(KeyCode.F2)) SelectPartyMemberByIndex(1);
-                else if (WasKeyPressed(KeyCode.F3)) SelectPartyMemberByIndex(2);
-                else if (WasKeyPressed(KeyCode.F4)) SelectPartyMemberByIndex(3);
-                else if (WasKeyPressed(KeyCode.F5)) SelectPartyMemberByIndex(4);
-                else if (WasKeyPressed(KeyCode.F6)) SelectPartyMemberByIndex(5);
-                else if (WasKeyPressed(KeyCode.F7)) SelectPartyMemberByIndex(6);
-                else if (WasKeyPressed(KeyCode.F8)) SelectPartyMemberByIndex(7);
-            }
-
-            // [Tab] 전장 생존 적(보스 + 소환된 쫄) 거리순 순환 타겟팅
-            if (WasKeyPressed(KeyCode.Tab))
-            {
-                CycleEnemyTarget();
-            }
-
-            // [T] 대상의 대상(Target of Target) 즉시 스왑
-            if (WasKeyPressed(KeyCode.T))
-            {
-                SwapToTargetOfTarget();
-            }
-
-            // [ESC] 타겟 해제
-            if (!LocalGameplayInput.EscapeConsumed && WasKeyPressed(KeyCode.Escape))
-            {
-                ClearTarget();
-            }
-        }
-
-        private static bool IsShiftHeld()
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null &&
-                (Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed))
-            {
-                return true;
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-            {
-                return true;
-            }
-#endif
-            return false;
-        }
-
-        private static bool WasKeyPressed(KeyCode key)
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null)
-            {
-                switch (key)
-                {
-                    case KeyCode.F1: if (Keyboard.current.f1Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F2: if (Keyboard.current.f2Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F3: if (Keyboard.current.f3Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F4: if (Keyboard.current.f4Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F5: if (Keyboard.current.f5Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F6: if (Keyboard.current.f6Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F7: if (Keyboard.current.f7Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.F8: if (Keyboard.current.f8Key.wasPressedThisFrame) return true; break;
-                    case KeyCode.Tab: if (Keyboard.current.tabKey.wasPressedThisFrame) return true; break;
-                    case KeyCode.T: if (Keyboard.current.tKey.wasPressedThisFrame) return true; break;
-                    case KeyCode.Escape: if (Keyboard.current.escapeKey.wasPressedThisFrame) return true; break;
-                }
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(key))
-            {
-                return true;
-            }
-#endif
-            return false;
+            for (int i = 0; i < 8; i++) if (LocalInputBindings.Pressed("Party" + (i + 1))) { SelectPartyMemberByIndex(i); break; }
+            if (LocalInputBindings.Pressed("ClearTarget")) ClearTarget();
+            if (LocalInputBindings.Pressed("CycleEnemy")) CycleEnemyTarget();
+            if (LocalInputBindings.Pressed("TargetOfTarget")) SwapToTargetOfTarget();
         }
 
         /// <summary>
@@ -1218,7 +1142,7 @@ namespace RaidRogue
             totNameRect.sizeDelta = new Vector2(-12f, 18f);
             _totNameText.raycastTarget = false;
 
-            _totHpText = CreateUIText(_totBoxRoot.transform, "ToTHP", "[T] 키 또는 클릭하여 전환", font, 10, FontStyle.Normal, TextAnchor.MiddleLeft, new Color(0.8f, 0.9f, 1f));
+            _totHpText = CreateUIText(_totBoxRoot.transform, "ToTHP", $"[{LocalInputBindings.Label("TargetOfTarget")}] 키 또는 클릭하여 전환", font, 10, FontStyle.Normal, TextAnchor.MiddleLeft, new Color(0.8f, 0.9f, 1f));
             RectTransform totHpRect = _totHpText.GetComponent<RectTransform>();
             totHpRect.anchorMin = new Vector2(0f, 0f);
             totHpRect.anchorMax = new Vector2(1f, 0f);
@@ -1229,7 +1153,7 @@ namespace RaidRogue
 
             // 하단 조작 가이드 힌트
             Text hintText = CreateUIText(_targetHudRoot.transform, "HotkeyHint",
-                "클릭/F1~F4: 아군 타겟 | Tab: 적·쫄 순환 | T: 대상의 대상 전환 | ESC: 해제",
+                "",
                 font, 10, FontStyle.Normal, TextAnchor.MiddleRight, new Color(0.72f, 0.82f, 0.95f, 0.92f));
             RectTransform hintRect = hintText.GetComponent<RectTransform>();
             hintRect.anchorMin = new Vector2(1f, 0f);
@@ -1238,6 +1162,7 @@ namespace RaidRogue
             hintRect.anchoredPosition = new Vector2(-10f, 1f);
             hintRect.sizeDelta = new Vector2(360f, 14f);
             hintText.raycastTarget = false;
+            LocalShortcutText.Set(hintText, "클릭/{key:Party1}~{key:Party4}: 아군 | {key:CycleEnemy}: 적 순환 | {key:TargetOfTarget}: 대상의 대상 | {key:ClearTarget}: 해제");
         }
 
         private void UpdateTargetInfoHUD()
@@ -1246,7 +1171,7 @@ namespace RaidRogue
 
             if (currentTarget == null)
             {
-                _targetNameText.text = "현재 지정된 타겟 없음 (클릭 / Tab / F1~F4 로 타겟 선택)";
+                _targetNameText.text = $"타겟 없음 (클릭 / {LocalInputBindings.Label("CycleEnemy")} / {LocalInputBindings.PartyLabels()})";
                 _targetNameText.color = new Color(0.75f, 0.78f, 0.85f);
                 _targetHpFill.fillAmount = 0f;
                 _targetHpText.text = "-";
@@ -1281,7 +1206,7 @@ namespace RaidRogue
                 Transform offensiveTarget = combat.GetOffensiveTarget();
                 string reach = offensiveTarget == null ? "유효한 공격 대상 없음" :
                     CombatRange.InRange(player.transform, offensiveTarget, combat.PrimaryMeleeRange) ? "사거리 안" : "사거리 밖";
-                _targetStatusText.text = $"[1] {reach} | {_targetStatusText.text}";
+                _targetStatusText.text = $"[{LocalInputBindings.Label("Skill1")}] {reach} | {_targetStatusText.text}";
                 _targetStatusText.horizontalOverflow = HorizontalWrapMode.Wrap;
                 _targetStatusText.verticalOverflow = VerticalWrapMode.Truncate;
             }
@@ -1300,7 +1225,7 @@ namespace RaidRogue
                     _totNameText.color = (totFaction == TargetFaction.Friendly)
                         ? new Color(0.45f, 0.95f, 1f)
                         : new Color(1f, 0.85f, 0.35f);
-                    _totHpText.text = $"타겟의 대상 (HP {totPct}%) | [T] 전환";
+                    _totHpText.text = $"타겟의 대상 (HP {totPct}%) | [{LocalInputBindings.Label("TargetOfTarget")}] 전환";
                 }
                 else
                 {

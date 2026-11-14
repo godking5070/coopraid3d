@@ -726,7 +726,7 @@ namespace RaidRogue
             if (Keyboard.current != null)
             {
                 shiftHeld = Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
-                if (Keyboard.current.rKey.wasPressedThisFrame) toggleRot = true;
+                if (shiftHeld && Keyboard.current.rKey.wasPressedThisFrame) toggleRot = true;
                 if (shiftHeld)
                 {
                     if (Keyboard.current.f1Key.wasPressedThisFrame) instantKillBoss = true;
@@ -740,7 +740,7 @@ namespace RaidRogue
 #endif
 #if ENABLE_LEGACY_INPUT_MANAGER
             shiftHeld = shiftHeld || Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            if (Input.GetKeyDown(KeyCode.R)) toggleRot = true;
+            if (shiftHeld && Input.GetKeyDown(KeyCode.R)) toggleRot = true;
             if (shiftHeld)
             {
                 if (Input.GetKeyDown(KeyCode.F1)) instantKillBoss = true;

@@ -248,7 +248,7 @@ namespace RaidRogue
 
                     if (cardDescTexts != null && i < cardDescTexts.Length && cardDescTexts[i] != null)
                     {
-                        cardDescTexts[i].text = roleDesc + $"\n\n<color=#FFE066>▶ 클릭 또는 [{i + 1}]키로 선택 & 다음 스테이지 진입</color>";
+                        LocalShortcutText.Set(cardDescTexts[i], roleDesc + "\n\n<color=#FFE066>▶ 클릭 또는 [{key:Choice" + (i + 1) + "}]키로 선택 & 다음 스테이지 진입</color>");
                     }
 
                     if (cardAccentBanners != null && i < cardAccentBanners.Length && cardAccentBanners[i] != null)
@@ -481,21 +481,7 @@ namespace RaidRogue
         private void HandleUnscaledCardModalInput()
         {
             if (LocalGameplayInput.ModalCovered) return;
-#if ENABLE_INPUT_SYSTEM
-            var keyboard = Keyboard.current;
-            if (keyboard != null)
-            {
-                if (keyboard.digit1Key.wasPressedThisFrame) OnCardButtonClicked(0);
-                else if (keyboard.digit2Key.wasPressedThisFrame) OnCardButtonClicked(1);
-                else if (keyboard.digit3Key.wasPressedThisFrame) OnCardButtonClicked(2);
-            }
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.Alpha1)) OnCardButtonClicked(0);
-            else if (Input.GetKeyDown(KeyCode.Alpha2)) OnCardButtonClicked(1);
-            else if (Input.GetKeyDown(KeyCode.Alpha3)) OnCardButtonClicked(2);
-#endif
-            // Pointer clicks go through the existing EventSystem button. A manual screen-rectangle
-            // fallback also clicked cards behind other modals and dispatched a second network request.
+            for (int i = 0; i < 3; i++) if (LocalInputBindings.Pressed("Choice" + (i + 1))) { OnCardButtonClicked(i); break; }
         }
 
         public bool HasCard(RoguelikeCardId id)

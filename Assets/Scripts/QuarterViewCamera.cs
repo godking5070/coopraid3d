@@ -62,7 +62,6 @@ namespace RaidRogue
         public bool Is2DMode => currentViewMode == CameraViewMode.View2D_TopDown;
         public bool IsOrbitDragging => _drag.Active;
         public float MovementYaw => (float)CameraControlMath.MovementYaw(Is2DMode, yawAngle);
-        private string PreferencesKey => "RaidRogue.Camera.v1." + localProfileId;
         private float ArenaRadius => _player != null ? _player.arenaBoundaryRadius : 18f;
         public float DefaultOrthoSize => (float)CameraControlMath.ArenaOrthoSize(ArenaRadius, UnityCamera.aspect, arenaPadding);
 
@@ -85,15 +84,7 @@ namespace RaidRogue
             _cam = GetComponent<Camera>();
             _player = target != null ? target.GetComponent<PlayerController>() : FindFirstObjectByType<PlayerController>();
             if (target == null && _player != null) target = _player.transform;
-            if (Application.isPlaying && PlayerPrefs.HasKey(PreferencesKey))
-            {
-                try { preferences = JsonUtility.FromJson<LocalCameraPreferences>(PlayerPrefs.GetString(PreferencesKey)) ?? new LocalCameraPreferences(); }
-                catch (ArgumentException) { preferences = new LocalCameraPreferences(); }
-                currentViewMode = preferences.viewMode == CameraViewMode.View2D_TopDown ? CameraViewMode.View2D_TopDown : CameraViewMode.View3D_Quarter;
-                distance = preferences.distance3D;
-                yawAngle = preferences.yaw3D;
-                pitchAngle3D = preferences.pitch3D;
-            }
+            if (LocalSettingsRuntime.Instance != null) ApplyLocalSettings(LocalSettingsRuntime.Instance.Previewed);
             _targetDistance = distance = Mathf.Clamp(distance, minDistance, maxDistance);
             yawAngle = (float)CameraControlMath.WrapYaw(yawAngle);
             pitchAngle3D = (float)CameraControlMath.ClampPitch(pitchAngle3D);
@@ -129,7 +120,7 @@ namespace RaidRogue
             bool blocked = LocalGameplayInput.Blocked;
             bool overUI = !_drag.Active && LocalGameplayInput.PointerOverUI(LocalGameplayInput.MousePosition);
             ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape);
-            if (_drag.Active && (escape || Cursor.lockState != CursorLockMode.Locked))
+            if (_drag.Active && ((escape && !LocalGameplayInput.EscapeConsumed) || Cursor.lockState != CursorLockMode.Locked))
             {
                 if (escape) LocalGameplayInput.ConsumeEscape();
                 ReleaseOrbit();
@@ -233,6 +224,27 @@ namespace RaidRogue
             SnapToTargetImmediate();
             SaveLocalPreferences();
         }
+        public void ApplyLocalSettings(LocalSettingsData data)
+        {
+            if (data == null) return;
+            preferences.rotationSensitivity = data.rotationSensitivity;
+            preferences.invertVertical = data.invertVertical;
+            preferences.zoomSensitivity3D = data.zoom3D;
+            preferences.zoomSensitivity2D = data.zoom2D;
+        }
+        public LocalCameraPreferences CaptureLocalState()
+        {
+            SaveLocalPreferences();
+            return JsonUtility.FromJson<LocalCameraPreferences>(JsonUtility.ToJson(preferences));
+        }
+        public void RestoreLocalState(LocalCameraPreferences state)
+        {
+            ReleaseOrbit(); preferences = state;
+            yawAngle = state.yaw3D; pitchAngle3D = state.pitch3D;
+            _targetDistance = state.distance3D; _zoom2D = state.zoom2D;
+            currentViewMode = state.viewMode; SnapToTargetImmediate();
+        }
+        // Pose stays in memory; only preference values are persisted by LocalSettingsRuntime.
         public void SaveLocalPreferences()
         {
             if (!Application.isPlaying || !_initialized) return;
@@ -241,7 +253,6 @@ namespace RaidRogue
             preferences.yaw3D = yawAngle;
             preferences.zoom2D = _zoom2D;
             preferences.viewMode = currentViewMode;
-            PlayerPrefs.SetString(PreferencesKey, JsonUtility.ToJson(preferences));
         }
         public void ReleaseOrbit(bool restorePosition = true, bool requireRightRelease = true)
         {
@@ -273,7 +284,7 @@ namespace RaidRogue
         private void OnApplicationPause(bool paused) { if (paused) ReleaseOrbit(false); }
         private void OnDisable() { ReleaseOrbit(); SaveLocalPreferences(); }
         private void OnDestroy() { ReleaseOrbit(); if (LocalCamera == this) LocalCamera = null; }
-        private void OnApplicationQuit() { ReleaseOrbit(); SaveLocalPreferences(); PlayerPrefs.Save(); }
+        private void OnApplicationQuit() { ReleaseOrbit(); SaveLocalPreferences(); }
 
         private static void ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape)
         {

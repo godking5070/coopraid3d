@@ -207,6 +207,12 @@ namespace RaidRogue
             UpdateSlot3(slots[2], role);
             UpdateSlot4(slots[3], role);
             UpdatePlayerCastBar(role);
+            if (playerCastText != null) playerCastText.text = LocalInputBindings.SkillText(playerCastText.text);
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i]?.keybindBadgeText != null) slots[i].keybindBadgeText.text = LocalInputBindings.Label("Skill" + (i + 1));
+                if (slots[i]?.skillNameText != null) slots[i].skillNameText.text = LocalInputBindings.SkillText(slots[i].skillNameText.text);
+            }
 
             if (gcdSummaryText != null)
             {
@@ -219,7 +225,7 @@ namespace RaidRogue
                 };
 
                 gcdSummaryText.text =
-                    $"현재 GCD: <b>{combatController.currentGcdDuration:F1}s</b>  |  {roleGuide}";
+                    $"현재 GCD: <b>{combatController.currentGcdDuration:F1}s</b>  |  {LocalInputBindings.SkillText(roleGuide)}";
             }
         }
 

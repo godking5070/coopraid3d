@@ -33,6 +33,13 @@ $taskFlowExe = Join-Path $taskOutput 'FlowTests.exe'
 if ($LASTEXITCODE -ne 0) { throw 'Run flow test compilation failed.' }
 & $taskFlowExe
 if ($LASTEXITCODE -ne 0) { throw 'Run flow tests failed.' }
+$taskSettingsExe = Join-Path $taskOutput 'SettingsTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskSettingsExe" (Join-Path $taskRoot 'Assets/Scripts/LocalSettingsData.cs') (Join-Path $PSScriptRoot 'LocalSettingsTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Local settings test compilation failed.' }
+$taskKeyboardSource = rg --files (Join-Path $OriginalProject 'Library/PackageCache') -g 'Keyboard.cs' | Where-Object { $_ -match 'com.unity.inputsystem' } | Select-Object -First 1
+if (!$taskKeyboardSource) { throw 'Installed Input System Keyboard source is required for control path validation.' }
+& $taskSettingsExe $taskKeyboardSource
+if ($LASTEXITCODE -ne 0) { throw 'Local settings tests failed.' }
 # Compile the actual pinned SDK, without loading native Steam or running Unity.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
 $taskDefines = $taskProject.SelectSingleNode("//*[local-name()='DefineConstants']").InnerText

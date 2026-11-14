@@ -12,7 +12,7 @@ namespace RaidRogue
         private GameObject _slot;
         private Image _background;
         private RectTransform _overlay;
-        private Text _state, _details;
+        private Text _state, _details, _key;
         private float _nextHotbarSearch;
 
         public void Initialize(PlayerController player)
@@ -64,6 +64,7 @@ namespace RaidRogue
                 CreateSlot(hotbar.transform);
             }
 
+            _key.text = LocalInputBindings.Label("Dash") + " 대쉬";
             bool ready = _player.CanDash;
             _background.color = ready ? new Color(0.13f, 0.32f, 0.38f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
             _overlay.anchorMax = new Vector2(1, _player.DashCooldownFraction);
@@ -93,7 +94,7 @@ namespace RaidRogue
             Image shade = _overlay.gameObject.AddComponent<Image>();
             shade.color = new Color(0, 0, 0, 0.6f);
             shade.raycastTarget = false;
-            Label("Key", rect, "SPACE 대쉬", 18, new Vector2(0, 0.72f), Vector2.one);
+            _key = Label("Key", rect, "", 18, new Vector2(0, 0.72f), Vector2.one);
             _state = Label("State", rect, "사용 가능", 21, new Vector2(0, 0.36f), new Vector2(1, 0.72f));
             _details = Label("Details", rect, "", 12, Vector2.zero, new Vector2(1, 0.36f));
         }

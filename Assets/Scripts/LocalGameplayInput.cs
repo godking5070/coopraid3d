@@ -29,13 +29,14 @@ namespace RaidRogue
         public static void ResetSession()
         {
             Reset();
+            LocalInputBindings.Capturing = false; LocalInputBindings.QuarantineHeld();
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
         }
 
         public static bool ModalCovered => RaidNetworkSession.Instance?.Ending == true || RaidNetworkSession.Instance?.MenuOpen == true ||
             (RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) ||
-            !Application.isFocused || IsTyping || LocalCameraSettingsUI.IsOpen || CombatMetricsUI.BlocksUnderlyingInput;
+            !Application.isFocused || IsTyping || LocalInputBindings.Capturing || LocalCameraSettingsUI.IsOpen || CombatMetricsUI.BlocksUnderlyingInput;
 
         public static bool IsTyping
         {
@@ -58,7 +59,7 @@ namespace RaidRogue
                 if (_cards == null) _cards = Object.FindFirstObjectByType<RoguelikeCardManager>();
                 if (_stages == null) _stages = Object.FindFirstObjectByType<StageManager>();
                 if ((RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) || RaidNetworkSession.BlocksInput || !Application.isFocused || Time.timeScale <= 0.001f || IsTyping ||
-                    CombatMetricsUI.BlocksUnderlyingInput || LocalCameraSettingsUI.IsOpen ||
+                    CombatMetricsUI.BlocksUnderlyingInput || LocalInputBindings.Capturing || LocalCameraSettingsUI.IsOpen ||
                     (_roles != null && _roles.IsRoleModalOpen) || (_cards != null && _cards.IsSelectionOpen) ||
                     (_stages != null && _stages.IsStageTransitioning)) SuppressThisFrame();
                 return _blockedFrame == Time.frameCount;

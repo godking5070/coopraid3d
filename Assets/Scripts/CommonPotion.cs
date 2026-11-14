@@ -64,13 +64,8 @@ namespace RaidRogue
             bool pressed = false, held = false;
             if (_player != null && RaidCombatAuthority.Local(this))
             {
-#if ENABLE_INPUT_SYSTEM
-                pressed = Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame;
-                held = Keyboard.current != null && Keyboard.current.qKey.isPressed;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-                pressed = Input.GetKeyDown(KeyCode.Q);
-                held = Input.GetKey(KeyCode.Q);
-#endif
+                pressed = LocalInputBindings.Pressed("Potion");
+                held = LocalInputBindings.Held("Potion");
             }
             bool newPress = pressed && !_qHeld;
             _qHeld = held; // Consume blocked/full-health/cooldown presses too; never queue an item use.

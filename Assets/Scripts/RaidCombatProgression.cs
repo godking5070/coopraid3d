@@ -62,7 +62,7 @@ namespace RaidRogue
             {
                 var card = _currentOfferedCards[i]; GetRoleAdaptedCardDisplay(card, out string title, out string category, out string description);
                 if (cardTitleTexts[i] != null) cardTitleTexts[i].text = title + "\n" + category;
-                if (cardDescTexts[i] != null) cardDescTexts[i].text = description + $"\n[{i + 1}] 선택 · 모든 참가자 선택 후 진행";
+                if (cardDescTexts[i] != null) LocalShortcutText.Set(cardDescTexts[i], description + "\n[{key:Choice" + (i + 1) + "}] 선택 · 모든 참가자 선택 후 진행");
                 if (cardAccentBanners[i] != null) cardAccentBanners[i].color = card.accentColor;
             }
             if (modalHeaderText != null) modalHeaderText.text = "보스 토벌 보상 · 나의 카드 선택";

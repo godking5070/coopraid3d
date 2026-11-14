@@ -1173,120 +1173,38 @@ namespace RaidRogue
 
             string currentTargetLabel = TargetingManager.Instance != null && TargetingManager.Instance.CurrentTarget != null
                 ? TargetingManager.Instance.GetUnitDisplayName(TargetingManager.Instance.CurrentTarget)
-                : "없음 (클릭 / Tab / F1~F4)";
+                : $"없음 (클릭 / {LocalInputBindings.Label("CycleEnemy")} / {LocalInputBindings.PartyLabels()})";
 
             string movementHint = ViewModeManager.Is2DViewActive
-                ? "WASD 화면 기준 이동 · 휠 줌 · 기본 시야: 전장 전체 / 확대: 플레이어 추적"
-                : "WASD 카메라 기준 이동 · 우클릭 드래그 회전 · 휠 줌";
+                ? $"{LocalInputBindings.MovementLabels} 화면 기준 이동 · 휠 줌 · 기본 시야: 전장 전체 / 확대: 플레이어 추적"
+                : $"{LocalInputBindings.MovementLabels} 카메라 기준 이동 · 우클릭 드래그 회전 · 휠 줌";
 
             hudStatusText.text =
-                $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [P] | 뷰: {viewModeLabel} [V])]</b>\n" +
-                $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[F1~F4]</b> 파티원 1~4번 | <b>[Tab]</b> 적(보스·쫄) 순환 | <b>[T]</b> 대상의 대상 | <b>[ESC]</b> 해제\n" +
-                $"• <b>이동/카메라</b> : {movementHint} · SPACE 대쉬 · Q 포션{(currentRole == PlayerRole.Oracle_Healer ? " · 5 부활(사망 아군 선택)" : "")} | 우측 [카메라 설정]\n" +
+                $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [{LocalInputBindings.Label("Roles")}] | 뷰: {viewModeLabel} [{LocalInputBindings.Label("View")}])]</b>\n" +
+                $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[{LocalInputBindings.PartyLabels()}]</b> 파티원 1~4번 | <b>[{LocalInputBindings.Label("CycleEnemy")}]</b> 적(보스·쫄) 순환 | <b>[{LocalInputBindings.Label("TargetOfTarget")}]</b> 대상의 대상 | <b>[{LocalInputBindings.Label("ClearTarget")}]</b> 타겟 해제 | <b>[ESC]</b> 창 닫기 / 메뉴\n" +
+                $"• <b>이동/카메라</b> : {movementHint} · {LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션{(currentRole == PlayerRole.Oracle_Healer ? $" · {LocalInputBindings.Label("Skill5")} 부활(사망 아군 선택)" : "")} | [{LocalInputBindings.Label("Settings")}] 설정\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
-                $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {targetBoss.LastHitMessage}\n" +
+                $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {LocalInputBindings.SkillText(targetBoss.LastHitMessage)}\n" +
                 $"• <b>누적 카드 빌드</b> : <color=#FFE066>{cardsSummary}</color>";
         }
 
         private static bool WasDashPressed()
-        {
-#if ENABLE_INPUT_SYSTEM
-            return Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            return Input.GetKeyDown(KeyCode.Space);
-#else
-            return false;
-#endif
-        }
+        { return LocalInputBindings.Pressed("Dash"); }
 
         private static bool IsDashKeyHeld()
-        {
-#if ENABLE_INPUT_SYSTEM
-            return Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
-#elif ENABLE_LEGACY_INPUT_MANAGER
-            return Input.GetKey(KeyCode.Space);
-#else
-            return false;
-#endif
-        }
+        { return LocalInputBindings.Held("Dash"); }
 
         private static Vector2 ReadMoveInput()
-        {
-            Vector2 input = Vector2.zero;
-
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null)
-            {
-                if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) input.y += 1f;
-                if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) input.y -= 1f;
-                if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1f;
-                if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) input.x -= 1f;
-            }
-#endif
-
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (input.sqrMagnitude < 0.001f)
-            {
-                input.x = Input.GetAxisRaw("Horizontal");
-                input.y = Input.GetAxisRaw("Vertical");
-            }
-#endif
-            return input;
-        }
+        { return LocalInputBindings.Movement; }
 
         private static bool WasSkill1Pressed()
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null &&
-                (Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame))
-            {
-                return true;
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
-            {
-                return true;
-            }
-#endif
-            return false;
-        }
+        { return LocalInputBindings.Pressed("Skill1"); }
 
         private static bool WasSkill2Pressed()
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null &&
-                (Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame))
-            {
-                return true;
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
-            {
-                return true;
-            }
-#endif
-            return false;
-        }
+        { return LocalInputBindings.Pressed("Skill2"); }
 
         private static bool WasSkill3Pressed()
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null &&
-                (Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame))
-            {
-                return true;
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
-            {
-                return true;
-            }
-#endif
-            return false;
-        }
+        { return LocalInputBindings.Pressed("Skill3"); }
     }
 }

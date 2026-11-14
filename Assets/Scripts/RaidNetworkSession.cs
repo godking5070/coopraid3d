@@ -26,6 +26,8 @@ namespace RaidRogue
             set
             {
                 if (_menuOpen == value) return;
+                LocalInputBindings.QuarantineHeld();
+                QuarterViewCamera.LocalCamera?.ReleaseOrbit();
                 if (Mode == RaidSessionMode.Single)
                 {
                     if (value) { _singleMenuTimeScale = Time.timeScale; Time.timeScale = 0; }

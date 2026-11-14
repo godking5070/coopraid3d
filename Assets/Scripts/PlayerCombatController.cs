@@ -550,7 +550,7 @@ namespace RaidRogue
 
         private void ShowRangeFeedback(string message)
         {
-            RangeFeedback = message;
+            RangeFeedback = LocalInputBindings.SkillText(message);
             _rangeFeedbackUntil = Time.unscaledTime + 1.25f;
         }
 
@@ -1720,50 +1720,7 @@ namespace RaidRogue
         }
 
         private static bool WasKeyPressed(int numberKey)
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null)
-            {
-                switch (numberKey)
-                {
-                    case 1:
-                        if (Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame)
-                            return true;
-                        break;
-                    case 2:
-                        if (Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame)
-                            return true;
-                        break;
-                    case 3:
-                        if (Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame)
-                            return true;
-                        break;
-                    case 4:
-                        if (Keyboard.current.digit4Key.wasPressedThisFrame || Keyboard.current.numpad4Key.wasPressedThisFrame)
-                            return true;
-                        break;
-                }
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            switch (numberKey)
-            {
-                case 1:
-                    if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1)) return true;
-                    break;
-                case 2:
-                    if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2)) return true;
-                    break;
-                case 3:
-                    if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3)) return true;
-                    break;
-                case 4:
-                    if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4)) return true;
-                    break;
-            }
-#endif
-            return false;
-        }
+        { return LocalInputBindings.Pressed("Skill" + numberKey); }
     }
 
     /// <summary>
