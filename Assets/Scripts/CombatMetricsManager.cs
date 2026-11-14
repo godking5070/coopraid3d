@@ -3,7 +3,7 @@ using UnityEngine;
 namespace RaidRogue
 {
     [DefaultExecutionOrder(-200)]
-    public sealed class CombatMetricsManager : MonoBehaviour
+    public sealed partial class CombatMetricsManager : MonoBehaviour
     {
         public static CombatMetricsManager Instance { get; private set; }
         public CombatMetricsLedger Ledger { get; } = new CombatMetricsLedger();
@@ -30,6 +30,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidCombatAuthority.Replica) return;
             Ledger.Advance(Time.unscaledDeltaTime, !StageManager.CombatSuspended && Time.timeScale > 0.001f && _stage != null &&
                 _stage.boss != null && !_stage.boss.IsBossDefeatedCollapse && !_stage.IsStageTransitioning);
         }
@@ -37,6 +38,12 @@ namespace RaidRogue
         public void BeginStage(int stage, bool resetRun)
         {
             if (resetRun) Ledger.ResetRun();
+            if (RaidCombatAuthority.Active)
+            {
+                var ids = new System.Collections.Generic.List<int>();
+                foreach (var member in PartyLife.OrderedMembers()) ids.Add(RaidCombatAuthority.Id(member));
+                Ledger.RetainCurrentRoster(ids); // Previous encounter results keep departed members; a new attempt has only its current party.
+            }
             RefreshRoster();
             Ledger.BeginStage(stage);
             _ui.CloseResults();
@@ -44,14 +51,15 @@ namespace RaidRogue
 
         public void RefreshRoster()
         {
-            if (_stage != null && _stage.player != null) Register(_stage.player.transform);
-            foreach (var bot in FindObjectsByType<PartyBotAI>(FindObjectsSortMode.InstanceID)) Register(bot.transform);
+            foreach (var member in PartyLife.OrderedMembers()) Register(member);
         }
 
         public int Register(Transform source)
         {
             if (source == null) return 0;
-            int id = source.GetInstanceID();
+            int id = RaidCombatAuthority.Active ? RaidCombatAuthority.Id(source) : source.GetInstanceID();
+            var avatar = source.GetComponent<NetworkRaidAvatar>();
+            if (avatar != null) { Ledger.Register(id, avatar.DisplayName, avatar.Role); return id; }
             var player = source.GetComponent<PlayerController>();
             if (player != null)
             {
@@ -71,24 +79,25 @@ namespace RaidRogue
 
         public static void Damage(Transform source, float before, float after, bool isAdd)
         {
-            if (Instance == null || Time.timeScale <= 0.001f) return;
+            if (RaidCombatAuthority.Replica || Instance == null || Time.timeScale <= 0.001f) return;
             Instance.Ledger.RecordDamage(SourceId(source), before, after, isAdd);
         }
 
         public static void Healing(Transform source, float before, float after, HealingKind kind = HealingKind.Ability)
         {
-            if (Instance == null || Time.timeScale <= 0.001f) return;
+            if (RaidCombatAuthority.Replica || Instance == null || Time.timeScale <= 0.001f) return;
             Instance.Ledger.RecordHealing(SourceId(source), before, after, kind);
+            RaidCombatAuthority.Threat(source, Mathf.Max(0, after - before) * .5f);
         }
 
         public static void Absorption(int source, double amount)
         {
-            if (Instance != null && Time.timeScale > 0.001f) Instance.Ledger.RecordAbsorption(source, amount);
+            if (!RaidCombatAuthority.Replica && Instance != null && Time.timeScale > 0.001f) Instance.Ledger.RecordAbsorption(source, amount);
         }
 
         public static void SetDead(Transform member, bool dead)
         {
-            if (Instance != null && (!dead || Time.timeScale > 0.001f)) Instance.Ledger.SetDead(SourceId(member), dead);
+            if (!RaidCombatAuthority.Replica && Instance != null && (!dead || Time.timeScale > 0.001f)) Instance.Ledger.SetDead(SourceId(member), dead);
         }
     }
 }

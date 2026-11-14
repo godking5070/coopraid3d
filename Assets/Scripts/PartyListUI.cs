@@ -502,9 +502,18 @@ namespace RaidRogue
                 row.boundTarget = i < members.Count ? members[i] : null;
                 var avatar = row.boundTarget != null ? row.boundTarget.GetComponent<NetworkRaidAvatar>() : null;
                 bool selected = avatar != null && TargetingManager.Instance != null && TargetingManager.Instance.CurrentTarget == avatar.transform;
+                var state = avatar?.State;
                 UpdateRowVisual(row, $"F{i + 1}", avatar != null ? NetworkRaidAvatar.RoleColor(avatar.Role) : Color.gray,
-                    avatar != null ? $"[F{i + 1}] {avatar.DisplayName} · {avatar.RoleName}" : "접속 대기", 1, 1, 0, false, selected, false);
-                if (row.hpValueText != null) row.hpValueText.text = avatar != null ? "접속 중 · 전투 미동기화" : "빈 자리";
+                    avatar != null ? $"[F{i + 1}] {avatar.DisplayName} · {avatar.RoleName}" : "접속 대기", state?.hp ?? 1, state?.maxHp ?? 1, state?.shield ?? 0,
+                    avatar != null && boss != null && boss.aggroTarget == avatar.transform, selected, state?.dead == true);
+                if (row.hpValueText != null && state != null)
+                {
+                    string suffix = state.dead ? " · 사망" : state.protection > 0 ? " · 부활 보호" : state.resurrecting ? " · 부활 시전" : state.casting ? " · " + state.castName : "";
+                    if (!state.dead && state.defense > 0) suffix += " · 방어";
+                    if (!state.dead && state.haste > 0) suffix += " · 가속";
+                    if (RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Reward) suffix = avatar.IsBot ? " · AI" : state.rewardChosen ? " · 선택 완료" : " · 카드 선택 중";
+                    row.hpValueText.text = $"{state.hp:0}/{state.maxHp:0} (+{state.shield:0}){suffix}";
+                }
             }
         }
 

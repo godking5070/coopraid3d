@@ -13,7 +13,7 @@ namespace RaidRogue
     /// 보스 처치 연출 -> 1.5초 뒤 로그라이크 카드 3택 보상 -> 파티 정비/재배치 -> 다음 보스 등장을 총괄하는 매니저 (Step 6).
     /// </summary>
     [DefaultExecutionOrder(1000)]
-    public class StageManager : MonoBehaviour
+    public partial class StageManager : MonoBehaviour
     {
         [Header("Stage Progression")]
         public int currentStage = 1;
@@ -143,6 +143,7 @@ namespace RaidRogue
         [ContextMenu("Retry Current Boss (Play Mode)")]
         public void RetryCurrentBoss()
         {
+            if (RaidCombatAuthority.Active) { RaidNetworkSession.Instance.RequestAction(9); return; }
             if (!Application.isPlaying || boss == null || IsPreparing || _isStageTransitioning || _isAllStagesCleared || _pendingBossClear || boss.currentHp <= 0) return;
             var metrics = CombatMetricsManager.Ensure(this);
             if (!IsWiped) metrics.Ledger.FailAttempt();
@@ -172,17 +173,19 @@ namespace RaidRogue
         // Resolve after all combat Updates. A kill and a wipe in one frame always award the clear once.
         private void LateUpdate()
         {
+            if (RaidCombatAuthority.Replica) return;
             if (!_hasStartedEncounter || CombatSuspended || boss == null) return;
             int living = 0;
             var members = PartyLife.OrderedMembers();
             foreach (var member in members) if (CombatRange.LivingPartyMember(member)) living++;
-            var outcome = PartyBattleRules.Resolve(_pendingBossClear || boss.currentHp <= 0, living, members.Count);
+            var outcome = PartyBattleRules.Resolve(_pendingBossClear || boss.currentHp <= 0, living, RaidCombatAuthority.Active ? Mathf.Max(4, members.Count) : members.Count);
             if (outcome == EncounterOutcome.Cleared)
             {
                 _pendingBossClear = false;
                 CombatMetricsManager.Instance?.Ledger.EndStage();
                 CleanupAttempt();
-                StartCoroutine(BossDefeatedSequenceRoutine());
+                if (RaidCombatAuthority.Host) { boss.PlayBossCollapseAnimation(); RaidNetworkSession.Instance.NetworkEncounterOutcome(true); }
+                else StartCoroutine(BossDefeatedSequenceRoutine());
             }
             else if (outcome == EncounterOutcome.Wiped)
             {
@@ -190,6 +193,7 @@ namespace RaidRogue
                 CombatMetricsManager.Instance?.Ledger.FailAttempt();
                 CleanupAttempt();
                 _wipeUI.ShowWipe();
+                if (RaidCombatAuthority.Host) RaidNetworkSession.Instance.NetworkEncounterOutcome(false);
             }
         }
 
@@ -281,17 +285,13 @@ namespace RaidRogue
 
         public void ResetAndHealAllPartyMembers()
         {
-            // 내 캐릭터 체력 100% 회복 및 현재 직업에 맞는 초기 위치 재배치
-            if (player != null)
+            var players = RaidCombatAuthority.Active ? PartyLife.OrderedMembers().FindAll(t => t.GetComponent<PlayerController>() != null) : new System.Collections.Generic.List<Transform>();
+            if (!RaidCombatAuthority.Active && player != null) players.Add(player.transform);
+            foreach (var member in players)
             {
-                Vector3 pSpawn = player.currentRole switch
-                {
-                    PlayerRole.Guardian_Tank => tankSpawnPos,
-                    PlayerRole.Oracle_Healer => healerSpawnPos,
-                    PlayerRole.Archmage_Caster => rangedSpawnPos,
-                    _ => playerSpawnPos
-                };
-                player.ResetToFullHealthAndPosition(pSpawn);
+                var pc = member.GetComponent<PlayerController>();
+                Vector3 spawn = pc.currentRole == PlayerRole.Guardian_Tank ? tankSpawnPos : pc.currentRole == PlayerRole.Oracle_Healer ? healerSpawnPos : pc.currentRole == PlayerRole.Archmage_Caster ? rangedSpawnPos : playerSpawnPos;
+                pc.ResetToFullHealthAndPosition(spawn);
             }
 
             // 3명의 AI 파티원 봇 전원 부활/체력 100% 회복 및 각자 역할군 초기 위치 재배치
@@ -317,7 +317,7 @@ namespace RaidRogue
         {
             _isAllStagesCleared = true;
             _isStageTransitioning = false;
-            Time.timeScale = 0f;
+            if (!RaidCombatAuthority.Active) Time.timeScale = 0f;
 
             int minutes = Mathf.FloorToInt(_totalPlayTime / 60f);
             float seconds = _totalPlayTime % 60f;
@@ -346,6 +346,7 @@ namespace RaidRogue
 
         public void RestartFromStage1()
         {
+            if (RaidCombatAuthority.Active) { RaidNetworkSession.Instance.Disconnect(); return; }
             if (CombatMetricsUI.BlocksUnderlyingInput) return;
             CombatMetricsManager.Instance?.Ledger.ResetRun();
             Time.timeScale = 1f;

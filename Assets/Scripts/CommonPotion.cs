@@ -8,7 +8,7 @@ namespace RaidRogue
     // Runs after player movement and before ordinary combat Updates. Drinking changes only health,
     // item cooldown and revival protection; it never invokes a skill, changes facing or cancels a cast.
     [DefaultExecutionOrder(-75)]
-    public sealed class CommonPotion : MonoBehaviour
+    public sealed partial class CommonPotion : MonoBehaviour
     {
         private static readonly PotionSettings FallbackSettings = new PotionSettings();
         private readonly PotionState _state = new PotionState();
@@ -21,9 +21,9 @@ namespace RaidRogue
         private float _pulseRemaining;
 
         public bool ItemsBlocked { get; set; }
-        public float CooldownRemaining => (float)_state.CooldownRemaining;
-        public float CooldownFraction => _state.CooldownDuration > 0 ? Mathf.Clamp01((float)(_state.CooldownRemaining / _state.CooldownDuration)) : 0;
-        public bool HasRevivalProtection => _state.RevivalProtectionRemaining > 0;
+        public float CooldownRemaining => Replicated != null ? Replicated.potion : (float)_state.CooldownRemaining;
+        public float CooldownFraction => Replicated != null ? Mathf.Clamp01(Replicated.potion / Mathf.Max(0.001f, Replicated.potionTotal)) : _state.CooldownDuration > 0 ? Mathf.Clamp01((float)(_state.CooldownRemaining / _state.CooldownDuration)) : 0;
+        public bool HasRevivalProtection => Replicated != null ? Replicated.protection > 0 : _state.RevivalProtectionRemaining > 0;
         public float CurrentHp => _player != null ? _player.currentHp : _bot != null ? _bot.currentHp : 0;
         public float MaximumHp => _player != null ? _player.maxHp : _bot != null ? _bot.maxHp : 0;
         public bool IsAlive => CurrentHp > 0 && (_player != null ? !_player.IsDead : _bot != null && !_bot.isDead);
@@ -37,9 +37,9 @@ namespace RaidRogue
         }
         private bool UseBlocked => !isActiveAndEnabled || ItemsBlocked || StageManager.CombatSuspended || Time.timeScale <= 0.001f ||
             (_stage != null && (_stage.IsStageTransitioning || (_stage.boss != null && _stage.boss.IsBossDefeatedCollapse))) ||
-            (_player != null && (!_player.isActiveAndEnabled || _player.IsStunned || LocalGameplayInput.Blocked)) ||
+            (_player != null && (!_player.isActiveAndEnabled || _player.IsStunned || RaidCombatAuthority.InputBlocked(this))) ||
             (_bot != null && !_bot.isActiveAndEnabled);
-        public bool CanUse => _state.CanUse(Settings, CurrentHp, MaximumHp, IsAlive, UseBlocked);
+        public bool CanUse => CooldownRemaining <= 0 && _state.CanUse(Settings, CurrentHp, MaximumHp, IsAlive, UseBlocked);
 
         public static CommonPotion Ensure(GameObject member)
         {
@@ -56,13 +56,13 @@ namespace RaidRogue
 
         private void Start()
         {
-            if (_player != null && GetComponent<PotionSlotUI>() == null) gameObject.AddComponent<PotionSlotUI>();
+            if (_player != null && RaidCombatAuthority.Local(this) && GetComponent<PotionSlotUI>() == null) gameObject.AddComponent<PotionSlotUI>();
         }
 
         private void Update()
         {
             bool pressed = false, held = false;
-            if (_player != null)
+            if (_player != null && RaidCombatAuthority.Local(this))
             {
 #if ENABLE_INPUT_SYSTEM
                 pressed = Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame;
@@ -74,7 +74,7 @@ namespace RaidRogue
             }
             bool newPress = pressed && !_qHeld;
             _qHeld = held; // Consume blocked/full-health/cooldown presses too; never queue an item use.
-            _state.Tick(Time.timeScale > 0.001f ? Time.deltaTime : 0);
+            if (!RaidCombatAuthority.Replica) _state.Tick(!StageManager.CombatSuspended && Time.timeScale > 0.001f ? Time.deltaTime : 0);
             if (!IsAlive) _state.EndRevivalProtection();
             if (_player != null && newPress) TryUse();
             else if (_bot != null && PotionState.NeedsAutomaticPotion(CurrentHp, MaximumHp, IsAlive)) TryUse();
@@ -83,6 +83,7 @@ namespace RaidRogue
 
         public bool TryUse()
         {
+            if (RaidCombatAuthority.Route(this, 6)) return false;
             float actual = _state.TryUse(Settings, CurrentHp, MaximumHp, IsAlive, UseBlocked, ApplyHealing);
             if (actual <= 0) return false;
             BeginPulse();

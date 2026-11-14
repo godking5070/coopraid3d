@@ -21,7 +21,7 @@ namespace RaidRogue
     ///      줄을 가로채고 생존기를 켜서 나를 지켜줍니다!
     ///   ③ 보호막(Shield) 게이지 및 플레이어 힐러의 '구출(Rescue)' 끌려감 + 3초 무적/이속 버프를 지원합니다.
     /// </summary>
-    public class PartyBotAI : MonoBehaviour
+    public partial class PartyBotAI : MonoBehaviour
     {
         [Header("Combat Body & Melee Ranges (world units)")]
         [Min(0f)] public float combatRadius = 0.55f;
@@ -317,7 +317,7 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (Time.timeScale <= 0.001f || targetBoss == null || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || Time.timeScale <= 0.001f || targetBoss == null || StageManager.CombatSuspended)
             {
                 return;
             }
@@ -734,10 +734,10 @@ namespace RaidRogue
             Vector3 bossPos = targetBoss.transform.position;
 
             // [Step 8 핵심] 보스의 2연타 탱크버스터 줄(Tether)이 탱커 플레이어에게 연결된 경우 -> 근딜 봇이 즉시 가로채기 돌진!
-            if (targetBoss.IsTetherActive && humanPlayer != null && targetBoss.TetherPrimaryTarget == humanPlayer.transform)
+            if (targetBoss.IsTetherActive && CombatRange.LivingPartyMember(targetBoss.TetherPrimaryTarget) && targetBoss.TetherPrimaryTarget != transform)
             {
                 _isInterceptingTetherForPlayer = true;
-                Vector3 interceptPoint = Vector3.Lerp(bossPos, humanPlayer.transform.position, 0.52f);
+                Vector3 interceptPoint = Vector3.Lerp(bossPos, targetBoss.TetherPrimaryTarget.position, 0.52f);
                 interceptPoint.y = 1.0f;
 
                 MoveTowardsXZ(interceptPoint, BossLookPointXZ(), GetMoveSpeedMultiplier(1.65f));
@@ -970,7 +970,7 @@ namespace RaidRogue
 
         private void CheckAndTriggerHealerRescue(Vector3 healerSafeSpotXZ)
         {
-            if (humanPlayer == null || humanPlayer.IsDead || targetBoss == null || !targetBoss.IsCasting)
+            if (targetBoss == null || !targetBoss.IsCasting)
             {
                 return;
             }
@@ -997,7 +997,9 @@ namespace RaidRogue
                 return;
             }
 
-            if (telegraph.IsPointInsideXZ(humanPlayer.transform.position))
+            var rescueMember = PartyLife.OrderedMembers().Find(member => member != transform && CombatRange.LivingPartyMember(member) &&
+                CombatRange.InRange(transform, member, 20) && telegraph.IsPointInsideXZ(member.position));
+            if (rescueMember != null)
             {
                 Resurrection?.Cancel();
                 Potion?.EndRevivalProtection();
@@ -1048,9 +1050,11 @@ namespace RaidRogue
                     }
                 }
 
-                FaceTargetXZ(humanPlayer.transform.position);
-                humanPlayer.StartPulledByHealerRescue(rescueDestinationXZ);
-                ShowTrackingRescueBeam(humanPlayer.transform, 0.55f);
+                FaceTargetXZ(rescueMember.position);
+                var rescuedPlayer = rescueMember.GetComponent<PlayerController>();
+                if (rescuedPlayer != null) rescuedPlayer.StartPulledByHealerRescue(rescueDestinationXZ);
+                else rescueMember.GetComponent<PartyBotAI>()?.StartPulledByPlayerRescue(rescueDestinationXZ);
+                ShowTrackingRescueBeam(rescueMember, 0.55f);
 
                 FloatingTextPopup.Spawn(
                     transform.position + Vector3.up * 2.4f,
@@ -1069,45 +1073,20 @@ namespace RaidRogue
 
         private void TryHealLowestPartyMember()
         {
-            float lowestRatio = 1.0f;
-            bool healPlayer = false;
-            PartyBotAI targetBot = null;
-
-            if (humanPlayer != null && humanPlayer.NeedsHealing)
+            Transform target = null; float lowest = 1;
+            foreach (var member in PartyLife.OrderedMembers())
             {
-                lowestRatio = humanPlayer.HpRatio;
-                healPlayer = true;
+                if (!CombatRange.LivingPartyMember(member)) continue;
+                var pc = member.GetComponent<PlayerController>(); var bot = member.GetComponent<PartyBotAI>();
+                float ratio = pc != null ? pc.HpRatio : bot.HpRatio;
+                if (ratio < lowest) { lowest = ratio; target = member; }
             }
-
-            PartyBotAI[] allBots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
-            foreach (PartyBotAI bot in allBots)
-            {
-                if (bot != null && bot.NeedsHealing && bot.HpRatio < lowestRatio)
-                {
-                    lowestRatio = bot.HpRatio;
-                    healPlayer = false;
-                    targetBot = bot;
-                }
-            }
-
-            if (healPlayer && humanPlayer != null)
-            {
-                CurrentActionTarget = humanPlayer.transform;
-                FaceTargetXZ(humanPlayer.transform.position);
-                if (humanPlayer.ReceiveHeal(healAmount, transform) > 0) Potion?.EndRevivalProtection();
-                ShowTrackingHealBeam(humanPlayer.transform, healBeamDuration);
-            }
-            else if (targetBot != null)
-            {
-                CurrentActionTarget = targetBot.transform;
-                FaceTargetXZ(targetBot.transform.position);
-                if (targetBot.ReceiveHeal(healAmount, transform) > 0) Potion?.EndRevivalProtection();
-                ShowTrackingHealBeam(targetBot.transform, healBeamDuration);
-            }
-            else if (targetBoss != null)
-            {
-                CurrentActionTarget = targetBoss.transform;
-            }
+            if (target == null) { CurrentActionTarget = targetBoss != null ? targetBoss.transform : null; return; }
+            CurrentActionTarget = target; FaceTargetXZ(target.position);
+            var player = target.GetComponent<PlayerController>();
+            float healed = player != null ? player.ReceiveHeal(healAmount, transform) : target.GetComponent<PartyBotAI>().ReceiveHeal(healAmount, transform);
+            if (healed > 0) Potion?.EndRevivalProtection();
+            ShowTrackingHealBeam(target, healBeamDuration);
         }
 
         // =====================================================================
@@ -1179,6 +1158,7 @@ namespace RaidRogue
 
             Vector3 spawnPos = transform.position + transform.forward * 0.65f + Vector3.up * 0.25f;
             RangedBotProjectile.Spawn(spawnPos, targetBoss, projectileSpeed, projectileDamage, transform);
+            RaidNetworkSession.Instance?.BroadcastEffect(spawnPos, targetBoss.transform.position + Vector3.up, new Color(1f, .65f, .15f), null, false, 1);
         }
 
         // =====================================================================
@@ -1380,6 +1360,7 @@ namespace RaidRogue
 
         private void ShowBeamEffect(Vector3 start, Vector3 end, Color color, float width, float duration)
         {
+            RaidNetworkSession.Instance?.BroadcastEffect(start, end, color, null, false, 1);
             if (_effectBeam == null)
             {
                 return;
@@ -1414,6 +1395,7 @@ namespace RaidRogue
 
         private void ShowTrackingRescueBeam(Transform rescueTarget, float duration)
         {
+            if (rescueTarget != null) RaidNetworkSession.Instance?.BroadcastEffect(transform.position + Vector3.up, rescueTarget.position + Vector3.up, Color.cyan, null, false, 1);
             if (_effectBeam == null || rescueTarget == null)
             {
                 return;

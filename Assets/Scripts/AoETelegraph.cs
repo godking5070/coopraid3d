@@ -14,7 +14,7 @@ namespace RaidRogue
     /// 보스가 스킬을 시전할 때 바닥(XZ 평면)에 반투명한 붉은색 절차적 메쉬(Mesh)와
     /// 테두리 라인으로 공격 범위를 미리 보여주는 3D 예고 장판 컴포넌트.
     /// </summary>
-    public class AoETelegraph : MonoBehaviour
+    public partial class AoETelegraph : MonoBehaviour
     {
         [Header("Telegraph Settings")]
         public AoETelegraphType telegraphType = AoETelegraphType.Circle_Radius6;
@@ -72,6 +72,7 @@ namespace RaidRogue
         {
             telegraphType = type;
             _duration = Mathf.Max(0.1f, duration);
+            _networkStart = RaidCombatAuthority.ServerTime;
             _elapsed = 0f;
             _active = true;
 
@@ -107,7 +108,7 @@ namespace RaidRogue
                 return;
             }
 
-            _elapsed += Time.deltaTime;
+            _elapsed = _networkReplica ? RaidCombatAuthority.ServerTime - _networkStart : _elapsed + Time.deltaTime;
             float t = Mathf.Clamp01(_elapsed / _duration);
             UpdateProgressVisual(t);
         }

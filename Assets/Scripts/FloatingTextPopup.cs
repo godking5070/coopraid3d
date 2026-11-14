@@ -19,6 +19,7 @@ namespace RaidRogue
 
         public static FloatingTextPopup Spawn(Vector3 worldPosition, string message, Color color, bool isCrit)
         {
+            if (RaidCombatAuthority.Host) RaidNetworkSession.Instance.BroadcastEffect(worldPosition, worldPosition, color, message, isCrit, 0);
             GameObject root = new GameObject($"Popup_{message}");
             // 연속 타격 시 겹치지 않도록 약간의 수평 랜덤 오프셋 부여
             bool is2D = ViewModeManager.Is2DViewActive;

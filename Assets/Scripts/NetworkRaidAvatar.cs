@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace RaidRogue
 {
-    // Remote replicas intentionally have no PlayerController, combat, input, AI or camera component.
+    // Replica controllers present shared combat state; only the owner reads input and only the host simulates combat.
     public sealed class NetworkRaidAvatar : MonoBehaviour
     {
         public int Id { get; private set; }
@@ -10,8 +10,13 @@ namespace RaidRogue
         public string DisplayName { get; private set; }
         public bool IsLocal { get; private set; }
         public float CombatRadius { get; private set; }
-        // Host-owned hook for the later authoritative combat/stun/death implementation.
+        // Host-owned movement gate, including combat state, stun, death and forced movement.
         public bool MovementLocked { get; set; }
+        public bool IsBot { get; set; }
+        public int MotionVersion { get; set; }
+        public bool ForcedLast { get; set; }
+        public Transform CombatTarget { get; set; }
+        public RaidCombatActor State { get; set; }
         private Vector3 _targetPosition;
         private float _targetYaw;
         private TextMesh _name;
@@ -26,7 +31,7 @@ namespace RaidRogue
         {
             if (Role == role && DisplayName == displayName) return;
             Role = role; DisplayName = RaidRoster.CleanName(displayName);
-            if (IsLocal)
+            if (GetComponent<PlayerController>() != null)
             {
                 var player = GetComponent<PlayerController>();
                 player.ApplyRoleStatsAndVisuals((PlayerRole)role);
@@ -51,7 +56,7 @@ namespace RaidRogue
         public void Display(Vector3 position, float yaw, bool dashing)
         {
             _targetPosition = position; _targetYaw = yaw;
-            if (_first || IsLocal) { transform.SetPositionAndRotation(position, Quaternion.Euler(0, yaw, 0)); _first = false; }
+            if (_first || IsLocal || RaidCombatAuthority.Host) { transform.SetPositionAndRotation(position, Quaternion.Euler(0, yaw, 0)); _first = false; }
             if (_trail == null)
             {
                 var obj = new GameObject("NetworkDashTrail"); obj.transform.SetParent(transform, false); obj.transform.localPosition = Vector3.down * 0.65f;
@@ -64,7 +69,7 @@ namespace RaidRogue
         }
         private void LateUpdate()
         {
-            if (!IsLocal && !_first)
+            if (!IsLocal && !_first && !RaidCombatAuthority.Host)
             {
                 float blend = 1f - Mathf.Exp(-20f * Time.unscaledDeltaTime);
                 transform.position = Vector3.Lerp(transform.position, _targetPosition, blend);
@@ -72,6 +77,7 @@ namespace RaidRogue
             }
             if (_name != null)
             {
+                _name.gameObject.SetActive(GetComponent<PlayerController>() == null && GetComponent<PartyBotAI>() == null);
                 _name.transform.position = transform.position + new Vector3(0, 1.8f, ViewModeManager.Is2DViewActive ? 1.15f : 0);
                 if (Camera.main != null) _name.transform.rotation = Camera.main.transform.rotation;
             }

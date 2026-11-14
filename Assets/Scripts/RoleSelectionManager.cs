@@ -155,7 +155,7 @@ namespace RaidRogue
 
         public void OpenRoleSelectionModal()
         {
-            if (RaidNetworkSession.CombatPreview || RaidNetworkSession.Instance?.MenuOpen == true)
+            if (RaidNetworkSession.Multiplayer || RaidNetworkSession.CombatPreview || RaidNetworkSession.Instance?.MenuOpen == true)
             { RaidNetworkSession.Instance.MenuOpen = true; return; }
             if (CombatMetricsUI.BlocksUnderlyingInput || !CanChangePartyRoles()) return;
             EnsureUI();

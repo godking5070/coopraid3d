@@ -274,7 +274,7 @@ namespace RaidRogue
         public Transform GetTargetOfTarget(Transform unit)
         {
             if (unit == null) return null;
-            if (RaidNetworkSession.Multiplayer) return null; // Aggro/target-of-target is part of the later combat synchronization.
+            if (unit.GetComponent<NetworkRaidAvatar>() is NetworkRaidAvatar avatar) return avatar.CombatTarget;
 
             // 1. 보스 -> 보스의 어그로 1순위 대상 (탱커 등)
             BossController b = unit.GetComponent<BossController>();
@@ -354,7 +354,7 @@ namespace RaidRogue
             maxHp = 1f;
             shield = 0f;
             if (unit == null) return;
-            if (unit.GetComponent<NetworkRaidAvatar>() != null) { currentHp = maxHp = 1f; return; }
+            if (RaidCombatAuthority.Replica && unit.GetComponent<NetworkRaidAvatar>()?.State is RaidCombatActor state) { currentHp = state.hp; maxHp = state.maxHp; shield = state.shield; return; }
 
             BossController b = unit.GetComponent<BossController>();
             if (b != null)
@@ -394,7 +394,8 @@ namespace RaidRogue
         public string GetUnitStatusSummary(Transform unit)
         {
             if (unit == null) return "";
-            if (unit.GetComponent<NetworkRaidAvatar>() != null) return "접속 중 · 이동 동기화 / 전투 미동기화";
+            if (unit.GetComponent<NetworkRaidAvatar>()?.State is RaidCombatActor state)
+                return state.dead ? "전투 불능 · [5] 부활 대상" : state.resurrecting ? $"부활 시전 {state.resurrection:0.0}s" : state.casting ? $"{state.castName} {state.castRemaining:0.0}s" : $"{(state.protection > 0 ? "부활 보호 · " : "")}{(state.defense > 0 ? "방어기 · " : "")}전투 중";
 
             BossController b = unit.GetComponent<BossController>();
             if (b != null)

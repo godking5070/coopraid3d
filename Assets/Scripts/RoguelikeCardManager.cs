@@ -33,7 +33,7 @@ namespace RaidRogue
     /// 보스를 완전히 처치(HP 0)했을 때만 클리어 보상으로 3장의 랜덤 로그라이크 카드 UI를 띄우고,
     /// 카드 선택 시 효과를 영구 중첩 적용한 뒤 다음 스테이지로 진행시키는 매니저 (Step 6).
     /// </summary>
-    public class RoguelikeCardManager : MonoBehaviour
+    public partial class RoguelikeCardManager : MonoBehaviour
     {
         [Header("References")]
         public BossController boss;
@@ -180,7 +180,7 @@ namespace RaidRogue
                 return;
             }
 
-            UpdateBerserkerShoutPassive();
+            if (!RaidCombatAuthority.Replica) UpdateBerserkerShoutPassive();
         }
 
         /// <summary>
@@ -269,6 +269,11 @@ namespace RaidRogue
         public void OnCardButtonClicked(int slotIndex)
         {
             if (CombatMetricsUI.BlocksUnderlyingInput) return;
+            if (RaidCombatAuthority.Active)
+            {
+                if (_isSelectionOpen && slotIndex >= 0 && slotIndex < _currentOfferedCards.Count) RaidNetworkSession.Instance.RequestAction(8, (int)_currentOfferedCards[slotIndex].id);
+                return;
+            }
             if (!_isSelectionOpen || slotIndex < 0 || slotIndex >= _currentOfferedCards.Count)
             {
                 return;
@@ -422,7 +427,7 @@ namespace RaidRogue
                 }
             }
 
-            if (!HasCard(RoguelikeCardId.BerserkerShout))
+            if (player == null || player.IsDead || !HasCard(RoguelikeCardId.BerserkerShout))
             {
                 return;
             }
@@ -443,6 +448,8 @@ namespace RaidRogue
         private void TriggerBerserkerShoutPulse()
         {
             _partyAttackSpeedBuffTimer = 5.0f;
+            if (RaidCombatAuthority.Host) foreach (var member in PartyLife.OrderedMembers())
+            { var manager = member.GetComponent<PlayerController>()?.cardManager; if (manager != null) manager._partyAttackSpeedBuffTimer = 5; }
 
             if (player != null)
             {

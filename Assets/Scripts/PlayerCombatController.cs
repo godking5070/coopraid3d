@@ -11,7 +11,7 @@ namespace RaidRogue
     /// Step 8: 4대 역할군(1.가디언 탱커 / 2.오라클 힐러 / 3.블레이드 근딜 / 4.아크메이지 캐스터) 전용 스킬셋 및
     /// 파판14 스타일 글로벌 쿨타임(GCD) / 논글로벌 쿨타임(oGCD) / 캐스터 캐스팅 바(이동 시 시전 취소) 통합 컨트롤러.
     /// </summary>
-    public class PlayerCombatController : MonoBehaviour
+    public partial class PlayerCombatController : MonoBehaviour
     {
         [Header("Melee Reach (combat boundary distance in world units)")]
         public MeleeRangeSettings meleeRanges = new MeleeRangeSettings();
@@ -113,9 +113,12 @@ namespace RaidRogue
             _gcdTotalForCurrentCycle = currentGcdDuration;
         }
 
-        private void Start()
+        private bool _initialized;
+        private void Start() => EnsureCombatInitialized();
+        public void EnsureCombatInitialized()
         {
-            if (GetComponent<PlayerAttackRangeDisplay>() == null) gameObject.AddComponent<PlayerAttackRangeDisplay>();
+            if (_initialized) return; _initialized = true;
+            if (RaidCombatAuthority.Local(this) && GetComponent<PlayerAttackRangeDisplay>() == null) gameObject.AddComponent<PlayerAttackRangeDisplay>();
             if (playerController == null)
             {
                 playerController = GetComponent<PlayerController>();
@@ -126,7 +129,7 @@ namespace RaidRogue
                     ? playerController.targetBoss
                     : FindFirstObjectByType<BossController>();
             }
-            if (hotbarUI == null)
+            if (RaidCombatAuthority.Local(this) && hotbarUI == null)
             {
                 hotbarUI = FindFirstObjectByType<SkillHotbarUI>();
             }
@@ -183,6 +186,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidCombatAuthority.Replica) { if (RaidCombatAuthority.Local(this) && !LocalGameplayInput.Blocked) HandleCombatHotkeys(); return; }
             if (Time.timeScale <= 0.001f || StageManager.CombatSuspended)
             {
                 return;
@@ -192,7 +196,7 @@ namespace RaidRogue
             if (playerController != null && playerController.IsDead) { InterruptForDeath(); return; }
             UpdateCasterSpellCasting();
 
-            if (!LocalGameplayInput.Blocked && (playerController == null || !playerController.IsBeingRescued))
+            if (RaidCombatAuthority.Local(this) && !RaidCombatAuthority.InputBlocked(this) && (playerController == null || !playerController.IsBeingRescued))
             {
                 HandleCombatHotkeys();
             }
@@ -314,10 +318,13 @@ namespace RaidRogue
 
         private void CompleteActiveFireSpellCast()
         {
+            if (!CombatRange.LivingEnemy(_castEnemy) || !CombatRange.InRange(transform, _castEnemy, rangedSkillRange)) { _isCastingSpell = false; ShowRangeFeedback("시전 대상이 유효하지 않거나 사거리 밖입니다"); return; }
             _isCastingSpell = false;
             _castElapsed = 0f;
 
-            ExecuteArchmageFireSpellImpact(_castingSpellComboStage, _castingSpellName, _castingSpellBaseDamage, wasInstantTriplecast: false);
+            _resolvingCast = true;
+            try { ExecuteArchmageFireSpellImpact(_castingSpellComboStage, _castingSpellName, _castingSpellBaseDamage, wasInstantTriplecast: false); }
+            finally { _resolvingCast = false; }
         }
 
         private void HandleCombatHotkeys()
@@ -345,9 +352,11 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill1_FlankCombo()
         {
+            if (RaidCombatAuthority.Route(this, 1)) return;
+            if (!ValidateCombatSkill(1, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
             if (GetOffensiveTarget() == null) { ShowRangeFeedback("공격할 수 있는 대상이 없습니다"); return; }
-            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
+            if (RaidCombatAuthority.InputBlocked(this) || (playerController != null && playerController.IsBeingRescued)) return;
             if (IsOnGcd || _isCastingSpell)
             {
                 return;
@@ -376,12 +385,14 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill2_RearCombo()
         {
+            if (RaidCombatAuthority.Route(this, 2)) return;
+            if (!ValidateCombatSkill(2, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
-            Transform selected = TargetingManager.Instance?.CurrentTarget;
+            Transform selected = SelectedCombatTarget;
             if (CurrentRole == PlayerRole.Oracle_Healer && selected != null && selected.GetComponent<PartyLife>()?.IsDead == true)
             { ShowRangeFeedback("사망한 아군에게는 [5] 부활을 사용하세요"); return; }
             if (CurrentRole != PlayerRole.Oracle_Healer && GetOffensiveTarget() == null) { ShowRangeFeedback("공격할 수 있는 대상이 없습니다"); return; }
-            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
+            if (RaidCombatAuthority.InputBlocked(this) || (playerController != null && playerController.IsBeingRescued)) return;
             if (IsOnGcd || _isCastingSpell)
             {
                 return;
@@ -410,8 +421,10 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill3_PersonalDefensive_oGCD()
         {
+            if (RaidCombatAuthority.Route(this, 3)) return;
+            if (!ValidateCombatSkill(3, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
-            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
+            if (RaidCombatAuthority.InputBlocked(this) || (playerController != null && playerController.IsBeingRescued)) return;
             if (_skill3CooldownRemaining > 0.001f)
             {
                 return;
@@ -460,12 +473,14 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill4_GaleThrust_oGCD()
         {
+            if (RaidCombatAuthority.Route(this, 4)) return;
+            if (!ValidateCombatSkill(4, out string failure)) { ShowRangeFeedback(failure); return; }
             if (!CanUseCombatAction) return;
-            Transform selected = TargetingManager.Instance?.CurrentTarget;
+            Transform selected = SelectedCombatTarget;
             if (CurrentRole == PlayerRole.Oracle_Healer && selected != null && selected.GetComponent<PartyLife>()?.IsDead == true)
             { ShowRangeFeedback("사망한 아군에게는 [5] 부활을 사용하세요"); return; }
             if (CurrentRole == PlayerRole.Guardian_Tank && GetOffensiveTarget() == null) return;
-            if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
+            if (RaidCombatAuthority.InputBlocked(this) || (playerController != null && playerController.IsBeingRescued)) return;
             if (_skill4CooldownRemaining > 0.001f)
             {
                 return;
@@ -493,10 +508,21 @@ namespace RaidRogue
         // Step 9: 통합 타겟팅 연동 헬퍼 (공격 타겟 판정 / 아군 지정 타겟 우선 판정)
         // =====================================================================
         private Transform _lastOffensiveVisualTarget;
+        private Transform _castEnemy;
+        private bool _resolvingCast;
 
         // This query is also used by the ring and target HUD. It has no facing/resource side effects.
         public Transform GetOffensiveTarget()
         {
+            if (_resolvingCast) return CombatRange.LivingEnemy(_castEnemy) ? _castEnemy : null;
+            if (RaidCombatAuthority.Active)
+            {
+                Transform selected = SelectedCombatTarget;
+                if (selected != null && !PartyLife.OrderedMembers().Contains(selected)) return CombatRange.LivingEnemy(selected) ? selected : null;
+                var ally = selected != null ? selected.GetComponent<NetworkRaidAvatar>() : null;
+                if (ally != null && CombatRange.LivingEnemy(ally.CombatTarget)) return ally.CombatTarget;
+                return targetBoss != null && CombatRange.LivingEnemy(targetBoss.transform) ? targetBoss.transform : null;
+            }
             return TargetingManager.Instance != null
                 ? TargetingManager.Instance.GetLivingOffensiveTarget(targetBoss)
                 : (targetBoss != null && CombatRange.LivingEnemy(targetBoss.transform) ? targetBoss.transform : null);
@@ -505,7 +531,7 @@ namespace RaidRogue
         private bool TryBeginMeleeAttack(MeleeSkill skill, int comboStage, out BossAddMinion targetedAdd)
         {
             targetedAdd = null;
-            if (LocalGameplayInput.Blocked) return false;
+            if (RaidCombatAuthority.InputBlocked(this)) return false;
             Transform target = GetOffensiveTarget();
             if (target == null || !CombatRange.LivingPartyMember(transform))
             {
@@ -546,34 +572,8 @@ namespace RaidRogue
         /// </summary>
         private void ResolveOffensiveTarget(out BossAddMinion targetedAdd, out Transform enemyVisualTr)
         {
-            targetedAdd = null;
-            enemyVisualTr = targetBoss != null ? targetBoss.transform : null;
-
-            Transform curTarget = TargetingManager.Instance != null ? TargetingManager.Instance.CurrentTarget : null;
-            if (curTarget != null)
-            {
-                BossAddMinion directAdd = curTarget.GetComponent<BossAddMinion>();
-                if (directAdd != null && !directAdd.isDead)
-                {
-                    targetedAdd = directAdd;
-                    enemyVisualTr = directAdd.transform;
-                }
-                else if (TargetingManager.Instance != null && TargetingManager.Instance.IsCurrentTargetFriendly)
-                {
-                    // 아군을 타겟팅한 상태에서 공격 스킬을 누르면 아군 타겟을 풀지 않고 대상의 적(또는 보스)을 자동 공격
-                    Transform tot = TargetingManager.Instance.GetTargetOfTarget(curTarget);
-                    if (tot != null)
-                    {
-                        BossAddMinion totAdd = tot.GetComponent<BossAddMinion>();
-                        if (totAdd != null && !totAdd.isDead)
-                        {
-                            targetedAdd = totAdd;
-                            enemyVisualTr = totAdd.transform;
-                        }
-                    }
-                }
-            }
-
+            enemyVisualTr = GetOffensiveTarget();
+            targetedAdd = enemyVisualTr != null ? enemyVisualTr.GetComponent<BossAddMinion>() : null;
             FaceOffensiveTarget(enemyVisualTr);
         }
 
@@ -625,7 +625,7 @@ namespace RaidRogue
                 {
                     targetedAdd.TauntBy(transform, playerController != null ? playerController.playerRoleDisplayName : "가디언");
                 }
-                targetedAdd.ReceivePlayerAttack("가디언", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3);
+                targetedAdd.ReceivePlayerAttack("가디언", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform);
             }
             else
             {
@@ -636,7 +636,8 @@ namespace RaidRogue
                     finalDmg,
                     hitCol,
                     stage == 3,
-                    extraNote
+                    extraNote,
+                    source: transform
                 );
             }
 
@@ -676,7 +677,7 @@ namespace RaidRogue
             Color hitCol = new Color(0.45f, 0.85f, 1.0f, 1f);
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("투창콤보", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3);
+                targetedAdd.ReceivePlayerAttack("투창콤보", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform);
             }
             else
             {
@@ -687,7 +688,8 @@ namespace RaidRogue
                     finalDmg,
                     hitCol,
                     stage == 3,
-                    extraNote
+                    extraNote,
+                    source: transform
                 );
             }
 
@@ -712,7 +714,7 @@ namespace RaidRogue
             if (targetedAdd != null)
             {
                 targetedAdd.TauntBy(transform, myName);
-                targetedAdd.ReceivePlayerAttack("oGCD 도발", "도발 (어그로 강탈!)", bonusDmg, new Color(0.25f, 0.95f, 1.0f, 1f), true);
+                targetedAdd.ReceivePlayerAttack("oGCD 도발", "도발 (어그로 강탈!)", bonusDmg, new Color(0.25f, 0.95f, 1.0f, 1f), true, source: transform);
             }
             else
             {
@@ -734,7 +736,8 @@ namespace RaidRogue
                     0,
                     bonusDmg,
                     new Color(0.25f, 0.95f, 1.0f, 1f),
-                    true
+                    true,
+                    source: transform
                 );
             }
             PlayGaleThrustPierceEffect();
@@ -766,7 +769,7 @@ namespace RaidRogue
             Color hitCol = stage == 3 ? new Color(0.55f, 1.0f, 0.45f, 1f) : new Color(0.35f, 0.95f, 0.55f, 1f);
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("오라클", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3);
+                targetedAdd.ReceivePlayerAttack("오라클", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform);
             }
             else
             {
@@ -776,7 +779,8 @@ namespace RaidRogue
                     stage,
                     finalDmg,
                     hitCol,
-                    stage == 3
+                    stage == 3,
+                    source: transform
                 );
             }
 
@@ -793,44 +797,12 @@ namespace RaidRogue
         /// </summary>
         private void ExecuteHealerSkill2_SalvationHealAndShield()
         {
-            PlayerController targetSelf = null;
-            PartyBotAI targetBot = null;
-            Transform targetTr = null;
-            string targetName = "";
-            bool isExplicitTarget = false;
-
-            Transform curTarget = TargetingManager.Instance != null ? TargetingManager.Instance.CurrentTarget : null;
-            if (curTarget != null && TargetingManager.Instance != null && TargetingManager.Instance.IsCurrentTargetFriendly)
-            {
-                PartyBotAI explicitBot = curTarget.GetComponent<PartyBotAI>();
-                PlayerController explicitSelf = curTarget.GetComponent<PlayerController>();
-
-                if (explicitBot != null && !explicitBot.isDead)
-                {
-                    targetBot = explicitBot;
-                    targetTr = explicitBot.transform;
-                    targetName = explicitBot.botDisplayName;
-                    isExplicitTarget = true;
-                }
-                else if (explicitSelf != null)
-                {
-                    targetSelf = explicitSelf;
-                    targetTr = explicitSelf.transform;
-                    targetName = explicitSelf.playerRoleDisplayName;
-                    isExplicitTarget = true;
-                }
-            }
-
-            if (!isExplicitTarget)
-            {
-                FindLowestHpRatioPartyMember(
-                    out targetSelf,
-                    out targetBot,
-                    out targetTr,
-                    out targetName
-                );
-            }
-
+            Transform targetTr = ResolveFriendlyCombatTarget(false);
+            if (targetTr == null || !CombatRange.LivingPartyMember(targetTr)) return;
+            PlayerController targetSelf = targetTr.GetComponent<PlayerController>();
+            PartyBotAI targetBot = targetTr.GetComponent<PartyBotAI>();
+            string targetName = targetSelf != null ? targetSelf.playerRoleDisplayName : targetBot.botDisplayName;
+            bool isExplicitTarget = targetTr == SelectedCombatTarget;
             float mult = GetPlayerDamageBuffMultiplier();
             string modePrefix = isExplicitTarget ? "[지정 타겟 치유]" : "[스마트 치유]";
 
@@ -878,7 +850,8 @@ namespace RaidRogue
                     0,
                     holyBacklash,
                     new Color(1.0f, 0.92f, 0.30f, 1f),
-                    true
+                    true,
+                    source: transform
                 );
             }
 
@@ -919,65 +892,17 @@ namespace RaidRogue
         /// </summary>
         private void ExecuteHealerSkill4_RescueAlly()
         {
-            float rescueCd = (playerController != null && playerController.hasTacticalRescue)
-                ? Mathf.Max(8f, 20f - 6f * playerController.tacticalRescueStacks)
-                : 20.0f;
-            skill4CooldownTotal = rescueCd;
-
-
-            PartyBotAI rescuedBot = null;
-            bool isExplicitTarget = false;
-
-            Transform curTarget = TargetingManager.Instance != null ? TargetingManager.Instance.CurrentTarget : null;
-            if (curTarget != null)
-            {
-                PartyBotAI explicitBot = curTarget.GetComponent<PartyBotAI>();
-                if (explicitBot != null && !explicitBot.isDead)
-                {
-                    rescuedBot = explicitBot;
-                    isExplicitTarget = true;
-                }
-            }
-
-            if (rescuedBot == null)
-            {
-                rescuedBot = FindBestBotForHealerRescue();
-            }
-
-            if (rescuedBot != null)
-            {
-                _skill4CooldownRemaining = rescueCd;
-                playerController?.Potion?.EndRevivalProtection();
-                Vector3 pullDest = transform.position + transform.forward * 1.1f;
-                pullDest.y = rescuedBot.transform.position.y;
-                rescuedBot.StartPulledByPlayerRescue(pullDest);
-                rescuedBot.AddShield(rescuedBot.maxHp * 0.25f, transform);
-
-                if (playerController != null)
-                {
-                    playerController.PlaySkillLineVisual(rescuedBot.transform.position, new Color(0.30f, 0.95f, 1.0f, 1f));
-                    playerController.TriggerTacticalRescueBuff(5.0f);
-                }
-
-                string modeTag = isExplicitTarget ? "[지정 타겟 구출]" : "[스마트 구출]";
-                if (targetBoss != null)
-                {
-                    targetBoss.ShowExternalAlert(
-                        $"★ 오라클 {modeTag} 발동! [{rescuedBot.botDisplayName}]을(를) 내 위치로 끌어당기며 3초간 무적 + 이속 버프를 부여했습니다! ★",
-                        new Color(0.30f, 0.95f, 1.0f, 1f),
-                        3.5f
-                    );
-                }
-            }
-            else
-            {
-                FloatingTextPopup.Spawn(
-                    transform.position + Vector3.up * 2.4f,
-                    "구출할 아군 봇이 없습니다!",
-                    Color.yellow,
-                    false
-                );
-            }
+            Transform ally = ResolveFriendlyCombatTarget(true);
+            if (!CombatRange.LivingPartyMember(ally) || !CombatRange.InRange(transform, ally, friendlySkillRange)) return;
+            float rescueCd = playerController.hasTacticalRescue ? Mathf.Max(8f, 20f - 6f * playerController.tacticalRescueStacks) : 20f;
+            skill4CooldownTotal = _skill4CooldownRemaining = rescueCd;
+            playerController.Potion?.EndRevivalProtection();
+            Vector3 destination = transform.position + transform.forward * 1.1f;
+            var pc = ally.GetComponent<PlayerController>(); var bot = ally.GetComponent<PartyBotAI>();
+            if (pc != null) { pc.StartPulledByHealerRescue(destination); pc.AddShield(pc.maxHp * .25f, transform); }
+            else if (bot != null) { bot.StartPulledByPlayerRescue(destination); bot.AddShield(bot.maxHp * .25f, transform); }
+            playerController.PlaySkillLineVisual(ally.position, new Color(.3f, .95f, 1f));
+            playerController.TriggerTacticalRescueBuff(5);
         }
 
         private void FindLowestHpRatioPartyMember(
@@ -1072,7 +997,8 @@ namespace RaidRogue
                     $"{executedStage}단 {skillName}",
                     finalPositional,
                     new Color(1.0f, 0.85f, 0.15f, 1f),
-                    executedStage == 3
+                    executedStage == 3,
+                    source: transform
                 );
             }
             else
@@ -1084,7 +1010,8 @@ namespace RaidRogue
                     executedStage,
                     finalNormal,
                     finalPositional,
-                    false
+                    false,
+                    source: transform
                 );
             }
 
@@ -1124,7 +1051,8 @@ namespace RaidRogue
                     $"{executedStage}단 {skillName}",
                     addDmg,
                     new Color(1.0f, 0.55f, 0.18f, 1f),
-                    executedStage == 3
+                    executedStage == 3,
+                    source: transform
                 );
             }
             else
@@ -1136,7 +1064,8 @@ namespace RaidRogue
                     executedStage,
                     finalNormal,
                     finalPositional,
-                    hasMasterOfRear
+                    hasMasterOfRear,
+                    source: transform
                 );
             }
 
@@ -1178,11 +1107,11 @@ namespace RaidRogue
 
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("oGCD 질풍", "질풍 찌르기", finalDmg, new Color(0.30f, 1.0f, 0.90f, 1f), true);
+                targetedAdd.ReceivePlayerAttack("oGCD 질풍", "질풍 찌르기", finalDmg, new Color(0.30f, 1.0f, 0.90f, 1f), true, source: transform);
             }
             else
             {
-                targetBoss.ReceiveOGcdAbilityAttack("질풍 찌르기 (oGCD)", finalDmg);
+                targetBoss.ReceiveOGcdAbilityAttack("질풍 찌르기 (oGCD)", finalDmg, source: transform);
             }
             PlayGaleThrustPierceEffect();
         }
@@ -1225,7 +1154,8 @@ namespace RaidRogue
             float castSpeedReduction = Mathf.Clamp(swiftStacks * 0.22f, 0f, 0.9f);
             float effectiveCastTime = Mathf.Max(0.45f, baseCastTime - castSpeedReduction);
 
-            FaceOffensiveTarget(GetOffensiveTarget());
+            _castEnemy = GetOffensiveTarget();
+            FaceOffensiveTarget(_castEnemy);
             // [4]번 '삼연속 마법' 활성 중이면 캐스팅 시간 0초 즉발 무빙샷!
             if (IsTriplecastActive)
             {
@@ -1288,7 +1218,7 @@ namespace RaidRogue
 
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("아크메이지", $"{stage}단 {spellName}", finalDmg, fireColor, stage == 3 || wasInstantTriplecast);
+                targetedAdd.ReceivePlayerAttack("아크메이지", $"{stage}단 {spellName}", finalDmg, fireColor, stage == 3 || wasInstantTriplecast, source: transform);
             }
             else
             {
@@ -1299,7 +1229,8 @@ namespace RaidRogue
                     finalDmg,
                     fireColor,
                     stage == 3 || wasInstantTriplecast,
-                    extraNote
+                    extraNote,
+                    source: transform
                 );
             }
 
@@ -1334,7 +1265,7 @@ namespace RaidRogue
             Color frostCol = new Color(0.35f, 0.88f, 1.0f, 1f);
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("무빙냉기", $"{stage}단 {spellName}", finalDmg, frostCol, stage == 3);
+                targetedAdd.ReceivePlayerAttack("무빙냉기", $"{stage}단 {spellName}", finalDmg, frostCol, stage == 3, source: transform);
             }
             else
             {
@@ -1345,7 +1276,8 @@ namespace RaidRogue
                     finalDmg,
                     frostCol,
                     stage == 3,
-                    "즉발 무빙샷"
+                    "즉발 무빙샷",
+                    source: transform
                 );
             }
 
@@ -1617,6 +1549,7 @@ namespace RaidRogue
 
         private void PlayStageSlashEffect(int stage, bool isLeftFlankStyle, bool isCrit)
         {
+            if (RaidCombatAuthority.Host && _lastOffensiveVisualTarget != null) RaidNetworkSession.Instance.BroadcastEffect(transform.position + Vector3.up, _lastOffensiveVisualTarget.position + Vector3.up, playerController.normalBodyColor, "", false, 1);
             if (targetBoss == null || _fxLines.Count == 0)
             {
                 return;
@@ -1631,6 +1564,7 @@ namespace RaidRogue
 
         private void PlayGaleThrustPierceEffect()
         {
+            if (RaidCombatAuthority.Host && _lastOffensiveVisualTarget != null) RaidNetworkSession.Instance.BroadcastEffect(transform.position + Vector3.up, _lastOffensiveVisualTarget.position + Vector3.up, playerController.normalBodyColor, "", false, 1);
             if (targetBoss == null || _fxLines.Count == 0)
             {
                 return;
@@ -1837,7 +1771,7 @@ namespace RaidRogue
     /// 바닥(XZ 평면)에 6초간 유지되는 초록색 광역 힐 장판을 생성하여 범위 내 모든 파티원을 지속 회복시킵니다.
     /// 2D 탑다운 뷰와 3D 쿼터뷰 양쪽에서 선명하게 보입니다.
     /// </summary>
-    public class HealingSanctuaryZone : MonoBehaviour
+    public partial class HealingSanctuaryZone : MonoBehaviour
     {
         private Transform _source;
         private int _encounterId;
@@ -1866,6 +1800,7 @@ namespace RaidRogue
             zone.healPerTick = healPerTick;
             zone.shieldPerTick = shieldPerTick;
             zone.BuildVisuals();
+            zone._networkStart = RaidCombatAuthority.ServerTime;
             zone.ApplyHealingTick(); // 설치 즉시 1회 틱 회복!
             return zone;
         }
@@ -1968,27 +1903,12 @@ namespace RaidRogue
             if (_encounterId != CombatMetricsManager.EncounterId || StageManager.CombatSuspended || (_source != null && !CombatRange.LivingPartyMember(_source))) { Destroy(gameObject); return; }
             Vector2 centerXZ = new Vector2(transform.position.x, transform.position.z);
 
-            PlayerController pc = FindFirstObjectByType<PlayerController>();
-            if (pc != null)
+            foreach (var member in PartyLife.OrderedMembers())
             {
-                Vector2 pXZ = new Vector2(pc.transform.position.x, pc.transform.position.z);
-                if (Vector2.Distance(centerXZ, pXZ) <= radius + 0.35f)
-                {
-                    pc.ReceiveHeal(healPerTick, _source);
-                    pc.AddShield(shieldPerTick, _source);
-                }
-            }
-
-            PartyBotAI[] bots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
-            foreach (PartyBotAI bot in bots)
-            {
-                if (bot == null || bot.isDead) continue;
-                Vector2 bXZ = new Vector2(bot.transform.position.x, bot.transform.position.z);
-                if (Vector2.Distance(centerXZ, bXZ) <= radius + 0.35f)
-                {
-                    bot.ReceiveHeal(healPerTick, _source);
-                    bot.AddShield(shieldPerTick, _source);
-                }
+                if (!CombatRange.LivingPartyMember(member) || BattleResurrection.FlatDistance(transform.position, member.position) > radius) continue;
+                var pc = member.GetComponent<PlayerController>(); var bot = member.GetComponent<PartyBotAI>();
+                if (pc != null) { pc.ReceiveHeal(healPerTick, _source); pc.AddShield(shieldPerTick, _source); }
+                else if (bot != null) { bot.ReceiveHeal(healPerTick, _source); bot.AddShield(shieldPerTick, _source); }
             }
         }
     }

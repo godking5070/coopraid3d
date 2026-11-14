@@ -17,6 +17,12 @@ if ($LASTEXITCODE -ne 0) { throw 'Network test compilation failed.' }
 & $taskExe
 if ($LASTEXITCODE -ne 0) { throw 'Network logic tests failed.' }
 
+$taskCombatExe = Join-Path $taskOutput 'CombatNetworkTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskCombatExe" (Join-Path $taskRoot 'Assets/Scripts/RaidCombatProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $taskRoot 'Assets/Scripts/CombatMetricsData.cs') (Join-Path $PSScriptRoot 'RaidCombatNetworkTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Combat network test compilation failed.' }
+& $taskCombatExe
+if ($LASTEXITCODE -ne 0) { throw 'Combat network logic tests failed.' }
+
 # Compile the real official transport sources against the original project's references.
 # This checks APIs without launching Unity or importing/copying Library into this worktree.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
