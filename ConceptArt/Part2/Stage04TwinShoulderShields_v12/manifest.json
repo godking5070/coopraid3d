@@ -1,0 +1,81 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "stage":  4,
+    "version":  "Stage04TwinShoulderShields_v12",
+    "created_date":  "2026-11-13",
+    "tool":  "built-in image_gen",
+    "status":  "generation_visual_qa_and_file_validation_complete",
+    "user_request":  "4스테이지 3안을 기준으로 방패가 양쪽 어깨에 있는3개 컨셉",
+    "selected_base":  "../DevelopedSelections_v7/Stage04/03-effigy.png",
+    "locked_identity":  "Sealed wedge head, asymmetrical heavy cuirass, giant gauntlets, long human legs, protective pose, furnace cel art family.",
+    "stage03_fixed":  "../FixedConcepts/Stage03/01-boss.png",
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "images":  [
+                   {
+                       "id":  "01-twin-arches",
+                       "title_ko":  "쌍곡면 열차폐",
+                       "description":  "기존 곡면 방패를 양쪽 어깨에 대칭 장착한 측면 보호형.",
+                       "image":  "01-twin-arches.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-0478d3bb-704f-4ae7-bfad-724c88a05919.png",
+                       "prompts":  [
+                                       "01-twin-arches.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../DevelopedSelections_v7/Stage04/03-effigy.png",
+                                              "role":  "Exact user-liked Stage04 option03; preserve its tank identity/body/pose and develop shield as a pair mounted at both shoulders."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: exact selected wedge mask, asymmetric heavy cuirass, giant free gauntlets and long legs retained. Two comparable large curved arched shields, one on each shoulder, with broad seated upper brass saddles and lower curved stays into separate waist bearings. Open chest/head gap and both actual arms remain visible; no handheld shield or common rear axle. Exactly8 chain runs to8posts, upper3 on each shield plus1each thigh. Full body/shield edges/posts contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2362470,
+                       "sha256":  "fb4abf22a6accea59cb22b490dfb3bfb532b05d6790b709373366d5ca6f6f4c0"
+                   },
+                   {
+                       "id":  "02-gate-bastions",
+                       "title_ko":  "양견갑 성문 방벽",
+                       "description":  "높은 직사각 방패 두 장이 머리와 몸을 감싸는 성문형.",
+                       "image":  "02-gate-bastions.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-5ab841b7-57b7-4d5d-b02f-7a07ac40850b.png",
+                       "prompts":  [
+                                       "02-gate-bastions.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../DevelopedSelections_v7/Stage04/03-effigy.png",
+                                              "role":  "Exact user-liked Stage04 option03; preserve its tank identity/body/pose and develop shield as a pair mounted at both shoulders."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: two tall rectangular-arched shoulder shield doors with ivory stepped borders, navy face and paired orange slots; each has a separate short shoulder hinge shaft/saddle and long diagonal waist brace. Not a shared neck-spanning axle or rollers. Original body proportions and both gauntlets/empty hands retained, chest seam/head/waist readable. Four separate chains/posts per side, total8. Full feet/head/shield/post tips within canvas; tower tops have less but adequate uncropped margin.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2370527,
+                       "sha256":  "0a74ef00ea9910018da55d3ae3c5b2b6378df212e66334ac99bb9f23ff4f22f7"
+                   },
+                   {
+                       "id":  "03-layered-bulwarks",
+                       "title_ko":  "쌍견갑 분절 방패",
+                       "description":  "세 겹의 장갑판이 한 방패로 이어지는 양어깨 가동형.",
+                       "image":  "03-layered-bulwarks.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-83de0872-c177-4a69-91fa-47f392b0e661.png",
+                       "prompts":  [
+                                       "03-layered-bulwarks.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../DevelopedSelections_v7/Stage04/03-effigy.png",
+                                              "role":  "Exact user-liked Stage04 option03; preserve its tank identity/body/pose and develop shield as a pair mounted at both shoulders."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: exactly two shield assemblies, one per shoulder, each comprising3large overlapping contiguous plates on a single support spine; six armor sections are not separate wings or limbs. Independent shoulder pivot saddles and lower waist bearings visible, arms/free hands and original body clear.8cooling chains/8posts,4per side. Complete shield/head/feet silhouette and margins, no old long axle/roller frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2413904,
+                       "sha256":  "85f765814fc4e6c9c4b6b63e6abf1748f3c0ed4b8e89c77252dd82067681940e"
+                   }
+               ],
+    "limits":  "Three single-view concept illustrations; no actual3D mesh/rigging check. Stage03 is fixed separately; these new Stage04 variations await choice. Previous files preserved."
+}

@@ -1,0 +1,279 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "version":  "DevelopedSelections_v7",
+    "created_date":  "2026-11-12",
+    "status":  "generation_visual_qa_and_packaging_complete",
+    "tool":  "built-in image_gen",
+    "stage_count":  5,
+    "concepts_per_stage":  3,
+    "final_image_count":  15,
+    "concept_family":  "Three functional artifact developments per selected v6 effigy",
+    "user_request":  "Develop selected Stage01 option02 with artifacts; Stage02 option01 keep pipe neck and replace disliked rear artifact; Stage03 option03 replace disliked rear balance and hand tool; Stage04 option03 add large shoulder shield; Stage05 option03 replace ambiguous rear artifact.",
+    "selected_sources":  [
+                             {
+                                 "stage":  1,
+                                 "source":  "../DistinctStageEffigies_v6/Stage01/02-effigy.png",
+                                 "display":  "v6 Stage01 선택 2안",
+                                 "link":  "../DistinctStageEffigies_v6/Stage01/02-effigy.png",
+                                 "identity":  "봉인마스크·비대칭 갈비·모래시계·캘리퍼 계승, 기억/광학/분신 위상 아티팩트 추가"
+                             },
+                             {
+                                 "stage":  2,
+                                 "source":  "../DistinctStageEffigies_v6/Stage02/01-effigy.png",
+                                 "display":  "v6 Stage02 선택 1안",
+                                 "link":  "../DistinctStageEffigies_v6/Stage02/01-effigy.png",
+                                 "identity":  "타원 봉인면·파이프 목·긴 갈비 외형 유지, 옆뒤 대형 원통/행거를 컴팩트 등 공명 기관으로 교체"
+                             },
+                             {
+                                 "stage":  3,
+                                 "source":  "../DistinctStageEffigies_v6/Stage03/03-effigy.png",
+                                 "display":  "v6 Stage03 선택 3안",
+                                 "link":  "../DistinctStageEffigies_v6/Stage03/03-effigy.png",
+                                 "identity":  "원형 의료계기면·백금 베일·반달 늑골 유지, 두 플라스크 저울과 손 U자 봉 완전 교체"
+                             },
+                             {
+                                 "stage":  4,
+                                 "source":  "../DistinctStageEffigies_v6/Stage04/03-effigy.png",
+                                 "display":  "v6 Stage04 선택 3안",
+                                 "link":  "../DistinctStageEffigies_v6/Stage04/03-effigy.png",
+                                 "identity":  "쐐기 투구·중갑·대형 건틀릿 유지, 대형 방패를 어깨에 지지 결합. 가로축·롤러 부활 없음"
+                             },
+                             {
+                                 "stage":  5,
+                                 "source":  "../DistinctStageEffigies_v6/Stage05/03-effigy.png",
+                                 "display":  "v6 Stage05 선택 3안",
+                                 "link":  "../DistinctStageEffigies_v6/Stage05/03-effigy.png",
+                                 "identity":  "긴 봉인 바이저·별 흉갑·원본 시침 창 유지, 애매한 후방 행성/토성환/막대를 하중 받는 천구 성유물로 교체"
+                             }
+                         ],
+    "reference_policy":  "The exact selected v6 stage image was visually inspected and supplied in each initial generation. Preferred head, humanoid proportions, core shell and Stage05 original spear retained. Disliked artifacts replaced at function and support level.",
+    "generation_schedule":  "Five stage jobs progressed in parallel: three assigned stage agents and two independent stage jobs orchestrated by the root.",
+    "stage_changes":  {
+                          "Stage04":  "Keep heavy armor and enlarged gauntlet; attach large shoulder shield with clear load-bearing mount, no rear transverse shaft/roller/column",
+                          "Stage03":  "Remove two-flask shoulder balance and U-shaped hand manometer entirely; replace with compact integrated mercury circuits and palm/wrist or small relic tools",
+                          "Stage01":  "Add memory capsules / remote optical survey / sand-double phase anchor to selected mask, ribs, hourglass and caliper",
+                          "Stage05":  "Keep long angular visor, cracked star chest and original two-ended hour-hand spear; replace vague rear planet/Saturn rings/rods with integrated celestial load relics",
+                          "Stage02":  "Keep pipe neck and selected silhouette, replace bent side pipes/large cylinders/hanger with compact crescent, spinal or layered resonance body"
+                      },
+    "variation_scope":  "Three meaningful artifact/support/shell arrangements, not the same mechanism in three poses. Human anatomy, stage narrative and cel materials remain.",
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "direction":  "ART_DIRECTION.txt",
+    "qa":  "All 15 final PNGs visually inspected by the root and/or assigned stage agents for selected-base family, requested artifact removal/replacement/addition, physical attachments and full-body framing. PNG decode, 1536x1024 dimensions, bytes and SHA256 verified. Individual manifests retain exact references, generation and correction records. Prior files preserved.",
+    "limits":  "Single-view concept illustrations. No 3D mesh, UV, rigging or animation verification.",
+    "images":  [
+                   {
+                       "stage":  1,
+                       "id":  "01-effigy",
+                       "title_ko":  "기억 캡슐의 봉인 수집자",
+                       "image":  "Stage01/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1742629,
+                       "sha256":  "1f054f3d156fe09cbfee3c763a19bfdb5cc158d0f53f647a1e759b6e5813221d",
+                       "prompts":  [
+                                       "Stage01/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "02-effigy",
+                       "title_ko":  "원거리 잔향의 광학 정찰자",
+                       "image":  "Stage01/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1785466,
+                       "sha256":  "3009f1972bb82e2f7d865cc075778549537d2d62bdeeca611554d7f0695b8666",
+                       "prompts":  [
+                                       "Stage01/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "03-effigy",
+                       "title_ko":  "모래 분신의 위상 고정자",
+                       "image":  "Stage01/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1757271,
+                       "sha256":  "406e4d70a37375160f01510627217c227292b0c109c0514a6bc3a852d6eb1c8e",
+                       "prompts":  [
+                                       "Stage01/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "01-effigy",
+                       "title_ko":  "목의 장송을 울리는 초승 공명체",
+                       "image":  "Stage02/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1811917,
+                       "sha256":  "13a2af07485ebdb0deba505bf982e5fc134b6e21398b3aa13d47041c3e038dc1",
+                       "prompts":  [
+                                       "Stage02/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "02-effigy",
+                       "title_ko":  "파이프 목을 구동하는 척추 오르골",
+                       "image":  "Stage02/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1840402,
+                       "sha256":  "80b5f7ed9441f604e6cdd586b92a5a2d05eca51aca23b976799d2d7f1992c1dc",
+                       "prompts":  [
+                                       "Stage02/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "03-effigy",
+                       "title_ko":  "장송을 누르는 겹공명 등판",
+                       "image":  "Stage02/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1910200,
+                       "sha256":  "bbc8f200856e61df5e3bb459ec0f9507b3063e96753bd994fc69c397157a18df",
+                       "prompts":  [
+                                       "Stage02/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "01-effigy",
+                       "title_ko":  "경맥 인장을 여는 수은심장",
+                       "image":  "Stage03/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1753053,
+                       "sha256":  "8e5aa54cb1468c5894e2e26449fa528a004a4f4680d9e9e593434ce2bb01e129",
+                       "prompts":  [
+                                       "Stage03/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "02-effigy",
+                       "title_ko":  "폐순환의 봉인 성배",
+                       "image":  "Stage03/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1771634,
+                       "sha256":  "23b85d5eb0d1061e6692b1fbfeb8918cdb1db2778106e09c841f011c58641ffb",
+                       "prompts":  [
+                                       "Stage03/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "03-effigy",
+                       "title_ko":  "빈 혈관의 정화 인장",
+                       "image":  "Stage03/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1782119,
+                       "sha256":  "f12e55e35389fb08eb2108c54802aba5457dfd6e38c81d8ddf3d08e0dd3485f8",
+                       "prompts":  [
+                                       "Stage03/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "01-effigy",
+                       "title_ko":  "견갑에 잠긴 세로 열벽",
+                       "image":  "Stage04/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2305960,
+                       "sha256":  "3b1dd10415f78d031a938abb34dbaa8ca11ed86627c9a9b2edca19e98d48f8c6",
+                       "prompts":  [
+                                       "Stage04/01-effigy.prompt.txt",
+                                       "Stage04/01-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "02-effigy",
+                       "title_ko":  "양견갑에서 접히는 방벽",
+                       "image":  "Stage04/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2321707,
+                       "sha256":  "9429a4912bec401da2700a4b10c59f398e55a151dd437c096fdc0c2d3eaa7b14",
+                       "prompts":  [
+                                       "Stage04/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "03-effigy",
+                       "title_ko":  "한 어깨에 걸친 아치 열차폐",
+                       "image":  "Stage04/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2314746,
+                       "sha256":  "71104f3c065cfa07f7c76a76462f3dbad6e3d41c35ee0e8f8844559ca3848f3f",
+                       "prompts":  [
+                                       "Stage04/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "01-effigy",
+                       "title_ko":  "천구의 반구를 짊어진 별흉갑 성상",
+                       "image":  "Stage05/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2118076,
+                       "sha256":  "92db4e8fb2d1ec793598d7f56b599b33be4dd507f92523af9f893767145b1351",
+                       "prompts":  [
+                                       "Stage05/01-effigy.prompt.txt",
+                                       "Stage05/01-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "02-effigy",
+                       "title_ko":  "낙하한 천구환을 붙잡는 시침 수호상",
+                       "image":  "Stage05/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2115800,
+                       "sha256":  "de2ffc56d88ef9546f86cdd3bf25bd871b555d27da2a5ae322c247d2412b7e5c",
+                       "prompts":  [
+                                       "Stage05/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "03-effigy",
+                       "title_ko":  "붕괴 성도를 봉인한 구속절단의 성상",
+                       "image":  "Stage05/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2039687,
+                       "sha256":  "1e509e2600fb1065fa182f71ebab213f4e012c8a9d43733c19acaf334ed98449",
+                       "prompts":  [
+                                       "Stage05/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   }
+               ]
+}

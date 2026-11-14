@@ -1,0 +1,50 @@
+﻿{
+    "status":  "complete",
+    "objective":  "All remaining Part1 stages 2-6 in parallel",
+    "inputPngs":  133,
+    "fourViewGroups":  32,
+    "floorTopViews":  5,
+    "references":  15,
+    "prompts":  191,
+    "independentAudits":  [
+                              {
+                                  "stage":  2,
+                                  "status":  "passed_with_declared_reference_limits",
+                                  "report":  "CrossAudit/stage2.json"
+                              },
+                              {
+                                  "stage":  3,
+                                  "status":  "passed_with_declared_reference_limits",
+                                  "report":  "CrossAudit/stage3.json"
+                              },
+                              {
+                                  "stage":  4,
+                                  "status":  "passed",
+                                  "report":  "CrossAudit/stage4.json"
+                              },
+                              {
+                                  "stage":  5,
+                                  "status":  "passed",
+                                  "report":  "CrossAudit/stage5.json"
+                              },
+                              {
+                                  "stage":  6,
+                                  "status":  "passed_with_declared_reference_limits",
+                                  "report":  "CrossAudit/stage6.json"
+                              }
+                          ],
+    "archive":  {
+                    "status":  "passed",
+                    "archive":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\TripoReady\\astella-stages2-6-tripo-4views-v1.zip",
+                    "files":  369,
+                    "bytes":  154271904,
+                    "sha256":  "f965a9c295cf540c234c447839e767194f8d11bffa8d6a3ed0d364fe75ef2ab9",
+                    "everyEntryEqualsCurrentSource":  true,
+                    "inputPngs":  133,
+                    "references":  15,
+                    "prompts":  191,
+                    "independentStagesVerified":  5
+                },
+    "stage5Correction":  "Weight resized consistently in all four views to height140px; right depth129px fits within pan rim149px; fresh ZIP independently verified",
+    "unperformed":  "3D reconstruction and rigging are outside this image-resource delivery and explicitly documented"
+}

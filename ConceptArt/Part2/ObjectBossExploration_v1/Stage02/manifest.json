@@ -1,0 +1,86 @@
+{
+    "stage":  "Part II Stage02 — 끝나지 않는 진혼곡의 무희",
+    "version":  "ObjectBossExploration_v1",
+    "created_date":  "2026-11-11",
+    "tool":  "built-in image_gen",
+    "status":  "three_proposals_pending_user_review",
+    "direction_source":  "../ART_DIRECTION.txt",
+    "scope":  "Three independent full-body object-body concepts referenced from actual Part I bosses. Existing Part II human designs not supplied as inputs.",
+    "shared_visual_qa":  "All three selected outputs were visually inspected. None has a real human face, pupils, facial acting, natural hair, a bald human head or a class costume. Bodies are sculptural shells, resonance organs and supported drive mechanisms. Music functions through external sound plates/rails and links; no gold pin cylinder displayed inside a torso. Clean ivory/light-gold/navy planes, lavender cel shading and controlled contours retained. All selected outputs are 1536x1024 landscape concept images, not turnarounds or verified 3D meshes.",
+    "assets":  [
+                   {
+                       "image":  "01-monster.png",
+                       "prompt":  "01-monster.prompt.txt",
+                       "title_ko":  "저상 공명껍질 — 완전 비인간 기관",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Object as main living body, cavity/support logic, shell thickness and limited mechanisms."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                              "role":  "Carved large masses, strong joint scale and soft illustrated planes."
+                                          }
+                                      ],
+                       "design_ko":  "가로로 큰 세 공명낭과 초승달 외피가 본체이며 네 록커 다리로 강제 박자를 밟는다. 등 태엽축과 외부 두 타격기·음판, 측면 위상 시계가 동일 구동틀에 연결된다.",
+                       "qa":  "Four distinct supported rocker legs and complete feet; no humanoid parts. External tone plates, supported hammers, one rear winding key and side phase dial visible. Whole silhouette contained in canvas. No internal pin drum or copied bell-spider anatomy.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2131440,
+                       "sha256":  "dc8e3fd08e3cf6e8a0b1000600ba14312a58055101fa126ed6ee84b6c3aff314"
+                   },
+                   {
+                       "image":  "02-hybrid.png",
+                       "prompts":  [
+                                       "02-hybrid.prompt.txt",
+                                       "02-hybrid.cleanup.prompt.txt"
+                                   ],
+                       "title_ko":  "조각 손의 무용틀 — 인체 흔적이 잠식된 혼성기관",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                              "role":  "Oversized carved hands, heavy joint mass and faceted surfaces."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Fixed doll shells, pivot sockets and supported panel logic; face/hair/costume excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Object-body support frame, acoustic void and functional mechanisms."
+                                          }
+                                      ],
+                       "design_ko":  "빈 목 소켓과 큰 조각 손·팔만 인체의 흔적으로 남고 대부분 몸체는 비스듬한 거대 음향 외피/다섯 외부 음판/구동틀로 바뀐다. 긴 손은 저항하듯 펼쳐지고 다른 손은 공명 레일을 누른다. 세 구동 다리가 몸을 강제로 움직인다.",
+                       "qa":  "Final correction removed an unintended fourth rear leg and expanded framing. Selected image has exactly three main attached legs, two complete carved hands, empty neck socket and no human head/face. Five external sound boards, rail, rear key and closed spring housing visible. Internal gold pin-cylinder display absent. All fingers/feet/key have margins.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2142207,
+                       "sha256":  "2341470b2304fba87359c6a32a9803fbfc931487c85a0bb0f73fa65e40e47c00"
+                   },
+                   {
+                       "image":  "03-effigy.png",
+                       "prompt":  "03-effigy.prompt.txt",
+                       "title_ko":  "봉인 무대 인형 — 얼굴 없는 의례체",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Closed sculpted shell as body and controlled broad ivory planes; face excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Precisely attached doll pivots and shell seams; no source face, hair, outfit or scissors."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Clean functional mechanisms, supported acoustic parts and illustrated materials."
+                                          }
+                                      ],
+                       "design_ko":  "육면체에 가까운 봉인 두상과 밀폐된 길고 좁은 몸껍질을 가진 무대 인형. 한 손은 펴지고 다른 손은 흉부를 막은 채 두 다리가 강제 스텝에 고정된다. 등 태엽과 허리 위상 캠이 외부 다섯 공명 레일을 구동한다.",
+                       "qa":  "Head is sealed faceted cap with no eyes/nose/lips or hair. Two segmented arms/hands and exactly two supported legs, with both feet contacting floor. Closed torso, rear spring/flat winding handle, side clock-phase cam and five externally supported tone bars visible. Full silhouette stays within frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1900712,
+                       "sha256":  "a9c14f906bee5a88ec2b98cb3c8ba61dd3210e337bc1049ea73e030e1fd11ed9"
+                   }
+               ]
+}

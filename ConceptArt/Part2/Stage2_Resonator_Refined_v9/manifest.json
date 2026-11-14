@@ -1,0 +1,44 @@
+{
+  "version": "stage2-resonator-refined-v9",
+  "created_date": "2026-11-11",
+  "scope": "Part II Stage 2 selected option 1 — resolved normal creature construction",
+  "title_ko": "경련하는 진혼의 공명낭",
+  "tool": "built-in image_gen",
+  "status": "refinement_pending_user_review",
+  "selected_direction": "../Stage2_ConceptExploration_v8/01-GrotesqueMonster/01-grotesque-resonator-v1.png",
+  "style_reference": "../../CharacterMatched/06-campanella-hard-v1.png",
+  "user_feedback_ko": "1번이 낫겠다. 좀 더 구성을 철저하게 만들어봐. 뭔가 다 만들어지다가 만 느낌이네.",
+  "structure_spec": "structure-spec-ko.txt",
+  "prompt_bundle": "prompts-all.txt",
+  "images": [
+    {
+      "role": "main_full_body",
+      "image": "01-resonator-refined-v9.png",
+      "prompt": "01-resonator-refined-v9.prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2121294,
+      "sha256": "7fbcbfa1ae81ad2b6bdc63ca436e22a87368183b1499d0bfb7e4317b656e4f27"
+    },
+    {
+      "role": "supplementary_rear_side_structure",
+      "image": "02-resonator-rear-structure-v9.png",
+      "prompt": "02-resonator-rear-structure-v9.prompt.txt",
+      "reference": "01-resonator-refined-v9.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1786399,
+      "sha256": "5dc7097d5a07457e86bff31da3087dc9a0e1ef4b095160311ddd26028d2f1806"
+    }
+  ],
+  "resolved_construction_ko": [
+    "닫힌 후방 부피와 안쪽 공명막을 가진 하나의 유기체 공명실",
+    "상·하 연속 레일에 뿌리를 고정한 판형 금속 음판",
+    "단일 판태엽 하우징과 두꺼운 장착 브래킷, 짧고 지지된 키 축",
+    "외부 캠·로커·연결봉으로 이어지는 발음/강제 운동 전달부",
+    "몸 아래 삼각 지지 프레임과 세 다리 소켓, 같은 원리를 공유하는 다리 관절",
+    "넓은 발 받침·뒤꿈치와 축에 고정된 시계바늘형 발톱"
+  ],
+  "visual_qa": "Both PNGs visually inspected. Original nonhumanoid sac, three legs, one slotted key and cel palette retained. Main view shows connected reed rails, cavity diaphragms, cam links, supported spring hub and underbody cradle. Rear-side supplement shows posterior volume, bearing cage and hip connections. Independently generated concept views may have minor projection/interface differences; they are not renders of a single verified 3D mesh. No physical gear/rig simulation or mesh validation performed.",
+  "stage3": "User-accepted Stage3 identity v4 unchanged."
+}

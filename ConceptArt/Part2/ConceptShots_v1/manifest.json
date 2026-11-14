@@ -1,0 +1,123 @@
+{
+  "project": "ASTELLA",
+  "part": 2,
+  "date": "2026-11-11",
+  "authority": "User-supplied Part2 master scenario",
+  "tool": "built-in image_gen",
+  "scope": "8 representative single boss concept shots, Stage1-8",
+  "shotCount": 8,
+  "format": "landscape 1536x1024 PNG",
+  "modelingSheets": false,
+  "separateEnvironmentAssets": false,
+  "variableBossClasses": {
+    "stages": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "representativeOnly": true,
+    "examples": [
+      "archer/scout DPS",
+      "dual-blade DPS",
+      "alchemical healer",
+      "lance/shield tank"
+    ],
+    "fixedClassAssignment": false
+  },
+  "stage8Selection": "Apeiron, true final Phase2 boss; Administrator and Extreme Kronos not separate shots in this set",
+  "images": [
+    {
+      "stage": 1,
+      "title": "기억을 흘리는 정찰병",
+      "file": "01-memory-leaking-scout.png",
+      "prompt": "Prompts/01-memory-leaking-scout.txt",
+      "visualReview": [
+        "Human companion face preserved",
+        "Cracked hourglass chest leaks golden sand",
+        "Glass-ring arena, sand waterfall and outer vortex present"
+      ]
+    },
+    {
+      "stage": 2,
+      "title": "끝나지 않는 진혼곡의 무희",
+      "file": "02-requiem-dancer.png",
+      "prompt": "Prompts/02-requiem-dancer.txt",
+      "visualReview": [
+        "Human tearful face and huge implanted back key both visible",
+        "Forced dance pose and dual-blade representative cues readable",
+        "Eight music-note tower pads visible after targeted correction"
+      ]
+    },
+    {
+      "stage": 3,
+      "title": "얼어붙은 혈관의 연금술사",
+      "file": "03-mercury-healer.png",
+      "prompt": "Prompts/03-mercury-healer.txt",
+      "visualReview": [
+        "Pale human alchemist identity preserved",
+        "Silver mercury conduits visible at arms, neck and protected chest",
+        "Six floor channels and two green amplification circles present"
+      ]
+    },
+    {
+      "stage": 4,
+      "title": "영원히 타오르는 가마의 수호자",
+      "file": "04-furnace-guardian.png",
+      "prompt": "Prompts/04-furnace-guardian.txt",
+      "visualReview": [
+        "Human shield tank protects the space behind shield",
+        "Molten-gold armor and octagonal grate arena present",
+        "Eight red cooling-chain runs and eight pillars (four to each side)"
+      ]
+    },
+    {
+      "stage": 5,
+      "title": "무너진 천구를 떠받치는 부단장",
+      "file": "05-vice-captain.png",
+      "prompt": "Prompts/05-vice-captain.txt",
+      "visualReview": [
+        "Vice-captain actor identity: silver/lavender hair, monocle, military coat",
+        "Collapsed celestial load and unconscious arm restraint readable",
+        "Entire hour-hand spear inside frame after camera widening"
+      ]
+    },
+    {
+      "stage": 6,
+      "title": "구원받은 인형, 이리스",
+      "file": "06-iris-clockhand-saint.png",
+      "prompt": "Prompts/06-iris-clockhand-saint.txt",
+      "visualReview": [
+        "Iris actor identity retained in hair, veil, blue eyes and blue flower",
+        "Exactly six gold clock-hand wings, three per side",
+        "Human anatomical right hand restrains blade anatomical left arm",
+        "Mechanical clock heart visible without organic gore"
+      ]
+    },
+    {
+      "stage": 7,
+      "title": "과거에 갇힌 선대 단장",
+      "file": "07-captain-in-mirrors.png",
+      "prompt": "Prompts/07-captain-in-mirrors.txt",
+      "visualReview": [
+        "Warm bearded old captain identity distinct from vice-captain",
+        "Half body disintegrates into gold sand",
+        "Dark mirror reality contrasts with blue-sky training-ground memories"
+      ]
+    },
+    {
+      "stage": 8,
+      "title": "제13시의 신, 아페이론",
+      "file": "08-apeiron-god-of-thirteenth-hour.png",
+      "prompt": "Prompts/08-apeiron-god-of-thirteenth-hour.txt",
+      "visualReview": [
+        "Colossal divine Apeiron with shattered XIII chest core",
+        "Clock-hand bridge leads from rooftop arena to core",
+        "Black eclipse/night contrasts with golden dawn"
+      ]
+    }
+  ],
+  "productionBrief": "production-brief.json",
+  "guide": "READ_ME_KO.txt",
+  "verification": "verification.json"
+}

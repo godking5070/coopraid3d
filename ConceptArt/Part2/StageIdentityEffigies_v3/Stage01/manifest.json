@@ -1,0 +1,86 @@
+{
+    "stage":  "01",
+    "title_ko":  "기억을 흘리는 정찰병",
+    "version":  "StageIdentityEffigies_v3",
+    "created_date":  "2026-11-11",
+    "tool":  "built-in image_gen",
+    "status":  "three_stage_specific_effigies_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "reference_policy":  "Only the two actual PartI PNGs below submitted. No prior Stage02 or EffigyExploration_v2 PNG submitted or used as a form template.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "기억 묘비의 파수상",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-5fd3359b-44fe-4be1-850e-52401ecc54d7.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                              "role":  "Heavy carved stone mass, oversized hands, fixed broad ivory/navy planes and lavender cel style only. Face, horns, wings and armor not copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Hollow object body, thick shell, clear hinges and connected mass, controlled cel style only. Bell/spider anatomy, music parts and sheet layout not copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: squat massive rectangular memory tomb, head is three closed observation shutters, thick arm and huge hand above the hourglass and cupped other hand beneath. Two short plinth legs planted. Intact aligned vertical hourglass, sand contained inside only. All main body parts and modest rear bracket inside frame. No thin dancer limbs, diamond head, V chest, pelvis wings, natural face or costume.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1933774,
+                       "sha256":  "a8afedfd82eef9a7d85774f65149c9ecacd9970fe6d2cfb2aa2a8925e8777bb5"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "모래 장례의 안치관",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-045ac9f0-1cf7-43f2-9ead-84e7c446b454.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                              "role":  "Heavy carved stone mass, oversized hands, fixed broad ivory/navy planes and lavender cel style only. Face, horns, wings and armor not copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Hollow object body, thick shell, clear hinges and connected mass, controlled cel style only. Bell/spider anatomy, music parts and sheet layout not copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: bowed rounded funerary shell, small closed camera-shutter hood, large palms cradling vertical glass and one kneeling stone leg with opposite planted foot. Hourglass upper bulb/neck/lower bulb share rigid vertical axis, sand internal only. Oversized masonry joints and continuous back shell, no exposed slim gold doll-joint template. Entire hood, hands and feet in frame. No human face or music parts.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1947904,
+                       "sha256":  "77e6f8193998e56f660ebf24baad7406c6bff52653458ce0a8f99b1652da2c82"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "폐쇄된 정찰 초소 의례체",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-aa7468e0-0789-4002-ae7b-e7a5be74c078.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                              "role":  "Heavy carved stone mass, oversized hands, fixed broad ivory/navy planes and lavender cel style only. Face, horns, wings and armor not copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Hollow object body, thick shell, clear hinges and connected mass, controlled cel style only. Bell/spider anatomy, music parts and sheet layout not copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: tall locked architectural scout watchpost, rectangular shutter hood covered by one large stone hand, lower caliper-like other hand, hourglass mounted vertically between top/bottom lintels. Two long substantial square leg pillars and full feet planted. Rear survey fin connected and inside frame. No human face, skin, hair, diamond head, V torso or skinny dancing silhouette. Sand stays inside closed intact glass.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1838205,
+                       "sha256":  "8bbd472849e60798ba65b72f37b9b14534edc00b6c395e0e927c3daaaf9454a9"
+                   }
+               ],
+    "common_visual_qa":  "All three new PNGs visually inspected. Stage01\u0027s own observation/memory/sand-burial identity expressed through mass and anatomy: squat gravestone / bowed interment vessel / tall sealed watchpost. Thick stone hands and legs, shutter organs and intact vertical hourglass common, not a shared dancer mannequin. Complete single-view concept illustrations, no 3D mesh or rigging verification. Existing earlier files preserved.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

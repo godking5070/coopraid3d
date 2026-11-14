@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "project": "ASTELLA",
+  "stage": 6,
+  "boss": "야누스 알파 & 오메가",
+  "date": "2026-11-10",
+  "generator": "built-in image_gen + deterministic fixed-slot assembly",
+  "views": [
+    "front",
+    "left",
+    "right",
+    "back"
+  ],
+  "cameraConvention": {
+    "up": "+Y",
+    "front": "+Z",
+    "characterRight": "+X",
+    "left": "camera at subject -X; front faces screen right",
+    "right": "camera at subject +X; front faces screen left"
+  },
+  "inputGroups": [
+    {
+      "id": "AlphaNormal",
+      "folder": "Bodies/Normal/Alpha",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "OmegaNormal",
+      "folder": "Bodies/Normal/Omega",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "AlphaHard",
+      "folder": "Bodies/Hard/Alpha",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "OmegaHard",
+      "folder": "Bodies/Hard/Omega",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "accessory-set",
+      "folder": "Accessories",
+      "count": 4,
+      "size": [
+        3200,
+        2400
+      ],
+      "contents": [
+        "ShieldNormal",
+        "SpearNormal",
+        "CapeNormal",
+        "ShieldHard",
+        "HalberdHard",
+        "CapeHard"
+      ],
+      "layout": "accessory-layout.json",
+      "slotOrderFixedAcrossViews": true,
+      "wholeSheetMirrored": false
+    },
+    {
+      "id": "GrandGate",
+      "folder": "Buildings/GrandGate",
+      "count": 4,
+      "size": [
+        2048,
+        1600
+      ]
+    },
+    {
+      "id": "BoundaryRail",
+      "folder": "Buildings/BoundaryRail",
+      "count": 4,
+      "size": [
+        2048,
+        1600
+      ]
+    },
+    {
+      "id": "WinchPost",
+      "folder": "Buildings/WinchPost",
+      "count": 4,
+      "size": [
+        2048,
+        1600
+      ]
+    }
+  ],
+  "floor": {
+    "path": "Floor/top.png",
+    "count": 1,
+    "size": [
+      1254,
+      1254
+    ],
+    "use": "flat semicircular arena layout/color guide",
+    "seamless": false,
+    "pbrSet": false
+  },
+  "modelingInputPngCount": 33,
+  "referenceOnlyPngCount": 3,
+  "promptCount": 39,
+  "guide": "START_HERE_KO.txt",
+  "prompts": "GenerationPrompts",
+  "qa": "verification.json",
+  "worldLayout": "map-layout.json",
+  "limitations": [
+    "AI concept turnarounds, not calibrated renders from one 3D model",
+    "Fixed sheet coordinates do not guarantee exact geometric identity across views",
+    "Accessory-set reconstruction may require object separation/cleanup",
+    "Cloth fitting and shield sliding mechanisms require DCC work",
+    "Floor inlay pixels are approximate; world positions are in map-layout.json"
+  ],
+  "performed": {
+    "tripoGeneration": false,
+    "mixamoRigging": false,
+    "gameCodeChanges": false
+  }
+}

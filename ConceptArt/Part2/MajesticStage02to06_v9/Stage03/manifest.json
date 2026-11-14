@@ -1,0 +1,48 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "stage":  3,
+    "title_ko":  "얼어붙은 혈관의 연금술사",
+    "version":  "MajesticStage02to06_v9",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "brief":  "../ART_DIRECTION.txt",
+    "concept_ko":  "폐순환 수은 성상",
+    "images":  [
+                   {
+                       "id":  "01-boss",
+                       "title_ko":  "얼어붙은 혈관의 연금술사 — 폐순환 수은 성상",
+                       "image":  "01-boss.png",
+                       "prompts":  [
+                                       "01-boss.prompt.txt",
+                                       "01-boss.refine.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1d013-82ad-7a82-a4b1-75540745837e/exec-69b70391-6e06-41d3-8bfe-bd712f9bfd89.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1d013-82ad-7a82-a4b1-75540745837e/exec-ccd554d3-5bad-4115-abab-6ce8d6e3c02e.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../Stage01Majesty_v8/01-effigy.png",
+                                              "role":  "User-liked major-boss presence, functional large forms and cel art style; Stage01 anatomy details and devices not copied"
+                                          },
+                                          {
+                                              "path":  "../../DistinctStageEffigies_v6/Stage03/03-effigy.png",
+                                              "role":  "Selected round sealed medical mask, short veil and crescent rib identity; rejected rear flask balance and hand manometer fully removed"
+                                          },
+                                          {
+                                              "path":  "../../DevelopedSelections_v7/Stage03/01-effigy.png",
+                                              "role":  "Integrated mercury-heart/meridian mechanism and cleansing palm reference; thin proportions and small back circuit developed"
+                                          }
+                                      ],
+                       "visual_qa":  "Final framing refinement visually inspected. Selected concentric sealed medical mask/short veil and feminine humanoid waist/pelvis/long legs preserved. Substantive crescent ribs/shoulders and legs provide greater raid-boss presence. A SINGLE wide continuous oval spinal mercury reliquary visibly connects at dorsal center, scapular mounts and lower pelvis; opaque cold silver liquid below horizontal meniscus, clear upper glass. Chest mercury-heart/reflux valve, two arm meridians and two wrist bead cuffs visible. Exactly two arms and two complete hands, no loose handheld tool. Old two-flask shoulder balance and U-hand manometer absent. Entire upper reliquary/head/hands/feet within generous margins; mild natural perspective, no floating backpack.",
+                       "refinement":  "Framing-only camera pullback to correct upper device margin; exact design and pose preserved.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2016174,
+                       "sha256":  "74d5d372c096e5d40e9efc6617b4a6f8f2d496a9062b25d4c23ab7c6e1c86258"
+                   }
+               ],
+    "common_visual_qa":  "One separately generated Stage03 final, read against three inspected references and then framing corrected. Full body, supports, mercury material and stage identity checked.",
+    "limits":  "Single-view concept illustration; not 3D mesh or rig validation. Existing stages and prior files preserved; pending user selection.",
+    "status":  "generation_visual_qa_and_file_validation_complete",
+    "file_validation":  "One final PNG decoded at1536x1024; bytes and SHA256 verified. Final ZIP PNG hash also compared by root packaging."
+}

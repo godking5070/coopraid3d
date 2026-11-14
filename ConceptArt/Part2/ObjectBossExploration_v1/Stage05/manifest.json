@@ -1,0 +1,97 @@
+{
+    "stage":  "05",
+    "scope":  "Part II Stage 05 normal — three object-boss comparisons using actual Part I references",
+    "created_date":  "2026-11-11",
+    "tool":  "built-in image_gen",
+    "status":  "proposals_pending_user_review",
+    "brief":  "../ART_DIRECTION.txt",
+    "generation_schedule":  "Stage01 and Stage05 ran as independent parallel jobs; within each stage the three concepts were generated sequentially. Maximum two image-generation calls at once.",
+    "images":  [
+                   {
+                       "id":  "01-monster",
+                       "image":  "01-monster.png",
+                       "prompt":  "01-monster.prompt.txt",
+                       "title_ko":  "천구 지지기관",
+                       "concept_ko":  "커다란 속 빈 아치와 버팀발 자체가 살아 있는 천구 하중 지지체. 천구가 지지홈에 얹히고 시침 창은 본체 측면의 강체 버팀부와 결합된다.",
+                       "part1_references":  [
+                                                {
+                                                    "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                                    "role":  "Fixed-surface sculptural mass and cel materials; no exact body/face copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                                    "role":  "Living-object construction, hollow joints and large connected plates; no face/hair/layout copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/09-silent-belfry-v1.png",
+                                                    "role":  "Architectural palette/floor readability and restrained setting style only."
+                                                }
+                                            ],
+                       "visual_qa":  "Visually inspected: no human anatomy or face; major arch buttresses, hollow core, fixed celestial saddles and side-clamped hour-hand spear define body. Complete celestial cage and spearhead inside frame, visible physical load contact. No floating sphere or minute-hand greatsword.",
+                       "selected_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-9c3b5a44-d6f2-450b-949c-83a0e7b0018d.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2197131,
+                       "sha256":  "a6589bbaf98452232b54ace9dff37bba49d134158fb8cefc9f5ea4055344a3c7"
+                   },
+                   {
+                       "id":  "02-hybrid",
+                       "image":  "02-hybrid.png",
+                       "prompt":  "02-hybrid.prompt.txt",
+                       "title_ko":  "인체 흔적이 갇힌 아틀라스",
+                       "concept_ko":  "기둥과 아치로 잠식된 몸에 석재 손과 한쪽 무릎만 흔적처럼 남았다. 빈 목 소켓 아래의 천구 지지구조와 시침 창이 하중을 받는다.",
+                       "part1_references":  [
+                                                {
+                                                    "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                                    "role":  "Fixed-surface sculptural mass and cel materials; no exact body/face copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                                    "role":  "Living-object construction, hollow joints and large connected plates; no face/hair/layout copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/09-silent-belfry-v1.png",
+                                                    "role":  "Architectural palette/floor readability and restrained setting style only."
+                                                }
+                                            ],
+                       "visual_qa":  "Visually inspected after one framing refinement: entire upper celestial arc now fully inside canvas with generous margin, alongside spear tip, hands and bases. Empty sealed neck socket, open arch torso, carved hand remnants and asymmetric kneeling/buttress supports. No human face, skin or hair.",
+                       "refinement_prompt":  "02-hybrid.refine.prompt.txt",
+                       "refinement_reason":  "The first generation clipped the upper celestial ring. Camera was pulled back and the missing outer arc completed; only the corrected PNG is saved as final.",
+                       "initial_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-c8a9dd5d-4387-46b7-bb47-818d53074ffa.png",
+                       "selected_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-41417b76-ace0-4991-ba44-dd1ecd6021ef.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2112267,
+                       "sha256":  "948c3cd2d4e55bec4379cc64c9dc5987801571e515f9e26bb0cb222d09d6346a"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "image":  "03-effigy.png",
+                       "prompt":  "03-effigy.prompt.txt",
+                       "title_ko":  "맹목의 봉인 지지석상",
+                       "concept_ko":  "무거운 짧은 다리와 낮게 숙인 봉인 투구를 가진 아틀라스 석상. 눈·얼굴 없는 면과 큰 고정 외피, 뒤의 버팀판으로 천구를 지탱하고 시침 창을 양손으로 붙잡는다.",
+                       "part1_references":  [
+                                                {
+                                                    "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                                    "role":  "Fixed-surface sculptural mass and cel materials; no exact body/face copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                                    "role":  "Living-object construction, hollow joints and large connected plates; no face/hair/layout copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/09-silent-belfry-v1.png",
+                                                    "role":  "Architectural palette/floor readability and restrained setting style only."
+                                                }
+                                            ],
+                       "visual_qa":  "Visually inspected: small sealed polygonal face plate has no eyes, nose, lips or human expression. Heavy sculpted blocks and rigid rear buttress slabs dominate the silhouette. Celestial cage contacts shoulder/back saddles; complete single hour-hand spear and feet inside frame. No actor-like portrait or costume focus.",
+                       "selected_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-40c95523-1680-4f36-ad66-e34ee5acbdf3.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2064545,
+                       "sha256":  "7e133196b3e6ed0bc2fcab8f011fe239e867166d61fb5bfb48e121ee8d87c838"
+                   }
+               ],
+    "common_visual_qa":  "All three selected PNGs viewed. Actual Part I images were used in every initial generation. No previous Part II character image was used as an initial generation reference. No actual human portrait, eyes/pupils, fashion hair, realistic skin or costume-led character. Broad ivory/gold/navy sculptural masses, fixed surfaces, lavender cel shadows and coherent large support interfaces retained. No 3D mesh, UV, rigging or animation validation performed.",
+    "workspace_changes":  "Only this stage folder. Existing art, shared direction notes and other stage options preserved."
+}

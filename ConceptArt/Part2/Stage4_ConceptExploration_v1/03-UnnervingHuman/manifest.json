@@ -1,0 +1,45 @@
+{
+  "version": "stage4-exploration-v1-option3",
+  "created_date": "2026-11-11",
+  "scope": "Part II Stage 4 — concept exploration OPTION 3: unnervingly human",
+  "title_ko": "살아 있는 용광로 봉인",
+  "tool": "built-in image_gen",
+  "status": "proposal_pending_user_review",
+  "image": "03-living-furnace-seal.png",
+  "prompts": [
+    "03-living-furnace-seal.prompt.txt",
+    "03-living-furnace-seal.chains.prompt.txt"
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 2199910,
+  "sha256": "abc21a499efbf8b222939bf70066cd9391b6be7d6b463ab6e4327c85b0fbe8ca",
+  "source_generated_images": [
+    {
+      "path": "C:\\Users\\godki\\.codex\\generated_images\\01a1c996-45c2-7120-ba8f-2ed77c878cea\\exec-df94c62d-ad93-40d8-91f0-41757c6bec13.png",
+      "role": "Initial generation with six chains, corrected before final."
+    },
+    {
+      "path": "C:\\Users\\godki\\.codex\\generated_images\\01a1c996-45c2-7120-ba8f-2ed77c878cea\\exec-543f7bbe-ed56-4e37-8ac7-f535b5d59326.png",
+      "role": "Selected final with eight chains."
+    }
+  ],
+  "references": [
+    {
+      "path": "../../../CharacterMatched/01-guardian-normal-v1.png",
+      "role": "Controlled linework, broad ivory/gold/navy planes and soft cel shading only; original knight identity/equipment not copied."
+    },
+    {
+      "path": "../../Stage3_MercuryHealer_Identity_v4/03-frozen-veins-alchemist-identity-v4.png",
+      "role": "Uncanny human-machine junctions and readable restraint/support only, no mercury apparatus copy."
+    }
+  ],
+  "design_notes_ko": [
+    "실제 인간 얼굴·짧은 머리·반쪽 열차폐 마스크, 피부 속 주황 열맥이 남은 인간형 수호자이다.",
+    "상아색 냉각 외장과 등쪽 냉각판·압력 밸브, 어깨에서 골반까지 이어진 고정틀이 용광로의 하중과 열기를 몸으로 견딘다.",
+    "한 팔은 세 장의 열차폐판으로 구성된 큰 방패를 잡고, 다른 손은 뒤쪽 동료를 안전지대로 이끄는 보호 자세이다.",
+    "사슬은 최종 이미지에서 왼쪽 네 줄·오른쪽 네 줄, 합계 여덟 줄이다. 프레임 핀에서 기둥 클램프로 이어지며 몸의 지지와 장력이 보인다.",
+    "최초 생성에서 여섯 줄로 나타난 사슬을 국소 보정으로 좌우 하단 한 줄씩 추가했다."
+  ],
+  "visual_qa": "Visually inspected initial and corrected final output. Final has four separate chain runs to each side, eight total, attached to pinned back/pelvic frame and pillar clamps. Some far-side roots are naturally shield-occluded but routes remain readable. Human face/hair, organic heat-vein skin, two arms/hands, one three-panel shield and two wide-planted legs/feet are fully in frame. Cooling fins/valves and protective backward-reaching hand retained. Clean cel style, controlled orange heat accents and broad molten-gold arena backdrop retained. No actual 3D mesh/rig validation performed."
+}

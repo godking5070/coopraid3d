@@ -1,0 +1,87 @@
+{
+    "stage":  "05",
+    "title_ko":  "무너진 천구를 떠받치는 부단장",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "reference_policy":  "Actual Part I references only. Previous Stage02 and EffigyExploration_v2 images were NOT initial generation inputs. Each ceremonial anatomy was designed for its own stage.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "천구의 무게를 짊어진 기둥성상",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt",
+                                       "01-effigy.refine.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-c55b4ca2-476e-4ce5-801c-fafa7139030f.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I sculpted surfaces, object-body structure and cel art ONLY. Source character face, identity and sheet layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Actual Part I sculpted surfaces, object-body structure and cel art ONLY. Source character face, identity and sheet layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Final wider framing restores entire celestial sphere and rings above actual shoulder saddles. Thick column legs, architectural arch chest, small blind tombstone seal and huge stone arms, one supporting yoke and one holding planted hour-hand spear. Distinct upright monolithic gravity-bearing anatomy. No dancer template or cropped main parts.",
+                       "initial_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-cac62b08-ceb6-41ad-9a0a-8494743cbc77.png",
+                       "refinement_reason":  "Initial celestial globe severely clipped. Pulled camera back and completed globe/ring contours, preserving stone atlas body.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2267603,
+                       "sha256":  "3051e382652f160732624e0689782a3483f99996ee189066157b2ca1d58ab521"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "추락한 별을 막는 전쟁 봉인상",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-5652bf6f-5e2a-451c-ab9d-84fa982684e8.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I sculpted surfaces, object-body structure and cel art ONLY. Source character face, identity and sheet layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Actual Part I sculpted surfaces, object-body structure and cel art ONLY. Source character face, identity and sheet layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Wide kneeling stone seal idol with split rectangular chest, raised shoulder load tower, small round shutter head, massive hands on one diagonal hour-hand spear and two thick legs. Celestial globe physically rests on tower. Entire main silhouette, feet and clock-hand tip visible. This is a large stone war relic, not a slim musician.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2086375,
+                       "sha256":  "16fe629e660db30ee1bae9bd69a4b817fc583a8f6ea04d081693433e18bd920c"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "명령을 거부하는 천구의 순교상",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-bf3ab3e4-e023-4c38-aec3-aaa84c959357.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I sculpted surfaces, object-body structure and cel art ONLY. Source character face, identity and sheet layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Actual Part I sculpted surfaces, object-body structure and cel art ONLY. Source character face, identity and sheet layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Low hunched arch-shaped stone martyr with two widely spaced pillar legs, massive arms where one hand locks the opposing forearm, blank hooded shrine face. Celestial globe presses into back saddles; one clamped hour-hand spear reaches floor and stays in frame. Readable two-arm/two-leg body; no extra holding hand or human portrait.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2153305,
+                       "sha256":  "de6ee9aee6c33179535cd992d15894b1b3b9e90a638c18469e2f0d00f03f45df"
+                   }
+               ],
+    "limits":  "Single-view concept illustrations; not verified 3D meshes or rigs.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

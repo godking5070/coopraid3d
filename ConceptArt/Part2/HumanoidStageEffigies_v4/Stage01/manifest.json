@@ -1,0 +1,87 @@
+{
+    "stage":  "01",
+    "title_ko":  "기억을 흘리는 정찰병",
+    "version":  "HumanoidStageEffigies_v4",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "three_humanoid_stage_specific_effigies_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "body_correction":  "Clear human body proportions restored: head/neck/shoulders/ribcage/waist/pelvis/upper arms/forearms/hands/long thighs/calves/feet. Prior giant object torso and short plinth anatomy rejected.",
+    "reference_policy":  "Original favored Stage02 effigy visually viewed to understand human body proportions only; not supplied as generation input. Only actual PartI 01/04 PNGs below submitted. No v2/v3 images supplied.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "잃어버린 맥박의 관측자",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-d1ca8ef4-0654-4cd0-aaa3-905e5384d772.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual PartI carved ivory/navy planes, humanoid articulation, controlled contours and lavender cel rendering only. Face, helmet shape, outfit and weapons not copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual PartI ceramic anatomy, integrated chest organ, fixed surface segments and soft cel materials only. Face, hair, hat, gendered clothes, key, scissors and wings not copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: clear adult humanoid anatomy with neck, two shoulders, rib-shaped chest, narrow waist, pelvis, distinct long thighs/calves/ankles and two feet. Two hands protect chest-sized intact hourglass. Closed curved louver visor, no human facial anatomy, hair or skin. Rounded articulated ceramic plates with warm brass accents. Complete body and hands inside frame, feet grounded. No object torso or plinth legs.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1774795,
+                       "sha256":  "1f47b330a93a0cf51ef329954aab9f686ddc390a2c7486657cf6390bb3dfd213"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "감각을 닫는 봉인 정찰병",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-846a25ca-f5a2-44b1-8301-20d2707a1450.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual PartI carved ivory/navy planes, humanoid articulation, controlled contours and lavender cel rendering only. Face, helmet shape, outfit and weapons not copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual PartI ceramic anatomy, integrated chest organ, fixed surface segments and soft cel materials only. Face, hair, hat, gendered clothes, key, scissors and wings not copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: human-proportioned sentinel with clear torso/waist/pelvis and two long segmented legs. One hand covers narrow sealed optical shutters, other reaches out with connected forearm survey ruler. Small hourglass integrated within ribcage, intact aligned bulbs and internal sand only. Four oblique rib panels and longitudinal calf strips distinguish shell rhythm. No portrait, diamond head or object-shaped torso. Full head, hands and feet in frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1786136,
+                       "sha256":  "35ce79237efa566d94bf048ea8a77368b659bbf7433658ebbc5347263bee08d6"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "기억 경계의 순찰 의례체",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-4cf7a49e-99f3-45b9-ab6c-a6c613478f7f.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual PartI carved ivory/navy planes, humanoid articulation, controlled contours and lavender cel rendering only. Face, helmet shape, outfit and weapons not copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual PartI ceramic anatomy, integrated chest organ, fixed surface segments and soft cel materials only. Face, hair, hat, gendered clothes, key, scissors and wings not copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: humanoid lateral patrol step, long thigh/calf segments, neck and shoulders, human chest/narrow waist/pelvis and two visible planted feet. One hand near circular closed radial shutter helmet, other low behind. Angular asymmetrical ceramic shell, sparse gold hardware; small back bracket attached. Torso-sized hourglass intact with internal sand. No giant hood, architecture body, facial features or music apparatus. Complete silhouette contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1753728,
+                       "sha256":  "a3481a1a8480afe178b2d0a25caff979bcb41fe35cfe00bb0a0312bd9c66fcac"
+                   }
+               ],
+    "common_visual_qa":  "All three new generated PNGs visually inspected. Stage01 observation/memory identity retained with three sealed head/shell/pose variants and torso-sized intact hourglass. Human body remains readable without apparatus. No natural human portrait or outfit. Full body framing and physical joints confirmed. Existing assets preserved; single-view concept only, no actual 3D mesh/rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

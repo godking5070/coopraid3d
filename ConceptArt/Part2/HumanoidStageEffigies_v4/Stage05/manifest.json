@@ -1,0 +1,85 @@
+{
+    "stage":  "05",
+    "title_ko":  "무너진 천구를 떠받치는 부단장",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "body_policy":  "Clearly human-shaped ceremonial effigies: attached head/neck, ribcage, waist, pelvis, two arms, two long legs. Stage identity through shell/device/pose, not replacing body with giant objects.",
+    "reference_policy":  "Actual Part I PNGs submitted as initial generation references. Original Stage02 effigy was visually reviewed for human proportions only, not supplied to these calls. v2/v3 images not used.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "천구를 떠받치는 맹목의 부단장상",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-f463ce22-1a04-404a-8fd4-12f8e6cdc7d2.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Human-proportioned ritual soldier with shoulders, rib-like chest, waist/pelvis, long human thighs/shins/ankles. Featureless closed visor; compact celestial sphere physically rests on yoke. One attached arm braces load, the other grips planted hour-hand spear. Whole sphere/rings/weapon/feet within canvas. No column legs or architectural chest.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2206733,
+                       "sha256":  "080e382f20dea851ce90b0183d589f9052db71eb94e2beccc94a93f62324d1ae"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "기울어진 천구를 버티는 전쟁 의례체",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-04617d73-299b-44b9-98fa-0cd2babbfc8f.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "One-knee humanoid effigy with articulated normal-length thighs/shins, visible waist/pelvis, two arms grasping one diagonal planted hour-hand spear. Oval sealed layered mask. Compact offset globe and attached back brace support load. Complete silhouette inside canvas, no real human face or object body.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2023913,
+                       "sha256":  "ddd6eb5052630477c4f1db8e86b0ecbf4d0dcbd6ccf08713cba6940e5078badf"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "동료를 지키려 명령을 거부하는 성상",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-00df5b37-8d0b-48ac-96d1-eb98bc8bd14a.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Forward-bowed humanoid statue with ribcage, waist/pelvis and two long braced legs. One hand restrains opposite arm; exactly two arms/two hands. Blank hooded mask, compact sphere in back yoke, single side-clamped hour-hand spear reaches floor. Full spear, body and sphere visible. No giant arch/boulder torso.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2145313,
+                       "sha256":  "ea036682e43f185e32e3a57b7968167e43ca758cab8db433b10bbfea25affe7d"
+                   }
+               ],
+    "limits":  "Concept illustrations; no 3D mesh or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

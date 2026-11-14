@@ -1,0 +1,75 @@
+{
+    "stage":  "01",
+    "title_ko":  "기억을 흘리는 정찰병",
+    "version":  "SelectedEffigyVariations_v5",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "three_selected_base_variations_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "selected_base":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+    "reference_policy":  "Exact selected Stage01 base visually inspected and supplied as the sole image reference in every initial call. No other stage/v2/v3 input. Human anatomy, round radial-shutter head, chest hourglass and scout family deliberately retained.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "잔향을 재는 경계자",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-2e3b1fa0-cd68-450a-9e4f-788245b1245a.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+                                              "role":  "Sole selected-base identity/form/style reference in every generation. Preserve circular radial shutter helmet, long human scout proportions, chest-sized intact hourglass, angular ceramic shell and clean cel style; vary only shell divisions, small measuring mechanisms and narrative pose."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected final: direct selected-base lineage preserved: round radial shutter helmet with hub/banded hood, long human anatomy, normal pelvis, angular ivory shell, chest-sized intact hourglass. New low measuring palm, attached forearm caliper rail, three curved side ribs and calf survey tracks are readable. Other hand near temple. Whole head, hands and feet in frame, grounded stance, sand internal. No new face, other-stage device or body redesign.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1755017,
+                       "sha256":  "35b1d748853c5ac5d75e7b02505fc228ba1d675fc6e92861bd214c38d1da045a"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "마지막 기억을 감싼 정찰병",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-49a35561-b6c5-47ad-b149-aa0d5c30a257.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+                                              "role":  "Sole selected-base identity/form/style reference in every generation. Preserve circular radial shutter helmet, long human scout proportions, chest-sized intact hourglass, angular ceramic shell and clean cel style; vary only shell divisions, small measuring mechanisms and narrative pose."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected final: selected round radial shutter head and tall human scout body preserved. Head bowed, both hands touch upper/lower hourglass bearings, protective narrow rib shutters and small lower latch added. Glass remains intact, aligned and mostly visible. Knee flexion and cautious forward lean retain long human thighs/calves/feet. Whole silhouette contained, no external sand or other-stage mechanism.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1752495,
+                       "sha256":  "5b088d60ee2b9dbe9063068b278476bf00990758379704f10bf61a0dd777abd3"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "소실된 동료를 찾는 순찰자",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-71591e9e-15ec-4fb8-aaf2-ef3f4e02f0fa.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+                                              "role":  "Sole selected-base identity/form/style reference in every generation. Preserve circular radial shutter helmet, long human scout proportions, chest-sized intact hourglass, angular ceramic shell and clean cel style; vary only shell divisions, small measuring mechanisms and narrative pose."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected final: direct round-shutter scout identity maintained, human waist/pelvis/long legs visible in lateral patrol stance. One low side arm signals stop, opposite hand held at upper hourglass bearing. Long angular side ribs, two small brass seams and one attached rear observation bracket distinguish shell. Intact aligned hourglass and internal sand. Entire head/hands/feet in frame, both feet planted. No facial anatomy, wings or music parts.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1746288,
+                       "sha256":  "51c7c4e9d6851efe225835464fdf03529a4bed8159fba1805f3612c31fbe1119"
+                   }
+               ],
+    "common_visual_qa":  "All three new PNGs visually inspected. Direct selected-base identity retained without a new head/body family. Three meaningful variations: measurement apparatus / protective memory closure / lost-signal patrol. Single full-body concept shots with clear contact, complete tips, normal intact glass and internal sand. Existing files preserved. No actual 3D mesh or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

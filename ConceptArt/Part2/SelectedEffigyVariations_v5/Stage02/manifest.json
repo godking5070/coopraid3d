@@ -1,0 +1,76 @@
+{
+    "stage":  "02",
+    "title_ko":  "끝나지 않는 진혼곡의 무희",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "scope":  "Three direct variations of the user\u0027s selected concept, retaining identity and humanoid body. Different shell segmentation, functional supports and story gesture.",
+    "selection_source":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\.orca\\drops\\스크린샷 2026-11-12 오전 10.56.41.png",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "첫 음을 거부하는 진혼의 의례체",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-2974cd4d-dc91-4975-9ef8-bb899618d943.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\.orca\\drops\\스크린샷 2026-11-12 오전 10.56.41.png",
+                                              "role":  "User-attached selected Stage02 concept, authoritative head/body/device/color reference."
+                                          }
+                                      ],
+                       "visual_qa":  "Selected polygonal sealed head, long tapered V torso, hip fins, sparse segmented humanoid limbs and same rear key/case retained. One palm on chest and one open arm lowered. Overlapping edge shell, five supported external tone rails and clock linkage changed. Whole silhouette contained; no internal music cylinder.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1826370,
+                       "sha256":  "42d8963c8ac7c69d7ff46bf8599fe378b52dc0c711c3fd33e3145b17a4f30d83"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "등태엽을 붙잡은 역결속의 무희",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-5bfbf9e0-57e5-4d5a-9377-cd9ee4c78e39.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\.orca\\drops\\스크린샷 2026-11-12 오전 10.56.41.png",
+                                              "role":  "User-attached selected Stage02 concept, authoritative head/body/device/color reference."
+                                          }
+                                      ],
+                       "visual_qa":  "Same polygonal head/V shell/hip fins, rear winding housing, pointed key, phase cam and five tone rails retained. Both attached arms grip axle/case at opposing heights with a locked cross-step. Vented casing, long rear rib and triangular rack support distinguish variant. Full body/feet/key/rails inside canvas.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1851081,
+                       "sha256":  "41dd0d16b66c9875e0e207dcab381a42472fd2b2f96a47118ed981ecc8cf3e0c"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "마지막 장송을 끊으려는 의례체",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt",
+                                       "03-effigy.refine.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-f900310b-27d2-4e68-aed9-ee687ca332cc.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\.orca\\drops\\스크린샷 2026-11-12 오전 10.56.41.png",
+                                              "role":  "User-attached selected Stage02 concept, authoritative head/body/device/color reference."
+                                          }
+                                      ],
+                       "visual_qa":  "Selected sealed polygonal head/V torso/hip fins retained. One hand at throat and opposite hand silences five tone rails; wider braced legs and chest sliding silence shutters. Same winding key/case/clock cam. Final back-to-rack attachment inspection recorded separately. Refined image visually inspected by assigned QA agent: upper back-housing bracket and lower rear-waist bracket attach to rack spine, five tone plates retained. Original side cam/elbow linkage is separate.",
+                       "initial_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-d05fc433-7c39-40d0-8b57-f88283fdaad0.png",
+                       "refinement_reason":  "Original tone rack was supported only by the hand. Added two fixed back/waist-to-rack brackets and a left rack spine, preserving five sound plates and existing pose.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1815943,
+                       "sha256":  "081c93be0b435146351d6db74783f6e8147ccbd6a7a5329bbe780d52d1d79d0d"
+                   }
+               ],
+    "limits":  "Concept images only, not verified 3D mesh or rig.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

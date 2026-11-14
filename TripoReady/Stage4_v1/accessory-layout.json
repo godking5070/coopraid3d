@@ -1,0 +1,233 @@
+﻿{
+    "canvas":  {
+                   "background":  "#E8E8E8",
+                   "width":  3200,
+                   "height":  1800
+               },
+    "method":  "Fixed bounding-box center X, bottom Y and per-item rendered height across four camera views; no whole-sheet mirroring.",
+    "slotOrder":  [
+                      "AdditionalArm",
+                      "CrossController",
+                      "BackReelFrame"
+                  ],
+    "slots":  [
+                  {
+                      "id":  "AdditionalArm",
+                      "source":  "arm",
+                      "maxX":  850,
+                      "centerX":  450,
+                      "minX":  70,
+                      "height":  1400
+                  },
+                  {
+                      "id":  "CrossController",
+                      "source":  "controller",
+                      "maxX":  1850,
+                      "centerX":  1400,
+                      "minX":  950,
+                      "height":  380
+                  },
+                  {
+                      "id":  "BackReelFrame",
+                      "source":  "frame",
+                      "maxX":  3160,
+                      "centerX":  2520,
+                      "minX":  1890,
+                      "height":  1080
+                  }
+              ],
+    "placements":  [
+                       {
+                           "item":  "AdditionalArm",
+                           "view":  "front",
+                           "centerX":  450,
+                           "height":  1400,
+                           "baseline":  1600,
+                           "x":  339,
+                           "y":  200,
+                           "width":  222,
+                           "sourceBounds":  [
+                                                393,
+                                                88,
+                                                209,
+                                                1319
+                                            ]
+                       },
+                       {
+                           "item":  "CrossController",
+                           "view":  "front",
+                           "centerX":  1400,
+                           "height":  380,
+                           "baseline":  1600,
+                           "x":  977,
+                           "y":  1220,
+                           "width":  847,
+                           "sourceBounds":  [
+                                                172,
+                                                180,
+                                                1313,
+                                                589
+                                            ]
+                       },
+                       {
+                           "item":  "BackReelFrame",
+                           "view":  "front",
+                           "centerX":  2520,
+                           "height":  1080,
+                           "baseline":  1600,
+                           "x":  1919,
+                           "y":  520,
+                           "width":  1202,
+                           "sourceBounds":  [
+                                                84,
+                                                88,
+                                                1141,
+                                                1025
+                                            ]
+                       },
+                       {
+                           "item":  "AdditionalArm",
+                           "view":  "left",
+                           "centerX":  450,
+                           "height":  1400,
+                           "baseline":  1600,
+                           "x":  355,
+                           "y":  200,
+                           "width":  190,
+                           "sourceBounds":  [
+                                                444,
+                                                87,
+                                                178,
+                                                1311
+                                            ]
+                       },
+                       {
+                           "item":  "CrossController",
+                           "view":  "left",
+                           "centerX":  1400,
+                           "height":  380,
+                           "baseline":  1600,
+                           "x":  1376,
+                           "y":  1220,
+                           "width":  48,
+                           "sourceBounds":  [
+                                                388,
+                                                129,
+                                                173,
+                                                1370
+                                            ]
+                       },
+                       {
+                           "item":  "BackReelFrame",
+                           "view":  "left",
+                           "centerX":  2520,
+                           "height":  1080,
+                           "baseline":  1600,
+                           "x":  2419,
+                           "y":  520,
+                           "width":  203,
+                           "sourceBounds":  [
+                                                554,
+                                                78,
+                                                195,
+                                                1035
+                                            ]
+                       },
+                       {
+                           "item":  "AdditionalArm",
+                           "view":  "right",
+                           "centerX":  450,
+                           "height":  1400,
+                           "baseline":  1600,
+                           "x":  364,
+                           "y":  200,
+                           "width":  173,
+                           "sourceBounds":  [
+                                                408,
+                                                87,
+                                                163,
+                                                1319
+                                            ]
+                       },
+                       {
+                           "item":  "CrossController",
+                           "view":  "right",
+                           "centerX":  1400,
+                           "height":  380,
+                           "baseline":  1600,
+                           "x":  1376,
+                           "y":  1220,
+                           "width":  49,
+                           "sourceBounds":  [
+                                                383,
+                                                116,
+                                                180,
+                                                1409
+                                            ]
+                       },
+                       {
+                           "item":  "BackReelFrame",
+                           "view":  "right",
+                           "centerX":  2520,
+                           "height":  1080,
+                           "baseline":  1600,
+                           "x":  2423,
+                           "y":  520,
+                           "width":  194,
+                           "sourceBounds":  [
+                                                536,
+                                                66,
+                                                189,
+                                                1051
+                                            ]
+                       },
+                       {
+                           "item":  "AdditionalArm",
+                           "view":  "back",
+                           "centerX":  450,
+                           "height":  1400,
+                           "baseline":  1600,
+                           "x":  331,
+                           "y":  200,
+                           "width":  238,
+                           "sourceBounds":  [
+                                                411,
+                                                88,
+                                                225,
+                                                1321
+                                            ]
+                       },
+                       {
+                           "item":  "CrossController",
+                           "view":  "back",
+                           "centerX":  1400,
+                           "height":  380,
+                           "baseline":  1600,
+                           "x":  976,
+                           "y":  1220,
+                           "width":  848,
+                           "sourceBounds":  [
+                                                170,
+                                                181,
+                                                1316,
+                                                590
+                                            ]
+                       },
+                       {
+                           "item":  "BackReelFrame",
+                           "view":  "back",
+                           "centerX":  2520,
+                           "height":  1080,
+                           "baseline":  1600,
+                           "x":  1918,
+                           "y":  520,
+                           "width":  1205,
+                           "sourceBounds":  [
+                                                84,
+                                                89,
+                                                1141,
+                                                1023
+                                            ]
+                       }
+                   ]
+}

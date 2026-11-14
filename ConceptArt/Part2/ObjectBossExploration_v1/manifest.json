@@ -1,0 +1,234 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "version":  "ObjectBossExploration_v1",
+    "created_date":  "2026-11-11",
+    "status":  "generation_visual_qa_and_packaging_complete",
+    "tool":  "built-in image_gen",
+    "stage_count":  5,
+    "concepts_per_stage":  3,
+    "final_image_count":  15,
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "direction":  "ART_DIRECTION.txt",
+    "qa":  "All 15 final PNGs visually inspected by the root agent and/or stage agents. PNG decode, 1536x1024 dimensions, bytes and SHA256 verified. Stage01 framing and head support, Stage02 surplus leg and hand margin, Stage04 eight-chain distribution and Stage05 top-ring margin were corrected. Existing earlier concepts preserved. User selection is not assumed.",
+    "limits":  "Single-view concept illustrations. No 3D mesh, UV, rigging or animation verification.",
+    "images":  [
+                   {
+                       "stage":  1,
+                       "id":  "01-monster",
+                       "title_ko":  "기억 저장 관측기관",
+                       "image":  "Stage01/01-monster.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2256192,
+                       "sha256":  "be4b66e84d61e26f379174bc7a9fa0a26b82fac79d6b33465dcf77c4a7c77e1b",
+                       "prompts":  [
+                                       "Stage01/01-monster.prompt.txt",
+                                       "Stage01/01-monster.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "02-hybrid",
+                       "title_ko":  "모래관에 삼켜진 손",
+                       "image":  "Stage01/02-hybrid.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2089575,
+                       "sha256":  "e9be4311db09b700beb2ebd9eee581e266b161660b56d5ffc267c92622f4889b",
+                       "prompts":  [
+                                       "Stage01/02-hybrid.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "03-effigy",
+                       "title_ko":  "봉인 관측 석상",
+                       "image":  "Stage01/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1952622,
+                       "sha256":  "37b7e201209dae9c6b0d488d19986eae1d6651b2378fdd28ef58a0225ace6f82",
+                       "prompts":  [
+                                       "Stage01/03-effigy.prompt.txt",
+                                       "Stage01/03-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "01-monster",
+                       "title_ko":  "저상 공명껍질 — 완전 비인간 기관",
+                       "image":  "Stage02/01-monster.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2131440,
+                       "sha256":  "dc8e3fd08e3cf6e8a0b1000600ba14312a58055101fa126ed6ee84b6c3aff314",
+                       "prompts":  [
+                                       "Stage02/01-monster.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "02-hybrid",
+                       "title_ko":  "조각 손의 무용틀 — 인체 흔적이 잠식된 혼성기관",
+                       "image":  "Stage02/02-hybrid.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2142207,
+                       "sha256":  "2341470b2304fba87359c6a32a9803fbfc931487c85a0bb0f73fa65e40e47c00",
+                       "prompts":  [
+                                       "Stage02/02-hybrid.cleanup.prompt.txt",
+                                       "Stage02/02-hybrid.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "03-effigy",
+                       "title_ko":  "봉인 무대 인형 — 얼굴 없는 의례체",
+                       "image":  "Stage02/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1900712,
+                       "sha256":  "a9c14f906bee5a88ec2b98cb3c8ba61dd3210e337bc1049ea73e030e1fd11ed9",
+                       "prompts":  [
+                                       "Stage02/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "01-monster",
+                       "title_ko":  "역류하는 순환조",
+                       "image":  "Stage03/01-monster.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2097851,
+                       "sha256":  "72737a5ebf79aa282a643fe1872c3888ec4f92dea1591bf980f60cb5f3f9e3dd",
+                       "prompts":  [
+                                       "Stage03/01-monster.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "02-hybrid",
+                       "title_ko":  "무너진 혈관 성해",
+                       "image":  "Stage03/02-hybrid.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2047186,
+                       "sha256":  "4f085ce0dc1155785e5e5182420147113fdb8719f6d4268936e0086c7bf8a260",
+                       "prompts":  [
+                                       "Stage03/02-hybrid.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "03-effigy",
+                       "title_ko":  "빈 자비의 좌",
+                       "image":  "Stage03/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1935940,
+                       "sha256":  "1c5f0b28d874c23d65780fad49e3470f49c35edd4f9a7ce3066b10cc4908116c",
+                       "prompts":  [
+                                       "Stage03/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "01-monster",
+                       "title_ko":  "살아 있는 가마 방벽",
+                       "image":  "Stage04/01-monster.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2335800,
+                       "sha256":  "46a956010f272f81c31739972b736b93dd1ada2fef3400327450c2a1f9392659",
+                       "prompts":  [
+                                       "Stage04/01-monster.prompt.txt",
+                                       "Stage04/01-monster.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "02-hybrid",
+                       "title_ko":  "봉인틀에 잠긴 방패의 잔재",
+                       "image":  "Stage04/02-hybrid.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2312998,
+                       "sha256":  "fef45208ec41833e59d4dbe5eddc625650eac1519c66c1371da301a4045f8bb1",
+                       "prompts":  [
+                                       "Stage04/02-hybrid.prompt.txt",
+                                       "Stage04/02-hybrid.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "03-effigy",
+                       "title_ko":  "맹목의 용광로 봉인상",
+                       "image":  "Stage04/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2313271,
+                       "sha256":  "a6590723a51ae41003ddbdcd8a4846706f513cd799f7700cc580b1fe29a27330",
+                       "prompts":  [
+                                       "Stage04/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "01-monster",
+                       "title_ko":  "천구 지지기관",
+                       "image":  "Stage05/01-monster.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2197131,
+                       "sha256":  "a6589bbaf98452232b54ace9dff37bba49d134158fb8cefc9f5ea4055344a3c7",
+                       "prompts":  [
+                                       "Stage05/01-monster.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "02-hybrid",
+                       "title_ko":  "인체 흔적이 갇힌 아틀라스",
+                       "image":  "Stage05/02-hybrid.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2112267,
+                       "sha256":  "948c3cd2d4e55bec4379cc64c9dc5987801571e515f9e26bb0cb222d09d6346a",
+                       "prompts":  [
+                                       "Stage05/02-hybrid.prompt.txt",
+                                       "Stage05/02-hybrid.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "03-effigy",
+                       "title_ko":  "맹목의 봉인 지지석상",
+                       "image":  "Stage05/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2064545,
+                       "sha256":  "7e133196b3e6ed0bc2fcab8f011fe239e867166d61fb5bfb48e121ee8d87c838",
+                       "prompts":  [
+                                       "Stage05/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   }
+               ]
+}

@@ -1,0 +1,64 @@
+{
+  "version": "stage2-resonator-fourviews-v10",
+  "created_date": "2026-11-11",
+  "scope": "Part II Stage 2 selected resonator monster — front, anatomical left, anatomical right and rear concept views",
+  "tool": "built-in image_gen",
+  "status": "four_view_concept_pending_user_review",
+  "base_reference": "../Stage2_Resonator_Refined_v9/01-resonator-refined-v9.png",
+  "coordinate_guide": "view-consistency-ko.txt",
+  "prompt_bundle": "prompts-all.txt",
+  "coordinates": {
+    "front": "+Y",
+    "back": "-Y",
+    "right": "+X",
+    "left": "-X",
+    "up": "+Z",
+    "drive": "one mechanism on anatomical right rear flank",
+    "legs": "two forward legs plus one rear-center leg"
+  },
+  "images": [
+    {
+      "view": "front",
+      "image": "01-front.png",
+      "prompt": "01-front.prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1617584,
+      "sha256": "e800d24467451c3223b74167d61abcc02c4d0276d331d177175c531ea7b88811",
+      "qa": "Frontal sound cavity, two front legs and one rear-center leg; right-flank drive appears edge-on at viewer-left."
+    },
+    {
+      "view": "anatomical_left",
+      "image": "02-left.png",
+      "prompt": "02-left.prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1781173,
+      "sha256": "c9b752b15903ef21d04fe5f03eccbf6951b14ecbd530d4cd468c5f417e62d270",
+      "qa": "Front points image-left. Near left flank is organic; no duplicated near-side spring or cam. Three limbs remain."
+    },
+    {
+      "view": "anatomical_right",
+      "image": "03-right.png",
+      "prompt": "03-right.prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1976663,
+      "sha256": "64881cddc6ba77707a35886717174af86ed5205e78b14a66096bffd6a177a7ce",
+      "qa": "Front points image-right. One near-side circular mainspring face, jaw cam and edge-on paddle key; three limbs remain."
+    },
+    {
+      "view": "rear",
+      "image": "04-rear.png",
+      "prompt": "04-rear.prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1767482,
+      "sha256": "cb5b91acae590e906373d4af586086ec5ba88d4fdeeb23c4b7d71806b85b3527",
+      "qa": "Closed posterior, one rear-center foreground leg and two front legs behind; right drive edge and key on viewer-right. No rear mouth."
+    }
+  ],
+  "visual_validation": "All four final images visually inspected. Major anatomy, three-leg topology, one-sided right-rear drive and left/right view differences checked. Same 1536×1024 canvas, approximate matching height/ground level and plain backdrop. Four saved PNGs successfully decoded and measured. No failed generation response observed in the four tool calls.",
+  "limitations": "These are independently generated concept projections, not four renders of a single mesh or exact CAD orthographics. Fine folds, reed counts, toe-spur projections, small joint details and pixel scale may differ and should be resolved in one 3D blockout. No mesh or rig validation performed.",
+  "archive": "../Stage2_Resonator_FourViews_v10.zip"
+}

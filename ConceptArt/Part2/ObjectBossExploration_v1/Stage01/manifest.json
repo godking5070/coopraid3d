@@ -1,0 +1,100 @@
+{
+    "stage":  "01",
+    "scope":  "Part II Stage 01 normal — three object-boss comparisons using actual Part I references",
+    "created_date":  "2026-11-11",
+    "tool":  "built-in image_gen",
+    "status":  "proposals_pending_user_review",
+    "brief":  "../ART_DIRECTION.txt",
+    "generation_schedule":  "Stage01 and Stage05 ran as independent parallel jobs; within each stage the three concepts were generated sequentially. Maximum two image-generation calls at once.",
+    "images":  [
+                   {
+                       "id":  "01-monster",
+                       "image":  "01-monster.png",
+                       "prompt":  "01-monster.prompt.txt",
+                       "title_ko":  "기억 저장 관측기관",
+                       "concept_ko":  "모래시계 자체가 본체인 삼각 지지형 관측 오브젝트. 세 받침과 상단 관측팔, 두 보호 호가 기능을 드러낸다.",
+                       "part1_references":  [
+                                                {
+                                                    "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                                    "role":  "Fixed-surface sculptural mass and cel materials; no exact body/face copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                                    "role":  "Living-object construction, hollow joints and large connected plates; no face/hair/layout copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/07-village-square-v1.png",
+                                                    "role":  "Architectural palette/floor readability and restrained setting style only."
+                                                }
+                                            ],
+                       "visual_qa":  "Final refined image visually inspected: scanner hinge, two side shields and all three feet have clear canvas margins. Body remains an intact hourglass with sand inside only. No human face, skin, hair or costume; one supported observation arm and three leg supports retained.",
+                       "selected_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1ca7e-1740-77d1-b465-d43526c24653\\exec-90c48d95-6335-4ae0-bc87-3d897945a970.png",
+                       "initial_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-89d8e057-260e-4a8d-8246-b52d9649ff38.png",
+                       "refinement_prompt":  "01-monster.refine.prompt.txt",
+                       "refinement_reason":  "Camera pulled back about 7 percent to create clear margin above the scanner hinge and around the feet; original design preserved.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2256192,
+                       "sha256":  "be4b66e84d61e26f379174bc7a9fa0a26b82fac79d6b33465dcf77c4a7c77e1b"
+                   },
+                   {
+                       "id":  "02-hybrid",
+                       "image":  "02-hybrid.png",
+                       "prompt":  "02-hybrid.prompt.txt",
+                       "title_ko":  "모래관에 삼켜진 손",
+                       "concept_ko":  "기울어진 큰 석재 관에 인체의 손 흔적만 잠식되어 있다. 한 손은 윗마개를 감싸고 다른 손은 바닥을 짚어 짧은 두 받침과 하중을 나눈다.",
+                       "part1_references":  [
+                                                {
+                                                    "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                                    "role":  "Fixed-surface sculptural mass and cel materials; no exact body/face copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                                    "role":  "Living-object construction, hollow joints and large connected plates; no face/hair/layout copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/07-village-square-v1.png",
+                                                    "role":  "Architectural palette/floor readability and restrained setting style only."
+                                                }
+                                            ],
+                       "visual_qa":  "Visually inspected: thick asymmetrical casket body dominates, with two carved hand remnants, two pedestal feet and a geometric survey cap. No actual human head/skin/face. Full sealed hourglass and internal sand visible; joints and hand roots connected.",
+                       "selected_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-8c71cef5-afa7-4e46-9b71-8769e7b09725.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2089575,
+                       "sha256":  "e9be4311db09b700beb2ebd9eee581e266b161660b56d5ffc267c92622f4889b"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "image":  "03-effigy.png",
+                       "prompt":  "03-effigy.prompt.txt",
+                       "title_ko":  "봉인 관측 석상",
+                       "concept_ko":  "눈·표정 없는 기하학 관측 캡과 고정된 외피가 몸인 인형 석상. 짧은 발과 낮게 모인 두 돌손 사이에 모래시계를 품는다.",
+                       "part1_references":  [
+                                                {
+                                                    "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                                    "role":  "Fixed-surface sculptural mass and cel materials; no exact body/face copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                                    "role":  "Living-object construction, hollow joints and large connected plates; no face/hair/layout copy."
+                                                },
+                                                {
+                                                    "path":  "../../../CharacterMatched/07-village-square-v1.png",
+                                                    "role":  "Architectural palette/floor readability and restrained setting style only."
+                                                }
+                                            ],
+                       "visual_qa":  "Final refined image visually inspected: one rigid ivory support post visibly joins sealed head cap and shoulder beam, with gold collar/bolts at the interfaces. No anatomical neck, face, eyes, hair or skin. Intact hourglass, carved hands, two feet, rigid side panels and clean cel style preserved. Full silhouette in frame.",
+                       "selected_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1ca7e-1740-77d1-b465-d43526c24653\\exec-2ff94383-96d1-41c1-99da-f655e3ce876c.png",
+                       "initial_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c954-1955-7670-8d90-31c79f6da81e\\exec-1f45875b-1280-4628-9d13-44c315aabd85.png",
+                       "refinement_prompt":  "03-effigy.refine.prompt.txt",
+                       "refinement_reason":  "Ambiguous dark cap-to-shoulder gap replaced with a short thick ivory support post and light-gold bolted collar.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1952622,
+                       "sha256":  "37b7e201209dae9c6b0d488d19986eae1d6651b2378fdd28ef58a0225ace6f82"
+                   }
+               ],
+    "common_visual_qa":  "All three selected PNGs viewed. Actual Part I images were used in every initial generation. No previous Part II character image was used as an initial generation reference. No actual human portrait, eyes/pupils, fashion hair, realistic skin or costume-led character. Broad ivory/gold/navy sculptural masses, fixed surfaces, lavender cel shadows and coherent large support interfaces retained. No 3D mesh, UV, rigging or animation validation performed.",
+    "workspace_changes":  "Only this stage folder. Existing art, shared direction notes and other stage options preserved."
+}

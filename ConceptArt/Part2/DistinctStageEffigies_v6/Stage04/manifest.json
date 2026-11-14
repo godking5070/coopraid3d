@@ -1,0 +1,75 @@
+{
+    "stage":  "04",
+    "title_ko":  "영원히 타오르는 가마의 수호자",
+    "version":  "DistinctStageEffigies_v6",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "three_distinct_heavy_tank_effigies_completed_pending_user_review",
+    "brief":  "../ART_DIRECTION.txt",
+    "family_base":  "../../HumanoidStageEffigies_v4/Stage04/02-effigy.png",
+    "reference_policy":  "The selected family base was visually reviewed and supplied as the sole image reference in each initial call. Prompts explicitly replace mask/chest/gauntlet construction with three distinct designs, retain human proportion/style/furnace identity and completely remove the base shoulder-back shaft/rack/columns.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "층진 흉벽의 중갑 수호자",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caeb-27f0-7ae1-be70-a3e2b105a3f8\\exec-ec4a6358-e9d2-4602-91c8-dbe7241ddfb0.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage04/02-effigy.png",
+                                              "role":  "Humanoid tank family proportion, furnace theme, clean cel materials, rectangular shield and restraint count; NOT fixed identical appearance. Head/chest/gauntlets redesigned independently and shoulder-back shaft completely removed."
+                                          }
+                                      ],
+                       "visual_qa":  "Final visually inspected: new stepped rectangular sealed vent helm, three thick horizontal chest courses and abdominal plates, broad layered shoulder armor, massive squared cuff/knuckle/finger gauntlets. Square rectangular heat-shield with horizontal cooling bands, upright tank stance. Tall human torso/waist/pelvis and long thighs/calves/knees/ankles remain readable. Complete removal of previous horizontal shoulder-back shaft, bearing frame and columns; clear upper silhouette. Eight cooling pillars and eight red chain routes, four each side, some armor root sections briefly behind gauntlet/shield. Full head, fingers, feet and shield within frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2271113,
+                       "sha256":  "dbdfd53db2cff8023d83bd7f36b45d1aa77a0727a2628af218b8bc23662b7347"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "곡면 냉각갑주의 열문 기사상",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caeb-27f0-7ae1-be70-a3e2b105a3f8\\exec-ed8738d4-ce03-4b3f-969e-50e2bb5b1e1f.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage04/02-effigy.png",
+                                              "role":  "Humanoid tank family proportion, furnace theme, clean cel materials, rectangular shield and restraint count; NOT fixed identical appearance. Head/chest/gauntlets redesigned independently and shoulder-back shaft completely removed."
+                                          }
+                                      ],
+                       "visual_qa":  "Final visually inspected: distinct smooth closed dome cooling helmet with side heat channels, rounded interlocking breast-shell silhouette and heavy curved shoulder cups. Thick cuff-ring and overlapping rounded knuckle gauntlets, long straight-edged rectangular shield with two vertical thermal channels, no flame motif. Thick armored torso/forearms/thighs with visible human waist/hips and long human knees/calves/ankles. No shoulder-back shaft, roller/rack/columns. Eight cooling pillars and routes, four per side; lower roots partly shield-occluded. No human face/scalp/hair/skin, complete silhouette inside canvas.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2308183,
+                       "sha256":  "b03bc17d038719d776de64ff44c3a769bb83aa65cbe459cadf453a4a5bf9104c"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "사슬 응력을 견디는 비대칭 방패상",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caeb-27f0-7ae1-be70-a3e2b105a3f8\\exec-a4d766de-3070-4ae5-a6e2-eeab3ccdeb45.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage04/02-effigy.png",
+                                              "role":  "Humanoid tank family proportion, furnace theme, clean cel materials, rectangular shield and restraint count; NOT fixed identical appearance. Head/chest/gauntlets redesigned independently and shoulder-back shaft completely removed."
+                                          }
+                                      ],
+                       "visual_qa":  "Final visually inspected: new closed wedge mask with offset seal plates, diagonal asymmetrical heavy pectoral overlap and jagged central heat seam, unequal layered shoulder armor. One oversized slab gauntlet grips wide rectangular shield; other reinforced open palm and fingers attached visibly. Wide shield has asymmetric buttress rail and pressure vents. Broad tank mass with clear narrow waist, pelvis and long human legs, diagonal bracing stance. No shoulder machine/axis/frame/columns. Eight unique red chain routes to eight cooling pillars, four per side. All body/hand/shield/foot extremities fully contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2270583,
+                       "sha256":  "fc72260941c858cfd616d85a82d2f6ffa4e20685e79a5ebfea1212825400195c"
+                   }
+               ],
+    "global_qa":  "All three finals visually inspected, no targeted edit needed. Stage04 user correction achieved: no large shoulder-back shafts/rollers/racks/support columns; much thicker shoulder/chest/abdomen/arm/thigh armor and enlarged protected hands. Three distinct appearances/concepts, not the same armor in three poses: stepped rectangle bulwark / curved cooling tank / asymmetric chain-stress guardian. Different heads, chest contours and gauntlet architectures, human body proportion and long articulated legs retained. No actual 3D mesh/UV/rig/simulation validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

@@ -1,0 +1,158 @@
+﻿{
+    "canvas":  {
+                   "background":  "#E8E8E8",
+                   "width":  3600,
+                   "height":  1800
+               },
+    "slotOrder":  [
+                      "shears",
+                      "spring",
+                      "key"
+                  ],
+    "slots":  [
+                  {
+                      "centerX":  450,
+                      "minX":  50,
+                      "id":  "shears",
+                      "height":  1400,
+                      "maxX":  950
+                  },
+                  {
+                      "centerX":  1775,
+                      "minX":  1100,
+                      "id":  "spring",
+                      "height":  1250,
+                      "maxX":  2400
+                  },
+                  {
+                      "centerX":  3000,
+                      "minX":  2450,
+                      "id":  "key",
+                      "height":  350,
+                      "maxX":  3550
+                  }
+              ],
+    "placements":  [
+                       {
+                           "item":  "shears",
+                           "view":  "front",
+                           "centerX":  450,
+                           "baseline":  1600,
+                           "height":  1400,
+                           "x":  96,
+                           "y":  200,
+                           "width":  709
+                       },
+                       {
+                           "item":  "spring",
+                           "view":  "front",
+                           "centerX":  1775,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1273,
+                           "y":  350,
+                           "width":  1005
+                       },
+                       {
+                           "item":  "key",
+                           "view":  "front",
+                           "centerX":  3000,
+                           "baseline":  1600,
+                           "height":  350,
+                           "x":  2543,
+                           "y":  1250,
+                           "width":  914
+                       },
+                       {
+                           "item":  "shears",
+                           "view":  "left",
+                           "centerX":  450,
+                           "baseline":  1600,
+                           "height":  1400,
+                           "x":  402,
+                           "y":  200,
+                           "width":  96
+                       },
+                       {
+                           "item":  "spring",
+                           "view":  "left",
+                           "centerX":  1775,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1641,
+                           "y":  350,
+                           "width":  268
+                       },
+                       {
+                           "item":  "key",
+                           "view":  "left",
+                           "centerX":  3000,
+                           "baseline":  1600,
+                           "height":  350,
+                           "x":  2931,
+                           "y":  1250,
+                           "width":  138
+                       },
+                       {
+                           "item":  "shears",
+                           "view":  "right",
+                           "centerX":  450,
+                           "baseline":  1600,
+                           "height":  1400,
+                           "x":  388,
+                           "y":  200,
+                           "width":  125
+                       },
+                       {
+                           "item":  "spring",
+                           "view":  "right",
+                           "centerX":  1775,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1674,
+                           "y":  350,
+                           "width":  202
+                       },
+                       {
+                           "item":  "key",
+                           "view":  "right",
+                           "centerX":  3000,
+                           "baseline":  1600,
+                           "height":  350,
+                           "x":  2953,
+                           "y":  1250,
+                           "width":  94
+                       },
+                       {
+                           "item":  "shears",
+                           "view":  "back",
+                           "centerX":  450,
+                           "baseline":  1600,
+                           "height":  1400,
+                           "x":  96,
+                           "y":  200,
+                           "width":  708
+                       },
+                       {
+                           "item":  "spring",
+                           "view":  "back",
+                           "centerX":  1775,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1277,
+                           "y":  350,
+                           "width":  996
+                       },
+                       {
+                           "item":  "key",
+                           "view":  "back",
+                           "centerX":  3000,
+                           "baseline":  1600,
+                           "height":  350,
+                           "x":  2543,
+                           "y":  1250,
+                           "width":  915
+                       }
+                   ],
+    "method":  "Deterministic per-object bounding-box center X, height and baseline. Camera view changes only; complete sheet never mirrored."
+}

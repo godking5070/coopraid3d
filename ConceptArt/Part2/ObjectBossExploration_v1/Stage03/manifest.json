@@ -1,0 +1,104 @@
+{
+    "version":  "object-boss-exploration-v1-stage03",
+    "created_date":  "2026-11-11",
+    "stage":  3,
+    "title_ko":  "얼어붙은 혈관의 연금술사",
+    "scope":  "Three new Part1-object-language boss concept comparisons; monster / hybrid / effigy",
+    "tool":  "built-in image_gen",
+    "status":  "proposal_pending_user_review",
+    "art_direction":  "../ART_DIRECTION.txt",
+    "reference_policy":  "Only actual Part1 CharacterMatched boss PNGs were supplied to image_gen. No previous Part2 humanlike figures, user sacred-character screenshot or Orianna references were input.",
+    "viewed_part1_sources":  [
+                                 "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                 "../../../CharacterMatched/04-flora-hard-v1.png",
+                                 "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                 "../../../CharacterMatched/09-silent-belfry-v1.png"
+                             ],
+    "environment_review":  "09-silent-belfry-v1.png was reviewed for broad gothic architecture and floor hierarchy; it was not an image_gen input.",
+    "concepts":  [
+                     {
+                         "id":  "01-monster",
+                         "title_ko":  "역류하는 순환조",
+                         "image":  "01-monster.png",
+                         "prompt":  "01-monster.prompt.txt",
+                         "source_generated_image":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c996-45c2-7120-ba8f-2ed77c878cea\\exec-0a9886e7-9860-4e76-b2f3-450333fb9b64.png",
+                         "references":  [
+                                            {
+                                                "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                                "role":  "Object-as-body, fixed support ring, hollow spaces and broad articulated limb construction; no bell/six-leg copy."
+                                            },
+                                            {
+                                                "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                                "role":  "Rigid ceramic shell, hinged openings and glass-organ integration; no face/hair/costume copied."
+                                            }
+                                        ],
+                         "design_notes_ko":  [
+                                                 "머리·얼굴·몸통·사람 팔이 없는 낮고 넓은 삼각형 수은 순환기관이다.",
+                                                 "밀폐된 납작한 수은조, 남색 펌프 주름막, 세 개의 굵은 닫힌 유리 아치와 세 개의 힌지 외장이 몸 자체를 이룬다.",
+                                                 "세 개의 굵은 분절 지지발이 삼각 지지영역을 만들고 작은 녹색 펄스가 과잉 치유/강제 맥박을 암시한다."
+                                             ],
+                         "visual_qa":  "Visually inspected. Entirely nonhuman object-organ body; no face, eyes, hair or clothing. Three stout radial support limbs and planted feet, three large tube arches and hinged shell lobes connect to one fixed triangular cradle. Main cistern and lower tube liquid read as opaque cold silver-gray below menisci, with transparent empty glass above. Intact normal-mode glass, restrained green accents, full silhouette inside canvas and clean Part1 cel materials confirmed.",
+                         "width":  1536,
+                         "height":  1024,
+                         "bytes":  2097851,
+                         "sha256":  "72737a5ebf79aa282a643fe1872c3888ec4f92dea1591bf980f60cb5f3f9e3dd"
+                     },
+                     {
+                         "id":  "02-hybrid",
+                         "title_ko":  "무너진 혈관 성해",
+                         "image":  "02-hybrid.png",
+                         "prompt":  "02-hybrid.prompt.txt",
+                         "source_generated_image":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c996-45c2-7120-ba8f-2ed77c878cea\\exec-06022b1f-6b94-457f-8000-0e2a22b8a694.png",
+                         "references":  [
+                                            {
+                                                "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                                "role":  "Large faceted stone hand/limb mass and fixed body planes; no knight portrait, eyes, equipment or costume copied."
+                                            },
+                                            {
+                                                "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                                "role":  "Load-bearing support ribs, functional body and large mechanical joints; no bell or six-leg anatomy copied."
+                                            }
+                                        ],
+                         "design_notes_ko":  [
+                                                 "큰 석재 손과 무릎·전굴 자세만 인체의 흔적으로 남고 몸의 주 질량은 분절 척추와 수은 등기관으로 바뀌었다.",
+                                                 "기하학적 밀폐 관마개가 목 끝에 놓이며 실제 얼굴·눈·입·머리카락이 없다.",
+                                                 "한 팔은 바닥을 짚는 거대한 돌 손, 다른 팔은 굵은 유리 반환관과 석재 펌프 집게로 구성했다.",
+                                                 "등의 수은 리저버와 닫힌 순환관이 어깨·척추·골반 및 사지 뿌리에 직접 융합되어 착용 배낭처럼 보이지 않는다."
+                                             ],
+                         "visual_qa":  "Visually inspected. No actual human face, scalp, eyes, hair, skin anatomy or costume. Angular manifold head cap, massive stone bracing hand, conduit-clamp arm, two bent stone legs and planted feet remain a readable asymmetric hybrid. Segmented back/spine, reservoir and fluid returns are continuous functional body mass; opaque silver-gray liquid and empty transparent glass are distinct. Large connected load paths, no floating pieces, complete silhouette and clean Part1 cel shading confirmed.",
+                         "width":  1536,
+                         "height":  1024,
+                         "bytes":  2047186,
+                         "sha256":  "4f085ce0dc1155785e5e5182420147113fdb8719f6d4268936e0086c7bf8a260"
+                     },
+                     {
+                         "id":  "03-effigy",
+                         "title_ko":  "빈 자비의 좌",
+                         "image":  "03-effigy.png",
+                         "prompt":  "03-effigy.prompt.txt",
+                         "source_generated_image":  "C:\\Users\\godki\\.codex\\generated_images\\01a1c996-45c2-7120-ba8f-2ed77c878cea\\exec-281db034-d761-4e0b-8f2f-c850ded1b45a.png",
+                         "references":  [
+                                            {
+                                                "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                                "role":  "Fixed doll shell surfaces, empty body, hinge parts and structural glass integration; no human face/hair/hat/clothes copied."
+                                            },
+                                            {
+                                                "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                                "role":  "Large carved planes, oversized nonhuman stone palms and grounded column mass; no knight likeness copied."
+                                            }
+                                        ],
+                         "design_notes_ko":  [
+                                                 "좌석·등받이·팔걸이가 곧 신체인 비인격적 치유 의례체이며 의자에 앉은 사람이 아니다.",
+                                                 "머리는 눈·코·입이 없는 겹친 기하학 밸브 마개, 몸통은 남색 빈 내부와 닫힌 석재 셔터가 있는 의례 수납체이다.",
+                                                 "두 팔은 돌 팔걸이와 큰 분절 손바닥, 두 다리는 무거운 기둥과 받침발이며 의상처럼 보이는 긴 옆판도 두꺼운 일체형 석재이다.",
+                                                 "등받이의 굵은 닫힌 유리 순환회로와 후방 좌골 수은조가 어깨·팔걸이·손으로 이어져 작은 회복광을 공급한다."
+                                             ],
+                         "visual_qa":  "Visually inspected. Human silhouette is a sealed faceted effigy/therapeutic seat with no natural face, pupils, expression, hair or character attire. Green head/chest points are fixed seals in geometric plate/gasket surfaces. Two carved arms/palms, two column shins/plinth feet, hollow torso, solid apron panels, backrest and rear circulation apparatus form one supported body. Intact glass contains opaque silver-gray liquid below visible levels, empty upper tubes transparent; full silhouette and Part1 cel style retained.",
+                         "width":  1536,
+                         "height":  1024,
+                         "bytes":  1935940,
+                         "sha256":  "1c5f0b28d874c23d65780fad49e3470f49c35edd4f9a7ce3066b10cc4908116c"
+                     }
+                 ],
+    "global_qa":  "All three images were generated by separate built-in image_gen calls with two actual Part1 shape/material references per call, then visually inspected. Low triangular organ / asymmetric crouching hybrid / tall seated effigy have clearly different masses and poses. No human portrait remained, so no facial cleanup was required. Existing assets, shared CURRENT_ART_DIRECTION and other stages were not modified. No actual 3D mesh, UV, rig or animation validation was performed."
+}

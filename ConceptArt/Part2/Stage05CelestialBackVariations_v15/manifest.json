@@ -1,0 +1,80 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "stage":  5,
+    "version":  "Stage05CelestialBackVariations_v15",
+    "created_date":  "2026-11-14",
+    "tool":  "built-in image_gen",
+    "status":  "generation_visual_qa_and_file_validation_complete",
+    "user_request":  "행성 분위기는 좋았지만 창 연결은 이상하다. 행성보다 천체 느낌의 뒤 컨셉3개, 망토도 허용.",
+    "locked_body":  "../MajesticStage02to06_v9/Stage05/01-boss.png",
+    "weapon_policy":  "Spear is carried by two hands only. Delete rear-to-spear struts, waist clamp/fork and linking pelvic pivot. Keep original two-ended spear shape/pose, a small direct pennant tie is allowed.",
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "images":  [
+                   {
+                       "id":  "01-constellation-cloak",
+                       "title_ko":  "별자리 성도 망토",
+                       "description":  "두꺼운 남색 망토의 큰 주름과 황금 별자리 선으로 천체의 분위기를 표현한 안.",
+                       "image":  "01-constellation-cloak.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-8f78c1a5-590e-4941-bf2b-c40d62c382d7.png",
+                       "prompts":  [
+                                       "01-constellation-cloak.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../MajesticStage02to06_v9/Stage05/01-boss.png",
+                                              "role":  "Sole exact edit target: body/armor/pose/spear identity retained, rear artifact changed and mechanical spear attachments removed."
+                                          }
+                                      ],
+                       "visual_qa":  "Compared visually with liked v9 body: head/cuirass/strong humanoid proportions, upright braced pose, hands/leg/foot locations and straight two-ended hour-hand spear family retained. Old rear panel and spear-waist mechanical bracket removed. A broad dark-navy constellation cloak with large clear folds, ivory/gold hem and a few star paths attaches at rear shoulder fasteners, no front chest cover. Two hands alone hold spear; only small tied pennant remains on shaft, no back/pelvis rod or clamp. Full cloak/head/hands/feet/weapon tips contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2135740,
+                       "sha256":  "f8775719ed2174ac9a88cdcd77b9a0419180b0c1d32d99a82bcb09f6935087bc"
+                   },
+                   {
+                       "id":  "02-celestial-veil",
+                       "title_ko":  "천구의 장막",
+                       "description":  "유리천 같은 반투명 장막 세 겹이 등에서 흐르는 성운형 안.",
+                       "image":  "02-celestial-veil.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-f1fbe508-d8dd-43f7-be23-752966ec1f08.png",
+                       "prompts":  [
+                                       "02-celestial-veil.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../MajesticStage02to06_v9/Stage05/01-boss.png",
+                                              "role":  "Sole exact edit target: body/armor/pose/spear identity retained, rear artifact changed and mechanical spear attachments removed."
+                                          }
+                                      ],
+                       "visual_qa":  "Compared visually with liked v9 body: same armor family, closed mask and pose, both hands and long legs readable. Three broad translucent lavender-blue celestial mantle sheets, finite folded edges, star seals and gold meridian paths; rear shoulder roots separate from weapon. Background visible through veil, body remains opaque. Waist shaft clamp/old diagonal support removed; spear carried by two hands only. Complete veil hem/body/spear ends inside margins.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2193009,
+                       "sha256":  "8bddffa5d735d61fc92200dfa970bd850bd221cbfc7ae2ac4df58dbf19a27c19"
+                   },
+                   {
+                       "id":  "03-orbital-fragments",
+                       "title_ko":  "붕괴한 천체 궤도편",
+                       "description":  "굵은 궤도 조각과 별 모양 성유물이 등 뒤에 결합된 단단한 아티팩트 안.",
+                       "image":  "03-orbital-fragments.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-8c5d0afd-d5ae-42c8-91b8-a32c4b891097.png",
+                       "prompts":  [
+                                       "03-orbital-fragments.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../MajesticStage02to06_v9/Stage05/01-boss.png",
+                                              "role":  "Sole exact edit target: body/armor/pose/spear identity retained, rear artifact changed and mechanical spear attachments removed."
+                                          }
+                                      ],
+                       "visual_qa":  "Compared visually with liked v9 body: head/body armor and pose retained, two arms/hands/legs. New rear celestial star prism and three finite broken orbit segments with compact upper-back bearings, open space and no planet sphere or solid shield. Upper arc reads as a suspended celestial segment. No old long support to pelvis/spear, no waist shaft clamp; uninterrupted independent spear held in both hands, small tied pennant only. All fragment/head/weapon/foot tips in frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2129508,
+                       "sha256":  "c9a0daf8d966b6d4136d290876b76885901f02eb477da171005b1bbf46444954"
+                   }
+               ],
+    "limits":  "Three single-view concepts, not 3D meshes/UV/rig validation. Prior files preserved; no new Stage05 selection yet."
+}

@@ -1,0 +1,106 @@
+{
+  "stage": 6,
+  "boss": "야누스 알파 & 오메가",
+  "canvas": {
+    "body": [
+      2048,
+      1600
+    ],
+    "accessory": [
+      3200,
+      2400
+    ],
+    "building": [
+      2048,
+      1600
+    ]
+  },
+  "bodies": [
+    {
+      "id": "AlphaNormal",
+      "folder": "Bodies/Normal/Alpha"
+    },
+    {
+      "id": "OmegaNormal",
+      "folder": "Bodies/Normal/Omega"
+    },
+    {
+      "id": "AlphaHard",
+      "folder": "Bodies/Hard/Alpha"
+    },
+    {
+      "id": "OmegaHard",
+      "folder": "Bodies/Hard/Omega"
+    }
+  ],
+  "slots": [
+    {
+      "id": "ShieldNormal",
+      "centerX": 550,
+      "baseline": 1120,
+      "height": 960,
+      "minX": 50,
+      "maxX": 1050
+    },
+    {
+      "id": "SpearNormal",
+      "centerX": 1600,
+      "baseline": 1120,
+      "height": 1020,
+      "minX": 1100,
+      "maxX": 2100
+    },
+    {
+      "id": "CapeNormal",
+      "centerX": 2650,
+      "baseline": 1120,
+      "height": 900,
+      "minX": 2150,
+      "maxX": 3150
+    },
+    {
+      "id": "ShieldHard",
+      "centerX": 550,
+      "baseline": 2260,
+      "height": 960,
+      "minX": 50,
+      "maxX": 1050
+    },
+    {
+      "id": "HalberdHard",
+      "centerX": 1600,
+      "baseline": 2260,
+      "height": 1020,
+      "minX": 1100,
+      "maxX": 2100
+    },
+    {
+      "id": "CapeHard",
+      "centerX": 2650,
+      "baseline": 2260,
+      "height": 900,
+      "minX": 2150,
+      "maxX": 3150
+    }
+  ],
+  "buildings": [
+    {
+      "id": "GrandGate",
+      "folder": "Buildings/GrandGate",
+      "height": 1300,
+      "baseline": 1460
+    },
+    {
+      "id": "BoundaryRail",
+      "folder": "Buildings/BoundaryRail",
+      "height": 480,
+      "baseline": 1080
+    },
+    {
+      "id": "WinchPost",
+      "folder": "Buildings/WinchPost",
+      "height": 1100,
+      "baseline": 1400
+    }
+  ]
+}

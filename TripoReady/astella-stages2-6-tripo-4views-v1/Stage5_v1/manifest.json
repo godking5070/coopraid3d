@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "project": "ASTELLA",
+  "stage": 5,
+  "boss": "죄업을 재는 천칭 유스티티아",
+  "map": "성채 재판소",
+  "date": "2026-11-10",
+  "revision": "weight-fit-140px",
+  "weightSheetHeightPx": 140,
+  "generator": "built-in image_gen; deterministic five-slot raster assembly",
+  "views": [
+    "front",
+    "left",
+    "right",
+    "back"
+  ],
+  "cameraConvention": {
+    "up": "+Y",
+    "front": "+Z",
+    "characterRight": "+X",
+    "left": "subject-left camera, face points screen right",
+    "right": "subject-right camera, face points screen left"
+  },
+  "inputGroups": [
+    {
+      "id": "normal-body",
+      "folder": "Bodies/Normal",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "hard-body",
+      "folder": "Bodies/Hard",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "accessory-set",
+      "folder": "Accessories",
+      "count": 4,
+      "size": [
+        3600,
+        2600
+      ],
+      "contents": [
+        "normal greatsword",
+        "hard cracked greatsword",
+        "level normal back scale",
+        "tilted hard back scale",
+        "standalone mass weight"
+      ],
+      "layout": "accessory-layout.json",
+      "slotOrderFixedAcrossViews": true,
+      "wholeSheetMirrored": false
+    },
+    {
+      "id": "judge-dais",
+      "folder": "Buildings/JudgeDais",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "window-wall-bay",
+      "folder": "Buildings/WindowWallBay",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "jury-bench",
+      "folder": "Buildings/JuryBench",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    }
+  ],
+  "floor": {
+    "path": "Floor/top.png",
+    "count": 1,
+    "size": [
+      1536,
+      1024
+    ],
+    "worldDimensionsMeters": {
+      "x": 36,
+      "z": 24
+    },
+    "centerDeadZoneHalfWidthMeters": 0.65,
+    "divisionAxis": "world X left/right",
+    "use": "flat color/layout reference",
+    "seamless": false,
+    "pbrSet": false
+  },
+  "modelingInputPngCount": 25,
+  "referenceOnlyPngCount": 3,
+  "promptCount": 41,
+  "guide": "START_HERE_KO.txt",
+  "prompts": "GenerationPrompts",
+  "qa": "verification.json",
+  "limitations": [
+    "AI-generated view references, not measured renders of one source mesh",
+    "Minor shape/projection differences remain",
+    "Scale chains, pans and drive mechanisms need DCC cleanup and separate animation joints"
+  ],
+  "performed": {
+    "tripoGeneration": false,
+    "mixamoRigging": false,
+    "gameCodeChanges": false
+  }
+}
