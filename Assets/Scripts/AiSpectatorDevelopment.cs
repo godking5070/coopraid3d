@@ -156,7 +156,7 @@ namespace RaidRogue
             }
             while(!File.Exists(Path.Combine(_caseDirectory,"STOP"))&&Time.realtimeSinceStartup-_began<_timeout+60)yield return null;
             if(_errors.Count>0){_result.success=false;_result.reason="Engine error after initial result.";SaveResult();}
-            Application.Quit(_result.success?0:1);
+            ExitCheck(_result.success?0:1);
         }
         private bool FixedBuild(CharacterActor actor,Slot slot,bool request)
         {
@@ -184,7 +184,15 @@ namespace RaidRogue
             _result.success=success&&_errors.Count==0;_result.reason=reason;
             SaveResult();
             Debug.Log("[HeadlessResume] "+(_result.success?"PASS ":"FAIL ")+reason);
-            if(!_result.success)Application.Quit(1);
+            if(!_result.success)ExitCheck(1);
+        }
+        private void ExitCheck(int code)
+        {
+            // Use the production session cleanup before quitting our own isolated
+            // process. This also satisfies CampaignUI's normal quit-confirmation gate.
+            var session=RaidNetworkSession.Instance;
+            if(CampaignRuntime.Instance?.IsolatedTestProfile==true&&session!=null&&!session.Ending)session.DisconnectConfirmed();
+            Application.Quit(code);
         }
         private void SaveResult()
         {
