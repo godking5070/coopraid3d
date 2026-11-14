@@ -537,7 +537,7 @@ namespace RaidRogue
 
         private void LateUpdate()
         {
-            if (followTarget == null)
+            if (followTarget == null || !CombatRange.LivingPartyMember(followTarget) || StageManager.CombatSuspended)
             {
                 Destroy(gameObject);
                 return;

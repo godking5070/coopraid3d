@@ -102,26 +102,12 @@ namespace RaidRogue
 
         private void AcquireHealerAsInitialAggroTarget()
         {
-            PlayerController pc = FindFirstObjectByType<PlayerController>();
-            if (pc != null && pc.currentRole == PlayerRole.Oracle_Healer)
+            aggroTarget = null;
+            foreach (var member in PartyLife.OrderedMembers())
             {
-                aggroTarget = pc.transform;
-                return;
-            }
-
-            PartyBotAI[] bots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
-            foreach (PartyBotAI bot in bots)
-            {
-                if (bot != null && !bot.isDead && bot.role == PartyBotRole.Healer)
-                {
-                    aggroTarget = bot.transform;
-                    return;
-                }
-            }
-
-            if (pc != null)
-            {
-                aggroTarget = pc.transform;
+                if (!CombatRange.LivingPartyMember(member)) continue;
+                if (aggroTarget == null) aggroTarget = member;
+                if (member.GetComponent<PartyLife>()?.IsHealer == true) { aggroTarget = member; return; }
             }
         }
 
@@ -251,6 +237,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (StageManager.CombatSuspended) return;
             if (isDead || Time.timeScale <= 0.001f)
             {
                 return;
@@ -312,20 +299,7 @@ namespace RaidRogue
 
         private void UpdateAssassinBehavior()
         {
-            // 타겟이 죽었거나 없으면 다시 힐러/플레이어 탐색
-            if (aggroTarget == null)
-            {
-                AcquireHealerAsInitialAggroTarget();
-            }
-            else
-            {
-                PartyBotAI bot = aggroTarget.GetComponent<PartyBotAI>();
-                if (bot != null && bot.isDead)
-                {
-                    AcquireHealerAsInitialAggroTarget();
-                }
-            }
-
+            if (!CombatRange.LivingPartyMember(aggroTarget)) AcquireHealerAsInitialAggroTarget();
             if (aggroTarget == null) return;
 
             Vector3 diffXZ = new Vector3(
@@ -463,7 +437,7 @@ namespace RaidRogue
             bool isBigHighlight = false,
             Transform source = null)
         {
-            if (isDead) return;
+            if (isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             float mult = ownerBoss != null ? ownerBoss.DamageTakenMultiplier : 1.0f;
             int finalDmg = Mathf.RoundToInt(damage * mult);
@@ -497,10 +471,12 @@ namespace RaidRogue
 
         public void ReceiveBotAttack(int damage, Transform source)
         {
+            if (StageManager.CombatSuspended || !CombatRange.LivingPartyMember(source)) return;
             var attacker = source != null ? source.GetComponent<PartyBotAI>() : null;
             if (attacker != null && (attacker.role == PartyBotRole.Tank || attacker.role == PartyBotRole.MeleeDPS) && !attacker.CanMeleeHit(transform)) return;
-            if (isDead) return;
+            if (isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
+            source.GetComponent<CommonPotion>()?.EndRevivalProtection();
             float hpBefore = currentHp;
             currentHp = Mathf.Max(0f, currentHp - damage);
             if (currentHp <= 0.1f) currentHp = 0f;
@@ -690,6 +666,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (StageManager.CombatSuspended) return;
             if (boss == null || Time.timeScale <= 0.001f)
             {
                 return;
@@ -737,6 +714,7 @@ namespace RaidRogue
             {
                 if (activeAdds[i] != null)
                 {
+                    activeAdds[i].gameObject.SetActive(false);
                     Destroy(activeAdds[i].gameObject);
                 }
             }

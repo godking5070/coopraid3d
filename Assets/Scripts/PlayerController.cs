@@ -91,7 +91,7 @@ namespace RaidRogue
         public float CurrentDamageReduction => IsDefensiveBuffActive ? damageReductionRate : 0f;
         public float HpRatio => maxHp > 0f ? Mathf.Clamp01(currentHp / maxHp) : 0f;
         public float ShieldRatio => maxHp > 0f ? Mathf.Clamp01(currentShield / maxHp) : 0f;
-        public bool NeedsHealing => currentHp < maxHp - 1f;
+        public bool NeedsHealing => !IsDead && currentHp < maxHp - 1f;
         public bool IsBeingRescued => _isBeingRescued;
         public bool IsBeingKnockedBack => _isBeingKnockedBack;
         public bool HasTacticalRescueBuff => _tacticalRescueBuffTimer > 0f;
@@ -103,7 +103,7 @@ namespace RaidRogue
         // Shared voluntary-movement gates for status effects; the current encounters do not apply stuns/roots yet.
         public bool IsStunned { get; set; }
         public bool IsMovementLocked { get; set; }
-        public bool CanMoveVoluntarily => isActiveAndEnabled && currentHp > 0 && !IsStunned && !IsMovementLocked &&
+        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && !StageManager.CombatSuspended && !IsStunned && !IsMovementLocked &&
             !IsBeingRescued && !IsBeingKnockedBack && !LocalGameplayInput.Blocked;
         public bool CanDash => CanMoveVoluntarily && !IsDashing && DashCooldownRemaining <= 0;
         public bool HasMovementIntent => !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
@@ -117,6 +117,8 @@ namespace RaidRogue
         private readonly PlayerMovementCollision _movementCollision = new PlayerMovementCollision();
         private PlayerDashPresentation _dashPresentation;
         public CommonPotion Potion { get; private set; }
+        public PartyLife Life { get; private set; }
+        public bool IsDead => (Life != null && Life.IsDead) || currentHp <= 0;
 
         // 힐러 '구출(Rescue)' 끌려감 상태
         private bool _isBeingRescued;
@@ -141,6 +143,7 @@ namespace RaidRogue
         private void Start()
         {
             Potion = CommonPotion.Ensure(gameObject);
+            Life = PartyLife.Ensure(gameObject);
             if (targetBoss == null)
             {
                 targetBoss = FindFirstObjectByType<BossController>();
@@ -204,6 +207,12 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (IsDead || StageManager.CombatSuspended)
+            {
+                _dash.Cancel(); IsMovingXZ = false;
+                UpdateOverheadHpBar(); UpdateHUD();
+                return;
+            }
             bool gameplayAllowed = !LocalGameplayInput.Blocked;
             bool dashPressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), gameplayAllowed);
             if (!CanMoveVoluntarily) _dash.Cancel();
@@ -256,6 +265,8 @@ namespace RaidRogue
             Vector3 direction = GetMoveDirectionXZ(ReadMoveInput());
             Vector3 facing = transform.forward;
             if (!_dash.TryStart(dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
+            GetComponent<BattleResurrection>()?.Cancel();
+            Potion?.EndRevivalProtection();
             if (_dashPresentation != null) _dashPresentation.BeginDash();
             return true;
         }
@@ -427,6 +438,8 @@ namespace RaidRogue
         /// </summary>
         public void ResetToFullHealthAndPosition(Vector3 spawnPos)
         {
+            Life?.ClearDeadForStagePlacement();
+            RestorePartyLife(1f);
             // This is also used for revival/repositioning: preserve the item's cooldown.
             Potion?.EndRevivalProtection();
             _dash.Cancel();
@@ -453,6 +466,7 @@ namespace RaidRogue
         /// </summary>
         public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f)
         {
+            if (IsDead || StageManager.CombatSuspended) return;
             if (_isBeingRescued)
             {
                 return;
@@ -511,6 +525,7 @@ namespace RaidRogue
 
         public void StartPulledByHealerRescue(Vector3 safeDestinationXZ)
         {
+            if (IsDead || StageManager.CombatSuspended) return;
             _dash.Cancel();
             _isBeingKnockedBack = false;
             _isBeingRescued = true;
@@ -652,6 +667,7 @@ namespace RaidRogue
             }
 
             if (!CanUseLegacyMeleeAttack()) return;
+            Potion?.EndRevivalProtection();
             FaceBossImmediateXZ();
             PlaySlashVisual(new Color(0.25f, 1f, 0.55f, 1f));
             targetBoss.ReceiveSkillAttack(transform.position, PositionalRequirement.Flank_45_To_135, baseSkillDamage, false);
@@ -666,6 +682,7 @@ namespace RaidRogue
             }
 
             if (!CanUseLegacyMeleeAttack()) return;
+            Potion?.EndRevivalProtection();
             FaceBossImmediateXZ();
             PlaySlashVisual(new Color(0.3f, 0.85f, 1f, 1f));
             targetBoss.ReceiveSkillAttack(transform.position, PositionalRequirement.Rear_135_To_180, baseSkillDamage, hasMasterOfRear);
@@ -673,7 +690,7 @@ namespace RaidRogue
 
         private bool CanUseLegacyMeleeAttack()
         {
-            if (LocalGameplayInput.Blocked) return false;
+            if (LocalGameplayInput.Blocked || IsDead || StageManager.CombatSuspended) return false;
             if (targetBoss == null || !CombatRange.LivingEnemy(targetBoss.transform) || Time.timeScale <= 0.001f) return false;
             var defaults = new MeleeRangeSettings();
             float range = defaults.Get(currentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank);
@@ -684,6 +701,7 @@ namespace RaidRogue
 
         public void TriggerVampiricBladeHeal()
         {
+            if (IsDead || StageManager.CombatSuspended) return;
             float heal = (currentRole == PlayerRole.Guardian_Tank ? 30f : 15f) * Mathf.Max(1, vampiricBladeStacks);
             float hpBefore = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + heal);
@@ -704,6 +722,8 @@ namespace RaidRogue
         /// </summary>
         public void ActivatePersonalDefensiveBuff()
         {
+            if (IsDead || StageManager.CombatSuspended) return;
+            Potion?.EndRevivalProtection();
             _defensiveRemainingTime = defensiveDuration;
             ApplyBodyColor(defensiveBodyColor);
 
@@ -740,6 +760,7 @@ namespace RaidRogue
         /// </summary>
         public void AddShield(float shieldAmount, Transform source = null)
         {
+            if (IsDead || StageManager.CombatSuspended) return;
             if (shieldAmount <= 0f)
             {
                 return;
@@ -759,6 +780,7 @@ namespace RaidRogue
 
         public void TakeDamage(float rawDamage)
         {
+            if (IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
             if (Potion != null && Potion.HasRevivalProtection) return;
             float finalDamage = CalculateFinalDamageTaken(rawDamage);
             float absorbedByShield = 0f;
@@ -772,10 +794,7 @@ namespace RaidRogue
                 _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
             }
 
-            float hpBefore = currentHp;
-            currentHp = Mathf.Max(100f, currentHp - finalDamage);
-            // Preserve the existing nonlethal player HP floor; only a real down transition counts.
-            if (hpBefore > 0f && currentHp <= 0f) CombatMetricsManager.SetDead(transform, true);
+            currentHp = Mathf.Max(0f, currentHp - finalDamage);
 
             // 가디언(탱커) 또는 생존기 발동 중 [가시 갑옷] 카드 보유 시 피격 반사 피해
             if (hasThornArmor && (IsDefensiveBuffActive || currentRole == PlayerRole.Guardian_Tank) && targetBoss != null)
@@ -802,11 +821,12 @@ namespace RaidRogue
                 : (absorbedByShield > 0.5f ? new Color(1f, 0.9f, 0.3f, 1f) : new Color(1f, 0.35f, 0.35f, 1f));
 
             FloatingTextPopup.Spawn(transform.position + Vector3.up * 2.1f, dmgText, dmgColor, false);
+            if (currentHp <= 0) PartyLife.Ensure(gameObject).Die();
         }
 
         public float ReceiveHeal(float healAmount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
-            if (healAmount <= 0f)
+            if (healAmount <= 0f || IsDead || StageManager.CombatSuspended)
             {
                 return 0;
             }
@@ -840,6 +860,39 @@ namespace RaidRogue
                 StopCoroutine(_slashEffectCoroutine);
             }
             _slashEffectCoroutine = StartCoroutine(CustomLineVisualRoutine(targetWorldPos, lineColor));
+        }
+
+        public void OnPartyDeath()
+        {
+            currentHp = currentShield = 0;
+            ClearInterruptedActions();
+            ApplyBodyColor(new Color(0.3f, 0.3f, 0.34f, 0.5f));
+        }
+
+        private void ClearInterruptedActions()
+        {
+            _dash.Cancel(); _dashPress.RequireRelease();
+            _isBeingRescued = _isBeingKnockedBack = IsMovingXZ = false;
+            IsStunned = IsMovementLocked = false;
+            _defensiveRemainingTime = _tacticalRescueBuffTimer = _rescueSpeedBoostTimer = 0;
+            _metricsShields.Clear();
+            StopAllCoroutines(); _slashEffectCoroutine = null;
+            if (_slashEffectLine != null) _slashEffectLine.enabled = false;
+            _dashPresentation?.ClearTrail();
+            combatController?.InterruptForDeath();
+        }
+
+        public void RestorePartyLife(float fraction, bool resetCooldowns = false)
+        {
+            ClearInterruptedActions();
+            currentShield = 0;
+            currentHp = maxHp * Mathf.Clamp01(fraction);
+            ApplyBodyColor(normalBodyColor);
+            if (resetCooldowns)
+            {
+                _dash.ResetForRetry();
+                combatController?.OnPlayerRoleChanged(currentRole);
+            }
         }
 
         private IEnumerator CustomLineVisualRoutine(Vector3 targetWorldPos, Color lineColor)
@@ -1104,7 +1157,7 @@ namespace RaidRogue
             hudStatusText.text =
                 $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [P] | 뷰: {viewModeLabel} [V])]</b>\n" +
                 $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[F1~F4]</b> 파티원 1~4번 | <b>[Tab]</b> 적(보스·쫄) 순환 | <b>[T]</b> 대상의 대상 | <b>[ESC]</b> 해제\n" +
-                $"• <b>이동/카메라</b> : {movementHint} · SPACE 대쉬 · Q 포션 | 우측 [카메라 설정]\n" +
+                $"• <b>이동/카메라</b> : {movementHint} · SPACE 대쉬 · Q 포션{(currentRole == PlayerRole.Oracle_Healer ? " · 5 부활(사망 아군 선택)" : "")} | 우측 [카메라 설정]\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
                 $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {targetBoss.LastHitMessage}\n" +

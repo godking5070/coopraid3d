@@ -31,7 +31,7 @@ namespace RaidRogue
         {
             if (unit == null || !unit.gameObject.activeInHierarchy) return false;
             var player = unit.GetComponent<PlayerController>();
-            if (player != null) return player.currentHp > 0;
+            if (player != null) return !player.IsDead;
             var bot = unit.GetComponent<PartyBotAI>();
             return bot != null && !bot.isDead && bot.currentHp > 0;
         }

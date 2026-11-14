@@ -96,6 +96,16 @@ namespace RaidRogue
         public string InterruptAlertMessage => _interruptAlertMessage;
 
         public PlayerRole CurrentRole => playerController != null ? playerController.currentRole : PlayerRole.Blade_MeleeDPS;
+        private bool CanUseCombatAction => !StageManager.CombatSuspended && playerController != null &&
+            !playerController.IsDead && !playerController.IsStunned && !(GetComponent<BattleResurrection>()?.IsCasting ?? false);
+
+        public void InterruptForDeath()
+        {
+            _isCastingSpell = false; _castElapsed = 0; _triplecastBuffRemaining = 0;
+            _combo1Stage = _combo2Stage = 1; _combo1Timer = _combo2Timer = 0;
+            StopAllCoroutines(); _fxCoroutine = null;
+            foreach (var line in _fxLines) if (line != null) line.enabled = false;
+        }
 
         private void Awake()
         {
@@ -173,12 +183,13 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (Time.timeScale <= 0.001f)
+            if (Time.timeScale <= 0.001f || StageManager.CombatSuspended)
             {
                 return;
             }
 
             UpdateCooldownsAndComboTimers();
+            if (playerController != null && playerController.IsDead) { InterruptForDeath(); return; }
             UpdateCasterSpellCasting();
 
             if (!LocalGameplayInput.Blocked && (playerController == null || !playerController.IsBeingRescued))
@@ -334,6 +345,8 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill1_FlankCombo()
         {
+            if (!CanUseCombatAction) return;
+            if (GetOffensiveTarget() == null) { ShowRangeFeedback("공격할 수 있는 대상이 없습니다"); return; }
             if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (IsOnGcd || _isCastingSpell)
             {
@@ -363,6 +376,11 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill2_RearCombo()
         {
+            if (!CanUseCombatAction) return;
+            Transform selected = TargetingManager.Instance?.CurrentTarget;
+            if (CurrentRole == PlayerRole.Oracle_Healer && selected != null && selected.GetComponent<PartyLife>()?.IsDead == true)
+            { ShowRangeFeedback("사망한 아군에게는 [5] 부활을 사용하세요"); return; }
+            if (CurrentRole != PlayerRole.Oracle_Healer && GetOffensiveTarget() == null) { ShowRangeFeedback("공격할 수 있는 대상이 없습니다"); return; }
             if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (IsOnGcd || _isCastingSpell)
             {
@@ -392,6 +410,7 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill3_PersonalDefensive_oGCD()
         {
+            if (!CanUseCombatAction) return;
             if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (_skill3CooldownRemaining > 0.001f)
             {
@@ -399,6 +418,7 @@ namespace RaidRogue
             }
 
             _skill3CooldownRemaining = skill3CooldownTotal;
+            playerController.Potion?.EndRevivalProtection();
 
             switch (CurrentRole)
             {
@@ -440,6 +460,11 @@ namespace RaidRogue
         // =====================================================================
         public void TryUseSkill4_GaleThrust_oGCD()
         {
+            if (!CanUseCombatAction) return;
+            Transform selected = TargetingManager.Instance?.CurrentTarget;
+            if (CurrentRole == PlayerRole.Oracle_Healer && selected != null && selected.GetComponent<PartyLife>()?.IsDead == true)
+            { ShowRangeFeedback("사망한 아군에게는 [5] 부활을 사용하세요"); return; }
+            if (CurrentRole == PlayerRole.Guardian_Tank && GetOffensiveTarget() == null) return;
             if (LocalGameplayInput.Blocked || (playerController != null && playerController.IsBeingRescued)) return;
             if (_skill4CooldownRemaining > 0.001f)
             {
@@ -676,6 +701,7 @@ namespace RaidRogue
             if (targetBoss == null) return;
 
             _skill4CooldownRemaining = skill4CooldownTotal;
+            playerController?.Potion?.EndRevivalProtection();
             ResolveOffensiveTarget(out BossAddMinion targetedAdd, out _);
 
             string myName = playerController != null ? playerController.playerRoleDisplayName : "가디언(탱커)";
@@ -897,7 +923,7 @@ namespace RaidRogue
                 ? Mathf.Max(8f, 20f - 6f * playerController.tacticalRescueStacks)
                 : 20.0f;
             skill4CooldownTotal = rescueCd;
-            _skill4CooldownRemaining = rescueCd;
+
 
             PartyBotAI rescuedBot = null;
             bool isExplicitTarget = false;
@@ -920,6 +946,8 @@ namespace RaidRogue
 
             if (rescuedBot != null)
             {
+                _skill4CooldownRemaining = rescueCd;
+                playerController?.Potion?.EndRevivalProtection();
                 Vector3 pullDest = transform.position + transform.forward * 1.1f;
                 pullDest.y = rescuedBot.transform.position.y;
                 rescuedBot.StartPulledByPlayerRescue(pullDest);
@@ -1143,6 +1171,7 @@ namespace RaidRogue
             if (!TryBeginMeleeAttack(MeleeSkill.BladeGale, 1, out BossAddMinion targetedAdd)) return;
 
             _skill4CooldownRemaining = skill4CooldownTotal;
+            playerController?.Potion?.EndRevivalProtection();
 
             float buffMult = GetPlayerDamageBuffMultiplier();
             int finalDmg = Mathf.RoundToInt(skill4GaleThrustDamage * buffMult);
@@ -1219,6 +1248,7 @@ namespace RaidRogue
             }
 
             // 말뚝 캐스팅 시작!
+            playerController?.Potion?.EndRevivalProtection();
             _isCastingSpell = true;
             _castingSpellComboStage = stage;
             _castingSpellName = spellName;
@@ -1331,6 +1361,7 @@ namespace RaidRogue
         private void ExecuteCasterSkill4_Triplecast()
         {
             _skill4CooldownRemaining = skill4CooldownTotal;
+            playerController?.Potion?.EndRevivalProtection();
             _triplecastBuffRemaining = 6.0f;
 
             // 이미 캐스팅 중이었다면 즉시 발사 완료시켜 줌!
@@ -1409,6 +1440,7 @@ namespace RaidRogue
 
         private void TriggerSharedGCD()
         {
+            playerController?.Potion?.EndRevivalProtection();
             _gcdTotalForCurrentCycle = Mathf.Max(minGcdDuration, currentGcdDuration);
             _gcdRemaining = _gcdTotalForCurrentCycle;
         }
@@ -1933,7 +1965,7 @@ namespace RaidRogue
         private void ApplyHealingTick()
         {
             // A lingering zone cannot heal or grant shields in the next encounter.
-            if (_encounterId != CombatMetricsManager.EncounterId) { Destroy(gameObject); return; }
+            if (_encounterId != CombatMetricsManager.EncounterId || StageManager.CombatSuspended || (_source != null && !CombatRange.LivingPartyMember(_source))) { Destroy(gameObject); return; }
             Vector2 centerXZ = new Vector2(transform.position.x, transform.position.z);
 
             PlayerController pc = FindFirstObjectByType<PlayerController>();

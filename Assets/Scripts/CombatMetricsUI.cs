@@ -187,7 +187,7 @@ namespace RaidRogue
                 }
                 _resultRows.Add(cells);
             }
-            ButtonAt(box, "Close", "닫기 · 보상/클리어 화면으로", new Vector2(0.5f, 0), new Vector2(0, 45), new Vector2(370, 48), CloseResults);
+            ButtonAt(box, "Close", "닫기 · 이전 화면으로", new Vector2(0.5f, 0), new Vector2(0, 45), new Vector2(370, 48), CloseResults);
             _results.SetActive(false);
         }
 
@@ -218,10 +218,22 @@ namespace RaidRogue
             if (_results != null) _results.SetActive(false);
         }
 
+        public void ShowFailedResult()
+        {
+            EnsureUI();
+            var failed = _metrics.Ledger.FailedAttempts;
+            if (_results == null || failed.Count == 0) return;
+            foreach (Transform child in _tabs) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
+            DisplayResult(failed[failed.Count - 1]);
+            _resultTitle.text = $"STAGE {failed[failed.Count - 1].Stage} · 실패한 시도 (클리어 합산 제외)";
+            ResultsOpen = true; _lastModalFrame = Time.frameCount;
+            _results.SetActive(true); _results.transform.SetAsLastSibling();
+        }
+
         private void DisplayResult(CombatEncounterResult data)
         {
             _resultTitle.text = data.Stage == 0 ? "전체 런 · 누적 전투 결과" : $"STAGE {data.Stage} · 전투 결과";
-            _resultTime.text = $"전투 시간 {data.Seconds:0.00}초 · 포션은 자가 회복에만 집계 (HPS 제외)";
+            _resultTime.text = $"전투 시간 {data.Seconds:0.00}초 · 전체 런 재도전 {_metrics.Ledger.RetryCount}회 · 포션/부활 HPS 제외";
             var members = Sorted(data);
             for (int i = 0; i < _resultRows.Count; i++)
             {

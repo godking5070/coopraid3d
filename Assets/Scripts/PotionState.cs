@@ -7,7 +7,7 @@ namespace RaidRogue
     {
         // StageManager owns one settings instance shared by the player and all bots.
         public float cooldown = 30f;
-        public const float HealFraction = 0.5f;
+        public float healFraction = 0.5f;
         public const float BotUseHpFraction = 0.4f;
         public const float RevivalProtectionSeconds = 3f;
     }
@@ -22,7 +22,8 @@ namespace RaidRogue
 
         public bool CanUse(PotionSettings settings, float hp, float maxHp, bool alive, bool blocked) =>
             !_applying && alive && !blocked && CooldownRemaining <= 0 && Finite(hp) && Finite(maxHp) &&
-            hp > 0 && maxHp > hp && settings != null && Finite(settings.cooldown) && settings.cooldown >= 0;
+            hp > 0 && maxHp > hp && settings != null && Finite(settings.cooldown) && settings.cooldown >= 0 &&
+            Finite(settings.healFraction) && settings.healFraction > 0 && settings.healFraction <= 1;
 
         public static bool NeedsAutomaticPotion(float hp, float maxHp, bool alive) =>
             alive && Finite(hp) && Finite(maxHp) && hp > 0 && maxHp > 0 && hp <= maxHp * PotionSettings.BotUseHpFraction;
@@ -34,7 +35,7 @@ namespace RaidRogue
             float cooldown = settings.cooldown;
             _applying = true;
             float actual;
-            try { actual = applyHeal(maxHp * PotionSettings.HealFraction); }
+            try { actual = applyHeal(maxHp * settings.healFraction); }
             finally { _applying = false; }
             if (!Finite(actual) || actual <= 0) return 0;
             CooldownDuration = CooldownRemaining = cooldown;

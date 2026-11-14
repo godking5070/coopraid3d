@@ -145,9 +145,17 @@ namespace RaidRogue
             }
         }
 
+        private bool CanChangePartyRoles()
+        {
+            if (StageManager.CombatSuspended) return false;
+            foreach (var member in PartyLife.OrderedMembers())
+                if (!CombatRange.LivingPartyMember(member)) return false;
+            return true;
+        }
+
         public void OpenRoleSelectionModal()
         {
-            if (CombatMetricsUI.BlocksUnderlyingInput) return;
+            if (CombatMetricsUI.BlocksUnderlyingInput || !CanChangePartyRoles()) return;
             EnsureUI();
 
             if (roleModalRoot != null)
@@ -189,6 +197,7 @@ namespace RaidRogue
 
         public void SelectRoleByIndex(int roleNumber1To4)
         {
+            if (!CanChangePartyRoles()) return;
             PlayerRole chosen = roleNumber1To4 switch
             {
                 1 => PlayerRole.Guardian_Tank,
@@ -212,6 +221,7 @@ namespace RaidRogue
         public void ApplySelectedRole(PlayerRole selectedRole, bool repositionParty = true, bool showAlertBanner = true)
         {
             RefreshSceneReferences();
+            if (!CanChangePartyRoles()) return;
 
             // 1. 내 캐릭터 직업 스탯/외형/스킬셋 적용
             if (player != null)
