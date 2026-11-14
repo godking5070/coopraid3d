@@ -1,13 +1,18 @@
 param(
     [string]$OriginalProject = (Split-Path $PSScriptRoot -Parent),
-    [ValidateSet('LAN', 'AI', 'SaveResume')][string]$Mode = 'LAN',
+    [ValidateSet('LAN', 'AI', 'SaveResume', 'RestoreFixture')][string]$Mode = 'LAN',
     [ValidateSet('normal', 'hard', 'both')][string]$Difficulty = 'both',
     [ValidateSet(1, 6)][int]$ThroughStage = 1,
     [ValidateSet(2, 4)][int]$Players = 4,
+    [ValidateSet(4, 6)][int]$FixtureStage = 4,
     [ValidateRange(30, 3600)][int]$TimeoutSeconds = 900,
     [string]$ReportDirectory
 )
 $ErrorActionPreference = 'Stop'
+$headlessRunnerSha = (Get-FileHash -LiteralPath $PSCommandPath).Hash
+$headlessSavePair = $Mode -in @('SaveResume', 'RestoreFixture')
+$headlessBoundary = $(if ($Mode -eq 'RestoreFixture') { $FixtureStage } else { 1 })
+if ($Mode -ne 'RestoreFixture' -and $PSBoundParameters.ContainsKey('FixtureStage')) { throw 'FixtureStage is only valid for the generated-data RestoreFixture mode.' }
 # The observed hard six-stage run exceeded thirty minutes before its last boss.
 # Keep shorter lobby/first-boundary defaults; respect explicit caller deadlines.
 if ($Mode -eq 'AI' -and $ThroughStage -eq 6 -and !$PSBoundParameters.ContainsKey('TimeoutSeconds')) { $TimeoutSeconds = 3600 }
@@ -26,6 +31,7 @@ foreach ($headlessArtifact in $headlessReceipt.artifacts) {
 $headlessFingerprint = Get-Part1ProjectFingerprint -Project (Split-Path $PSScriptRoot -Parent)
 if ($headlessFingerprint.sha256 -ne $headlessReceipt.inputSha256) { throw 'Rebuild the exact current source/assets before running integration checks.' }
 $headlessScenario = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot 'Scenarios/Part1-FourPlayer.json')).Path
+$headlessScenarioSha = (Get-FileHash -LiteralPath $headlessScenario).Hash
 $headlessProjectSettings = [IO.File]::ReadAllText((Join-Path $headlessOriginal 'ProjectSettings/ProjectSettings.asset'))
 function Read-HeadlessProductField([string]$Name) {
     $value = [regex]::Match($headlessProjectSettings, ('(?m)^  ' + $Name + ': (.+)$')).Groups[1].Value.Trim()
@@ -60,9 +66,12 @@ if (!$ReportDirectory) { $ReportDirectory = Join-Path ([IO.Path]::GetTempPath())
 if (Test-Path -LiteralPath (Join-Path $ReportDirectory 'results.json')) { throw 'Use a new report directory to preserve existing evidence.' }
 [IO.Directory]::CreateDirectory($ReportDirectory) | Out-Null
 $ReportDirectory = (Resolve-Path -LiteralPath $ReportDirectory).Path
-if ($Mode -eq 'SaveResume' -and $ThroughStage -ne 1) { throw 'SaveResume checks the first regular checkpoint; use AI for complete combat runs.' }
-$headlessCases = $(if ($Mode -eq 'LAN') { @('lan') } elseif ($Mode -eq 'SaveResume') {
-    foreach ($headlessDiff in $(if ($Difficulty -eq 'both') { @('normal', 'hard') } else { @($Difficulty) })) { 'single-save-' + $headlessDiff; 'single-resume-' + $headlessDiff }
+if ($headlessSavePair -and $ThroughStage -ne 1) { throw 'Persistence checks use ThroughStage 1. RestoreFixture selects its generated-data boundary with FixtureStage; use AI for combat.' }
+$headlessCases = $(if ($Mode -eq 'LAN') { @('lan') } elseif ($headlessSavePair) {
+    foreach ($headlessDiff in $(if ($Difficulty -eq 'both') { @('normal', 'hard') } else { @($Difficulty) })) {
+        $headlessPrefix = $(if ($Mode -eq 'RestoreFixture') { 'single-fixture' } else { 'single' })
+        $headlessPrefix + '-save-' + $headlessDiff; $headlessPrefix + '-resume-' + $headlessDiff
+    }
 } elseif ($Difficulty -eq 'both') { @('normal', 'hard') } else { @($Difficulty) })
 $headlessSharedProfiles = @{ normal = ('resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16)); hard = ('resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16)) }
 $headlessResults = [System.Collections.Generic.List[object]]::new()
@@ -80,18 +89,18 @@ foreach ($headlessCase in $headlessCases) {
         Copy-Item -LiteralPath (Join-Path $headlessNormalRoot $headlessUserFile.path) -Destination $headlessBackupPath
     }
     $headlessPort = Get-Random -Minimum 20000 -Maximum 50000
-    $headlessActualDifficulty = $(if ($Mode -eq 'AI') { $headlessCase } elseif ($Mode -eq 'SaveResume') { ($headlessCase -split '-')[-1] } else { 'normal' })
-    $headlessProfile = $(if ($Mode -eq 'SaveResume') { $headlessSharedProfiles[$headlessActualDifficulty] } else { 'resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16) })
+    $headlessActualDifficulty = $(if ($Mode -eq 'AI') { $headlessCase } elseif ($headlessSavePair) { ($headlessCase -split '-')[-1] } else { 'normal' })
+    $headlessProfile = $(if ($headlessSavePair) { $headlessSharedProfiles[$headlessActualDifficulty] } else { 'resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16) })
     Write-Output "RUN: $Mode $headlessCase players=$Players through=$ThroughStage evidence=$headlessCaseDirectory"
     try {
         $headlessCount = $(if ($Mode -eq 'LAN') { $Players } else { 1 })
         for ($headlessRole = 1; $headlessRole -le $headlessCount; $headlessRole++) {
-            $headlessKind = $(if ($Mode -eq 'AI') { 'ai' } elseif ($Mode -eq 'SaveResume') { $headlessCase.Substring(0, $headlessCase.LastIndexOf('-')) } elseif ($headlessRole -eq 1) { 'lan-host' } else { 'lan-client' })
+            $headlessKind = $(if ($Mode -eq 'AI') { 'ai' } elseif ($headlessSavePair) { $headlessCase.Substring(0, $headlessCase.LastIndexOf('-')) } elseif ($headlessRole -eq 1) { 'lan-host' } else { 'lan-client' })
             $headlessLog = Join-Path $headlessCaseDirectory ("role-$headlessRole.log")
             foreach ($headlessPath in @($headlessLog, $headlessCaseDirectory, $headlessScenario)) { if ($headlessPath.Contains('"')) { throw 'Quotes are not supported in check paths.' } }
             $headlessArguments = '-batchmode -nographics -logFile "' + $headlessLog + '" --raid-test-profile=' + $headlessProfile + '-r' + $headlessRole +
                 ' --astella-check=' + $headlessKind + ' --astella-role=' + $headlessRole + ' --astella-players=' + $Players +
-                ' --astella-through=' + $ThroughStage + ' --astella-timeout=' + $TimeoutSeconds + ' --astella-difficulty=' + $headlessActualDifficulty +
+                ' --astella-through=' + $ThroughStage + ' --astella-boundary=' + $headlessBoundary + ' --astella-timeout=' + $TimeoutSeconds + ' --astella-difficulty=' + $headlessActualDifficulty +
                 ' --astella-address=127.0.0.1:' + $headlessPort + ' --astella-case-dir="' + $headlessCaseDirectory + '" --astella-scenario="' + $headlessScenario + '"'
             $headlessProcess = Start-Process -FilePath $headlessExe -ArgumentList $headlessArguments -WindowStyle Hidden -PassThru
             $headlessProcesses.Add([pscustomobject]@{ process = $headlessProcess; role = $headlessRole; log = $headlessLog; startedUtc = [DateTime]::UtcNow.ToString('O') })
@@ -136,7 +145,7 @@ foreach ($headlessCase in $headlessCases) {
         }
     }
     $headlessNormalAfter = Get-HeadlessNormalDataFingerprint
-    if ($Mode -eq 'SaveResume' -and $headlessCase.StartsWith('single-resume-') -and $headlessCaseResults.Count -eq 1 -and $headlessResults.Count -gt 0) {
+    if ($headlessSavePair -and $headlessCase -like '*-resume-*' -and $headlessCaseResults.Count -eq 1 -and $headlessResults.Count -gt 0) {
         $headlessPreviousRun = $headlessResults[$headlessResults.Count - 1].members[0]
         $headlessResumedRun = $headlessCaseResults[0]
         if ($headlessPreviousRun.runId -ne $headlessResumedRun.runId -or $headlessPreviousRun.profileRoot -ne $headlessResumedRun.profileRoot -or $headlessPreviousRun.processSessionId -eq $headlessResumedRun.processSessionId -or $headlessPreviousRun.attemptId -eq $headlessResumedRun.attemptId) { $headlessFailure = 'Resume did not reuse the saved run in a fresh process and fresh attempt.' }
@@ -145,6 +154,7 @@ foreach ($headlessCase in $headlessCases) {
     $headlessDataPreserved = $headlessNormalBefore.sha256 -eq $headlessNormalAfter.sha256
     if (!$headlessDataPreserved -and !$headlessFailure) { $headlessFailure = 'Ordinary user data changed during the check; inspect fingerprints before continuing.' }
     foreach ($headlessMember in $headlessCaseResults) {
+        if ($Mode -eq 'RestoreFixture' -and (!$headlessMember.generatedFixture -or $headlessMember.checkpointStage -ne $FixtureStage)) { $headlessFailure = 'Generated fixture provenance or boundary mismatch.' }
         if ([string]::IsNullOrWhiteSpace($headlessMember.profileRoot)) { $headlessFailure = 'Runtime failed before isolated-profile validation; inspect its reason and log.'; continue }
         try {
             if (![IO.Path]::GetFullPath($headlessMember.profileRoot).StartsWith([IO.Path]::GetFullPath((Join-Path $headlessNormalRoot 'test-profiles')) + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
@@ -156,10 +166,10 @@ foreach ($headlessCase in $headlessCases) {
     $headlessResults.Add([pscustomobject]@{ case = $headlessCase; directory = $headlessCaseDirectory; success = !$headlessFailure; error = $headlessFailure; members = $headlessCaseResults; processes = $headlessProcessEvidence; ordinaryDataBefore = $headlessNormalBefore; ordinaryDataAfter = $headlessNormalAfter; ordinaryDataFilesPreserved = $headlessDataPreserved; engineDiagnosticsBefore = $headlessEngineBefore; engineDiagnosticsAfter = $headlessEngineAfter; engineDiagnosticsChanged = ($headlessEngineBefore.sha256 -ne $headlessEngineAfter.sha256) })
     [pscustomobject]@{
         version = 1; sourceCommit = $headlessReceipt.sourceCommit; inputSha256 = $headlessReceipt.inputSha256
-        scenarioPath = $headlessScenario; scenarioSha256 = (Get-FileHash -LiteralPath $headlessScenario).Hash; runnerSha256 = (Get-FileHash -LiteralPath $PSCommandPath).Hash
-        mode = $Mode; targetStage = $ThroughStage; players = $Players; completedUtc = [DateTime]::UtcNow.ToString('O')
+        scenarioPath = $headlessScenario; scenarioSha256 = $headlessScenarioSha; runnerSha256 = $headlessRunnerSha
+        mode = $Mode; targetStage = $ThroughStage; generatedFixture = ($Mode -eq 'RestoreFixture'); checkpointStage = $headlessBoundary; timeoutSeconds = $TimeoutSeconds; players = $Players; completedUtc = [DateTime]::UtcNow.ToString('O')
         cases = @($headlessResults.ToArray()); humanInputVerified = $false; steamVerified = $false; gpuPerformanceVerified = $false
-    } | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $ReportDirectory 'results.json') -Encoding UTF8
+    } | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath (Join-Path $ReportDirectory 'results.json') -Encoding UTF8
     if ($headlessFailure) { throw "Headless $headlessCase failed: $headlessFailure. Evidence: $headlessCaseDirectory" }
     Write-Output "PASS: $Mode $headlessCase. Evidence: $headlessCaseDirectory"
 }

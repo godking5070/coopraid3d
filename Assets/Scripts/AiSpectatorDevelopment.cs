@@ -18,14 +18,14 @@ namespace RaidRogue
         [Serializable] public sealed class Result
         {
             public string mode,difficulty,reason,profileRoot,protocol,startedUtc,finishedUtc,runId,seed,checkpointPath,processSessionId=Guid.NewGuid().ToString("N"),attemptId;
-            public bool success,headless=true,humanInputVerified,steamVerified;
-            public int expectedPlayers,connectedPlayers,targetStage,stage,frames,gc0,gc1,gc2;
+            public bool success,headless=true,humanInputVerified,steamVerified,generatedFixture;
+            public int expectedPlayers,connectedPlayers,targetStage,checkpointStage=1,stage,frames,gc0,gc1,gc2;
             public double seconds,meanFrameIntervalMs,maxFrameIntervalMs,peakAllocatedMB;
             public Member[] members; public string[] errors;
         }
         private readonly List<string> _errors=new List<string>();
         private string _mode,_caseDirectory,_reportPath,_difficulty;
-        private int _role,_expected,_target,_timeout;
+        private int _role,_expected,_target,_timeout,_boundary;
         private int _startFrame,_gc0,_gc1,_gc2;
         private float _began,_maximumFrame,_nextReport;
         private double _peakMemory;
@@ -70,10 +70,13 @@ namespace RaidRogue
             _mode=Argument("check");_difficulty=Argument("difficulty",CampaignCatalog.Normal);
             _role=int.Parse(Argument("role","1"));_expected=int.Parse(Argument("players","4"));
             _target=int.Parse(Argument("through","1"));_timeout=int.Parse(Argument("timeout","900"));
+            _boundary=int.Parse(Argument("boundary","1"));
+            bool single=_mode=="single-save"||_mode=="single-resume";
+            bool fixture=_mode=="single-fixture-save"||_mode=="single-fixture-resume";
             _caseDirectory=Path.GetFullPath(Argument("case-dir"));
             if(!Directory.Exists(_caseDirectory)||!System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(_caseDirectory),"^case-[a-f0-9]{32}$"))throw new InvalidOperationException("An explicit unique case directory is required.");
             _reportPath=Path.Combine(_caseDirectory,"role-"+_role+".json");
-            if(File.Exists(_reportPath)||(_mode!="ai"&&_mode!="lan-host"&&_mode!="lan-client"&&_mode!="single-save"&&_mode!="single-resume")||_role<1||_role>4||(_expected!=2&&_expected!=4)||(_target!=1&&_target!=6)||_timeout<15||_timeout>3600)throw new InvalidOperationException("Invalid isolated integration request.");
+            if(File.Exists(_reportPath)||(_mode!="ai"&&_mode!="lan-host"&&_mode!="lan-client"&&!single&&!fixture)||_role<1||_role>4||(_expected!=2&&_expected!=4)||(_target!=1&&_target!=6)||_timeout<15||_timeout>3600||(!fixture&&_boundary!=1)||(fixture&&_boundary!=4&&_boundary!=6))throw new InvalidOperationException("Invalid isolated integration request.");
             string scenarioPath=Path.GetFullPath(Argument("scenario"));
             if(new FileInfo(scenarioPath).Length>32768)throw new InvalidOperationException("Scenario is too large.");
             _scenario=JsonUtility.FromJson<Scenario>(File.ReadAllText(scenarioPath));
@@ -90,7 +93,7 @@ namespace RaidRogue
                 var definition=CharacterCatalog.Find(slot.jobId);
                 if(definition==null||!definition.playable||!CharacterSlots.IsNineKey(definition)||CharacterRosterData.Role(definition)!=slot.role||slot.routeIndex<0||slot.routeIndex>=definition.routes.Length)throw new InvalidOperationException("Scenario catalog/role mismatch.");
             }
-            _result=new Result{mode=_mode,difficulty=_difficulty,expectedPlayers=_expected,targetStage=_target,profileRoot=profile,protocol=RaidWire.Version.ToString(),startedUtc=DateTime.UtcNow.ToString("O")};
+            _result=new Result{mode=_mode,difficulty=_difficulty,expectedPlayers=_expected,targetStage=_target,checkpointStage=_boundary,generatedFixture=fixture,profileRoot=profile,protocol=RaidWire.Version.ToString(),startedUtc=DateTime.UtcNow.ToString("O")};
             if(_mode=="ai")
             {
                 _tacticTrace=new StreamWriter(Path.Combine(_caseDirectory,"tactics.csv"),false,new System.Text.UTF8Encoding(false));
@@ -98,11 +101,11 @@ namespace RaidRogue
             }
             Application.targetFrameRate=60;
             Debug.Log("[HeadlessResume] START mode="+_mode+" role="+_role+" report="+_reportPath+" profile="+profile);
-            if(_mode=="single-save"||_mode=="single-resume")
+            if(single||fixture)
             {
                 var stage=StageManager.Instance;
                 if(_target!=1)throw new InvalidOperationException("Application restart fixture checks the first regular stage boundary only.");
-                if(_mode=="single-save")
+                if(_mode=="single-save"||_mode=="single-fixture-save")
                 {
                     if(campaign.Saved!=null||campaign.Settlement!=null)throw new InvalidOperationException("Fresh save fixture requires an unused profile.");
                     campaign.SelectDifficulty(_difficulty);_session.SinglePlay();
@@ -117,10 +120,12 @@ namespace RaidRogue
                     string chosen=BuildKey(actor.Snapshot);
                     AegisRouteSelectionUI.Close();RoleSelectionManager.Instance.ConfirmAegisDeparture();stage.BeginSingleRun();
                     if(campaign.Saved==null||campaign.Saved.transport!="single"||campaign.Saved.nextStage!=1||BuildKey(actor.Snapshot)!=chosen)throw new InvalidOperationException("Regular departure checkpoint or chosen build was lost.");
+                    if(fixture)WriteRestoreFixture(campaign,_boundary);
                 }
                 else
                 {
-                    if(!campaign.CanContinue||campaign.Saved?.transport!="single"||campaign.Saved.nextStage!=1||campaign.Saved.difficultyId!=_difficulty)throw new InvalidOperationException("Prior process regular checkpoint is not resumable.");
+                    if(!campaign.CanContinue||campaign.Saved?.transport!="single"||campaign.Saved.nextStage!=_boundary||campaign.Saved.difficultyId!=_difficulty)throw new InvalidOperationException("Prior process regular checkpoint is not resumable.");
+                    string before=File.ReadAllText(campaign.RunPath),personal=JsonUtility.ToJson(campaign.Personal);
                     var prior=JsonUtility.FromJson<CampaignCheckpoint>(JsonUtility.ToJson(campaign.Saved));
                     var local=prior.party.Single(p=>!p.bot&&p.userId==campaign.Owner);
                     campaign.Continue(false);
@@ -130,14 +135,18 @@ namespace RaidRogue
                     // at the real door and invoke the production continuation entry.
                     stage.player.transform.position=RaidLobbyRoom.DoorPosition;
                     _session.ContinueSavedSingleFromDoor();
-                    if(campaign.Resume!=null||stage.RunId!=prior.runId||stage.currentStage!=1||stage.IrisCoins!=4||Mathf.Abs(stage.player.currentHp-stage.player.maxHp)>.01f||BuildKey(actor.Snapshot)!=BuildKey(local.character)||actor.Snapshot.skills.Any(s=>s.recharge!=0))throw new InvalidOperationException("Fresh process boundary restore did not complete correctly.");
+                    if(campaign.Resume!=null||stage.RunId!=prior.runId||stage.currentStage!=_boundary||stage.IrisCoins!=4||Mathf.Abs(stage.player.currentHp-stage.player.maxHp)>.01f||BuildKey(actor.Snapshot)!=BuildKey(local.character)||actor.Snapshot.skills.Any(s=>s.recharge!=0))throw new InvalidOperationException("Fresh process boundary restore did not complete correctly.");
+                    VerifyRestoredParty(prior);
+                    if(File.ReadAllText(campaign.RunPath)!=before||JsonUtility.ToJson(campaign.Personal)!=personal)throw new InvalidOperationException("Loading a boundary rewrote the checkpoint or personal rewards.");
+                    if(fixture&&(_boundary==4&&!stage.boss.MarionetteEncounter||_boundary==6&&!stage.boss.JanusEncounter))throw new InvalidOperationException("Late checkpoint restored the wrong encounter.");
                 }
                 if(campaign.HasSaveFailure)throw new InvalidOperationException("Regular checkpoint write failed.");
                 var persisted=JsonUtility.FromJson<CampaignCheckpoint>(File.ReadAllText(campaign.RunPath));
                 string invalid=CampaignValidation.Checkpoint(persisted,campaign.Owner,CharacterCatalog.Find);
-                if(invalid!=null||persisted.completed||persisted.clears.Length!=0)throw new InvalidOperationException("Regular first-boundary checkpoint invalid: "+invalid);
+                if(invalid!=null||persisted.completed||persisted.nextStage!=_boundary||persisted.clears.Length!=_boundary-1)throw new InvalidOperationException("Regular boundary checkpoint invalid: "+invalid);
                 File.Copy(campaign.RunPath,Path.Combine(_caseDirectory,"checkpoint.json"));
-                Finish(true,_mode=="single-save"?"Regular single first-boundary checkpoint with nondefault build written through production departure.":"Separate game process resumed the same regular checkpoint, build and run with fresh HP/cooldowns/four revivals. Door movement/input and later-stage rewards remain separate.");
+                Finish(true,fixture?"Generated regular stage-"+_boundary+" restore fixture: "+(_mode=="single-fixture-save"?"validated representative card/unlock/history data written in the isolated profile; no combat simulated.":"new process restored cards, unlocks, party, metrics and encounter without replaying personal rewards or rewriting disk. This is a generated-data restore check, not a combat clear."):
+                    _mode=="single-save"?"Regular single first-boundary checkpoint with nondefault build written through production departure.":"Separate game process resumed the same regular checkpoint, build and run with fresh HP/cooldowns/four revivals. Door movement/input and later-stage rewards remain separate.");
             }
             else if(_mode=="ai")
             {
@@ -208,6 +217,60 @@ namespace RaidRogue
             while(!File.Exists(Path.Combine(_caseDirectory,"STOP"))&&Time.realtimeSinceStartup-_began<_timeout+60)yield return null;
             if(_errors.Count>0){_result.success=false;_result.reason="Engine error after initial result.";SaveResult();}
             ExitCheck(_result.success?0:1);
+        }
+        private static string CardKey(CampaignCardStack[] cards)=>string.Join(",",cards.OrderBy(c=>c.id).Select(c=>c.id+"="+c.stacks));
+        private static string EffectKey(JobBuildEffect[] effects)=>string.Join(",",effects.OrderBy(e=>e.id).Select(e=>e.id+"="+e.stacks+"@"+TraceNumber(e.magnitude)));
+        private static void WriteRestoreFixture(CampaignRuntime campaign,int boundary)
+        {
+            if(!campaign.IsolatedTestProfile||(boundary!=4&&boundary!=6)||campaign.Saved?.nextStage!=1)throw new InvalidOperationException("Generated restore fixtures require an unused isolated departure checkpoint.");
+            var data=JsonUtility.FromJson<CampaignCheckpoint>(JsonUtility.ToJson(campaign.Saved));int finished=boundary-1;
+            foreach(var slot in data.party)
+            {
+                var state=new CharacterRuntimeState(CharacterCatalog.Find(slot.character.jobId));
+                if(!state.Restore(slot.character))throw new InvalidOperationException("Fixture source actor is invalid.");
+                for(int n=1;n<=finished;n++)
+                {
+                    if(!state.ClearedStage(data.runId,data.chapterId,n))throw new InvalidOperationException("Fixture stage identity is invalid.");
+                    foreach(var rule in state.PendingChoices())if(!state.ChooseSkill(rule.id,rule.choices.Last(),state.RewardKey(rule),true))throw new InvalidOperationException("Fixture unlock is invalid.");
+                }
+                var jobCards=Enumerable.Range(7,24).Select(CampaignCardIds.Id).Where(id=>CampaignCardIds.Fits(id,slot.character.jobId)).ToArray();
+                slot.cards=slot.bot?Array.Empty<CampaignCardStack>():new[]{new CampaignCardStack{id=CampaignCardIds.Id(6),stacks=finished-2},
+                    new CampaignCardStack{id=jobCards[0],stacks=1},new CampaignCardStack{id=jobCards[1],stacks=1}};
+                foreach(var effect in CampaignCardIds.Effects(slot.cards))state.SetBuildEffect(effect.id,effect.stacks,effect.magnitude);
+                state.Reset(CharacterReset.NextStage);slot.character=state.Snapshot;
+            }
+            data.nextStage=boundary;data.attemptsStarted=boundary;data.runSeconds=finished;data.savedUtc=DateTimeOffset.UtcNow.ToString("O");
+            data.processedStages=Enumerable.Range(1,finished).Select(n=>CharacterRewardKey.Stage(data.runId,data.chapterId,n)).ToArray();
+            var owner=data.party.Single(p=>!p.bot);
+            var ownerCards=owner.cards.Where(c=>CampaignCardIds.Index(c.id)>=7).Select(c=>c.id).ToArray();
+            data.rewards=Enumerable.Range(1,finished).Select(n=>new CampaignRewardRecord{key=CharacterRewardKey.Stage(data.runId,data.chapterId,n)+"/card/"+owner.slotId,slotId=owner.slotId,
+                offeredIds=new[]{n<=2?ownerCards[n-1]:CampaignCardIds.Id(6),CampaignCardIds.Id(0),CampaignCardIds.Id(1)},selectedId=n<=2?ownerCards[n-1]:CampaignCardIds.Id(6)}).ToArray();
+            data.clears=Enumerable.Range(1,finished).Select(n=>new CampaignMetricRecord{stage=n,seconds=1,members=data.party.Select(p=>new CampaignMetricMember{slotId=p.slotId,name=p.name,role=p.role,jobId=p.character.jobId}).ToArray()}).ToArray();
+            string invalid=CampaignValidation.Checkpoint(data,campaign.Owner,CharacterCatalog.Find);
+            if(invalid!=null)throw new InvalidOperationException("Generated checkpoint rejected: "+invalid);
+            // Fixture data never enters ordinary saves or changes the live campaign.
+            // The next process must load it through the normal continuation API.
+            if(!CampaignStorage.Save(campaign.RunPath,JsonUtility.ToJson(data,true),json=>CampaignValidation.Checkpoint(JsonUtility.FromJson<CampaignCheckpoint>(json),campaign.Owner,CharacterCatalog.Find)==null?CampaignFileState.Valid:CampaignFileState.Corrupt,out string error))throw new IOException(error);
+        }
+        private static void VerifyRestoredParty(CampaignCheckpoint prior)
+        {
+            var members=PartyLife.OrderedMembers();if(members.Count!=prior.party.Length)throw new InvalidOperationException("Restored party count differs.");
+            foreach(var member in members)
+            {
+                var actor=CharacterActor.Ensure(member.gameObject);var live=actor.Snapshot;
+                var saved=prior.party.Single(p=>p.role==CharacterRosterData.Role(actor.Definition));
+                if(BuildKey(live)!=BuildKey(saved.character)||live.runId!=prior.runId||live.clearedStage!=prior.nextStage-1||
+                    !new HashSet<string>(live.clearedEncounters).SetEquals(saved.character.clearedEncounters)||!new HashSet<string>(live.unlocked).SetEquals(saved.character.unlocked)||
+                    !new HashSet<string>(live.chosenRules).SetEquals(saved.character.chosenRules)||!new HashSet<string>(live.automaticChoices).SetEquals(saved.character.automaticChoices)||
+                    !live.selections.OrderBy(s=>s.slot).Select(s=>s.skillId).SequenceEqual(saved.character.selections.OrderBy(s=>s.slot).Select(s=>s.skillId))||
+                    live.gcd!=0||live.castSkillId!=""||live.skills.Any(s=>s.recharge!=0||s.charges!=actor.RuntimeState.MaximumCharges(s.id))||
+                    EffectKey(live.effects)!=EffectKey(CampaignCardIds.Effects(saved.cards))||live.resources.Any(r=>Mathf.Abs(r.value-saved.character.resources.Single(v=>v.id==r.id).value)>.001f))throw new InvalidOperationException("Restored actor progress/build differs: "+actor.Definition.id);
+                float maximum=member.GetComponent<PlayerController>()?.maxHp??member.GetComponent<PartyBotAI>().maxHp;
+                if(Mathf.Abs(member.GetComponent<PartyLife>().Hp-maximum)>.01f)throw new InvalidOperationException("Restored party member is not at full health.");
+                if(member.GetComponent<PlayerController>() is PlayerController player&&CardKey(player.cardManager.CaptureCampaignCards())!=CardKey(saved.cards))throw new InvalidOperationException("Restored card stacks differ.");
+            }
+            if(CombatMetricsManager.Instance.Ledger.Stages.Count!=prior.clears.Length)throw new InvalidOperationException("Restored stage history differs.");
+            if(CampaignRuntime.Instance.DifficultyId!=prior.difficultyId||CampaignRuntime.Instance.ReportWorking.randomState!=prior.randomState||Mathf.Abs(StageManager.Instance.TotalPlayTime-prior.runSeconds)>.01f)throw new InvalidOperationException("Restored difficulty, random state or run time differs.");
         }
         private bool FixedBuild(CharacterActor actor,Slot slot,bool request)
         {
