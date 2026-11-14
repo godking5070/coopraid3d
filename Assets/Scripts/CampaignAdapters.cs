@@ -29,15 +29,28 @@ namespace RaidRogue
             _state = candidate; _role = definition.legacyRole; ObserveResources();
             if (definition.id == AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
             if (CharacterRosterData.Find(definition.id) != null) CharacterKit.Ensure(gameObject);
+            if(NineKeyHealerKit.Supports(definition))NineKeyHealerKit.Ensure(gameObject).Clear();
+            if(NineKeyTankKit.Supports(definition)){var tank=NineKeyTankKit.Ensure(gameObject);tank.Clear();tank.Recalculate();}
+            if(NineKeyDamageKit.Supports(definition))NineKeyDamageKit.Ensure(gameObject).Clear();
             _previous = transform.position; _singleCastTarget = null; _identityHeld = false;
             GetComponent<AegisPaladin>()?.RecalculateStats(); GetComponent<CharacterKit>()?.Recalculate();
             if (_player != null) { _player.currentHp = _player.maxHp; _player.playerRoleDisplayName = definition.name; }
+            if (CampaignRuntime.Instance?.ResumingSettlement == true)
+            {
+                if (_player != null) _player.currentHp = _player.maxHp * Mathf.Clamp01(slot.healthFraction);
+                var bot = GetComponent<PartyBotAI>();
+                if (bot != null) bot.currentHp = bot.maxHp * Mathf.Clamp01(slot.healthFraction);
+            }
             return true;
         }
         internal bool RestoreCampaignState(CharacterStateSnapshot snapshot)
         {
             if (RaidCombatAuthority.Replica || CampaignRuntime.Instance?.Restoring != true || _state == null) return false;
-            return _state.Restore(snapshot); // No resource gain/cast/reward events on restore.
+            if(!_state.Restore(snapshot))return false;
+            // Stage-boundary restore may change the magazine after PrepareEncounter.
+            // Rebuild transient route state from these authoritative resources.
+            GetComponent<NineKeyTankKit>()?.Clear();GetComponent<NineKeyHealerKit>()?.Clear();GetComponent<NineKeyDamageKit>()?.Clear();
+            return true; // No resource gain/cast/reward events on restore.
         }
     }
     public partial class PlayerController

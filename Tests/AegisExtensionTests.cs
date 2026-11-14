@@ -131,7 +131,13 @@ public static class AegisExtensionTests
         var flow=new RaidRunFlow();var actor=Actor();actor.BeginRun("run",CharacterRewardKey.CurrentChapter);var cards=new RaidRewardRound();
         for(int stage=1;stage<=3;stage++)
         {
-            Check(flow.TryPrepare(stage,3,false)&&flow.TryCountdown(flow.Revision)&&flow.TryStart(flow.Revision),"prepare once");
+            Check(flow.TryPrepare(stage,3,false),"prepare once");
+            Check(flow.Phase==RaidBattlePhase.Loading&&!flow.TryCountdown(flow.Revision)&&!flow.TryStart(flow.Revision),"loading cannot skip approach and arrival");
+            Check(flow.TryApproach(flow.Revision)&&flow.Phase==RaidBattlePhase.Approach,"prepared party enters approach");
+            Check(!flow.TryApproach(flow.Revision)&&!flow.TryCountdown(flow.Revision)&&!flow.TryStart(flow.Revision),"approach cannot repeat or skip arrival");
+            Check(flow.TryArrival(flow.Revision)&&flow.Phase==RaidBattlePhase.Arrival,"approach enters arrival presentation");
+            Check(flow.TryCountdown(flow.Revision)&&flow.Phase==RaidBattlePhase.Countdown,"arrival enters countdown");
+            Check(!flow.TryCountdown(flow.Revision)&&flow.TryStart(flow.Revision)&&flow.Phase==RaidBattlePhase.Combat,"countdown enters combat exactly once");
             Check(flow.Resolve(flow.Revision,true,0,4)==EncounterOutcome.Cleared,"boss clear wins simultaneous wipe");actor.ClearedStage(stage);
             Check(flow.FinishClear(flow.Revision,3,actor.PendingChoices().Length>0)&&flow.Phase==RaidBattlePhase.Reward,"final stage waits for V too");
             Check(!flow.FinishClear(flow.Revision,3,true),"duplicate clear callback refused");

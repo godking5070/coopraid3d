@@ -30,14 +30,16 @@ namespace RaidRogue
         public int Stage { get; }
         public double Seconds { get; }
         public IReadOnlyList<CombatMemberRecord> Members { get; }
+        public IReadOnlyList<string> Events { get; }
 
-        internal CombatEncounterResult(int stage, double seconds, IEnumerable<CombatMemberRecord> members)
+        internal CombatEncounterResult(int stage, double seconds, IEnumerable<CombatMemberRecord> members, IEnumerable<string> events = null)
         {
             Stage = stage;
             Seconds = seconds;
             var copies = new List<CombatMemberRecord>();
             foreach (var member in members) copies.Add(member.Copy());
             Members = copies.AsReadOnly();
+            Events = new List<string>(events ?? Array.Empty<string>()).AsReadOnly();
         }
     }
 
@@ -46,6 +48,7 @@ namespace RaidRogue
         private readonly Dictionary<int, CombatMemberRecord> _members = new Dictionary<int, CombatMemberRecord>();
         private readonly List<CombatEncounterResult> _stages = new List<CombatEncounterResult>();
         private readonly List<CombatEncounterResult> _failed = new List<CombatEncounterResult>();
+        private readonly List<string> _events = new List<string>();
         public IReadOnlyList<CombatEncounterResult> FailedAttempts => _failed.AsReadOnly();
         public int RetryCount { get; private set; }
         private readonly HashSet<int> _downMembers = new HashSet<int>();
@@ -74,6 +77,7 @@ namespace RaidRogue
             _downMembers.Clear();
             _stages.Clear();
             _failed.Clear(); RetryCount = 0;
+            _events.Clear();
         }
 
         public void RetainCurrentRoster(IEnumerable<int> ids)
@@ -89,6 +93,7 @@ namespace RaidRogue
             Seconds = 0;
             Active = true;
             _downMembers.Clear();
+            _events.Clear();
             var roster = new List<CombatMemberRecord>(_members.Values);
             _members.Clear();
             foreach (var member in roster) Register(member.Id, member.Name, member.Role, member.JobId);
@@ -99,6 +104,7 @@ namespace RaidRogue
         {
             Seconds = 0;
             foreach (var m in _members.Values) { m.BossDamage = m.AddDamage = m.Healing = m.SelfHealing = m.ShieldAbsorbed = 0; m.Deaths = 0; }
+            _events.Clear();
         }
 
         // Wall-clock duration while gameplay is advancing; paused/reward time is excluded.
@@ -107,7 +113,13 @@ namespace RaidRogue
             if (Active && gameplayAdvancing && ValidPositive(unscaledSeconds)) Seconds += unscaledSeconds;
         }
 
-        public CombatEncounterResult Snapshot() => new CombatEncounterResult(Stage, Seconds, _members.Values);
+        public CombatEncounterResult Snapshot() => new CombatEncounterResult(Stage, Seconds, _members.Values, _events);
+        public void RecordEvent(string description)
+        {
+            if (!Active || string.IsNullOrWhiteSpace(description)) return;
+            _events.Add($"{Seconds:0.0}s {description}");
+            if (_events.Count > 32) _events.RemoveAt(0);
+        }
 
         public void EndStage()
         {
@@ -186,6 +198,7 @@ namespace RaidRogue
         {
             Active = false; Stage = current.Stage; Seconds = current.Seconds; RetryCount = retries;
             _members.Clear(); foreach (var member in current.Members) _members[member.Id] = member.Copy();
+            _events.Clear(); _events.AddRange(current.Events);
             _stages.Clear(); _stages.AddRange(clears); _failed.Clear(); _failed.AddRange(failures);
         }
 
@@ -232,6 +245,13 @@ namespace RaidRogue
             Remaining=Math.Max(0,Remaining-removed);return removed;
         }
         public double RemainingFrom(int source) => _slices.Where(s=>s.Source==source).Sum(s=>s.Remaining);
+        public double RemoveEffect(int source,string key)
+        {
+            if(source==0||string.IsNullOrEmpty(key))return 0;
+            double removed=0;
+            for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Source==source&&_slices[i].Key==key){removed+=_slices[i].Remaining;_slices.RemoveAt(i);}
+            Remaining=Math.Max(0,Remaining-removed);return removed;
+        }
         public double RemainingFor(int source,string key) => _slices.Where(s=>s.Source==source&&s.Key==key).Sum(s=>s.Remaining);
         public double Expire(double now,Action<int,double> expired=null)
         {
@@ -239,22 +259,25 @@ namespace RaidRogue
             for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Key!=null&&_slices[i].Expires<=now){var slice=_slices[i];removed+=slice.Remaining;_slices.RemoveAt(i);expired?.Invoke(slice.Source,slice.Remaining);}
             Remaining=Math.Max(0,Remaining-removed);return removed;
         }
-        public void GrantTimed(int source,string key,double amount,double maximum,double expires)
+        public void GrantTimed(int source,string key,double amount,double maximum,double expires,bool preserveLarger=false)
         {
             if(string.IsNullOrEmpty(key)||amount<=0||double.IsNaN(amount)||double.IsInfinity(amount))return;
+            if(preserveLarger)amount=Math.Max(amount,RemainingFor(source,key));
             for(int i=_slices.Count-1;i>=0;i--)if(_slices[i].Source==source&&_slices[i].Key==key){Remaining-=_slices[i].Remaining;_slices.RemoveAt(i);}
             double added=Math.Max(0,Math.Min(amount,maximum-Remaining));
             if(added>0){_slices.Add(new Slice{Source=source,Key=key,Remaining=added,Expires=expires});Remaining+=added;}
         }
-        public void Absorb(double actualAbsorbed, Action<int, double> record)
+        public void Absorb(double actualAbsorbed, Action<int, double> record, Action<int,string,double> effectRecord=null)
         {
             var grouped = new Dictionary<int,double>();
+            var attributed = new Dictionary<(int source,string key),double>();
             double pending = Math.Min(Math.Max(0, actualAbsorbed), Remaining);
             while (pending > 0 && _slices.Count > 0)
             {
                 var slice = _slices[0];
                 double used = Math.Min(pending, slice.Remaining);
                 if(slice.Source!=0){grouped.TryGetValue(slice.Source,out double sum);grouped[slice.Source]=sum+used;}
+                if(effectRecord!=null&&slice.Source!=0&&slice.Key!=null){var key=(slice.Source,slice.Key);attributed.TryGetValue(key,out double sum);attributed[key]=sum+used;}
                 pending -= used;
                 Remaining -= used;
                 slice.Remaining -= used;
@@ -262,6 +285,9 @@ namespace RaidRogue
             }
             if (_slices.Count == 0) Remaining = 0;
             if(record!=null)foreach(var entry in grouped)record(entry.Key,entry.Value);
+            // Deliberately after the entire hit: callbacks may remove old residue
+            // and install the next layer, which must not absorb this same hit.
+            if(effectRecord!=null)foreach(var entry in attributed)effectRecord(entry.Key.source,entry.Key.key,entry.Value);
         }
     }
 }

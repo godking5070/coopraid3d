@@ -222,6 +222,8 @@ namespace RaidRogue
             var kit = GetComponent<CharacterKit>();
             if (kit?.Active == true)
                 return;
+            var tank=GetComponent<NineKeyTankKit>();
+            if(tank?.Active==true){tank.Recalculate();return;}
             var paladin = GetComponent<AegisPaladin>();
             if (paladin?.IsActive == true)
             {

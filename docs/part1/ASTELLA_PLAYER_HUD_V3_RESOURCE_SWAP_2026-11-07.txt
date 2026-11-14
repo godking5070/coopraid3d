@@ -1,0 +1,58 @@
+요청 리소스: astella-player-hud-v3.zip
+가져온 자산: Assets/UI/AstellaPlayerHUDV3
+
+배치:
+제공된 1600x300 배치를 원본 대비0.5 배율, 800x150로 구성한다.
+HP 바 왼쪽, 궁극기 자원 바 오른쪽. 원본560x72 -> 표시280x36.
+왼쪽 1/2/3/4, 오른쪽 Q/Space/R/F, 가운데 원형 V. 실제 키는 사용자 설정을 따른다.
+좌우 버튼 원본128 -> 표시64. 중앙 원256 -> 표시128.
+V 배지는 원 위쪽 테두리에 겹쳐 두며 원 아래에 놓지 않는다.
+중앙 문양은 제공된12직업 궁극기 PNG128 중 실제 직업 ID로 선택한다.
+좌우 스킬 그림은 미정이라는 이전 지시를 유지하여 빈 슬롯으로 남긴다.
+팔라딘 예시 스킬 그림8개는 가져오지 않았다.
+
+값과 동작:
+원래 버튼·스킬 슬롯·단축키·툴팁·쿨타임 및 클릭 동작 참조를 유지한다.
+HP 수치는 실제 체력/최대체력. 궁극기 자원은 실제 .ultimate 자원 값/최댓값.
+궁극기 준비 강조는 실제 버튼 사용 가능, 해금, 재사용/충전, 자원 비용과 조작 상태를 따른다.
+자원 부족·잠김 등으로 사용하지 못하는 V에는 준비 강조가 켜지지 않는다.
+새 문양에는 기존 스킬 팔레트 머티리얼을 덮지 않는다.
+
+게이지:
+신규560x72 전용 좌표를 사용한다. 내부15,16,530,40; 삼각 끝18; 반사선 패딩1x1.
+질감을 고정하고 마스크만 실제 비율에 따라 바뀐다.
+0% 채움/이동 반사선 숨김, 100% 원래 내부 윤곽 및 이동 반사선 숨김.
+금테와 숫자는 고정한다.
+
+기존 직업 자원(아덴):
+가운데 V는 궁극기 버튼이며 아덴과 합치는 기능이 아니다.
+기존 Identity gauge는 별도의 실제 자원 링으로 중앙 V 위에 유지한다.
+기본 위치(0,208), 원본140x140/배율0.6. 기존 자원 채움·수치·분할 표시 참조 유지.
+LocalHUDLayoutController의 identity ID로 계속 편집할 수 있다.
+
+보존:
+PlayerHUD 최상위 위치/크기/배율과 기존 레이아웃 ID·객체 이름을 유지한다.
+Left - 1234 / Right - Q F R Space / Center - V / HP / Ultimate resource / Identity gauge를 재사용한다.
+새 배치에 맞춰 위 요소의 기본 위치·크기·배율을 조정한다.
+포션·공유 부활·파티·보스 HUD 및 전투 로직은 변경하지 않는다.
+이전 그래픽과 v2 게이지 컴포넌트는 삭제하지 않고 비활성 보관한다.
+씬·프리팹은 Unity Editor API로 저장하며 YAML을 직접 수정하지 않는다.
+
+적용:
+원본 Astella SampleScene이 편집 모드에서 컴파일/가져오기를 마치면 한 번 자동 적용한다.
+Play 또는 Prefab Mode를 자동 종료하지 않는다.
+수동 메뉴: Tools / RaidRogue / UI / Apply Player HUD v3
+완료 표식: Logs/PlayerHUD-v3.applied.txt
+실패 기록: Logs/PlayerHUD-v3.error.txt
+적용 전 백업: Logs/UIRepairBackups/player-v3-*
+
+명령 검사:
+원형 부품5개·게이지8개·12직업 궁극기 아이콘의 RGBA/manifest 치수 일치.
+런타임/에디터 관리 코드 컴파일 및 기존 CombatMetrics 검사 통과.
+기존 SplitCombatLayout의 이름·직접 부모·참조 계약 유지 확인.
+실제 Unity 적용 여부는 완료 표식으로 확인하며, 실제 Play 및 해상도별 화면 검증은 별도다.
+
+관련 코드:
+Assets/Scripts/Editor/AstellaPlayerHUDV3Installer.cs
+Assets/Scripts/AstellaPlayerHUDV3.cs
+Assets/Scripts/AstellaPointedGauge.cs

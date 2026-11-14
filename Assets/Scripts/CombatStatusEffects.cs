@@ -12,12 +12,18 @@ namespace RaidRogue
         public float MorningEnd {get;private set;}
         public float InvulnerabilityEnd {get;private set;}
         public float BrandEnd {get;private set;}
+        public float FloraAttackEnd {get;private set;}
+        public float FloraAttackBonus {get;private set;}
+        public float ActiveFloraAttack => FloraAttackEnd>RaidCombatAuthority.ServerTime?FloraAttackBonus:0;
+        public void GrantFloraAttack(float bonus,float seconds){if(!RaidCombatAuthority.Replica&&CombatRange.LivingPartyMember(transform)){FloraAttackBonus=Mathf.Max(0,bonus);FloraAttackEnd=RaidCombatAuthority.ServerTime+Mathf.Max(0,seconds);}}
+        public void ClearFloraAttack(){FloraAttackEnd=FloraAttackBonus=0;}
         public bool MorningActive=>MorningEnd>RaidCombatAuthority.ServerTime;
         public bool CombatInvulnerable=>InvulnerabilityEnd>RaidCombatAuthority.ServerTime;
         public bool BrandActive=>BrandEnd>RaidCombatAuthority.ServerTime;
         public string ExtensionLabel()
         {
             float now=RaidCombatAuthority.ServerTime;
+            if(ActiveFloraAttack>0)return $"정화의 씨앗 공격력 +{FloraAttackBonus*100:0}% {FloraAttackEnd-now:0.0}s";
             if(CombatInvulnerable)return $"엑스칼리버 무적 {InvulnerabilityEnd-now:0.0}s";
             if(MorningActive)return $"아침의 성역 {MorningEnd-now:0.0}s";
             if(BrandActive)return $"규탄의 낙인 {BrandEnd-now:0.0}s · 치명 +10%p";
@@ -44,7 +50,8 @@ namespace RaidRogue
         }
         public bool CleanseOne(string[] tags)
         {if(RaidCombatAuthority.Replica)return false;int i=CombatDispel.FirstAllowed(_debuffs,tags);if(i<0)return false;_debuffs.RemoveAt(i);return true;}
-        public void Clear(){_debuffs.Clear();KnockbackImmunity=ControlImmunity=MorningEnd=InvulnerabilityEnd=BrandEnd=0;_knockbackSource=_controlSource=0;}
+        public bool HasDispellable(string[] tags)=>CombatDispel.FirstAllowed(_debuffs,tags)>=0;
+        public void Clear(){_debuffs.Clear();KnockbackImmunity=ControlImmunity=MorningEnd=InvulnerabilityEnd=BrandEnd=0;ClearFloraAttack();_knockbackSource=_controlSource=0;}
         public void GrantControlImmunity(float duration,Transform source)
         {if(!RaidCombatAuthority.Replica&&CombatRange.LivingPartyMember(transform)&&duration>=ControlImmunity){ControlImmunity=duration;_controlSource=CombatMetricsManager.SourceId(source);}}
         public void GrantKnockbackImmunity(float duration,Transform source)
@@ -52,23 +59,23 @@ namespace RaidRogue
         public void RemoveProtectionFrom(int source)
         {if(RaidCombatAuthority.Replica||source==0)return;if(source==_knockbackSource){KnockbackImmunity=0;_knockbackSource=0;}if(source==_controlSource){ControlImmunity=0;_controlSource=0;}}
         public static float ShieldAmount(float amount,Transform source)=>amount*(source!=null?source.GetComponent<AegisPaladin>()?.OutgoingShieldScale??1:1);
-        public string Capture()=>JsonUtility.ToJson(new CombatDebuffSnapshot{knockbackImmunity=KnockbackImmunity,knockbackSource=_knockbackSource,controlImmunity=ControlImmunity,controlSource=_controlSource,morningEnd=MorningEnd,invulnerabilityEnd=InvulnerabilityEnd,entries=_debuffs.ToArray()});
+        public string Capture()=>JsonUtility.ToJson(new CombatDebuffSnapshot{knockbackImmunity=KnockbackImmunity,knockbackSource=_knockbackSource,controlImmunity=ControlImmunity,controlSource=_controlSource,morningEnd=MorningEnd,invulnerabilityEnd=InvulnerabilityEnd,floraAttackEnd=FloraAttackEnd,floraAttackBonus=FloraAttackBonus,entries=_debuffs.ToArray()});
         public void Restore(string json)
-        {if(!RaidCombatAuthority.Replica)return;Clear();if(string.IsNullOrEmpty(json))return;var s=JsonUtility.FromJson<CombatDebuffSnapshot>(json);if(s?.entries!=null){_debuffs.AddRange(s.entries);KnockbackImmunity=Mathf.Max(0,s.knockbackImmunity);_knockbackSource=s.knockbackSource;ControlImmunity=Mathf.Max(0,s.controlImmunity);_controlSource=s.controlSource;MorningEnd=s.morningEnd;InvulnerabilityEnd=s.invulnerabilityEnd;}}
+        {if(!RaidCombatAuthority.Replica)return;Clear();if(string.IsNullOrEmpty(json))return;var s=JsonUtility.FromJson<CombatDebuffSnapshot>(json);if(s?.entries!=null){_debuffs.AddRange(s.entries);KnockbackImmunity=Mathf.Max(0,s.knockbackImmunity);_knockbackSource=s.knockbackSource;ControlImmunity=Mathf.Max(0,s.controlImmunity);_controlSource=s.controlSource;MorningEnd=s.morningEnd;InvulnerabilityEnd=s.invulnerabilityEnd;FloraAttackEnd=s.floraAttackEnd;FloraAttackBonus=s.floraAttackBonus;}}
         private void Update()
         {
             if(RaidCombatAuthority.Replica)return;
             GetComponent<PlayerController>()?.ExpireTimedShields();GetComponent<PartyBotAI>()?.ExpireTimedShields();
-            if(StageManager.CombatSuspended)return;
+            if(StageManager.PlayerSkillsSuspended)return;
             KnockbackImmunity=Mathf.Max(0,KnockbackImmunity-Time.deltaTime);
             ControlImmunity=Mathf.Max(0,ControlImmunity-Time.deltaTime);
             foreach(var d in _debuffs)d.remaining-=Time.deltaTime;_debuffs.RemoveAll(d=>d.remaining<=0);
         }
-        public static void Shield(Transform recipient,Transform source,string key,float amount,float duration)
+        public static void Shield(Transform recipient,Transform source,string key,float amount,float duration,bool preserveLarger=false)
         {
-            if(!CombatRange.LivingPartyMember(recipient)||RaidCombatAuthority.Replica||StageManager.CombatSuspended)return;
+            if(!CombatRange.LivingPartyMember(recipient)||RaidCombatAuthority.Replica||StageManager.PlayerSkillsSuspended)return;
             Ensure(recipient.gameObject);var pc=recipient.GetComponent<PlayerController>();
-            if(pc!=null)pc.AddTimedShield(amount,source,key,duration);else recipient.GetComponent<PartyBotAI>()?.AddTimedShield(amount,source,key,duration);
+            if(pc!=null)pc.AddTimedShield(amount,source,key,duration,preserveLarger);else recipient.GetComponent<PartyBotAI>()?.AddTimedShield(amount,source,key,duration,preserveLarger);
         }
     }
     public partial class PlayerController
@@ -101,6 +108,15 @@ namespace RaidRogue
             _skillRushDirection=delta.normalized;_skillRushRemaining=delta.magnitude;_skillRushSpeed=delta.magnitude/Mathf.Max(.01f,seconds);
             if(_dashPresentation!=null&&IsSkillRushing)_dashPresentation.BeginDash();
         }
+        public bool PlanSkillRushToPoint(Vector3 point,float maximum,out Vector3 end)
+        {
+            end=transform.position;
+            if(!CanMoveVoluntarily||IsDashing||IsSkillRushing||!CharacterDefinitionValidation.Finite(point.x)||!CharacterDefinitionValidation.Finite(point.z)||maximum<=0)return false;
+            Vector3 delta=point-transform.position;delta.y=0;
+            if(delta.magnitude>maximum)return false;
+            end=_movementCollision.Move(this,delta,delta.magnitude,out bool blocked);
+            return !blocked;
+        }
         public void StepSkillRush(float seconds)
         {
             if(IsDead||IsStunned||IsMovementLocked){CancelSkillRush();GetComponent<CharacterActor>()?.InterruptCast();return;}
@@ -117,17 +133,19 @@ namespace RaidRogue
             var actor=CharacterActor.Ensure(gameObject);var settings=actor.MovementSettings(dashSettings);
             if(RaidCombatAuthority.Active)NetworkMotor?.Dash.RefillCharges(settings);else _dash.RefillCharges(settings);
         }
+        public void RemoveTimedShield(int source,string key)
+        {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.RemoveEffect(source,key));}}
         public void RemoveShieldsFrom(int source)
         {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.RemoveSource(source));}}
         public void ExpireTimedShields()
         {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);var expired=new List<(int source,double amount)>();currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.Expire(Time.time,(id,value)=>expired.Add((id,value))));foreach(var e in expired)CharacterKit.OnShieldExpired(e.source,transform,(float)e.amount);}}
         public float ShieldsFrom(int source){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFrom(source);}
         public float ShieldFor(int source,string key){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFor(source,key);}
-        public void AddTimedShield(float amount,Transform source,string key,float duration)
+        public void AddTimedShield(float amount,Transform source,string key,float duration,bool preserveLarger=false)
         {
-            if(RaidCombatAuthority.Replica||IsDead||StageManager.CombatSuspended||duration<=0)return;
+            if(RaidCombatAuthority.Replica||IsDead||StageManager.PlayerSkillsSuspended||duration<=0)return;
             amount=CombatStatusEffects.ShieldAmount(amount,source)*CharacterKit.ShieldScale(source,transform);
-            ExpireTimedShields();_metricsShields.GrantTimed(CombatMetricsManager.SourceId(source),key,amount,maxHp,Time.time+duration);currentShield=(float)_metricsShields.Remaining;
+            ExpireTimedShields();_metricsShields.GrantTimed(CombatMetricsManager.SourceId(source),key,amount,maxHp,Time.time+duration,preserveLarger);currentShield=(float)_metricsShields.Remaining;
             FloatingTextPopup.Spawn(transform.position+Vector3.up*2.3f,"보호막 "+Mathf.RoundToInt(amount),Color.yellow,false);
         }
         // Repayment of an already confirmed hit: no mitigation, shield, reflection or resource callbacks.
@@ -142,17 +160,19 @@ namespace RaidRogue
     {
         private readonly CombatEventGate _resolvedCombatHits=new CombatEventGate();
         public void ClearResolvedCombatHits()=>_resolvedCombatHits.Clear();
+        public void RemoveTimedShield(int source,string key)
+        {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.RemoveEffect(source,key));}}
         public void RemoveShieldsFrom(int source)
         {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.RemoveSource(source));}}
         public void ExpireTimedShields()
         {if(!RaidCombatAuthority.Replica){_metricsShields.Reconcile(currentShield);var expired=new List<(int source,double amount)>();currentShield=Mathf.Max(0,currentShield-(float)_metricsShields.Expire(Time.time,(id,value)=>expired.Add((id,value))));foreach(var e in expired)CharacterKit.OnShieldExpired(e.source,transform,(float)e.amount);}}
         public float ShieldsFrom(int source){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFrom(source);}
         public float ShieldFor(int source,string key){ExpireTimedShields();_metricsShields.Reconcile(currentShield);return (float)_metricsShields.RemainingFor(source,key);}
-        public void AddTimedShield(float amount,Transform source,string key,float duration)
+        public void AddTimedShield(float amount,Transform source,string key,float duration,bool preserveLarger=false)
         {
-            if(RaidCombatAuthority.Replica||isDead||StageManager.CombatSuspended||duration<=0)return;
+            if(RaidCombatAuthority.Replica||isDead||StageManager.PlayerSkillsSuspended||duration<=0)return;
             amount=CombatStatusEffects.ShieldAmount(amount,source)*CharacterKit.ShieldScale(source,transform);
-            ExpireTimedShields();_metricsShields.GrantTimed(CombatMetricsManager.SourceId(source),key,amount,maxHp,Time.time+duration);currentShield=(float)_metricsShields.Remaining;
+            ExpireTimedShields();_metricsShields.GrantTimed(CombatMetricsManager.SourceId(source),key,amount,maxHp,Time.time+duration,preserveLarger);currentShield=(float)_metricsShields.Remaining;
             FloatingTextPopup.Spawn(transform.position+Vector3.up*2.3f,"보호막 "+Mathf.RoundToInt(amount),Color.yellow,false);
         }
     }

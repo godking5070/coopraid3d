@@ -1,5 +1,5 @@
 param(
-    [string]$OriginalProject = 'C:/coopraid/coopraid3d',
+    [string]$OriginalProject = (Split-Path $PSScriptRoot -Parent),
     [string]$Unity,
     [switch]$CheckOnly
 )
@@ -30,10 +30,10 @@ $taskEditors = @(Get-CimInstance Win32_Process -Filter "name = 'Unity.exe'" | Wh
     $_.CommandLine -and $_.CommandLine.Replace('/', '\').IndexOf($taskOriginal.Replace('/', '\'), [StringComparison]::OrdinalIgnoreCase) -ge 0
 })
 if ($taskEditors.Count -gt 0) { $taskProblems.Add('Original Unity editor is open. Use its build menu after source review, or close it before this batch command.') }
-$taskOutput = Join-Path $taskOriginal 'Builds/Part1Windows'
+$taskOutput = Join-Path $taskOriginal 'Builds/AstellaWindows'
 Write-Output "Original: $taskOriginal"
 Write-Output "Unity: $Unity"
-Write-Output "Output: $(Join-Path $taskOutput 'RaidPart1.exe')"
+Write-Output "Output: $(Join-Path $taskOutput 'Astella.exe')"
 if ($taskProblems.Count -gt 0) {
     foreach ($taskProblem in $taskProblems) { Write-Output "BLOCKED: $taskProblem" }
     if ($CheckOnly) { exit 2 }
@@ -48,7 +48,7 @@ $taskStarted = [DateTime]::UtcNow
 $taskProcess = Start-Process -FilePath $Unity -ArgumentList $taskArguments -WindowStyle Hidden -PassThru
 $taskProcess.WaitForExit()
 if ($taskProcess.ExitCode -ne 0) { throw "Unity build failed ($($taskProcess.ExitCode)); inspect $taskLog" }
-if (!(Test-Path -LiteralPath (Join-Path $taskOutput 'RaidPart1.exe')) -or !(Test-Path -LiteralPath (Join-Path $taskOutput 'BUILD_INFO.txt'))) {
+if (!(Test-Path -LiteralPath (Join-Path $taskOutput 'Astella.exe')) -or !(Test-Path -LiteralPath (Join-Path $taskOutput 'BUILD_INFO.txt'))) {
     throw "Unity did not produce the expected executable and build receipt. Inspect $taskLog"
 }
 if ((Get-Item -LiteralPath (Join-Path $taskOutput 'BUILD_INFO.txt')).LastWriteTimeUtc -lt $taskStarted) {

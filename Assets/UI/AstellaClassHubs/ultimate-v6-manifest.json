@@ -1,0 +1,1088 @@
+{
+  "version": 6,
+  "classes": [
+    {
+      "classId": "aegis-paladin",
+      "className": "이지스 팔라딘",
+      "ultimateName": "첫 번째 아침의 성역",
+      "motif": "여명의 성역 · 빛을 품은 성소 돔과 양쪽 성익",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        30,
+        53,
+        300,
+        156
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#dfbb5c",
+      "assets": {
+        "track": {
+          "svg": "aegis-paladin/track.svg",
+          "png": "aegis-paladin/track.png"
+        },
+        "fill": {
+          "svg": "aegis-paladin/fill.svg",
+          "png": "aegis-paladin/fill.png"
+        },
+        "frame": {
+          "svg": "aegis-paladin/frame.svg",
+          "png": "aegis-paladin/frame.png"
+        },
+        "core": {
+          "svg": "aegis-paladin/core.svg",
+          "png": "aegis-paladin/core.png"
+        },
+        "full-glow": {
+          "svg": "aegis-paladin/full-glow.svg",
+          "png": "aegis-paladin/full-glow.png"
+        },
+        "mask": {
+          "svg": "aegis-paladin/mask.svg",
+          "png": "aegis-paladin/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "aegis-paladin/example-empty-textless.svg",
+          "png": "aegis-paladin/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "aegis-paladin/example-charging-textless.svg",
+          "png": "aegis-paladin/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "aegis-paladin/example-full-textless.svg",
+          "png": "aegis-paladin/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 209,
+        "topAtFull": 53,
+        "heightAtFull": 156
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "berserker",
+      "className": "버서커",
+      "ultimateName": "정오의 포효",
+      "motif": "정오의 포효 · 불타는 태양의 송곳니와 중앙 대검",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        58,
+        57,
+        244,
+        158
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#ed5d37",
+      "assets": {
+        "track": {
+          "svg": "berserker/track.svg",
+          "png": "berserker/track.png"
+        },
+        "fill": {
+          "svg": "berserker/fill.svg",
+          "png": "berserker/fill.png"
+        },
+        "frame": {
+          "svg": "berserker/frame.svg",
+          "png": "berserker/frame.png"
+        },
+        "core": {
+          "svg": "berserker/core.svg",
+          "png": "berserker/core.png"
+        },
+        "full-glow": {
+          "svg": "berserker/full-glow.svg",
+          "png": "berserker/full-glow.png"
+        },
+        "mask": {
+          "svg": "berserker/mask.svg",
+          "png": "berserker/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "berserker/example-empty-textless.svg",
+          "png": "berserker/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "berserker/example-charging-textless.svg",
+          "png": "berserker/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "berserker/example-full-textless.svg",
+          "png": "berserker/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 215,
+        "topAtFull": 57,
+        "heightAtFull": 158
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "dragon-breaker",
+      "className": "드래곤 브레이커",
+      "ultimateName": "황혼의 종말",
+      "motif": "황혼의 종말 · 용의 턱이 감싼 용염 포심",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        54,
+        69,
+        252,
+        146
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#ed9354",
+      "assets": {
+        "track": {
+          "svg": "dragon-breaker/track.svg",
+          "png": "dragon-breaker/track.png"
+        },
+        "fill": {
+          "svg": "dragon-breaker/fill.svg",
+          "png": "dragon-breaker/fill.png"
+        },
+        "frame": {
+          "svg": "dragon-breaker/frame.svg",
+          "png": "dragon-breaker/frame.png"
+        },
+        "core": {
+          "svg": "dragon-breaker/core.svg",
+          "png": "dragon-breaker/core.png"
+        },
+        "full-glow": {
+          "svg": "dragon-breaker/full-glow.svg",
+          "png": "dragon-breaker/full-glow.png"
+        },
+        "mask": {
+          "svg": "dragon-breaker/mask.svg",
+          "png": "dragon-breaker/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "dragon-breaker/example-empty-textless.svg",
+          "png": "dragon-breaker/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "dragon-breaker/example-charging-textless.svg",
+          "png": "dragon-breaker/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "dragon-breaker/example-full-textless.svg",
+          "png": "dragon-breaker/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 215,
+        "topAtFull": 69,
+        "heightAtFull": 146
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "sylvan-oracle",
+      "className": "실반 오라클",
+      "ultimateName": "에덴의 만개",
+      "motif": "에덴의 만개 · 세계수의 가지와 다섯 잎으로 펼쳐지는 성역",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        28,
+        52,
+        304,
+        155
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#6db77f",
+      "assets": {
+        "track": {
+          "svg": "sylvan-oracle/track.svg",
+          "png": "sylvan-oracle/track.png"
+        },
+        "fill": {
+          "svg": "sylvan-oracle/fill.svg",
+          "png": "sylvan-oracle/fill.png"
+        },
+        "frame": {
+          "svg": "sylvan-oracle/frame.svg",
+          "png": "sylvan-oracle/frame.png"
+        },
+        "core": {
+          "svg": "sylvan-oracle/core.svg",
+          "png": "sylvan-oracle/core.png"
+        },
+        "full-glow": {
+          "svg": "sylvan-oracle/full-glow.svg",
+          "png": "sylvan-oracle/full-glow.png"
+        },
+        "mask": {
+          "svg": "sylvan-oracle/mask.svg",
+          "png": "sylvan-oracle/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "sylvan-oracle/example-empty-textless.svg",
+          "png": "sylvan-oracle/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "sylvan-oracle/example-charging-textless.svg",
+          "png": "sylvan-oracle/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "sylvan-oracle/example-full-textless.svg",
+          "png": "sylvan-oracle/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 207,
+        "topAtFull": 52,
+        "heightAtFull": 155
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "seraphic-bard",
+      "className": "세라픽 바드",
+      "ultimateName": "영웅들의 행진곡",
+      "motif": "영웅들의 행진곡 · 날개를 펼친 리라와 빛의 현",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        35,
+        69,
+        290,
+        150
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#a89ce3",
+      "assets": {
+        "track": {
+          "svg": "seraphic-bard/track.svg",
+          "png": "seraphic-bard/track.png"
+        },
+        "fill": {
+          "svg": "seraphic-bard/fill.svg",
+          "png": "seraphic-bard/fill.png"
+        },
+        "frame": {
+          "svg": "seraphic-bard/frame.svg",
+          "png": "seraphic-bard/frame.png"
+        },
+        "core": {
+          "svg": "seraphic-bard/core.svg",
+          "png": "seraphic-bard/core.png"
+        },
+        "full-glow": {
+          "svg": "seraphic-bard/full-glow.svg",
+          "png": "seraphic-bard/full-glow.png"
+        },
+        "mask": {
+          "svg": "seraphic-bard/mask.svg",
+          "png": "seraphic-bard/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "seraphic-bard/example-empty-textless.svg",
+          "png": "seraphic-bard/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "seraphic-bard/example-charging-textless.svg",
+          "png": "seraphic-bard/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "seraphic-bard/example-full-textless.svg",
+          "png": "seraphic-bard/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 219,
+        "topAtFull": 69,
+        "heightAtFull": 150
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "blood-apothecary",
+      "className": "블러드 아포테카리",
+      "ultimateName": "현자의 붉은 돌",
+      "motif": "현자의 붉은 돌 · 연성 도가니에 떠오르는 진홍 결정",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        61,
+        51,
+        238,
+        161
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#df677f",
+      "assets": {
+        "track": {
+          "svg": "blood-apothecary/track.svg",
+          "png": "blood-apothecary/track.png"
+        },
+        "fill": {
+          "svg": "blood-apothecary/fill.svg",
+          "png": "blood-apothecary/fill.png"
+        },
+        "frame": {
+          "svg": "blood-apothecary/frame.svg",
+          "png": "blood-apothecary/frame.png"
+        },
+        "core": {
+          "svg": "blood-apothecary/core.svg",
+          "png": "blood-apothecary/core.png"
+        },
+        "full-glow": {
+          "svg": "blood-apothecary/full-glow.svg",
+          "png": "blood-apothecary/full-glow.png"
+        },
+        "mask": {
+          "svg": "blood-apothecary/mask.svg",
+          "png": "blood-apothecary/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "blood-apothecary/example-empty-textless.svg",
+          "png": "blood-apothecary/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "blood-apothecary/example-charging-textless.svg",
+          "png": "blood-apothecary/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "blood-apothecary/example-full-textless.svg",
+          "png": "blood-apothecary/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 212,
+        "topAtFull": 51,
+        "heightAtFull": 161
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "nightblade",
+      "className": "나이트블레이드",
+      "ultimateName": "영겁의 절명",
+      "motif": "한 쌍의 초승달 칼날과 영겁의 처형검",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        40,
+        54,
+        280,
+        160
+      ],
+      "chargeValueBaseline": [
+        180,
+        241
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#9d63df",
+      "assets": {
+        "track": {
+          "svg": "nightblade/track.svg",
+          "png": "nightblade/track.png"
+        },
+        "fill": {
+          "svg": "nightblade/fill.svg",
+          "png": "nightblade/fill.png"
+        },
+        "frame": {
+          "svg": "nightblade/frame.svg",
+          "png": "nightblade/frame.png"
+        },
+        "core": {
+          "svg": "nightblade/core.svg",
+          "png": "nightblade/core.png"
+        },
+        "full-glow": {
+          "svg": "nightblade/full-glow.svg",
+          "png": "nightblade/full-glow.png"
+        },
+        "mask": {
+          "svg": "nightblade/mask.svg",
+          "png": "nightblade/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "nightblade/example-empty-textless.svg",
+          "png": "nightblade/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "nightblade/example-charging-textless.svg",
+          "png": "nightblade/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "nightblade/example-full-textless.svg",
+          "png": "nightblade/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 214,
+        "topAtFull": 54,
+        "heightAtFull": 160
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "tempest-lancer",
+      "className": "템페스트 랜서",
+      "ultimateName": "천뢰 강림",
+      "motif": "수직으로 강림하는 천뢰창과 번개 날개",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        33,
+        47,
+        294,
+        171
+      ],
+      "chargeValueBaseline": [
+        180,
+        241
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#42c7f0",
+      "assets": {
+        "track": {
+          "svg": "tempest-lancer/track.svg",
+          "png": "tempest-lancer/track.png"
+        },
+        "fill": {
+          "svg": "tempest-lancer/fill.svg",
+          "png": "tempest-lancer/fill.png"
+        },
+        "frame": {
+          "svg": "tempest-lancer/frame.svg",
+          "png": "tempest-lancer/frame.png"
+        },
+        "core": {
+          "svg": "tempest-lancer/core.svg",
+          "png": "tempest-lancer/core.png"
+        },
+        "full-glow": {
+          "svg": "tempest-lancer/full-glow.svg",
+          "png": "tempest-lancer/full-glow.png"
+        },
+        "mask": {
+          "svg": "tempest-lancer/mask.svg",
+          "png": "tempest-lancer/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "tempest-lancer/example-empty-textless.svg",
+          "png": "tempest-lancer/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "tempest-lancer/example-charging-textless.svg",
+          "png": "tempest-lancer/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "tempest-lancer/example-full-textless.svg",
+          "png": "tempest-lancer/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 218,
+        "topAtFull": 47,
+        "heightAtFull": 171
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "gunslinger",
+      "className": "건슬링어",
+      "ultimateName": "은빛 세례",
+      "motif": "은빛 세례 · 교차한 쌍권총과 은빛 탄두",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        40,
+        52,
+        280,
+        150
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#82bad6",
+      "assets": {
+        "track": {
+          "svg": "gunslinger/track.svg",
+          "png": "gunslinger/track.png"
+        },
+        "fill": {
+          "svg": "gunslinger/fill.svg",
+          "png": "gunslinger/fill.png"
+        },
+        "frame": {
+          "svg": "gunslinger/frame.svg",
+          "png": "gunslinger/frame.png"
+        },
+        "core": {
+          "svg": "gunslinger/core.svg",
+          "png": "gunslinger/core.png"
+        },
+        "full-glow": {
+          "svg": "gunslinger/full-glow.svg",
+          "png": "gunslinger/full-glow.png"
+        },
+        "mask": {
+          "svg": "gunslinger/mask.svg",
+          "png": "gunslinger/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "gunslinger/example-empty-textless.svg",
+          "png": "gunslinger/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "gunslinger/example-charging-textless.svg",
+          "png": "gunslinger/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "gunslinger/example-full-textless.svg",
+          "png": "gunslinger/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 202,
+        "topAtFull": 52,
+        "heightAtFull": 150
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "spirit-ranger",
+      "className": "스피릿 레인저",
+      "ultimateName": "사계의 종언",
+      "motif": "사계의 종언 · 사계의 잎과 서리 날개를 꿰는 영혼의 화살",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        46,
+        61,
+        263,
+        164
+      ],
+      "chargeValueBaseline": [
+        180,
+        240
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#69bdc0",
+      "assets": {
+        "track": {
+          "svg": "spirit-ranger/track.svg",
+          "png": "spirit-ranger/track.png"
+        },
+        "fill": {
+          "svg": "spirit-ranger/fill.svg",
+          "png": "spirit-ranger/fill.png"
+        },
+        "frame": {
+          "svg": "spirit-ranger/frame.svg",
+          "png": "spirit-ranger/frame.png"
+        },
+        "core": {
+          "svg": "spirit-ranger/core.svg",
+          "png": "spirit-ranger/core.png"
+        },
+        "full-glow": {
+          "svg": "spirit-ranger/full-glow.svg",
+          "png": "spirit-ranger/full-glow.png"
+        },
+        "mask": {
+          "svg": "spirit-ranger/mask.svg",
+          "png": "spirit-ranger/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "spirit-ranger/example-empty-textless.svg",
+          "png": "spirit-ranger/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "spirit-ranger/example-charging-textless.svg",
+          "png": "spirit-ranger/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "spirit-ranger/example-full-textless.svg",
+          "png": "spirit-ranger/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 225,
+        "topAtFull": 61,
+        "heightAtFull": 164
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "astromancer",
+      "className": "아스트로맨서",
+      "ultimateName": "코스믹 노바",
+      "motif": "폭발 직전의 초신성 결정과 분리된 궤도 조각",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        60,
+        47,
+        240,
+        169
+      ],
+      "chargeValueBaseline": [
+        180,
+        241
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#9475ec",
+      "assets": {
+        "track": {
+          "svg": "astromancer/track.svg",
+          "png": "astromancer/track.png"
+        },
+        "fill": {
+          "svg": "astromancer/fill.svg",
+          "png": "astromancer/fill.png"
+        },
+        "frame": {
+          "svg": "astromancer/frame.svg",
+          "png": "astromancer/frame.png"
+        },
+        "core": {
+          "svg": "astromancer/core.svg",
+          "png": "astromancer/core.png"
+        },
+        "full-glow": {
+          "svg": "astromancer/full-glow.svg",
+          "png": "astromancer/full-glow.png"
+        },
+        "mask": {
+          "svg": "astromancer/mask.svg",
+          "png": "astromancer/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "astromancer/example-empty-textless.svg",
+          "png": "astromancer/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "astromancer/example-charging-textless.svg",
+          "png": "astromancer/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "astromancer/example-full-textless.svg",
+          "png": "astromancer/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 216,
+        "topAtFull": 47,
+        "heightAtFull": 169
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    },
+    {
+      "classId": "mirror-phantom",
+      "className": "미러 팬텀",
+      "ultimateName": "만화경 종막",
+      "motif": "펼쳐진 만화경 부채와 중앙의 반사 가면",
+      "canvas": [
+        360,
+        280
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "chargeBounds": [
+        44,
+        48,
+        272,
+        166
+      ],
+      "chargeValueBaseline": [
+        180,
+        241
+      ],
+      "chargeValueFontSize": 25,
+      "topKeyReservedRect": [
+        148,
+        0,
+        64,
+        40
+      ],
+      "accent": "#ba85df",
+      "assets": {
+        "track": {
+          "svg": "mirror-phantom/track.svg",
+          "png": "mirror-phantom/track.png"
+        },
+        "fill": {
+          "svg": "mirror-phantom/fill.svg",
+          "png": "mirror-phantom/fill.png"
+        },
+        "frame": {
+          "svg": "mirror-phantom/frame.svg",
+          "png": "mirror-phantom/frame.png"
+        },
+        "core": {
+          "svg": "mirror-phantom/core.svg",
+          "png": "mirror-phantom/core.png"
+        },
+        "full-glow": {
+          "svg": "mirror-phantom/full-glow.svg",
+          "png": "mirror-phantom/full-glow.png"
+        },
+        "mask": {
+          "svg": "mirror-phantom/mask.svg",
+          "png": "mirror-phantom/mask.png"
+        }
+      },
+      "examples": {
+        "empty": {
+          "svg": "mirror-phantom/example-empty-textless.svg",
+          "png": "mirror-phantom/example-empty-textless.png"
+        },
+        "charging": {
+          "svg": "mirror-phantom/example-charging-textless.svg",
+          "png": "mirror-phantom/example-charging-textless.png"
+        },
+        "full": {
+          "svg": "mirror-phantom/example-full-textless.svg",
+          "png": "mirror-phantom/example-full-textless.png"
+        }
+      },
+      "fillMethod": "continuous vertical clipping inside chargeBounds; bottom to top",
+      "chargeClip": {
+        "x": 0,
+        "width": 360,
+        "topAtEmpty": 214,
+        "topAtFull": 48,
+        "heightAtFull": 166
+      },
+      "drawOrder": [
+        "track",
+        "fill (clipped)",
+        "frame",
+        "core",
+        "full-glow (full charge only)",
+        "runtime percentage",
+        "runtime key badge"
+      ],
+      "fullChargeMeaning": "Visual full-charge state only. Availability is decided by game state."
+    }
+  ],
+  "chargeUnit": "normalized 0..1, independent of job resource",
+  "textBakedIntoAssets": false,
+  "decorativeShapesAreNotStacks": true
+}

@@ -15,6 +15,9 @@ namespace RaidRogue
 
         public static float Incoming(Transform target, float damage, CombatHitContext hit)
         {
+            damage=NineKeyTankKit.Incoming(target,damage,hit);
+            damage=NineKeyHealerKit.Incoming(target,damage,hit);
+            damage=NineKeyDamageKit.Incoming(target,damage,hit);
             if (hit.Kind == CombatDamageKind.System || hit.Kind == CombatDamageKind.Transfer || hit.Kind == CombatDamageKind.Deferred)
                 return damage;
             if (Protected(target))
@@ -108,7 +111,7 @@ namespace RaidRogue
                 return 1;
             float value = 1;
             if (scaleAttack)
-                value *= 1 + Bonus(source, "attack");
+                value *= 1 + Bonus(source, "attack") + (source?.GetComponent<CombatStatusEffects>()?.ActiveFloraAttack ?? 0);
             value *= 1 + Bonus(source, "damage");
             value *= 1 + Bonus(target, "vulnerability");
             float penetration = Bonus(source, "penetration");
@@ -131,6 +134,10 @@ namespace RaidRogue
         {
             if (actual <= 0 || !CombatRange.LivingPartyMember(source) || kind == CombatDamageKind.Extra || kind == CombatDamageKind.Reflection || kind == CombatDamageKind.Deferred || kind == CombatDamageKind.Transfer)
                 return;
+            AegisPaladin.ResolveCooperation(source,target,origin,kind);
+            NineKeyTankKit.AfterDirect(source,target,origin,kind);
+            NineKeyHealerKit.OnDirectAttack(source,target,origin,kind);
+            NineKeyDamageKit.OnDirectAttack(source,target,origin,kind);
             float leech = Bonus(source, "leech") + Bonus(target, "leechTaken");
             var kit = source.GetComponent<CharacterKit>();
             if (kit?.Active == true)
@@ -144,7 +151,7 @@ namespace RaidRogue
             if (leech > 0)
             {
                 float healing = actual * leech * (1 + Bonus(source, "leechScale"));
-                if (kit != null)
+                if (kit?.Active == true)
                     kit.Leech(healing);
                 else
                     HealStatic(source, source, healing);
@@ -154,7 +161,7 @@ namespace RaidRogue
                 return;
             float extra = Mathf.Max(Bonus(source, "extra"), Bonus(target, "partyExtra"));
             if (extra > 0)
-                CombatSecondaryDamage.Apply(source, target, actual * extra, origin + ".synergy", CombatDamageKind.Extra);
+                CombatSecondaryDamage.Apply(source, target, actual * extra, origin + ".synergy", CombatDamageKind.Extra, true);
         }
 
         private void OnDamage(float actual, Transform target, CombatDamageKind kind)
@@ -313,7 +320,11 @@ namespace RaidRogue
             ForceCritical = false;
             float actual = kind == CombatDamageKind.Extra ? Mathf.Max(0, before - after) : _primaryDamage;
             if (actual <= 0)
+            {
+                if (applyStagger && AiSpectatorDamage.ZeroHpDamageMode(transform))
+                    CombatCounterTarget.Ensure(target).AddStagger(StaggerPower(target, a));
                 return 0;
+            }
             if (kind == CombatDamageKind.Direct && _attackSequence && !_sequenceConsumed)
             {
                 if (_sequenceCritical) { State.Remove("nextCrit"); State.Remove("nextInstant"); }
@@ -325,7 +336,7 @@ namespace RaidRogue
             if (kind == CombatDamageKind.Direct)
             {
                 _recordedHits.TryGetValue(Id(target), out float recorded);
-                _recordedHits[Id(target)] = recorded + actual;
+                _recordedHits[Id(target)] = recorded + AiSpectatorDamage.BaseFromConfirmed(transform,actual);
                 _player.PlaySkillLineVisual(target.position, Tint);
                 if (!Channeling)
                     _player.FaceAttackTarget(target);
@@ -334,9 +345,9 @@ namespace RaidRogue
             if (kind == CombatDamageKind.Direct)
             {
                 if (Job.index == 11 && Data.clones > 0 && Route == 1 && a.key != "z1")
-                    CombatSecondaryDamage.Apply(transform, target, actual * .3f * Data.clones, Job.SkillId(a.key) + ".clone", CombatDamageKind.Extra);
+                    CombatSecondaryDamage.Apply(transform, target, actual * .3f * Data.clones, Job.SkillId(a.key) + ".clone", CombatDamageKind.Extra, true);
                 if (Job.index == 6 && Has("identity"))
-                    CombatSecondaryDamage.Apply(transform, target, actual * .3f, Job.SkillId(a.key) + ".shadow", CombatDamageKind.Extra);
+                    CombatSecondaryDamage.Apply(transform, target, actual * .3f, Job.SkillId(a.key) + ".shadow", CombatDamageKind.Extra, true);
                 if (Job.index == 2 && Route == 3)
                 {
                     var burn = Effect("dot.g1@" + Id(target));

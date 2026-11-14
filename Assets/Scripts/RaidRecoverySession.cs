@@ -39,6 +39,7 @@ namespace RaidRogue
                 bool changed = _recovery.Reserve(peer.Id, ServerTime, BattlePhase == RaidBattlePhase.Reward ? BattleEpoch : -1);
                 if (changed && _avatars.TryGetValue(peer.Id, out var avatar))
                 {
+                    StageManager.Instance?.boss?.MarionetteControlOwnerDisconnected(avatar.transform);
                     if (CampaignBuildLocked) _recovery.Actor(peer.Id).Deadline = float.MaxValue;
                     avatar.Automated = true; avatar.MotionVersion++;
                     if (wasHuman)
@@ -53,8 +54,9 @@ namespace RaidRogue
                 }
                 return;
             }
+            if(_avatars.TryGetValue(peer.Id,out var leaving))StageManager.Instance?.boss?.MarionetteControlOwnerDisconnected(leaving.transform);
             _recovery.Remove(peer.Id); _roster.Remove(peer.Id); OnNetworkDeparture(peer.Id); RemoveAvatar(peer.Id);
-            if (CanJoinBattle) ReconcileBots();
+            if (CanChooseRole) ReconcileBots();
         }
         private bool TryResumePeer(Peer peer)
         {

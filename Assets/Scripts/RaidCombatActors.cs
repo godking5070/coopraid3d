@@ -13,6 +13,11 @@ namespace RaidRogue
         public bool ValidateCombatSkill(int skill, out string reason)
         {
             reason = "";
+            if(StageManager.Instance?.boss?.MarionetteControlled(transform)==true)
+            {reason="조종당함 · 인형의 실 절단 대기";return false;}
+            if ((StageManager.Instance?.boss?.GuardianClashHolding(transform)==true ||
+                StageManager.Instance?.boss?.CampanellaLockHolding(transform)==true) && skill!=3)
+            { reason="힘겨루기 중에는 [3] 자기 방어기와 포션만 사용할 수 있습니다"; return false; }
             if (!CharacterActor.Ensure(gameObject).Available(CharacterSlots.LegacySlot(skill), out reason)) return false;
             if (!CanUseCombatAction || playerController.IsBeingRescued || playerController.IsBeingKnockedBack) reason = "현재 행동할 수 없습니다";
             else if (skill <= 2 && (IsOnGcd || _isCastingSpell)) reason = "글로벌 쿨타임 또는 시전 중입니다";
@@ -51,9 +56,11 @@ namespace RaidRogue
             return best;
         }
         public void InterruptForConnectionLoss()
+            => InterruptForControl();
+        public void InterruptForControl()
         {
             GetComponent<CharacterActor>()?.InterruptCast();
-            // A disconnect is neither death nor a new encounter: preserve combo, buffs and cooldowns.
+            // Control interruption preserves combo, buffs and cooldowns.
             _isCastingSpell = false; _castElapsed = 0; _castingSpellName = "";
         }
         public void ReportNetworkFailure(string reason) => ShowRangeFeedback(reason);

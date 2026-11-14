@@ -1,0 +1,212 @@
+{
+  "version": 8,
+  "type": "Combined bottom HUD resource preview, not a Unity scene or prefab",
+  "layout": {
+    "canvas": [
+      1600,
+      420
+    ],
+    "recommendedDisplay": [
+      800,
+      210
+    ],
+    "hp": {
+      "bar": [
+        76,
+        146,
+        560,
+        60
+      ],
+      "labelBaseline": [
+        86,
+        138
+      ],
+      "valueBaseline": [
+        356,
+        190
+      ],
+      "current": 48639,
+      "maximum": 50000
+    },
+    "skills": {
+      "x": [
+        76,
+        220,
+        364,
+        508,
+        964,
+        1108,
+        1252,
+        1396
+      ],
+      "y": 220,
+      "size": 128,
+      "keys": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "Q",
+        "Space",
+        "R",
+        "F"
+      ],
+      "icons": [
+        "dawn-swordsmanship",
+        "shield-combo",
+        "guardians-hand",
+        "judgement-shield-bash",
+        "unyielding-faith",
+        "surge-of-light",
+        "dawn-citadel",
+        "dawn-call"
+      ]
+    },
+    "ultimate": {
+      "rect": [
+        640,
+        116,
+        320,
+        248.8888889
+      ],
+      "nativeCanvas": [
+        360,
+        280
+      ],
+      "keyBadgeNative": [
+        152,
+        3,
+        56,
+        36
+      ],
+      "statusSymbolNative": [
+        216,
+        8,
+        24,
+        24
+      ]
+    },
+    "jobResource": {
+      "rect": [
+        1084,
+        8,
+        320,
+        192
+      ],
+      "nativeCanvas": [
+        400,
+        240
+      ],
+      "scale": 0.8
+    }
+  },
+  "assets": {
+    "health": "gauges/sprite-manifest.json",
+    "skills": "skill-buttons/frames-reference-manifest.json",
+    "jobResources": "job-huds/manifest.json",
+    "ultimates": "ultimate/manifest.json"
+  },
+  "classes": [
+    {
+      "classId": "aegis-paladin",
+      "className": "이지스 팔라딘",
+      "ultimateName": "첫 번째 아침의 성역",
+      "jobResource": "성광",
+      "skillIconStatus": "existing paladin example set",
+      "preview": "previews/classes/aegis-paladin-ready.png"
+    },
+    {
+      "classId": "berserker",
+      "className": "버서커",
+      "ultimateName": "정오의 포효",
+      "jobResource": "혈기",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/berserker-ready.png"
+    },
+    {
+      "classId": "dragon-breaker",
+      "className": "드래곤 브레이커",
+      "ultimateName": "황혼의 종말",
+      "jobResource": "용염 탄창",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/dragon-breaker-ready.png"
+    },
+    {
+      "classId": "sylvan-oracle",
+      "className": "실반 오라클",
+      "ultimateName": "에덴의 만개",
+      "jobResource": "세계수의 꽃봉오리",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/sylvan-oracle-ready.png"
+    },
+    {
+      "classId": "seraphic-bard",
+      "className": "세라픽 바드",
+      "ultimateName": "영웅들의 행진곡",
+      "jobResource": "공명음",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/seraphic-bard-ready.png"
+    },
+    {
+      "classId": "blood-apothecary",
+      "className": "블러드 아포테카리",
+      "ultimateName": "현자의 붉은 돌",
+      "jobResource": "진홍 영약",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/blood-apothecary-ready.png"
+    },
+    {
+      "classId": "nightblade",
+      "className": "나이트블레이드",
+      "ultimateName": "영겁의 절명",
+      "jobResource": "그림자 인장",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/nightblade-ready.png"
+    },
+    {
+      "classId": "tempest-lancer",
+      "className": "템페스트 랜서",
+      "ultimateName": "천뢰 강림",
+      "jobResource": "뇌룡의 전류",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/tempest-lancer-ready.png"
+    },
+    {
+      "classId": "gunslinger",
+      "className": "건슬링어",
+      "ultimateName": "은빛 세례",
+      "jobResource": "마탄",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/gunslinger-ready.png"
+    },
+    {
+      "classId": "spirit-ranger",
+      "className": "스피릿 레인저",
+      "ultimateName": "사계의 종언",
+      "jobResource": "사계의 풍압",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/spirit-ranger-ready.png"
+    },
+    {
+      "classId": "astromancer",
+      "className": "아스트로맨서",
+      "ultimateName": "코스믹 노바",
+      "jobResource": "성좌 마력",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/astromancer-ready.png"
+    },
+    {
+      "classId": "mirror-phantom",
+      "className": "미러 팬텀",
+      "ultimateName": "만화경 종막",
+      "jobResource": "거울상 파편",
+      "skillIconStatus": "empty slots awaiting class-specific skill art",
+      "preview": "previews/classes/mirror-phantom-ready.png"
+    }
+  ],
+  "statesAndMotion": "Preserve v7 charge/availability separation. Ultimate animation is placed only in its 320 x 248.8889 rect; HP, skills, text, and job resource do not pulse.",
+  "text": "Keys and values are preview labels; production layer images remain text-free.",
+  "inputBindings": "Shown planning examples must be replaced by actual game bindings.",
+  "resourceIndependence": "HP, ultimate charge, and right job resource use separate values. No resource is consumed by previewing the ultimate.",
+  "scope": "12 basic class layouts, not every origin variant."
+}

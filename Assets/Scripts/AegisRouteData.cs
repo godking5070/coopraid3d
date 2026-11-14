@@ -2,6 +2,202 @@ using System;
 using System.Collections.Generic;
 namespace RaidRogue
 {
+    public sealed class AegisRecallInput
+    {
+        public const float HoldSeconds=.45f;
+        private bool _armed;private float _started;
+        // 1=short release, 2=long press. Blocking or losing control cancels the gesture.
+        public int Step(bool pressed,bool held,float now,bool blocked)
+        {
+            if(blocked||!CharacterDefinitionValidation.Finite(now)){_armed=false;return 0;}
+            if(pressed){_armed=true;_started=now;}
+            if(!_armed)return 0;
+            if(now-_started>=HoldSeconds){_armed=false;return 2;}
+            if(!held){_armed=false;return 1;}return 0;
+        }
+    }
+    [Serializable] public sealed class AegisMirrorSnapshot
+    {
+        public float remaining,precise;
+        public int support;
+        public bool earned;
+        public int[] responses=Array.Empty<int>();
+        public float[] ages=Array.Empty<float>();
+    }
+    public sealed class AegisMirrorState
+    {
+        public const float Cost=30,Duration=2,Precision=.6f,Reduction=.3f,Bonus=180,Range=20;
+        private AegisMirrorSnapshot _data=new AegisMirrorSnapshot();
+        public float Remaining=>_data.remaining;
+        public float Precise=>_data.precise;
+        public int Support=>_data.support;
+        public int Count=>_data.responses.Length;
+        public int First=>Count>0?_data.responses[0]:0;
+        public float FirstAge=>Count>0?_data.ages[0]:60;
+        public static float ResponsePower(string trait,float age)=>trait==AegisPaladinData.Reflection?90:trait==AegisPaladinData.Flash&&age<=4?270:Bonus;
+        public bool Begin(int support)
+        {if(support==0)return false;_data.support=support;_data.remaining=Duration;_data.precise=Precision;_data.earned=false;return true;}
+        public bool Protect(CombatDamageKind kind,bool ignoreGuard,bool bypass,float amount,int maximum=2)
+        {
+            if(_data.remaining<=0||!CombatDamageRules.CanGuard(kind,ignoreGuard||bypass)||!CombatDamageRules.FinitePositive(amount))return false;
+            if(_data.precise>0&&!_data.earned)
+            {
+                _data.earned=true;
+                if(Count<Math.Max(1,Math.Min(2,maximum))){var queue=new List<int>(_data.responses){_data.support};_data.responses=queue.ToArray();var ages=new List<float>(_data.ages){0};_data.ages=ages.ToArray();}
+            }
+            return true;
+        }
+        public int Consume()
+        {int target=First;if(target==0)return 0;var queue=new List<int>(_data.responses);queue.RemoveAt(0);_data.responses=queue.ToArray();var ages=new List<float>(_data.ages);ages.RemoveAt(0);_data.ages=ages.ToArray();return target;}
+        public void Advance(float seconds)
+        {
+            if(!CharacterDefinitionValidation.Finite(seconds)||seconds<0)return;
+            _data.remaining=Math.Max(0,_data.remaining-seconds);_data.precise=Math.Max(0,_data.precise-seconds);
+            for(int i=0;i<_data.ages.Length;i++)_data.ages[i]=Math.Min(60,_data.ages[i]+seconds);
+            if(_data.remaining==0){_data.support=0;_data.earned=false;}
+        }
+        public void Clear()=>_data=new AegisMirrorSnapshot();
+        public AegisMirrorSnapshot Capture()=>new AegisMirrorSnapshot{remaining=_data.remaining,precise=_data.precise,support=_data.support,earned=_data.earned,responses=(int[])_data.responses.Clone(),ages=(float[])_data.ages.Clone()};
+        public bool Restore(AegisMirrorSnapshot value)
+        {
+            if(value==null){Clear();return true;}
+            if(!CharacterDefinitionValidation.Finite(value.remaining)||value.remaining<0||value.remaining>Duration||
+                !CharacterDefinitionValidation.Finite(value.precise)||value.precise<0||value.precise>Precision||value.precise>value.remaining||
+                value.remaining>0&&value.support==0||value.responses==null||value.responses.Length>2||Array.IndexOf(value.responses,0)>=0)return false;
+            var ages=value.ages;
+            if(ages==null||ages.Length==0){ages=new float[value.responses.Length];for(int i=0;i<ages.Length;i++)ages[i]=60;}
+            if(ages.Length!=value.responses.Length)return false;
+            foreach(float age in ages)if(!CharacterDefinitionValidation.Finite(age)||age<0||age>60)return false;
+            _data=new AegisMirrorSnapshot{remaining=value.remaining,precise=value.precise,support=value.support,earned=value.earned,responses=(int[])value.responses.Clone(),ages=(float[])ages.Clone()};return true;
+        }
+    }
+    [Serializable] public sealed class AegisGlyph
+    {
+        public float x,z,remaining;
+        public int[] used=Array.Empty<int>();
+        public AegisGlyph Copy()=>new AegisGlyph{x=x,z=z,remaining=remaining,used=(int[])used.Clone()};
+    }
+    public sealed class AegisGlyphState
+    {
+        public const float Cost=40,Range=20,Radius=2,Lifetime=20,ShieldRatio=.1f,ShieldDuration=6;
+        public const int Maximum=2;
+        private readonly List<AegisGlyph> _glyphs=new List<AegisGlyph>();
+        public IReadOnlyList<AegisGlyph> Glyphs=>_glyphs;
+        public bool Full=>_glyphs.Count>=Maximum;
+        public static bool DecodePoint(string value,out float x,out float z)
+        {
+            x=z=0;var parts=(value??"").Split('|');
+            return parts.Length==2&&float.TryParse(parts[0],System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out x)&&
+                float.TryParse(parts[1],System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out z)&&
+                CharacterDefinitionValidation.Finite(x)&&CharacterDefinitionValidation.Finite(z);
+        }
+        public bool Install(float x,float z,int maximum=Maximum)
+        {
+            if(_glyphs.Count>=Math.Max(1,Math.Min(Maximum,maximum))||!CharacterDefinitionValidation.Finite(x)||!CharacterDefinitionValidation.Finite(z))return false;
+            _glyphs.Add(new AegisGlyph{x=x,z=z,remaining=Lifetime});return true;
+        }
+        public bool RecallUnused()
+        {int index=_glyphs.FindIndex(g=>g.used.Length==0);if(index<0)return false;_glyphs.RemoveAt(index);return true;}
+        public bool Visit(int index,int member,float fromX,float fromZ,float toX,float toZ,float radius=Radius)
+        {
+            if(index<0||index>=_glyphs.Count||member==0)return false;
+            foreach(float n in new[]{fromX,fromZ,toX,toZ})if(!CharacterDefinitionValidation.Finite(n))return false;
+            var glyph=_glyphs[index];if(glyph.remaining<=0||Array.IndexOf(glyph.used,member)>=0||glyph.used.Length>=8)return false;
+            double dx=toX-fromX,dz=toZ-fromZ,len=dx*dx+dz*dz;
+            double t=len<.000001?0:Math.Max(0,Math.Min(1,((glyph.x-fromX)*dx+(glyph.z-fromZ)*dz)/len));
+            double x=fromX+t*dx-glyph.x,z=fromZ+t*dz-glyph.z;
+            if(!CharacterDefinitionValidation.Finite(radius)||radius<=0||x*x+z*z>radius*radius)return false;
+            var used=new List<int>(glyph.used){member};glyph.used=used.ToArray();return true;
+        }
+        public void Advance(float seconds)
+        {
+            if(!CharacterDefinitionValidation.Finite(seconds)||seconds<0)return;
+            foreach(var glyph in _glyphs)glyph.remaining=Math.Max(0,glyph.remaining-seconds);
+            _glyphs.RemoveAll(g=>g.remaining<=0);
+        }
+        public void Clear()=>_glyphs.Clear();
+        public AegisGlyph[] Capture()=>_glyphs.ConvertAll(g=>g.Copy()).ToArray();
+        public bool Restore(AegisGlyph[] value)
+        {
+            if(value==null){Clear();return true;} // Snapshots from before the glyph migration.
+            if(value.Length>Maximum)return false;
+            foreach(var g in value)if(g==null||!CharacterDefinitionValidation.Finite(g.x)||!CharacterDefinitionValidation.Finite(g.z)||
+                !CharacterDefinitionValidation.Finite(g.remaining)||g.remaining<=0||g.remaining>Lifetime||g.used==null||g.used.Length>8||
+                new HashSet<int>(g.used).Count!=g.used.Length||Array.IndexOf(g.used,0)>=0)return false;
+            Clear();foreach(var g in value)_glyphs.Add(g.Copy());return true;
+        }
+    }
+    [Serializable] public sealed class AegisFollowupShield
+    { public int target; public float amount,remaining; public AegisFollowupShield Copy()=>(AegisFollowupShield)MemberwiseClone(); }
+    [Serializable] public sealed class AegisSunSnapshot
+    {
+        public bool shield,secondRecorded,secondShield;
+        public float markRemaining,markPower;
+        public int markTarget;
+        public int[] eligible=Array.Empty<int>();
+        public AegisFollowupShield[] followups=Array.Empty<AegisFollowupShield>();
+    }
+    public sealed class AegisSunState
+    {
+        public const float Cost=40, MarkDuration=6, AllyRange=20, ShieldDuration=6;
+        // Prototype effect budgets, separately exposed for four/eight-player tuning.
+        public const float SwordBonus=180, ShieldRatio=.1f, SmallShieldRatio=.03f, FourBudget=120, EightBudget=160;
+        private AegisSunSnapshot _data=new AegisSunSnapshot();
+        public bool Shield=>_data.shield;
+        public bool SecondShield=>_data.secondRecorded?_data.secondShield:_data.shield;
+        public bool SecondRecorded=>_data.secondRecorded;
+        public int MarkTarget=>_data.markTarget;
+        public int MarkRights=>_data.eligible.Length;
+        public float MarkRemaining=>_data.markRemaining;
+        public float FirstReward=>Shield?20:30;
+        public void Toggle()=>_data.shield=!_data.shield;
+        public void BeginSecond(){_data.secondRecorded=true;_data.secondShield=_data.shield;}
+        public void FinishSecond(){_data.secondRecorded=false;_data.secondShield=false;}
+        public void Clear()=>_data=new AegisSunSnapshot();
+        public void SetMark(int target,int owner,IEnumerable<int> members,int partySize,float scale=1)
+        {
+            var eligible=new HashSet<int>();foreach(int id in members)if(id!=0&&id!=owner&&eligible.Count<7)eligible.Add(id);
+            _data.eligible=new List<int>(eligible).ToArray();_data.markTarget=target;_data.markRemaining=MarkDuration;
+            _data.markPower=(partySize>4?EightBudget:FourBudget)/Math.Max(1,Math.Min(8,partySize)-1)*scale;
+        }
+        public void QueueProtection(int target,float amount)
+        {
+            // Same caster/effect replaces pending protection for this target; no infinite queue.
+            var list=new List<AegisFollowupShield>(_data.followups);list.RemoveAll(x=>x.target==target);
+            if(target!=0&&amount>0&&CharacterDefinitionValidation.Finite(amount)&&list.Count<8)list.Add(new AegisFollowupShield{target=target,amount=amount,remaining=AegisPaladinData.FollowupDelay});
+            _data.followups=list.ToArray();
+        }
+        public AegisFollowupShield[] TakeProtection(float seconds)
+        {
+            if(!CharacterDefinitionValidation.Finite(seconds)||seconds<0)return Array.Empty<AegisFollowupShield>();
+            var due=new List<AegisFollowupShield>();var pending=new List<AegisFollowupShield>();
+            foreach(var shield in _data.followups){shield.remaining=Math.Max(0,shield.remaining-seconds);if(shield.remaining==0)due.Add(shield.Copy());else pending.Add(shield);}
+            _data.followups=pending.ToArray();return due.ToArray();
+        }
+        public float Consume(int member,bool direct)
+        {
+            if(!direct||_data.markRemaining<=0||member==0)return 0;
+            int index=Array.IndexOf(_data.eligible,member);if(index<0)return 0;
+            var list=new List<int>(_data.eligible);list.RemoveAt(index);_data.eligible=list.ToArray();return _data.markPower;
+        }
+        public void Advance(float seconds)
+        {
+            if(!CharacterDefinitionValidation.Finite(seconds)||seconds<0)return;
+            _data.markRemaining=Math.Max(0,_data.markRemaining-seconds);
+            if(_data.markRemaining==0){_data.eligible=Array.Empty<int>();_data.markTarget=0;_data.markPower=0;}
+        }
+        public AegisSunSnapshot Capture()=>new AegisSunSnapshot{shield=_data.shield,secondRecorded=_data.secondRecorded,secondShield=_data.secondShield,
+            markRemaining=_data.markRemaining,markPower=_data.markPower,markTarget=_data.markTarget,eligible=(int[])_data.eligible.Clone(),followups=Array.ConvertAll(_data.followups,x=>x.Copy())};
+        public bool Restore(AegisSunSnapshot s)
+        {
+            if(s==null||s.eligible==null||s.eligible.Length>7||!CharacterDefinitionValidation.Finite(s.markRemaining)||s.markRemaining<0||s.markRemaining>MarkDuration||
+                !CharacterDefinitionValidation.Finite(s.markPower)||s.markPower<0||s.markPower>EightBudget||new HashSet<int>(s.eligible).Count!=s.eligible.Length||Array.IndexOf(s.eligible,0)>=0)return false;
+            var followups=s.followups??Array.Empty<AegisFollowupShield>(); // Older job snapshots have no pending-protection field.
+            if(followups.Length>8)return false;
+            var targets=new HashSet<int>();foreach(var f in followups)if(f==null||f.target==0||!targets.Add(f.target)||!CharacterDefinitionValidation.Finite(f.amount)||f.amount<=0||!CharacterDefinitionValidation.Finite(f.remaining)||f.remaining<=0||f.remaining>AegisPaladinData.FollowupDelay)return false;
+            _data=new AegisSunSnapshot{shield=s.shield,secondRecorded=s.secondRecorded,secondShield=s.secondShield,markRemaining=s.markRemaining,markPower=s.markPower,markTarget=s.markTarget,eligible=(int[])s.eligible.Clone(),followups=Array.ConvertAll(followups,x=>x.Copy())};return true;
+        }
+    }
     // Stable IDs and initial tuning. No actor state is stored in these definitions.
     public static class AegisRouteData
     {

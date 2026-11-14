@@ -49,7 +49,36 @@ static class CampaignSaveTests
         Part1SaveTests.Run(Check);
         CharacterCatalog.Register(AegisPaladinData.Build(), out _, true);
         foreach (var job in CharacterRosterData.Jobs) CharacterCatalog.Register(CharacterRosterData.Definition(job), out _, true);
+        PendingSettlementRecovery();
+        var spectator = Build(CharacterCatalog.Legacy(1), 0, 0);
+        spectator.transport = "spectator-test";
+        foreach (var slot in spectator.party) { slot.bot = true; slot.userId = ""; }
+        Check(Valid(spectator), "isolated four-AI checkpoint accepted: " + CampaignValidation.Checkpoint(spectator, Owner, CharacterCatalog.Find));
+        var normalTransport = Copy(spectator); normalTransport.transport = "single";
+        Check(!Valid(normalTransport), "four-AI checkpoint cannot enter ordinary single-player transport");
+        var extraHuman = Copy(spectator); extraHuman.party[0].bot = false; extraHuman.party[0].userId = Owner;
+        Check(!Valid(extraHuman), "spectator checkpoint cannot contain an observing combatant");
+        var rewardedSpectator = Build(CharacterCatalog.Legacy(1), 0, 1);
+        rewardedSpectator.transport = "spectator-test";
+        foreach (var slot in rewardedSpectator.party)
+        {
+            slot.bot = true; slot.userId = "";
+            slot.cards = new[] { new CampaignCardStack { id = CampaignCardIds.Id(6), stacks = 1 } };
+            slot.character.effects = CampaignCardIds.Effects(slot.cards);
+        }
+        rewardedSpectator.rewards = rewardedSpectator.party.Select(slot => new CampaignRewardRecord {
+            key = CharacterRewardKey.Stage(rewardedSpectator.runId, rewardedSpectator.chapterId, 1) + "/card/" + slot.slotId,
+            slotId = slot.slotId, offeredIds = new[] { CampaignCardIds.Id(6), CampaignCardIds.Id(0), CampaignCardIds.Id(1) },
+            selectedId = CampaignCardIds.Id(6) }).ToArray();
+        Check(Valid(rewardedSpectator), "four AI card selections survive next-stage checkpoint: " + CampaignValidation.Checkpoint(rewardedSpectator, Owner, CharacterCatalog.Find));
         var definitions = CharacterCatalog.All.Where(d => d.playable).ToArray();
+        foreach (var modern in definitions.Where(d => d.legacyRole == 0))
+        {
+            var modernSpectator = Build(modern, 0, 0);
+            modernSpectator.transport = "spectator-test";
+            foreach (var slot in modernSpectator.party) { slot.bot = true; slot.userId = ""; }
+            Check(Valid(modernSpectator), "modern AI job in isolated spectator checkpoint: " + modern.id);
+        }
         foreach (var job in definitions)
         foreach (var rule in job.unlocks)
         foreach (string choice in rule.choices)
@@ -87,6 +116,12 @@ static class CampaignSaveTests
             }
         }
         var sample = Build(AegisPaladinData.Build(), 1, 2);
+        var hardBoundary = Copy(sample); hardBoundary.difficultyId = CampaignCatalog.Hard;
+        Check(Valid(hardBoundary) && Valid(Copy(hardBoundary)), "hard checkpoint survives validation and serialization");
+        var hardReceipt = Receipt(CampaignCatalog.PartOne, 1); hardReceipt.difficultyId = CampaignCatalog.Hard;
+        Check(CampaignValidation.Receipt(hardReceipt, Owner), "hard clear receipt accepted");
+        hardBoundary.difficultyId = "extreme";
+        Check(!Valid(hardBoundary), "unsupported difficulty still rejected");
         void Reject(Action<CampaignCheckpoint> change, string reason) { var c = Copy(sample); change(c); Check(!Valid(c), reason); }
         Reject(c => c.owner = "offline-local", "cross account");
         Reject(c => c.version = 99, "future version");
@@ -196,7 +231,7 @@ static class CampaignSaveTests
         foreach (int index in Enumerable.Range(0, 31)) Check(CampaignCardIds.Index(CampaignCardIds.Id(index)) == index, "stable card id mapping");
         var flow = new RaidRunFlow(); Check(flow.TryResume(3, 3), "resume boundary enters loading");
         Check(!flow.TryResume(2, 3) && !flow.TryPrepare(2, 3, false), "no double resume or premature stage advance");
-        Check(flow.TryCountdown(flow.Revision) && flow.TryStart(flow.Revision), "resume countdown uses existing flow");
+        Check(flow.TryApproach(flow.Revision) && flow.TryArrival(flow.Revision) && flow.TryCountdown(flow.Revision) && flow.TryStart(flow.Revision), "resume countdown uses existing flow");
         Check(!flow.TryResume(1, 3), "no combat load");
         foreach (var kind in new[] { RaidPacketKind.CampaignClear, RaidPacketKind.CampaignAck })
         { string text = "verified-owner/run/main/1"; Check(RaidWire.Decode(RaidWire.Encode(new RaidPacket { Kind = kind, Text = text }), out var decoded) && decoded.Kind == kind && decoded.Text == text, "receipt wire round trip"); }
@@ -269,6 +304,187 @@ static class CampaignSaveTests
         File.WriteAllText(path, "broken"); File.WriteAllText(path + ".bak", "broken");
         Check(!CampaignStorage.Read(path, Inspect).Writable && !CampaignStorage.Save(path, first, Inspect, out _), "corruption not silently defaulted over");
         Check(CampaignStorage.Delete(path, out _) && !File.Exists(path) && !File.Exists(path + ".bak"), "delete selected scope primary and backup");
+        try {
+        CharacterCatalog.ResetCatalog();
+        var nineKey=AegisPaladinData.BuildNineKey();
+        Check(CharacterCatalog.Register(nineKey,out string auxiliaryCatalogError,true),"register current nine-key catalog for durable auxiliary save: "+auxiliaryCatalogError);
+        var auxiliaryCheckpoint=Build(nineKey,0,3);
+        var auxiliaryMember=auxiliaryCheckpoint.party.Single(p=>!p.bot);
+        var auxiliaryState=new CharacterRuntimeState(nineKey);
+        Check(auxiliaryState.Restore(auxiliaryMember.character)&&auxiliaryState.ChangeAuxiliary("auxiliary.1",AegisPaladinData.LastingSanctuary,true),"choose nondefault auxiliary on campaign boundary");
+        auxiliaryMember.character=auxiliaryState.Snapshot;
+        string auxiliaryPath=Path.Combine(directory,"auxiliary.json");
+        Check(CampaignStorage.Save(auxiliaryPath,Json.Serialize(auxiliaryCheckpoint),Inspect,out _),"atomic save accepts current auxiliary schema");
+        var auxiliaryReload=Json.Deserialize<CampaignCheckpoint>(CampaignStorage.Read(auxiliaryPath,Inspect).text);
+        Check(auxiliaryState.Restore(auxiliaryReload.party.Single(p=>!p.bot).character)&&auxiliaryState.HasAuxiliary(AegisPaladinData.LastingSanctuary)&&auxiliaryState.HasAuxiliary(AegisPaladinData.FarCall),"disk reload retains two distinct nondefault traits");
+        var corruptAuxiliary=Copy(auxiliaryCheckpoint);var corruptMember=corruptAuxiliary.party.Single(p=>!p.bot);
+        corruptMember.character.auxiliaryTraits[1]=corruptMember.character.auxiliaryTraits[0];
+        Check(!Valid(corruptAuxiliary)&&!CampaignStorage.Save(auxiliaryPath,Json.Serialize(corruptAuxiliary),Inspect,out _),"duplicate traits cannot overwrite valid checkpoint");
+        Check(CampaignStorage.Read(auxiliaryPath,Inspect).state==CampaignFileState.Valid,"rejected auxiliary save leaves valid file");
+        CharacterCatalog.ResetCatalog();
+        } catch(Exception e) { Console.WriteLine("Auxiliary save failure: "+e.GetType().Name+": "+e.Message); Environment.Exit(1); }
+        try { TankCheckpoints(directory); HealerCheckpoints(directory); DamageCheckpoints(directory); }
+        catch(Exception e) { Console.WriteLine("Nine-key job save failure: "+e.Message);Environment.Exit(1); }
         Console.WriteLine("PASS campaign save: " + checks + " assertions (real atomic file IO + pure state; no Unity/Steam execution). Files: " + directory);
+    }
+    static void TankCheckpoints(string directory)
+    {
+        foreach(var job in CharacterRosterData.Jobs.Where(NineKeyTankData.Supports))
+        {
+            CharacterCatalog.ResetCatalog();var definition=NineKeyTankData.Build(job);
+            Check(CharacterCatalog.Register(definition,out _,true),"live tank catalog");
+            for(int route=0;route<3;route++)for(int core=0;core<2;core++)for(int second=0;second<3;second++)for(int third=0;third<3;third++)
+            {
+                var checkpoint=Build(definition,route,3);var member=checkpoint.party.Single(p=>!p.bot);
+                var state=new CharacterRuntimeState(definition);Check(state.Restore(member.character),"tank checkpoint fixture");
+                foreach(var rule in definition.loadouts.Where(r=>string.IsNullOrEmpty(r.routeId)||r.routeId==state.RouteId))
+                    Check(state.ChangeLoadout(rule.id,rule.choices[rule.slot==CharacterSlot.Gcd2?second:rule.slot==CharacterSlot.OffGcd1?third:core],true),"tank persisted loadout");
+                Check(state.ChangeAuxiliary("auxiliary.1",NineKeyTankData.MeasuredStep,true),"tank persisted nondefault auxiliary");
+                member.character=state.Snapshot;
+                Check(Valid(checkpoint),"tank checkpoint validation: "+CampaignValidation.Checkpoint(checkpoint,Owner,CharacterCatalog.Find));
+                string path=Path.Combine(directory,job.slug+"-"+route+"-"+core+"-"+second+"-"+third+".json");
+                Check(CampaignStorage.Save(path,Json.Serialize(checkpoint),Inspect,out _),"tank atomic disk save");
+                var loaded=CampaignStorage.Read(path,Inspect);Check(loaded.state==CampaignFileState.Valid,"tank disk validation");
+                var restored=new CharacterRuntimeState(definition);
+                Check(restored.Restore(Json.Deserialize<CampaignCheckpoint>(loaded.text).party.Single(p=>!p.bot).character),"tank disk restore");
+                Check(restored.Snapshot.coreTrait==state.Snapshot.coreTrait&&restored.Selected(CharacterSlot.Gcd2).id==state.Selected(CharacterSlot.Gcd2).id&&restored.Selected(CharacterSlot.OffGcd1).id==state.Selected(CharacterSlot.OffGcd1).id&&restored.HasAuxiliary(NineKeyTankData.MeasuredStep)&&restored.Unlocked(CharacterSlot.Ultimate),"tank full build and stage3 unlock survive");
+            }
+            for(int route=0;route<3;route++)
+            {
+                var legacy=Build(CharacterRosterData.Definition(job),route,2);
+                string path=Path.Combine(directory,job.slug+"-old-"+route+".json");
+                Check(CampaignStorage.Save(path,Json.Serialize(legacy),Inspect,out _),"legacy tank checkpoint accepted by active catalog");
+                var old=Json.Deserialize<CampaignCheckpoint>(CampaignStorage.Read(path,Inspect).text).party.Single(p=>!p.bot).character;
+                var migrated=new CharacterRuntimeState(definition);
+                Check(migrated.Restore(old)&&migrated.RouteId==definition.routes[route].id&&!migrated.Unlocked(CharacterSlot.Ultimate),"legacy disk migration preserves route and V lock");
+            }
+        }
+        CharacterCatalog.ResetCatalog();
+    }
+    static void HealerCheckpoints(string directory)
+    {
+        foreach(var job in CharacterRosterData.Jobs.Where(NineKeyHealerData.Supports))
+        {
+            CharacterCatalog.ResetCatalog();var definition=NineKeyHealerData.Build(job);
+            Check(CharacterCatalog.Register(definition,out _,true),"live healer catalog");
+            for(int route=0;route<3;route++)for(int core=0;core<2;core++)for(int second=0;second<3;second++)for(int third=0;third<3;third++)
+            {
+                var checkpoint=Build(definition,route,3);var member=checkpoint.party.Single(p=>!p.bot);
+                var state=new CharacterRuntimeState(definition);Check(state.Restore(member.character),"healer checkpoint fixture");
+                foreach(var rule in definition.loadouts.Where(r=>string.IsNullOrEmpty(r.routeId)||r.routeId==state.RouteId))
+                    Check(state.ChangeLoadout(rule.id,rule.choices[rule.slot==CharacterSlot.Gcd2?second:rule.slot==CharacterSlot.OffGcd1?third:core],true),"healer persisted loadout");
+                Check(state.ChangeAuxiliary("auxiliary.1",NineKeyHealerData.Safe,true),"healer persisted nondefault auxiliary");
+                member.character=state.Snapshot;
+                Check(Valid(checkpoint),"healer checkpoint validation: "+CampaignValidation.Checkpoint(checkpoint,Owner,CharacterCatalog.Find));
+                string path=Path.Combine(directory,job.slug+"-"+route+"-"+core+"-"+second+"-"+third+".json");
+                Check(CampaignStorage.Save(path,Json.Serialize(checkpoint),Inspect,out _),"healer atomic disk save");
+                var loaded=CampaignStorage.Read(path,Inspect);Check(loaded.state==CampaignFileState.Valid,"healer disk validation");
+                var restored=new CharacterRuntimeState(definition);
+                Check(restored.Restore(Json.Deserialize<CampaignCheckpoint>(loaded.text).party.Single(p=>!p.bot).character),"healer disk restore");
+                Check(restored.Snapshot.coreTrait==state.Snapshot.coreTrait&&restored.Selected(CharacterSlot.Gcd2).id==state.Selected(CharacterSlot.Gcd2).id&&restored.Selected(CharacterSlot.OffGcd1).id==state.Selected(CharacterSlot.OffGcd1).id&&restored.HasAuxiliary(NineKeyHealerData.Safe)&&restored.Unlocked(CharacterSlot.Ultimate),"healer full build and stage3 unlock survive");
+            }
+            for(int route=0;route<3;route++)
+            {
+                var legacy=Build(CharacterRosterData.Definition(job),route,2);
+                string path=Path.Combine(directory,job.slug+"-old-"+route+".json");
+                Check(CampaignStorage.Save(path,Json.Serialize(legacy),Inspect,out _),"legacy healer checkpoint accepted by active catalog");
+                var old=Json.Deserialize<CampaignCheckpoint>(CampaignStorage.Read(path,Inspect).text).party.Single(p=>!p.bot).character;
+                var migrated=new CharacterRuntimeState(definition);
+                Check(migrated.Restore(old)&&migrated.RouteId==definition.routes[route].id&&!migrated.Unlocked(CharacterSlot.Ultimate),"legacy disk migration preserves route and V lock");
+            }
+        }
+        CharacterCatalog.ResetCatalog();
+    }
+    static void DamageCheckpoints(string directory)
+    {
+        foreach(var job in CharacterRosterData.Jobs.Where(NineKeyDamageData.Supports))
+        {
+            CharacterCatalog.ResetCatalog();var definition=NineKeyDamageData.Build(job);
+            Check(CharacterCatalog.Register(definition,out _,true),"active damage catalog");
+            for(int route=0;route<3;route++)for(int core=0;core<2;core++)for(int variant=0;variant<3;variant++)
+            {
+                var checkpoint=Build(definition,route,3);var member=checkpoint.party.Single(p=>!p.bot);
+                var state=new CharacterRuntimeState(definition);Check(state.Restore(member.character),"damage checkpoint fixture");
+                foreach(var rule in definition.loadouts.Where(r=>r.slot!=0))
+                {
+                    int pick=rule.slot==CharacterSlot.OffGcd1&&job.index==7&&route==1&&core==1?1:variant;
+                    Check(state.ChangeLoadout(rule.id,rule.choices[pick],true),"damage persisted replacement: "+job.name+" "+rule.id);
+                }
+                var coreRule=definition.loadouts.First(r=>r.slot==0&&r.routeId==state.RouteId);
+                string coreId=NineKeyDamageData.Core(job,route+1,core);
+                Check(state.ChangeLoadout(coreRule.id,coreId,true),"damage persisted core");
+                member.character=state.Snapshot;
+                Check(Valid(checkpoint),"damage checkpoint validation: "+CampaignValidation.Checkpoint(checkpoint,Owner,CharacterCatalog.Find));
+                string path=Path.Combine(directory,job.slug+"-nine-"+route+"-"+core+"-"+variant+".json");
+                Check(CampaignStorage.Save(path,Json.Serialize(checkpoint),Inspect,out _),"damage atomic disk save");
+                var loaded=CampaignStorage.Read(path,Inspect);Check(loaded.state==CampaignFileState.Valid,"damage disk validation");
+                var restored=new CharacterRuntimeState(definition);
+                Check(restored.Restore(Json.Deserialize<CampaignCheckpoint>(loaded.text).party.Single(p=>!p.bot).character),"damage disk restore");
+                Check(restored.Snapshot.coreTrait==coreId&&restored.Unlocked(CharacterSlot.Ultimate)&&
+                    restored.Snapshot.selections.Select(s=>s.skillId).SequenceEqual(state.Snapshot.selections.Select(s=>s.skillId))&&
+                    restored.Snapshot.auxiliaryTraits.SequenceEqual(state.Snapshot.auxiliaryTraits),"damage nine key loadout/core/auxiliary and V unlock survive disk");
+            }
+            for(int route=0;route<3;route++)
+            {
+                var legacy=Build(CharacterRosterData.Definition(job),route,2);
+                string path=Path.Combine(directory,job.slug+"-legacy-nine-"+route+".json");
+                Check(CampaignStorage.Save(path,Json.Serialize(legacy),Inspect,out var saveFailure),"legacy DPS disk accepted by active new catalog: "+job.name+" route"+route+" "+saveFailure+" "+CampaignValidation.Checkpoint(legacy,Owner,CharacterCatalog.Find));
+                var loaded=CampaignStorage.Read(path,Inspect);Check(loaded.state==CampaignFileState.Valid,"legacy DPS disk remains valid");
+                var migrated=new CharacterRuntimeState(definition);
+                Check(migrated.Restore(Json.Deserialize<CampaignCheckpoint>(loaded.text).party.Single(p=>!p.bot).character)&&
+                    migrated.RouteId==definition.routes[route].id&&!migrated.Unlocked(CharacterSlot.Ultimate)&&migrated.Resource(NineKeyDamageData.Gauge(job))==0,
+                    "legacy DPS disk migration preserves route/V lock without free ultimate");
+            }
+        }
+        CharacterCatalog.ResetCatalog();
+    }
+    static void PendingSettlementRecovery()
+    {
+        for (int stage = 1; stage <= 6; stage++)
+        {
+            var run = Build(AegisPaladinData.Build(), 0, stage);
+            run.completed = false; run.nextStage = stage;
+            var human = run.party.Single(p => !p.bot);
+            string cardKey = CharacterRewardKey.Stage(run.runId, run.chapterId, stage) + "/card/" + human.slotId;
+            run.rewards = run.rewards.Where(r => r.key != cardKey).ToArray();
+            int priorCards = Math.Min(stage - 1, 5);
+            human.cards = priorCards == 0 ? Array.Empty<CampaignCardStack>() : new[] { new CampaignCardStack { id = CampaignCardIds.Id(6), stacks = priorCards } };
+            var actor = new CharacterRuntimeState(CharacterCatalog.Find(human.character.jobId));
+            actor.BeginRun(run.runId, run.chapterId);
+            Check(actor.ChooseRoute(human.character.routeId, true), "settlement keeps original route");
+            for (int cleared = 1; cleared <= stage; cleared++)
+            {
+                Check(actor.ClearedStage(run.runId, run.chapterId, cleared), "journal includes confirmed clear");
+                if (cleared < stage)
+                    foreach (var rule in actor.PendingChoices()) Check(actor.ChooseSkill(rule.id, rule.choices[0], actor.RewardKey(rule)), "prior skill rewards remain settled");
+            }
+            human.character = actor.Snapshot;
+            human.character.effects = CampaignCardIds.Effects(human.cards);
+            var journal = new CampaignSettlement { owner = Owner, runId = run.runId, stage = stage, run = run, savedUtc = DateTimeOffset.UtcNow.ToString("O") };
+            Check(CampaignValidation.Settlement(journal, Owner, CharacterCatalog.Find) == null, "pending card/skill journal accepted at stage " + stage);
+            Check(!Valid(run), "post-kill unsettled run is not a replayable stage-start checkpoint");
+            var restored = Copy(journal);
+            Check(CampaignValidation.Settlement(restored, Owner, CharacterCatalog.Find) == null, "journal JSON roundtrip preserves unfinished rewards");
+            var restoredActor = new CharacterRuntimeState(CharacterCatalog.Find(human.character.jobId));
+            Check(restoredActor.Restore(restored.run.party.Single(p => !p.bot).character), "pending journal restores actor independently of Unity IDs");
+            Check(restoredActor.PendingChoices().Length == actor.PendingChoices().Length, "resume preserves pending choice count");
+            Check(!restoredActor.ClearedStage(run.runId, run.chapterId, stage), "journal resume cannot award the boss clear twice");
+            var old = Build(AegisPaladinData.Build(), 0, stage - 1); old.runId = run.runId;
+            Check(ReferenceEquals(CampaignRecovery.ContinueSource(journal, old), run) && ReferenceEquals(CampaignRecovery.ContinueSource(journal, null), run), "durable journal wins over older or absent stage-start save");
+            Check(CampaignValidation.SettlementSupersedesPending(journal, old), "same-run stage-start save failure cannot block durable settlement");
+            old.runId = Guid.NewGuid().ToString("N");
+            Check(!CampaignValidation.SettlementSupersedesPending(journal, old), "journal cannot discard another run's pending checkpoint");
+            var nextBoundary = Copy(run); nextBoundary.nextStage = stage + 1;
+            Check(!CampaignValidation.SettlementSupersedesPending(journal, nextBoundary), "next-stage write must finish before settlement is discarded");
+            nextBoundary.nextStage = stage; nextBoundary.completed = true;
+            Check(!CampaignValidation.SettlementSupersedesPending(journal, nextBoundary), "final completion write must finish before settlement is discarded");
+            if (stage == 6)
+            {
+                Check(run.rewards.Length == 5 && human.cards.Sum(c => c.stacks) == 5, "final-clear journal has five cards and no stage-six card");
+                var flow = new RaidRunFlow();
+                Check(flow.TryRestoreSettlement(restored.stage, 6) && flow.Phase == RaidBattlePhase.Reward, "final journal resumes settlement rather than a seventh encounter");
+                Check(flow.FinishFinalRewards(flow.Revision, 6) && !flow.TryPrepare(7, 6, false), "settled final journal ends at victory");
+            }
+        }
     }
 }

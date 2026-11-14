@@ -35,6 +35,7 @@ namespace RaidRogue
             ResourceChanges[id] = totals;
         }
         private readonly List<BossAddMinion> _adds = new List<BossAddMinion>();
+        public IReadOnlyList<BossAddMinion> ExtraTargets => _adds;
         private float _damage;
         private Transform _victim;
         private int _successAtWarning;
@@ -72,7 +73,7 @@ namespace RaidRogue
         public static string FirstChoice(CharacterDefinition job, CharacterSlot slot) => job.unlocks.First(r => r.slot == slot).choices[0];
         private void CreateExtraTarget(int index)
         {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Capsule); go.name = "훈련 표적 " + (index + 2);
+            var go = RaidPrimitive.Create(PrimitiveType.Capsule); go.name = "훈련 표적 " + (index + 2);
             var add = go.AddComponent<BossAddMinion>(); add.enabled = false;
             add.addType = AddMinionType.Assassin_HealerHunter; add.addDisplayName = go.name;
             add.maxHp = add.currentHp = 1000000; add.combatRadius = .65f;
@@ -191,12 +192,12 @@ namespace RaidRogue
         {
             if (!CombatRange.LivingPartyMember(_victim)) { StopAttacks(); Message = "시험 대상이 사망했습니다."; return; }
             _origin = Target.transform.position;
-            _warning.startColor = _warning.endColor = Attack == TrainingAttack.Counter ? Color.cyan : Color.red;
+            _warning.startColor = _warning.endColor = Attack == TrainingAttack.Counter ? new Color(1f,.75f,.15f) : Color.red;
             _warning.enabled = true; _warning.SetPosition(0, _origin + Vector3.up); _warning.SetPosition(1, _victim.position + Vector3.up);
             _successAtWarning = Counters;
             if (Attack == TrainingAttack.Counter) CombatCounterTarget.Ensure(Target.transform).OpenWindow((float)TrainingAttackClock.WarningSeconds + .1f);
-            Message = "예고: " + Attack + " → " + _victim.name + " (1.5초)";
-            Target.ShowExternalAlert(Message, Attack == TrainingAttack.Counter ? Color.cyan : Color.red, 1.5f);
+            Message = "예고: " + (Attack == TrainingAttack.Counter ? "⚔ 금색 일반 카운터" : Attack.ToString()) + " → " + _victim.name + " (1.5초)";
+            Target.ShowExternalAlert(Message, Attack == TrainingAttack.Counter ? new Color(1f,.75f,.15f) : Color.red, 1.5f);
         }
         public void StopAttacks()
         {

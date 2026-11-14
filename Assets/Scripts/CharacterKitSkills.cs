@@ -212,7 +212,7 @@ namespace RaidRogue
                     if (chain == 2 && flank)
                     {
                         Self("next1", "폭풍 파쇄격", 8);
-                        CombatSecondaryDamage.Apply(transform, target, actual * .3f, Job.SkillId(a.key), CombatDamageKind.Extra);
+                        CombatSecondaryDamage.Apply(transform, target, actual * .3f, Job.SkillId(a.key), CombatDamageKind.Extra, true);
                     }
 
                     break;

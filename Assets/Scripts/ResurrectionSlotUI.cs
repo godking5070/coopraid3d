@@ -16,23 +16,8 @@ namespace RaidRogue
         private void Awake() { _skill = GetComponent<BattleResurrection>(); }
         private void Update()
         {
-            if (_root == null)
-            {
-                var hotbar = FindFirstObjectByType<SkillHotbarUI>(); if (hotbar == null) return;
-                _root = new GameObject("Healer_ResurrectionSlot", typeof(RectTransform), typeof(Image));
-                var rect = _root.GetComponent<RectTransform>(); rect.SetParent(hotbar.transform, false);
-                rect.anchorMin = rect.anchorMax = new Vector2(1, 1); rect.pivot = new Vector2(0, 0);
-                rect.anchoredPosition = new Vector2(12, 8); rect.sizeDelta = new Vector2(180, 70);
-                _root.GetComponent<Image>().color = new Color(0.08f, 0.24f, 0.22f, 0.95f);
-                var bar = new GameObject("CastProgress", typeof(RectTransform), typeof(Image)); bar.transform.SetParent(rect, false);
-                _fill = bar.GetComponent<Image>(); _fill.color = new Color(0.3f, 0.8f, 0.6f, 0.45f); _fill.raycastTarget = false;
-                var text = new GameObject("Text", typeof(RectTransform), typeof(Text)); text.transform.SetParent(rect, false);
-                var tr = text.GetComponent<RectTransform>(); tr.anchorMin = Vector2.zero; tr.anchorMax = Vector2.one; tr.offsetMin = tr.offsetMax = Vector2.zero;
-                _label = text.GetComponent<Text>(); _label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                _label.fontSize = 14; _label.alignment = TextAnchor.MiddleCenter; _label.color = Color.white; _label.raycastTarget = false;
-                _rescue = _root.AddComponent<Button>(); _rescue.targetGraphic = _root.GetComponent<Image>(); _rescue.onClick.AddListener(() => _skill.TryBegin(TargetingManager.Instance?.CurrentTarget));
-                BuildDeathPanel(hotbar.GetComponentInParent<Canvas>().transform);
-            }
+            EnsureView();
+            if (_root == null) return;
             if (Time.unscaledTime < _nextRefresh) return;
             _nextRefresh = Time.unscaledTime + .15f;
             bool dead = GetComponent<PlayerController>()?.IsDead == true;
@@ -42,8 +27,8 @@ namespace RaidRogue
             _root.SetActive(true);
             _rescue.interactable = !blocked && reason.Length == 0;
             _label.text = $"[{LocalInputBindings.Label("Skill5")}] 이리스의 구원\n이번 도전 부활 {StageManager.Instance?.IrisCoins??0} / {IrisRescueState.DefaultCoins}";
-            var fill = _fill.rectTransform; fill.anchorMin = Vector2.zero;
-            fill.anchorMax = new Vector2(_skill.IsCasting ? _skill.Progress : 0, 1); fill.offsetMin = fill.offsetMax = Vector2.zero;
+            if (_fill.type == Image.Type.Filled) _fill.fillAmount = _skill.IsCasting ? _skill.Progress : 0;
+            else { var fill = _fill.rectTransform; fill.anchorMin = Vector2.zero; fill.anchorMax = new Vector2(_skill.IsCasting ? _skill.Progress : 0, 1); fill.offsetMin = fill.offsetMax = Vector2.zero; }
             bool show = dead && !StageManager.CombatSuspended && !LocalGameplayInput.ModalCovered;
             _deathPanel.gameObject.SetActive(show);
             var camera = QuarterViewCamera.LocalCamera;
@@ -60,6 +45,37 @@ namespace RaidRogue
             _deathText.text = $"전투 불능 · 이번 도전 부활 {StageManager.Instance?.IrisCoins ?? 0} / 4\n" +
                 (reason.Length == 0 ? $"[{LocalInputBindings.Label("Skill5")}] 이리스에게 내 구조 요청" : reason) +
                 "\n관전: " + watching + " · 보기만 변경\n" + result;
+        }
+        private void EnsureView()
+        {
+            if (_root == null || RaidUIView.For(this) == null)
+            {
+                var hotbar = FindFirstObjectByType<SkillHotbarUI>(); if (hotbar == null) return;
+                var canvas = hotbar.GetComponentInParent<Canvas>();
+                if (RaidUIView.Attach(this,"resurrection",canvas.transform)) { BindActions(); return; }
+                var viewParent=RaidUIView.Begin(this,"resurrection",canvas.transform);
+                var anchor=new GameObject("Hotbar anchor",typeof(RectTransform)).GetComponent<RectTransform>();
+                anchor.SetParent(viewParent,false); RaidUILayout.Copy(anchor,(RectTransform)hotbar.transform);
+                _root = new GameObject("Healer_ResurrectionSlot", typeof(RectTransform), typeof(Image));
+                var rect = _root.GetComponent<RectTransform>(); rect.SetParent(anchor, false);
+                rect.anchorMin = rect.anchorMax = new Vector2(1, 1); rect.pivot = new Vector2(0, 0);
+                rect.anchoredPosition = new Vector2(12, 8); rect.sizeDelta = new Vector2(180, 70);
+                _root.GetComponent<Image>().color = new Color(0.08f, 0.24f, 0.22f, 0.95f);
+                var bar = new GameObject("CastProgress", typeof(RectTransform), typeof(Image)); bar.transform.SetParent(rect, false);
+                _fill = bar.GetComponent<Image>(); _fill.color = new Color(0.3f, 0.8f, 0.6f, 0.45f); _fill.raycastTarget = false;
+                var text = new GameObject("Text", typeof(RectTransform), typeof(Text)); text.transform.SetParent(rect, false);
+                var tr = text.GetComponent<RectTransform>(); tr.anchorMin = Vector2.zero; tr.anchorMax = Vector2.one; tr.offsetMin = tr.offsetMax = Vector2.zero;
+                _label = text.GetComponent<Text>(); _label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                _label.fontSize = 14; _label.alignment = TextAnchor.MiddleCenter; _label.color = Color.white; _label.raycastTarget = false;
+                _rescue = _root.AddComponent<Button>(); _rescue.targetGraphic = _root.GetComponent<Image>(); RaidUIView.Bind(this,"rescue",() => _skill.TryBegin(TargetingManager.Instance?.CurrentTarget),_rescue);
+                BuildDeathPanel(viewParent);
+            }
+        }
+        private void BindActions()
+        {
+            RaidUIView.Bind(this,"rescue",() => _skill.TryBegin(TargetingManager.Instance?.CurrentTarget));
+            RaidUIView.Bind(this,"spectate.-1",() => CycleSpectator(-1));
+            RaidUIView.Bind(this,"spectate.1",() => CycleSpectator(1));
         }
         private void BuildDeathPanel(Transform canvas)
         {
@@ -83,7 +99,7 @@ namespace RaidRogue
             var rect = go.GetComponent<RectTransform>(); rect.SetParent(_deathPanel, false);
             rect.sizeDelta = new Vector2(280, 38); rect.anchoredPosition = new Vector2(x, -57);
             go.GetComponent<Image>().color = new Color(.15f, .22f, .3f, 1);
-            var button = go.GetComponent<Button>(); button.onClick.AddListener(() => CycleSpectator(step));
+            var button = go.GetComponent<Button>(); RaidUIView.Bind(this,"spectate."+step,() => CycleSpectator(step),button);
             var label = new GameObject("Label", typeof(RectTransform), typeof(Text)); label.transform.SetParent(rect, false);
             var t = label.GetComponent<Text>(); t.rectTransform.sizeDelta = rect.sizeDelta;
             t.font = _deathText.font; t.fontSize = 16; t.alignment = TextAnchor.MiddleCenter; t.color = Color.white; t.text = caption; t.raycastTarget = false;

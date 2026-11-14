@@ -115,3 +115,20 @@
 - 검토 대상 소스는 CharacterTrainingUI.cs(행 확장/설정 겹침/입력 높이)와 StageManager.cs(Unity 파괴 객체 정리) 2개, 문서는 HANDOFF/ROADMAP/WORK_LOG/PLAYTEST 4개. 원본 반영 직전 이전 내용/해시 비교 및 백업 후 두 소스만 갱신. meta/GUID 및 사용자 원본 브랜치 전환 없음.
 - 기존 광범위 계산 검사는 다시 반복하지 않았다. 이번 검증은 실제 Unity 컴파일/Windows 빌드/훈련 UI/종료 로그와 소스 일치/diff 검사이다. Stage 1~6 완주·사망 관전·저장/이어하기·재접속·LAN/Steam·장시간 반복은 미확인.
 - 출력/증거: 원본 Builds/Part1Windows/RaidPart1.exe, BUILD_INFO.txt, UnityBuild-final.log, BUILD_VERIFY-final.json, PlayerSmoke-final.log. 초기 성공 및 오류 재현 로그도 같은 Git 제외 폴더에 보존. 원본 Unity가 만든 씬/재료/설정 변경은 백업과 함께 미커밋 검토 대상으로 유지.
+
+## 2026-10-25 UI 누락 스크립트 복구 및 검사 종료
+
+- 사용자 요청으로 추가 검사를 중단했다. 현재 원본 Unity는 Play 상태이며 추가 실행/빌드/Steam 검사는 하지 않는다.
+- 작업 기준: feature/part1-playable-build / 5d4e1c6, C:/coopraid/coopraid3d-playable. 원본 feature/aegis-paladin-routes / 7c57e36 및 기존 미커밋 변경 보존.
+- 원인/수정: LocalShortcutText가 LocalInputBindings.cs 안에 있어 HUD에 m_Script=0인 컴포넌트 10개로 저장됨. 전용 스크립트 파일로 분리하고 템플릿 직렬화, 저장된 MonoScript 검사, 기존 HUD가 있을 때 중복 생성 방지를 추가했다.
+- 원본 Unity의 복구 도구로 새 복구본을 생성하고 활성 프로필에 연결했다. 기존 프리팹/디자인 보존. 활성 HUD: Assets/UI/Generated/ShortcutRepair-20261025-002953-073/RaidHUD.prefab. 중첩 패널과 템플릿: Assets/UI/Generated/20261025-001328-635/. 프로필: Assets/Resources/UI/RaidUIPresentation.asset.
+- 초기 presenter 9종 연결 경고는 Start 이후 한 번 재연결하도록 보완. 실제 Play 재진입에서 누락 오류/초기 연결 경고 없음, Live 검사와 생성 메뉴 재실행(기존 에셋 유지) 통과.
+- 실행한 검사: 관리 C# 컴파일 및 미터 1,040개, 원본 Unity 프리팹 안전성 215개+바인딩 15개, 참조 479개. 방 만들기/뒤로 실제 클릭 정상. 설정 열기·취소 콜백은 300ms 대기 포함 검사 통과(설정 파일 저장 없음).
+- 남은 확인: 작은 설정 버튼/단축키의 직접 입력에서 화면이 나타나지 않은 현상이 있었으나 원인 미확정. 콜백과 Raycast 검사는 통과했으며 물리 입력부터 최종 표시까지의 성공으로 간주하지 않는다. 사용자 요청에 따라 추가 추적 중단. 아티스트 편집 후 스테이지 전환·정규 완주·멀티플레이·새 Windows 빌드 미확인.
+- 다음 재개점(요청 시): 설정 물리 입력/표시 경로부터 제한적으로 확인. 프리팹 생성은 반복할 필요가 없으며 Play OFF 후 위 활성 HUD/중첩 패널을 편집한다. 사용법 UI_EDITING.md.
+- 원본 소스 반영은 사전 해시 비교/백업 후 수행했다. .git/codex-backups/ui-shortcut-script-20261024T152624Z 및 ui-startup-bindings-20261024T153330Z. 복구 프로필 백업 Logs/UIRepairBackups/20261025-002953-073/. 브랜치 전환/병합/푸시 및 YAML 직접 편집 없음.- 2026-10-25 미니맵: 기존 RaidHUD에 로컬 표시를 추가하고 활성 프리팹에 저장하는 Play OFF 에디터 명령을 제공했다. Unity 새 컴파일/실제 전투는 아직 미확인.
+- 2026-10-25 추가 확인: 원본 Editor.log에서 새 스크립트 재컴파일/도메인 재로드 완료, CS 컴파일 오류 0. 활성 RaidHUD.prefab에 Minimap은 아직 저장되지 않음. Windows 앱 제어는 Unity 재로드 직후 activate_window timeout, 재탐색에서도 창을 반환하지 않아 중단. 일회성 자동 수정 후크는 제거했고 원본/작업용 소스가 다시 일치한다. Play OFF에서 기존 Add Minimap 메뉴 실행과 Play 확인이 남음.
+- 2026-10-25 미니맵 후속: 원격 파티 생존·훈련 다수 표적·UI 겹침/로비 표시 수정. 원본 반영, 실제 플레이 미확인.
+- 2026-10-25 컴파일 검증: 원본 Unity 생성 Assembly-CSharp.csproj의 dotnet msbuild에서 훈련장 변수 이름 충돌 CS0128/CS1061을 발견하고 수정했다. 같은 명령 재실행 성공(exit 0), Assembly-CSharp-Editor.csproj도 성공(exit 0). 이는 관리 코드 컴파일만 확인한 것으로 에디터 Play/프리팹 생성/4인 세션 확인은 아직 아니다. 표식의 변하지 않은 색·좌표·문구 UI 갱신도 줄였다.
+2026-10-25 minimap follow-up code review: multiplayer snapshots keep the scene PlayerController as the local avatar; StageManager.player therefore remains the correct local marker on clients. ApplyNetworkAdds registers replica adds in BossAddSpawner.activeAdds, and ApplyNetworkCombat updates their HP/death/position, which are the same fields read by CombatRange.LivingEnemy and the minimap. This is code inspection only; prefab bake and Play visuals are still unverified.
+2026-10-25 minimap authoring correction: removed the user-facing prerequisite to open the prefab or run the Add Minimap command. RaidUIAuthoring now queues an idempotent, backed-up upgrade after script import and waits until Play/compile/import/Prefab Mode is inactive. The manual command remains a recovery option. Managed editor assembly compiled successfully (exit 0); original Unity asset save and Play rendering are not yet observed because the editor window is unavailable to computer-use.

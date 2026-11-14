@@ -56,10 +56,10 @@ internal static class Part1SaveTests
             for (int stage = start; stage <= 6; stage++)
             {
                 int rev = flow.Revision;
-                check(flow.TryCountdown(rev) && flow.TryStart(rev), "boundary goes through countdown");
+                check(flow.TryApproach(rev) && flow.TryArrival(rev) && flow.TryCountdown(rev) && flow.TryStart(rev), "boundary goes through arrival and countdown");
                 check(flow.Resolve(rev, false, 0, 4) == EncounterOutcome.Wiped, "existing wipe policy");
                 check(flow.TryPrepare(stage, 6, true), "same-stage retry"); rev = flow.Revision;
-                check(flow.TryCountdown(rev) && flow.TryStart(rev), "retry countdown");
+                check(flow.TryApproach(rev) && flow.TryArrival(rev) && flow.TryCountdown(rev) && flow.TryStart(rev), "retry arrival and countdown");
                 check(flow.Resolve(rev, true, 0, 4) == EncounterOutcome.Cleared, "simultaneous boss death and wipe clears");
                 check(flow.Resolve(rev, true, 4, 4) == EncounterOutcome.None, "duplicate clear ignored");
                 check(flow.FinishClear(rev, 6), "confirmed clear completes presentation");

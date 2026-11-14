@@ -126,7 +126,40 @@ internal static class CharacterFrameworkTests
     }
     public static int Main()
     {
-        try {Catalog();Transactions();CastingAndRecovery();GrowthAndReset();MovementCharges();Console.WriteLine("PASS: "+checks+" character catalog, independent state, atomic use, combos, resources, casts, growth, recovery, reset and movement charge checks.");return 0;}
+        try {Catalog();Transactions();CastingAndRecovery();GrowthAndReset();MovementCharges();NineKeyResponses();Console.WriteLine("PASS: "+checks+" character catalog, independent state, atomic use, combos, resources, casts, growth, recovery, reset and movement charge checks.");return 0;}
         catch(Exception e){Console.WriteLine("FAIL: "+e.Message);return 1;}
+    }
+    static void NineKeyResponses()
+    {
+        var d=Definition();d.controlLayout=CharacterControlLayout.NineKey;
+        Check(CharacterSlots.All.Count(s=>s!=CharacterSlot.Potion&&CharacterSlots.Enabled(d,s))==9,"nine class actions excluding existing potion");
+        Check(CharacterSlots.Binding(d,CharacterSlot.Identity)=="SelectedActive","R dispatches route identity using existing configurable R binding");
+        Check(CharacterSlots.Binding(d,CharacterSlot.Job2)==""&&CharacterSlots.Binding(d,CharacterSlot.Active)=="","no E or duplicate R action");
+        Check(CharacterDefinitionValidation.Check(new[]{d}).Length>0,"cannot silently relabel incompatible old kit");
+        d.skills= d.skills.Concat(new[]{new CharacterSkillDefinition{id="response",handlerId="test",implemented=true,target=SkillTargetRule.Self}}).ToArray();
+        d.slots=d.slots.Where(s=>CharacterSlots.Enabled(d,s.slot)).ToArray();
+        d.unlocks=d.unlocks.Where(s=>CharacterSlots.Enabled(d,s.slot)).ToArray();
+        d.slots.First(s=>s.slot==CharacterSlot.Job1).skillId="response";
+        d.slots.First(s=>s.slot==CharacterSlot.OffGcd1).skillId="cast";
+        d.slots=d.slots.Concat(new[]{Slot(CharacterSlot.Counter,"response"),Slot(CharacterSlot.Movement,"response")}).ToArray();
+        var state=new CharacterRuntimeState(d);int attacks=0,responses=0;
+        Check(state.TryUse(CharacterSlot.OffGcd1,Ready(),1,s=>{attacks++;return true;},out _),"begin pending attack fixture");
+        Check(!state.TryUse(CharacterSlot.Counter,new CharacterUseContext(true,true,false,0),0,s=>true,out _)&&state.Snapshot.castRemaining>0,"invalid response preserves pending cast");
+        state.Tick(3);
+        Check(state.Spend("gauge",50),"empty resource during cast fixture");
+        Check(state.TryUse(CharacterSlot.Counter,Ready(),0,s=>{responses++;return true;},out _),"response can interrupt on completion frame");
+        Check(!state.FinishCast(Ready(),s=>{attacks++;return true;},out _)&&attacks==0&&responses==1,"cancelled attack never auto completes");
+        Check(!state.TryUse(CharacterSlot.Active,Ready(),0,s=>true,out _),"hidden obsolete slot rejected by authoritative state");
+        state.Gain("gauge",50);
+        Check(state.TryUse(CharacterSlot.Gcd1,Ready(),1,s=>true,out _),"first combo starts");
+        state.Tick(1,true);
+        Check(state.TryUse(CharacterSlot.Gcd2,Ready(),1,s=>true,out _)&&state.Snapshot.combo1==2&&state.Snapshot.combo2==2,"movement and other chain preserve both combo steps");
+        Check(state.TryUse(CharacterSlot.Counter,Ready(),0,s=>true,out _)&&state.Snapshot.combo1==2&&state.Snapshot.combo2==2,"response during shared GCD preserves both chains");
+        d.role=CharacterRole.Healer;
+        Check(CharacterSlots.InterruptsCast(d,CharacterSlot.OffGcd2),"healer F interrupts");
+        d.role=CharacterRole.Damage;
+        Check(!CharacterSlots.InterruptsCast(d,CharacterSlot.OffGcd2),"damage F does not inherit healer priority");
+        d.controlLayout=CharacterControlLayout.Legacy;
+        Check(CharacterSlots.Binding(d,CharacterSlot.Identity)=="Identity"&&!CharacterSlots.InterruptsCast(d,CharacterSlot.Counter),"legacy binding and cast policy preserved");
     }
 }

@@ -12,7 +12,7 @@ internal static class RaidCombatNetworkTests
 
     private static void Main()
     {
-        OwnershipAndRetries(); RewardsAndDepartures(); FragmentLossAndReordering(); MetricsReplaceRatherThanReplay(); MovementBarrier();
+        OwnershipAndRetries(); RewardsAndDepartures(); FragmentLossAndReordering(); MetricsReplaceRatherThanReplay(); MovementBarrier(); SessionDifficulty();
         Console.WriteLine("PASS: " + checks + " authoritative combat protocol, reward, replication and motion-barrier checks.");
     }
 
@@ -24,7 +24,9 @@ internal static class RaidCombatNetworkTests
         Check(!gate.Accept(0, 3, Request(0, 3, 1)), "unadmitted peer cannot act");
         Check(!gate.Accept(2, 3, Request(2, 2, 1)), "previous attempt request cannot apply");
         Check(!gate.Accept(2, 3, Request(2, 4, 1)), "future attempt request cannot apply");
-        Check(!gate.Accept(2, 3, Request(2, 3, 1, 14)), "unknown skill rejected");
+        Check(!gate.Accept(2, 3, Request(2, 3, 1, 18)), "unknown skill rejected");
+        Check(gate.Accept(3,3,Request(3,3,1,17)),"healer lure rescue uses authoritative action gate");
+        Check(!gate.Accept(3,3,Request(3,3,1,17)),"duplicate lure rescue rejected");
         Check(!gate.Accept(2, 3, Request(2, 3, 0)), "zero sequence rejected");
         Check(gate.Accept(2, 3, Request(2, 3, 1)), "invalid requests did not consume valid sequence");
         for (int i = 0; i < 10; i++) Check(!gate.Accept(2, 3, Request(2, 3, 1)), "retry cannot repeat damage or cooldown");
@@ -141,5 +143,44 @@ internal static class RaidCombatNetworkTests
         posePacket.Poses.Add(new RaidPose { Id = 2, Role = 2, Name = "Healer", MotionVersion = 3, MovementLocked = true, MoveSpeed = 10, Bot = false });
         Check(RaidWire.Decode(RaidWire.Encode(posePacket), out copy), "authoritative movement lock and generation roundtrip");
         Check(copy.Poses[0].MovementLocked && copy.Poses[0].MotionVersion == 3 && copy.Poses[0].MoveSpeed == 10, "rescue/death override owner prediction");
+    }
+    private static void SessionDifficulty()
+    {
+        foreach (string host in new[] { "normal", "hard" })
+        {
+            string personal = host == "hard" ? "normal" : "hard";
+            var session = new RaidSessionDifficulty();
+            Check(session.Resolve(personal, true) == personal, "before the first baseline personal preference is untouched");
+            var lobby = new RaidCombatFrame { difficultyId = host, epoch = 0, phase = RaidBattlePhase.Lobby };
+            Check(session.TryApply(lobby, out bool changed) && changed, "first lobby frame initializes host difficulty even at epoch zero");
+            Check(session.Resolve(personal, true) == host && session.Resolve(personal, false) == personal, "replica presentation uses host; single/host still use personal difficulty");
+            Check(session.TryApply(lobby, out changed) && !changed, "same baseline does not reset the boss repeatedly");
+            int epoch = 1;
+            foreach (var phase in new[] { RaidBattlePhase.Loading, RaidBattlePhase.Arrival, RaidBattlePhase.Combat, RaidBattlePhase.Wiped, RaidBattlePhase.Loading })
+            {
+                var retry = new RaidCombatFrame { difficultyId = host, epoch = epoch, phase = phase };
+                Check(session.TryApply(retry, out changed) && !changed && session.Resolve(personal, true) == host, "stage/retry phases retain the authoritative difficulty");
+                if (phase == RaidBattlePhase.Wiped) epoch++;
+            }
+            var recovery = new RaidSessionDifficulty();
+            var baseline = new RaidCombatFrame { difficultyId = host, epoch = 9, phase = RaidBattlePhase.Combat, ownerLease = 3,
+                recoveryPoses = new[] { new RaidPose { Id = 2 } }, controlGranted = false };
+            Check(recovery.TryApply(baseline, out changed) && changed && recovery.Resolve(personal, true) == host, "fresh recovery full baseline restores host difficulty before control grant");
+            baseline.controlGranted = true;
+            Check(recovery.TryApply(baseline, out changed) && !changed, "control grant does not discard or repeatedly reinitialize difficulty");
+            foreach (string invalid in new[] { null, "", "extreme", "Hard", " hard " })
+            {
+                Check(!session.TryApply(new RaidCombatFrame { difficultyId = invalid }, out changed) && !changed, "missing or unsupported frame difficulty is rejected");
+                Check(session.Resolve(personal, true) == host, "rejected frame leaves the last valid difficulty intact");
+            }
+            Check(!session.TryApply(null, out changed) && !changed, "null frame cannot set difficulty");
+            Check(session.TryApply(new RaidCombatFrame { difficultyId = personal, epoch = 0, phase = RaidBattlePhase.Lobby }, out changed) && changed &&
+                session.Resolve(host, true) == personal, "a changed host lobby difficulty requests setup even without an epoch change");
+            session.Clear();
+            Check(session.Value == null && session.Resolve(personal, true) == personal, "session end discards the live override without writing personal preference");
+            var next = new RaidSessionDifficulty();
+            Check(next.Resolve(personal, true) == personal && next.TryApply(new RaidCombatFrame { difficultyId = personal }, out changed) && changed, "another session initializes independently of the previous host");
+            Check(session.TryApply(new RaidCombatFrame { difficultyId = personal }, out changed) && changed, "a cleared state can initialize a new baseline");
+        }
     }
 }

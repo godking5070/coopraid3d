@@ -1,0 +1,317 @@
+{
+  "version": 4,
+  "sourceWidth": 760,
+  "preview4": [
+    760,
+    308
+  ],
+  "preview8": [
+    760,
+    572
+  ],
+  "row": {
+    "canvas": [
+      760,
+      64
+    ],
+    "step": 66,
+    "classIcon": [
+      6,
+      8,
+      48,
+      48
+    ],
+    "nameBaseline": [
+      64,
+      25
+    ],
+    "nameMaxWidth": 210,
+    "hpPercentRightBaseline": [
+      344,
+      25
+    ],
+    "hpLayerCanvas": [
+      62,
+      36,
+      284,
+      22
+    ],
+    "hpLocalFillBounds": [
+      2.5559999999999996,
+      4.8125,
+      278.888,
+      12.375
+    ],
+    "hpGlobalFillBounds": [
+      64.556,
+      40.8125,
+      278.888,
+      12.375
+    ],
+    "hpTipWidth": 3.4079999999999995,
+    "hpTipRule": "Both ends pointed; right tip width=min(12,982*ratio) in native1000x64 coordinates. Hide at zero; use full inner shape at one.",
+    "effectSlots": [
+      [
+        366,
+        8,
+        36,
+        36
+      ],
+      [
+        412,
+        8,
+        36,
+        36
+      ],
+      [
+        458,
+        8,
+        36,
+        36
+      ],
+      [
+        504,
+        8,
+        36,
+        36
+      ],
+      [
+        550,
+        8,
+        36,
+        36
+      ],
+      [
+        596,
+        8,
+        36,
+        36
+      ],
+      [
+        642,
+        8,
+        36,
+        36
+      ],
+      [
+        688,
+        8,
+        36,
+        36
+      ]
+    ],
+    "effectIconInset": [
+      4,
+      3,
+      28,
+      28
+    ],
+    "effectTimerBaselineY": 60,
+    "effectTimerFont": 16,
+    "emptySlotsRendered": false
+  },
+  "palette": {
+    "normalHealth": "approved textured green",
+    "lowHealth": "same texture, red palette only",
+    "frames": "approved metallic champagne gold",
+    "debuff": "gold rim, red interior and downward marker"
+  },
+  "layoutUnchangedFromV3": true,
+  "materialSources": [
+    {
+      "name": "frame-gold",
+      "file": "source/gauge-material/frame-gold.svg",
+      "sha256": "2984d0606e83023357daab09c014b13b0d21577dc9a8210ac31321f15218e0fd"
+    },
+    {
+      "name": "track-inset",
+      "file": "source/gauge-material/track-inset.svg",
+      "sha256": "838a51369e6ef2b4fce4fbaed5b80910abe3a48b434698f203d92ce0b8374f1a"
+    },
+    {
+      "name": "hp-fill",
+      "file": "source/gauge-material/hp-fill.svg",
+      "sha256": "f3dabb28e4461a73a45a9c5c4437139d67700e52a9f93c3eae3c009d68b5014e"
+    },
+    {
+      "name": "hp-tip-mask",
+      "file": "source/gauge-material/hp-tip-mask.svg",
+      "sha256": "4d1fccb19d2eec9140327129abcf41f09a73f4ca251ca89be6c97ba9fddd737e"
+    },
+    {
+      "name": "hp-tip-highlight",
+      "file": "source/gauge-material/hp-tip-highlight.svg",
+      "sha256": "145ff7b1cab178827416f5e40b4013ad56618cbff038100668753b68acb13f13"
+    }
+  ],
+  "assets": [
+    {
+      "name": "name-backplate",
+      "width": 356,
+      "height": 64,
+      "transparentPixels": 1424,
+      "hasAlpha": true,
+      "borderLBRTop": [
+        10,
+        8,
+        20,
+        8
+      ],
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "hp-track",
+      "width": 284,
+      "height": 22,
+      "transparentPixels": 2384,
+      "hasAlpha": true,
+      "borderLBRTop": [
+        10,
+        8,
+        10,
+        8
+      ],
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "hp-frame",
+      "width": 284,
+      "height": 22,
+      "transparentPixels": 3967,
+      "hasAlpha": true,
+      "borderLBRTop": [
+        10,
+        8,
+        10,
+        8
+      ],
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "hp-fill",
+      "width": 284,
+      "height": 22,
+      "transparentPixels": 2384,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "hp-fill-critical",
+      "width": 284,
+      "height": 22,
+      "transparentPixels": 2384,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "hp-tip-mask",
+      "width": 12,
+      "height": 36,
+      "transparentPixels": 192,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": true,
+      "optional": false
+    },
+    {
+      "name": "hp-tip-highlight",
+      "width": 14,
+      "height": 38,
+      "transparentPixels": 434,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": true
+    },
+    {
+      "name": "buff-slot",
+      "width": 36,
+      "height": 36,
+      "transparentPixels": 40,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "debuff-slot",
+      "width": 36,
+      "height": 36,
+      "transparentPixels": 164,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "status-shield",
+      "width": 28,
+      "height": 28,
+      "transparentPixels": 598,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "status-heal",
+      "width": 28,
+      "height": 28,
+      "transparentPixels": 624,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "status-bleed",
+      "width": 28,
+      "height": 28,
+      "transparentPixels": 554,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    },
+    {
+      "name": "status-defeated",
+      "width": 24,
+      "height": 24,
+      "transparentPixels": 312,
+      "hasAlpha": true,
+      "borderLBRTop": null,
+      "mask": false,
+      "optional": false
+    }
+  ],
+  "layerOrder": [
+    "optional name-backplate",
+    "class icon",
+    "hp-track",
+    "pointed hp-fill mask",
+    "moving tip highlight",
+    "hp-frame",
+    "active effect slot",
+    "effect icon",
+    "runtime text"
+  ],
+  "sampleRoleCounts": {
+    "four": {
+      "tank": 1,
+      "healer": 1,
+      "damage": 2
+    },
+    "eight": {
+      "tank": 2,
+      "healer": 2,
+      "damage": 4
+    }
+  }
+}

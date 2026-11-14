@@ -8,9 +8,9 @@ namespace RaidRogue
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RegisterAssets()
         {
-            if(!CharacterCatalog.Register(AegisPaladinData.Build(),out string basicError,true)) Debug.LogError(basicError);
+            if(!CharacterCatalog.Register(AegisPaladinData.BuildNineKey(),out string basicError,true)) Debug.LogError(basicError);
             foreach(var job in CharacterRosterData.Jobs)
-                if(!CharacterCatalog.Register(CharacterRosterData.Definition(job),out string error,true))Debug.LogError(error);
+                if(!CharacterCatalog.Register(NineKeyTankData.Supports(job)?NineKeyTankData.Build(job):NineKeyHealerData.Supports(job)?NineKeyHealerData.Build(job):NineKeyDamageData.Supports(job)?NineKeyDamageData.Build(job):CharacterRosterData.Definition(job),out string error,true))Debug.LogError(error);
             // Optional definitions live in Resources/Characters. No inspector scene references required.
             foreach(var asset in Resources.LoadAll<CharacterDefinitionSO>("Characters"))
             {

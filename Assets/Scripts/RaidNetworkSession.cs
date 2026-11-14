@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace RaidRogue
 {
-    public enum RaidSessionMode { Menu, Single, Connecting, Host, Client, Closing, Disconnected, Restoring, Training }
+    public enum RaidSessionMode { Menu, Single, Connecting, Host, Client, Closing, Disconnected, Restoring, Training, AiSpectator }
 
     [DefaultExecutionOrder(-50)]
     public sealed partial class RaidNetworkSession : MonoBehaviour
@@ -37,7 +37,7 @@ namespace RaidRogue
             }
         }
         public static bool CombatPreview => Instance != null && Instance.Mode != RaidSessionMode.Single && Instance.Mode != RaidSessionMode.Training && (Instance.IsRecovering || !Multiplayer || Instance.BattlePhase != RaidBattlePhase.Combat);
-        public static bool Multiplayer => Instance != null && (Instance.Mode == RaidSessionMode.Host || Instance.Mode == RaidSessionMode.Client || Instance.Mode == RaidSessionMode.Restoring || Instance.Mode == RaidSessionMode.Disconnected || (Instance.Mode == RaidSessionMode.Connecting && Instance._resumeRequested));
+        public static bool Multiplayer => Instance != null && (Instance.Mode == RaidSessionMode.Host || Instance.Mode == RaidSessionMode.AiSpectator || Instance.Mode == RaidSessionMode.Client || Instance.Mode == RaidSessionMode.Restoring || Instance.Mode == RaidSessionMode.Disconnected || (Instance.Mode == RaidSessionMode.Connecting && Instance._resumeRequested));
         public static bool BlocksInput => Instance != null && (Instance.Ending || Instance.MenuOpen || (Instance.Mode != RaidSessionMode.Single && Instance.Mode != RaidSessionMode.Training && !Instance.ControlsReady) || (Instance.Mode != RaidSessionMode.Single && Instance.Mode != RaidSessionMode.Training && !Instance.HasLocalAvatar));
         public bool HasLocalAvatar => Multiplayer && _avatars.ContainsKey(_localId);
         public RaidNetworkMotor LocalMotor => _motors.TryGetValue(_localId, out var motor) ? motor : null;
@@ -68,9 +68,10 @@ namespace RaidRogue
         private uint _sequence, _tick, _lastSnapshot;
         private float _accumulator, _connectTime, _lastServerPacket, _closeAt;
         private Vector3 _frameDirection;
+        private Vector3 _queuedDashDirection;
         private bool _dashQueued, _returnRequested;
         private string _playerName;
-        private bool IsHost => Mode == RaidSessionMode.Host;
+        private bool IsHost => Mode == RaidSessionMode.Host || Mode == RaidSessionMode.AiSpectator;
         public static void Ensure(StageManager stage)
         {
             if (Instance == null) stage.gameObject.AddComponent<RaidNetworkSession>();
@@ -83,15 +84,27 @@ namespace RaidRogue
             Time.timeScale = 1;
             Application.runInBackground = true;
             if (GetComponent<RaidConnectionUI>() == null) gameObject.AddComponent<RaidConnectionUI>();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if(Debug.isDebugBuild && GetComponent<AiSpectatorDevelopment>()==null)gameObject.AddComponent<AiSpectatorDevelopment>();
+#endif
         }
         public void EnterTraining()
         {
+            if (CampaignRuntime.Instance?.TrainingUnlocked != true)
+            { Status = "훈련소는 정규 전투에 한 번 참여하면 해금됩니다."; return; }
             if (Ending || Mode != RaidSessionMode.Menu || _player == null || StageManager.Instance == null ||
                 RaidSteamRuntime.Instance?.Busy == true || GetComponent<CharacterTrainingSession>() != null) return;
             // Only a fresh main menu can enter. No regular run is started, saved, or rewarded.
             Mode = RaidSessionMode.Training; MenuOpen = false;
             RoleSelectionManager.Instance?.CloseRoleSelectionModal();
             gameObject.AddComponent<CharacterTrainingSession>();
+        }
+        public void EnterTrainingFromLobby()
+        {
+            if (Mode != RaidSessionMode.Single || StageManager.Instance?.Progress.Phase != RaidBattlePhase.Lobby ||
+                CampaignRuntime.Instance?.Resume != null || !RaidLobbyRoom.Active) return;
+            Mode = RaidSessionMode.Menu;
+            EnterTraining(); // Reuse the existing isolated practice session and unlock check.
         }
         public void SinglePlay()
         {
@@ -162,12 +175,22 @@ namespace RaidRogue
         public void SampleInput(Vector3 direction, bool dash)
         {
             _frameDirection = Vector3.ClampMagnitude(direction, 1);
-            if (dash && !BlocksInput) _dashQueued = true;
+            if (dash && !BlocksInput && !_dashQueued)
+            {
+                _queuedDashDirection = _frameDirection;
+                _dashQueued = true;
+            }
             if (LocalGameplayInput.Blocked) { _frameDirection = Vector3.zero; _dashQueued = false; }
         }
         private void Update()
         {
             if (_returnRequested || (Mode == RaidSessionMode.Closing && Time.unscaledTime >= _closeAt)) { ReloadMenu(); return; }
+            if (Mode == RaidSessionMode.AiSpectator)
+            {
+                _accumulator = Mathf.Min(_accumulator + Time.unscaledDeltaTime, RaidWire.Step * 4);
+                while (_accumulator >= RaidWire.Step) { _accumulator -= RaidWire.Step; Tick(); }
+                return;
+            }
             if (_transport == null || !_transport.IsCreated) return;
             _transport.Update();
             if (IsHost) PollHost(); else if (Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Connecting || Mode == RaidSessionMode.Restoring) PollClient();
@@ -294,9 +317,10 @@ namespace RaidRogue
         private void Tick()
         {
             _tick++;
-            if (HasLocalAvatar && ControlsReady && (IsHost || _prediction.Count < 90))
+            if (Mode != RaidSessionMode.AiSpectator && HasLocalAvatar && ControlsReady && (IsHost || _prediction.Count < 90))
             {
-                var input = new RaidMoveInput { Sequence = ++_sequence, MotionVersion = _avatars[_localId].MotionVersion, X = _frameDirection.x, Z = _frameDirection.z, Dash = _dashQueued };
+                var moveDirection = _dashQueued ? _queuedDashDirection : _frameDirection;
+                var input = new RaidMoveInput { Sequence = ++_sequence, MotionVersion = _avatars[_localId].MotionVersion, X = moveDirection.x, Z = moveDirection.z, Dash = _dashQueued, SupportId = RaidCombatAuthority.Id(TargetingManager.Instance!=null&&TargetingManager.Instance.HasSupportSelection?TargetingManager.Instance.SupportTarget:_player.transform) };
                 _dashQueued = false;
                 if (LocalGameplayInput.Blocked) { input.X = input.Z = 0; input.Dash = false; }
                 if (IsHost) StepHostAvatar(_avatars[_localId], input);
@@ -374,7 +398,7 @@ namespace RaidRogue
         {
             if (_avatars.ContainsKey(id)) return;
             bool local = id == _localId;
-            GameObject obj = local ? _player.gameObject : GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            GameObject obj = local ? _player.gameObject : RaidPrimitive.Create(PrimitiveType.Capsule);
             if (!local) obj.name = "NetworkPlayer_" + id;
             var avatar = obj.GetComponent<NetworkRaidAvatar>() ?? obj.AddComponent<NetworkRaidAvatar>();
             avatar.Configure(id, local, _config.Radius); avatar.SetIdentity(role, name);
@@ -384,7 +408,7 @@ namespace RaidRogue
         private void RemoveAvatar(int id)
         {
             if (!_avatars.TryGetValue(id, out var avatar)) return;
-            if (TargetingManager.Instance != null && TargetingManager.Instance.CurrentTarget == avatar.transform) TargetingManager.Instance.ClearTarget();
+            TargetingManager.Instance?.ForgetRemovedTarget(avatar.transform);
             if (!avatar.IsLocal) { avatar.gameObject.SetActive(false); if (avatar.GetComponent<PartyBotAI>() == null) Destroy(avatar.gameObject); }
             _avatars.Remove(id); _motors.Remove(id);
         }
@@ -396,7 +420,7 @@ namespace RaidRogue
         }
         public void SelectRole(int role)
         {
-            if (!HasLocalAvatar || !ControlsReady) return;
+            if (AiSpectatorActive || !HasLocalAvatar || !ControlsReady) return;
             if (IsHost) ChooseRole(_localId, role, default);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.Role, Role = role }, true);
         }
@@ -451,6 +475,7 @@ namespace RaidRogue
         private void EndProgress(string reason)
         {
             if (Ending) return;
+            AiSpectatorRecordSessionStop();
             Ending = true; Status = reason; _controlReady = false; _frameDirection = Vector3.zero; _dashQueued = false;
             _prediction.Clear(); foreach (var peer in _peers) peer.Inputs.DiscardPending();
             StageManager.Instance?.EndSessionProgress(); ClearReplicaMechanics();

@@ -22,6 +22,9 @@ namespace RaidRogue
         public static bool LivingEnemy(Transform unit)
         {
             if (unit == null || !unit.gameObject.activeInHierarchy) return false;
+            var dummy = unit.GetComponent<BossAddMinion>();
+            if (dummy != null && dummy.IsLobbyDummy) return RaidLobbyRoom.PracticeActive;
+            if (RaidLobbyRoom.Active) return false;
             var boss = unit.GetComponent<BossController>();
             if (boss != null) return boss.currentHp > 0 && !boss.IsBossDefeatedCollapse;
             var add = unit.GetComponent<BossAddMinion>();

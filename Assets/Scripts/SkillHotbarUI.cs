@@ -4,6 +4,50 @@ using UnityEngine.UI;
 
 namespace RaidRogue
 {
+    // An input acknowledgement only: never implies that the server accepted a skill.
+    // Additive edges preserve authored button graphics, colors and layout.
+    internal sealed class HotbarInputFeedback
+    {
+        private Button _button;
+        private Image[] _edges;
+        private float _until;
+        private void Pulse() { _until = Time.unscaledTime + .18f; }
+        public void Tick(Button button, CharacterActor actor, CharacterSlot slot)
+        {
+            if (button == null) return;
+            if (_button != button)
+            {
+                if (_button != null) _button.onClick.RemoveListener(Pulse);
+                if (_edges != null) foreach (var edge in _edges) if (edge != null) UnityEngine.Object.Destroy(edge.gameObject);
+                _button = button; _button.onClick.AddListener(Pulse);
+                _edges = new Image[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    var obj = new GameObject("KeyboardInputEdge", typeof(RectTransform), typeof(Image));
+                    obj.transform.SetParent(button.transform, false);
+                    var rect = (RectTransform)obj.transform;
+                    rect.anchorMin = i == 0 ? new Vector2(0, 1) : i == 3 ? new Vector2(1, 0) : Vector2.zero;
+                    rect.anchorMax = i == 1 ? new Vector2(1, 0) : i == 2 ? new Vector2(0, 1) : Vector2.one;
+                    rect.pivot = i == 0 ? new Vector2(.5f, 1) : i == 1 ? new Vector2(.5f, 0) : i == 2 ? new Vector2(0, .5f) : new Vector2(1, .5f);
+                    rect.anchoredPosition = Vector2.zero;
+                    rect.sizeDelta = i < 2 ? new Vector2(0, 3) : new Vector2(3, 0);
+                    _edges[i] = obj.GetComponent<Image>(); _edges[i].raycastTarget = false;
+                }
+            }
+            bool allowed = actor?.Definition != null && RaidCombatAuthority.Local(actor) && !LocalGameplayInput.Blocked;
+            string binding = allowed ? CharacterSlots.Binding(actor.Definition, slot) : "";
+            if (allowed && LocalInputBindings.Pressed(binding)) Pulse();
+            bool held = allowed && LocalInputBindings.Held(binding);
+            bool visible = allowed && (held || Time.unscaledTime < _until);
+            foreach (var edge in _edges)
+            {
+                edge.enabled = visible;
+                edge.color = new Color(1f, .85f, .4f, held ? 1f : .7f);
+            }
+            if (!allowed) _until = 0;
+        }
+    }
+
     [Serializable]
     public class HotbarSlotView
     {
@@ -39,6 +83,62 @@ namespace RaidRogue
         public Text playerCastText;
 
         private Sprite _whiteFillSprite;
+        private readonly System.Collections.Generic.HashSet<HotbarSlotView> _commonLayouts = new System.Collections.Generic.HashSet<HotbarSlotView>();
+        private void PrepareCommonLayout(HotbarSlotView slot)
+        {
+            if (RaidUIStyle.Authored(slot.slotButton)) return;
+            if (slot.slotButton == null || !_commonLayouts.Add(slot)) return;
+            // Legacy generated cards used full-card cooldown text and a bar positioned
+            // relative to the entire hotbar. Keep both inside their own card.
+            if (slot.cooldownNumberText != null)
+            {
+                var text = slot.cooldownNumberText;
+                var rect = text.rectTransform;
+                rect.SetParent(slot.slotButton.transform, false);
+                rect.anchorMin = Vector2.zero; rect.anchorMax = new Vector2(1, 0);
+                rect.pivot = new Vector2(.5f, 0);
+                rect.offsetMin = new Vector2(4, 7); rect.offsetMax = new Vector2(-4, 25);
+                text.fontSize = 12; text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 8; text.resizeTextMaxSize = 12;
+                text.alignment = TextAnchor.MiddleCenter;
+                text.horizontalOverflow = HorizontalWrapMode.Wrap;
+                text.verticalOverflow = VerticalWrapMode.Truncate;
+                text.raycastTarget = false;
+            }
+            if (slot.skillNameText != null)
+            {
+                var text = slot.skillNameText;
+                var rect = text.rectTransform;
+                rect.SetParent(slot.slotButton.transform, false);
+                rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+                rect.offsetMin = new Vector2(4, 27); rect.offsetMax = new Vector2(-4, -23);
+                text.alignment = TextAnchor.MiddleCenter;
+                text.resizeTextForBestFit = true; text.resizeTextMinSize = 8; text.resizeTextMaxSize = 14;
+                text.horizontalOverflow = HorizontalWrapMode.Wrap; text.verticalOverflow = VerticalWrapMode.Truncate;
+                text.raycastTarget = false;
+            }
+            if (slot.stageBadgeText != null)
+            {
+                var text = slot.stageBadgeText;
+                var rect = text.rectTransform;
+                rect.SetParent(slot.slotButton.transform, false);
+                rect.anchorMin = new Vector2(0, 1); rect.anchorMax = Vector2.one;
+                rect.offsetMin = new Vector2(23, -21); rect.offsetMax = new Vector2(-4, -3);
+                text.alignment = TextAnchor.MiddleRight;
+                text.resizeTextForBestFit = true; text.resizeTextMinSize = 8; text.resizeTextMaxSize = 11;
+                text.raycastTarget = false;
+            }
+            if (slot.comboTimerBarRoot != null)
+            {
+                var rect = slot.comboTimerBarRoot.GetComponent<RectTransform>();
+                rect.SetParent(slot.slotButton.transform, false);
+                rect.anchorMin = Vector2.zero; rect.anchorMax = new Vector2(1, 0);
+                rect.pivot = new Vector2(.5f, 0);
+                rect.offsetMin = new Vector2(4, 2); rect.offsetMax = new Vector2(-4, 6);
+                if (slot.comboTimerText != null) slot.comboTimerText.gameObject.SetActive(false);
+            }
+        }
+        private readonly HotbarInputFeedback[] _inputFeedback = { new HotbarInputFeedback(), new HotbarInputFeedback(), new HotbarInputFeedback(), new HotbarInputFeedback() };
 
         private void Start()
         {
@@ -84,7 +184,7 @@ namespace RaidRogue
             rootRect.sizeDelta = new Vector2(540f, 34f);
 
             Image bgImg = rootObj.AddComponent<Image>();
-            bgImg.color = new Color(0.06f, 0.07f, 0.11f, 0.94f);
+            RaidUIStyle.Color(bgImg, new Color(0.06f, 0.07f, 0.11f, 0.94f));
             Outline bgOutline = rootObj.AddComponent<Outline>();
             bgOutline.effectColor = new Color(1.0f, 0.55f, 0.18f, 0.9f);
             bgOutline.effectDistance = new Vector2(2f, -2f);
@@ -97,7 +197,7 @@ namespace RaidRogue
             fillRect.offsetMin = new Vector2(4f, 4f);
             fillRect.offsetMax = new Vector2(-4f, -4f);
             playerCastFillImage = fillObj.AddComponent<Image>();
-            playerCastFillImage.color = new Color(1.0f, 0.48f, 0.12f, 1f);
+            RaidUIStyle.Color(playerCastFillImage, new Color(1.0f, 0.48f, 0.12f, 1f));
 
             GameObject txtObj = new GameObject("PlayerCastBar_Text");
             txtObj.transform.SetParent(rootObj.transform, false);
@@ -111,7 +211,7 @@ namespace RaidRogue
             playerCastText.fontSize = 15;
             playerCastText.fontStyle = FontStyle.Bold;
             playerCastText.alignment = TextAnchor.MiddleCenter;
-            playerCastText.color = Color.white;
+            RaidUIStyle.Color(playerCastText, Color.white);
             playerCastText.raycastTarget = false;
 
             playerCastBarRoot = rootObj;
@@ -128,9 +228,9 @@ namespace RaidRogue
             if (playerCastFillImage != null)
             {
                 if (playerCastFillImage.sprite == null) playerCastFillImage.sprite = _whiteFillSprite;
-                playerCastFillImage.type = Image.Type.Filled;
-                playerCastFillImage.fillMethod = Image.FillMethod.Horizontal;
-                playerCastFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                if(!RaidUIStyle.Authored(playerCastFillImage)) playerCastFillImage.type = Image.Type.Filled;
+                if(!RaidUIStyle.Authored(playerCastFillImage)) playerCastFillImage.fillMethod = Image.FillMethod.Horizontal;
+                if(!RaidUIStyle.Authored(playerCastFillImage)) playerCastFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
             }
 
             if (slots == null)
@@ -148,9 +248,9 @@ namespace RaidRogue
                     {
                         slot.cooldownOverlayImage.sprite = _whiteFillSprite;
                     }
-                    slot.cooldownOverlayImage.type = Image.Type.Filled;
-                    slot.cooldownOverlayImage.fillMethod = Image.FillMethod.Vertical;
-                    slot.cooldownOverlayImage.fillOrigin = (int)Image.OriginVertical.Bottom;
+                    if(!RaidUIStyle.Authored(slot.cooldownOverlayImage)) slot.cooldownOverlayImage.type = Image.Type.Filled;
+                    if(!RaidUIStyle.Authored(slot.cooldownOverlayImage)) slot.cooldownOverlayImage.fillMethod = Image.FillMethod.Vertical;
+                    if(!RaidUIStyle.Authored(slot.cooldownOverlayImage)) slot.cooldownOverlayImage.fillOrigin = (int)Image.OriginVertical.Bottom;
                 }
 
                 if (slot.comboTimerFillImage != null)
@@ -159,9 +259,9 @@ namespace RaidRogue
                     {
                         slot.comboTimerFillImage.sprite = _whiteFillSprite;
                     }
-                    slot.comboTimerFillImage.type = Image.Type.Filled;
-                    slot.comboTimerFillImage.fillMethod = Image.FillMethod.Horizontal;
-                    slot.comboTimerFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                    if(!RaidUIStyle.Authored(slot.comboTimerFillImage)) slot.comboTimerFillImage.type = Image.Type.Filled;
+                    if(!RaidUIStyle.Authored(slot.comboTimerFillImage)) slot.comboTimerFillImage.fillMethod = Image.FillMethod.Horizontal;
+                    if(!RaidUIStyle.Authored(slot.comboTimerFillImage)) slot.comboTimerFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
                 }
             }
         }
@@ -239,9 +339,12 @@ namespace RaidRogue
             for (int i = 0; i < 4; i++)
             {
                 var slot = slots[i]; if (slot == null) continue;
+                PrepareCommonLayout(slot);
                 var commonSlot = CharacterSlots.LegacySlot(i + 1);
+                _inputFeedback[i].Tick(slot.slotButton, actor, commonSlot);
                 var selection = System.Array.Find(state.selections, s => s.slot == commonSlot);
                 var skill = selection == null ? null : actor.Definition.Skill(selection.skillId);
+                slot.slotButton?.GetComponentInChildren<RaidUIIcon>(true)?.Show(skill?.id);
                 bool available = skill != null && skill.implemented && System.Array.IndexOf(state.unlocked, skill.id) >= 0;
                 var timing = skill == null ? null : System.Array.Find(state.skills, s => s.id == skill.id);
                 float remaining = timing != null && timing.charges == 0 ? timing.recharge : 0;
@@ -249,15 +352,27 @@ namespace RaidRogue
                 if (skill != null && skill.usesGcd && state.gcd > remaining) { remaining = state.gcd; total = state.gcdTotal; }
                 if (slot.keybindBadgeText != null) slot.keybindBadgeText.text = LocalInputBindings.Label(CharacterSlots.Binding(commonSlot));
                 if (slot.skillNameText != null) slot.skillNameText.text = actor.Definition.id==AegisPaladinData.JobId && (i==0||i==1)
-                    ? (i==0?AegisPaladinData.SwordNames[state.combo1-1]:AegisPaladinData.ShieldNames[state.combo2-1]) : skill?.name ?? "빈 슬롯";
+                    ? (i==0?AegisPaladinData.SwordNames[state.combo1-1]:AegisPaladinData.SecondName(skill.id,state.combo2)) : skill?.name ?? "빈 슬롯";
                 var job=CharacterRosterData.Find(actor.Definition.id);
-                if(job!=null&&i<2&&slot.skillNameText!=null)slot.skillNameText.text=i==0?job.combo1[state.combo1-1]:job.combo2[state.combo2-1];
+                if(job!=null&&i<2&&slot.skillNameText!=null)slot.skillNameText.text=NineKeyHealerKit.Supports(actor.Definition)?NineKeyHealerData.ComboName(job,skill.id,i==0?state.combo1:state.combo2):NineKeyTankKit.Supports(actor.Definition)?NineKeyTankData.ComboName(job,skill.id,i==0?state.combo1:state.combo2):i==0?job.combo1[state.combo1-1]:job.combo2[state.combo2-1];
                 if(job?.index==6&&i<3&&actor.GetComponent<CharacterKit>()?.Has("ninjutsu")==true&&slot.skillNameText!=null)slot.skillNameText.text=CharacterRosterData.Ninjutsu(i==0?"g1":i==1?"g2":"a").name;
-                if (slot.slotButton != null) slot.slotButton.interactable = available;
-                if (slot.cooldownOverlayImage != null) slot.cooldownOverlayImage.fillAmount = total > 0 ? Mathf.Clamp01(remaining / total) : 0;
-                if (slot.cooldownNumberText != null) slot.cooldownNumberText.text = !available ? "잠김 / 미구현" : remaining > 0 ? remaining.ToString("0.0") : skill.maximumCharges > 1 ? timing.charges + "/" + skill.maximumCharges : "";
+                var damage=actor.GetComponent<NineKeyDamageKit>();
+                if(damage?.Active==true&&i<2&&slot.skillNameText!=null)slot.skillNameText.text=damage.ComboLabel(skill,i==0?state.combo1:state.combo2);
+                string blocked=CharacterFrameworkUI.DamageSlotUnavailable(actor,skill,commonSlot);
+                if(damage?.Active==true&&skill!=null&&blocked.Length==0&&!System.Array.TrueForAll(skill.costs,c=>(System.Array.Find(state.resources,r=>r.id==c.resourceId)?.value??0)>=c.amount*damage.CostScale(skill)))blocked="자원 부족";
+                bool usable=available&&blocked.Length==0&&CombatRange.LivingPartyMember(actor.transform)&&!LocalGameplayInput.Blocked;
+                if (slot.slotButton != null) slot.slotButton.interactable = usable;
+                RaidUIStyle.State(slot.iconBackgroundImage, usable && remaining <= 0, !usable);
+                if (slot.cooldownOverlayImage != null)
+                {
+                    slot.cooldownOverlayImage.gameObject.SetActive(remaining > 0);
+                    slot.cooldownOverlayImage.fillAmount = total > 0 ? Mathf.Clamp01(remaining / total) : 0;
+                }
+                if (slot.cooldownNumberText != null) slot.cooldownNumberText.gameObject.SetActive(true);
+                if (slot.cooldownNumberText != null) slot.cooldownNumberText.text = !available ? "잠김 / 미구현" : !CombatRange.LivingPartyMember(actor.transform)?"사망":blocked.Length>0?blocked:remaining > 0 ? (skill.usesGcd && state.gcd >= remaining ? "공유 " : "대기 ")+remaining.ToString("0.0")+"초" : actor.MaximumCharges(skill.id) > 1 ? "준비 "+timing.charges + "/" + actor.MaximumCharges(skill.id) : "사용 가능";
                 int chain = skill?.comboChain ?? 0; float combo = chain == 1 ? state.comboTime1 : chain == 2 ? state.comboTime2 : 0;
-                if (slot.stageBadgeText != null) slot.stageBadgeText.text = chain == 0 ? "" : (chain == 1 ? state.combo1 : state.combo2) + "단";
+                if (slot.stageBadgeText != null) slot.stageBadgeText.text = chain == 0 ? "" : "다음 "+(chain == 1 ? state.combo1 : state.combo2) + "단";
+                if(damage?.Active==true&&damage.IsFourth(skill)&&slot.stageBadgeText!=null)slot.stageBadgeText.text="다음 4단";
                 if (slot.comboTimerBarRoot != null) slot.comboTimerBarRoot.SetActive(combo > 0);
                 if (slot.comboTimerFillImage != null) slot.comboTimerFillImage.fillAmount = skill != null && skill.comboWindow > 0 ? combo / skill.comboWindow : 0;
                 if (slot.comboTimerText != null) slot.comboTimerText.text = combo.ToString("0.0");
@@ -300,13 +415,13 @@ namespace RaidRogue
                 if (playerCastFillImage != null)
                 {
                     playerCastFillImage.fillAmount = combatController.CastProgress;
-                    playerCastFillImage.color = new Color(1.0f, 0.45f, 0.10f, 1f);
+                    RaidUIStyle.Color(playerCastFillImage, new Color(1.0f, 0.45f, 0.10f, 1f));
                 }
                 if (playerCastText != null)
                 {
                     playerCastText.text =
                         $"시전 중: {combatController.CastingSpellName}  ({combatController.CastProgress * 100f:F0}% | 남은 {combatController.CastRemaining:F1}s) — [이동 시 취소!]";
-                    playerCastText.color = Color.white;
+                    RaidUIStyle.Color(playerCastText, Color.white);
                 }
             }
             else if (combatController.HasInterruptAlert)
@@ -314,12 +429,12 @@ namespace RaidRogue
                 if (playerCastFillImage != null)
                 {
                     playerCastFillImage.fillAmount = 1f;
-                    playerCastFillImage.color = new Color(0.85f, 0.14f, 0.16f, 0.95f);
+                    RaidUIStyle.Color(playerCastFillImage, new Color(0.85f, 0.14f, 0.16f, 0.95f));
                 }
                 if (playerCastText != null)
                 {
                     playerCastText.text = combatController.InterruptAlertMessage;
-                    playerCastText.color = new Color(1f, 0.92f, 0.35f, 1f);
+                    RaidUIStyle.Color(playerCastText, new Color(1f, 0.92f, 0.35f, 1f));
                 }
             }
             else if (combatController.IsTriplecastActive)
@@ -327,13 +442,13 @@ namespace RaidRogue
                 if (playerCastFillImage != null)
                 {
                     playerCastFillImage.fillAmount = Mathf.Clamp01(combatController.TriplecastRemaining / 6.0f);
-                    playerCastFillImage.color = new Color(0.95f, 0.72f, 0.12f, 0.95f);
+                    RaidUIStyle.Color(playerCastFillImage, new Color(0.95f, 0.72f, 0.12f, 0.95f));
                 }
                 if (playerCastText != null)
                 {
                     playerCastText.text =
                         $"★ [삼연속 마법] 활성 중 ({combatController.TriplecastRemaining:F1}s) — [1]번 화염 폭풍 콤보 캐스팅 0초 즉발 무빙샷!! ★";
-                    playerCastText.color = new Color(1f, 0.98f, 0.75f, 1f);
+                    RaidUIStyle.Color(playerCastText, new Color(1f, 0.98f, 0.75f, 1f));
                 }
             }
             else
@@ -349,7 +464,7 @@ namespace RaidRogue
                 {
                     playerCastText.text =
                         $"[캐스터 캐스팅 게이지 대기]  [1] {stg}단 {nextFire} (시전 {nextCastSec:F1}s - 제자리 발사)  |  [2] 냉기 무빙샷 (즉발)";
-                    playerCastText.color = new Color(1.0f, 0.82f, 0.55f, 0.95f);
+                    RaidUIStyle.Color(playerCastText, new Color(1.0f, 0.82f, 0.55f, 0.95f));
                 }
             }
         }
@@ -378,7 +493,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = stage == 3 ? "★ 3단 자힐 강타 ★" : $"{stage}단계 (방패 강타)";
-                        slot.stageBadgeText.color = stage == 3 ? new Color(0.4f, 0.95f, 1f, 1f) : new Color(0.75f, 0.9f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, stage == 3 ? new Color(0.4f, 0.95f, 1f, 1f) : new Color(0.75f, 0.9f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -386,13 +501,13 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = stage switch
+                        RaidUIStyle.Color(slot.iconBackgroundImage, stage switch
                         {
                             1 => new Color(0.12f, 0.26f, 0.48f, 0.96f),
                             2 => new Color(0.15f, 0.38f, 0.65f, 0.98f),
                             3 => new Color(0.20f, 0.55f, 0.78f, 1.00f),
                             _ => new Color(0.12f, 0.26f, 0.48f, 0.96f)
-                        };
+                        });
                     }
                     break;
                 }
@@ -403,7 +518,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = stage == 3 ? "★ 3단 천벌 폭딜 ★" : $"{stage}단계 (심판의 빛)";
-                        slot.stageBadgeText.color = stage == 3 ? new Color(0.6f, 1f, 0.4f, 1f) : new Color(0.8f, 1f, 0.85f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, stage == 3 ? new Color(0.6f, 1f, 0.4f, 1f) : new Color(0.8f, 1f, 0.85f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -411,13 +526,13 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = stage switch
+                        RaidUIStyle.Color(slot.iconBackgroundImage, stage switch
                         {
                             1 => new Color(0.12f, 0.36f, 0.22f, 0.96f),
                             2 => new Color(0.16f, 0.50f, 0.28f, 0.98f),
                             3 => new Color(0.28f, 0.62f, 0.18f, 1.00f),
                             _ => new Color(0.12f, 0.36f, 0.22f, 0.96f)
-                        };
+                        });
                     }
                     break;
                 }
@@ -432,9 +547,9 @@ namespace RaidRogue
                         slot.stageBadgeText.text = instant
                             ? "★ 삼연속 즉발! ★"
                             : (stage == 3 ? "★ 3단 초고화력 ★" : $"{stage}단계 (화염 캐스팅)");
-                        slot.stageBadgeText.color = (stage == 3 || instant)
+                        RaidUIStyle.Color(slot.stageBadgeText, (stage == 3 || instant)
                             ? new Color(1f, 0.9f, 0.25f, 1f)
-                            : new Color(1f, 0.75f, 0.55f, 1f);
+                            : new Color(1f, 0.75f, 0.55f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -443,13 +558,13 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = stage switch
+                        RaidUIStyle.Color(slot.iconBackgroundImage, stage switch
                         {
                             1 => new Color(0.45f, 0.18f, 0.10f, 0.96f),
                             2 => new Color(0.62f, 0.22f, 0.10f, 0.98f),
                             3 => new Color(0.78f, 0.35f, 0.08f, 1.00f),
                             _ => new Color(0.45f, 0.18f, 0.10f, 0.96f)
-                        };
+                        });
                     }
                     break;
                 }
@@ -461,9 +576,9 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = stage == 3 ? "★ 3단 최종 오의 ★" : $"{stage}단계 (측면)";
-                        slot.stageBadgeText.color = stage == 3
+                        RaidUIStyle.Color(slot.stageBadgeText, stage == 3
                             ? new Color(1f, 0.9f, 0.25f, 1f)
-                            : (stage == 2 ? new Color(0.55f, 1f, 0.45f, 1f) : new Color(0.8f, 0.9f, 0.85f, 1f));
+                            : (stage == 2 ? new Color(0.55f, 1f, 0.45f, 1f) : new Color(0.8f, 0.9f, 0.85f, 1f)));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -471,13 +586,13 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = stage switch
+                        RaidUIStyle.Color(slot.iconBackgroundImage, stage switch
                         {
                             1 => new Color(0.14f, 0.34f, 0.22f, 0.96f),
                             2 => new Color(0.18f, 0.52f, 0.24f, 0.98f),
                             3 => new Color(0.58f, 0.45f, 0.10f, 1.00f),
                             _ => new Color(0.14f, 0.34f, 0.22f, 0.96f)
-                        };
+                        });
                     }
                     break;
                 }
@@ -516,7 +631,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = stage == 3 ? "★ 3단 방패 투척 ★" : $"{stage}단계 (원거리 투창)";
-                        slot.stageBadgeText.color = new Color(0.55f, 0.9f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.55f, 0.9f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -524,7 +639,7 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = new Color(0.14f, 0.30f, 0.52f, 0.96f);
+                        RaidUIStyle.Color(slot.iconBackgroundImage, new Color(0.14f, 0.30f, 0.52f, 0.96f));
                     }
                     UpdateCooldownVisual(slot, combatController.GcdRemaining, combatController.GcdTotal);
                     UpdateComboHighlightAndTimerBar(slot, stage, combatController.Combo2TimerRemaining, combatController.comboExpireDuration);
@@ -536,7 +651,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "스마트 힐 & 보호막";
-                        slot.stageBadgeText.color = new Color(0.45f, 1.0f, 0.65f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.45f, 1.0f, 0.65f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -544,7 +659,7 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = new Color(0.14f, 0.45f, 0.30f, 0.96f);
+                        RaidUIStyle.Color(slot.iconBackgroundImage, new Color(0.14f, 0.45f, 0.30f, 0.96f));
                     }
                     UpdateCooldownVisual(slot, combatController.GcdRemaining, combatController.GcdTotal);
                     UpdateComboHighlightAndTimerBar(slot, 1, 0f, 8f);
@@ -557,7 +672,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = stage == 3 ? "★ 3단 절대영도 ★" : $"{stage}단계 (무빙 즉발)";
-                        slot.stageBadgeText.color = new Color(0.5f, 0.92f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.5f, 0.92f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -565,7 +680,7 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = new Color(0.12f, 0.32f, 0.50f, 0.96f);
+                        RaidUIStyle.Color(slot.iconBackgroundImage, new Color(0.12f, 0.32f, 0.50f, 0.96f));
                     }
                     UpdateCooldownVisual(slot, combatController.GcdRemaining, combatController.GcdTotal);
                     UpdateComboHighlightAndTimerBar(slot, stage, combatController.Combo2TimerRemaining, combatController.comboExpireDuration);
@@ -579,9 +694,9 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = stage == 3 ? "★ 3단 최종 오의 ★" : $"{stage}단계 (후면)";
-                        slot.stageBadgeText.color = stage == 3
+                        RaidUIStyle.Color(slot.stageBadgeText, stage == 3
                             ? new Color(1f, 0.85f, 0.25f, 1f)
-                            : (stage == 2 ? new Color(0.45f, 0.9f, 1f, 1f) : new Color(0.8f, 0.88f, 0.95f, 1f));
+                            : (stage == 2 ? new Color(0.45f, 0.9f, 1f, 1f) : new Color(0.8f, 0.88f, 0.95f, 1f)));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -589,13 +704,13 @@ namespace RaidRogue
                     }
                     if (slot.iconBackgroundImage != null)
                     {
-                        slot.iconBackgroundImage.color = stage switch
+                        RaidUIStyle.Color(slot.iconBackgroundImage, stage switch
                         {
                             1 => new Color(0.14f, 0.25f, 0.42f, 0.96f),
                             2 => new Color(0.32f, 0.18f, 0.55f, 0.98f),
                             3 => new Color(0.62f, 0.14f, 0.32f, 1.00f),
                             _ => new Color(0.14f, 0.25f, 0.42f, 0.96f)
-                        };
+                        });
                     }
                     UpdateCooldownVisual(slot, combatController.GcdRemaining, combatController.GcdTotal);
                     UpdateComboHighlightAndTimerBar(slot, stage, combatController.Combo2TimerRemaining, combatController.comboExpireDuration);
@@ -617,7 +732,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 탱버 방어 (12s)";
-                        slot.stageBadgeText.color = new Color(0.45f, 0.9f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.45f, 0.9f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -629,7 +744,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 광역 힐 (15s)";
-                        slot.stageBadgeText.color = new Color(0.45f, 1.0f, 0.65f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.45f, 1.0f, 0.65f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -641,7 +756,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 배리어 (15s)";
-                        slot.stageBadgeText.color = new Color(0.80f, 0.55f, 1.0f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.80f, 0.55f, 1.0f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -654,7 +769,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 생존기 (15s)";
-                        slot.stageBadgeText.color = new Color(0.55f, 0.85f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.55f, 0.85f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -668,9 +783,9 @@ namespace RaidRogue
             if (slot.borderHighlightImage != null)
             {
                 bool ready = combatController.Skill3CooldownRemaining <= 0.001f;
-                slot.borderHighlightImage.color = ready
+                RaidUIStyle.Color(slot.borderHighlightImage, ready
                     ? new Color(0.28f, 0.65f, 1f, 0.85f)
-                    : new Color(0.22f, 0.24f, 0.30f, 0.8f);
+                    : new Color(0.22f, 0.24f, 0.30f, 0.8f));
             }
 
             if (slot.comboTimerBarRoot != null && slot.comboTimerBarRoot.activeSelf)
@@ -692,7 +807,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 어그로/줄 (15s)";
-                        slot.stageBadgeText.color = new Color(0.35f, 0.95f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.35f, 0.95f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -704,7 +819,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = $"oGCD 구출 ({combatController.Skill4CooldownMax:F0}s)";
-                        slot.stageBadgeText.color = new Color(0.35f, 0.98f, 1f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.35f, 0.98f, 1f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -716,7 +831,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 흑마 핵심 (25s)";
-                        slot.stageBadgeText.color = new Color(1.0f, 0.78f, 0.25f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(1.0f, 0.78f, 0.25f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -729,7 +844,7 @@ namespace RaidRogue
                     if (slot.stageBadgeText != null)
                     {
                         slot.stageBadgeText.text = "oGCD 끼워넣기 (8s)";
-                        slot.stageBadgeText.color = new Color(0.4f, 1f, 0.9f, 1f);
+                        RaidUIStyle.Color(slot.stageBadgeText, new Color(0.4f, 1f, 0.9f, 1f));
                     }
                     if (slot.skillNameText != null)
                     {
@@ -746,13 +861,13 @@ namespace RaidRogue
                 if (ready && combatController.IsOnGcd)
                 {
                     float pulse = 0.65f + Mathf.PingPong(Time.time * 6f, 0.35f);
-                    slot.borderHighlightImage.color = new Color(0.25f, 1f, 0.9f, pulse);
+                    RaidUIStyle.Color(slot.borderHighlightImage, new Color(0.25f, 1f, 0.9f, pulse));
                 }
                 else
                 {
-                    slot.borderHighlightImage.color = ready
+                    RaidUIStyle.Color(slot.borderHighlightImage, ready
                         ? new Color(0.25f, 0.85f, 0.78f, 0.85f)
-                        : new Color(0.22f, 0.24f, 0.30f, 0.8f);
+                        : new Color(0.22f, 0.24f, 0.30f, 0.8f));
                 }
             }
 
@@ -802,11 +917,11 @@ namespace RaidRogue
                         ? new Color(1.0f, 0.48f, 0.08f, 1f)
                         : new Color(1.0f, 0.90f, 0.15f, 1f);
                     Color brightCol = new Color(1.0f, 1.0f, 0.65f, 1f);
-                    slot.borderHighlightImage.color = Color.Lerp(baseCol, brightCol, pulse);
+                    RaidUIStyle.Color(slot.borderHighlightImage, Color.Lerp(baseCol, brightCol, pulse));
                 }
                 else
                 {
-                    slot.borderHighlightImage.color = new Color(0.28f, 0.32f, 0.40f, 0.85f);
+                    RaidUIStyle.Color(slot.borderHighlightImage, new Color(0.28f, 0.32f, 0.40f, 0.85f));
                 }
             }
 
@@ -824,9 +939,9 @@ namespace RaidRogue
                         slot.comboTimerFillImage.fillAmount = comboTotal > 0.01f
                             ? Mathf.Clamp01(comboRemaining / comboTotal)
                             : 0f;
-                        slot.comboTimerFillImage.color = stage == 3
+                        RaidUIStyle.Color(slot.comboTimerFillImage, stage == 3
                             ? new Color(1.0f, 0.55f, 0.12f, 1f)
-                            : new Color(1.0f, 0.88f, 0.20f, 1f);
+                            : new Color(1.0f, 0.88f, 0.20f, 1f));
                     }
 
                     if (slot.comboTimerText != null)

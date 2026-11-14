@@ -15,9 +15,9 @@ namespace RaidRogue
         public readonly CharacterEffectState State = new CharacterEffectState();
         private CharacterKitSnapshot Data => State.Data;
         public RosterJob Job => CharacterRosterData.Find(_actor?.Definition?.id);
-        public bool Active => Job != null;
-        public bool Overcome => CharacterEvolutionCards.Has(_actor, false);
-        public bool Maximize => CharacterEvolutionCards.Has(_actor, true);
+        public bool Active => Job != null&&!NineKeyTankKit.Supports(_actor?.Definition)&&!NineKeyHealerKit.Supports(_actor?.Definition)&&!NineKeyDamageKit.Supports(_actor?.Definition);
+        public bool Overcome => Active&&CharacterEvolutionCards.Has(_actor, false);
+        public bool Maximize => Active&&CharacterEvolutionCards.Has(_actor, true);
         public int Route => Active ? Array.FindIndex(_actor.Definition.routes, r => r.id == _actor.RouteId) + 1 : 0;
         public float Now => RaidCombatAuthority.ServerTime;
         public Color Tint => Color.HSVToRGB((Job?.index ?? 0) / 12f, .55f, .95f);
@@ -145,7 +145,7 @@ namespace RaidRogue
                             yield return (kit, e);
         }
 
-        public static float Bonus(Transform t, string key) => Buffs(t, key).Select(b => b.effect.value).DefaultIfEmpty(0).Max();
+        public static float Bonus(Transform t, string key) => Mathf.Max(Buffs(t, key).Select(b => b.effect.value).DefaultIfEmpty(0).Max(),key=="speed"||key=="healingReceived"?Mathf.Max(NineKeyHealerKit.SupportBonus(t,key),NineKeyDamageKit.SupportBonus(t,key)):0);
         public static bool Protected(Transform t) => Bonus(t, "invulnerable") > 0;
         public void OnResourceChanged(string id, float delta)
         {
@@ -316,6 +316,7 @@ namespace RaidRogue
         {
             if (!Active)
             {
+                if(NineKeyTankKit.Supports(_actor?.Definition)||NineKeyHealerKit.Supports(_actor?.Definition)||NineKeyDamageKit.Supports(_actor?.Definition)){DrawGear();return;}
                 HideGear();
                 return;
             }

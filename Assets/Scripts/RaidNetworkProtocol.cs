@@ -9,6 +9,7 @@ namespace RaidRogue
     {
         public uint Sequence;
         public int MotionVersion;
+        public int SupportId;
         public float X, Z;
         public bool Dash;
         public bool Valid => Sequence > 0 && Finite(X) && Finite(Z) && Math.Abs(X) <= 1.001f && Math.Abs(Z) <= 1.001f;
@@ -103,7 +104,12 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 13, MaxBytes = 1100;
+        // Version 29 carries the new DPS combat snapshot in the existing jobState envelope.
+        // Reject mismatched peers before decoding a Hello or JSON frame on LAN and Steam.
+        // v30 adds validated mirror selection/position/normal action payloads.
+        // v31 preserves delayed piercing-arrow launch geometry in DPS snapshots.
+        // Version 32 includes authoritative stagger lock/threshold presentation.
+        public const int Version = 34, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -127,7 +133,7 @@ namespace RaidRogue
                 case RaidPacketKind.Role: w.Write(packet.Role); break;
                 case RaidPacketKind.Input:
                     w.Write((byte)packet.Inputs.Count);
-                    foreach (var input in packet.Inputs) { w.Write(input.Sequence); w.Write(input.MotionVersion); w.Write(input.X); w.Write(input.Z); w.Write(input.Dash); }
+                    foreach (var input in packet.Inputs) { w.Write(input.Sequence); w.Write(input.MotionVersion); w.Write(input.X); w.Write(input.Z); w.Write(input.Dash); w.Write(input.SupportId); }
                     break;
                 case RaidPacketKind.Snapshot:
                     w.Write(packet.Tick); w.Write((byte)packet.Poses.Count);
@@ -176,7 +182,7 @@ namespace RaidRogue
                         int count = r.ReadByte(); if (count > 8) return false;
                         for (int i = 0; i < count; i++)
                         {
-                            var input = new RaidMoveInput { Sequence = r.ReadUInt32(), MotionVersion = r.ReadInt32(), X = Number(r), Z = Number(r), Dash = r.ReadBoolean() };
+                            var input = new RaidMoveInput { Sequence = r.ReadUInt32(), MotionVersion = r.ReadInt32(), X = Number(r), Z = Number(r), Dash = r.ReadBoolean(), SupportId = r.ReadInt32() };
                             if (!input.Valid) return false; p.Inputs.Add(input);
                         }
                         break;

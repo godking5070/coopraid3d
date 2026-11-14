@@ -112,7 +112,7 @@ namespace RaidRogue
             while (!RaidNetworkSession.Multiplayer && partyBots.Count < 3)
             {
                 int idx = partyBots.Count + 1;
-                GameObject botObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                GameObject botObj = RaidPrimitive.Create(PrimitiveType.Capsule);
                 botObj.name = $"PartyBot_Auto_{idx}";
                 Collider col = botObj.GetComponent<Collider>();
                 if (col != null) Destroy(col);
@@ -166,32 +166,19 @@ namespace RaidRogue
             return true;
         }
 
+        // Compatibility entry point for old scene buttons and lobby callers.
+        // Player-facing selection opens the current roster directly.
         public void OpenRoleSelectionModal()
         {
-            if (RaidNetworkSession.Multiplayer || RaidNetworkSession.CombatPreview || RaidNetworkSession.Instance?.MenuOpen == true)
-            { RaidNetworkSession.Instance.MenuOpen = true; return; }
-            if (CombatMetricsUI.BlocksUnderlyingInput || !CanChangePartyRoles()) return;
-            EnsureUI();
-
-            if (roleModalRoot != null)
+            CloseRoleSelectionModal();
+            if (RaidNetworkSession.Multiplayer)
             {
-                roleModalRoot.SetActive(true);
-                roleModalRoot.transform.SetAsLastSibling();
+                AegisRouteSelectionUI.OpenNetwork();
+                return;
             }
-
-            PlayerRole curRole = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
-            var character = player != null ? player.GetComponent<CharacterActor>() : null;
-            string currentName = character?.Definition?.legacyRole == 0 ? character.Definition.name : GetRoleTitleKor(curRole);
-            if (roleModalSubtitleText != null)
-            {
-                LocalShortcutText.Set(roleModalSubtitleText,
-                    $"현재 직업: <color=#FFE055>{currentName}</color> · 아래 금색 버튼 → 12직업 → 기원 선택 → 출발\n" +
-                    "기존 테스트 직업은 아래 카드 또는 <b>[{key:Choice1}] · [{key:Choice2}] · [{key:Choice3}] · [{key:Choice4}]</b>로 선택 · 남은 역할은 AI 봇이 담당합니다.");
-            }
-
-            _isModalOpen = true;
-            Time.timeScale = 0f;
-            UpdateTopButtonLabel();
+            if (RaidNetworkSession.CombatPreview || RaidNetworkSession.Instance?.MenuOpen == true ||
+                CombatMetricsUI.BlocksUnderlyingInput || stageManager?.CanSelectInitialRole != true || player == null) return;
+            AegisRouteSelectionUI.Open(CharacterActor.Ensure(player.gameObject), false);
         }
 
         public void CloseRoleSelectionModal()
@@ -229,7 +216,7 @@ namespace RaidRogue
         public void ConfirmAegisDeparture()
         {
             if(player==null||stageManager==null||!stageManager.CanSelectInitialRole||!CharacterActor.Ensure(player.gameObject).DepartureReady)return;
-            _hasSelectedInitialRole=true;CloseRoleSelectionModal();stageManager.BeginSingleRun();
+            _hasSelectedInitialRole=true;CloseRoleSelectionModal();
         }
         public void SelectRoleByIndex(int roleNumber1To4)
         {
@@ -246,7 +233,6 @@ namespace RaidRogue
             _hasSelectedInitialRole = true;
             ApplySelectedRole(chosen, repositionParty: true, showAlertBanner: true);
             CloseRoleSelectionModal();
-            stageManager?.BeginSingleRun();
         }
 
         /// <summary>
@@ -550,25 +536,18 @@ namespace RaidRogue
                 }
             }
 
-            // 2. 화면 중앙 [직업 선택 창: 1.가디언 / 2.오라클 / 3.블레이드 / 4.아크메이지] 모달 생성
+            // Keep old serialized references, but never show or build the retired modal.
             if (roleModalRoot == null)
-            {
-                Transform existingModal = canvas.transform.Find("RoleSelection_ModalOverlay");
-                if (existingModal != null)
-                {
-                    roleModalRoot = existingModal.gameObject;
-                }
-                else
-                {
-                    BuildRoleSelectionModalUI(canvas.transform, font);
-                }
-            }
-            // Runtime upgrade also covers previously generated scenes and does not depend on the hotbar being visible.
-            if (Application.isPlaying) EnsureCharacterChoices(font);
+                roleModalRoot = canvas.transform.Find("RoleSelection_ModalOverlay")?.gameObject;
+            if (roleModalRoot != null) roleModalRoot.SetActive(false);
         }
 
         private void EnsureCharacterChoices(Font font)
         {
+            if (RaidUIStyle.Authored(roleModalRoot != null ? roleModalRoot.transform : null) && _aegisSelect != null)
+            {
+                _aegisSelect.onClick.RemoveAllListeners(); _aegisSelect.onClick.AddListener(SelectAegisPaladin); return;
+            }
             if (roleModalRoot == null) return;
             _selectionPanel = roleModalRoot.transform.Find("RoleSelection_CenterWindow") as RectTransform;
             if (_selectionPanel == null) return;
@@ -643,7 +622,7 @@ namespace RaidRogue
         {
             if (_selectionPanel == null || roleModalRoot == null) return;
             var available = ((RectTransform)roleModalRoot.transform).rect.size;
-            if (available.x > 0 && available.y > 0)
+            if (!RaidUIStyle.Authored(_selectionPanel) && available.x > 0 && available.y > 0)
                 _selectionPanel.localScale = Vector3.one * Mathf.Clamp(Mathf.Min((available.x - 24) / 1480, (available.y - 24) / 900), .01f, 1);
             if (_aegisSelect == null) return;
             bool canSelect = stageManager != null && stageManager.CanSelectInitialRole && CharacterCatalog.Find(AegisPaladinData.JobId)?.playable == true;

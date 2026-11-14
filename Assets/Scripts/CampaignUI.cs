@@ -15,21 +15,20 @@ namespace RaidRogue
         private bool _quitApproved;
         private void BuildCampaignUI(Transform canvas, Transform overlay)
         {
-            _start.GetComponent<RectTransform>().anchoredPosition = new Vector2(-230, 0);
-            _campaignMenu = Box(overlay, "CampaignSaveMenu", new Vector2(550, -40), new Vector2(440, 510), new Color(.06f, .10f, .16f)).gameObject;
-            _campaignSummary = Label(_campaignMenu.transform, "", new Vector2(0, 165), new Vector2(414, 150), 18);
-            _campaignContinue = ButtonAt(_campaignMenu.transform, "이어하기", new Vector2(0, 52), new Vector2(390, 46), () => {
-                var c = CampaignRuntime.Instance; if (c?.Saved != null) c.Continue(c.Saved.transport == "steam");
-            });
-            ButtonAt(_campaignMenu.transform, "저장 정보 확인", new Vector2(0, -2), new Vector2(390, 46), () => CampaignDialog(CampaignRuntime.Instance.SaveDescription, null));
-            ButtonAt(_campaignMenu.transform, "런 체크포인트 삭제", new Vector2(0, -56), new Vector2(390, 46), () => CampaignDialog("이 계정의 런 체크포인트와 최근 백업을 삭제합니다.\n개인 클리어 기록·챕터 해금·설정은 유지됩니다.\n\n" + CampaignRuntime.Instance.LastSaveLabel, () => CampaignRuntime.Instance.DeleteSelected(false)));
-            ButtonAt(_campaignMenu.transform, "개인 진행도 / 챕터 해금", new Vector2(0, -110), new Vector2(390, 46), ShowPersonalProgress);
-            ButtonAt(_campaignMenu.transform, "개인 진행도 삭제", new Vector2(0, -164), new Vector2(390, 46), () => CampaignDialog("이 계정의 개인 스테이지 클리어·챕터 해금·미전달 클리어 확정 알림과 백업을 삭제합니다.\n런 체크포인트·설정·키 배치는 유지됩니다.\n기존 런의 완료 영수증을 다시 받으면 해당 기록은 복구될 수 있습니다.", () => CampaignRuntime.Instance.DeleteSelected(true)));
-            Label(_campaignMenu.transform, "1부 4인 · 6스테이지 / 2부 준비 중", new Vector2(0, -218), new Vector2(414, 40), 16);
-            _campaignNotice = Label(overlay, "", new Vector2(0, -380), new Vector2(1400, 75), 16);
+            _campaignMenu = Box(overlay, "CampaignSaveMenu", new Vector2(0, -15), new Vector2(960, 380), new Color(.06f, .10f, .16f)).gameObject;
+            _campaignSummary = Label(_campaignMenu.transform, "", new Vector2(-230, 0), new Vector2(420, 320), 20);
+            _campaignSummary.alignment = TextAnchor.MiddleLeft;
+            _campaignContinue = ButtonAt(_campaignMenu.transform, "이어하기", new Vector2(235, 130), new Vector2(390, 48), ContinueFromMenu);
+            ButtonAt(_campaignMenu.transform, "저장 정보 확인", new Vector2(235, 65), new Vector2(390, 48), () => CampaignDialog(CampaignRuntime.Instance.SaveDescription, null));
+            ButtonAt(_campaignMenu.transform, "런 체크포인트 삭제", new Vector2(235, 0), new Vector2(390, 48), () => CampaignDialog("이 계정의 런 체크포인트와 최근 백업을 삭제합니다.\n개인 클리어 기록·챕터 해금·설정은 유지됩니다.\n\n" + CampaignRuntime.Instance.LastSaveLabel, () => CampaignRuntime.Instance.DeleteSelected(false)));
+            ButtonAt(_campaignMenu.transform, "개인 진행도 확인", new Vector2(235, -65), new Vector2(390, 48), ShowPersonalProgress);
+            ButtonAt(_campaignMenu.transform, "개인 진행도 삭제", new Vector2(235, -130), new Vector2(390, 48), () => CampaignDialog("이 계정의 개인 클리어·챕터 해금·미전달 클리어 확정 알림과 백업을 삭제합니다.\n런 체크포인트·설정·키 배치는 유지됩니다.\n기존 런의 완료 영수증을 다시 받으면 해당 기록은 복구될 수 있습니다.", () => CampaignRuntime.Instance.DeleteSelected(true)));
+            _campaignMenu.SetActive(false);
+            _campaignNotice = Label(overlay, "", new Vector2(0, -350), new Vector2(1120, 62), 16);
+            _campaignNotice.supportRichText = false;
             _campaignHudNotice = Label(canvas, "", new Vector2(0, 180), new Vector2(1000, 90), 19);
             _campaignHudNotice.color = new Color(1, .7f, .35f);
-            _campaignRetry = ButtonAt(overlay, "저장 재시도", new Vector2(0, -435), new Vector2(260, 40), () => CampaignRuntime.Instance?.RetrySave());
+            _campaignRetry = ButtonAt(overlay, "저장 재시도", new Vector2(0, -398), new Vector2(260, 36), () => CampaignRuntime.Instance?.RetrySave());
             var dialog = Box(canvas, "CampaignConfirmation", Vector2.zero, Vector2.zero, new Color(.02f, .03f, .05f, .99f));
             dialog.anchorMin = Vector2.zero; dialog.anchorMax = Vector2.one; dialog.offsetMin = dialog.offsetMax = Vector2.zero;
             _campaignDialog = dialog.gameObject;
@@ -51,14 +50,14 @@ namespace RaidRogue
         private void RequestNewCampaign(Action start)
         {
             var c = CampaignRuntime.Instance;
-            if (c?.Saved == null) { start(); return; }
-            CampaignDialog("새 런을 시작합니다.\n현재 런 체크포인트는 새 런의 첫 출발 경계에서 교체됩니다.\n개인 진행도·챕터 해금·설정은 유지됩니다.\n\n기존: " + c.LastSaveLabel, start);
+            if (c == null || (c.Saved == null && c.Settlement == null)) { start(); return; }
+            CampaignDialog("새 런을 시작합니다.\n새 런의 첫 출발 경계가 저장되면 기존 런 대신 새 런을 이어가게 됩니다.\n기존 보상 정산을 마치려면 취소 후 이어하기를 선택하세요.\n개인 진행도·챕터 해금·설정은 유지됩니다.\n\n기존: " + c.LastSaveLabel, start);
         }
         internal void ConfirmCampaignExit(bool quit, Action returnAction = null)
         {
             var c = CampaignRuntime.Instance;
             CampaignDialog((quit ? "게임을 종료합니다." : "현재 세션을 종료하고 메인 메뉴로 돌아갑니다.") + "\n\n" + _session.CampaignExitSaveLabel +
-                "\n\n현재 전투와 완료하지 않은 보상 선택은 저장되지 않습니다.\n이어하기는 마지막 저장 스테이지 시작부터 새 도전으로 재개하며 공유 부활은 4회입니다.\n진행 중 세션 재접속은 현재 상태와 남은 부활을 유지합니다." +
+                "\n\n진행 중인 전투 상태는 저장되지 않습니다.\n저장된 처치 후 정산 기록이 있으면 보상 선택부터 이어갑니다.\n그 외에는 마지막 저장 스테이지 시작부터 새 도전으로 재개하며 공유 부활은 4회입니다.\n진행 중 세션 재접속은 현재 상태와 남은 부활을 유지합니다." +
                 (_session.Mode == RaidSessionMode.Client ? "\n런 체크포인트는 호스트만 보관합니다. 내 개인 클리어 기록은 내 계정에 저장됩니다." : "") +
                 (RaidNetworkSession.Multiplayer && !_session.UsesSteam ? "\nLAN 테스트 세션은 영구 저장 대상이 아닙니다. 표시된 이전 저장은 이 세션의 진행이 아닐 수 있습니다." : "") +
                 (_session.CampaignRemoteSaveFailed ? "\n호스트의 저장 실패가 보고되었습니다. 호스트가 저장을 재시도해야 합니다." : "") +
@@ -84,15 +83,25 @@ namespace RaidRogue
         private void UpdateCampaignUI()
         {
             var c = CampaignRuntime.Instance; if (c == null || _campaignMenu == null) return;
-            _campaignMenu.SetActive(_session.Mode == RaidSessionMode.Menu);
-            _campaignSummary.text = c.LastSaveLabel + "\n" + (c.Saved?.completed == true ? "완료된 런 · 새 게임으로 출발하세요" : c.Saved == null ? "첫 출발 및 보상 선택 완료 후 자동 저장" : c.Saved.transport == "steam" ? "같은 호스트 · 새 Steam 로비로 재개" : "싱글플레이 · 저장 구성으로 재개");
-            _campaignContinue.interactable = c.CanContinue && RaidSteamRuntime.Instance?.Busy != true && (c.Saved.transport != "steam" || RaidSteamRuntime.Instance?.Available == true);
+            _campaignMenu.SetActive(_session.Mode == RaidSessionMode.Menu && _menuPage == MainMenuPage.Saves);
+            string summary = c.Saved == null ? "저장된 원정이 없습니다" : c.Saved.completed ? "1부 원정 완료" : "1부  ·  Stage " + c.Saved.nextStage + " / 6";
+            if (c.Settlement != null) summary = "1부 · Stage " + c.Settlement.stage + " 처치 후 정산 대기";
+            _homeSave.text = summary + (c.Saved != null && !c.Saved.completed ? "  ·  마지막 출발 지점부터 재개" : "  ·  방 만들기에서 새롭게 출발하세요");
+            if (c.Settlement != null) _homeSave.text = summary + " · 미완료 보상부터 재개";
+            string date = c.Saved != null && DateTimeOffset.TryParse(c.Saved.savedUtc, out var savedAt) ? savedAt.ToLocalTime().ToString("yyyy.MM.dd  HH:mm") : "";
+            _campaignSummary.text = summary + "\n\n" + (c.Saved?.completed == true ? "새 원정을 시작할 수 있습니다." : c.Saved == null ? "첫 출발과 스테이지 사이에\n자동으로 저장됩니다." : "노말  ·  " + (c.Saved.transport == "steam" ? "Steam 파티" : "싱글 / AI 파티") + "\n" + date + "\n\n직업과 파티 구성은\n저장 정보에서 확인하세요.");
+            if (c.Settlement != null) _campaignSummary.text = c.SaveDescription + "\n\n이어하기 후 북쪽 문에서 미완료 보상을 정산합니다.";
+            var resumable = c.Settlement?.run ?? c.Saved;
+            _campaignContinue.interactable = c.CanContinue && RaidSteamRuntime.Instance?.Busy != true &&
+                (resumable?.transport != "steam" || RaidSteamRuntime.Instance?.Available == true);
+            _homeContinue.interactable = _campaignContinue.interactable;
+            _homeContinue.gameObject.SetActive(RaidSteamRuntime.Instance?.Busy != true);
             _campaignNotice.text = c.Notice;
             _campaignHudNotice.gameObject.SetActive(c.HasSaveFailure && !_session.MenuOpen && _session.Mode != RaidSessionMode.Training);
-            _campaignHudNotice.text = "저장 실패 · 플레이는 계속되며 이전 저장을 유지합니다.\n메뉴에서 원인 확인 / 저장 재시도 가능";
-            if (_campaignHudNotice.gameObject.activeSelf) _campaignHudNotice.transform.SetAsLastSibling();
+            _campaignHudNotice.text = "Save failed: " + c.SaveFailureDetail + "\nOpen the menu to retry saving.";
+            if (_campaignHudNotice.gameObject.activeSelf) RaidUIOrder.Raise(_campaignHudNotice.transform);
             _campaignRetry.gameObject.SetActive(c.HasSaveFailure);
-            if (_campaignDialog.activeSelf) _campaignDialog.transform.SetAsLastSibling();
+            if (_campaignDialog.activeSelf) RaidUIOrder.Raise(_campaignDialog.transform);
         }
         private void DestroyCampaignUI()
         {

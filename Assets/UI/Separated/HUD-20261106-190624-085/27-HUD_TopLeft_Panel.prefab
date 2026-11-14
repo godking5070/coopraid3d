@@ -1,0 +1,217 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &270452598517206495
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8476760955318307078}
+  - component: {fileID: 2470818819157016419}
+  - component: {fileID: 1866581176794621459}
+  - component: {fileID: 6164194610845184771}
+  m_Layer: 0
+  m_Name: 27-HUD_TopLeft_Panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &8476760955318307078
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270452598517206495}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4120097003116077064}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 16, y: -14}
+  m_SizeDelta: {x: 495, y: 220}
+  m_Pivot: {x: 0, y: 1}
+--- !u!222 &2470818819157016419
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270452598517206495}
+  m_CullTransparentMesh: 1
+--- !u!114 &1866581176794621459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270452598517206495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.050980393, g: 0.07450981, b: 0.13333334, a: 0.98039216}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6164194610845184771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270452598517206495}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f15f68c654434faa93774292b661a4d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidRogue.RaidUIStyle
+  role: 0
+  useTheme: 0
+  themeOverride: {fileID: 11400000, guid: e4e8347413b2e9c4ca3fdad9bd470a9e, type: 2}
+  graphic: {fileID: 1866581176794621459}
+  useStateColors: 0
+  ready: {r: 0.90588236, g: 0.91764706, b: 0.9372549, a: 1}
+  unavailable: {r: 0.5882353, g: 0.6509804, b: 0.7294118, a: 1}
+  selected: {r: 0.40784314, g: 0.84313726, b: 0.8, a: 1}
+  locked: {r: 0.25882354, g: 0.31764707, b: 0.40784314, a: 1}
+--- !u!1 &1150000060408121349
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4120097003116077064}
+  - component: {fileID: 8202068250035021282}
+  - component: {fileID: 5981724664471145931}
+  - component: {fileID: 5808706225582517293}
+  m_Layer: 0
+  m_Name: HUD_StatusText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &4120097003116077064
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1150000060408121349}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8476760955318307078}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -28, y: -20}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &8202068250035021282
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1150000060408121349}
+  m_CullTransparentMesh: 1
+--- !u!114 &5981724664471145931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1150000060408121349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.90588236, g: 0.91764706, b: 0.9372549, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 14
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1.12
+  m_Text: "<b>[Project: Raid Rogue - Step 9 (STAGE 1/3 | \uB0B4 \uC9C1\uC5C5: <color=#FFEE44>3.\uBE14\uB808\uC774\uB4DC(\uADFC\uB51C)</color>
+    [P] | \uBDF0: <color=#FFEE55>3D \uCFFC\uD130\uBDF0</color> [F12])]</b>\n\u2022
+    <b>\uD0C0\uAC9F\uD305</b> : <b>[\uB9C8\uC6B0\uC2A4 \uC88C\uD074\uB9AD]</b> \uC720\uB2DB/UI
+    \uC120\uD0DD | <b>[F1 / F2 / F3 / F4]</b> \uD30C\uD2F0\uC6D0 1~4\uBC88 | <b>[TAB]</b>
+    \uC801(\uBCF4\uC2A4\xB7\uCAC4) \uC21C\uD658 | <b>[T]</b> \uB300\uC0C1\uC758 \uB300\uC0C1
+    | <b>[BKSP]</b> \uD0C0\uAC9F \uD574\uC81C | <b>[ESC]</b> \uCC3D \uB2EB\uAE30
+    / \uBA54\uB274\n\u2022 <b>\uC774\uB3D9/\uCE74\uBA54\uB77C</b> : W/A/S/D \uCE74\uBA54\uB77C
+    \uAE30\uC900 \uC774\uB3D9 \xB7 \uC6B0\uD074\uB9AD \uB4DC\uB798\uADF8 \uD68C\uC804
+    \xB7 \uD720 \uC90C \xB7 SPACE \uB300\uC26C \xB7 X \uD3EC\uC158 \xB7 5 \uC774\uB9AC\uC2A4
+    \uCF54\uC778(\uC0AC\uB9DD \uC544\uAD70 \uC120\uD0DD) | [F10] \uC124\uC815\n--------------------------------------------------------------------------------\n\u2022
+    <b>\uB0B4 \uCCB4\uB825</b> : <b>1000 / 1000</b>   |   <b>\uD604\uC7AC \uD0C0\uAC9F</b>
+    : <color=#FFEE55>[BOSS] STAGE 1 : \uACF5\uD5C8\uC758 \uD30C\uC218\uAFBC</color>\n\u2022
+    <b>\uB0B4 \uAC01\uB3C4 (XZ)</b> : <b>180.0\xB0</b> [<color=#55CCFF>\uD6C4\uBA74
+    (Rear)</color>]   |   <b>\uCD5C\uADFC \uC804\uD22C \uB85C\uADF8</b> : \uB300\uAE30
+    \uC911 ([1] \uCE21\uBA74 3\uB2E8 \uCF64\uBCF4 / [2] \uD6C4\uBA74 3\uB2E8 \uCF64\uBCF4)\n\u2022
+    <b>\uB204\uC801 \uCE74\uB4DC \uBE4C\uB4DC</b> : <color=#FFE066>\uC5C6\uC74C (\uBCF4\uC2A4
+    \uCC98\uCE58 \uC2DC \uCE74\uB4DC 3\uD0DD \uBCF4\uC0C1 \uC9C0\uAE09!)</color>"
+--- !u!114 &5808706225582517293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1150000060408121349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f15f68c654434faa93774292b661a4d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RaidRogue.RaidUIStyle
+  role: 7
+  useTheme: 0
+  themeOverride: {fileID: 11400000, guid: e4e8347413b2e9c4ca3fdad9bd470a9e, type: 2}
+  graphic: {fileID: 5981724664471145931}
+  useStateColors: 0
+  ready: {r: 0.90588236, g: 0.91764706, b: 0.9372549, a: 1}
+  unavailable: {r: 0.5882353, g: 0.6509804, b: 0.7294118, a: 1}
+  selected: {r: 0.40784314, g: 0.84313726, b: 0.8, a: 1}
+  locked: {r: 0.25882354, g: 0.31764707, b: 0.40784314, a: 1}

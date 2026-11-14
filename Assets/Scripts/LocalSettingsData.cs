@@ -20,6 +20,7 @@ namespace RaidRogue
         public int width = 1280, height = 720, windowMode = 1; // 0 exclusive, 1 borderless, 2 windowed
         public bool vSync = true;
         public int frameLimit = 120;
+        public int movementMode; // 0 keyboard (existing), 1 right-click ground movement.
         public float master = 1, music = .8f, effects = 1, ui = .8f;
         public float rotationSensitivity = .16f, zoom3D = 2, zoom2D = 2;
         public bool invertVertical;
@@ -36,6 +37,7 @@ namespace RaidRogue
             version = CurrentVersion;
             width = Math.Max(640, Math.Min(16384, width)); height = Math.Max(480, Math.Min(16384, height));
             if (windowMode < 0 || windowMode > 2) windowMode = 1;
+            if(movementMode<0||movementMode>1)movementMode=0;
             if (Array.IndexOf(new[] { 0, 30, 60, 90, 120, 144, 165, 240, 360 }, frameLimit) < 0) frameLimit = 120;
             master = Clamp(master, 0, 1, 1); music = Clamp(music, 0, 1, .8f);
             effects = Clamp(effects, 0, 1, 1); ui = Clamp(ui, 0, 1, .8f);
@@ -83,6 +85,7 @@ namespace RaidRogue
                 new Definition("Forward", "앞으로 이동", "w", "upArrow"), new Definition("Back", "뒤로 이동", "s", "downArrow"),
                 new Definition("Left", "왼쪽 이동", "a", "leftArrow"), new Definition("Right", "오른쪽 이동", "d", "rightArrow"),
                 new Definition("Dash", "대쉬", "space"), new Definition("Potion", "포션", "x") };
+            a.Add(new Definition("Interact", "상호작용", "g"));
             for (int i = 1; i <= 5; i++) a.Add(new Definition("Skill" + i, i == 5 ? "힐러 부활 (기존 유틸리티)" : i == 4 ? "직업 스킬 1" : "스킬 " + i, i == 4 ? "q" : "digit" + i, i == 4 ? "" : "numpad" + i));
             a.Add(new Definition("Counter", "카운터", "digit4", "numpad4"));
             a.Add(new Definition("JobSkill2", "직업 스킬 2", "e"));
@@ -96,6 +99,11 @@ namespace RaidRogue
             a.Add(new Definition("Roles", "역할 창", "p", "", 3)); a.Add(new Definition("View", "2D / 3D 전환", "f12", "", 3));
             a.Add(new Definition("Settings", "설정 창", "f10", "", 3)); a.Add(new Definition("Menu", "게임 메뉴", "f9", "", 3));
             a.Add(new Definition("Results", "전투 기록", "f11", "", 3));
+            a.Add(new Definition("SpectatePrevious", "관전 이전 대상", "pageUp", "", 4));
+            a.Add(new Definition("SpectateNext", "관전 다음 대상", "pageDown", "", 4));
+            a.Add(new Definition("SpectateBoss", "관전 보스 중심", "home", "", 4));
+            a.Add(new Definition("SpectateArena", "관전 전장 전체", "end", "", 4));
+            a.Add(new Definition("SpectateFree", "관전 자유 카메라", "insert", "", 4));
             for (int i = 1; i <= 4; i++) a.Add(new Definition("Choice" + i, "카드 / 직업 선택 " + i, "digit" + i, "numpad" + i, 2));
             return a.ToArray();
         }
@@ -157,7 +165,7 @@ namespace RaidRogue
             var old = new List<LocalKeyBinding>();
             foreach (var d in Actions)
             {
-                if (Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate"}, d.Id) >= 0) continue;
+                if (Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate","Interact"}, d.Id) >= 0) continue;
                 old.Add(new LocalKeyBinding { action=d.Id, primary=d.Id=="Potion"?"q":d.Id=="Skill4"?"digit4":d.Id=="View"?"v":d.Key,
                     secondary=d.Id=="Skill4"?"numpad4":d.Alternate });
             }

@@ -29,16 +29,22 @@ namespace RaidRogue
             _key.text = LocalInputBindings.Label("Potion") + " 포션";
             bool ready = _potion.CanUse;
             _description.text = $"최대 HP {(_potion.Settings != null ? _potion.Settings.healFraction * 100 : 0):0.#}%\n즉시 회복 · GCD 별도";
-            _background.color = ready ? new Color(0.12f, 0.32f, 0.2f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
-            _overlay.anchorMax = new Vector2(1, _potion.CooldownFraction);
+            RaidUIStyle.Color(_background, ready ? new Color(0.12f, 0.32f, 0.2f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f));
+            var image = _overlay.GetComponent<Image>();
+            if (image != null && image.type == Image.Type.Filled) image.fillAmount = _potion.CooldownFraction;
+            else _overlay.anchorMax = new Vector2(1, _potion.CooldownFraction);
+            _slot.GetComponentInChildren<RaidUIIcon>(true)?.Show("potion");
+            RaidUIStyle.State(_background, ready);
             _status.text = _potion.CooldownRemaining > 0 ? $"{_potion.CooldownRemaining:0.0}s" :
                 !_potion.IsAlive ? "전투 불능" : _potion.CurrentHp >= _potion.MaximumHp ? "HP 가득 참" : ready ? "사용 가능" : "사용 불가";
-            _status.color = ready ? new Color(0.65f, 1f, 0.75f) : Color.white;
+            RaidUIStyle.Color(_status, ready ? new Color(0.65f, 1f, 0.75f) : Color.white);
         }
 
         private void Build(Transform hotbar)
         {
-            var root = Rect("CommonPotion_Slot", hotbar);
+            if (RaidUIView.Attach(this, "potion", hotbar)) return;
+            var viewParent = RaidUIView.Begin(this, "potion", hotbar);
+            var root = Rect("CommonPotion_Slot", viewParent);
             root.anchorMin = root.anchorMax = Vector2.zero;
             root.pivot = new Vector2(1, 0);
             root.anchoredPosition = new Vector2(-12, 36); // Q left, SPACE right: fits narrower views without overlapping skills.
@@ -52,7 +58,7 @@ namespace RaidRogue
             _overlay = Rect("CooldownOverlay", root);
             _overlay.pivot = Vector2.zero;
             var shade = _overlay.gameObject.AddComponent<Image>();
-            shade.color = new Color(0, 0, 0, 0.6f);
+            RaidUIStyle.Color(shade, new Color(0, 0, 0, 0.6f));
             shade.raycastTarget = false;
             _key = Label(root, "Key", "", 18, new Vector2(0, 0.72f), Vector2.one);
             _status = Label(root, "Status", "", 18, new Vector2(0, 0.36f), new Vector2(1, 0.72f));
@@ -78,7 +84,7 @@ namespace RaidRogue
             text.fontStyle = FontStyle.Bold;
             text.alignment = TextAnchor.MiddleCenter;
             text.text = value;
-            text.color = Color.white;
+            RaidUIStyle.Color(text, Color.white);
             text.raycastTarget = false;
             return text;
         }

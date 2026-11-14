@@ -34,6 +34,7 @@ namespace RaidRogue
         private int _generation;
         private float _deadline, _nextCheck;
         private string _publishedPhase;
+        private bool _publishedJoinable;
         private RaidNetworkSession Session => RaidNetworkSession.Instance;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -202,18 +203,25 @@ namespace RaidRogue
         {
             if (!Available || LobbyId == 0 || HostId != UserId || Session == null) return;
             string phase = Session.IsHostAuthority ? Session.BattlePhase.ToString().ToLowerInvariant() : "closed";
-            if (_publishedPhase == phase) return;
-            bool joinable = phase == "lobby";
+            bool joinable = Session.IsHostAuthority && Session.CanJoinBattle;
+            if (_publishedPhase == phase && _publishedJoinable == joinable) return;
             SteamMatchmaking.SetLobbyJoinable(new CSteamID(LobbyId), false);
             if (!SetData("phase", phase) || !SetData("ready", joinable ? "1" : "0") || !SteamMatchmaking.SetLobbyJoinable(new CSteamID(LobbyId), joinable))
             { Fail("Steam 로비 상태 갱신에 실패하여 방을 닫았습니다."); return; }
             _publishedPhase = phase;
+            _publishedJoinable = joinable;
         }
         public void InviteFriends()
         {
             if (!Available || LobbyId == 0 || Session == null || !Session.CanJoinBattle) return;
             if (!SteamUtils.IsOverlayEnabled()) { Status = "Steam 오버레이를 사용할 수 없습니다. Steam 실행 및 게임별 오버레이 설정을 확인하세요."; return; }
             SteamFriends.ActivateGameOverlayInviteDialog(new CSteamID(LobbyId));
+        }
+        public void OpenFriends()
+        {
+            if (!Available || Busy || Session?.Mode != RaidSessionMode.Menu) return;
+            if (!SteamUtils.IsOverlayEnabled()) { Status = "Steam 오버레이를 사용할 수 없습니다. Steam에서 게임별 오버레이 설정을 확인하세요."; return; }
+            SteamFriends.ActivateGameOverlay("Friends");
         }
         public void NoteSessionEnd(string reason) => Status = reason;
         public void CancelJoin() { _invites.Decline(); Fail("Steam 접속을 취소했습니다."); }

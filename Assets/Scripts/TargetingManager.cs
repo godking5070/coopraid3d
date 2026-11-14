@@ -41,6 +41,11 @@ namespace RaidRogue
         [Header("Current Target State")]
         [SerializeField] private Transform currentTarget;
         public Transform CurrentTarget => currentTarget;
+        private Transform _attackTarget, _supportTarget;
+        private bool _hasSupportSelection;
+        public Transform AttackTarget => _attackTarget;
+        public Transform SupportTarget => _supportTarget;
+        public bool HasSupportSelection => _hasSupportSelection;
 
         // 발밑 선택 링 & 머리 위 역삼각형 마커
         private LineRenderer _outerSelectionRing;
@@ -85,6 +90,7 @@ namespace RaidRogue
             BuildVisualIndicators();
             BuildTargetInfoHUD();
 
+            if (currentTarget != null) SetTarget(currentTarget);
             if (boss != null && currentTarget == null)
             {
                 SetTarget(boss.transform);
@@ -104,6 +110,14 @@ namespace RaidRogue
             if (player == null || boss == null)
             {
                 RefreshSceneReferences();
+            }
+
+            if (!CharacterTrainingSession.Active && StageManager.Instance != null &&
+                (RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.BattlePhase : StageManager.Instance.Progress.Phase) == RaidBattlePhase.Arrival)
+            {
+                ClearTarget();
+                UpdateVisualIndicators(); UpdateTargetInfoHUD();
+                return;
             }
 
             ValidateCurrentTarget();
@@ -165,6 +179,11 @@ namespace RaidRogue
         private void ValidateCurrentTarget()
         {
             if (currentTarget == null) return;
+            if (currentTarget.GetComponent<BossController>() != null && !BossCanBeTargeted())
+            {
+                ClearTarget();
+                return;
+            }
 
             BossAddMinion add = currentTarget.GetComponent<BossAddMinion>();
             if (add != null && add.isDead)
@@ -175,15 +194,44 @@ namespace RaidRogue
 
         public Transform GetLivingOffensiveTarget(BossController fallbackBoss)
         {
-            if (currentTarget != null)
+            if (_attackTarget != null)
+                return CombatRange.LivingEnemy(_attackTarget) &&
+                    (_attackTarget.GetComponent<BossController>() == null || BossCanBeTargeted()) ? _attackTarget : null;
+            // Only the offensive channel uses the existing no-selection boss fallback.
+            // Choosing a support target never redirects attacks to that ally's target.
+            return fallbackBoss != null && BossCanBeTargeted() && CombatRange.LivingEnemy(fallbackBoss.transform) ? fallbackBoss.transform : null;
+        }
+
+        public bool TryResolveSkillTarget(SkillTargetRule rule, Transform self, BossController fallbackBoss,
+            out Transform target, out string reason)
+        {
+            target = null; reason = "";
+            if (rule == SkillTargetRule.None) return true;
+            if (rule == SkillTargetRule.Self) { target = self; return true; }
+            if (rule == SkillTargetRule.LivingEnemy)
             {
-                if (CombatRange.LivingEnemy(currentTarget)) return currentTarget;
-                if (!CombatRange.LivingPartyMember(currentTarget)) return null;
-                Transform enemy = GetTargetOfTarget(currentTarget);
-                if (CombatRange.LivingEnemy(enemy)) return enemy;
+                target = GetLivingOffensiveTarget(fallbackBoss);
+                if (target != null) return true;
+                reason = "유효한 공격 대상을 선택하세요"; return false;
             }
-            // Preserve Step 9's no-target / friendly-target boss fallback.
-            return fallbackBoss != null && CombatRange.LivingEnemy(fallbackBoss.transform) ? fallbackBoss.transform : null;
+            // The explicit-selection flag survives Unity's destroyed-object null.
+            // A lost/dead ally must not silently turn a targeted skill into self-healing.
+            target = _hasSupportSelection ? _supportTarget : self;
+            bool valid = rule == SkillTargetRule.LivingAlly ? CombatRange.LivingPartyMember(target) :
+                rule == SkillTargetRule.DeadAlly && target != null && PartyLife.OrderedMembers().Contains(target) &&
+                target.GetComponent<PartyLife>()?.IsDead == true;
+            if (valid) return true;
+            reason = "지원 대상이 유효하지 않습니다. 아군을 다시 선택하세요";
+            return false;
+        }
+
+        // Removal is not an intentional user clear. Preserve invalid support intent.
+        public void ForgetRemovedTarget(Transform removed)
+        {
+            if (removed == null) return;
+            if (currentTarget == removed) currentTarget = null;
+            if (_attackTarget == removed) _attackTarget = null;
+            if (_supportTarget == removed) { _supportTarget = null; _hasSupportSelection = true; }
         }
 
         public void AutoSwitchTargetAfterEnemyDeath()
@@ -238,13 +286,22 @@ namespace RaidRogue
 
             Transform resolved = ResolveUnitRoot(newTarget);
             if (resolved == null) return;
+            if (resolved.GetComponent<BossController>() != null && !BossCanBeTargeted()) return;
 
             currentTarget = resolved;
+            if (GetTargetFaction(resolved) == TargetFaction.Enemy) _attackTarget = resolved;
+            else if (GetTargetFaction(resolved) == TargetFaction.Friendly)
+            { _supportTarget = resolved; _hasSupportSelection = true; }
         }
+
+        private static bool BossCanBeTargeted() =>
+            !RaidLobbyRoom.Active && (RaidApproachField.Instance?.Showing != true || RaidApproachField.Instance.BossVisible);
 
         public void ClearTarget()
         {
             currentTarget = null;
+            _attackTarget = _supportTarget = null;
+            _hasSupportSelection = false;
         }
 
         private Transform ResolveUnitRoot(Transform hitTransform)
@@ -409,7 +466,7 @@ namespace RaidRogue
                 }
                 if (b.IsGroggy)
                 {
-                    return $"★ 무력화(그로기) 상태! 받는 피해 +50% 증가!{supplierTag}";
+                    return $"★ 그로기 상태! 받는 피해 +50% 증가!{supplierTag}";
                 }
                 return $"페이즈 {(int)b.currentPhase} 전투 중{supplierTag}";
             }
@@ -547,6 +604,11 @@ namespace RaidRogue
         public List<Transform> GetLivingEnemiesSortedByDistance()
         {
             List<Transform> enemies = new List<Transform>(8);
+            if (RaidLobbyRoom.Active)
+            {
+                if (RaidLobbyRoom.PracticeActive) enemies.Add(RaidLobbyRoom.Dummy.transform);
+                return enemies;
+            }
 
             if (BossAddSpawner.Instance != null)
             {
@@ -677,6 +739,7 @@ namespace RaidRogue
 
             // 후보군 수집: 살아있는 쫄 -> 파티원/나 -> 보스
             List<Transform> candidates = new List<Transform>();
+            if (RaidLobbyRoom.PracticeActive) candidates.Add(RaidLobbyRoom.Dummy.transform);
             if (BossAddSpawner.Instance != null)
             {
                 foreach (BossAddMinion add in BossAddSpawner.Instance.activeAdds)
@@ -1013,6 +1076,20 @@ namespace RaidRogue
             Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
+            // RaidUIRoot restores these explicit references from the authored HUD before Start.
+            // Keep the artist's layout instead of deleting it and building a default copy.
+            if (_targetHudRoot != null && _targetHudRoot.GetComponentInParent<Canvas>() == canvas &&
+                _floatingMarkerRect != null && _floatingMarkerRect.GetComponentInParent<Canvas>() == canvas &&
+                _targetHudOutline != null && _targetNameText != null && _targetHpFill != null &&
+                _targetHpText != null && _targetStatusText != null && _totBoxRoot != null &&
+                _totButton != null && _totNameText != null && _totHpText != null &&
+                _floatingMarkerArrowText != null && _floatingMarkerLabelText != null)
+            {
+                _totButton.onClick.RemoveListener(SwapToTargetOfTarget);
+                _totButton.onClick.AddListener(SwapToTargetOfTarget);
+                return;
+            }
+
             Transform oldMarker = canvas.transform.Find("TargetFloatingArrowUI");
             if (oldMarker != null) DestroyImmediate(oldMarker.gameObject);
             Transform oldHud = canvas.transform.Find("TargetInfoHUD_FFXIV");
@@ -1175,7 +1252,7 @@ namespace RaidRogue
                 _targetNameText.color = new Color(0.75f, 0.78f, 0.85f);
                 _targetHpFill.fillAmount = 0f;
                 _targetHpText.text = "-";
-                _targetStatusText.text = "공격 시 보스 자동 타겟 / 힐 시 최저 체력 아군 스마트 타겟 작동 중";
+                _targetStatusText.text = _hasSupportSelection ? "지원 대상 소실 · 아군을 다시 선택하세요" : "공격 미선택 시 보스 / 지정형 지원 미선택 시 자신";
                 _targetHudOutline.effectColor = new Color(0.4f, 0.45f, 0.55f, 0.8f);
                 if (_totBoxRoot != null) _totBoxRoot.SetActive(false);
                 return;

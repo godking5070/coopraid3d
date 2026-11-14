@@ -78,6 +78,7 @@ namespace RaidRogue
 
         public bool TryUse()
         {
+            if(StageManager.Instance?.boss?.MarionetteControlled(transform)==true)return false;
             if (RaidCombatAuthority.Route(this, 6)) return false;
             if (!CharacterActor.Ensure(gameObject).Available(CharacterSlot.Potion, out _)) return false;
             float actual = _state.TryUse(Settings, CurrentHp, MaximumHp, IsAlive, UseBlocked, ApplyHealing);

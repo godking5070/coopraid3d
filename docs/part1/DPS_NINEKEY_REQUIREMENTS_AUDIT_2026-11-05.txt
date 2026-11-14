@@ -1,0 +1,152 @@
+딜러 6직업18루트 구현 대조 및 완료감사
+기준: DPS_ORCA_SOURCE_20261102.txt / 현재 작업트리. 날짜: 2026-11-05
+상태: 완료 선언이 아닌 근거표. 사용자의 Unity 실행/직접조작/병합/푸시 금지 유지.
+이전 턴 분류: 실제 코드·검사 변경이 있었으므로 진행. 이번 턴도 명세 불일치 수정 및 감사 진행.
+
+근거 등급
+- 코드 연결 확인: 정의→입력→실행/상태→표시 호출을 소스에서 추적했다.
+- 명령 검사 확인: 순수 상태 또는 실제 메서드를 추출한 관리 fixture를 실행했다.
+- 미검증: Unity 물리/렌더링/JsonUtility/실제 네트워크/플레이 감각. 관리 fixture의 월드 대역은 이를 증명하지 않는다.
+- 미결: 기존 레이드 무력화 차단과 최신 무력화 역할/시너지의 정책 충돌. 사용자 답 대기.
+
+공통 요구와 근거
+1. 활성 카탈로그 전환: CharacterDefinitions.RegisterAssets가 NineKeyDamageData.Build를 등록한다.
+   DamageCatalogActivationTests는 실제 등록 메서드로6직업을 확인한다. Unity Resources 자산 로딩은 미검증.
+2. 9키와 교체: NineKeyDamageData.Build, CharacterSlots, CharacterActor.RequestSlot/Execute.
+   2/3/4/F, 핵심1/보조2, 독립콤보, 스킬호환성은 NineKeyDamageTests의 정의/자원/Compatibility 검사.
+   E/Z 추가키와 구형 공중상태는 새 딜러 실행 경로에 추가하지 않았다. 레거시 코드는 마이그레이션용 보존.
+3. 자원·예약·취소: NineKeyDamageResources 및 Damage*State, CharacterActor의 검증 후 BeforeInput,
+   Moved/Interrupt/CompleteDirect. 자원 재귀·예약1회정산·빈 탄창의 대응 슬롯은 상태/어댑터 검사.
+4. 카운터: RoleCounter→CombatCounterTarget.CanCounter/TryCounter. 신호/정면/기믹권한 검사와
+   AI 실제 판단·정지 회전24검사. 대기실 선택4 표시229검사. 6보스의 기존 정면 접근 경로는 이미 존재한다. 이전의 접근 누락 표기는 정정한다.
+5. 협공: Mark/OnDirectAttack는 시전자별 동료1회권리, Direct출처 확인, 권리 선소모, Extra공격.
+   4인총120/8인총160은 미검증 프로토타입 예산. 이번 검사는 인원별 예산·권리·반올림 정합성만 증명.
+   보호·이동 지원의 실제4/8인 전투 성능과 모든 루트별 총 기여 비교는 미검증.
+6. 저장: CampaignSaveTests.DamageCheckpoints에서108빌드(6×3×2×3)의 선택/핵심/보조/V와
+   구형18루트 전환을 실제 임시 파일 원자적 IO로 확인한다. 네이티브 저장UI/종료는 별도.
+7. 네트워크: RaidCombatSession의 host Capture(jobState), client CharacterActor/kit Restore 연결.
+   DamageCombatState는 루트·특성·예약·유한공격 예산을 검증한다. Network관리검사는 실제 멀티플레이가 아니다.
+8. HUD/AI: Context/Input/Snapshot, RaidReplacementAI, CharacterFrameworkUI/SkillHotbarUI,
+   PartyListUI/RaidConnectionUI 연결. 실행과 같은 공격/지원대상 조회 및 내부제한20검사,
+   동료 메테오 시간11검사. 사용자저작 UI 자산·배치 보존. 읽기 쉬움·마우스 조작은 미검증.
+9. 설계 산출물: DPS_REDESIGN.md 및 상세원문에 대체규칙/직업콘셉트/키/교체/18루트/
+   특성/빌드 예/미정항목이 있다. 현재 구현 기록은 DPS_NINEKEY_IMPLEMENTATION_2026-11-05.txt.
+10. 게임 전체의4/8인 구성·고정보스진행은 설계 조건이다. 이 직업 감사가8인 전체 게임 구현을
+    검증한 것은 아니다. 그 진행 시스템 전체를 딜러 코드 검사만으로 완료라 주장하지 않는다.
+
+18루트 대조(각 항목은 코드 연결+기재된 명령 근거, 플레이 완료 아님)
+N1 사각의 집행자: CompleteDirect/DamageWeaknessState/Identity.
+   TacticalChecks: 측후방·방향없음·적귀속·상한·죽은대상정리. 실제 보스 방향/처형 전체월드 미검증.
+N2 무한 그림자 춤: DirectCombo/FinishDance/Identity와 R GCD정의.
+   Resource/CapacityChecks: 박자대체·직전콤보만종결·반대콤보보존·2/3상한. 타수별월드효과 미검증.
+N3 인술의 달인: RequestIdentity/DamageSealState/BossDamageActionEvents/ResolveSeal.
+   Tactical/BossEvent/ScheduledAdapter: 조건/만료1회·카운터중단·무적/지연기폭. 모든보스FSM 플레이 미검증.
+T1 창공의 지배자: Identity→지상rush→TickRoutes 도착공격, SplitResidualCloud.
+   CoreCharge/ResidualCloudAdapter: 대상별충전·지면예산·중복/무적. 지형강습/취소 전체월드 미검증.
+T2 뇌제의 창술: DirectCombo/GcdScale/CompleteDirect/SignalTempestResponse.
+   Resource/TempestAdapter/TempestResponse: 교차/절반수급·수동3/자동추가타분리·지정동료응답1회.
+T3 태풍의 핵: DamageSpearState/Identity/CompleteDirect, F별도DamageSeedState.
+   ArrowAndField/SeedAdapter: 두창충전·압축상한·유영수명·회수/만료·R/F분리. 지형/회수월드 미검증.
+G1 피스키퍼: DamageHandsState/Combo/CompleteDirect.
+   Preparation/Resource/AiTests: 양손비용·반대손장전·기본수급대체·빈손복구. 실제입력연속 미검증.
+G2 전술폭파수: DamageGrenadeState/Identity/DetonateGrenade/OnDirectAttack.
+   Tactical/ScheduledAdapter: 타이머조정·상한·단일기폭·파쇄1회. 레이드 무력화는 미결.
+G3 데드아이: DamageSnipeState/Identity/BeforeInput/Moved.
+   Preparation/CombatSnapshot: 예약/취소·완성보관·고정대상·무효입력보존·세트표식1회.
+S1 천궁의 명사수: DamageArrowState/TickArrows/ArrowAttack/RangerConvergence.
+   Arrow/BurstAdapter: 같은적 실제양쪽적중·예약1쌍·완주1회·관통/범위·합류소비. 실제탄착감각 미검증.
+S2 질풍의 연사수: DamageBurstState/RangerBurst.
+   Window/BurstAdapter: 후속2회·강화1·만료이월금지·빠른/분할사용·마지막이동1회.
+S3 사계의 마궁사: DamageSeasonState/Identity/ResetStates.
+   WindowChecks: 봄고정·순환·방문1회유예·큰틱·재도전초기화. 계절별월드지원 종합검사 약함.
+C1 종말의 메테오: DamageMeteorState/Identity/TickRoutes/PartyPreparationText.
+   Preparation/PartyPreparation: 구간보존·재예약없음·만료환급1회·최종발사·동료완료시간.
+C2 유성우 지휘자: DamageInstantState/CastTime/Combo, AiWantsIdentity/AiCombo.
+   Window/Control/AiTests: ON/OFF·준비CD분리·유효2소비·이동즉발·정지보관·만료사용.
+C3 중력 제어자: DamageGravityState/Identity/TickGravity.
+   GravityAdapter/ArrowAndField: 단일장·수명·첫확산보호1회·2완주추적·범위/무적. 무력화 미결.
+M1 환영의 군단장: CompleteDirect/DamageMemoryState/QueueMemoryReplay/ReplayAttack.
+   Mirror/ReplayAdapter: 적중완주기록·잠금/유효기간·1/2기록특성·별도계수·재귀금지·최종적중표식.
+M2 사신의 대낫: EffectiveRange/DamageProjectionState/FinishReaperCombo/Identity.
+   Resource/Mirror/Reaper/ComboArea: 근접/투영·유료이력만료우회차단·빗나간완주정리·보호공용제한.
+M3 프리즘 아키텍트: UsePrism/UpdatePrismInput/Trace/Clip/PrismFinisher/Presentation.
+   ArrowAndField/PrismOcclusion/ComboArea: 실제1/2반사·같은적1예산·무료조정/수명·교체·지형차단.
+   실제드래그/미리보기/장애물AI우회는 별도.
+
+교체/특성 대조
+- 6직업2/3/4/F는 Build/Execute/Combo/CompleteDirect/Identity/ScheduleDamage/Support에 연결됨.
+- 각루트핵심2방향은 Core분기, 템페스트호환기술지정형 변형은 BuildCompatibility에 연결됨.
+- 공통aux6종과템페스트전용6종은 Resource/Context/Attack/PersonalDefense/역할/지원/이동 경로.
+- 확인한모순수정: 사거리조정은 선택2 Direct만95%, Periodic/Extra에는 감산없음.
+  DamageAttackAdapterTests75개는 실제Attack를 boss/add대역으로 실행해검사한다.
+- 이름/효과가있다는 사실만으로 애니메이션·아이콘 품질·체감차별화의완성을 주장하지 않는다.
+
+이번 공통 수정과 검사
+- Mark의8인예산160/7은 개별RoundToInt로23×7=161이 될 수 있었다.
+  정수몫+나머지를동료별배분해 최종합160을보존한다. 기존4인120은유지. 수치확정아님.
+- 실제Mark/OnDirectAttack로4/8인 각1회권리·중복재적용·사망/거리대상·원래총예산 검사를추가.
+- Run-NineKeyDamageChecks.ps1:2872개 PASS.
+- Run-StudioChecks.ps1 -Group Network -OriginalProject C:/coopraid/coopraid3d:PASS, runtime/editor관리컴파일PASS.
+- Run-CampaignSaveChecks.ps1:41862 저장검사,1003 진행/재시도,16 새런확인 PASS.
+- 로그: %TEMP%/Coopraid-DpsAudit-Damage.log,Coopraid-DpsAudit-Network.log,Coopraid-DpsAudit-Campaign.log.
+
+완료판정 및 다음작업
+- 이 감사만으로 목표완료를 선언하지 않는다. 구조/관리검사 근거와 실제월드 증거를 분리한다.
+- 우선 정책결정 필요: CombatCounterTarget.AddStagger가 훈련장밖 레이드 전체에서 반환하는
+  기존규칙과 최신 무력화역할/시너지의 충돌. 사용자질문이 미응답이므로 임의변경하지 않는다.
+- 실제Identity 전체18분기 어댑터111검사 추가 완료. 비용·재입력·특성 분기를 확인하되 대상/피해/지원/강습 이동은 관리 대역이므로 실제 월드 완결 검증은 아니다.
+- 사용자 플레이 점검: 설치3루트(T3/C3/M3), 준비3루트(G3/C1/M1), 연계3루트(N2/T2/S2)를
+  같은보스에서 비교. 취소/무적/사망/재접속/재도전 후 권리·예약·UI가남지않는지 확인.
+- 최종계수/시작자원/쿨타임/사거리/해금은초기구현값이며밸런스확정아님. 실제플레이/4·8지원성능 미검증.
+추가 진행: 실제 R 18루트와 AI 카운터 담당 연결 (2026-11-05)
+- DamageIdentityAdapterTests: 실제 Identity 및 관련 메서드 추출 111검사. 비용/재입력/루트별 특성 검증. 대상, 피해 수신, 지원 효과, 강습 이동은 관리 대역이며 Unity 전체월드 검증이 아니다.
+- RaidReplacementAI: 카운터 장착+신호에서 기존 FaceAttackTarget 호출 후 실제 CanCounter 판정. 정지 중 보스 방향 보정, 이동/대시/구출/넉백 회전 제한 유지. 실제 API 연결24검사.
+- PartyAiTactics.CanTakeCounterPosition: 새 DPS의 선택4 카운터·구현·해금을 확인. Guardian 후보 순위 및 Flora/Campanella/Marionette/Justitia 카운터 전용 위치에 적용. Janus 대상/준비·창 위치에도 적용. 탱커/힐러/레거시와 다른 기믹 유지.
+- 실제 후보 helper/Guardian 순위/Janus 대상·위치195검사. 기존 6보스에 정면 접근 경로가 없다는 이전 기록은 정정한다. 이번 결함은 미장착 후보 점유 및 정지 후 방향이었다.
+- 최종 Run-NineKeyDamageChecks.ps1: 3189 개 PASS. Run-StudioChecks.ps1 -Group Network -OriginalProject C:/coopraid/coopraid3d 및 runtime/editor 관리 컴파일 PASS.
+- 관련 Normal 검사: Guardian20048, Flora17, Campanella27, Marionette15, Justitia33, Janus32 PASS. 실제 보스 기믹 이동을 실행한 결과는 아니다.
+- 로그: %TEMP%/Coopraid-Integrated-Damage.log, Coopraid-Integrated-Network.log, Coopraid-Integrated-Boss.log. Janus32는 직접 명령 출력 확인. 첫 Boss 로그 리다이렉션 명령 오류는 수정 재실행 후 통과.
+- 변경 파일: RaidReplacementAI.cs, PartyAiTactics.cs, BossGuardianNormal.cs, BossFloraNormal.cs, BossCampanellaNormal.cs, BossMarionetteNormal.cs, BossJustitiaNormal.cs, BossJanusNormal.cs, BossJanusMechanics.cs, DamageIdentityAdapterTests.cs, DamageAiCounterTests.cs, DamageCounterPositionTests.cs, Run-NineKeyDamageChecks.ps1, 감사/진행 문서.
+- 플레이 미검증: 원본 프로젝트에서 카운터/보호/무력화 선택 혼합 파티로 6보스 신호를 확인. 카운터 장착 AI만 담당 위치로 이동하고 정지 후 정면 판정에 성공해야 한다. 이동/강제이동 중 강제 회전이 없어야 한다. Janus의 2대상·기둥 배정과 Guardian 백업 순위를 확인한다. 실제 멀티플레이 회전 표시/복귀/재도전도 사용자 검증 대상.
+- 미확정 수치/무력화 정책 답변 대기 유지. Unity/Steam/게임 실행·직접조작·병합·푸시 없음. 전체 목표 완료 선언 아님.
+
+추가 진행: 새 런·저장 복원·R 입력 경계 수정 (2026-11-05)
+- 이전 턴은 진행으로 분류. 이번 턴은 명세 대조에서 확인한 실제 초기화/입력/복원 결함을 수정했다.
+- DamageCombatState.TryRestore: S3 계절 주기와 유예 잔여 시간을 선택 핵심의 상한으로 검증. 과도한 period/remaining 및 다른 핵심의 주기를 거부한다. 정상 중간 진행·유예 권리·경계 오차·재진행22검사 추가.
+- CharacterActor.ResetEncounter: NewRun의 departureRoute/default core 복원 후 DPS.Clear. 빠른 윤회가 core 복원 전에8초로 초기화되던 순서 오류 수정. 실제 ResetEncounter/Runtime 및 실제 season/hands 초기화문으로18루트 NewRun/Retry/NextStage·replica306검사.
+- CampaignAdapters.RestoreCampaignBuild: DPS Ensure().Clear로 새 캐릭터의 nine.damage 처리기 등록 보장. RestoreCampaignState도 runtime 복원 후 DPS.Clear. 실제 두 복원 메서드+Awake 본문180검사. AddComponent/Unity 생명주기 자체는 관리 대역이며 네이티브 검증이 아니다. 저장 스키마 변경 없음.
+- NineKeyDamageInput.RequestIdentity: 기본 공격과 같은 GetLivingOffensiveTarget 사용. 명시 공격 대상이 없을 때만 기존 보스 fallback을 사용하고, 명시 무효 대상/숨긴 보스는 대체하지 않는다. 공격/지원 대상 분리 유지.
+- DPS ResetInput: 기존 AegisRecallInput.Step의 blocked 취소를 재사용. Clear/ResetStates/OnDisable/조작권 상실/비활성 및 프리즘 전환에서 이전 R 제스처 폐기. 공용 입력 규칙 변경 없음. 실제 입력/대상 resolver/gesture 메서드18검사.
+- 최종 Run-NineKeyDamageChecks.ps1: 3535개 PASS(출력 형식이 다른 reset306 포함). Network 및 runtime/editor 관리 컴파일 PASS. NewRun16 PASS.
+- Run-CampaignSaveChecks.ps1: 저장41862, 진행1003, 새런16, 신규 DPS캠페인복원180 PASS. 테스트는 임시 경로 사용, 실사용 저장 데이터 변경 없음.
+- 로그: %TEMP%/Coopraid-DpsLifecycle-Damage.log, Coopraid-DpsLifecycle-Network.log, Coopraid-DpsLifecycle-NewRun.log. Campaign 검사 결과는 담당 명령 출력으로 확인.
+- 수정 파일: DamageCombatState.cs, CharacterActor.cs, CampaignAdapters.cs, NineKeyDamageInput.cs, NineKeyDamageKit.cs, NineKeyDamagePresentation.cs, NineKeyDamageTests.cs, DamageEncounterResetTests.cs, DamageInputTargetTests.cs, DamageCampaignRestoreTests.cs, Run-NineKeyDamageChecks.ps1, Run-CampaignSaveChecks.ps1, 감사/진행 문서.
+- 사용자 플레이 점검: 원본 프로젝트에서 새 S3 런→6초 계절/유예 확인, 저장 후 앱 재시작 이어하기→1/2/R 정상 실행, 대상 해제→기본 공격과 R 동일 보스 대상 확인, R 누른 채 루트·조작권 전환 후 복귀→키를 새로 누르기 전 자동발사 없음. 실제 조작/렌더/멀티플레이는 미검증.
+- 미확정 밸런스/수치와 레이드 무력화 정책 답 대기 유지. Unity·Steam·게임 실행/직접조작/병합/푸시 없음. 전체 목표는 완료 선언하지 않고 계속 진행 상태.
+
+후속 확인 후보: ResetEncounter(NewRun)는 route만 보존하고 Runtime.Reset이 selections/aux를 초기화한다. 로비에서 선택한 교체/핵심/보조가 새 출발에 보존되는지 신규 캠페인 재적용 경로와 스토리 해금 정책을 확인할 것. 현재 확정 수정/정책 변경은 하지 않았다.
+
+추가 진행: 새 런 출발 시 직접 선택 빌드 보존 (2026-11-05)
+- 이전 턴은 실제 코드수정·검사 완료로 진행. 이번 턴도 확정된 로비 빌드 유실 수정.
+- CharacterActor.ResetEncounter에서 새 DPS만 Runtime.Reset(reason,preserveLoadout)에 opt-in. 다른 직업/기존 직접 Reset 호출의 초기화 정책은 유지.
+- CharacterRuntimeState.NewRunBuild: 새 snapshot 기본값을 만든 뒤 route/2·3·4·F/core/서로다른aux2 선택만 복사한다. 최종 조합 호환성을 한 번 확인하여 Tempest 기술전용 특성 및 지원F+지원지속의 중간조합 거부를 피한다.
+- 이전 runId/클리어/보상/V해금/자동선택/빌드효과/자원/쿨타임/콤보/시전은 복사하지 않는다. 초기 슬롯 권한을 선택된 대체스킬에 옮기고 route 기본해금만 재생성한다. 최종 core/aux 기준 초기자원상한과 최대충전/재충전시간을 계산한다. 해금 시점은 새로 확정하거나 변경하지 않았다.
+- 싱글·네트워크의 PrepareEncounter와 완료후 로비귀환 모두 같은 ResetEncounter 경계 사용을 소스 확인. PrepareFreshRun/Prepared 및 체력·위치 초기화에서 새 빌드를 다시 덮는 경로는 검토 범위에서 발견하지 못했다.
+- DamageEncounterResetTests: 18루트×기본/대체빌드, 실제 이전런 V해금/자원/Q쿨타임/GCD를 만든 뒤 NewRun/Retry/NextStage/replica 경계 확인. 마지막 추가 지원F+지원aux, Tempest F전용core 조합 포함 reset4026개 PASS.
+- 명령 결과: 전체 DPS7243개 PASS 후 테스트만12개 추가하여 reset구역 단독4026개 PASS(전체 재실행은 하지 않음). Network/runtime/editor 관리컴파일 PASS. 기존 CharacterRoster1136 PASS. Campaign 저장41862/진행1003/새런16/DPS복원180 PASS.
+- 로그: %TEMP%/Coopraid-DpsDeparture-Damage.log, Coopraid-DpsDeparture-Network.log, Coopraid-DpsDeparture-Campaign.log, Coopraid-DpsDeparture-Roster.log. 추가 reset fixture: %TEMP%/RaidRogue-NineKeyDamage-554b306caa9d40fb9ba733480c61d3e2.
+- 수정 파일: CharacterRuntimeState.cs, CharacterActor.cs, Tests/DamageEncounterResetTests.cs 및 감사/진행 문서. 저장 포맷·직업 수치 변경 없음.
+- 사용자 플레이 순서: 로비에서 S3 머무는 계절과 교체2/3/4/F·보조2 선택→새 출발→선택 유지 및8초 계절 확인. 지원F+지원지속, Tempest F씨앗+F전용핵심도 확인. 이전런 V는 기존 해금조건 전 잠겨 있어야 하고 자원/쿨타임은 초기값이어야 함. 완료후 로비귀환/다시 출발/멀티플레이에서도 동일 확인. 실제 플레이·UI·네트워크 표시는 미검증.
+- 기존 후속 후보였던 로비 선택빌드 유실은 위 코드·명령 범위에서 해결. 레이드 무력화 정책 미응답과 실전 체감/밸런스는 별도로 남음. Unity/Steam/게임 실행·직접조작·병합·푸시 없음. 전체 목표 진행 상태 유지.
+
+추가 완료감사: 레이드 무력화 정책의 실제 차단 범위 (2026-11-05)
+- 이전 턴은 진행(새런 빌드 보존 수정/명령검사). 이번 감사에서 기존 차단을 재확인하고 별도의 보스 상태 차단을 발견했다. 완료 선언 없음.
+- 최신 DPS_ORCA_SOURCE_20261102는 4번 무력화 선택, 파쇄 표식, S3 가을, C3 압축, M3 반사 등 무력화 기여를 요구한다.
+- CombatCounterTarget.AddStagger: 훈련장이 아닌 boss이면 즉시 return. 딜러가 전달한 무력화 값은 실전 보스에 적용되지 않는다.
+- 단순 차단문 삭제로 완료할 수 없음: GuardianNormalState.AddStagger는 현재 항상 false. Marionette 시작의 _marClimaxUsed=true, Justitia 시작의 _justVerdictUsed=true로 기존 노멀 무력화 진입도 비활성. Campanella 역시 _campForceUsed 및 하드 분기에서 기존 이벤트 건너뛰기 처리 존재.
+- 남아 있는 수신기는 Campanella ForcedBell, Marionette Climax, Justitia Verdict 단계에만 반응한다. 따라서 일반 전투 누적과 지정 기믹 누적은 별개 정책이며, 기존 함수를 연결했다는 사실만으로 전투 기여를 완료 처리할 수 없다.
+- 사용자 결정용 범위: (1) 지정 기믹 전용이면 보스별 실제 활성 기믹/진입 여부를 확정하고 해당 창에서만 누적, (2) 일반 누적이면 임계치/회복/기믹 중단/면역 정책을 추가 설계, (3) 차단 유지면 무력화 선택/시너지 명세 수정 필요. 카운터 신호·정면·그로기 규칙을 무력화 성공으로 우회하지 않음.
+- 위 정책 질문을 비동기로 제시했다. 답변 없는 동안 전투 정책 코드/보스 패턴/수치는 변경하지 않는다. 동일 질문 대기 외 확인 가능한 발견사항을 이 문서에 반영했으며, 기존 명령검사는 새 변경이 없어 반복하지 않았다.
+- Unity/Steam/게임 실행·직접조작·병합·푸시 없음. 플레이/4·8인 성능·렌더·실제 동기화는 기존 미검증 목록 유지. 정책 결정 전 전체목표 미완료.
+
+사용자 결정 반영: 일반 무력화/필수 패턴 잠금 구현 완료(2026-11-05). 이전 무력화 정책 질문은 해소됐다. 상세 범위·보스별목록·초기수치·검증·플레이미검증은 GENERAL_STAGGER_REQUIRED_PATTERNS_2026-11-05.txt 참조. 공용/실제보스분기231검사, 기존Normal/Hard/Network/DPS 및관리컴파일PASS. 실플레이/밸런스미검증. 전체딜러목표 자동상태는도구상 blocked로남아있지만 해당정책차단원인은해소.

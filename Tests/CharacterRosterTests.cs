@@ -20,6 +20,9 @@ class CharacterRosterTests
         {
             var d = CharacterRosterData.Definition(job);
             Check(CharacterDefinitionValidation.Check(new[] { d }).Length == 0, job.slug + " data");
+            var counterSkill = d.Skill(d.slots.Single(s => s.slot == CharacterSlot.Counter).skillId);
+            Check(counterSkill.implemented && counterSkill.handlerId == CharacterRosterData.Handler && counterSkill.target == SkillTargetRule.LivingEnemy, job.slug + " counter connected");
+            Check(job.Ability("c") != null && counterSkill.range == job.Ability("c").range && counterSkill.cooldown == job.Ability("c").cooldown, job.slug + " counter tuning");
             Check(d.slots.Length == 12 && d.routes.Length == 3 && d.unlocks.Select(r => r.choices.Length).SequenceEqual(new[] { 3, 3, 2 }), "complete candidate sets");
             var first = new CharacterRuntimeState(d);
             var second = new CharacterRuntimeState(d);
@@ -88,6 +91,20 @@ class CharacterRosterTests
                 Check(first.FinishCast(Context(), s => true, out error), "normal heal completes");
                 Near(first.Resource(job.Id + ".mana"), 75, "normal mana once");
             }
+        }
+
+        for (int role = 1; role <= 4; role++)
+        {
+            var legacy = CharacterCatalog.Legacy(role);
+            var counter = legacy.Skill(legacy.slots.Single(s => s.slot == CharacterSlot.Counter).skillId);
+            Check(counter.implemented && counter.handlerId == "legacy.counter" && counter.target == SkillTargetRule.LivingEnemy, legacy.id + " counter connected");
+            Check(counter.cooldown == 10 && counter.range == (role == 1 || role == 3 ? 3 : 15), legacy.id + " counter tuning");
+            var state = new CharacterRuntimeState(legacy);
+            Check(!state.TryUse(CharacterSlot.Counter, Context(false), 1, s => true, out _), legacy.id + " rejects missing target");
+            Check(state.TryUse(CharacterSlot.Counter, Context(), 1, s => true, out _), legacy.id + " counter commits");
+            Check(!state.TryUse(CharacterSlot.Counter, Context(), 1, s => true, out _), legacy.id + " counter cooldown");
+            state.Tick(10);
+            Check(state.TryUse(CharacterSlot.Counter, Context(), 1, s => true, out _), legacy.id + " counter ready again");
         }
 
         var dragon = CharacterRosterData.Find("job.dragon-breaker");

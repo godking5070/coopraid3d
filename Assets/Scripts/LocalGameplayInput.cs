@@ -34,12 +34,26 @@ namespace RaidRogue
             AegisRouteSelectionUI.Close();
             CharacterRewardUI.Close();
             Reset();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            DevBugReportUI.CloseForSessionEnd();
+#endif
             LocalInputBindings.Capturing = false; LocalInputBindings.QuarantineHeld();
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
         }
 
-        public static bool ModalCovered => RaidConnectionUI.CampaignDialogOpen || RaidNetworkSession.Instance?.Ending == true || RaidNetworkSession.Instance?.MenuOpen == true ||
+        public static bool DevelopmentReportCovered
+        {
+            get
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                return DevBugReportUI.BlocksUnderlyingInput;
+#else
+                return false;
+#endif
+            }
+        }
+        public static bool ModalCovered => DevelopmentReportCovered || RaidConnectionUI.CampaignDialogOpen || RaidNetworkSession.Instance?.Ending == true || RaidNetworkSession.Instance?.MenuOpen == true ||
             (RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) ||
             !Application.isFocused || IsTyping || LocalInputBindings.Capturing || LocalCameraSettingsUI.IsOpen || AegisRouteSelectionUI.IsOpen || CharacterRewardUI.IsOpen || CombatMetricsUI.BlocksUnderlyingInput;
 
@@ -63,10 +77,13 @@ namespace RaidRogue
                 if (_roles == null) _roles = Object.FindFirstObjectByType<RoleSelectionManager>();
                 if (_cards == null) _cards = Object.FindFirstObjectByType<RoguelikeCardManager>();
                 if (_stages == null) _stages = Object.FindFirstObjectByType<StageManager>();
-                if ((RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) || RaidNetworkSession.BlocksInput || !Application.isFocused || Time.timeScale <= 0.001f || IsTyping ||
-                    RaidConnectionUI.CampaignDialogOpen || CombatMetricsUI.BlocksUnderlyingInput || LocalInputBindings.Capturing || LocalCameraSettingsUI.IsOpen || AegisRouteSelectionUI.IsOpen || CharacterRewardUI.IsOpen ||
+                if ((RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) || RaidNetworkSession.Instance?.Mode == RaidSessionMode.AiSpectator || RaidNetworkSession.BlocksInput || !Application.isFocused || Time.timeScale <= 0.001f || IsTyping ||
+                    DevelopmentReportCovered || RaidConnectionUI.CampaignDialogOpen || CombatMetricsUI.BlocksUnderlyingInput || LocalInputBindings.Capturing || LocalCameraSettingsUI.IsOpen || AegisRouteSelectionUI.IsOpen || CharacterRewardUI.IsOpen ||
                     (_roles != null && _roles.IsRoleModalOpen) || (_cards != null && _cards.IsSelectionOpen) ||
-                    (_stages != null && _stages.IsStageTransitioning)) SuppressThisFrame();
+                    // The approach is a playable part of stage preparation. Arrival and countdown
+                    // remain blocked, while the existing combat gates still prevent corridor attacks.
+                    (_stages != null && _stages.IsStageTransitioning && RaidApproachField.Instance?.Walking != true && RaidApproachField.Instance?.PortalActive != true) ||
+                    (_stages?.boss?.HardTransformationActive == true)) SuppressThisFrame();
                 return _blockedFrame == Time.frameCount;
             }
         }
@@ -91,6 +108,7 @@ namespace RaidRogue
 
         public static bool PointerOverUI(Vector2 position)
         {
+            if (DevelopmentReportCovered) { SuppressPointerThisFrame(); return true; }
             if (_pointerFrame == Time.frameCount) return true;
             if (CombatMetricsUI.BlocksPointer(position)) { SuppressPointerThisFrame(); return true; }
             if (EventSystem.current == null) return false;

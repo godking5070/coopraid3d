@@ -45,9 +45,10 @@ namespace RaidRogue
             if (!_recovering || _recoveryConnecting || Session == null || Session.Ending) return;
             if (!success) { RecoveryError("이전 방이 사라졌거나 세션이 종료되었습니다.", true); return; }
             var data = Metadata();
-            if (data["game"] != RaidSteamPolicy.Game || data["build"] != Build || data["protocol"] != RaidWire.Version.ToString(CultureInfo.InvariantCulture))
-            { RecoveryError("이전 게임과 빌드·프로토콜이 다릅니다. 동일한 빌드로 실행하세요.", true); return; }
-            if (data["phase"] == "closed" || !RaidSteamPolicy.TryId(data["host"], out ulong host) || host == UserId)
+            ulong owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID;
+            string validation = RaidSteamPolicy.ValidateRecovery(data, Build, RaidWire.Version, owner);
+            if (validation != null) { RecoveryError(validation, true); return; }
+            if (!RaidSteamPolicy.TryId(data["host"], out ulong host) || host == UserId)
             { RecoveryError("원래 호스트가 종료했습니다. 호스트 이전은 지원하지 않습니다.", true); return; }
             HostId = host; _recoveryConnecting = true; Status = "Steam 호스트 인증 및 예약 자리 확인 중…";
             if (!Session.StartSteamRecovery(host, Persona(UserId))) RecoveryError("호스트에 다시 연결하지 못했습니다.", false);

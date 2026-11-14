@@ -19,11 +19,11 @@ namespace RaidRogue
     public static class CombatSecondaryDamage
     {
         // This amount is derived from already confirmed damage. Do not mitigate/buff it a second time.
-        public static float Apply(Transform source,Transform target,double amount,string origin,CombatDamageKind kind)
+        public static float Apply(Transform source,Transform target,double amount,string origin,CombatDamageKind kind,bool alreadyScaled=false)
         {
-            if(RaidCombatAuthority.Replica||StageManager.CombatSuspended||!CombatRange.LivingPartyMember(source)||!CombatRange.LivingEnemy(target)||!CombatDamageRules.FinitePositive(amount))return 0;
+            if(RaidCombatAuthority.Replica||StageManager.PlayerSkillsSuspended||!CombatRange.LivingPartyMember(source)||!CombatRange.LivingEnemy(target)||!CombatDamageRules.FinitePositive(amount))return 0;
             var boss=target.GetComponent<BossController>();
-            return boss!=null?boss.ReceiveConfirmedSecondary((float)amount,source,origin,kind):target.GetComponent<BossAddMinion>().ReceiveConfirmedSecondary((float)amount,source,origin,kind);
+            return boss!=null?boss.ReceiveConfirmedSecondary((float)amount,source,origin,kind,alreadyScaled):target.GetComponent<BossAddMinion>().ReceiveConfirmedSecondary((float)amount,source,origin,kind,alreadyScaled);
         }
         public static void Absorption(int source,double amount,CombatHitContext hit)
         {

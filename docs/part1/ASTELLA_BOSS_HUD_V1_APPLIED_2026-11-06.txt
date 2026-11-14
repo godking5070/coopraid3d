@@ -1,0 +1,43 @@
+프로젝트: C:/Astella/Astella
+메인 씬: Assets/Scenes/SampleScene.unity
+활성 프리팹: Assets/UI/AstellaOrnate/Applied-20261106-131209-797/RaidHUD.prefab
+적용 오브젝트: Astella_CelestialHUD / CelestialPresentation / Supplied Boss HUD v1
+백업: Logs/UIRepairBackups/boss-v1-20261106-142736-182
+
+사용 리소스:
+C:/Users/godki/OneDrive/문서/ChatGPT/게임 개발/output/ui-resources/astella-boss-hud-v1
+원본 PNG 9개를 Assets/UI/AstellaBossHUDv1/Sprites에 복사했다.
+sprite-manifest.json의 크기, 채움 위치, 레이어 순서를 그대로 사용한다.
+HP: 1200x64, 채움 (40,20,1120,24).
+시전: 760x104, 채움 (108,68,620,10), 모래시계 (23,20,64,64).
+PNG는 Single Sprite, Full Rect, RGBA, Bilinear, 무압축, mipmap off로 가져왔다.
+
+배치 및 연결:
+상단 중앙 컨테이너, 좌우 4% 여백, 상단 18, 높이 270의 편집 가능한 RectTransform.
+1360x340 디자인 비율을 AspectRatioFitter FitInParent로 유지한다.
+내부 좌표는 비례 앵커를 사용하여 프레임, 채움, 장식, 텍스트의 정렬을 함께 유지한다.
+프레임과 배경은 Simple Image로 고정한다.
+HP와 시전 채움만 Filled / Horizontal / Left로 갱신한다.
+
+기존 AstellaOrnateHUD의 실제 BossController 연결을 유지한다:
+HpRatio -> HP fillAmount / 체력 %.
+현재 스테이지 보스명 -> 보스 이름.
+IsCasting -> 시전 그룹 표시, 비시전 시 숨김.
+CastProgress -> 시전 fillAmount (0에서 1로 증가).
+CurrentCastSkillName / CastRemainingTime -> 시전 이름 / 남은 시간.
+메뉴 및 결과 화면에서는 기존 가시성 규칙으로 숨긴다.
+기존 보스 HUD는 같은 프리팹 안에 비활성으로 보관했다.
+씬 및 프리팹은 Unity Editor API로 저장했다. YAML 직접 수정은 하지 않았다.
+
+검증:
+- 제공 스프라이트 9개의 실제 RGBA 및 manifest 픽셀 크기 일치.
+- 관리 코드 런타임/에디터 컴파일 및 기존 CombatMetrics 검사 통과.
+- Unity 가져오기 및 UI 479개 참조 검사 통과.
+- 설치 시 0/50/100% 채움에서 프레임 앵커 불변, 좌측 채움, 초기 비시전 숨김 검사 통과.
+- 실제 Play에서 Stage 2 Hard 대기 화면 보스명·HP 100%·비시전 숨김 확인.
+- Game View 일반/최대화 및 16:9, 16:10에서 중앙 정렬과 비율 유지 확인. 16:9로 복원.
+- 새 리소스가 적용된 상태에서 실제 전투 중 HP 감소/시전 카운트다운 및 멀티플레이는 이번 확인에서 실행하지 않았다.
+
+편집 도구: Assets/Scripts/Editor/AstellaBossHUDV1Installer.cs
+메뉴: Tools / RaidRogue / UI / Apply Supplied Boss HUD v1 (Alt+F5).
+이미 적용된 프리팹에는 재설치를 거부한다. 이후 디자인 조정은 활성 프리팹에서 직접 편집한다.

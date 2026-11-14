@@ -1,0 +1,20 @@
+Project: C:/Astella/Astella
+Scene: Assets/Scenes/SampleScene.unity
+Active HUD: Assets/UI/AstellaOrnate/Applied-20261106-131209-797/RaidHUD.prefab
+
+Applied refinement:
+- Editable job palette materials for all 12 jobs and four legacy definitions.
+- UI luminance ramp retains icon shape and light/shadow, unifies skill hue per job.
+- Skill materials selected by actual CharacterDefinition.id. Potion, movement and shared revival remain independent.
+- Potion separate consumable dock; 70% scale, original click/input and cooldown bindings retained.
+- Shared revival key5 moved immediately below party list, gold presentation with live 4/4 count; enemy panel shifted down.
+- Menu/results hide party revival parent, preventing its legacy updater from showing it over modals.
+- Main scene and active prefab saved through Unity Editor API; backup Logs/UIRepairBackups/palette-*.
+
+Validation:
+- Run-CombatMetricsChecks.ps1 completed successfully, including managed runtime/editor compilation and existing suites.
+- Unity imported shader and materials without reported errors.
+- Direct Play check: saved legacy Blade, Stage2 hard waiting room, gold skill row, independent blue dash/red smaller potion, party revival 4/4 and key5 visible.
+- Main menu hides new HUD and party revival.
+- All other job palettes are authored but each individual job has not been played this pass.
+- Final screenshot: docs/part1/ASTELLA_CELESTIAL_HUD.png

@@ -1,0 +1,191 @@
+{
+  "version": 3,
+  "palette": {
+    "metal": [
+      "#f7eacc",
+      "#d7be8d",
+      "#aa8d58",
+      "#756041",
+      "#b19560",
+      "#c9ac76",
+      "#e4ce9f"
+    ],
+    "hp": [
+      "#83253e",
+      "#a02d49",
+      "#c13d57",
+      "#d94d65",
+      "#e86377",
+      "#f18a94"
+    ],
+    "cast": "Unchanged approved player gauge v2 violet"
+  },
+  "gaugeGeometry": {
+    "canvas": [
+      1000,
+      64
+    ],
+    "outerPath": "M22 10H978L996 32L978 54H22L4 32Z",
+    "innerPath": "M23 14H977L991 32L977 50H23L9 32Z",
+    "fillBounds": [
+      9,
+      14,
+      982,
+      36
+    ],
+    "movingTipWidth": "min(12,982*ratio)",
+    "movingTipHeight": 36,
+    "pointedBothEnds": true,
+    "ratioZero": "Hide fill and moving tip",
+    "ratioOne": "Full inner shape; hide moving-tip highlight"
+  },
+  "frameAndTrackMatchApprovedPlayerGauge": true,
+  "textureIncludedInFill": true,
+  "textBakedIntoAssets": false,
+  "assets": [
+    {
+      "name": "hp-frame",
+      "png": "sprites/hp-frame.png",
+      "svg": "source/hp-frame.svg",
+      "size": [
+        1000,
+        64
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 48863,
+      "translucentPixels": 7250
+    },
+    {
+      "name": "hp-track",
+      "png": "sprites/hp-track.png",
+      "svg": "source/hp-track.svg",
+      "size": [
+        1000,
+        64
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 34908
+    },
+    {
+      "name": "hp-fill",
+      "png": "sprites/hp-fill.png",
+      "svg": "source/hp-fill.svg",
+      "size": [
+        1000,
+        64
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 120
+    },
+    {
+      "name": "cast-frame",
+      "png": "sprites/cast-frame.png",
+      "svg": "source/cast-frame.svg",
+      "size": [
+        1000,
+        64
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 48863,
+      "translucentPixels": 7250
+    },
+    {
+      "name": "cast-track",
+      "png": "sprites/cast-track.png",
+      "svg": "source/cast-track.svg",
+      "size": [
+        1000,
+        64
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 34908
+    },
+    {
+      "name": "cast-fill",
+      "png": "sprites/cast-fill.png",
+      "svg": "source/cast-fill.svg",
+      "size": [
+        1000,
+        64
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 120
+    },
+    {
+      "name": "hp-tip-mask",
+      "png": "sprites/hp-tip-mask.png",
+      "svg": "source/hp-tip-mask.svg",
+      "size": [
+        12,
+        36
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 192,
+      "translucentPixels": 48
+    },
+    {
+      "name": "hp-tip-highlight",
+      "png": "sprites/hp-tip-highlight.png",
+      "svg": "source/hp-tip-highlight.svg",
+      "size": [
+        14,
+        38
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 434,
+      "translucentPixels": 98
+    },
+    {
+      "name": "cast-tip-mask",
+      "png": "sprites/cast-tip-mask.png",
+      "svg": "source/cast-tip-mask.svg",
+      "size": [
+        12,
+        36
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 192,
+      "translucentPixels": 48
+    },
+    {
+      "name": "cast-tip-highlight",
+      "png": "sprites/cast-tip-highlight.png",
+      "svg": "source/cast-tip-highlight.svg",
+      "size": [
+        14,
+        38
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 434,
+      "translucentPixels": 98
+    },
+    {
+      "name": "emblem-boss",
+      "png": "sprites/emblem-boss.png",
+      "svg": "source/emblem-boss.svg",
+      "size": [
+        96,
+        96
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 6014,
+      "translucentPixels": 2438
+    },
+    {
+      "name": "tiny-star",
+      "png": "sprites/tiny-star.png",
+      "svg": "source/tiny-star.svg",
+      "size": [
+        24,
+        24
+      ],
+      "hasAlpha": true,
+      "transparentPixels": 452,
+      "translucentPixels": 70
+    }
+  ]
+}

@@ -62,7 +62,16 @@ namespace RaidRogue
         }
         private bool Execute(CharacterSkillDefinition skill,Transform target)
         {
-            if(!Active||RaidCombatAuthority.Replica||StageManager.CombatSuspended||_player==null||_player.IsDead||_player.IsStunned||Channeling)return false;
+            if(!Active||RaidCombatAuthority.Replica||StageManager.PlayerSkillsSuspended||_player==null||_player.IsDead||_player.IsStunned||Channeling)return false;
+            if(CharacterSlots.IsNineKey(_actor.Definition)&&(skill.id==AegisExtensionData.Morning||skill.id==AegisExtensionData.Excalibur))
+            {
+                if(CombatRange.LivingEnemy(target)&&CombatRange.InRange(transform,target,skill.range))
+                    _paladin.DealAttack(target,skill.id,skill.name,AegisPaladinData.UltimatePower,0,1);
+                foreach(var member in PartyLife.OrderedMembers())
+                    if(CombatRange.LivingPartyMember(member)&&CombatRange.InRange(transform,member,AegisPaladinData.UltimateRange))
+                        CombatStatusEffects.Shield(member,transform,"aegis.ultimate.protection",_player.maxHp*AegisPaladinData.UltimateShieldRatio,AegisPaladinData.AuxiliaryUltimateDuration(_paladin.HasAuxiliary(AegisPaladinData.LastingSanctuary)),true);
+                _paladin.ShowPulse(transform.position,3);Notice(skill.name);return true;
+            }
             float now=Now;
             switch(skill.id)
             {
@@ -131,7 +140,7 @@ namespace RaidRogue
         private void Update()
         {
             if(!Active){HideVisuals();return;}
-            if(!RaidCombatAuthority.Replica&&!StageManager.CombatSuspended)
+            if(!RaidCombatAuthority.Replica&&!StageManager.PlayerSkillsSuspended)
             {
                 if(!ValidChannel())State.CancelWings();
                 if(!CombatRange.LivingPartyMember(transform)||!CombatRange.LivingPartyMember(LinkedTarget))State.Unlink();
@@ -141,7 +150,7 @@ namespace RaidRogue
         }
         private void GroundTick()
         {
-            if(_player.IsDead||StageManager.CombatSuspended)return;
+            if(_player.IsDead||StageManager.PlayerSkillsSuspended)return;
             Vector3 center=new Vector3(Data.groundX,transform.position.y,Data.groundZ);
             foreach(var enemy in Enemies())if(FlatDistance(center,enemy.position)<=AegisExtensionData.GroundRadius)
                 _paladin.DealAttack(enemy,AegisExtensionData.Ground,"축성된 대지",AegisExtensionData.GroundPower,0,1,CombatDamageKind.Periodic);

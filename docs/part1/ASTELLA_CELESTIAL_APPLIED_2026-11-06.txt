@@ -1,0 +1,45 @@
+﻿Astella Celestial Illustrated HUD — applied 2026-11-06
+
+Project: C:/Astella/Astella
+Scene: Assets/Scenes/SampleScene.unity
+Scene object: Astella_CelestialHUD
+Active prefab: Assets/UI/AstellaOrnate/Applied-20261106-131209-797/RaidHUD.prefab
+Actual Play screenshot: docs/part1/ASTELLA_CELESTIAL_HUD.png
+
+Visual assets
+- 12 original ImageGen illustrations in Assets/UI/AstellaOrnate/Art.
+- Gold beveled frames, key badges, stars, circular compass and gauge outlines are editable native uGUI objects.
+- Korean title font: Nanum Myeongjo, with OFL license in Assets/UI/AstellaOrnate/Fonts/OFL.txt.
+- Bar fills, cooldown veils, numbers, keys and notices remain separate live UI elements.
+
+Data and inputs
+- Existing skill button callbacks retained. Original long labels remain hidden source data for tooltips.
+- Primary slots map to actual Gcd1, Gcd2, OffGcd1, Job1.
+- Extra slots follow actual job availability; inactive slots reflow through the authored HorizontalLayoutGroup.
+- Actual current keybindings, player HP, job resource, boss title/stage/HP/cast, shared resurrection count.
+- Classes without a resource hide the second gauge instead of displaying fabricated MP.
+- New potion/dash clicks route through existing CharacterActor.RequestSlot; existing skill actions are unchanged.
+- Dedicated tooltip and cooldown labels; legacy cooldowns read real PlayerCombatController timers.
+
+Verified directly in original Unity
+- Main scene saved with the new prefab instance. Old HUD roots are disabled and preserved.
+- UI validator: 479 references passed.
+- Main menu covers the presentation correctly; Continue opens the waiting-room HUD.
+- Illustrated slots and complete key labels, including SPACE, shown at normal and maximized Game view.
+- Defensive skill button activated the existing defensive buff; numeric cooldown 15 decreased on the icon.
+- Tooltip showed actual defensive skill description and remaining cooldown.
+- HP 1,000 / 1,000 and shared revival 4/4 reflected live state.
+- Runtime/editor managed compilation and existing command suite passed; log: TEMP/Astella-CelestialHUD-Checks.log.
+
+Scope of visual validation
+The existing saved legacy Blade campaign was resumed only to inspect the waiting-room UI; no boss battle or
+campaign progression was started. Full modern-job resource transitions, all 12 jobs, boss cast animation,
+multiplayer and narrow/ultrawide aspect ratios remain additional play-test coverage.
+
+Authoring/recovery
+- Edit active RaidHUD.prefab in Unity to adjust frames, sizes, fonts, icons and placements.
+- First installation: Tools > RaidRogue > UI > Apply Celestial Illustrated HUD (Alt+F8).
+- Active copy polish: Tools > RaidRogue > UI > Polish Active Celestial HUD (Alt+F7).
+- Play screenshot export: Tools > RaidRogue > UI > Capture Celestial HUD (Play Mode) (Alt+F6).
+- Previous scene/profile backup: Logs/UIRepairBackups/celestial-20261106-131209-797.
+- Previous UI assets and inactive scene HUD roots are preserved.

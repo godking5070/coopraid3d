@@ -68,27 +68,31 @@ namespace RaidRogue
             var snapshot=actor?.Snapshot;var selection=snapshot==null?null:System.Array.Find(snapshot.selections,x=>x.slot==CharacterSlot.Movement);
             var skill=selection==null?null:actor.Definition.Skill(selection.skillId);
             _key.text = LocalInputBindings.Label("Dash") + " " + (actor?.Selected(CharacterSlot.Movement)?.name??"대쉬");
+            _slot.GetComponent<RaidUIIcon>()?.Show(skill?.id);
             bool ready = _player.CanDash;
-            _background.color = ready ? new Color(0.13f, 0.32f, 0.38f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
-            _overlay.anchorMax = new Vector2(1, _player.DashCooldownFraction);
+            RaidUIStyle.Color(_background, ready ? new Color(0.13f, 0.32f, 0.38f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f));
+            RaidUIFill.Set(_overlay, _player.DashCooldownFraction);
             _state.text = _player.IsDashing ? "대쉬 중" : _player.DashCooldownRemaining > 0
                 ? $"{_player.DashCooldownRemaining:0.0}s" : ready ? "사용 가능" : "사용 불가";
-            if(skill!=null&&skill.maximumCharges>1)
+            int maximum = skill != null ? actor.MaximumCharges(skill.id) : 1;
+            if(skill!=null&&maximum>1)
             {
                 var timing=System.Array.Find(snapshot.skills,x=>x.id==skill.id);
-                _state.text=timing.charges+"/"+skill.maximumCharges+(timing.recharge>0?" · "+timing.recharge.ToString("0.0")+"s":"");
-                _overlay.anchorMax=new Vector2(1,timing.charges==0&&timing.rechargeTotal>0?Mathf.Clamp01(timing.recharge/timing.rechargeTotal):0);
+                _state.text=timing.charges+"/"+maximum+(timing.recharge>0?" · "+timing.recharge.ToString("0.0")+"s":"");
+                RaidUIFill.Set(_overlay,timing.charges==0&&timing.rechargeTotal>0?Mathf.Clamp01(timing.recharge/timing.rechargeTotal):0);
             }
-            _state.color = ready ? new Color(0.65f, 1f, 0.92f) : Color.white;
+            RaidUIStyle.Color(_state, ready ? new Color(0.65f, 1f, 0.92f) : Color.white);
             DashSettings settings = CharacterActor.Ensure(_player.gameObject).MovementSettings(_player.dashSettings);
             var charges = _player.CaptureDash();
-            if ((skill==null||skill.maximumCharges<=1) && charges.MaximumCharges > 1) _state.text += $" · {charges.Charges}/{charges.MaximumCharges}";
-            _details.text = settings != null ? $"{settings.distance:0.#}m / {settings.duration:0.##}초\nGCD 별도" : "설정 없음";
+            if ((skill==null||maximum<=1) && charges.MaximumCharges > 1) _state.text += $" · {charges.Charges}/{charges.MaximumCharges}";
+            _details.text = settings != null ? $"{settings.distance:0.#}m / {settings.duration:0.##}초\n"+(settings.backwardFromFacing?"바라보는 방향의 뒤로":"이동 입력 방향") : "설정 없음";
         }
 
         private void CreateSlot(Transform hotbar)
         {
-            RectTransform rect = Rect("CommonDash_Slot", hotbar);
+            if(RaidUIView.Attach(this,"dash",hotbar))return;
+            var viewParent=RaidUIView.Begin(this,"dash",hotbar);
+            RectTransform rect = Rect("CommonDash_Slot", viewParent);
             rect.anchorMin = rect.anchorMax = new Vector2(1, 0);
             rect.pivot = Vector2.zero;
             rect.anchoredPosition = new Vector2(12, 36);
