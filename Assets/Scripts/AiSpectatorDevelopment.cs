@@ -17,7 +17,7 @@ namespace RaidRogue
         [Serializable] public sealed class Member { public int role,id; public string job,route,core; public string[] auxiliary,selectedSkills; public bool bot,automated,ready; }
         [Serializable] public sealed class Result
         {
-            public string mode,difficulty,reason,profileRoot,protocol,startedUtc,finishedUtc,runId,seed,checkpointPath;
+            public string mode,difficulty,reason,profileRoot,protocol,startedUtc,finishedUtc,runId,seed,checkpointPath,processSessionId=Guid.NewGuid().ToString("N"),attemptId;
             public bool success,headless=true,humanInputVerified,steamVerified;
             public int expectedPlayers,connectedPlayers,targetStage,stage,frames,gc0,gc1,gc2;
             public double seconds,meanFrameIntervalMs,maxFrameIntervalMs,peakAllocatedMB;
@@ -70,7 +70,7 @@ namespace RaidRogue
             _caseDirectory=Path.GetFullPath(Argument("case-dir"));
             if(!Directory.Exists(_caseDirectory)||!System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(_caseDirectory),"^case-[a-f0-9]{32}$"))throw new InvalidOperationException("An explicit unique case directory is required.");
             _reportPath=Path.Combine(_caseDirectory,"role-"+_role+".json");
-            if(File.Exists(_reportPath)||(_mode!="ai"&&_mode!="lan-host"&&_mode!="lan-client")||_role<1||_role>4||(_expected!=2&&_expected!=4)||(_target!=1&&_target!=6)||_timeout<15||_timeout>1800)throw new InvalidOperationException("Invalid isolated integration request.");
+            if(File.Exists(_reportPath)||(_mode!="ai"&&_mode!="lan-host"&&_mode!="lan-client"&&_mode!="single-save"&&_mode!="single-resume")||_role<1||_role>4||(_expected!=2&&_expected!=4)||(_target!=1&&_target!=6)||_timeout<15||_timeout>1800)throw new InvalidOperationException("Invalid isolated integration request.");
             string scenarioPath=Path.GetFullPath(Argument("scenario"));
             if(new FileInfo(scenarioPath).Length>32768)throw new InvalidOperationException("Scenario is too large.");
             _scenario=JsonUtility.FromJson<Scenario>(File.ReadAllText(scenarioPath));
@@ -90,7 +90,48 @@ namespace RaidRogue
             _result=new Result{mode=_mode,difficulty=_difficulty,expectedPlayers=_expected,targetStage=_target,profileRoot=profile,protocol=RaidWire.Version.ToString(),startedUtc=DateTime.UtcNow.ToString("O")};
             Application.targetFrameRate=60;
             Debug.Log("[HeadlessResume] START mode="+_mode+" role="+_role+" report="+_reportPath+" profile="+profile);
-            if(_mode=="ai")
+            if(_mode=="single-save"||_mode=="single-resume")
+            {
+                var stage=StageManager.Instance;
+                if(_target!=1)throw new InvalidOperationException("Application restart fixture checks the first regular stage boundary only.");
+                if(_mode=="single-save")
+                {
+                    if(campaign.Saved!=null||campaign.Settlement!=null)throw new InvalidOperationException("Fresh save fixture requires an unused profile.");
+                    campaign.SelectDifficulty(_difficulty);_session.SinglePlay();
+                    var slot=_scenario.party[0];
+                    if(!RoleSelectionManager.Instance.SelectRosterJob(slot.jobId))throw new InvalidOperationException("Regular single job selection rejected.");
+                    var actor=CharacterActor.Ensure(stage.player.gameObject);
+                    if(!actor.Choose("route",actor.Definition.routes[slot.routeIndex].id,out _))throw new InvalidOperationException("Regular single origin rejected.");
+                    foreach(var rule in actor.Definition.loadouts.Where(r=>string.IsNullOrEmpty(r.routeId)||r.routeId==actor.RouteId))
+                        if(!actor.Choose(rule.id,rule.choices.Last(),out _))throw new InvalidOperationException("Nondefault departure choice rejected.");
+                    var auxiliary=actor.Definition.auxiliaryTraits.Reverse().Take(2).ToArray();
+                    if(!actor.Choose("auxiliary.1",auxiliary[0].id,out _)||!actor.Choose("auxiliary.2",auxiliary[1].id,out _))throw new InvalidOperationException("Nondefault auxiliary selection rejected.");
+                    string chosen=BuildKey(actor.Snapshot);
+                    AegisRouteSelectionUI.Close();RoleSelectionManager.Instance.ConfirmAegisDeparture();stage.BeginSingleRun();
+                    if(campaign.Saved==null||campaign.Saved.transport!="single"||campaign.Saved.nextStage!=1||BuildKey(actor.Snapshot)!=chosen)throw new InvalidOperationException("Regular departure checkpoint or chosen build was lost.");
+                }
+                else
+                {
+                    if(!campaign.CanContinue||campaign.Saved?.transport!="single"||campaign.Saved.nextStage!=1||campaign.Saved.difficultyId!=_difficulty)throw new InvalidOperationException("Prior process regular checkpoint is not resumable.");
+                    var prior=JsonUtility.FromJson<CampaignCheckpoint>(JsonUtility.ToJson(campaign.Saved));
+                    var local=prior.party.Single(p=>!p.bot&&p.userId==campaign.Owner);
+                    campaign.Continue(false);
+                    var actor=CharacterActor.Ensure(stage.player.gameObject);
+                    if(_session.Mode!=RaidSessionMode.Single||BuildKey(actor.Snapshot)!=BuildKey(local.character))throw new InvalidOperationException("Fresh process failed to restore the saved lobby build.");
+                    // Door geometry/input is not under test. Place this isolated actor
+                    // at the real door and invoke the production continuation entry.
+                    stage.player.transform.position=RaidLobbyRoom.DoorPosition;
+                    _session.ContinueSavedSingleFromDoor();
+                    if(campaign.Resume!=null||stage.RunId!=prior.runId||stage.currentStage!=1||stage.IrisCoins!=4||Mathf.Abs(stage.player.currentHp-stage.player.maxHp)>.01f||BuildKey(actor.Snapshot)!=BuildKey(local.character)||actor.Snapshot.skills.Any(s=>s.recharge!=0))throw new InvalidOperationException("Fresh process boundary restore did not complete correctly.");
+                }
+                if(campaign.HasSaveFailure)throw new InvalidOperationException("Regular checkpoint write failed.");
+                var persisted=JsonUtility.FromJson<CampaignCheckpoint>(File.ReadAllText(campaign.RunPath));
+                string invalid=CampaignValidation.Checkpoint(persisted,campaign.Owner,CharacterCatalog.Find);
+                if(invalid!=null||persisted.completed||persisted.clears.Length!=0)throw new InvalidOperationException("Regular first-boundary checkpoint invalid: "+invalid);
+                File.Copy(campaign.RunPath,Path.Combine(_caseDirectory,"checkpoint.json"));
+                Finish(true,_mode=="single-save"?"Regular single first-boundary checkpoint with nondefault build written through production departure.":"Separate game process resumed the same regular checkpoint, build and run with fresh HP/cooldowns/four revivals. Door movement/input and later-stage rewards remain separate.");
+            }
+            else if(_mode=="ai")
             {
                 if(!_session.BeginAiSpectator(1,_difficulty,_scenario.party.Select(p=>p.jobId).ToArray(),_target==6))throw new InvalidOperationException(_session.AiSpectatorError);
                 _session.AiSpectatorStopOnClear=_target==1;
@@ -171,6 +212,7 @@ namespace RaidRogue
             }
             return snapshot.auxiliaryTraits.Length==2&&snapshot.auxiliaryTraits.Distinct().Count()==2;
         }
+        private static string BuildKey(CharacterStateSnapshot state)=>state.routeId+"/"+state.coreTrait+"/"+string.Join(",",state.auxiliaryTraits)+"/"+string.Join(",",state.selections.Where(s=>s.slot!=CharacterSlot.Ultimate).Select(s=>s.slot+"="+s.skillId));
         private void Update()
         {
             _maximumFrame=Mathf.Max(_maximumFrame,Time.unscaledDeltaTime);
@@ -203,7 +245,9 @@ namespace RaidRogue
             _result.meanFrameIntervalMs=_result.seconds*1000/Math.Max(1,_result.frames);_result.maxFrameIntervalMs=_maximumFrame*1000;_result.peakAllocatedMB=_peakMemory;
             _result.errors=_errors.ToArray();
             var saved=CampaignRuntime.Instance?.Saved;_result.runId=saved?.runId??"";_result.seed=saved!=null?saved.seed.ToString():"";_result.checkpointPath=CampaignRuntime.Instance?.RunPath??"";
+            _result.attemptId=StageManager.Instance?.AttemptId??"";
             _result.members=_session?.Avatars.Values.OrderBy(a=>a.Role).Select(a=>{var actor=CharacterActor.Ensure(a.gameObject);var state=actor.Snapshot;return new Member{role=a.Role,id=a.Id,job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,selectedSkills=state.selections.Select(s=>s.slot+"="+s.skillId).ToArray(),bot=a.IsBot,automated=a.Automated,ready=a.Ready};}).ToArray();
+            if(_session?.Mode==RaidSessionMode.Single)_result.members=PartyLife.OrderedMembers().Select(member=>{var actor=CharacterActor.Ensure(member.gameObject);var state=actor.Snapshot;return new Member{role=CharacterRosterData.Role(actor.Definition),id=RaidCombatAuthority.Id(member),job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,selectedSkills=state.selections.Select(s=>s.slot+"="+s.skillId).ToArray(),bot=member.GetComponent<PartyBotAI>()!=null,automated=member.GetComponent<PartyBotAI>()!=null,ready=actor.DepartureReady};}).OrderBy(m=>m.role).ToArray();
             if(!string.IsNullOrEmpty(_reportPath))File.WriteAllText(_reportPath,JsonUtility.ToJson(_result,true));
         }
     }

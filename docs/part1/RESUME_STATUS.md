@@ -17,7 +17,7 @@
 
 | 단계 | 현재 증거 | 남은 확인 |
 | --- | --- | --- |
-| 원본 보존·통합 기준 | 기준 커밋, 바이트 백업, 16폴더 스냅샷 완료. `f165343` 및 `53f4d79`의 All 30묶음 통과·원본 반영 완료 | 새 출발 빌드 보존 수정 포함 최종 검사 기록 |
+| 원본 보존·통합 기준 | 기준 커밋, 바이트 백업, 16폴더 스냅샷 완료. `5f37606`의 All 31묶음 통과 | 최종 엔진 실행 영수증 추가 |
 | 최신 빌드 | `f165343` 원본 Windows 배치 빌드 성공. 2026-11-14 20:24 KST, 프로토콜34, 입력2,179파일 지문 전후 일치 | 격리 실행 도구를 포함한 다음 빌드 |
 | 1스테이지 파티 | 실제 직업 정의/선택/출발·데이터 격리를 고정한 601개 명령 검사 통과 | 사람 입력, 기믹·화면·밸런스는 보류 |
 | 1부 완주·복원 | 고정 4직업의 두 난이도 6단계 상태/원자 파일 왕복 검사 통과 | 엔진 전투 완주와 앱 재시작 복원 |
@@ -50,9 +50,12 @@ cd C:/Astella/Astella-resume
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode LAN -Players 4 -TimeoutSeconds 120
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 1
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 6
+./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode SaveResume -Difficulty both -ThroughStage 1
 ```
 
 LAN은 실제 게임 프로세스와 UDP를 사용해 연결·직업/기원/교체 선택·준비 상태 복제를 확인한다. 실제 전투·Steam 재접속·다른 PC 지연 검증과 구분한다. AI는 기본 피해100%의 실제 엔진 전투와 Unity JsonUtility 체크포인트를 검사하며, 전멸/정체/엔진 오류를 성공으로 처리하거나 피해·보스 수치를 바꾸지 않는다.
+
+SaveResume은 일반 단일 플레이의 첫 출발 체크포인트에 비기본 빌드를 저장하고 프로세스를 정상 종료한 뒤, 같은 테스트 프로필의 별도 프로세스에서 실제 이어하기 경로를 실행한다. 같은 런·프로필, 다른 프로세스 세션·도전 ID, 빌드·HP·쿨타임·부활4회를 대조한다. 문까지의 이동은 검사 대상에서 제외하고 해당 위치에서 기존 문 출발 함수를 호출한다. 이후 스테이지 카드 정산/사람 입력 검증을 이 첫 경계 검사로 대체하지 않는다.
 
 테스트 프로필은 캠페인뿐 아니라 로컬 설정과 HUD 배치 파일도 분리한다. 프로필 없는 검사 요청은 일반 저장으로 대체하지 않고 거절한다. 각 실행 전후 일반 저장·설정 등 파일을 백업하고 지문을 대조한다. Unity/ 아래 엔진 분석·셰이더 캐시는 별도의 전후 지문으로 기록한다. 첫 검사에서 이 엔진 캐시 추가가 전체 폴더 지문 차이로 잡혔으며, 제품 저장과 혼동하지 않도록 보고서를 구분했다. 검사 도구는 자신이 생성한 프로세스만 종료하며 Steam이나 사용자 게임을 종료하지 않는다. 기록된 프레임 간격·GC·메모리는 무화면 조건의 관측값이고, GPU/사람4인 성능이나 밸런스 판정이 아니다.
 

@@ -1,6 +1,6 @@
 param(
     [string]$OriginalProject = (Split-Path $PSScriptRoot -Parent),
-    [ValidateSet('LAN', 'AI')][string]$Mode = 'LAN',
+    [ValidateSet('LAN', 'AI', 'SaveResume')][string]$Mode = 'LAN',
     [ValidateSet('normal', 'hard', 'both')][string]$Difficulty = 'both',
     [ValidateSet(1, 6)][int]$ThroughStage = 1,
     [ValidateSet(2, 4)][int]$Players = 4,
@@ -57,7 +57,11 @@ if (!$ReportDirectory) { $ReportDirectory = Join-Path ([IO.Path]::GetTempPath())
 if (Test-Path -LiteralPath (Join-Path $ReportDirectory 'results.json')) { throw 'Use a new report directory to preserve existing evidence.' }
 [IO.Directory]::CreateDirectory($ReportDirectory) | Out-Null
 $ReportDirectory = (Resolve-Path -LiteralPath $ReportDirectory).Path
-$headlessCases = $(if ($Mode -eq 'LAN') { @('lan') } elseif ($Difficulty -eq 'both') { @('normal', 'hard') } else { @($Difficulty) })
+if ($Mode -eq 'SaveResume' -and $ThroughStage -ne 1) { throw 'SaveResume checks the first regular checkpoint; use AI for complete combat runs.' }
+$headlessCases = $(if ($Mode -eq 'LAN') { @('lan') } elseif ($Mode -eq 'SaveResume') {
+    foreach ($headlessDiff in $(if ($Difficulty -eq 'both') { @('normal', 'hard') } else { @($Difficulty) })) { 'single-save-' + $headlessDiff; 'single-resume-' + $headlessDiff }
+} elseif ($Difficulty -eq 'both') { @('normal', 'hard') } else { @($Difficulty) })
+$headlessSharedProfiles = @{ normal = ('resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16)); hard = ('resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16)) }
 $headlessResults = [System.Collections.Generic.List[object]]::new()
 foreach ($headlessCase in $headlessCases) {
     $headlessCaseDirectory = Join-Path $ReportDirectory ('case-' + [Guid]::NewGuid().ToString('N'))
@@ -73,17 +77,18 @@ foreach ($headlessCase in $headlessCases) {
         Copy-Item -LiteralPath (Join-Path $headlessNormalRoot $headlessUserFile.path) -Destination $headlessBackupPath
     }
     $headlessPort = Get-Random -Minimum 20000 -Maximum 50000
-    $headlessProfile = 'resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16)
+    $headlessActualDifficulty = $(if ($Mode -eq 'AI') { $headlessCase } elseif ($Mode -eq 'SaveResume') { ($headlessCase -split '-')[-1] } else { 'normal' })
+    $headlessProfile = $(if ($Mode -eq 'SaveResume') { $headlessSharedProfiles[$headlessActualDifficulty] } else { 'resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16) })
     Write-Output "RUN: $Mode $headlessCase players=$Players through=$ThroughStage evidence=$headlessCaseDirectory"
     try {
         $headlessCount = $(if ($Mode -eq 'LAN') { $Players } else { 1 })
         for ($headlessRole = 1; $headlessRole -le $headlessCount; $headlessRole++) {
-            $headlessKind = $(if ($Mode -eq 'AI') { 'ai' } elseif ($headlessRole -eq 1) { 'lan-host' } else { 'lan-client' })
+            $headlessKind = $(if ($Mode -eq 'AI') { 'ai' } elseif ($Mode -eq 'SaveResume') { $headlessCase.Substring(0, $headlessCase.LastIndexOf('-')) } elseif ($headlessRole -eq 1) { 'lan-host' } else { 'lan-client' })
             $headlessLog = Join-Path $headlessCaseDirectory ("role-$headlessRole.log")
             foreach ($headlessPath in @($headlessLog, $headlessCaseDirectory, $headlessScenario)) { if ($headlessPath.Contains('"')) { throw 'Quotes are not supported in check paths.' } }
             $headlessArguments = '-batchmode -nographics -logFile "' + $headlessLog + '" --raid-test-profile=' + $headlessProfile + '-r' + $headlessRole +
                 ' --astella-check=' + $headlessKind + ' --astella-role=' + $headlessRole + ' --astella-players=' + $Players +
-                ' --astella-through=' + $ThroughStage + ' --astella-timeout=' + $TimeoutSeconds + ' --astella-difficulty=' + $(if ($Mode -eq 'AI') { $headlessCase } else { 'normal' }) +
+                ' --astella-through=' + $ThroughStage + ' --astella-timeout=' + $TimeoutSeconds + ' --astella-difficulty=' + $headlessActualDifficulty +
                 ' --astella-address=127.0.0.1:' + $headlessPort + ' --astella-case-dir="' + $headlessCaseDirectory + '" --astella-scenario="' + $headlessScenario + '"'
             $headlessProcess = Start-Process -FilePath $headlessExe -ArgumentList $headlessArguments -WindowStyle Hidden -PassThru
             $headlessProcesses.Add([pscustomobject]@{ process = $headlessProcess; role = $headlessRole; log = $headlessLog; startedUtc = [DateTime]::UtcNow.ToString('O') })
@@ -128,6 +133,11 @@ foreach ($headlessCase in $headlessCases) {
         }
     }
     $headlessNormalAfter = Get-HeadlessNormalDataFingerprint
+    if ($Mode -eq 'SaveResume' -and $headlessCase.StartsWith('single-resume-') -and $headlessCaseResults.Count -eq 1 -and $headlessResults.Count -gt 0) {
+        $headlessPreviousRun = $headlessResults[$headlessResults.Count - 1].members[0]
+        $headlessResumedRun = $headlessCaseResults[0]
+        if ($headlessPreviousRun.runId -ne $headlessResumedRun.runId -or $headlessPreviousRun.profileRoot -ne $headlessResumedRun.profileRoot -or $headlessPreviousRun.processSessionId -eq $headlessResumedRun.processSessionId -or $headlessPreviousRun.attemptId -eq $headlessResumedRun.attemptId) { $headlessFailure = 'Resume did not reuse the saved run in a fresh process and fresh attempt.' }
+    }
     $headlessEngineAfter = Get-HeadlessNormalDataFingerprint -EngineOnly
     $headlessDataPreserved = $headlessNormalBefore.sha256 -eq $headlessNormalAfter.sha256
     if (!$headlessDataPreserved -and !$headlessFailure) { $headlessFailure = 'Ordinary user data changed during the check; inspect fingerprints before continuing.' }
