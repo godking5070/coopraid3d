@@ -12,6 +12,9 @@ namespace RaidRogue
         public static GameObject Create(PrimitiveType type)
         {
             var primitive = GameObject.CreatePrimitive(type);
+            // A -nographics player still needs transforms/colliders, but it has no
+            // rendering device on which a pipeline shader can be supported.
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) return primitive;
             var pipeline = GraphicsSettings.currentRenderPipeline;
             if (pipeline == null) return primitive;
             var shader = pipeline.defaultShader;

@@ -13,7 +13,7 @@ if (!(Test-Path -LiteralPath (Join-Path $headlessOriginal '.git') -PathType Cont
 if (![string]::IsNullOrWhiteSpace($env:RAID_STEAM_APP_ID) -and $env:RAID_STEAM_APP_ID -ne '0') { throw 'Clear the Steam override for isolated LAN/AI checks.' }
 $headlessBuild = Join-Path $headlessOriginal 'Builds/AstellaWindows'
 $headlessExe = Join-Path $headlessBuild 'Astella.exe'
-$headlessReceipt = Get-Content -LiteralPath (Join-Path $headlessBuild 'BUILD_RECEIPT.json') -Raw | ConvertFrom-Json
+$headlessReceipt = Get-Content -LiteralPath (Join-Path $headlessBuild 'BUILD_RECEIPT.json') -Encoding UTF8 -Raw | ConvertFrom-Json
 if (!$headlessReceipt.inputsPreserved) { throw 'The build has unreviewed input changes.' }
 foreach ($headlessArtifact in $headlessReceipt.artifacts) {
     $headlessArtifactPath = Join-Path $headlessBuild $headlessArtifact.path
@@ -87,7 +87,7 @@ foreach ($headlessCase in $headlessCases) {
             foreach ($headlessEntry in $headlessProcesses) {
                 $headlessResultPath = Join-Path $headlessCaseDirectory ("role-$($headlessEntry.role).json")
                 if (Test-Path -LiteralPath $headlessResultPath) {
-                    try { $headlessCaseResults += Get-Content -LiteralPath $headlessResultPath -Raw | ConvertFrom-Json } catch { continue }
+                    try { $headlessCaseResults += Get-Content -LiteralPath $headlessResultPath -Encoding UTF8 -Raw | ConvertFrom-Json } catch { continue }
                 } elseif ($headlessEntry.process.HasExited) { throw "Role $($headlessEntry.role) exited without a receipt; inspect $($headlessEntry.log)" }
             }
             if (@($headlessCaseResults | Where-Object { !$_.success }).Count -gt 0) { throw (($headlessCaseResults | Where-Object { !$_.success } | ForEach-Object { $_.reason }) -join '; ') }
@@ -117,9 +117,11 @@ foreach ($headlessCase in $headlessCases) {
     if (!$headlessDataPreserved -and !$headlessFailure) { $headlessFailure = 'Ordinary user data changed during the check; inspect fingerprints before continuing.' }
     foreach ($headlessMember in $headlessCaseResults) {
         if ([string]::IsNullOrWhiteSpace($headlessMember.profileRoot)) { $headlessFailure = 'Runtime failed before isolated-profile validation; inspect its reason and log.'; continue }
-        if (![IO.Path]::GetFullPath($headlessMember.profileRoot).StartsWith([IO.Path]::GetFullPath((Join-Path $headlessNormalRoot 'test-profiles')) + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-            $headlessFailure = 'Runtime test profile does not match the protected persistent-data root.'
-        }
+        try {
+            if (![IO.Path]::GetFullPath($headlessMember.profileRoot).StartsWith([IO.Path]::GetFullPath((Join-Path $headlessNormalRoot 'test-profiles')) + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+                $headlessFailure = 'Runtime test profile does not match the protected persistent-data root.'
+            }
+        } catch { $headlessFailure = 'Invalid runtime test profile path; inspect the preserved UTF-8 receipt.' }
     }
     $headlessResults.Add([pscustomobject]@{ case = $headlessCase; directory = $headlessCaseDirectory; success = !$headlessFailure; error = $headlessFailure; members = $headlessCaseResults; ordinaryDataBefore = $headlessNormalBefore; ordinaryDataAfter = $headlessNormalAfter; ordinaryDataFilesPreserved = $headlessDataPreserved })
     [pscustomobject]@{
