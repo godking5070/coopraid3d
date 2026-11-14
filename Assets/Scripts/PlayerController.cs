@@ -36,6 +36,7 @@ namespace RaidRogue
         public float maxHp = 1000f;
         public float currentHp = 1000f;
         public float currentShield = 0f;
+        private readonly CombatShieldLedger _metricsShields = new CombatShieldLedger();
         [Range(0f, 0.6f)]
         public float tankPassiveDefenseRate = 0.25f; // 가디언(탱커) 기본 패시브 방어력 25%
 
@@ -583,7 +584,9 @@ namespace RaidRogue
         public void TriggerVampiricBladeHeal()
         {
             float heal = (currentRole == PlayerRole.Guardian_Tank ? 30f : 15f) * Mathf.Max(1, vampiricBladeStacks);
+            float hpBefore = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + heal);
+            CombatMetricsManager.Healing(transform, hpBefore, currentHp);
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * 2.25f,
                 $"+{Mathf.RoundToInt(heal)} HP [흡혈 회복]",
@@ -634,14 +637,17 @@ namespace RaidRogue
         /// <summary>
         /// Step 8 오라클(힐러) [2]번 '구원의 치유 & 보호막': 노란색 보호막(Shield) 부여
         /// </summary>
-        public void AddShield(float shieldAmount)
+        public void AddShield(float shieldAmount, Transform source = null)
         {
             if (shieldAmount <= 0f)
             {
                 return;
             }
 
+            _metricsShields.Reconcile(currentShield);
+            float shieldBefore = currentShield;
             currentShield = Mathf.Min(maxHp, currentShield + shieldAmount);
+            _metricsShields.Grant(CombatMetricsManager.SourceId(source != null ? source : transform), currentShield - shieldBefore);
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * 2.45f,
                 $"+{Mathf.RoundToInt(shieldAmount)} SHIELD (노란 보호막!)",
@@ -657,12 +663,17 @@ namespace RaidRogue
 
             if (currentShield > 0.1f && finalDamage > 0f)
             {
+                _metricsShields.Reconcile(currentShield);
                 absorbedByShield = Mathf.Min(currentShield, finalDamage);
                 currentShield -= absorbedByShield;
                 finalDamage -= absorbedByShield;
+                _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
             }
 
+            float hpBefore = currentHp;
             currentHp = Mathf.Max(100f, currentHp - finalDamage);
+            // Preserve the existing nonlethal player HP floor; only a real down transition counts.
+            if (hpBefore > 0f && currentHp <= 0f) CombatMetricsManager.SetDead(transform, true);
 
             // 가디언(탱커) 또는 생존기 발동 중 [가시 갑옷] 카드 보유 시 피격 반사 피해
             if (hasThornArmor && (IsDefensiveBuffActive || currentRole == PlayerRole.Guardian_Tank) && targetBoss != null)
@@ -691,7 +702,7 @@ namespace RaidRogue
             FloatingTextPopup.Spawn(transform.position + Vector3.up * 2.1f, dmgText, dmgColor, false);
         }
 
-        public void ReceiveHeal(float healAmount)
+        public void ReceiveHeal(float healAmount, Transform source = null)
         {
             if (healAmount <= 0f)
             {
@@ -701,6 +712,7 @@ namespace RaidRogue
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + healAmount);
             float actualHealed = currentHp - before;
+            CombatMetricsManager.Healing(source != null ? source : transform, before, currentHp);
 
             if (actualHealed > 0.5f)
             {

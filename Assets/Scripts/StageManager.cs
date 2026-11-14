@@ -105,6 +105,7 @@ namespace RaidRogue
             {
                 boss.SetupBossForStage(currentStage);
             }
+            CombatMetricsManager.Ensure(this).BeginStage(currentStage, resetPlayTime);
         }
 
         /// <summary>
@@ -119,6 +120,8 @@ namespace RaidRogue
                 return;
             }
 
+            // The killing blow is recorded by BossController before this notification.
+            CombatMetricsManager.Instance?.Ledger.EndStage();
             StartCoroutine(BossDefeatedSequenceRoutine());
         }
 
@@ -243,10 +246,13 @@ namespace RaidRogue
             {
                 victoryModalRoot.SetActive(true);
             }
+            GetComponent<CombatMetricsUI>()?.ShowResults(true);
         }
 
         public void RestartFromStage1()
         {
+            if (CombatMetricsUI.BlocksUnderlyingInput) return;
+            CombatMetricsManager.Instance?.Ledger.ResetRun();
             Time.timeScale = 1f;
             Scene activeScene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(activeScene.buildIndex >= 0 ? activeScene.name : activeScene.path);
@@ -254,6 +260,7 @@ namespace RaidRogue
 
         private void HandleVictoryModalClickFallback()
         {
+            if (CombatMetricsUI.BlocksUnderlyingInput) return;
             if (victoryModalRoot == null || !victoryModalRoot.activeSelf || restartButton == null)
             {
                 return;

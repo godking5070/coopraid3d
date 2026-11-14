@@ -774,8 +774,8 @@ namespace RaidRogue
             {
                 float healAmt = targetBot.maxHp * 0.40f * mult;
                 float shieldAmt = targetBot.maxHp * 0.20f * mult;
-                targetBot.ReceiveHeal(healAmt);
-                targetBot.AddShield(shieldAmt);
+                targetBot.ReceiveHeal(healAmt, transform);
+                targetBot.AddShield(shieldAmt, transform);
 
                 if (playerController != null)
                 {
@@ -793,8 +793,8 @@ namespace RaidRogue
             {
                 float healAmt = targetSelf.maxHp * 0.40f * mult;
                 float shieldAmt = targetSelf.maxHp * 0.20f * mult;
-                targetSelf.ReceiveHeal(healAmt);
-                targetSelf.AddShield(shieldAmt);
+                targetSelf.ReceiveHeal(healAmt, transform);
+                targetSelf.AddShield(shieldAmt, transform);
 
                 FloatingTextPopup.Spawn(
                     targetSelf.transform.position + Vector3.up * 2.65f,
@@ -828,7 +828,7 @@ namespace RaidRogue
         private void ExecuteHealerSkill3_HealingSanctuaryZone()
         {
             float mult = GetPlayerDamageBuffMultiplier();
-            HealingSanctuaryZone.Spawn(transform.position, radius: 5.5f, duration: 6.0f, healPerTick: 110f * mult, shieldPerTick: 45f * mult);
+            HealingSanctuaryZone.Spawn(transform.position, radius: 5.5f, duration: 6.0f, healPerTick: 110f * mult, shieldPerTick: 45f * mult, source: transform);
 
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * 2.6f,
@@ -885,7 +885,7 @@ namespace RaidRogue
                 Vector3 pullDest = transform.position + transform.forward * 1.1f;
                 pullDest.y = rescuedBot.transform.position.y;
                 rescuedBot.StartPulledByPlayerRescue(pullDest);
-                rescuedBot.AddShield(rescuedBot.maxHp * 0.25f);
+                rescuedBot.AddShield(rescuedBot.maxHp * 0.25f, transform);
 
                 if (playerController != null)
                 {
@@ -1773,6 +1773,8 @@ namespace RaidRogue
     /// </summary>
     public class HealingSanctuaryZone : MonoBehaviour
     {
+        private Transform _source;
+        private int _encounterId;
         public float radius = 5.5f;
         public float duration = 6.0f;
         public float tickInterval = 1.0f;
@@ -1785,12 +1787,14 @@ namespace RaidRogue
         private LineRenderer _innerCross;
         private MeshRenderer _discRenderer;
 
-        public static HealingSanctuaryZone Spawn(Vector3 centerPos, float radius, float duration, float healPerTick, float shieldPerTick)
+        public static HealingSanctuaryZone Spawn(Vector3 centerPos, float radius, float duration, float healPerTick, float shieldPerTick, Transform source)
         {
             GameObject go = new GameObject("HealingSanctuaryZone_AoE");
             go.transform.position = new Vector3(centerPos.x, 0.045f, centerPos.z);
 
             HealingSanctuaryZone zone = go.AddComponent<HealingSanctuaryZone>();
+            zone._source = source;
+            zone._encounterId = CombatMetricsManager.EncounterId;
             zone.radius = radius;
             zone.duration = duration;
             zone.healPerTick = healPerTick;
@@ -1894,6 +1898,8 @@ namespace RaidRogue
 
         private void ApplyHealingTick()
         {
+            // A lingering zone cannot heal or grant shields in the next encounter.
+            if (_encounterId != CombatMetricsManager.EncounterId) { Destroy(gameObject); return; }
             Vector2 centerXZ = new Vector2(transform.position.x, transform.position.z);
 
             PlayerController pc = FindFirstObjectByType<PlayerController>();
@@ -1902,8 +1908,8 @@ namespace RaidRogue
                 Vector2 pXZ = new Vector2(pc.transform.position.x, pc.transform.position.z);
                 if (Vector2.Distance(centerXZ, pXZ) <= radius + 0.35f)
                 {
-                    pc.ReceiveHeal(healPerTick);
-                    pc.AddShield(shieldPerTick);
+                    pc.ReceiveHeal(healPerTick, _source);
+                    pc.AddShield(shieldPerTick, _source);
                 }
             }
 
@@ -1914,8 +1920,8 @@ namespace RaidRogue
                 Vector2 bXZ = new Vector2(bot.transform.position.x, bot.transform.position.z);
                 if (Vector2.Distance(centerXZ, bXZ) <= radius + 0.35f)
                 {
-                    bot.ReceiveHeal(healPerTick);
-                    bot.AddShield(shieldPerTick);
+                    bot.ReceiveHeal(healPerTick, _source);
+                    bot.AddShield(shieldPerTick, _source);
                 }
             }
         }
