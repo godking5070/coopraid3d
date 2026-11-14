@@ -224,7 +224,7 @@ namespace RaidRogue
             BindLegacy();if(RaidCombatAuthority.Replica||_state==null)return;
             _actionExecution?.Reset();_executingSkill=null;
             string departureRoute=_state.Snapshot.routeId;
-            _state.Reset(reason,NineKeyDamageKit.Supports(Definition));GetComponent<NineKeyTankKit>()?.Clear();GetComponent<NineKeyHealerKit>()?.Clear();
+            _state.Reset(reason,CharacterSlots.IsNineKey(Definition));GetComponent<NineKeyTankKit>()?.Clear();GetComponent<NineKeyHealerKit>()?.Clear();
             GetComponent<AegisPaladin>()?.ClearTransient();GetComponent<CharacterKit>()?.Clear();GetComponent<CombatStatusEffects>()?.Clear();
             if(reason==CharacterReset.NewRun&&departureRoute.Length>0)_state.ChooseRoute(departureRoute,true);
             // DPS route state (for example the season period) depends on the restored core trait.

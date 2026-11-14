@@ -34,6 +34,7 @@ if ($Group -in @('Characters', 'All')) {
     # Steam -> Compile already includes Paladin/selection. Standalone Characters needs it too.
     if ($Group -ne 'All') { Add-StudioCheck 'Run-NineKeyPaladinChecks.ps1' }
     foreach ($taskName in @('Tank', 'Healer', 'Damage')) { Add-StudioCheck "Run-NineKey${taskName}Checks.ps1" }
+    Add-StudioCheck 'Run-DepartureBuildChecks.ps1'
 }
 if ($Group -in @('Input', 'All')) { Add-StudioCheck 'Run-ClickMoveChecks.ps1' }
 if ($Group -in @('UI', 'All')) {
@@ -52,6 +53,7 @@ if ($Group -in @('Steam', 'All')) {
 }
 if ($Group -eq 'Progression') { Add-StudioCheck 'Run-CampaignSaveChecks.ps1' }
 if ($Group -in @('Progression', 'All')) {
+    Add-StudioCheck 'Run-DepartureBuildChecks.ps1'
     Add-StudioCheck 'Run-ResumeScenarioChecks.ps1'
     Add-StudioCheck 'Run-Part1BuildChecks.ps1'
 }

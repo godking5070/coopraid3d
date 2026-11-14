@@ -31,17 +31,26 @@ function Read-HeadlessProductField([string]$Name) {
     return $value
 }
 $headlessNormalRoot = Join-Path (Join-Path (Join-Path (Split-Path ([Environment]::GetFolderPath('LocalApplicationData')) -Parent) 'LocalLow') (Read-HeadlessProductField 'companyName')) (Read-HeadlessProductField 'productName')
-function Get-HeadlessNormalDataFingerprint {
+function Get-HeadlessNormalDataFingerprint([switch]$EngineOnly) {
     $lines = [System.Collections.Generic.List[string]]::new()
+    $details = [System.Collections.Generic.List[object]]::new()
     if (Test-Path -LiteralPath $headlessNormalRoot) {
         foreach ($entry in (Get-ChildItem -LiteralPath $headlessNormalRoot -Force | Where-Object { $_.Name -ne 'test-profiles' })) {
+            # Unity/ contains engine-owned analytics/shader diagnostics. Record its
+            # changes separately; never confuse them with player save/settings data.
+            if (($entry.Name -eq 'Unity') -ne [bool]$EngineOnly) { continue }
             $files = $(if ($entry.PSIsContainer) { @(Get-ChildItem -LiteralPath $entry.FullName -File -Recurse -Force) } else { @($entry) })
-            foreach ($file in $files) { $lines.Add($file.FullName.Substring($headlessNormalRoot.Length) + "`t" + (Get-FileHash -LiteralPath $file.FullName).Hash + "`n") }
+            foreach ($file in $files) {
+                $relative = $file.FullName.Substring($headlessNormalRoot.Length + 1)
+                $digest = (Get-FileHash -LiteralPath $file.FullName).Hash
+                $lines.Add($relative + "`t" + $digest + "`n")
+                $details.Add([pscustomobject]@{ path = $relative; sha256 = $digest })
+            }
         }
     }
     $sorted = [string[]]$lines.ToArray(); [Array]::Sort($sorted, [StringComparer]::Ordinal)
     $hasher = [Security.Cryptography.SHA256]::Create()
-    try { [pscustomobject]@{ count = $lines.Count; sha256 = [BitConverter]::ToString($hasher.ComputeHash([Text.Encoding]::UTF8.GetBytes(($sorted -join '')))).Replace('-', '').ToLowerInvariant() } }
+    try { [pscustomobject]@{ count = $lines.Count; sha256 = [BitConverter]::ToString($hasher.ComputeHash([Text.Encoding]::UTF8.GetBytes(($sorted -join '')))).Replace('-', '').ToLowerInvariant(); files = @($details.ToArray()) } }
     finally { $hasher.Dispose() }
 }
 if (!$ReportDirectory) { $ReportDirectory = Join-Path ([IO.Path]::GetTempPath()) ('Astella-Headless-' + [Guid]::NewGuid().ToString('N')) }
@@ -57,6 +66,12 @@ foreach ($headlessCase in $headlessCases) {
     $headlessCaseResults = @()
     $headlessFailure = ''
     $headlessNormalBefore = Get-HeadlessNormalDataFingerprint
+    $headlessEngineBefore = Get-HeadlessNormalDataFingerprint -EngineOnly
+    foreach ($headlessUserFile in $headlessNormalBefore.files) {
+        $headlessBackupPath = Join-Path (Join-Path $headlessCaseDirectory 'ordinary-data-before') $headlessUserFile.path
+        [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($headlessBackupPath)) | Out-Null
+        Copy-Item -LiteralPath (Join-Path $headlessNormalRoot $headlessUserFile.path) -Destination $headlessBackupPath
+    }
     $headlessPort = Get-Random -Minimum 20000 -Maximum 50000
     $headlessProfile = 'resume-' + [Guid]::NewGuid().ToString('N').Substring(0, 16)
     Write-Output "RUN: $Mode $headlessCase players=$Players through=$ThroughStage evidence=$headlessCaseDirectory"
@@ -113,6 +128,7 @@ foreach ($headlessCase in $headlessCases) {
         }
     }
     $headlessNormalAfter = Get-HeadlessNormalDataFingerprint
+    $headlessEngineAfter = Get-HeadlessNormalDataFingerprint -EngineOnly
     $headlessDataPreserved = $headlessNormalBefore.sha256 -eq $headlessNormalAfter.sha256
     if (!$headlessDataPreserved -and !$headlessFailure) { $headlessFailure = 'Ordinary user data changed during the check; inspect fingerprints before continuing.' }
     foreach ($headlessMember in $headlessCaseResults) {
@@ -123,9 +139,11 @@ foreach ($headlessCase in $headlessCases) {
             }
         } catch { $headlessFailure = 'Invalid runtime test profile path; inspect the preserved UTF-8 receipt.' }
     }
-    $headlessResults.Add([pscustomobject]@{ case = $headlessCase; directory = $headlessCaseDirectory; success = !$headlessFailure; error = $headlessFailure; members = $headlessCaseResults; ordinaryDataBefore = $headlessNormalBefore; ordinaryDataAfter = $headlessNormalAfter; ordinaryDataFilesPreserved = $headlessDataPreserved })
+    $headlessProcessEvidence = @($headlessProcesses | ForEach-Object { [pscustomobject]@{ role = $_.role; processId = $_.process.Id; exitCode = $_.process.ExitCode; startedUtc = $_.startedUtc; log = $_.log } })
+    $headlessResults.Add([pscustomobject]@{ case = $headlessCase; directory = $headlessCaseDirectory; success = !$headlessFailure; error = $headlessFailure; members = $headlessCaseResults; processes = $headlessProcessEvidence; ordinaryDataBefore = $headlessNormalBefore; ordinaryDataAfter = $headlessNormalAfter; ordinaryDataFilesPreserved = $headlessDataPreserved; engineDiagnosticsBefore = $headlessEngineBefore; engineDiagnosticsAfter = $headlessEngineAfter; engineDiagnosticsChanged = ($headlessEngineBefore.sha256 -ne $headlessEngineAfter.sha256) })
     [pscustomobject]@{
         version = 1; sourceCommit = $headlessReceipt.sourceCommit; inputSha256 = $headlessReceipt.inputSha256
+        scenarioPath = $headlessScenario; scenarioSha256 = (Get-FileHash -LiteralPath $headlessScenario).Hash; runnerSha256 = (Get-FileHash -LiteralPath $PSCommandPath).Hash
         mode = $Mode; targetStage = $ThroughStage; players = $Players; completedUtc = [DateTime]::UtcNow.ToString('O')
         cases = @($headlessResults.ToArray()); humanInputVerified = $false; steamVerified = $false; gpuPerformanceVerified = $false
     } | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath (Join-Path $ReportDirectory 'results.json') -Encoding UTF8

@@ -14,10 +14,10 @@ namespace RaidRogue
     {
         [Serializable] public sealed class Scenario { public int version; public string chapterId; public string[] difficulties; public int[] stages; public Slot[] party; }
         [Serializable] public sealed class Slot { public int role,routeIndex,loadoutChoiceIndex; public string jobId; }
-        [Serializable] public sealed class Member { public int role,id; public string job,route,core; public string[] auxiliary; public bool bot,automated,ready; }
+        [Serializable] public sealed class Member { public int role,id; public string job,route,core; public string[] auxiliary,selectedSkills; public bool bot,automated,ready; }
         [Serializable] public sealed class Result
         {
-            public string mode,difficulty,reason,profileRoot,protocol,startedUtc,finishedUtc;
+            public string mode,difficulty,reason,profileRoot,protocol,startedUtc,finishedUtc,runId,seed,checkpointPath;
             public bool success,headless=true,humanInputVerified,steamVerified;
             public int expectedPlayers,connectedPlayers,targetStage,stage,frames,gc0,gc1,gc2;
             public double seconds,meanFrameIntervalMs,maxFrameIntervalMs,peakAllocatedMB;
@@ -117,6 +117,7 @@ namespace RaidRogue
                 string saved=File.ReadAllText(campaign.RunPath);
                 string invalid=CampaignValidation.Checkpoint(JsonUtility.FromJson<CampaignCheckpoint>(saved),campaign.Owner,CharacterCatalog.Find);
                 if(invalid!=null)throw new InvalidOperationException("Unity JSON checkpoint invalid: "+invalid);
+                File.Copy(campaign.RunPath,Path.Combine(_caseDirectory,"checkpoint.json"));
                 Finish(true,"Unmodified four-job AI combat and Unity JSON checkpoint confirmed through stage "+_target+"; human input, live transport and balance remain unverified.");
             }
             else
@@ -201,7 +202,8 @@ namespace RaidRogue
             _result.stage=StageManager.Instance?.currentStage??0;_result.gc0=GC.CollectionCount(0)-_gc0;_result.gc1=GC.CollectionCount(1)-_gc1;_result.gc2=GC.CollectionCount(2)-_gc2;
             _result.meanFrameIntervalMs=_result.seconds*1000/Math.Max(1,_result.frames);_result.maxFrameIntervalMs=_maximumFrame*1000;_result.peakAllocatedMB=_peakMemory;
             _result.errors=_errors.ToArray();
-            _result.members=_session?.Avatars.Values.OrderBy(a=>a.Role).Select(a=>{var actor=CharacterActor.Ensure(a.gameObject);var state=actor.Snapshot;return new Member{role=a.Role,id=a.Id,job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,bot=a.IsBot,automated=a.Automated,ready=a.Ready};}).ToArray();
+            var saved=CampaignRuntime.Instance?.Saved;_result.runId=saved?.runId??"";_result.seed=saved!=null?saved.seed.ToString():"";_result.checkpointPath=CampaignRuntime.Instance?.RunPath??"";
+            _result.members=_session?.Avatars.Values.OrderBy(a=>a.Role).Select(a=>{var actor=CharacterActor.Ensure(a.gameObject);var state=actor.Snapshot;return new Member{role=a.Role,id=a.Id,job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,selectedSkills=state.selections.Select(s=>s.slot+"="+s.skillId).ToArray(),bot=a.IsBot,automated=a.Automated,ready=a.Ready};}).ToArray();
             if(!string.IsNullOrEmpty(_reportPath))File.WriteAllText(_reportPath,JsonUtility.ToJson(_result,true));
         }
     }
