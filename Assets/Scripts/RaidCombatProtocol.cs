@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RaidRogue
 {
-    public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory, Loading }
+    public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory, Loading, BossClear, Closed }
     [Serializable] public sealed class RaidActionRequest
     {
         public uint sequence, lease;
@@ -99,7 +99,7 @@ namespace RaidRogue
         public bool controlGranted;
         public RaidPose[] recoveryPoses;
         public RaidBattlePhase phase;
-        public float time, countdownEnd, runTime;
+        public float time, countdownEnd, runTime, phaseDeadline;
         public RaidCombatActor[] party;
         public RaidCombatEnemy boss;
         public RaidCombatEnemy[] adds;

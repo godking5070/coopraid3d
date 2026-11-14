@@ -23,8 +23,19 @@ namespace RaidRogue
         private static void Reset()
         {
             _blockedFrame = _pointerFrame = _escapeFrame = -1;
-            _roles = null; _cards = null; _stages = null;
+            _roles = null; _cards = null; _stages = null; Hits.Clear();
         }
+
+        public static void ResetSession()
+        {
+            Reset();
+            if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
+            Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+        }
+
+        public static bool ModalCovered => RaidNetworkSession.Instance?.Ending == true || RaidNetworkSession.Instance?.MenuOpen == true ||
+            (RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) ||
+            !Application.isFocused || IsTyping || LocalCameraSettingsUI.IsOpen || CombatMetricsUI.BlocksUnderlyingInput;
 
         public static bool IsTyping
         {

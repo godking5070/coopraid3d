@@ -11,10 +11,18 @@ namespace RaidRogue
         public RaidBattlePhase BattlePhase { get; private set; } = RaidBattlePhase.Lobby;
         public int BattleEpoch { get; private set; }
         public float CountdownEnd { get; private set; }
+        public float PhaseDeadline { get; private set; }
+        private void SetBattlePhase(RaidBattlePhase phase, string reason)
+        {
+            if (BattlePhase == phase) return;
+            Debug.Log($"[Raid {SessionTag}] epoch={BattleEpoch} stage={StageManager.Instance?.currentStage} {BattlePhase}->{phase}: {reason}");
+            BattlePhase = phase;
+            RaidSteamRuntime.Instance?.PublishPhase();
+        }
         public float ServerTime => IsHost ? Time.unscaledTime : Time.unscaledTime + _serverOffset;
-        public bool CombatRunning => Multiplayer && BattlePhase == RaidBattlePhase.Combat;
-        public bool CanJoinBattle => BattlePhase == RaidBattlePhase.Lobby;
-        public bool CanChooseRole => BattlePhase == RaidBattlePhase.Lobby;
+        public bool CombatRunning => !Ending && Multiplayer && BattlePhase == RaidBattlePhase.Combat;
+        public bool CanJoinBattle => !Ending && BattlePhase == RaidBattlePhase.Lobby;
+        public bool CanChooseRole => !Ending && BattlePhase == RaidBattlePhase.Lobby;
         private readonly RaidActionGate _actionGate = new RaidActionGate();
         private readonly RaidRewardRound _rewards = new RaidRewardRound();
         private readonly RaidFrameAssembler _combatAssembler = new RaidFrameAssembler();
@@ -105,14 +113,14 @@ namespace RaidRogue
         }
         public void RequestAction(int skill, int target = 0)
         {
-            if (!HasLocalAvatar || !ControlsReady) return;
+            if (Ending || !HasLocalAvatar || !ControlsReady) return;
             var request = new RaidActionRequest { actor = _localId, epoch = BattleEpoch, sequence = ++_actionSequence, lease = _localLease, skill = skill, target = target };
             if (IsHost) ExecuteAction(_localId, request);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = JsonUtility.ToJson(request) }, true);
         }
         private void ExecuteAction(int owner, RaidActionRequest request, bool automatic = false)
         {
-            if (request == null || !_avatars.TryGetValue(owner, out var avatar) || avatar.IsBot) return;
+            if (Ending || request == null || !_avatars.TryGetValue(owner, out var avatar) || avatar.IsBot) return;
             var ownership = _recovery.Actor(owner);
             if (!automatic && (avatar.Automated || request.lease != (ownership?.Lease ?? 0) || !_actionGate.Accept(owner, BattleEpoch, request))) return;
             if (request.skill == 7) { avatar.CombatTarget = CombatTarget(request.target); return; }
@@ -159,12 +167,13 @@ namespace RaidRogue
         }
         public void BeginNetworkEncounter(int stage, bool retry)
         {
-            if (!IsHost || (BattlePhase != RaidBattlePhase.Lobby && BattlePhase != RaidBattlePhase.Wiped && BattlePhase != RaidBattlePhase.Reward)) return;
+            if (Ending || !IsHost || (BattlePhase != RaidBattlePhase.Lobby && BattlePhase != RaidBattlePhase.Wiped && BattlePhase != RaidBattlePhase.Reward)) return;
             if (BattlePhase == RaidBattlePhase.Lobby && !CanStartLobby) return;
-            BattleEpoch++; BattlePhase = RaidBattlePhase.Loading; CountdownEnd = 0;
+            if (!StageManager.Instance.PrepareNetworkEncounter(stage, retry)) return;
+            BattleEpoch++; CountdownEnd = PhaseDeadline = 0;
+            SetBattlePhase(RaidBattlePhase.Loading, retry ? "retry" : "prepare stage");
             BeginLoadingBarrier();
             MenuOpen = false;
-            StageManager.Instance.PrepareNetworkEncounter(stage, retry);
             ResetNetworkMotors();
         }
         private void ResetNetworkMotors()
@@ -181,16 +190,38 @@ namespace RaidRogue
         {
             if (!IsHost || BattlePhase != RaidBattlePhase.Combat) return;
             foreach (var avatar in _avatars.Values) { avatar.MovementLocked = true; _motors[avatar.Id].Dash.Cancel(); }
-            if (!cleared) { BattlePhase = RaidBattlePhase.Wiped; return; }
+            PhaseDeadline = cleared ? ServerTime + StageManager.Instance.FlowSettings.clearSeconds : 0;
+            SetBattlePhase(cleared ? RaidBattlePhase.BossClear : RaidBattlePhase.Wiped, "authoritative outcome");
+        }
+        private void FinishNetworkClearPresentation()
+        {
+            if (BattlePhase != RaidBattlePhase.BossClear || ServerTime < PhaseDeadline) return;
             var stage = StageManager.Instance;
-            if (stage.currentStage >= stage.maxStage) { BattlePhase = RaidBattlePhase.Victory; return; }
-            BattlePhase = RaidBattlePhase.Reward; _rewards.Begin(BattleEpoch);
+            if (!stage.FinishNetworkClear()) return;
+            if (stage.currentStage >= stage.maxStage)
+            { PhaseDeadline = 0; SetBattlePhase(RaidBattlePhase.Victory, "final clear"); return; }
+            _rewards.Begin(BattleEpoch);
             foreach (var member in _roster.Members)
                 if (_avatars.TryGetValue(member.Id, out var actor)) _rewards.Offer(member.Id, actor.GetComponent<PlayerController>().cardManager.GenerateNetworkOffer());
+            PhaseDeadline = ServerTime + stage.FlowSettings.rewardSeconds;
+            SetBattlePhase(RaidBattlePhase.Reward, "offers generated once");
+        }
+        private void UpdateRewardDeadline()
+        {
+            if (BattlePhase != RaidBattlePhase.Reward || ServerTime < PhaseDeadline) return;
+            foreach (var member in _roster.Members)
+            {
+                int[] cards = _rewards.Cards(member.Id);
+                if (cards.Length == 0 || !_rewards.Choose(BattleEpoch, member.Id, cards[0])) continue;
+                _avatars[member.Id].GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)cards[0]);
+                var slot = _recovery.Actor(member.Id); if (slot != null) _recovery.AutoSelected(slot, cards[0]);
+                BroadcastPartyNotice(member.Name + " 카드 선택 시간 초과 · 첫 번째 카드 자동 선택");
+            }
+            FinishRewardsIfReady();
         }
         private void FinishRewardsIfReady()
         {
-            if (IsHost && BattlePhase == RaidBattlePhase.Reward && _rewards.Complete) BeginNetworkEncounter(StageManager.Instance.currentStage + 1, false);
+            if (!Ending && IsHost && BattlePhase == RaidBattlePhase.Reward && _rewards.Complete) BeginNetworkEncounter(StageManager.Instance.currentStage + 1, false);
         }
         private void OnNetworkDeparture(int id)
         {
@@ -202,18 +233,20 @@ namespace RaidRogue
                 foreach (var cast in FindObjectsByType<BattleResurrection>(FindObjectsSortMode.None)) cast.CancelIfTarget(avatar.transform);
                 foreach (var effect in FindObjectsByType<HealingSanctuaryZone>(FindObjectsSortMode.None)) effect.CancelIfSource(avatar.transform);
             }
-            _rewards.Remove(id); _actionGate.Remove(id); FinishRewardsIfReady();
+            _rewards.Remove(id); _actionGate.Remove(id); // Advance only after peer/avatar removal has completed.
         }
         private void LateUpdate()
         {
-            if (!Multiplayer) return;
+            if (Ending || !Multiplayer) return;
             UpdateRecoveryHost();
+            if (IsHost) { FinishNetworkClearPresentation(); UpdateRewardDeadline(); }
             if (Mode == RaidSessionMode.Disconnected) return;
             UpdateLoadingBarrier();
+            if (Ending || StageManager.Instance?.boss == null) return;
             Time.timeScale = 1; // Local menus never stop the authoritative simulation.
             if (IsHost && BattlePhase == RaidBattlePhase.Countdown && ServerTime >= CountdownEnd)
             {
-                BattlePhase = RaidBattlePhase.Combat; StageManager.Instance.StartStage(StageManager.Instance.currentStage);
+                SetBattlePhase(RaidBattlePhase.Combat, "all loaded; countdown complete"); StageManager.Instance.StartStage(StageManager.Instance.currentStage);
                 foreach (var avatar in _avatars.Values) avatar.MovementLocked = false;
             }
             if (HasLocalAvatar && ControlsReady)
@@ -250,7 +283,7 @@ namespace RaidRogue
                 if (add != null && !add.isDead) adds.Add(add.CaptureNetworkCombat(CombatId(add.transform)));
             var ledger = CombatMetricsManager.Instance.Ledger;
             return new RaidCombatFrame { epoch = BattleEpoch, stage = stage.currentStage, retries = ledger.RetryCount, phase = BattlePhase, time = ServerTime,
-                countdownEnd = CountdownEnd, runTime = stage.NetworkRunTime, party = actors.ToArray(), boss = stage.boss.CaptureNetworkCombat(), adds = adds.ToArray(), mechanics = CaptureMechanics(),
+                countdownEnd = CountdownEnd, phaseDeadline = PhaseDeadline, runTime = stage.NetworkRunTime, party = actors.ToArray(), boss = stage.boss.CaptureNetworkCombat(), adds = adds.ToArray(), mechanics = CaptureMechanics(),
                 current = CombatMetricsManager.CaptureNetworkResult(ledger.Snapshot()), clears = CombatMetricsManager.CaptureNetworkResults(ledger.Stages), failures = CombatMetricsManager.CaptureNetworkResults(ledger.FailedAttempts) };
         }
         private void SendCombatFrame(Peer peer, RaidCombatFrame frame, bool immediate = true)
@@ -303,9 +336,13 @@ namespace RaidRogue
                 var snapshot = new RaidPacket { Kind = RaidPacketKind.Snapshot, Tick = frame.poseTick }; snapshot.Poses.AddRange(frame.recoveryPoses);
                 ApplySnapshot(snapshot); _lastSnapshot = frame.poseTick;
             }
-            if (frame.epoch != BattleEpoch) { _prediction.Clear(); ClearReplicaMechanics(); _loadFrame = Time.frameCount; }
+            if (frame.epoch != BattleEpoch)
+            {
+                _prediction.Clear(); ClearReplicaMechanics(); _loadFrame = Time.frameCount;
+                StageManager.Instance.boss.SetupBossForStage(frame.stage); // Also reset collapse/casting on a same-stage retry.
+            }
             if (frame.phase != BattlePhase && Mode != RaidSessionMode.Restoring) MenuOpen = false;
-            BattleEpoch = frame.epoch; BattlePhase = frame.phase; CountdownEnd = frame.countdownEnd; _latestCombatFrame = frame;
+            BattleEpoch = frame.epoch; SetBattlePhase(frame.phase, "host snapshot"); CountdownEnd = frame.countdownEnd; PhaseDeadline = frame.phaseDeadline; _latestCombatFrame = frame;
             var stage = StageManager.Instance; stage.ApplyNetworkStage(frame);
             stage.boss.ApplyNetworkCombat(frame.boss, frame.time);
             ApplyNetworkAdds(frame.adds);

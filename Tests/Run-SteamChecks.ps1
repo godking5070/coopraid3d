@@ -28,6 +28,11 @@ $taskRecoveryExe = Join-Path $taskOutput 'RecoveryTests.exe'
 if ($LASTEXITCODE -ne 0) { throw 'Recovery test compilation failed.' }
 & $taskRecoveryExe
 if ($LASTEXITCODE -ne 0) { throw 'Recovery tests failed.' }
+$taskFlowExe = Join-Path $taskOutput 'FlowTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskFlowExe" (Join-Path $taskRoot 'Assets/Scripts/RaidRunFlow.cs') (Join-Path $taskRoot 'Assets/Scripts/PartyBattleState.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidRecoveryState.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidCombatProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $PSScriptRoot 'RaidFlowTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Run flow test compilation failed.' }
+& $taskFlowExe
+if ($LASTEXITCODE -ne 0) { throw 'Run flow tests failed.' }
 # Compile the actual pinned SDK, without loading native Steam or running Unity.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
 $taskDefines = $taskProject.SelectSingleNode("//*[local-name()='DefineConstants']").InnerText

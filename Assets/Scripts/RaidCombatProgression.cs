@@ -8,29 +8,25 @@ namespace RaidRogue
     {
         private RaidBattlePhase? _presentedNetworkPhase;
         public float NetworkRunTime => _totalPlayTime;
-        public void PrepareNetworkEncounter(int stage, bool retry)
+        public bool PrepareNetworkEncounter(int stage, bool retry)
+        { return RaidCombatAuthority.Host && PrepareEncounter(stage, retry, !_hasStartedEncounter); }
+        internal bool FinishNetworkClear()
         {
-            if (!RaidCombatAuthority.Host) return;
-            if (retry) CombatMetricsManager.Instance.Ledger.RegisterRetry();
-            CleanupAttempt(); currentStage = stage; IsWiped = false; IsPreparing = true;
-            _isStageTransitioning = _isAllStagesCleared = _pendingBossClear = false;
-            ResetAndHealAllPartyMembers();
-            foreach (var member in PartyLife.OrderedMembers())
-            {
-                PartyLife.Ensure(member.gameObject).ResetForEncounter();
-                member.GetComponent<PlayerController>()?.cardManager?.ResetTemporaryCombatState();
-            }
-            boss.SetupBossForStage(stage); UpdateStageHeaderUI();
+            if (!RaidCombatAuthority.Host || !Progress.FinishClear(Progress.Revision, maxStage)) return false;
+            TraceProgress("clear presentation completed"); return true;
         }
         public void ApplyNetworkStage(RaidCombatFrame frame)
         {
             _totalPlayTime = frame.runTime;
             currentStage = frame.stage; IsWiped = frame.phase == RaidBattlePhase.Wiped; IsPreparing = frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Loading;
-            _isAllStagesCleared = frame.phase == RaidBattlePhase.Victory; _isStageTransitioning = frame.phase == RaidBattlePhase.Reward;
+            _isAllStagesCleared = frame.phase == RaidBattlePhase.Victory; _isStageTransitioning = frame.phase == RaidBattlePhase.Reward || frame.phase == RaidBattlePhase.BossClear;
             UpdateStageHeaderUI();
         }
         public void PresentNetworkPhase(RaidBattlePhase phase, int seconds)
         {
+            if (phase != RaidBattlePhase.Victory && victoryModalRoot != null) victoryModalRoot.SetActive(false);
+            if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(phase == RaidBattlePhase.BossClear);
+            if (phase == RaidBattlePhase.BossClear && bossClearBannerText != null) bossClearBannerText.text = $"STAGE {currentStage} BOSS CLEAR!";
             if (phase == RaidBattlePhase.Loading) { _wipeUI.ShowNetworkLoading(); _presentedNetworkPhase = phase; return; }
             if (phase == RaidBattlePhase.Countdown) { _wipeUI.ShowCountdown(Mathf.Max(1, seconds)); _presentedNetworkPhase = phase; return; }
             if (_presentedNetworkPhase == phase) return;

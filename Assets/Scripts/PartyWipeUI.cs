@@ -35,7 +35,7 @@ namespace RaidRogue
             _root.SetActive(true); _root.transform.SetAsLastSibling(); _buttons.SetActive(true);
             _retry.interactable = !RaidCombatAuthority.Active || RaidCombatAuthority.Host;
             _retry.GetComponentInChildren<Text>().text = _retry.interactable ? "현재 보스 재도전" : "호스트 재도전 대기";
-            _connection.SetActive(RaidCombatAuthority.Active);
+            _connection.SetActive(true);
             _title.text = "PARTY WIPED";
             _title.color = new Color(1f, 0.4f, 0.4f);
             _details.text = $"STAGE {_stage.currentStage} · 파티 전멸\n재도전 시 현재 스테이지와 획득한 카드 성장은 유지됩니다.";
@@ -52,7 +52,7 @@ namespace RaidRogue
             if (!Build()) return;
             _root.SetActive(true); _root.transform.SetAsLastSibling(); _buttons.SetActive(false);
             _title.color = Color.white; _title.text = "파티 전투 준비 중";
-            _details.text = "모든 참가자의 전장 로딩을 기다립니다";
+            _details.text = RaidNetworkSession.Instance?.FlowStatus ?? "모든 참가자의 전장 로딩을 기다립니다";
         }
         public void Hide() { if (_root != null) _root.SetActive(false); }
         private static Text TextAt(Transform parent, string name, Vector2 pos, Vector2 size, int fontSize)
