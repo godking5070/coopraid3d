@@ -257,12 +257,13 @@ namespace RaidRogue
     }
     public partial class PartyBotAI
     {
+        private float ActionInterval => role == PartyBotRole.Tank ? tankAttackInterval : role == PartyBotRole.Healer ? healCheckInterval : role == PartyBotRole.MeleeDPS ? meleeAttackInterval : rangedFireInterval;
         public void CaptureNetworkCombat(RaidCombatActor state)
         {
             state.hp = currentHp; state.maxHp = maxHp; state.shield = currentShield; state.dead = isDead; state.defense = _tankDefensiveTimer;
             state.speed = moveSpeed; state.target = RaidCombatAuthority.Id(CurrentActionTarget);
             // Native bots keep their existing AI cadence; expose its actual timer in common state.
-            float interval = role == PartyBotRole.Tank ? tankAttackInterval : role == PartyBotRole.Healer ? healCheckInterval : role == PartyBotRole.MeleeDPS ? meleeAttackInterval : rangedFireInterval;
+            float interval = ActionInterval;
             state.gcdTotal = interval; state.gcd = Mathf.Max(0, interval - _actionTimer);
             if (role == PartyBotRole.Healer) { state.cd4 = _rescueCooldownTimer; state.cd4Total = rescueCooldown; }
         }

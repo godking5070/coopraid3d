@@ -897,7 +897,7 @@ namespace RaidRogue
             currentShield = 0;
             currentHp = maxHp * Mathf.Clamp01(fraction);
             ApplyBodyColor(_defaultBodyColor);
-            if (resetCooldowns) { _rescueCooldownTimer = 0; _lastRescuedTelegraph = null; }
+            if (resetCooldowns) { _actionTimer = ActionInterval; _rescueCooldownTimer = 0; _lastRescuedTelegraph = null; }
         }
 
         public void ReviveBot() => IrisRescue.TryUse(transform, transform, StageManager.Instance?.AttemptId, PartyLife.Ensure(gameObject).DeathGeneration);

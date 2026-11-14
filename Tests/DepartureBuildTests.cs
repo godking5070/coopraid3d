@@ -9,7 +9,19 @@ sealed class AegisPaladin { public void ClearTransient(){} public void Recalcula
 sealed class CharacterKit { public void Clear(){} public void Recalculate(){} }
 sealed class CombatStatusEffects { public void Clear(){} }
 sealed class NineKeyDamageKit { public static bool Supports(CharacterDefinition d)=>CharacterSlots.IsNineKey(d)&&NineKeyDamageData.Supports(CharacterRosterData.Find(d?.id)); public void Clear(){} }
-static class RaidCombatAuthority { public static bool Replica; }
+static class RaidCombatAuthority { public static bool Replica; public static int Id(object target)=>0; }
+enum PartyBotRole { Tank,Healer,MeleeDPS,RangedDPS }
+static class Mathf { public static float Clamp01(float n)=>Math.Max(0,Math.Min(1,n)); public static float Max(float a,float b)=>Math.Max(a,b); }
+sealed class RaidCombatActor { public float hp,maxHp,shield,defense,speed,gcdTotal,gcd,cd4,cd4Total;public bool dead;public int target; }
+sealed class NativeBotBoundaryFixture
+{
+    public PartyBotRole role;public float _actionTimer,_rescueCooldownTimer=9;
+    public float tankAttackInterval=1.5f,healCheckInterval=1.3f,meleeAttackInterval=1.45f,rangedFireInterval=1.25f,rescueCooldown=15;
+    float currentShield,currentHp,maxHp=100,_tankDefensiveTimer,moveSpeed=5; bool isDead;
+    object CurrentActionTarget,_lastRescuedTelegraph,_defaultBodyColor;
+    void ClearInterruptedActions(){_actionTimer=0;}void ApplyBodyColor(object color){}
+    /* ACTUAL_BOT_BOUNDARY */
+}
 sealed class StageManager { public static StageManager Instance=new StageManager(); public string RunId=Guid.NewGuid().ToString("N"),ChapterId=CampaignCatalog.PartOne; }
 sealed class DepartureActorFixture
 {
@@ -31,6 +43,20 @@ static class DepartureBuildTests
     }
     static void Run()
     {
+        foreach(PartyBotRole role in Enum.GetValues(typeof(PartyBotRole)))
+        {
+            var bot=new NativeBotBoundaryFixture{role=role,_actionTimer=.2f};
+            var data=new RaidCombatActor();
+            bot.CaptureNetworkCombat(data);
+            Check(data.gcd>0,"reproduce native bot pending cadence "+role);
+            bot.RestorePartyLife(1,true);bot.CaptureNetworkCombat(data);
+            Check(data.gcd==0&&data.cd4==0,"encounter setup makes native bot ready "+role);
+            var definition=CharacterCatalog.Legacy((int)role+1);var state=new CharacterRuntimeState(definition);
+            state.MirrorLegacy(data.gcd,data.gcdTotal,1,1,0,0,"",0,0);
+            Check(state.Snapshot.gcd==0,"native snapshot is a safe boundary "+role);
+            bot._rescueCooldownTimer=9;bot.RestorePartyLife(.3f,false);bot.CaptureNetworkCombat(data);
+            Check(data.gcd>0&&bot._rescueCooldownTimer==9,"ordinary revival keeps cadence delay and rescue cooldown "+role);
+        }
         var definitions=new[]{AegisPaladinData.BuildNineKey()}.Concat(CharacterRosterData.Jobs.Where(j=>j.index<=5).Select(j=>NineKeyTankData.Supports(j)?NineKeyTankData.Build(j):NineKeyHealerData.Build(j))).ToArray();
         Check(definitions.Length==6,"all three tanks and three healers");
         foreach(var definition in definitions)
