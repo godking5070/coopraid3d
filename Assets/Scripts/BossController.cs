@@ -699,6 +699,7 @@ namespace RaidRogue
 
         private void HandleDebugShortcuts()
         {
+            if (LocalGameplayInput.Blocked) return;
             if (fsmState == BossFSMState.Defeated)
             {
                 return;

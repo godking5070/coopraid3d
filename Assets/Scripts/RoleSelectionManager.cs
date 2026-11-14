@@ -123,6 +123,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (LocalGameplayInput.IsTyping || LocalCameraSettingsUI.IsOpen) return;
             if (CombatMetricsUI.BlocksUnderlyingInput) return;
             // 단축키 [P]: 언제든 직업 선택 창 열기/닫기
             if (WasShortcutPPressed())

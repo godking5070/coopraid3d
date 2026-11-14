@@ -9,10 +9,11 @@ namespace RaidRogue
     /// <summary>
     /// Step 7: 클라이언트 독립형 2D / 3D 뷰 실시간 전환 매니저 (ViewModeManager)
     /// - 화면 우측 상단 [뷰 전환: 현재 3D (단축키 V)] 버튼 클릭 또는 키보드 [V] 단축키 입력으로
-    ///   게임을 멈추지 않고 언제든 '3D 쿼터뷰(Perspective, X축 50도)' <-> '2D 탑다운 뷰(Orthographic, X축 90도)'를 실시간 전환합니다.
+    ///   3D 회전 카메라와 고정 방향 2D 탑다운 카메라를 전환하며 각 모드의 로컬 설정을 유지합니다.
     /// - 향후 멀티플레이 연동 시 각 플레이어 클라이언트가 독립적으로 2D/3D를 선택할 수 있도록
     ///   게임의 물리/판정 좌표(XZ 평면)는 전혀 건드리지 않고 로컬 카메라와 [Visual_3D]/[Visual_2D] 렌더러만 전환합니다.
     /// </summary>
+    [DefaultExecutionOrder(-300)]
     public class ViewModeManager : MonoBehaviour
     {
         public static ViewModeManager Instance { get; private set; }
@@ -75,21 +76,17 @@ namespace RaidRogue
                 viewToggleButton.onClick.AddListener(ToggleViewMode);
             }
 
+            if (quarterViewCamera != null) currentViewMode = quarterViewCamera.currentViewMode;
             ApplyViewMode(currentViewMode, immediateCameraSnap: true, showFeedbackPopup: false);
         }
 
         private void Update()
         {
+            if (LocalGameplayInput.Blocked) return;
             if (WasToggleShortcutPressed())
             {
                 ToggleViewMode();
                 return;
-            }
-
-            // 카드 선택 모달 등 Time.timeScale == 0 상태에서도 우측 상단 버튼 클릭이 항상 즉각 동작하도록 보조 체크
-            if (Time.timeScale <= 0.001f)
-            {
-                HandleUnscaledButtonClickFallback();
             }
         }
 
@@ -98,6 +95,7 @@ namespace RaidRogue
         /// </summary>
         public void ToggleViewMode()
         {
+            if (LocalGameplayInput.Blocked) return;
             if (Time.frameCount == _lastToggleFrame)
             {
                 return;
@@ -119,7 +117,7 @@ namespace RaidRogue
             currentViewMode = mode;
             bool is2D = currentViewMode == CameraViewMode.View2D_TopDown;
 
-            // 1. 로컬 카메라 투영 방식(Perspective <-> Orthographic) 및 목표 각도(50도 <-> 90도) 전환
+            // 1. 로컬 카메라 투영 방식과 저장된 모드별 회전/줌 전환
             if (quarterViewCamera == null)
             {
                 quarterViewCamera = FindFirstObjectByType<QuarterViewCamera>();
@@ -155,7 +153,7 @@ namespace RaidRogue
                 {
                     string popupMsg = is2D
                         ? "★ 2D 탑다운 뷰 (Orthographic 90°) 전환! ★"
-                        : "★ 3D 쿼터뷰 (Perspective 50°) 전환! ★";
+                        : "★ 3D 뷰 전환 · 우클릭 드래그로 카메라 회전 ★";
                     Color popupCol = is2D
                         ? new Color(0.30f, 1.0f, 0.85f, 1f)
                         : new Color(1.0f, 0.88f, 0.28f, 1f);
@@ -185,8 +183,8 @@ namespace RaidRogue
             if (viewToggleSubHintText != null)
             {
                 viewToggleSubHintText.text = is2D
-                    ? "세피리아 스타일 2D 직교(Orthographic) 탑다운  |  XZ 물리/판정 100% 동일"
-                    : "입체 3D 원근(Perspective) 50° 쿼터뷰  |  클릭 또는 [V] 키로 즉시 전환";
+                    ? "WASD 화면 기준 이동 | 휠 줌 | 확대 시 플레이어 추적"
+                    : "WASD 카메라 기준 이동 | 우클릭 회전 | 휠 줌";
             }
 
             if (viewToggleButtonBg != null)
@@ -214,39 +212,6 @@ namespace RaidRogue
             return false;
         }
 
-        private void HandleUnscaledButtonClickFallback()
-        {
-            if (viewToggleButton == null)
-            {
-                return;
-            }
-
-            bool clicked = false;
-            Vector2 mousePos = Vector2.zero;
-
-#if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-            {
-                clicked = true;
-                mousePos = Mouse.current.position.ReadValue();
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (!clicked && Input.GetMouseButtonDown(0))
-            {
-                clicked = true;
-                mousePos = Input.mousePosition;
-            }
-#endif
-
-            if (clicked)
-            {
-                RectTransform rt = viewToggleButton.GetComponent<RectTransform>();
-                if (rt != null && RectTransformUtility.RectangleContainsScreenPoint(rt, mousePos, null))
-                {
-                    ToggleViewMode();
-                }
-            }
-        }
+        private void OnDestroy() { if (Instance == this) Instance = null; }
     }
 }
