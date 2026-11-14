@@ -40,6 +40,11 @@ $taskEditors = @(Get-CimInstance Win32_Process -Filter "name = 'Unity.exe'" | Wh
 })
 if ($taskEditors.Count -gt 0) { $taskProblems.Add('Original Unity editor is open. Use its build menu after source review, or close it before this batch command.') }
 $taskOutput = Join-Path $taskOriginal 'Builds/AstellaWindows'
+$taskOutputPrefix = [IO.Path]::GetFullPath($taskOutput).TrimEnd('\') + '\'
+$taskRunningPlayers = @(Get-CimInstance Win32_Process -Filter "name = 'Astella.exe'" | Where-Object {
+    $_.ExecutablePath -and [IO.Path]::GetFullPath($_.ExecutablePath).StartsWith($taskOutputPrefix, [StringComparison]::OrdinalIgnoreCase)
+})
+if ($taskRunningPlayers.Count -gt 0) { $taskProblems.Add('The output game executable is running. Finish or close that session before replacing its build artifacts.') }
 Write-Output "Original: $taskOriginal"
 Write-Output "Unity: $Unity"
 Write-Output "Output: $(Join-Path $taskOutput 'Astella.exe')"

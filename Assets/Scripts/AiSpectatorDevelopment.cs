@@ -14,7 +14,7 @@ namespace RaidRogue
     {
         [Serializable] public sealed class Scenario { public int version; public string chapterId; public string[] difficulties; public int[] stages; public Slot[] party; }
         [Serializable] public sealed class Slot { public int role,routeIndex,loadoutChoiceIndex; public string jobId; }
-        [Serializable] public sealed class Member { public int role,id; public string job,route,core; public string[] auxiliary,selectedSkills; public bool bot,automated,ready; }
+        [Serializable] public sealed class Member { public int role,id; public string job,route,core; public string[] auxiliary,selectedSkills; public bool bot,automated,ready; public CharacterStateSnapshot state; }
         [Serializable] public sealed class Result
         {
             public string mode,difficulty,reason,profileRoot,protocol,startedUtc,finishedUtc,runId,seed,checkpointPath,processSessionId=Guid.NewGuid().ToString("N"),attemptId;
@@ -185,6 +185,7 @@ namespace RaidRogue
                                 if(actor.RouteId!=origin.id)actor.RequestChoice("route",origin.id);
                                 else if(!FixedBuild(actor,slot,true)){}
                                 else if(!_session.LocalReady)_session.ToggleReady();
+                                else if(avatar.Role==_role)File.WriteAllText(Path.Combine(_caseDirectory,"role-"+_role+".configured"),profile);
                             }
                         }
                     }
@@ -225,6 +226,8 @@ namespace RaidRogue
             if(_finished)return;_finished=true;
             if(_result==null)_result=new Result{mode=_mode,difficulty=_difficulty};
             _result.success=success&&_errors.Count==0;_result.reason=reason;
+            if(!_result.success&&!string.IsNullOrEmpty(_caseDirectory)&&CampaignRuntime.Instance?.ReportWorking!=null)
+                File.WriteAllText(Path.Combine(_caseDirectory,"rejected-working-checkpoint.json"),JsonUtility.ToJson(CampaignRuntime.Instance.ReportWorking,true));
             SaveResult();
             Debug.Log("[HeadlessResume] "+(_result.success?"PASS ":"FAIL ")+reason);
             if(!_result.success)ExitCheck(1);
@@ -247,7 +250,7 @@ namespace RaidRogue
             var saved=CampaignRuntime.Instance?.Saved;_result.runId=saved?.runId??"";_result.seed=saved!=null?saved.seed.ToString():"";_result.checkpointPath=CampaignRuntime.Instance?.RunPath??"";
             _result.attemptId=StageManager.Instance?.AttemptId??"";
             _result.members=_session?.Avatars.Values.OrderBy(a=>a.Role).Select(a=>{var actor=CharacterActor.Ensure(a.gameObject);var state=actor.Snapshot;return new Member{role=a.Role,id=a.Id,job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,selectedSkills=state.selections.Select(s=>s.slot+"="+s.skillId).ToArray(),bot=a.IsBot,automated=a.Automated,ready=a.Ready};}).ToArray();
-            if(_session?.Mode==RaidSessionMode.Single)_result.members=PartyLife.OrderedMembers().Select(member=>{var actor=CharacterActor.Ensure(member.gameObject);var state=actor.Snapshot;return new Member{role=CharacterRosterData.Role(actor.Definition),id=RaidCombatAuthority.Id(member),job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,selectedSkills=state.selections.Select(s=>s.slot+"="+s.skillId).ToArray(),bot=member.GetComponent<PartyBotAI>()!=null,automated=member.GetComponent<PartyBotAI>()!=null,ready=actor.DepartureReady};}).OrderBy(m=>m.role).ToArray();
+            if(_session?.Mode==RaidSessionMode.Single)_result.members=PartyLife.OrderedMembers().Select(member=>{var actor=CharacterActor.Ensure(member.gameObject);var state=actor.Snapshot;return new Member{role=CharacterRosterData.Role(actor.Definition),id=RaidCombatAuthority.Id(member),job=actor.Definition.id,route=actor.RouteId,core=state.coreTrait,auxiliary=state.auxiliaryTraits,selectedSkills=state.selections.Select(s=>s.slot+"="+s.skillId).ToArray(),bot=member.GetComponent<PartyBotAI>()!=null,automated=member.GetComponent<PartyBotAI>()!=null,ready=actor.DepartureReady,state=state};}).OrderBy(m=>m.role).ToArray();
             if(!string.IsNullOrEmpty(_reportPath))File.WriteAllText(_reportPath,JsonUtility.ToJson(_result,true));
         }
     }

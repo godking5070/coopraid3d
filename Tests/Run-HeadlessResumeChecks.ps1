@@ -92,11 +92,11 @@ foreach ($headlessCase in $headlessCases) {
                 ' --astella-address=127.0.0.1:' + $headlessPort + ' --astella-case-dir="' + $headlessCaseDirectory + '" --astella-scenario="' + $headlessScenario + '"'
             $headlessProcess = Start-Process -FilePath $headlessExe -ArgumentList $headlessArguments -WindowStyle Hidden -PassThru
             $headlessProcesses.Add([pscustomobject]@{ process = $headlessProcess; role = $headlessRole; log = $headlessLog; startedUtc = [DateTime]::UtcNow.ToString('O') })
-            if ($Mode -eq 'LAN' -and $headlessRole -eq 1) {
+            if ($Mode -eq 'LAN') {
                 $headlessListenUntil = [DateTime]::UtcNow.AddSeconds(40)
-                while (!(Test-Path -LiteralPath (Join-Path $headlessCaseDirectory 'role-1.started'))) {
-                    if ($headlessProcess.HasExited) { throw 'Host exited before listener startup; inspect role-1.log.' }
-                    if ([DateTime]::UtcNow -gt $headlessListenUntil) { throw 'Host listener startup timed out.' }
+                while (!(Test-Path -LiteralPath (Join-Path $headlessCaseDirectory ("role-$headlessRole.configured")))) {
+                    if ($headlessProcess.HasExited) { throw "Role $headlessRole exited before build/ready configuration; inspect its log/receipt." }
+                    if ([DateTime]::UtcNow -gt $headlessListenUntil) { throw "Role $headlessRole build/ready configuration timed out." }
                     Start-Sleep -Milliseconds 200
                 }
             }
