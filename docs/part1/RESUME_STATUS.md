@@ -17,8 +17,8 @@
 
 | 단계 | 현재 증거 | 남은 확인 |
 | --- | --- | --- |
-| 원본 보존·통합 기준 | 기준 커밋, 바이트 백업, 16폴더 스냅샷 완료. `10c9b17`의 All 31묶음 통과 | 원격 병합·푸시는 하지 않음 |
-| 최신 빌드 | `10c9b17`, 2026-11-14 21:55 KST 원본 Windows 배치 빌드·필수 HUD 참조 검사 성공. 프로토콜34, 입력2,179파일 지문 전후 일치 | 사람 화면/GPU 검증 보류 |
+| 원본 보존·통합 기준 | 기준 커밋, 바이트 백업, 16폴더 스냅샷 완료. `d41e38a`의 All 31묶음 통과 | 원격 병합·푸시는 하지 않음 |
+| 최신 빌드 | `d41e38a`, 2026-11-14 22:18 KST 원본 Windows 배치 빌드·필수 HUD 참조 검사 성공. 프로토콜34, 입력2,179파일 지문 전후 일치 | 사람 화면/GPU 검증 보류 |
 | 1스테이지 파티 | 고정 빌드/격리 601개, 실제 출발·봇 준비 메서드 917개 명령 검사 통과. 노멀 실제 AI 클리어 | 하드 AI는 1스테이지에서 전멸. 사람 입력·화면·밸런스는 보류 |
 | 1부 완주·복원 | `2990c59` 노멀 실제 AI 1~6 연속 완주·완료 저장, `10c9b17` 일반/하드 싱글 앱 재시작·비기본 빌드 복원 통과 | 하드 엔진 완주 미확인 |
 | 2→4인 연결·성능 | 실제 게임 2인/4인 UDP 연결·직업/기원/교체/준비 복제 통과. 무화면 프레임/GC/메모리 기록 | 실제 Steam·다른 PC·GPU 성능 미확인 |
@@ -51,7 +51,7 @@ cd C:/Astella/Astella-resume
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode LAN -Players 2 -TimeoutSeconds 120
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode LAN -Players 4 -TimeoutSeconds 120
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 1
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 6
+./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 6 -TimeoutSeconds 3600
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode SaveResume -Difficulty both -ThroughStage 1
 ```
 
@@ -77,6 +77,20 @@ SaveResume은 일반 단일 플레이의 첫 출발 체크포인트에 비기본
 
 하드 실패 로그에는 카운터3회·무력화2회 성공, 봉쇄 피격3명, 힐러에 부활3회/레인저에1회 사용, 이후 공명 분담 인원4→2→1 감소가 기록됐다. 단순히 카운터가 전혀 실행되지 않은 상태는 아니다. `GuardianHardDestination`의 봉쇄 탈출은 열린 균열 밖 한 점으로 직진하고, 네이티브 충돌은 벽을 막으므로 경유 이동/사전 위치 선정이 다음 AI 조사 지점이다. 실제 피격 순간 위치·치유 내역을 이 로그만으로 확정할 수 없어 원인 가설로 남긴다. 보스 체력·피해·공격 간격을 변경해 성공으로 만들지 않았다.
 
+### 하드 AI 후속 조사·수정
+
+`00e492f`의 `native-hard-tactic-trace/`에 0.25초 간격 실제 위치·HP·시전·단계·열린 균열 위치를 기록했다. `tactics.csv`는 명시적인 격리 개발 검사에서만 생성하고 AI 목적지 함수를 호출하지 않는 관측이다. 해당 실행도 1스테이지 약167초에 전멸했다. 봉쇄 종료 직전 근딜 `(-11.2201,-1.2960)`, 원딜 `(-10.4910,-3.5507)`이 벽 안쪽에 남고 열린 균열은 `(-11.5911,-3.1058)`에 있는 것을 확인했다.
+
+`d41e38a`에서 `GuardianNormalData.cs`/`BossGuardianHard.cs`의 AI 경로를 보완했다. 조준선의 같은 쪽에서 균열 근처로 미리 모이고, 벽 안쪽 경유점에 맞춘 뒤 열린 틈으로 나온다. 이미 밖으로 나간 AI는 안으로 되돌아오지 않는다. `RaidReplacementAI.cs`는 기존 직업만 적용하던 이동기 선택 조건에 새 9키 직업도 포함한다. 보스 수치·공격 시간·회전 제한·AI 반응 설정·플레이어 입력/이동 충돌은 유지한다.
+
+하드 상태/기하2,547개, 노멀20,048개 및 `checks-guardian-routing-all/results.json`의 31/31 묶음이 통과했다. 순수 계산 검사는 실제 기록의 시작점과 기존 6초 창을 사용하고, 벽 회전별 조준선/캐릭터 반경·균열 폭·벽 내부 경유를 검사한다. 이를 실제 엔진 충돌 검증과 구분한다.
+
+후속 실제 실행은 `native-hard-routing-six/`, `native-normal-routing-six/`다. 노멀은 약636초에 재시도0/부활0, 클리어6/카드20, 파티원별 카드5개, 완료 저장/정상 종료/일반 파일 보존으로 통과했다. 하드는 1~5 클리어 뒤 6스테이지 전투 중 검사 자체의1,800초 제한으로 종료됐다. 전멸이나 엔진 오류가 아니라 시간 제한 실패이며, 완료 판정은 하지 않는다. 이 실측에 맞춰 개발 검사/launcher의 허용 상한을3,600초로 늘리고, AI 6단계 검사의 기본 제한도3,600초로 정한다. 게임 전투 시간·체력·피해는 유지한다.
+
+하드 첫 봉쇄는 균열 유도 실패로 피격4명이었으므로 모든 AI 기믹을 해결했다고 주장하지 않는다. 두 번째 완전 봉쇄에서는 실제 열린 균열 `(0,-12)`을 통해 4명이 모두 반경12.65~14.88로 벽 밖에 나가고 피격0명이 기록됐다. 최종 하드 완주/저장은 연장한 새 연속 실행의 영수증으로 별도 확인한다.
+
+원격도 추가 대조했다. GitHub 브랜치 검색의 끝 페이지와 `git ls-remote --heads origin` 모두 `ingame-move-system` 하나만 반환했다. HEAD는 로컬 캐시와 같은 `f80d0c5476cd1e6f49be2adde3e39610c810014e`(2026-10-21)이며 `remote-audit.json`에 기록했다. 최근 개발 변경은 원격의 별도 최신 브랜치가 아니라 보존한 로컬 브랜치/worktree에 있다.
+
 노멀 완주 과정의 무화면 관측은 평균 프레임 간격26.31ms, 시작 로딩 포함 최대835.63ms, Unity 할당 메모리 최대100.03MiB였다. 이 실행은 AI·로그·컴파일 검사 병행 환경이며 GPU 렌더링과 사람 입력이 없다. 출시 성능 기준이나 4인 실플레이 FPS 판정으로 사용하지 않는다.
 
 Steam 2→4인 검증에는 유효한 아스텔라 App ID, 서로 다른 테스트 계정과 PC가 필요하다. 현재 설정은0이고 환경 정보는 요청한 상태다. 실제 사람 플레이·마우스/키보드·HUD 가독성·공격 예고 시각·GPU 성능은 사용자 보류를 유지한다. 하드 AI 전멸 원인/행동 개선과 하드 완주, 실제 Steam 연결은 남은 단계다.
@@ -89,6 +103,7 @@ Steam 2→4인 검증에는 유효한 아스텔라 App ID, 서로 다른 테스�
 | --- | --- |
 | `Assets/Scripts/CharacterActor.cs` | 모든 새 9키 직업의 출발 빌드 보존. 이전 런 진행/카드/V 해금은 초기화 |
 | `Assets/Scripts/PartyBotAI.cs`, `RaidCombatWorld.cs` | 전투 준비에서 네이티브 봇 GCD를 준비 상태로 초기화. 일반 부활은 쿨타임을 유지 |
+| `Assets/Scripts/GuardianNormalData.cs`, `BossGuardianHard.cs`, `RaidReplacementAI.cs` | 하드 봉쇄 AI의 조준선 옆 사전 이동·벽 안 경유·균열 탈출 및 새 9키 직업 이동기 선택 |
 | `Assets/Scripts/AiSpectatorDevelopment.cs`, `RaidPrimitive.cs` | 명시적인 격리 개발 검사와 Null 그래픽 장치 처리. 일반/릴리스 입력 흐름과 실제 GPU 셰이더 검사는 유지 |
 | `Assets/Scripts/CampaignStorage.cs`, `LocalSettingsRuntime.cs`, `LocalHUDLayoutController.cs` | 검사 프로필 없는 실행 거절, 일반 저장/설정/HUD와 테스트 데이터 분리 |
 | `Assets/Scripts/Editor/RaidMultiplayerBuild.cs` 및 UI 자동 설치 도구 | 활성 HUD 필수 연결 검사, 배치 빌드 중 사용자 편집 UI 자동 설치/재배치 방지 |
@@ -97,4 +112,4 @@ Steam 2→4인 검증에는 유효한 아스텔라 App ID, 서로 다른 테스�
 
 원본 HEAD와 인덱스는 기존 상태를 보존했다. 검토한 파일만 원본 작업 파일에 반영했으며, 원본 인덱스 SHA256은 `ce345c2144a658aa620262e9f99f1b5c0fa36a1ea44789cb5a51ea857cc59c48`이다. 작업 worktree에는 Library를 만들지 않았다. 씬·프리팹 YAML/기존 GUID는 수정하지 않았다.
 
-최종 빌드 입력 SHA256은 `a3f2fcd9bfb51961e659856f0cd339277e49382409660e188bd47df003701809`다. 빌드 영수증의 코드 커밋은 `10c9b17f85c01517162520abaa2f013fd46fa9d8`이며, 이후 문서 커밋은 같은 빌드 입력을 유지한다. 하드 완주와 실제 Steam 연결이 남아 있으므로 전체 재개 목표는 완료로 처리하지 않는다.
+현재 빌드 입력 SHA256은 `bcedf553712e72123c2af61b504cdcdb0bb0b3d0ecf1548e13c67fad3accf3a6`다. 빌드 영수증의 코드 커밋은 `d41e38a684db5ad584fb33d8ab75429c8ad4596a`다. 이전 `10c9b17` 빌드와 실행 증거도 별도로 보존했다. 하드 완주와 실제 Steam 연결이 남아 있으므로 전체 재개 목표는 완료로 처리하지 않는다.

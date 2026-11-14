@@ -4,10 +4,13 @@ param(
     [ValidateSet('normal', 'hard', 'both')][string]$Difficulty = 'both',
     [ValidateSet(1, 6)][int]$ThroughStage = 1,
     [ValidateSet(2, 4)][int]$Players = 4,
-    [ValidateRange(30, 1800)][int]$TimeoutSeconds = 900,
+    [ValidateRange(30, 3600)][int]$TimeoutSeconds = 900,
     [string]$ReportDirectory
 )
 $ErrorActionPreference = 'Stop'
+# The observed hard six-stage run exceeded thirty minutes before its last boss.
+# Keep shorter lobby/first-boundary defaults; respect explicit caller deadlines.
+if ($Mode -eq 'AI' -and $ThroughStage -eq 6 -and !$PSBoundParameters.ContainsKey('TimeoutSeconds')) { $TimeoutSeconds = 3600 }
 $headlessOriginal = (Resolve-Path -LiteralPath $OriginalProject).Path
 if (!(Test-Path -LiteralPath (Join-Path $headlessOriginal '.git') -PathType Container)) { throw 'Only the original project build may be used.' }
 if (![string]::IsNullOrWhiteSpace($env:RAID_STEAM_APP_ID) -and $env:RAID_STEAM_APP_ID -ne '0') { throw 'Clear the Steam override for isolated LAN/AI checks.' }

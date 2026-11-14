@@ -73,7 +73,7 @@ namespace RaidRogue
             _caseDirectory=Path.GetFullPath(Argument("case-dir"));
             if(!Directory.Exists(_caseDirectory)||!System.Text.RegularExpressions.Regex.IsMatch(Path.GetFileName(_caseDirectory),"^case-[a-f0-9]{32}$"))throw new InvalidOperationException("An explicit unique case directory is required.");
             _reportPath=Path.Combine(_caseDirectory,"role-"+_role+".json");
-            if(File.Exists(_reportPath)||(_mode!="ai"&&_mode!="lan-host"&&_mode!="lan-client"&&_mode!="single-save"&&_mode!="single-resume")||_role<1||_role>4||(_expected!=2&&_expected!=4)||(_target!=1&&_target!=6)||_timeout<15||_timeout>1800)throw new InvalidOperationException("Invalid isolated integration request.");
+            if(File.Exists(_reportPath)||(_mode!="ai"&&_mode!="lan-host"&&_mode!="lan-client"&&_mode!="single-save"&&_mode!="single-resume")||_role<1||_role>4||(_expected!=2&&_expected!=4)||(_target!=1&&_target!=6)||_timeout<15||_timeout>3600)throw new InvalidOperationException("Invalid isolated integration request.");
             string scenarioPath=Path.GetFullPath(Argument("scenario"));
             if(new FileInfo(scenarioPath).Length>32768)throw new InvalidOperationException("Scenario is too large.");
             _scenario=JsonUtility.FromJson<Scenario>(File.ReadAllText(scenarioPath));
