@@ -13,7 +13,9 @@ namespace RaidRogue
         private Font _font;
         private Button _beginBattle, _steamCreate, _invite, _ready, _cancelJoin, _single, _lanHost, _lanJoin;
         private Text _steamStatus;
-        private GameObject _confirmation;
+        private GameObject _confirmation, _recoveryPanel;
+        private Button _recover, _retry, _cancelRecovery;
+        private Text _recoveryStatus, _partyNotice;
         private void Start()
         {
             _session = GetComponent<RaidNetworkSession>();
@@ -36,6 +38,7 @@ namespace RaidRogue
             _lanJoin = ButtonAt(_start.transform, "LAN 주소로 참가", new Vector2(150, -60), new Vector2(280, 48), () => Connect(false));
             _steamCreate = ButtonAt(_start.transform, "Steam 방 만들기 · 친구 전용", new Vector2(0, -120), new Vector2(560, 48), () => RaidSteamRuntime.Instance?.CreateRoom());
             _cancelJoin = ButtonAt(_start.transform, "Steam 접속 취소", new Vector2(0, -180), new Vector2(300, 42), () => RaidSteamRuntime.Instance?.CancelJoin());
+            _recover = ButtonAt(_start.transform, "이전 게임으로 복귀", new Vector2(0, -180), new Vector2(400, 42), () => RaidSteamRuntime.Instance?.RequestRecovery());
             Label(_start.transform, "Steam 친구 초대는 오버레이에서 수락 · LAN 테스트는 주소로 참가\n최대 4명 · 빈 역할은 호스트 AI가 담당", new Vector2(0, -245), new Vector2(820, 70), 18);
             _room = Rect(overlay, "RoomOptions", Vector2.zero, new Vector2(800, 380)).gameObject;
             _roster = Label(_room.transform, "", new Vector2(0, 85), new Vector2(850, 160), 20);
@@ -48,7 +51,7 @@ namespace RaidRogue
             _invite = ButtonAt(_room.transform, "친구 초대", new Vector2(170, -105), new Vector2(325, 45), () => RaidSteamRuntime.Instance?.InviteFriends());
             _beginBattle = ButtonAt(_room.transform, "전투 시작 (호스트)", new Vector2(-170, -165), new Vector2(325, 48), () => _session.RequestAction(9));
             ButtonAt(_room.transform, "화면으로 돌아가기", new Vector2(170, -165), new Vector2(325, 48), () => _session.MenuOpen = false);
-            ButtonAt(_room.transform, "연결 종료 · 시작 화면", new Vector2(0, -225), new Vector2(470, 48), _session.Disconnect);
+            ButtonAt(_room.transform, "방 나가기 · 시작 화면", new Vector2(0, -225), new Vector2(470, 48), _session.Disconnect);
             var confirm = Box(canvas.transform, "SteamInviteConfirmation", Vector2.zero, Vector2.zero, new Color(.02f, .03f, .05f, .98f));
             confirm.anchorMin = Vector2.zero; confirm.anchorMax = Vector2.one; confirm.offsetMin = confirm.offsetMax = Vector2.zero;
             _confirmation = confirm.gameObject;
@@ -56,6 +59,15 @@ namespace RaidRogue
             ButtonAt(confirm, "현재 방 유지", new Vector2(-185, -70), new Vector2(340, 55), () => RaidSteamRuntime.Instance.AnswerInvite(false));
             ButtonAt(confirm, "나가고 초대 참가", new Vector2(185, -70), new Vector2(340, 55), () => RaidSteamRuntime.Instance.AnswerInvite(true));
             _confirmation.SetActive(false);
+            var recovery = Box(canvas.transform, "RecoveryOverlay", Vector2.zero, Vector2.zero, new Color(.02f, .03f, .05f, .96f));
+            recovery.anchorMin = Vector2.zero; recovery.anchorMax = Vector2.one; recovery.offsetMin = recovery.offsetMax = Vector2.zero;
+            _recoveryPanel = recovery.gameObject;
+            _recoveryStatus = Label(recovery, "", new Vector2(0, 80), new Vector2(920, 180), 25);
+            _retry = ButtonAt(recovery, "다시 연결", new Vector2(-190, -60), new Vector2(350, 55), () => RaidSteamRuntime.Instance?.RequestRecovery());
+            _cancelRecovery = ButtonAt(recovery, "재접속 취소", new Vector2(-190, -60), new Vector2(350, 55), _session.CancelRecovery);
+            ButtonAt(recovery, "메인 메뉴로", new Vector2(190, -60), new Vector2(350, 55), _session.RecoveryMenu);
+            _recoveryPanel.SetActive(false);
+            _partyNotice = Label(canvas.transform, "", new Vector2(0, 250), new Vector2(900, 90), 23);
             var bar = Box(canvas.transform, "LAN_Status", Vector2.zero, new Vector2(390, 70), new Color(0.04f, 0.08f, 0.13f, 0.94f));
             bar.anchorMin = bar.anchorMax = new Vector2(0, 1); bar.pivot = new Vector2(0, 1); bar.anchoredPosition = new Vector2(15, -64);
             _bar = bar.gameObject;
@@ -79,7 +91,16 @@ namespace RaidRogue
             _steamStatus.text = steam != null ? steam.Status : "Steam 사용 불가 · 싱글/LAN 사용 가능";
             _steamCreate.interactable = steam != null && steam.Available && !busy;
             _single.interactable = _lanHost.interactable = _lanJoin.interactable = !busy;
-            _cancelJoin.gameObject.SetActive(busy);
+            _cancelJoin.gameObject.SetActive(busy && !_session.IsRecovering);
+            _recover.gameObject.SetActive(steam != null && steam.PreviousLobby != 0 && !busy && _session.Mode == RaidSessionMode.Menu);
+            _recover.interactable = steam != null && steam.CanRecover;
+            bool recovering = _session.IsRecovering;
+            _recoveryPanel.SetActive(recovering);
+            _retry.gameObject.SetActive(recovering && !busy && _session.Mode == RaidSessionMode.Disconnected);
+            _retry.interactable = steam != null && steam.CanRecover;
+            _cancelRecovery.gameObject.SetActive(recovering && (busy || _session.Mode != RaidSessionMode.Disconnected));
+            _recoveryStatus.text = _session.Status + "\n" + (steam != null ? steam.Status : "Steam 사용 불가") + "\n상태 복구 완료 후 조작이 재개됩니다.";
+            _partyNotice.text = _session.VisiblePartyNotice; _partyNotice.gameObject.SetActive(_partyNotice.text.Length > 0);
             _invite.gameObject.SetActive(_session.UsesSteam && _session.CanJoinBattle);
             _ready.gameObject.SetActive(RaidNetworkSession.Multiplayer && _session.CanChooseRole);
             _ready.interactable = _session.HasLocalAvatar;
@@ -89,17 +110,17 @@ namespace RaidRogue
             _status.text = _session.Status;
             _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanJoinBattle);
             _beginBattle.interactable = _session.CanStartLobby;
-            _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · {_session.PlayerCount}/4명 · {_session.BattlePhase}\nSPACE 대쉬 · Q 포션";
+            _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\nSPACE 대쉬 · Q 포션";
             if (starting) return;
             if (_session.Mode == RaidSessionMode.Single)
                 _roster.text = "싱글플레이 진행 중\n연결 종료를 누르면 시작 화면으로 돌아갑니다.";
             else
             {
-                _roster.text = $"접속 완료 {_session.PlayerCount}/4 (호스트 포함)\n";
+                _roster.text = $"접속 {_session.ConnectedPlayerCount}/4 · 예약 포함 {_session.PlayerCount}자리 (호스트 포함)\n";
                 foreach (var avatar in _session.Avatars.Values)
                 {
                     if (avatar.IsBot && _session.CanChooseRole) continue;
-                    _roster.text += $"{avatar.DisplayName}{(avatar.Id == 1 ? " [호스트]" : "")}{(avatar.IsLocal ? " (나)" : "")} · {avatar.RoleName} · {(avatar.IsBot ? "AI" : avatar.Ready ? "준비 완료" : "준비 전")} · {(avatar.IsBot ? "" : avatar.Loaded ? "연결 완료" : "로딩 중")}\n";
+                    _roster.text += $"{avatar.DisplayName}{(avatar.Id == 1 ? " [호스트]" : "")}{(avatar.IsLocal ? " (나)" : "")} · {avatar.RoleName} · {(avatar.IsBot ? "AI" : avatar.Automated ? _session.ConnectionLabel(avatar.State) : avatar.Ready ? "준비 완료" : "준비 전")} · {(avatar.IsBot || avatar.Automated ? "" : avatar.Loaded ? "연결 완료" : "로딩 중")}\n";
                 }
                 if (_session.UsesSteam && steam != null)
                     foreach (ulong id in steam.Members())
@@ -145,8 +166,10 @@ namespace RaidRogue
         }
         private void LateUpdate()
         {
+            if (_recoveryPanel != null && _recoveryPanel.activeSelf) _recoveryPanel.transform.SetAsLastSibling();
+            if (_partyNotice != null && _partyNotice.gameObject.activeSelf) _partyNotice.transform.SetAsLastSibling();
             if (_confirmation != null && _confirmation.activeSelf) _confirmation.transform.SetAsLastSibling();
         }
-        private void OnDestroy() { if (_overlay != null) Destroy(_overlay); if (_bar != null) Destroy(_bar); if (_confirmation != null) Destroy(_confirmation); }
+        private void OnDestroy() { if (_overlay != null) Destroy(_overlay); if (_bar != null) Destroy(_bar); if (_confirmation != null) Destroy(_confirmation); if (_recoveryPanel != null) Destroy(_recoveryPanel); if (_partyNotice != null) Destroy(_partyNotice.gameObject); }
     }
 }

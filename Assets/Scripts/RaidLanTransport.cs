@@ -54,7 +54,8 @@ namespace RaidRogue
             foreach (byte value in bytes) writer.WriteByte(value);
             return _driver.EndSend(writer) >= 0;
         }
-        public void Disconnect(int connection) { if (_connections.TryGetValue(connection, out var handle)) _driver.Disconnect(handle); _connections.Remove(connection); }
+        public int TakeCloseCode(int connection) => 0;
+        public void Disconnect(int connection, bool voluntary = false, bool transient = false) { if (_connections.TryGetValue(connection, out var handle)) _driver.Disconnect(handle); _connections.Remove(connection); }
         public ulong RemoteSteamId(int connection) => 0;
         public void Dispose() { if (_driver.IsCreated) _driver.Dispose(); _driver = default; _connections.Clear(); }
     }

@@ -19,10 +19,15 @@ if ($LASTEXITCODE -ne 0) { throw 'Steam policy test compilation failed.' }
 & $taskExe
 if ($LASTEXITCODE -ne 0) { throw 'Steam policy tests failed.' }
 $taskAdapterExe = Join-Path $taskOutput 'SteamTransportTests.exe'
-& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskAdapterExe" (Join-Path $taskRoot 'Assets/Scripts/RaidTransport.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidSteamTransport.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $PSScriptRoot 'RaidSteamTransportTests.cs')
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskAdapterExe" (Join-Path $taskRoot 'Assets/Scripts/RaidTransport.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidSteamTransport.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidRecoveryState.cs') (Join-Path $PSScriptRoot 'RaidSteamTransportTests.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Steam transport test compilation failed.' }
 & $taskAdapterExe
 if ($LASTEXITCODE -ne 0) { throw 'Steam transport tests failed.' }
+$taskRecoveryExe = Join-Path $taskOutput 'RecoveryTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskRecoveryExe" (Join-Path $taskRoot 'Assets/Scripts/RaidRecoveryState.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidCombatProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $PSScriptRoot 'RaidRecoveryTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Recovery test compilation failed.' }
+& $taskRecoveryExe
+if ($LASTEXITCODE -ne 0) { throw 'Recovery tests failed.' }
 # Compile the actual pinned SDK, without loading native Steam or running Unity.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
 $taskDefines = $taskProject.SelectSingleNode("//*[local-name()='DefineConstants']").InnerText

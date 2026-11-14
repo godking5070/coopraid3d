@@ -566,6 +566,7 @@ namespace RaidRogue
         private bool TryGetPartyMechanicDestinationXZ(out Vector3 mechanicDestXZ)
         {
             mechanicDestXZ = transform.position;
+            if (RaidNetworkSession.Multiplayer && targetBoss != null) return PartyAiTactics.PartyMechanic(transform, (int)role + 1, targetBoss, out mechanicDestXZ);
             if (targetBoss == null)
             {
                 return false;
@@ -669,9 +670,7 @@ namespace RaidRogue
         {
             _isInterceptingTetherForPlayer = false;
             // A world-space parking point must not move north each time the boss follows us.
-            Vector3 desiredPos = new Vector3(0, 1, tankNorthParkingDistance);
-            if (!targetBoss.isMeleeBoss || targetBoss.ResolveLivingAggroTarget() != transform)
-                desiredPos = CombatRange.AttackPosition(transform, targetBoss.transform, Vector3.forward, MeleeAttackRange);
+            Vector3 desiredPos = PartyAiTactics.TankPosition(transform, targetBoss, MeleeAttackRange, tankNorthParkingDistance);
             if (TryGetMeleeMechanicDestination(out Vector3 mechanicPos)) desiredPos = mechanicPos;
             desiredPos = CombatRange.ClampToArena(desiredPos, PartyArenaRadius);
 
@@ -839,23 +838,7 @@ namespace RaidRogue
         private bool TryGetMeleeMechanicDestination(out Vector3 destination)
         {
             if (TryGetPartyMechanicDestinationXZ(out destination)) return true;
-            AoETelegraph aoe = targetBoss.ActiveTelegraph;
-            if (aoe == null) return false;
-            Vector3 direction = transform.position - aoe.transform.position;
-            direction.y = 0;
-            if (direction.sqrMagnitude < 0.001f) direction = -targetBoss.transform.forward;
-            if (aoe.telegraphType == AoETelegraphType.Circle_Radius6)
-                destination = aoe.transform.position + direction.normalized * (aoe.outerRadius + combatRadius + 0.4f);
-            else if (aoe.telegraphType == AoETelegraphType.Donut_Inner4_Outer12)
-            {
-                float safeRadius = Mathf.Max(0, aoe.innerRadius - combatRadius - 0.2f);
-                destination = aoe.transform.position + direction.normalized * Mathf.Min(safeRadius, targetBoss.CombatRadius + combatRadius + 0.2f);
-            }
-            else if (aoe.telegraphType == AoETelegraphType.FrontCone_120Deg)
-                destination = CombatRange.AttackPosition(transform, targetBoss.transform, -targetBoss.transform.forward, MeleeAttackRange);
-            else return false;
-            destination.y = transform.position.y;
-            return true;
+            return PartyAiTactics.HazardDestination(transform, targetBoss, MeleeAttackRange, out destination);
         }
 
         public void KillTankByUninterceptedTether()
@@ -947,23 +930,7 @@ namespace RaidRogue
                 Resurrection.TryBegin(corpse);
                 return true; // Stand still for the next attempt if we moved earlier this frame.
             }
-            Vector3 best = transform.position;
-            float closest = float.PositiveInfinity;
-            for (int i = 0; i < 24; i++)
-            {
-                float angle = i * Mathf.PI * 2 / 24;
-                Vector3 candidate = corpse.position + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * Mathf.Max(0, range - 1f);
-                candidate = CombatRange.ClampToArena(candidate, PartyArenaRadius);
-                candidate.y = transform.position.y;
-                if (BattleResurrection.FlatDistance(candidate, corpse.position) > range - 0.1f) continue;
-                bool safe = true;
-                for (int sample = 1; sample <= 12 && hazard != null; sample++)
-                    if (hazard.IsPointInsideXZ(Vector3.Lerp(transform.position, candidate, sample / 12f))) { safe = false; break; }
-                if (!safe) continue;
-                float distance = (candidate - transform.position).sqrMagnitude;
-                if (distance < closest) { closest = distance; best = candidate; }
-            }
-            if (float.IsPositiveInfinity(closest)) return false;
+            if (!PartyAiTactics.ResurrectionApproach(transform, corpse, range, PartyArenaRadius, hazard, out Vector3 best)) return false;
             MoveTowardsXZ(best, corpse.position, GetMoveSpeedMultiplier(1f));
             return true;
         }
@@ -1073,14 +1040,7 @@ namespace RaidRogue
 
         private void TryHealLowestPartyMember()
         {
-            Transform target = null; float lowest = 1;
-            foreach (var member in PartyLife.OrderedMembers())
-            {
-                if (!CombatRange.LivingPartyMember(member)) continue;
-                var pc = member.GetComponent<PlayerController>(); var bot = member.GetComponent<PartyBotAI>();
-                float ratio = pc != null ? pc.HpRatio : bot.HpRatio;
-                if (ratio < lowest) { lowest = ratio; target = member; }
-            }
+            Transform target = PartyAiTactics.LowestHealth(out _);
             if (target == null) { CurrentActionTarget = targetBoss != null ? targetBoss.transform : null; return; }
             CurrentActionTarget = target; FaceTargetXZ(target.position);
             var player = target.GetComponent<PlayerController>();
@@ -1607,7 +1567,7 @@ namespace RaidRogue
         }
     }
 
-    public class RangedBotProjectile : MonoBehaviour
+    public partial class RangedBotProjectile : MonoBehaviour
     {
         private BossController _targetBoss;
         private Transform _source;

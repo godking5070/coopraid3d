@@ -9,13 +9,13 @@ namespace RaidRogue
 {
     // The only owner of Steam initialization, callbacks, lobby membership and shutdown.
     [DefaultExecutionOrder(-1000)]
-    public sealed class RaidSteamRuntime : MonoBehaviour
+    public sealed partial class RaidSteamRuntime : MonoBehaviour
     {
         public static RaidSteamRuntime Instance { get; private set; }
         public bool Available { get; private set; }
         public bool OverlayOpen { get; private set; }
         public bool ConfirmInvite => _invites.NeedsConfirmation;
-        public bool Busy => _creating || _invites.Attempt != 0;
+        public bool Busy => _creating || _invites.Attempt != 0 || _recovering;
         public ulong LobbyId { get; private set; }
         public ulong HostId { get; private set; }
         public ulong UserId => Available ? SteamUser.GetSteamID().m_SteamID : 0;
@@ -65,7 +65,7 @@ namespace RaidRogue
                     // Never change timeScale: the host and the battle keep running.
                 });
                 _members = Callback<LobbyChatUpdate_t>.Create(e => { if (e.m_ulSteamIDLobby == LobbyId) _nextCheck = 0; });
-                _data = Callback<LobbyDataUpdate_t>.Create(e => { if (e.m_ulSteamIDLobby == LobbyId) _nextCheck = 0; });
+                _data = Callback<LobbyDataUpdate_t>.Create(e => { if (e.m_ulSteamIDLobby == LobbyId) { _nextCheck = 0; if (_recovering && !_recoveryConnecting) RecoveryMetadata(e.m_bSuccess != 0); } });
                 Status = "Steam 연결됨 · " + Persona(UserId);
                 ulong launch = RaidSteamPolicy.LaunchLobby(Environment.GetCommandLineArgs());
                 if (launch == 0 && SteamApps.GetLaunchCommandLine(out string command, 4096) > 0)
@@ -82,20 +82,21 @@ namespace RaidRogue
         {
             if (!Available) return;
             SteamAPI.RunCallbacks();
+            if (_recovering) { if (Time.unscaledTime > _deadline) RecoveryError("재접속 시간이 초과되었습니다. 다시 시도해 주세요.", false); return; }
+            if (_readOnlyRecovery) return;
             if (_invites.Pending != 0 && !_invites.NeedsConfirmation && !Busy && Session != null && Session.Mode == RaidSessionMode.Menu)
                 JoinPending();
             if (Busy && Time.unscaledTime > _deadline) { Fail("Steam 참가 시간이 초과되었습니다. 호스트 상태를 확인한 뒤 다시 초대받으세요."); return; }
             if (LobbyId == 0 || Time.unscaledTime < _nextCheck) return;
             _nextCheck = Time.unscaledTime + .5f;
             ulong owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID;
-            if (HostId != 0 && (owner != HostId || !IsMember(HostId)))
+            if (HostId != 0 && IsMember(UserId) && owner != 0 && (owner != HostId || !IsMember(HostId)))
             { Fail("호스트가 방을 나갔습니다. 호스트 이전은 지원하지 않습니다."); return; }
             if (_waitingHost) { CheckHost(); return; }
             if (Session == null || !Session.UsesSteam) return;
             if (Session.IsHostAuthority)
             {
                 PublishPhase();
-                foreach (var id in Session.ConnectedSteamIds()) if (id != UserId && !IsMember(id)) Session.RemoveSteamMember(id);
             }
             else if (Session.Mode == RaidSessionMode.Client && _invites.Attempt != 0)
             { _invites.Finish(); Status = "Steam Relay 연결 완료"; }
@@ -127,6 +128,7 @@ namespace RaidRogue
         public void RequestInvite(ulong lobby)
         {
             if (!Available || !new CSteamID(lobby).IsLobby()) return;
+            if (lobby == PreviousLobby && Session != null && (Session.Mode == RaidSessionMode.Menu || Session.Mode == RaidSessionMode.Disconnected)) { RequestRecovery(); return; }
             bool occupied = LobbyId != 0 || Busy || (Session != null && Session.Mode != RaidSessionMode.Menu);
             if (!_invites.Request(lobby, LobbyId, occupied)) return;
             if (occupied) { QuarterViewCamera.LocalCamera?.ReleaseOrbit(); Status = "다른 Steam 방 초대 · 현재 세션을 나갈지 선택하세요"; }
@@ -142,6 +144,7 @@ namespace RaidRogue
         private void JoinPending()
         {
             ulong lobbyId = _invites.Begin(); if (lobbyId == 0) return;
+            if (lobbyId == PreviousLobby) { _invites.Finish(); RequestRecovery(); return; }
             int generation = ++_generation; _deadline = Time.unscaledTime + 30; Status = "Steam 로비 참가 중…";
             CallResult<LobbyEnter_t> call = null;
             call = CallResult<LobbyEnter_t>.Create((result, failed) =>
@@ -180,8 +183,8 @@ namespace RaidRogue
         }
         public bool Admit(ulong remote)
         {
-            return Available && LobbyId != 0 && HostId == UserId && Session != null && Session.CanJoinBattle &&
-                SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID == HostId && remote != UserId && IsMember(remote) && LobbyCount <= 4;
+            return Available && LobbyId != 0 && HostId == UserId && Session != null && (Session.KnowsSteamMember(remote) || (Session.CanJoinBattle && IsMember(remote) && LobbyCount <= 4)) &&
+                SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID == HostId && remote != UserId;
         }
         public int LobbyCount => Available && LobbyId != 0 ? SteamMatchmaking.GetNumLobbyMembers(new CSteamID(LobbyId)) : 0;
         public List<ulong> Members()
@@ -219,12 +222,12 @@ namespace RaidRogue
         public void LeaveLobby()
         {
             ulong attempt = _invites.Attempt;
-            ++_generation; _creating = _waitingHost = false; _invites.Finish(); _publishedPhase = null;
+            ++_generation; _creating = _waitingHost = _recovering = _recoveryConnecting = _readOnlyRecovery = false; _invites.Finish(); _publishedPhase = null;
             if (Available && attempt != 0 && attempt != LobbyId) SteamMatchmaking.LeaveLobby(new CSteamID(attempt));
             if (Available && LobbyId != 0)
             {
                 var lobby = new CSteamID(LobbyId);
-                if (HostId == UserId) { SteamMatchmaking.SetLobbyJoinable(lobby, false); SteamMatchmaking.SetLobbyData(lobby, "ready", "0"); }
+                if (HostId == UserId) { SteamMatchmaking.SetLobbyJoinable(lobby, false); SteamMatchmaking.SetLobbyData(lobby, "ready", "0"); SteamMatchmaking.SetLobbyData(lobby, "phase", "closed"); }
                 SteamMatchmaking.LeaveLobby(lobby);
             }
             LobbyId = HostId = 0;

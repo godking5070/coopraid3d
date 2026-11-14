@@ -42,6 +42,7 @@ namespace RaidRogue
     public partial class RoguelikeCardManager
     {
         private int _networkOfferEpoch = -1;
+        public string NetworkCardName(int id) => _cardPool.Find(c => (int)c.id == id)?.title ?? ((RoguelikeCardId)id).ToString();
         public float NetworkHaste { get => _partyAttackSpeedBuffTimer; set => _partyAttackSpeedBuffTimer = value; }
         public int[] GenerateNetworkOffer()
         {

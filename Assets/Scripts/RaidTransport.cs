@@ -13,7 +13,8 @@ namespace RaidRogue
         int Accept();
         RaidTransportEvent Poll(int connection, out byte[] bytes);
         bool Send(int connection, byte[] bytes, bool reliable);
-        void Disconnect(int connection);
+        void Disconnect(int connection, bool voluntary = false, bool transient = false);
+        int TakeCloseCode(int connection);
         ulong RemoteSteamId(int connection);
     }
 

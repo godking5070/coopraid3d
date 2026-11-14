@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace RaidRogue
 {
-    public enum RaidSessionMode { Menu, Single, Connecting, Host, Client, Closing }
+    public enum RaidSessionMode { Menu, Single, Connecting, Host, Client, Closing, Disconnected, Restoring }
 
     [DefaultExecutionOrder(-50)]
     public sealed partial class RaidNetworkSession : MonoBehaviour
@@ -31,17 +31,18 @@ namespace RaidRogue
                 _menuOpen = value;
             }
         }
-        public static bool CombatPreview => Instance != null && Instance.Mode != RaidSessionMode.Single && (!Multiplayer || Instance.BattlePhase != RaidBattlePhase.Combat);
-        public static bool Multiplayer => Instance != null && (Instance.Mode == RaidSessionMode.Host || Instance.Mode == RaidSessionMode.Client);
-        public static bool BlocksInput => Instance != null && (Instance.MenuOpen || (Instance.Mode != RaidSessionMode.Single && !Instance.HasLocalAvatar));
+        public static bool CombatPreview => Instance != null && Instance.Mode != RaidSessionMode.Single && (Instance.IsRecovering || !Multiplayer || Instance.BattlePhase != RaidBattlePhase.Combat);
+        public static bool Multiplayer => Instance != null && (Instance.Mode == RaidSessionMode.Host || Instance.Mode == RaidSessionMode.Client || Instance.Mode == RaidSessionMode.Restoring || Instance.Mode == RaidSessionMode.Disconnected || (Instance.Mode == RaidSessionMode.Connecting && Instance._resumeRequested));
+        public static bool BlocksInput => Instance != null && (Instance.MenuOpen || (Instance.Mode != RaidSessionMode.Single && !Instance.ControlsReady) || (Instance.Mode != RaidSessionMode.Single && !Instance.HasLocalAvatar));
         public bool HasLocalAvatar => Multiplayer && _avatars.ContainsKey(_localId);
         public RaidNetworkMotor LocalMotor => _motors.TryGetValue(_localId, out var motor) ? motor : null;
         public int PlayerCount { get { int count = 0; foreach (var avatar in _avatars.Values) if (!avatar.IsBot) count++; return count; } }
+        public int ConnectedPlayerCount { get { int count = 0; foreach (var avatar in _avatars.Values) if (!avatar.IsBot && !avatar.Automated) count++; return count; } }
         public IReadOnlyDictionary<int, NetworkRaidAvatar> Avatars => _avatars;
         private PlayerController _player;
         private IRaidTransport _transport;
         private int _server;
-        public bool UsesSteam => _transport != null && _transport.IsSteam;
+        public bool UsesSteam => _steamSession || (_transport != null && _transport.IsSteam);
         private readonly RaidRoster _roster = new RaidRoster();
         private readonly Dictionary<int, NetworkRaidAvatar> _avatars = new Dictionary<int, NetworkRaidAvatar>();
         private readonly Dictionary<int, RaidNetworkMotor> _motors = new Dictionary<int, RaidNetworkMotor>();
@@ -50,7 +51,10 @@ namespace RaidRogue
         {
             public int Connection;
             public int Id;
-            public float ConnectedAt, LastInput, CloseAt, LastRole;
+            public uint Lease;
+            public bool Voluntary, RecoveryFrame;
+            public readonly RaidRestoreBarrier Barrier = new RaidRestoreBarrier();
+            public float ConnectedAt, LastInput, CloseAt, LastRole, NextRecoveryFrame;
             public readonly RaidInputQueue Inputs = new RaidInputQueue();
         }
         private readonly List<Peer> _peers = new List<Peer>();
@@ -66,7 +70,7 @@ namespace RaidRogue
         {
             if (Instance == null) stage.gameObject.AddComponent<RaidNetworkSession>();
         }
-        private void Awake() { Instance = this; Status = _returnMessage; }
+        private void Awake() { Instance = this; Status = _returnMessage; _recovery = new RaidRecoverySlots(RecoverySettings); }
         private void Start()
         {
             _player = FindFirstObjectByType<PlayerController>();
@@ -97,7 +101,7 @@ namespace RaidRogue
             _playerName = RaidRoster.CleanName(name);
             try
             {
-                _transport = create();
+                _transport = create(); _steamSession = _transport.IsSteam;
                 if (host)
                 {
                     Mode = RaidSessionMode.Host;
@@ -120,7 +124,7 @@ namespace RaidRogue
             {
                 DisposeDriver();
                 if (Mode == RaidSessionMode.Host || Mode == RaidSessionMode.Client) RequestReturn("연결 실패: " + error.Message);
-                Mode = RaidSessionMode.Menu; Status = "연결 실패: " + error.Message; return false;
+                Mode = _resumeRequested ? RaidSessionMode.Disconnected : RaidSessionMode.Menu; Status = "연결 실패: " + error.Message; return false;
             }
         }
         public static bool TryAddress(string address, out NetworkEndpoint endpoint)
@@ -151,9 +155,10 @@ namespace RaidRogue
             if (_returnRequested) { ReloadMenu(); return; }
             if (_transport == null || !_transport.IsCreated) return;
             _transport.Update();
-            if (IsHost) PollHost(); else if (Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Connecting) PollClient();
-            if (Mode == RaidSessionMode.Connecting && Time.unscaledTime - _connectTime > (UsesSteam ? 30 : 8)) RequestReturn(UsesSteam ? "Steam 호스트 접속 시간 초과: 호스트와 Steam 연결 상태를 확인하세요." : "접속 시간 초과: 주소, 포트, 호스트 실행 및 방화벽을 확인하세요.");
-            if (Mode == RaidSessionMode.Client && Time.unscaledTime - _lastServerPacket > 6) RequestReturn("호스트 응답이 끊겼습니다.");
+            if (IsHost) PollHost(); else if (Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Connecting || Mode == RaidSessionMode.Restoring) PollClient();
+            if (Mode == RaidSessionMode.Connecting && Time.unscaledTime - _connectTime > (UsesSteam ? 30 : 8)) { if (_resumeRequested) { UnexpectedClientLoss("호스트 재접속 시간 초과"); return; } RequestReturn(UsesSteam ? "Steam 호스트 접속 시간 초과: 호스트와 Steam 연결 상태를 확인하세요." : "접속 시간 초과: 주소, 포트, 호스트 실행 및 방화벽을 확인하세요."); }
+            if ((Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Restoring) && Time.unscaledTime - _lastServerPacket > RecoverySettings.silenceSeconds) { UnexpectedClientLoss("호스트 응답이 끊겼습니다"); return; }
+            if (Mode == RaidSessionMode.Restoring && Time.unscaledTime - _restoreStarted > RecoverySettings.restoreSeconds) { UnexpectedClientLoss("현재 상태 복구 시간이 초과되었습니다"); return; }
             if (Multiplayer && !_returnRequested)
             {
                 _accumulator = Mathf.Min(_accumulator + Time.unscaledDeltaTime, RaidWire.Step * 4);
@@ -177,12 +182,15 @@ namespace RaidRogue
                 int budget = 64;
                 while (budget-- > 0 && (type = _transport.Poll(peer.Connection, out var bytes)) != RaidTransportEvent.Empty)
                 {
-                    if (type == RaidTransportEvent.Disconnected) { remove = true; break; }
+                    if (type == RaidTransportEvent.Disconnected) { peer.Voluntary |= _transport.TakeCloseCode(peer.Connection) == 1002; remove = true; break; }
                     if (type != RaidTransportEvent.Data || !RaidWire.Decode(bytes, out var packet) || peer.CloseAt > 0) continue;
-                    if (packet.Kind == RaidPacketKind.Hello && peer.Id == 0)
+                    peer.LastInput = Time.unscaledTime;
+                    if ((packet.Kind == RaidPacketKind.Hello || packet.Kind == RaidPacketKind.ResumeHello) && peer.Id == 0)
                     {
                         string[] hello = packet.Text.Split('\n');
                         if (hello.Length != 2 || hello[0] != HelloTag) { Reject(peer, "호스트와 같은 씬/테스트 빌드를 사용하세요."); continue; }
+                        if (packet.Kind == RaidPacketKind.ResumeHello) { TryResumePeer(peer); continue; }
+                        if (UsesSteam && _recovery.Find(_transport.RemoteSteamId(peer.Connection)) != null) { Reject(peer, "이미 배정된 자리입니다. 이전 게임으로 복귀를 사용하세요."); continue; }
                         if (!CanJoinBattle) { Reject(peer, "현재 런에는 참가할 수 없습니다. 최초 대기실에서만 참가할 수 있습니다."); continue; }
                         ulong steamId = UsesSteam ? _transport.RemoteSteamId(peer.Connection) : 0;
                         if (UsesSteam && (!RaidSteamRuntime.Instance.Admit(steamId) || _roster.Members.Exists(m => m.SteamId == steamId)))
@@ -192,26 +200,30 @@ namespace RaidRogue
                         member.SteamId = steamId;
                         peer.Id = member.Id; peer.LastInput = Time.unscaledTime;
                         AddAvatar(member.Id, member.Role, member.Name, SpawnPoint(member.Role)); ReconcileBots(); SyncLobbyAvatar(member);
-                        _config.Id = member.Id; Send(peer.Connection, _config, true);
+                        RegisterRecoveryMember(member); peer.Lease = _recovery.Actor(member.Id)?.Lease ?? 0;
+                        SendWelcome(peer, false);
                         SendSnapshot(peer.Connection);
                     }
-                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.Ready) SetReady(peer.Id, packet.Id != 0);
-                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.SceneReady) SetLoaded(peer.Id, packet.Id);
-                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.CombatRequest)
+                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.Leave) { peer.Voluntary = true; _transport.Disconnect(peer.Connection); remove = true; break; }
+                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.RestoreReady) AcceptRestore(peer, packet);
+                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.RestoreComplete && (uint)packet.Role == peer.Lease && PeerControls(peer)) peer.RecoveryFrame = false;
+                    else if (PeerControls(peer) && packet.Kind == RaidPacketKind.Ready) SetReady(peer.Id, packet.Id != 0);
+                    else if (PeerControls(peer) && packet.Kind == RaidPacketKind.SceneReady) SetLoaded(peer.Id, packet.Id);
+                    else if (PeerControls(peer) && packet.Kind == RaidPacketKind.CombatRequest)
                     {
                         try { ExecuteAction(peer.Id, JsonUtility.FromJson<RaidActionRequest>(packet.Text)); } catch (ArgumentException) { ActionFailure(peer.Id, "잘못된 행동 요청입니다"); }
                     }
                     else if (peer.Id != 0 && packet.Kind == RaidPacketKind.Ping)
                         Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.Pong, Speed = packet.Speed, Radius = ServerTime }, false);
-                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.Input)
+                    else if (PeerControls(peer) && packet.Kind == RaidPacketKind.Input)
                     {
                         foreach (var input in packet.Inputs) if (peer.Inputs.Add(input)) peer.LastInput = Time.unscaledTime;
                     }
-                    else if (peer.Id != 0 && packet.Kind == RaidPacketKind.Role && Time.unscaledTime - peer.LastRole >= 0.25f)
+                    else if (PeerControls(peer) && packet.Kind == RaidPacketKind.Role && Time.unscaledTime - peer.LastRole >= 0.25f)
                     { peer.LastRole = Time.unscaledTime; ChooseRole(peer.Id, packet.Role, peer.Connection); }
                 }
-                if ((peer.CloseAt > 0 && Time.unscaledTime >= peer.CloseAt) || (peer.Id == 0 && Time.unscaledTime - peer.ConnectedAt > 6)) { _transport.Disconnect(peer.Connection); remove = true; }
-                if (remove) { _roster.Remove(peer.Id); OnNetworkDeparture(peer.Id); RemoveAvatar(peer.Id); _peers.RemoveAt(i); if (CanJoinBattle) ReconcileBots(); }
+                if ((peer.CloseAt > 0 && Time.unscaledTime >= peer.CloseAt) || (peer.Id == 0 && Time.unscaledTime - peer.ConnectedAt > 6) || (peer.Id != 0 && Time.unscaledTime - peer.LastInput > RecoverySettings.silenceSeconds)) { _transport.Disconnect(peer.Connection, transient: peer.CloseAt == 0); remove = true; }
+                if (remove) { DropPeer(peer); _peers.RemoveAt(i); }
             }
         }
         private void PollClient()
@@ -220,19 +232,36 @@ namespace RaidRogue
             while ((type = _transport.Poll(_server, out var bytes)) != RaidTransportEvent.Empty)
             {
                 if (type == RaidTransportEvent.Connected)
-                    Send(_server, new RaidPacket { Kind = RaidPacketKind.Hello, Text = HelloTag + "\n" + _playerName }, true);
-                else if (type == RaidTransportEvent.Disconnected) { RequestReturn("호스트 연결이 종료되었거나 접속에 실패했습니다."); return; }
+                    Send(_server, new RaidPacket { Kind = _resumeRequested ? RaidPacketKind.ResumeHello : RaidPacketKind.Hello, Text = HelloTag + "\n" + _playerName }, true);
+                else if (type == RaidTransportEvent.Disconnected)
+                {
+                    int code = _transport.TakeCloseCode(_server);
+                    if (code == 1003 && _resumeRequested) UnexpectedClientLoss("같은 Steam 계정의 기존 연결을 정리 중입니다. 잠시 후 다시 시도하세요");
+                    else if (code == 1000 || code == 1001 || code == 1003) { RaidSteamRuntime.Instance?.ForgetRecovery(); RequestReturn("호스트가 종료했거나 참가를 승인할 수 없는 상태입니다."); }
+                    else if (UsesSteam && (Mode != RaidSessionMode.Connecting || _resumeRequested)) UnexpectedClientLoss("네트워크 연결이 끊겼습니다");
+                    else RequestReturn("호스트 접속에 실패했습니다.");
+                    return;
+                }
                 else if (type == RaidTransportEvent.Data && RaidWire.Decode(bytes, out var packet))
                 {
                     _lastServerPacket = Time.unscaledTime;
                     if (packet.Kind == RaidPacketKind.Welcome && Mode == RaidSessionMode.Connecting)
-                    { _localId = packet.Id; _config = packet; DisableBots(); Mode = RaidSessionMode.Client; Status = "연결됨 · 역할 선택 후 호스트가 전투를 시작합니다"; }
-                    else if (packet.Kind == RaidPacketKind.Snapshot && Mode == RaidSessionMode.Client && packet.Tick > _lastSnapshot)
+                    {
+                        _localId = packet.Id; _config = packet; _localLease = packet.Tick;
+                        if (_avatars.Count == 0) DisableBots();
+                        _controlReady = packet.Role == 0; _resumeRequested = packet.Role != 0;
+                        Mode = packet.Role != 0 ? RaidSessionMode.Restoring : RaidSessionMode.Client; _restoreStarted = Time.unscaledTime;
+                        Status = packet.Role != 0 ? "현재 전투 상태 복구 중…" : "연결됨 · 역할 선택 후 준비하세요";
+                        if (UsesSteam) RaidSteamRuntime.Instance?.RememberRecovery();
+                    }
+                    else if (packet.Kind == RaidPacketKind.Snapshot && (Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Restoring) && packet.Tick > _lastSnapshot)
                     { _lastSnapshot = packet.Tick; ApplySnapshot(packet); }
-                    else if (Mode == RaidSessionMode.Client && (packet.Kind == RaidPacketKind.CombatFrame || packet.Kind == RaidPacketKind.CombatEffect || packet.Kind == RaidPacketKind.Pong)) ReceiveCombatPacket(packet);
+                    else if ((Mode == RaidSessionMode.Client || Mode == RaidSessionMode.Restoring) && (packet.Kind == RaidPacketKind.CombatFrame || packet.Kind == RaidPacketKind.CombatEffect || packet.Kind == RaidPacketKind.Pong)) ReceiveCombatPacket(packet);
+                    else if (packet.Kind == RaidPacketKind.PartyNotice) ShowPartyNotice(packet.Text);
                     else if (packet.Kind == RaidPacketKind.Notice)
                     {
-                        if (packet.Text.StartsWith("종료:")) { RequestReturn(packet.Text.Substring(3)); return; }
+                        if (packet.Text.StartsWith("재접속:")) { UnexpectedClientLoss(packet.Text.Substring(4)); return; }
+                        if (packet.Text.StartsWith("종료:")) { RaidSteamRuntime.Instance?.ForgetRecovery(); RequestReturn(packet.Text.Substring(3)); return; }
                         Status = packet.Text; _player.combatController.ReportNetworkFailure(packet.Text);
                     }
                 }
@@ -241,7 +270,7 @@ namespace RaidRogue
         private void Tick()
         {
             _tick++;
-            if (HasLocalAvatar)
+            if (HasLocalAvatar && ControlsReady && (IsHost || _prediction.Count < 90))
             {
                 var input = new RaidMoveInput { Sequence = ++_sequence, MotionVersion = _avatars[_localId].MotionVersion, X = _frameDirection.x, Z = _frameDirection.z, Dash = _dashQueued };
                 _dashQueued = false;
@@ -250,7 +279,7 @@ namespace RaidRogue
                 else { _config.Speed = _player.NetworkMoveSpeed; Vector3 before = LocalMotor.Position; LocalMotor.Step(input, _player.transform, _config, !_avatars[_localId].MovementLocked); _player.SetNetworkMoving((before - LocalMotor.Position).sqrMagnitude > .000001f); }
                 if (!IsHost)
                 {
-                    if (_prediction.Count >= 90) { RequestReturn("이동 확인 응답이 지연되었습니다. 다시 접속하세요."); return; }
+
                     _prediction.Add(input);
                     var packet = new RaidPacket { Kind = RaidPacketKind.Input };
                     for (int i = 0; i < Math.Min(8, _prediction.Count); i++) packet.Inputs.Add(_prediction[i]);
@@ -258,17 +287,29 @@ namespace RaidRogue
                 }
                 _avatars[_localId].Display(LocalMotor.Position, LocalMotor.Yaw, LocalMotor.Dash.Active);
             }
-            if (!IsHost) return;
+            if (!IsHost)
+            {
+                // Keep retransmitting unacknowledged input when prediction is capped during a latency spike.
+                if (ControlsReady && _prediction.Count >= 90)
+                {
+                    var pending = new RaidPacket { Kind = RaidPacketKind.Input };
+                    for (int i = 0; i < Math.Min(8, _prediction.Count); i++) pending.Inputs.Add(_prediction[i]);
+                    Send(_server, pending, false);
+                }
+                return;
+            }
+            StepReplacementAI();
             foreach (var peer in _peers)
             {
-                if (peer.Id == 0 || peer.CloseAt != 0 || !_motors.TryGetValue(peer.Id, out var motor)) continue;
+                if (!PeerControls(peer) || !_motors.TryGetValue(peer.Id, out var motor)) continue;
                 var input = peer.Inputs.Next();
                 if (Time.unscaledTime - peer.LastInput > 0.3f) { input.X = input.Z = 0; input.Dash = false; }
                 StepHostAvatar(_avatars[peer.Id], input);
             }
             foreach (var peer in _peers) if (peer.Id != 0 && peer.CloseAt == 0) SendSnapshot(peer.Connection);
         }
-        private void SendSnapshot(int connection)
+        private void SendSnapshot(int connection) => Send(connection, BuildSnapshot(), false);
+        private RaidPacket BuildSnapshot()
         {
             var packet = new RaidPacket { Kind = RaidPacketKind.Snapshot, Tick = _tick + 1 };
             foreach (var avatar in _avatars.Values)
@@ -282,7 +323,7 @@ namespace RaidRogue
                 pose.MoveSpeed = avatar.GetComponent<PlayerController>()?.NetworkMoveSpeed ?? 7.8f;
                 packet.Poses.Add(pose);
             }
-            Send(connection, packet, false);
+            return packet;
         }
         private void ApplySnapshot(RaidPacket packet)
         {
@@ -331,7 +372,7 @@ namespace RaidRogue
         }
         public void SelectRole(int role)
         {
-            if (!HasLocalAvatar) return;
+            if (!HasLocalAvatar || !ControlsReady) return;
             if (IsHost) ChooseRole(_localId, role, default);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.Role, Role = role }, true);
         }
@@ -354,7 +395,9 @@ namespace RaidRogue
         {
             if (IsHost)
                 foreach (var peer in _peers) Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.Notice, Text = "종료:호스트가 방을 닫았습니다." }, true);
-            else if (_transport != null && _transport.IsCreated && _server != 0) _transport.Disconnect(_server);
+            else if (_transport != null && _transport.IsCreated && _server != 0)
+            { Send(_server, new RaidPacket { Kind = RaidPacketKind.Leave }, true); _transport.Disconnect(_server, true); }
+            if (UsesSteam) RaidSteamRuntime.Instance?.ForgetRecovery();
             _returnMessage = "연결을 종료했습니다.";
             if (UsesSteam) RaidSteamRuntime.Instance?.NoteSessionEnd(_returnMessage);
             if (_transport != null && _transport.IsCreated) { Mode = RaidSessionMode.Closing; MenuOpen = true; _closeAt = Time.unscaledTime + 0.35f; RaidSteamRuntime.Instance?.PublishPhase(); }

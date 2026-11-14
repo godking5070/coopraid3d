@@ -512,7 +512,15 @@ namespace RaidRogue
                     if (!state.dead && state.defense > 0) suffix += " · 방어";
                     if (!state.dead && state.haste > 0) suffix += " · 가속";
                     if (RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Reward) suffix = avatar.IsBot ? " · AI" : state.rewardChosen ? " · 선택 완료" : " · 카드 선택 중";
+                    string connection = RaidNetworkSession.Instance.ConnectionLabel(state);
                     row.hpValueText.text = $"{state.hp:0}/{state.maxHp:0} (+{state.shield:0}){suffix}";
+                    if (row.memberNameText != null)
+                    {
+                        if (connection.Length > 0) row.memberNameText.text += "\n" + connection;
+                        row.memberNameText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 22);
+                        row.memberNameText.lineSpacing = .85f; row.memberNameText.resizeTextForBestFit = true;
+                        row.memberNameText.resizeTextMinSize = 9; row.memberNameText.resizeTextMaxSize = 13;
+                    }
                 }
             }
         }

@@ -49,6 +49,11 @@ namespace RaidRogue
             }
             return best;
         }
+        public void InterruptForConnectionLoss()
+        {
+            // A disconnect is neither death nor a new encounter: preserve combo, buffs and cooldowns.
+            _isCastingSpell = false; _castElapsed = 0; _castingSpellName = "";
+        }
         public void ReportNetworkFailure(string reason) => ShowRangeFeedback(reason);
         public void CaptureNetworkCombat(RaidCombatActor state)
         {
