@@ -45,7 +45,7 @@ namespace RaidRogue
         private Vector2 _dragStart,_positionStart,_lastCanvasSize;
         private float _nextScan;
         private string _loadNotice="";
-        public string FilePath=>Path.Combine(Application.persistentDataPath,"hud-layout.json");
+        public string FilePath=>Path.Combine(CampaignStorage.RootFor(Application.persistentDataPath,System.Environment.GetCommandLineArgs(),Debug.isDebugBuild),"hud-layout.json");
         public static LocalHUDLayoutController Ensure(AstellaOrnateHUD hud)
         {
             if(hud==null)return null;

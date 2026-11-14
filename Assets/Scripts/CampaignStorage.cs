@@ -23,13 +23,19 @@ namespace RaidRogue
         {
             if (arguments == null) return persistentRoot;
             string profile = null;
+            bool headlessCheck = false;
             foreach (string argument in arguments)
             {
+                if (argument != null && argument.StartsWith("--astella-check=", StringComparison.Ordinal)) headlessCheck = true;
                 if (argument == null || !argument.StartsWith(TestProfileArgument, StringComparison.Ordinal)) continue;
                 if (profile != null) throw new ArgumentException("Duplicate raid test profile");
                 profile = argument.Substring(TestProfileArgument.Length);
             }
-            if (profile == null) return persistentRoot;
+            if (profile == null)
+            {
+                if (headlessCheck) throw new ArgumentException("Headless checks require an explicit isolated raid test profile");
+                return persistentRoot;
+            }
             if (!development) throw new InvalidOperationException("Raid test profile requires a development build");
             if (profile.Length < 1 || profile.Length > 40) throw new ArgumentException("Invalid raid test profile");
             foreach (char c in profile)

@@ -27,6 +27,17 @@ static class ResumeScenarioTests
     {
         var scenario = Json.Deserialize<Scenario>(File.ReadAllText(args[0]));
         string output = args[1]; Directory.CreateDirectory(output);
+        Check(CampaignStorage.RootFor(output, new string[0], true) == output, "ordinary profile path preserved");
+        string isolated = CampaignStorage.RootFor(output, new[] { "--astella-check=ai", "--raid-test-profile=resume-fixture" }, true);
+        Check(isolated == Path.Combine(output, "test-profiles", "resume-fixture"), "headless profile is isolated");
+        bool missingProfileRejected = false;
+        try { CampaignStorage.RootFor(output, new[] { "--astella-check=lan-host" }, true); }
+        catch (ArgumentException) { missingProfileRejected = true; }
+        Check(missingProfileRejected, "headless request cannot fall back to ordinary data");
+        bool releaseRejected = false;
+        try { CampaignStorage.RootFor(output, new[] { "--raid-test-profile=resume-fixture" }, false); }
+        catch (InvalidOperationException) { releaseRejected = true; }
+        Check(releaseRejected, "test profiles remain unavailable in release builds");
         Check(scenario.version == 1 && scenario.chapterId == CampaignCatalog.PartOne, "scenario version/chapter");
         Check(scenario.difficulties.SequenceEqual(new[] { CampaignCatalog.Normal, CampaignCatalog.Hard }), "both difficulties");
         Check(scenario.stages.SequenceEqual(CampaignCatalog.Stages(scenario.chapterId)), "all six stages");
