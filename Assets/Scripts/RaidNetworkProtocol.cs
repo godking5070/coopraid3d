@@ -38,9 +38,17 @@ namespace RaidRogue
 
     public sealed class RaidRoster
     {
-        public sealed class Member { public int Id, Role; public string Name; }
+        public sealed class Member { public int Id, Role; public string Name; public ulong SteamId; public bool Ready, Loaded; }
         public readonly List<Member> Members = new List<Member>();
         private int _nextId = 1;
+        public bool AllLoaded => Members.Count > 0 && Members.TrueForAll(m => m.Loaded);
+        public bool AllReady => AllLoaded && Members.TrueForAll(m => m.Ready && m.Role >= 1 && m.Role <= 4);
+        public bool SetReady(int id, bool ready)
+        {
+            var member = Members.Find(m => m.Id == id);
+            if (member == null || !member.Loaded) return false;
+            member.Ready = ready; return true;
+        }
         public Member Join(string name)
         {
             if (Members.Count >= 4) return null;
@@ -52,6 +60,7 @@ namespace RaidRogue
         {
             var member = Members.Find(m => m.Id == id);
             if (member == null || role < 1 || role > 4 || Members.Exists(m => m.Id != id && m.Role == role)) return false;
+            if (member.Role != role) member.Ready = false;
             member.Role = role; return true;
         }
         public void Remove(int id) => Members.RemoveAll(m => m.Id == id);
@@ -63,14 +72,15 @@ namespace RaidRogue
         }
     }
 
-    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong }
+    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong, Ready, SceneReady }
     public sealed class RaidPose
     {
         public int Id, Role;
         public string Name;
         public uint Ack;
         public float X, Z, Yaw;
-        public bool MovementLocked, Bot;
+        public bool MovementLocked, Bot, Ready, Loaded;
+        public ulong SteamId;
         public int MotionVersion;
         public float MoveSpeed;
         public DashMotion.Snapshot Dash;
@@ -92,7 +102,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 2, MaxBytes = 1100;
+        public const int Version = 3, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -109,6 +119,7 @@ namespace RaidRogue
                 case RaidPacketKind.Welcome:
                     w.Write(packet.Id); w.Write(packet.Speed); w.Write(packet.Radius); w.Write(packet.Arena); w.Write(packet.TurnSpeed);
                     w.Write(packet.Dash.distance); w.Write(packet.Dash.duration); w.Write(packet.Dash.cooldown); break;
+                case RaidPacketKind.Ready: case RaidPacketKind.SceneReady: w.Write(packet.Id); break;
                 case RaidPacketKind.Role: w.Write(packet.Role); break;
                 case RaidPacketKind.Input:
                     w.Write((byte)packet.Inputs.Count);
@@ -119,7 +130,7 @@ namespace RaidRogue
                     foreach (var pose in packet.Poses)
                     {
                         w.Write(pose.Id); w.Write(pose.Role); WriteText(w, pose.Name); w.Write(pose.Ack);
-                        w.Write(pose.X); w.Write(pose.Z); w.Write(pose.Yaw); w.Write(pose.MovementLocked); w.Write(pose.MotionVersion); w.Write(pose.MoveSpeed); w.Write(pose.Bot);
+                        w.Write(pose.X); w.Write(pose.Z); w.Write(pose.Yaw); w.Write(pose.MovementLocked); w.Write(pose.MotionVersion); w.Write(pose.MoveSpeed); w.Write(pose.Bot); w.Write(pose.SteamId); w.Write(pose.Ready); w.Write(pose.Loaded);
                         w.Write(pose.Dash.Active); w.Write(pose.Dash.Cooldown); w.Write(pose.Dash.CooldownTotal);
                         w.Write(pose.Dash.Time); w.Write(pose.Dash.Distance); w.Write(pose.Dash.Speed); w.Write(pose.Dash.X); w.Write(pose.Dash.Z);
                     }
@@ -152,6 +163,7 @@ namespace RaidRogue
                         p.Dash.distance = Number(r); p.Dash.duration = Number(r); p.Dash.cooldown = Number(r);
                         if (p.Id <= 0 || p.Speed <= 0 || p.Radius <= 0 || p.Arena <= 0 || p.TurnSpeed <= 0 || p.Dash.distance <= 0 || p.Dash.duration <= 0 || p.Dash.cooldown < 0) return false;
                         break;
+                    case RaidPacketKind.Ready: case RaidPacketKind.SceneReady: p.Id = r.ReadInt32(); if (p.Id < 0 || (p.Kind == RaidPacketKind.Ready && p.Id > 1)) return false; break;
                     case RaidPacketKind.Role: p.Role = r.ReadInt32(); if (p.Role < 1 || p.Role > 4) return false; break;
                     case RaidPacketKind.Input:
                         int count = r.ReadByte(); if (count > 8) return false;
@@ -166,7 +178,7 @@ namespace RaidRogue
                         var ids = new HashSet<int>(); var roles = new HashSet<int>();
                         for (int i = 0; i < count; i++)
                         {
-                            var pose = new RaidPose { Id = r.ReadInt32(), Role = r.ReadInt32(), Name = ReadText(r), Ack = r.ReadUInt32(), X = Number(r), Z = Number(r), Yaw = Number(r), MovementLocked = r.ReadBoolean(), MotionVersion = r.ReadInt32(), MoveSpeed = Number(r), Bot = r.ReadBoolean() };
+                            var pose = new RaidPose { Id = r.ReadInt32(), Role = r.ReadInt32(), Name = ReadText(r), Ack = r.ReadUInt32(), X = Number(r), Z = Number(r), Yaw = Number(r), MovementLocked = r.ReadBoolean(), MotionVersion = r.ReadInt32(), MoveSpeed = Number(r), Bot = r.ReadBoolean(), SteamId = r.ReadUInt64(), Ready = r.ReadBoolean(), Loaded = r.ReadBoolean() };
                             if (pose.Id <= 0 || pose.Role < 1 || pose.Role > 4 || !ids.Add(pose.Id) || !roles.Add(pose.Role)) return false;
                             pose.Dash = new DashMotion.Snapshot { Active = r.ReadBoolean(), Cooldown = Number(r), CooldownTotal = Number(r), Time = Number(r), Distance = Number(r), Speed = Number(r), X = Number(r), Z = Number(r) };
                             p.Poses.Add(pose);

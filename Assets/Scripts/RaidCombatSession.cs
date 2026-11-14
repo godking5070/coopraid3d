@@ -13,7 +13,7 @@ namespace RaidRogue
         public float CountdownEnd { get; private set; }
         public float ServerTime => IsHost ? Time.unscaledTime : Time.unscaledTime + _serverOffset;
         public bool CombatRunning => Multiplayer && BattlePhase == RaidBattlePhase.Combat;
-        public bool CanJoinBattle => BattlePhase == RaidBattlePhase.Lobby || BattlePhase == RaidBattlePhase.Wiped;
+        public bool CanJoinBattle => BattlePhase == RaidBattlePhase.Lobby;
         public bool CanChooseRole => BattlePhase == RaidBattlePhase.Lobby;
         private readonly RaidActionGate _actionGate = new RaidActionGate();
         private readonly RaidRewardRound _rewards = new RaidRewardRound();
@@ -117,6 +117,7 @@ namespace RaidRogue
             if (request.skill == 9)
             {
                 if (owner != _localId) { ActionFailure(owner, "현재 보스 시작/재도전은 호스트만 할 수 있습니다"); return; }
+                if (BattlePhase == RaidBattlePhase.Lobby && !CanStartLobby) { ActionFailure(owner, "모든 참가자의 접속·역할·준비가 완료되어야 합니다"); return; }
                 if (BattlePhase == RaidBattlePhase.Lobby || BattlePhase == RaidBattlePhase.Wiped) BeginNetworkEncounter(StageManager.Instance.currentStage, BattlePhase == RaidBattlePhase.Wiped);
                 return;
             }
@@ -157,7 +158,9 @@ namespace RaidRogue
         public void BeginNetworkEncounter(int stage, bool retry)
         {
             if (!IsHost || (BattlePhase != RaidBattlePhase.Lobby && BattlePhase != RaidBattlePhase.Wiped && BattlePhase != RaidBattlePhase.Reward)) return;
-            BattleEpoch++; BattlePhase = RaidBattlePhase.Countdown; CountdownEnd = ServerTime + 3;
+            if (BattlePhase == RaidBattlePhase.Lobby && !CanStartLobby) return;
+            BattleEpoch++; BattlePhase = RaidBattlePhase.Loading; CountdownEnd = 0;
+            BeginLoadingBarrier();
             MenuOpen = false;
             StageManager.Instance.PrepareNetworkEncounter(stage, retry);
             ResetNetworkMotors();
@@ -202,6 +205,7 @@ namespace RaidRogue
         private void LateUpdate()
         {
             if (!Multiplayer) return;
+            UpdateLoadingBarrier();
             Time.timeScale = 1; // Local menus never stop the authoritative simulation.
             if (IsHost && BattlePhase == RaidBattlePhase.Countdown && ServerTime >= CountdownEnd)
             {
@@ -284,7 +288,7 @@ namespace RaidRogue
         }
         private void ApplyCombatFrame(RaidCombatFrame frame)
         {
-            if (frame.epoch != BattleEpoch) { _prediction.Clear(); ClearReplicaMechanics(); }
+            if (frame.epoch != BattleEpoch) { _prediction.Clear(); ClearReplicaMechanics(); _loadFrame = Time.frameCount; }
             if (frame.phase != BattlePhase) MenuOpen = false;
             BattleEpoch = frame.epoch; BattlePhase = frame.phase; CountdownEnd = frame.countdownEnd; _latestCombatFrame = frame;
             var stage = StageManager.Instance; stage.ApplyNetworkStage(frame);

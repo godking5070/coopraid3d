@@ -25,12 +25,13 @@ namespace RaidRogue
         public void ApplyNetworkStage(RaidCombatFrame frame)
         {
             _totalPlayTime = frame.runTime;
-            currentStage = frame.stage; IsWiped = frame.phase == RaidBattlePhase.Wiped; IsPreparing = frame.phase == RaidBattlePhase.Countdown;
+            currentStage = frame.stage; IsWiped = frame.phase == RaidBattlePhase.Wiped; IsPreparing = frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Loading;
             _isAllStagesCleared = frame.phase == RaidBattlePhase.Victory; _isStageTransitioning = frame.phase == RaidBattlePhase.Reward;
             UpdateStageHeaderUI();
         }
         public void PresentNetworkPhase(RaidBattlePhase phase, int seconds)
         {
+            if (phase == RaidBattlePhase.Loading) { _wipeUI.ShowNetworkLoading(); _presentedNetworkPhase = phase; return; }
             if (phase == RaidBattlePhase.Countdown) { _wipeUI.ShowCountdown(Mathf.Max(1, seconds)); _presentedNetworkPhase = phase; return; }
             if (_presentedNetworkPhase == phase) return;
             _presentedNetworkPhase = phase; _wipeUI.Hide(); GetComponent<CombatMetricsUI>()?.CloseResults();

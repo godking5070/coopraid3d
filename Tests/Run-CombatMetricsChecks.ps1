@@ -30,11 +30,13 @@ foreach ($taskAssembly in @('Assembly-CSharp', 'Assembly-CSharp-Editor')) {
         $taskRefPath = $taskReference.InnerText
         if (![IO.Path]::IsPathRooted($taskRefPath)) { $taskRefPath = Join-Path $OriginalProject $taskRefPath }
         if ([IO.Path]::GetFileName($taskRefPath) -eq 'Assembly-CSharp.dll') { continue }
+        if ($env:RAIDROGUE_STEAM_REFERENCE -and [IO.Path]::GetFileName($taskRefPath) -eq 'com.rlabrecque.steamworks.net.dll') { continue }
         if ($env:RAIDROGUE_TRANSPORT_REFERENCE -and [IO.Path]::GetFileName($taskRefPath) -eq 'Unity.Networking.Transport.dll') { continue }
         if (!(Test-Path -LiteralPath $taskRefPath)) { throw "Missing original project reference: $taskRefPath" }
         $taskLines += "/reference:`"$taskRefPath`""
     }
     if ($env:RAIDROGUE_TRANSPORT_REFERENCE) { $taskLines += "/reference:`"$env:RAIDROGUE_TRANSPORT_REFERENCE`"" }
+    if ($env:RAIDROGUE_STEAM_REFERENCE) { $taskLines += "/reference:`"$env:RAIDROGUE_STEAM_REFERENCE`"" }
     $taskEditor = $taskAssembly -eq 'Assembly-CSharp-Editor'
     if ($taskEditor) { $taskLines += "/reference:`"$(Join-Path $taskOutput 'Assembly-CSharp.dll')`"" }
     foreach ($taskSource in $taskSources) {
