@@ -161,6 +161,15 @@ namespace RaidRogue.Editor
             // 8. 전체 UI 및 StageManager / RoguelikeCardManager 생성
             CreateAllRaidStageAndCardUI(boss, player);
 
+            // Keep the themed UI in the saved scene, including after Setup Scene is used again.
+            GameObject hudCanvas = GameObject.Find("RaidRogue_HUD_Canvas");
+            if (hudCanvas != null)
+            {
+                RaidHudTheme theme = hudCanvas.AddComponent<RaidHudTheme>();
+                theme.Apply();
+                theme.SendMessage("LateUpdate");
+            }
+
             if (boss.targetRing != null)
             {
                 boss.targetRing.BuildTargetRing();
