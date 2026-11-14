@@ -425,6 +425,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidNetworkSession.Multiplayer) { UpdateNetworkParty(); return; }
             if (player == null || partyBots.Count == 0)
             {
                 RefreshPartyReferences();
@@ -488,6 +489,22 @@ namespace RaidRogue
                         bot.isDead
                     );
                 }
+            }
+        }
+
+        private void UpdateNetworkParty()
+        {
+            if (memberRows == null || memberRows.Length != 4) return;
+            var members = RaidNetworkSession.Instance.OrderedParty();
+            for (int i = 0; i < 4; i++)
+            {
+                var row = memberRows[i]; if (row == null) continue;
+                row.boundTarget = i < members.Count ? members[i] : null;
+                var avatar = row.boundTarget != null ? row.boundTarget.GetComponent<NetworkRaidAvatar>() : null;
+                bool selected = avatar != null && TargetingManager.Instance != null && TargetingManager.Instance.CurrentTarget == avatar.transform;
+                UpdateRowVisual(row, $"F{i + 1}", avatar != null ? NetworkRaidAvatar.RoleColor(avatar.Role) : Color.gray,
+                    avatar != null ? $"[F{i + 1}] {avatar.DisplayName} · {avatar.RoleName}" : "접속 대기", 1, 1, 0, false, selected, false);
+                if (row.hpValueText != null) row.hpValueText.text = avatar != null ? "접속 중 · 전투 미동기화" : "빈 자리";
             }
         }
 
