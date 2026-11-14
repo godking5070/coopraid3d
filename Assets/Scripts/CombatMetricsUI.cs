@@ -90,19 +90,19 @@ namespace RaidRogue
         private void BuildMeter()
         {
             _panel = Box(_canvas.transform, "CombatMetrics_RightHUD", new Vector2(1, 0.5f),
-                new Vector2(-18, 170), new Vector2(380, 380), new Color(0.035f, 0.05f, 0.09f, 0.91f));
+                new Vector2(-18, 170), new Vector2(380, 440), new Color(0.035f, 0.05f, 0.09f, 0.91f));
             _panel.pivot = new Vector2(1, 1);
             // Keep modal overlays above the meter even if they were created before this component.
             _panel.SetAsFirstSibling();
             _header = Label(_panel, "Title", new Vector2(12, -7), new Vector2(285, 26), 17);
             ButtonAt(_panel, "Fold", "접기", new Vector2(1, 1), new Vector2(-38, -20), new Vector2(62, 28), ToggleFold);
             _foldLabel = _panel.Find("Fold").GetComponentInChildren<Text>();
-            _body = Rect(_panel, "Body", new Vector2(0, 1), Vector2.zero, new Vector2(380, 380)).gameObject;
+            _body = Rect(_panel, "Body", new Vector2(0, 1), Vector2.zero, new Vector2(380, 440)).gameObject;
             _body.GetComponent<RectTransform>().pivot = new Vector2(0, 1);
             ButtonAt(_body.transform, "DPS", "DPS", new Vector2(0, 1), new Vector2(48, -51), new Vector2(72, 28), () => { _sortByHealing = false; RefreshMeter(); });
             ButtonAt(_body.transform, "HPS", "HPS", new Vector2(0, 1), new Vector2(128, -51), new Vector2(72, 28), () => { _sortByHealing = true; RefreshMeter(); });
             for (int i = 0; i < 4; i++)
-                _rows.Add(Label(_body.transform, "Member" + i, new Vector2(12, -72 - i * 75), new Vector2(356, 72), 14));
+                _rows.Add(Label(_body.transform, "Member" + i, new Vector2(12, -72 - i * 88), new Vector2(356, 86), 14));
         }
 
         public static bool BlocksPointer(Vector2 screenPosition)
@@ -119,7 +119,7 @@ namespace RaidRogue
         {
             _collapsed = !_collapsed;
             _body.SetActive(!_collapsed);
-            _panel.sizeDelta = new Vector2(380, _collapsed ? 40 : 380);
+            _panel.sizeDelta = new Vector2(380, _collapsed ? 40 : 440);
             _foldLabel.text = _collapsed ? "펼치기" : "접기";
             RefreshMeter();
         }
@@ -138,7 +138,8 @@ namespace RaidRogue
                 _rows[i].text = $"<color=#{RoleHex(m.Role)}><b>{m.Name}</b></color>\n" +
                     $"DPS {m.Dps(data.Seconds):N1} / 피해 {m.Damage:N0}\n" +
                     $"HPS {m.Hps(data.Seconds):N1} / 유효 회복 {m.Healing:N0}\n" +
-                    $"보호막 흡수 {m.ShieldAbsorbed:N0} · 쓰러짐 {m.Deaths}";
+                    $"보호막 흡수 {m.ShieldAbsorbed:N0} · 쓰러짐 {m.Deaths}\n" +
+                    $"자가 회복(포션) {m.SelfHealing:N0}";
             }
         }
 
@@ -165,8 +166,8 @@ namespace RaidRogue
             _tabs = Rect(box, "Stages", new Vector2(0, 1), new Vector2(28, -84), new Vector2(1180, 40));
             _tabs.pivot = new Vector2(0, 0.5f);
             _resultTime = Label(box, "Time", new Vector2(28, -116), new Vector2(1180, 32), 20);
-            string[] headers = { "파티원", "피해량", "DPS", "유효 회복", "HPS", "보호막 흡수", "쓰러짐", "보스 피해", "쫄 피해" };
-            float[] widths = { 230, 135, 100, 135, 100, 135, 75, 130, 130 };
+            string[] headers = { "파티원", "피해량", "DPS", "유효 회복", "HPS", "보호막 흡수", "쓰러짐", "보스 피해", "쫄 피해", "자가회복(포션)" };
+            float[] widths = { 200, 120, 85, 120, 85, 120, 65, 115, 115, 145 };
             float x = 20;
             for (int c = 0; c < headers.Length; c++)
             {
@@ -220,7 +221,7 @@ namespace RaidRogue
         private void DisplayResult(CombatEncounterResult data)
         {
             _resultTitle.text = data.Stage == 0 ? "전체 런 · 누적 전투 결과" : $"STAGE {data.Stage} · 전투 결과";
-            _resultTime.text = $"전투 시간 {data.Seconds:0.00}초";
+            _resultTime.text = $"전투 시간 {data.Seconds:0.00}초 · 포션은 자가 회복에만 집계 (HPS 제외)";
             var members = Sorted(data);
             for (int i = 0; i < _resultRows.Count; i++)
             {
@@ -228,7 +229,7 @@ namespace RaidRogue
                 if (i >= members.Count) continue;
                 var m = members[i];
                 string[] values = { m.Name, m.Damage.ToString("N0"), m.Dps(data.Seconds).ToString("N1"), m.Healing.ToString("N0"),
-                    m.Hps(data.Seconds).ToString("N1"), m.ShieldAbsorbed.ToString("N0"), m.Deaths.ToString(), m.BossDamage.ToString("N0"), m.AddDamage.ToString("N0") };
+                    m.Hps(data.Seconds).ToString("N1"), m.ShieldAbsorbed.ToString("N0"), m.Deaths.ToString(), m.BossDamage.ToString("N0"), m.AddDamage.ToString("N0"), m.SelfHealing.ToString("N0") };
                 for (int c = 0; c < values.Length; c++) _resultRows[i][c].text = values[c];
                 _resultRows[i][0].text = $"<color=#{RoleHex(m.Role)}>{m.Name}</color>";
             }

@@ -46,6 +46,7 @@ namespace RaidRogue
         public float currentShield = 0f;
         private readonly CombatShieldLedger _metricsShields = new CombatShieldLedger();
         public bool isDead;
+        public CommonPotion Potion { get; private set; }
 
         [Header("Tank Settings (North Z+ Parking & Defensive)")]
         public float tankNorthParkingDistance = 4.8f;
@@ -121,6 +122,7 @@ namespace RaidRogue
 
         private void Start()
         {
+            Potion = CommonPotion.Ensure(gameObject);
             if (targetBoss == null)
             {
                 targetBoss = FindFirstObjectByType<BossController>();
@@ -164,6 +166,7 @@ namespace RaidRogue
 
         public void ConfigureBotRoleDynamic(PartyBotRole newRole, Vector3 spawnPos, bool reposition = true)
         {
+            Potion?.EndRevivalProtection();
             role = newRole;
             isDead = false;
             CombatMetricsManager.SetDead(transform, false);
@@ -402,6 +405,7 @@ namespace RaidRogue
         /// </summary>
         public void ResetBotForNewStage(Vector3 spawnPos)
         {
+            Potion?.EndRevivalProtection();
             isDead = false;
             CombatMetricsManager.SetDead(transform, false);
             _metricsShields.Clear();
@@ -861,6 +865,7 @@ namespace RaidRogue
             currentHp = 0f;
             currentShield = 0f;
             isDead = true;
+            Potion?.EndRevivalProtection();
             _metricsShields.Clear();
             CombatMetricsManager.SetDead(transform, true);
             isTankDefensiveActive = false;
@@ -890,6 +895,8 @@ namespace RaidRogue
             _metricsShields.Clear();
             currentHp = maxHp;
             currentShield = 0f;
+            Potion = CommonPotion.Ensure(gameObject);
+            Potion.GrantRevivalProtection(); // Separate from rescue immunity; does not reset potion cooldown.
             transform.position = new Vector3(transform.position.x, 1.0f, transform.position.z);
             transform.rotation = Quaternion.identity;
             ApplyBodyColor(_defaultBodyColor);
@@ -1225,6 +1232,8 @@ namespace RaidRogue
                 return;
             }
 
+            if (Potion != null && Potion.HasRevivalProtection) return;
+
             if (IsInvulnerable)
             {
                 FloatingTextPopup.Spawn(
@@ -1270,27 +1279,28 @@ namespace RaidRogue
             }
         }
 
-        public void ReceiveHeal(float amount, Transform source = null)
+        public float ReceiveHeal(float amount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
-            if (isDead)
+            if (isDead || amount <= 0f)
             {
-                return;
+                return 0;
             }
 
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + amount);
             float actualHealed = currentHp - before;
-            CombatMetricsManager.Healing(source != null ? source : transform, before, currentHp);
+            CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 
-            if (actualHealed > 0.5f)
+            if (actualHealed > 0.5f || (kind == HealingKind.Potion && actualHealed > 0))
             {
                 FloatingTextPopup.Spawn(
                     transform.position + Vector3.up * 2.1f,
-                    $"+{Mathf.RoundToInt(actualHealed)} HP",
+                    kind == HealingKind.Potion ? $"포션 +{actualHealed:0.##} HP" : $"+{Mathf.RoundToInt(actualHealed)} HP",
                     new Color(0.25f, 1f, 0.45f, 1f),
                     false
                 );
             }
+            return actualHealed;
         }
 
         public void AddShield(float shieldAmount, Transform source = null)

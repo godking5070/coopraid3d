@@ -75,10 +75,10 @@ namespace RaidRogue
             Instance.Ledger.RecordDamage(SourceId(source), before, after, isAdd);
         }
 
-        public static void Healing(Transform source, float before, float after)
+        public static void Healing(Transform source, float before, float after, HealingKind kind = HealingKind.Ability)
         {
             if (Instance == null || Time.timeScale <= 0.001f) return;
-            Instance.Ledger.RecordHealing(SourceId(source), before, after);
+            Instance.Ledger.RecordHealing(SourceId(source), before, after, kind);
         }
 
         public static void Absorption(int source, double amount)

@@ -18,6 +18,9 @@ namespace RaidRogue
         public int currentStage = 1;
         public int maxStage = 3;
 
+        [Header("Common Potion (shared by all four party members)")]
+        public PotionSettings potionSettings = new PotionSettings();
+
         [Header("References")]
         public BossController boss;
         public PlayerController player;
@@ -40,6 +43,7 @@ namespace RaidRogue
         private float _totalPlayTime;
         private bool _isStageTransitioning;
         private bool _isAllStagesCleared;
+        private bool _hasStartedEncounter;
 
         public bool IsStageTransitioning => _isStageTransitioning;
         public float TotalPlayTime => _totalPlayTime;
@@ -81,6 +85,17 @@ namespace RaidRogue
         /// </summary>
         public void StartStage(int stageNumber, bool resetPlayTime = false)
         {
+            int nextStage = Mathf.Clamp(stageNumber, 1, maxStage);
+            bool retryingCurrentBoss = _hasStartedEncounter && currentStage == nextStage;
+            if (resetPlayTime || retryingCurrentBoss)
+            {
+                // Initial run/retry resets all members, including dead bots. Normal revival and
+                // advancing to a different stage preserve their remaining item cooldowns.
+                if (player != null) CommonPotion.Ensure(player.gameObject).ResetForBossRetry();
+                foreach (var bot in FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None))
+                    CommonPotion.Ensure(bot.gameObject).ResetForBossRetry();
+            }
+            _hasStartedEncounter = true;
             currentStage = Mathf.Clamp(stageNumber, 1, maxStage);
             _isStageTransitioning = false;
             _isAllStagesCleared = false;
@@ -103,10 +118,22 @@ namespace RaidRogue
 
             if (boss != null)
             {
+                if (retryingCurrentBoss && boss.addSpawner != null)
+                    boss.addSpawner.ResetWaveFlagsAndClearAdds();
                 boss.SetupBossForStage(currentStage);
             }
             CombatMetricsManager.Ensure(this).BeginStage(currentStage, resetPlayTime);
             QuarterViewCamera.LocalCamera?.BeginCombat(resetPlayTime);
+        }
+
+        [ContextMenu("Retry Current Boss (Play Mode)")]
+        public void RetryCurrentBoss()
+        {
+            if (!Application.isPlaying || boss == null || _isStageTransitioning || _isAllStagesCleared) return;
+            ResetAndHealAllPartyMembers();
+            if (player != null && player.combatController != null)
+                player.combatController.OnPlayerRoleChanged(player.currentRole);
+            StartStage(currentStage); // Discards only this attempt's metrics; keeps prior cleared stages and cards.
         }
 
         /// <summary>
