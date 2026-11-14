@@ -33,6 +33,9 @@ namespace RaidRogue
         private RaidNetworkSession _session;
         private bool _finished;
         private Result _result;
+        private StreamWriter _tacticTrace;
+        private float _nextTacticTrace;
+        private Transform _traceWall;
         private static string Argument(string name,string fallback="")
         {
             string prefix="--astella-"+name+"=";
@@ -47,7 +50,7 @@ namespace RaidRogue
             var host=new GameObject("Explicit isolated headless resume check");DontDestroyOnLoad(host);host.AddComponent<HeadlessResumeCheck>();
         }
         private void Awake(){Application.logMessageReceived+=OnLog;_began=Time.realtimeSinceStartup;_startFrame=Time.frameCount;_gc0=GC.CollectionCount(0);_gc1=GC.CollectionCount(1);_gc2=GC.CollectionCount(2);}
-        private void OnDestroy(){Application.logMessageReceived-=OnLog;}
+        private void OnDestroy(){Application.logMessageReceived-=OnLog;_tacticTrace?.Dispose();}
         private void OnLog(string text,string stack,LogType type)
         {if((type==LogType.Error||type==LogType.Exception||type==LogType.Assert)&&_errors.Count<16)_errors.Add(text);}
         private IEnumerator Start()
@@ -88,6 +91,11 @@ namespace RaidRogue
                 if(definition==null||!definition.playable||!CharacterSlots.IsNineKey(definition)||CharacterRosterData.Role(definition)!=slot.role||slot.routeIndex<0||slot.routeIndex>=definition.routes.Length)throw new InvalidOperationException("Scenario catalog/role mismatch.");
             }
             _result=new Result{mode=_mode,difficulty=_difficulty,expectedPlayers=_expected,targetStage=_target,profileRoot=profile,protocol=RaidWire.Version.ToString(),startedUtc=DateTime.UtcNow.ToString("O")};
+            if(_mode=="ai")
+            {
+                _tacticTrace=new StreamWriter(Path.Combine(_caseDirectory,"tactics.csv"),false,new System.Text.UTF8Encoding(false));
+                _tacticTrace.WriteLine("time,stage,phase,pattern,step,bossX,bossZ,role,x,z,hp,maxHp,shield,dead,cast,castRemaining,coins,gapX,gapZ");
+            }
             Application.targetFrameRate=60;
             Debug.Log("[HeadlessResume] START mode="+_mode+" role="+_role+" report="+_reportPath+" profile="+profile);
             if(_mode=="single-save"||_mode=="single-resume")
@@ -218,12 +226,40 @@ namespace RaidRogue
         {
             _maximumFrame=Mathf.Max(_maximumFrame,Time.unscaledDeltaTime);
             _peakMemory=Math.Max(_peakMemory,UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong()/1048576.0);
+            if(!_finished&&_tacticTrace!=null&&Time.realtimeSinceStartup>=_nextTacticTrace)
+            {_nextTacticTrace=Time.realtimeSinceStartup+.25f;TraceTactics();}
             if(_session!=null&&!_finished&&Time.realtimeSinceStartup>=_nextReport)
-            {_nextReport=Time.realtimeSinceStartup+10;Debug.Log("[HeadlessResume] progress mode="+_mode+" stage="+StageManager.Instance?.currentStage+" phase="+_session.BattlePhase+" connected="+_session.ConnectedPlayerCount+" bossHp="+StageManager.Instance?.boss?.currentHp);}
+            {_nextReport=Time.realtimeSinceStartup+10;_tacticTrace?.Flush();Debug.Log("[HeadlessResume] progress mode="+_mode+" stage="+StageManager.Instance?.currentStage+" phase="+_session.BattlePhase+" connected="+_session.ConnectedPlayerCount+" bossHp="+StageManager.Instance?.boss?.currentHp);}
+        }
+        private static string TraceNumber(float value)=>value.ToString("R",System.Globalization.CultureInfo.InvariantCulture);
+        private void TraceTactics()
+        {
+            var stage=StageManager.Instance;var boss=stage?.boss;
+            if(_session==null||boss==null)return;
+            // Read-only observation of the actual poses and inactive exit segment.
+            // Never call destination selection here: that mutates the AI's cache.
+            string gapX="",gapZ="";
+            if(boss.GuardianNormal&&(boss.GuardianPatternNow==GuardianPattern.Lockdown||boss.GuardianPatternNow==GuardianPattern.FullLockdown))
+            {
+                if(_traceWall==null)_traceWall=GameObject.Find("Guardian hard · breakable ring wall")?.transform;
+                if(_traceWall!=null)for(int i=0;i<_traceWall.childCount;i++)
+                {var piece=_traceWall.GetChild(i);if(!piece.gameObject.activeSelf){gapX=TraceNumber(piece.position.x);gapZ=TraceNumber(piece.position.z);break;}}
+            }
+            foreach(var avatar in _session.Avatars.Values)
+            {
+                var pc=avatar.GetComponent<PlayerController>();var actor=avatar.GetComponent<CharacterActor>();
+                if(pc==null||actor==null)continue;
+                var runtime=actor.RuntimeState;
+                _tacticTrace.WriteLine(string.Join(",",TraceNumber(RaidCombatAuthority.ServerTime),stage.currentStage.ToString(),_session.BattlePhase.ToString(),
+                    boss.GuardianNormal?boss.GuardianPatternNow.ToString():"",boss.GuardianNormal?boss.GuardianStepNow.ToString():"",TraceNumber(boss.transform.position.x),TraceNumber(boss.transform.position.z),
+                    avatar.Role.ToString(),TraceNumber(pc.transform.position.x),TraceNumber(pc.transform.position.z),TraceNumber(pc.currentHp),TraceNumber(pc.maxHp),TraceNumber(pc.currentShield),pc.IsDead?"1":"0",
+                    runtime?.CastingSkillId??"",TraceNumber(runtime?.CastingRemaining??0),stage.IrisCoins.ToString(),gapX,gapZ));
+            }
         }
         private void Finish(bool success,string reason)
         {
             if(_finished)return;_finished=true;
+            _tacticTrace?.Flush();
             if(_result==null)_result=new Result{mode=_mode,difficulty=_difficulty};
             _result.success=success&&_errors.Count==0;_result.reason=reason;
             if(!_result.success&&!string.IsNullOrEmpty(_caseDirectory)&&CampaignRuntime.Instance?.ReportWorking!=null)
