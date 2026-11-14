@@ -344,6 +344,52 @@ namespace RaidRogue
             return x * x + z * z <= radius * radius;
         }
 
+        // Rally inside the visible crack, beside the aiming line. A straight
+        // approach to this inner point stays inside the convex wall boundary.
+        public static void LockdownRally(double x,double z,double breachX,double breachZ,
+            double originX,double originZ,double forwardX,double forwardZ,double wallRadius,
+            double actorRadius,double lineHalfWidth,out double targetX,out double targetZ)
+        {
+            targetX=x;targetZ=z;
+            if(!LockdownEraseHits(x,z,wallRadius,actorRadius+.1))return;
+            double length=Math.Sqrt(breachX*breachX+breachZ*breachZ);
+            double facing=Math.Sqrt(forwardX*forwardX+forwardZ*forwardZ);
+            if(length<.001||facing<.001)return;
+            breachX/=length;breachZ/=length;forwardX/=facing;forwardZ/=facing;
+            double inside=Math.Max(0,wallRadius-.21-Math.Max(0,actorRadius)-.2);
+            double clear=Math.Max(0,lineHalfWidth)+Math.Max(0,actorRadius)+.35;
+            double actorAlong=(x-originX)*forwardX+(z-originZ)*forwardZ;
+            double actorSide=(x-originX)*forwardZ-(z-originZ)*forwardX;
+            double best=double.PositiveInfinity;
+            for(int sign=-1;sign<=1;sign+=2)
+            for(int degrees=0;degrees<=90;degrees+=2)
+            {
+                double angle=sign*degrees*Math.PI/180,cos=Math.Cos(angle),sin=Math.Sin(angle);
+                double px=(breachX*cos-breachZ*sin)*inside,pz=(breachX*sin+breachZ*cos)*inside;
+                double along=(px-originX)*forwardX+(pz-originZ)*forwardZ;
+                double side=(px-originX)*forwardZ-(pz-originZ)*forwardX;
+                if(along>=0&&along<=wallRadius*2&&Math.Abs(side)<clear)continue;
+                // Keep an already safe member on its side of the locked line.
+                if(actorAlong>=0&&Math.Abs(actorSide)>=clear&&side*actorSide<0)continue;
+                double cost=(px-x)*(px-x)+(pz-z)*(pz-z);
+                if(cost<best){best=cost;targetX=px;targetZ=pz;}
+                break; // Nearest safe angle to the crack on this side.
+            }
+        }
+        public static void LockdownExit(double x,double z,double breachX,double breachZ,
+            double wallRadius,int segments,double actorRadius,out double targetX,out double targetZ)
+        {
+            targetX=x;targetZ=z;
+            if(!LockdownEraseHits(x,z,wallRadius,actorRadius+.1))return;
+            double length=Math.Sqrt(breachX*breachX+breachZ*breachZ);
+            if(length<.001)return;
+            breachX/=length;breachZ/=length;
+            double lateral=Math.Abs(x*breachZ-z*breachX);
+            double gap=Math.Max(.05,Math.PI*wallRadius/Math.Max(12,segments)-.015-Math.Max(0,actorRadius)-.1);
+            double radius=lateral<=gap*.8?wallRadius+3.2:Math.Max(0,wallRadius-.21-Math.Max(0,actorRadius)-.2);
+            targetX=breachX*radius;targetZ=breachZ*radius;
+        }
+
         public static int[] ThreeCracks(int segments, int rotation, int first, int second, int third)
         {
             int count = Math.Max(12, segments), sector = count / 3;

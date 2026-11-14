@@ -79,7 +79,7 @@ namespace RaidRogue
                 Vector3 direction = delta.magnitude > .12f ? Vector3.ClampMagnitude(delta / Mathf.Max(.01f, pc.NetworkMoveSpeed * RaidWire.Step), 1) : Vector3.zero;
                 input.X = direction.x; input.Z = direction.z;
                 if(boss.GuardianAerialDashNeeded(pc.transform))input.Dash=true;
-                if(!boss.FloraEncounter&&!boss.CampanellaEncounter&&!boss.MarionetteEncounter&&!boss.JustitiaEncounter&&!boss.JanusEncounter&&(aegis||roster)&&delta.magnitude>character.MovementSettings(pc.dashSettings).distance&&(mechanic||CombatRange.BoundaryDistance(pc.transform,enemy)>range+4))input.Dash=true;
+                if(!boss.FloraEncounter&&!boss.CampanellaEncounter&&!boss.MarionetteEncounter&&!boss.JustitiaEncounter&&!boss.JanusEncounter&&(aegis||roster||CharacterSlots.IsNineKey(character.Definition))&&delta.magnitude>character.MovementSettings(pc.dashSettings).distance&&(mechanic||CombatRange.BoundaryDistance(pc.transform,enemy)>range+4))input.Dash=true;
                 StepHostAvatar(avatar, input); // Collision, forced movement, facing, dash CD and tether swept path are shared.
                 if (pc.IsBeingRescued || pc.IsBeingKnockedBack) continue;
                 if (resurrect)

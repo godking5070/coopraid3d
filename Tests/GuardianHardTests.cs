@@ -11,6 +11,7 @@ internal static class GuardianHardTests
 
     private static void Main()
     {
+        RoutingChecks();
         var normal = new GuardianNormalSettings();
         var hard = new GuardianHardSettings();
         hard.EnsureDefaults();
@@ -220,5 +221,50 @@ internal static class GuardianHardTests
         Check(encounter.Counter(21) && encounter.Step==GuardianStep.Groggy && encounter.Ends == 23, "full-lockdown counter grants two-second groggy");
         Check(!encounter.Counter(21), "second counter ignored");
         Console.WriteLine($"PASS: {checks} guardian hard state and geometry assertions.");
+    }
+    private static void RoutingChecks()
+    {
+        const double wall=12,body=.55,speed=6.5,dt=1.0/60;
+        double inner=wall-.21-body-.1,gap=Math.PI*wall/24-.015-body-.1;
+        // Observed native escape starts: two damage dealers previously reached
+        // closed wall faces instead of the exit. Replay without moving any wall.
+        double[,] starts={{4.23562145,10.4817038},{9.445803,-1.7272563},{3.14892364,1.58077335}};
+        double bx=-11.59111/12,bz=-3.10582781/12;
+        GuardianHardGeometry.LockdownExit(-11.2201157,-1.29595,bx,bz,wall,24,body,out double px,out double pz);
+        Check(Math.Sqrt(px*px+pz*pz)<inner,"blocked native pose routes to an inside waypoint");
+        for(int n=0;n<starts.GetLength(0);n++)
+        {
+            double x=starts[n,0],z=starts[n,1];
+            for(int frame=0;frame<360;frame++)
+            {
+                if(frame<162)GuardianHardGeometry.LockdownRally(x,z,bx,bz,0,0,bx,bz,wall,body,2,out px,out pz);
+                else GuardianHardGeometry.LockdownExit(x,z,bx,bz,wall,24,body,out px,out pz);
+                double dx=px-x,dz=pz-z,d=Math.Sqrt(dx*dx+dz*dz),travel=Math.Min(d,speed*dt);
+                if(d>0){x+=dx/d*travel;z+=dz/d*travel;}
+                if(frame>=162)
+                {
+                    double radius=Math.Sqrt(x*x+z*z);
+                    Check(radius<inner||radius>wall+.21+body+.1||x*bx+z*bz>0&&Math.Abs(x*bz-z*bx)<gap,
+                        "escape crosses only the actual gap, not a closed ring segment");
+                }
+            }
+            Check(!GuardianHardGeometry.LockdownEraseHits(x,z,wall,body),"observed native actor clears the wall in the unchanged six-second window");
+        }
+        for(int turn=0;turn<24;turn++)
+        {
+            double angle=turn*Math.PI/12,fx=Math.Sin(angle),fz=Math.Cos(angle);
+            for(int side=-1;side<=1;side+=2)
+            {
+                double x=fx*4+fz*side*5,z=fz*4-fx*side*5;
+                GuardianHardGeometry.LockdownRally(x,z,fx,fz,0,0,fx,fz,wall,body,2,out px,out pz);
+                double lateral=px*fz-pz*fx;
+                Check(Math.Abs(lateral)>=2+body+.35-1e-8,"rally respects line and body clearance at every wall rotation");
+                Check(lateral*side>0,"safe member does not cross the locked line");
+                Check(Math.Sqrt(px*px+pz*pz)<inner,"rally point fits inside the physical wall");
+            }
+            double outsideX=fx*13,outsideZ=fz*13;
+            GuardianHardGeometry.LockdownExit(outsideX,outsideZ,-fx,-fz,wall,24,body,out px,out pz);
+            Near(px,outsideX,"already escaped actor stays outside (X)");Near(pz,outsideZ,"already escaped actor stays outside (Z)");
+        }
     }
 }

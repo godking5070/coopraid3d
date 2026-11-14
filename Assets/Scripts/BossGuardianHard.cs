@@ -839,11 +839,18 @@ namespace RaidRogue
             if (_guardian.Pattern == GuardianPattern.Lockdown || _guardian.Pattern == GuardianPattern.FullLockdown)
             {
                 if (_hardPhase == 0)
-                    destination = actor == _guardianVictim ? HardAimPoint() : GuardianLineEscape(actor);
+                    destination = actor == _guardianVictim ? HardAimPoint() : GuardianLockdownRally(actor);
                 else if (_hardPhase == 1)
-                    destination = GuardianLineEscape(actor);
+                    destination = GuardianLockdownRally(actor);
                 else if (_hardPhase == 2)
-                    destination = _hardExitOpen ? HardBreachPoint(guardianHard.wallRadius + 3.2f) : actor.position;
+                {
+                    if(_hardExitOpen)
+                    {
+                        GuardianHardGeometry.LockdownExit(actor.position.x,actor.position.z,_hardBreachDirection.x,_hardBreachDirection.z,
+                            guardianHard.wallRadius,guardianHard.wallSegments,CombatRange.Radius(actor),out double x,out double z);
+                        destination=new Vector3((float)x,actor.position.y,(float)z);
+                    }
+                }
                 else if (_hardPhase == 3 || _hardPhase == 4)
                     destination = GuardianChargeDestination(actor, role);
                 else return false;
@@ -872,6 +879,13 @@ namespace RaidRogue
                 destination.y = actor.position.y; return true;
             }
             return false;
+        }
+        private Vector3 GuardianLockdownRally(Transform actor)
+        {
+            GuardianHardGeometry.LockdownRally(actor.position.x,actor.position.z,_hardBreachDirection.x,_hardBreachDirection.z,
+                _guardianOrigin.x,_guardianOrigin.z,_guardianForward.x,_guardianForward.z,guardianHard.wallRadius,
+                CombatRange.Radius(actor),guardianHard.lockdownWidth*.5f,out double x,out double z);
+            return new Vector3((float)x,actor.position.y,(float)z);
         }
         private Vector3 HardSweepSafePoint(Transform actor)
         {
