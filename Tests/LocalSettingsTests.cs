@@ -61,12 +61,15 @@ internal static class LocalSettingsTests
     }
     private static LocalKeyBinding[] OldDefaults()
     {
-        var old=LocalBindingRules.Defaults().Where(b=>Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate"},b.action)<0).ToArray();
+        var old=LocalBindingRules.Defaults().Where(b=>Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate","Interact"},b.action)<0).ToArray();
         old[Row(old,"Potion")].primary="q";old[Row(old,"Skill4")].primary="digit4";old[Row(old,"Skill4")].secondary="numpad4";old[Row(old,"View")].primary="v";return old;
     }
     private static void MigrationTests()
     {
-        var data=new LocalSettingsData{version=1,bindings=OldDefaults()};data.Normalize();
+        var old=OldDefaults();
+        Check(!old.Any(b=>b.action=="Interact"),"v1 factory fixture excludes the later Interact action");
+        Check(LocalBindingRules.IsVersionOneFactory(old),"v1 factory fixture is recognized before migration");
+        var data=new LocalSettingsData{version=1,bindings=old};data.Normalize();
         Check(data.bindings[Row(data.bindings,"Potion")].primary=="x"&&data.bindings[Row(data.bindings,"Skill4")].primary=="q"&&data.bindings[Row(data.bindings,"View")].primary=="f12","factory Q potion/X and V view migration");
         ValidBindings(data.bindings);string first=Fingerprint(data.bindings);data.Normalize();Check(Fingerprint(data.bindings)==first&&data.version==2,"migration is versioned and idempotent");
         var custom=OldDefaults();custom[Row(custom,"Skill1")].primary="x";

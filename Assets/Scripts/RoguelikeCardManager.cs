@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
@@ -46,6 +47,8 @@ namespace RaidRogue
         public Image[] cardAccentBanners = new Image[3];
         public Text[] cardTitleTexts = new Text[3];
         public Text[] cardDescTexts = new Text[3];
+        private readonly Button[] _boundCardButtons = new Button[3];
+        private readonly UnityAction[] _cardClickActions = new UnityAction[3];
 
         private bool _isSelectionOpen;
         private Action _onCardSelectedCallback;
@@ -89,6 +92,7 @@ namespace RaidRogue
         private void InitializeCardPool()
         {
             _cardPool.Clear();
+            _cardPool.AddRange(CharacterEvolutionCards.Build());
 
             _cardPool.Add(new RoguelikeCardData
             {
@@ -154,21 +158,23 @@ namespace RaidRogue
             });
         }
 
-        private void BindCardButtons()
+        internal void BindCardButtons()
         {
             if (cardButtons == null)
             {
                 return;
             }
 
-            for (int i = 0; i < cardButtons.Length; i++)
+            for (int i = 0; i < _boundCardButtons.Length; i++)
             {
+                if (_boundCardButtons[i] != null && _cardClickActions[i] != null)
+                    _boundCardButtons[i].onClick.RemoveListener(_cardClickActions[i]);
+                _boundCardButtons[i] = null;
+                if (i >= cardButtons.Length || cardButtons[i] == null) continue;
                 int capturedIndex = i;
-                if (cardButtons[i] != null)
-                {
-                    cardButtons[i].onClick.RemoveAllListeners();
-                    cardButtons[i].onClick.AddListener(() => OnCardButtonClicked(capturedIndex));
-                }
+                if (_cardClickActions[i] == null) _cardClickActions[i] = () => OnCardButtonClicked(capturedIndex);
+                cardButtons[i].onClick.AddListener(_cardClickActions[i]);
+                _boundCardButtons[i] = cardButtons[i];
             }
         }
 
@@ -202,12 +208,16 @@ namespace RaidRogue
                 return;
             }
 
+            // The card picker owns this reward step. A skill picker left open from the
+            // preceding frame would otherwise make ModalCovered reject every card click.
+            CharacterRewardUI.Close();
+
             _currentOfferedCards.Clear();
 
             List<RoguelikeCardData> candidatePool = new List<RoguelikeCardData>();
             foreach (RoguelikeCardData card in _cardPool)
             {
-                if (!_acquiredCardStacks.ContainsKey(card.id) || card.id == RoguelikeCardId.SwiftAwakening)
+                if (EligibleRosterCard(card)&&(!_acquiredCardStacks.ContainsKey(card.id) || card.id == RoguelikeCardId.SwiftAwakening))
                 {
                     candidatePool.Add(card);
                 }
@@ -215,15 +225,16 @@ namespace RaidRogue
 
             if (candidatePool.Count < 3)
             {
-                candidatePool = new List<RoguelikeCardData>(_cardPool);
+                candidatePool = _cardPool.FindAll(EligibleRosterCard);
             }
 
             for (int i = 0; i < 3 && candidatePool.Count > 0; i++)
             {
-                int pickIdx = UnityEngine.Random.Range(0, candidatePool.Count);
+                int pickIdx = CampaignRuntime.Instance?.RewardRandom(candidatePool.Count) ?? UnityEngine.Random.Range(0, candidatePool.Count);
                 _currentOfferedCards.Add(candidatePool[pickIdx]);
                 candidatePool.RemoveAt(pickIdx);
             }
+            if (player != null) CampaignRuntime.Instance?.RecordSettlementOffer(player.transform, _currentOfferedCards.ConvertAll(c => (int)c.id).ToArray());
 
             if (modalHeaderText != null)
             {
@@ -243,7 +254,7 @@ namespace RaidRogue
                         cardTitleTexts[i].text = alreadyOwned
                             ? $"{roleTitle} ({stackCount + 1}중첩)\n<size=15><color=#DDDDDD>{roleCategory}</color></size>"
                             : $"{roleTitle}\n<size=15><color=#DDDDDD>{roleCategory}</color></size>";
-                        cardTitleTexts[i].color = data.accentColor;
+                        RaidUIStyle.Color(cardTitleTexts[i], data.accentColor);
                     }
 
                     if (cardDescTexts != null && i < cardDescTexts.Length && cardDescTexts[i] != null)
@@ -253,7 +264,7 @@ namespace RaidRogue
 
                     if (cardAccentBanners != null && i < cardAccentBanners.Length && cardAccentBanners[i] != null)
                     {
-                        cardAccentBanners[i].color = data.accentColor;
+                        RaidUIStyle.Color(cardAccentBanners[i], data.accentColor);
                     }
                 }
             }
@@ -275,6 +286,14 @@ namespace RaidRogue
                 if (_isSelectionOpen && slotIndex >= 0 && slotIndex < _currentOfferedCards.Count) RaidNetworkSession.Instance.RequestAction(8, (int)_currentOfferedCards[slotIndex].id);
                 return;
             }
+            CommitSingleCard(slotIndex);
+        }
+        internal void AutoChooseSingleCard()
+        {
+            if(!RaidCombatAuthority.Active)CommitSingleCard(0);
+        }
+        private void CommitSingleCard(int slotIndex)
+        {
             if (!_isSelectionOpen || slotIndex < 0 || slotIndex >= _currentOfferedCards.Count)
             {
                 return;
@@ -283,7 +302,9 @@ namespace RaidRogue
             if (StageManager.Instance == null || StageManager.Instance.Progress.Phase != RaidBattlePhase.Reward) return;
             RoguelikeCardData chosen = _currentOfferedCards[slotIndex];
             _isSelectionOpen = false; // Consume before applying or invoking another state transition.
+            CampaignRuntime.Instance?.CardChosen(player, (int)chosen.id, _currentOfferedCards.ConvertAll(c => (int)c.id));
             ApplyCardEffect(chosen);
+            CampaignRuntime.Instance?.SyncSettlement();
             if (cardSelectionModalRoot != null)
             {
                 cardSelectionModalRoot.SetActive(false);
@@ -313,7 +334,9 @@ namespace RaidRogue
                 _acquiredCardStacks[card.id] = 1;
             }
 
-            if (player != null) CharacterActor.Ensure(player.gameObject).RecordBuildEffect("legacy.card." + card.id, _acquiredCardStacks[card.id]);
+            if(player!=null&&(int)card.id>=CharacterEvolutionCards.First)
+                CharacterActor.Ensure(player.gameObject).RecordBuildEffect(((int)card.id-CharacterEvolutionCards.First)%2==0?"evolution.overcome":"evolution.maximize",1);
+            if (player != null) CharacterActor.Ensure(player.gameObject).RecordBuildEffect(CampaignCardIds.Id((int)card.id), _acquiredCardStacks[card.id]);
             GetRoleAdaptedCardDisplay(card, out string roleTitle, out string roleCat, out _);
             _acquiredCardHistory.Add($"{roleTitle} ({roleCat})");
 
@@ -461,11 +484,10 @@ namespace RaidRogue
 
             if (player != null)
             {
-                FloatingTextPopup.Spawn(
+                FloatingTextPopup.SpawnPartyNotice(
                     player.transform.position + Vector3.up * 2.5f,
                     "[광전사의 함성] 파티 전체 공격속도 +50% 증가!",
-                    new Color(1f, 0.35f, 0.45f, 1f),
-                    true
+                    new Color(1f, 0.35f, 0.45f, 1f)
                 );
             }
 

@@ -1,0 +1,42 @@
+대기실 허수아비 전환 — 2026-11-05
+
+사용자 결정
+별도 훈련소 대신 대기실에서 바로 때릴 수 있는 허수아비 한 개를 사용한다.
+
+구현
+- RaidLobbyRoom: 대기실 동쪽 (10, 1, 4)에 목제 기둥·가로대·짚 몸통의 허수아비를 코드로 생성. 클릭 및 적 순환 대상으로 연결. 이리스는 허수아비 사용을 안내한다.
+- BossAddSpawner/BossAddMinion: 전용 허수아비 초기화. 이동·반격·사망·보상 없음. HP는 1 이상을 유지하고 프레임 갱신 시 회복. 적중 콜백은 유지하여 콤보 자원·루트 효과를 시험할 수 있다. 정규 전투 피해 통계에는 집계하지 않는다.
+- StageManager: PlayerSkillsSuspended를 분리. 로비 연습에서 플레이어 스킬만 허용하고 기존 CombatSuspended는 유지한다. 보스/적 AI·파티 피격·전투 진행은 중지 상태를 유지한다.
+- CharacterActor/PlayerCombatController/PlayerController/NineKey*/Aegis*/CombatStatusEffects/CombatHitContext/PartyBotAI: 직접 입력, 루트 타이머, 영창, 강습 이동, 회복·보호 및 플레이어 투사체가 연습 중 작동. AI 공격과 피격 게이트는 유지.
+- CombatRange/TargetingManager: 대기실의 적 대상은 허수아비로 제한. 숨은 보스와 일반 적을 연습 적중 대상으로 사용하지 않는다.
+- RaidCombatSession: 호스트 검증을 유지하면서 로비의 공용 스킬 요청을 허용. 각 참여자의 대기실 허수아비를 예약 ID -900000으로 해석. 일반 적 스폰/삭제 목록에는 등록하지 않는다. 기존 캐릭터 상태와 타격 팝업 동기화 경로 사용.
+- RaidNetworkProtocol: 버전 33. 온라인 참가자는 동일 버전 빌드 사용.
+- RaidMainMenuUI/RaidMenuBindings/CampaignUI: 별도 훈련소 진입과 해금 안내 제거. 저장 schema와 이전 훈련 내부 코드는 호환성을 위해 보존.
+
+출발 및 저장 경계
+기존 PrepareStage → CleanupAttempt → ResetAndHealAllPartyMembers → ResetEncounter 경로로 자원·GCD·콤보·캐스트·쿨타임·루트 상태·설치물·이동 충전을 초기화한다.
+대기실 공격으로 정규 클리어·보상을 만들지 않는다. 연습에서 얻은 자원은 다음 전투 준비 시 초기화한다.
+메뉴·전투 준비·출발·종료 중에는 허수아비 대상으로 행동할 수 없다.
+
+명령 검증
+- Run-LobbyPracticeChecks.ps1: 실제 메서드 추출 검사 39개 PASS. 로비 허용 조건, 적 제한, 호스트 피해, 사망 방지, 적중 콜백, 통계 제외, 대상 ID 수명 검사.
+- Run-NineKeyDamageChecks.ps1: PASS.
+- Run-NineKeyHealerChecks.ps1: 801 + 209 PASS.
+- Run-NineKeyTankChecks.ps1: 2119 + 134 PASS.
+- Run-StudioChecks.ps1 -Group Compile: 런타임·에디터 managed compilation PASS.
+- Run-StudioChecks.ps1 -Group Network: PASS (컴파일 포함).
+- ActionExecutionTests: 연습 중 직접 콤보 자원 획득 경로 검사 추가.
+초기 검사 실패는 새 게이트에 대한 테스트 스텁 누락과 지역 변수 이름 충돌이었으며 수정 후 재실행 통과.
+Unity·Steam·게임 실행/자동 조작, 씬·프리팹 YAML 편집, 병합·푸시 없음.
+
+플레이 미검증 / 사용자가 원본 Unity에서 확인할 순서
+1. 혼자 시작 후 대기실 동쪽 허수아비를 클릭하거나 적 순환 키로 선택한다. NPC·문 동선과 충돌하지 않는지 확인.
+2. 랜서 1/2로 전류를 얻고 3/4/Q/R을 사용한다. 강습 이동·폭풍창·회수·타격 숫자·쿨타임을 확인한다.
+3. 캐스터 영창·지연 공격, 힐러 과치유 자원/회복/보호, 탱커 자원 사용을 확인한다. 허수아비는 반격하지 않으므로 카운터 성공·피격 방어 훈련은 제공하지 않는다.
+4. 자원·설치물·보호막을 준비한 채 문으로 출발한다. 실제 보스 전투에 연습 상태가 이월되지 않는지 확인.
+5. 같은 빌드 2인으로 호스트/클라이언트가 각각 공격한다. 자기 자원·쿨타임과 타격 팝업, 늦은 참가, 메뉴 복귀 후 재입장을 확인한다.
+6. 정규 보스 클리어·저장·재시도 흐름 및 사용자 편집 UI가 유지되는지 확인한다.
+
+미확정/초기값
+허수아비 위치·크기·목재/짚 모형은 임시 표현이다. 별도 연습 DPS 집계창·자동 자원 충전·카운터 신호는 이번 요청에 추가하지 않았다.
+명령 통과는 라이브 네트워크·Unity 오브젝트 수명·화면 가독성·밸런스 검증을 의미하지 않는다.

@@ -8,7 +8,7 @@ namespace RaidRogue
     {
         // Zero deliberately disables Steam. No sample App ID becomes a product setting.
         public uint appId;
-        public string build = "steam-combat-1";
+        public string build = RaidSteamPolicy.CurrentBuild;
         public bool restartThroughSteam = true;
         public static RaidSteamSettings Load()
         {

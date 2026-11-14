@@ -57,6 +57,12 @@ namespace RaidRogue
             _ui.CloseResults();
         }
 
+        internal void ResetTrainingRecords()
+        {
+            if (!CharacterTrainingSession.Active) return;
+            if (!Ledger.Active) BeginStage(0, true);
+            else { _recentDamage.Clear(); Ledger.ResetCurrentCounters(); RefreshRoster(); }
+        }
         public void RefreshRoster()
         {
             foreach (var member in PartyLife.OrderedMembers()) Register(member);
@@ -87,6 +93,8 @@ namespace RaidRogue
 
         public static string RoleName(int role) => role == 1 ? "가디언" : role == 2 ? "오라클" : role == 3 ? "블레이드" : "아크메이지";
         public static int SourceId(Transform source) => Instance != null ? Instance.Register(source) : 0;
+        public static void Event(string description)
+        { if (!RaidCombatAuthority.Replica) Instance?.Ledger.RecordEvent(description); }
 
         public static void Damage(Transform source, float before, float after, bool isAdd,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
         {

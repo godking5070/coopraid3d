@@ -13,6 +13,11 @@ namespace RaidRogue
         public bool ValidateCombatSkill(int skill, out string reason)
         {
             reason = "";
+            if(StageManager.Instance?.boss?.MarionetteControlled(transform)==true)
+            {reason="조종당함 · 인형의 실 절단 대기";return false;}
+            if ((StageManager.Instance?.boss?.GuardianClashHolding(transform)==true ||
+                StageManager.Instance?.boss?.CampanellaLockHolding(transform)==true) && skill!=3)
+            { reason="힘겨루기 중에는 [3] 자기 방어기와 포션만 사용할 수 있습니다"; return false; }
             if (!CharacterActor.Ensure(gameObject).Available(CharacterSlots.LegacySlot(skill), out reason)) return false;
             if (!CanUseCombatAction || playerController.IsBeingRescued || playerController.IsBeingKnockedBack) reason = "현재 행동할 수 없습니다";
             else if (skill <= 2 && (IsOnGcd || _isCastingSpell)) reason = "글로벌 쿨타임 또는 시전 중입니다";
@@ -51,9 +56,11 @@ namespace RaidRogue
             return best;
         }
         public void InterruptForConnectionLoss()
+            => InterruptForControl();
+        public void InterruptForControl()
         {
             GetComponent<CharacterActor>()?.InterruptCast();
-            // A disconnect is neither death nor a new encounter: preserve combo, buffs and cooldowns.
+            // Control interruption preserves combo, buffs and cooldowns.
             _isCastingSpell = false; _castElapsed = 0; _castingSpellName = "";
         }
         public void ReportNetworkFailure(string reason) => ShowRangeFeedback(reason);
@@ -80,6 +87,7 @@ namespace RaidRogue
         {
             if (_isBeingRescued) UpdateRescuePullMovementXZ(seconds);
             else if (_isBeingKnockedBack) UpdateKnockbackMovementXZ(seconds);
+            else if(IsSkillRushing)StepSkillRush(seconds);
         }
         public float NetworkMoveSpeed => moveSpeed * (!RaidCombatAuthority.Replica && _rescueSpeedBoostTimer > 0 ? 1.35f : 1);
         public void CaptureNetworkCombat(RaidCombatActor state)
@@ -87,8 +95,8 @@ namespace RaidRogue
             state.hp = currentHp; state.maxHp = maxHp; state.shield = currentShield; state.dead = IsDead;
             state.defense = _defensiveRemainingTime; state.tactical = _tacticalRescueBuffTimer; state.speedBoost = _rescueSpeedBoostTimer; state.speed = NetworkMoveSpeed;
             state.haste = cardManager != null ? cardManager.NetworkHaste : 0;
-            state.stunned = IsStunned; state.rooted = IsMovementLocked; state.forced = IsBeingRescued || IsBeingKnockedBack;
-            state.cards = new[] { masterOfRearStacks, ghostStepStacks, thornArmorStacks, tacticalRescueStacks, berserkerShoutStacks, vampiricBladeStacks, swiftAwakeningStacks };
+            state.stunned = IsStunned; state.rooted = IsMovementLocked || GetComponent<CharacterKit>()?.DashBlocked==true; state.forced = IsBeingRescued || IsBeingKnockedBack || IsSkillRushing;
+            state.cards = cardManager!=null?cardManager.CaptureCardStacks():new[] { masterOfRearStacks, ghostStepStacks, thornArmorStacks, tacticalRescueStacks, berserkerShoutStacks, vampiricBladeStacks, swiftAwakeningStacks };
             combatController?.CaptureNetworkCombat(state);
         }
         public void ApplyNetworkCombat(RaidCombatActor state)
@@ -98,7 +106,7 @@ namespace RaidRogue
             _defensiveRemainingTime = state.defense; _tacticalRescueBuffTimer = state.tactical; _rescueSpeedBoostTimer = state.speedBoost;
             IsStunned = state.stunned; IsMovementLocked = state.rooted; _isBeingRescued = state.forced; _isBeingKnockedBack = false;
             moveSpeed = state.speed; ApplyBodyColor(IsDefensiveBuffActive ? defensiveBodyColor : normalBodyColor);
-            if (state.cards != null && state.cards.Length == 7)
+            if (state.cards != null && state.cards.Length >= 7)
             {
                 masterOfRearStacks = state.cards[0]; ghostStepStacks = state.cards[1]; thornArmorStacks = state.cards[2]; tacticalRescueStacks = state.cards[3];
                 berserkerShoutStacks = state.cards[4]; vampiricBladeStacks = state.cards[5]; swiftAwakeningStacks = state.cards[6];

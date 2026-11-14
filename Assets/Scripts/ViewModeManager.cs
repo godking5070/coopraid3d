@@ -154,7 +154,7 @@ namespace RaidRogue
                 {
                     string popupMsg = is2D
                         ? "★ 2D 탑다운 뷰 (Orthographic 90°) 전환! ★"
-                        : "★ 3D 뷰 전환 · 우클릭 드래그로 카메라 회전 ★";
+                        : LocalMovementPreferences.RightClick?"★ 3D 뷰 전환 · 휠 버튼 드래그로 카메라 회전 ★":"★ 3D 뷰 전환 · 우클릭 드래그로 카메라 회전 ★";
                     Color popupCol = is2D
                         ? new Color(0.30f, 1.0f, 0.85f, 1f)
                         : new Color(1.0f, 0.88f, 0.28f, 1f);
@@ -176,23 +176,21 @@ namespace RaidRogue
                 viewToggleButtonText.text = is2D
                     ? $"[뷰 전환: 현재 2D ({LocalInputBindings.Label("View")})]"
                     : $"[뷰 전환: 현재 3D ({LocalInputBindings.Label("View")})]";
-                viewToggleButtonText.color = is2D
+                RaidUIStyle.Color(viewToggleButtonText, is2D
                     ? new Color(0.35f, 1.0f, 0.88f, 1f)
-                    : new Color(1.0f, 0.94f, 0.45f, 1f);
+                    : new Color(1.0f, 0.94f, 0.45f, 1f));
             }
 
             if (viewToggleSubHintText != null)
             {
-                viewToggleSubHintText.text = is2D
-                    ? $"{LocalInputBindings.MovementLabels} 화면 기준 이동 | 휠 줌 | 확대 시 플레이어 추적"
-                    : $"{LocalInputBindings.MovementLabels} 카메라 기준 이동 | 우클릭 회전 | 휠 줌";
+                viewToggleSubHintText.text = LocalMovementPreferences.Hint(is2D);
             }
 
             if (viewToggleButtonBg != null)
             {
-                viewToggleButtonBg.color = is2D
+                RaidUIStyle.Color(viewToggleButtonBg, is2D
                     ? new Color(0.08f, 0.28f, 0.34f, 0.95f)
-                    : new Color(0.14f, 0.18f, 0.30f, 0.95f);
+                    : new Color(0.14f, 0.18f, 0.30f, 0.95f));
             }
         }
 

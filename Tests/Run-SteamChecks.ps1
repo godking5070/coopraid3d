@@ -1,4 +1,4 @@
-﻿param([Parameter(Mandatory = $true)][string]$OriginalProject, [string]$SteamPackage, [string]$TransportPackage, [string]$Compiler)
+param([Parameter(Mandatory = $true)][string]$OriginalProject, [string]$SteamPackage, [string]$TransportPackage, [string]$Compiler)
 $ErrorActionPreference = 'Stop'
 if (!$Compiler) {
     $taskVsWhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
@@ -46,11 +46,15 @@ if ($LASTEXITCODE -ne 0) { throw 'Character framework test compilation failed.' 
 & $taskCharacterExe
 if ($LASTEXITCODE -ne 0) { throw 'Character framework tests failed.' }
 $taskAegisExe = Join-Path $taskOutput 'AegisPaladinTests.exe'
-& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskAegisExe" (Join-Path $taskRoot 'Assets/Scripts/CharacterFrameworkData.cs') (Join-Path $taskRoot 'Assets/Scripts/CharacterRuntimeState.cs') (Join-Path $taskRoot 'Assets/Scripts/AegisPaladinData.cs') (Join-Path $taskRoot 'Assets/Scripts/AegisRouteData.cs') (Join-Path $taskRoot 'Assets/Scripts/CombatMetricsData.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidCombatProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $PSScriptRoot 'AegisPaladinTests.cs')
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskAegisExe" (Join-Path $taskRoot 'Assets/Scripts/CharacterFrameworkData.cs') (Join-Path $taskRoot 'Assets/Scripts/CharacterRuntimeState.cs') (Join-Path $taskRoot 'Assets/Scripts/AegisPaladinData.cs') (Join-Path $taskRoot 'Assets/Scripts/AegisRouteData.cs') (Join-Path $taskRoot 'Assets/Scripts/AegisExtensionData.cs') (Join-Path $taskRoot 'Assets/Scripts/CombatMetricsData.cs') (Join-Path $taskRoot 'Assets/Scripts/DashMotion.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidCombatProtocol.cs') (Join-Path $taskRoot 'Assets/Scripts/RaidNetworkProtocol.cs') (Join-Path $PSScriptRoot 'AegisPaladinTests.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Aegis test compilation failed.' }
 & $taskAegisExe
 if ($LASTEXITCODE -ne 0) { throw 'Aegis tests failed.' }
 & (Join-Path $PSScriptRoot 'Run-AegisRouteChecks.ps1') -Compiler $Compiler
+& (Join-Path $PSScriptRoot 'Run-AegisExtensionChecks.ps1') -Compiler $Compiler
+& (Join-Path $PSScriptRoot 'Run-CharacterRosterChecks.ps1') -Compiler $Compiler
+& (Join-Path $PSScriptRoot 'Run-CharacterTrainingChecks.ps1') -Compiler $Compiler
+& (Join-Path $PSScriptRoot 'Run-CampaignSaveChecks.ps1') -Compiler $Compiler
 # Compile the actual pinned SDK, without loading native Steam or running Unity.
 [xml]$taskProject = Get-Content (Join-Path $OriginalProject 'Assembly-CSharp.csproj') -Raw
 $taskDefines = $taskProject.SelectSingleNode("//*[local-name()='DefineConstants']").InnerText

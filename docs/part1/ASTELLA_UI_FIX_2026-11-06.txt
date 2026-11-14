@@ -1,0 +1,40 @@
+﻿Astella UI correction — 2026-11-06
+
+Project: C:/Astella/Astella
+Main scene: Assets/Scenes/SampleScene.unity
+
+Confirmed causes:
+1. Connection views embedded inside RaidHUD are preferred by RaidUIView.Attach.
+   The first design tool decorated only a root connection view and skipped the embedded copy.
+2. The first design pass changed menu accents, but did not redesign the in-game combat HUD shown by the user.
+3. The editor main scene retained the legacy canvas while the selected HUD was instantiated only in Play.
+
+Applied with the existing original Unity editor:
+- Fixed nested connection view traversal.
+- Reworked the main menu with the star chart and two vertical action cards.
+- Applied party panel, boss frame, skill bar and auxiliary slot layout to the active Astella HUD prefab.
+- Replaced stretched fill sprites with an authored flat fill sprite.
+- Added the theme-controlled collapsed waiting-room build selector.
+- Prevented legacy skill-card layout preparation from overwriting authored layouts.
+- Installed Astella_RaidHUD as a prefab instance in SampleScene and saved the scene.
+- Kept the previous RaidRogue_HUD_Canvas disabled for recovery.
+- Scene presenters were rebound through RaidUIView reference contracts, without editing YAML.
+- Existing saved campaign was resumed only to inspect waiting-room presentation. No battle was started.
+
+Verified:
+- Runtime and editor managed compilation pass (TEMP/Astella-CombatHUD-Checks.log).
+- Unity UI validation: 479 references pass.
+- Directly observed the updated main menu and waiting-room combat HUD in Play.
+- Directly observed the updated HUD in the saved main scene outside Play.
+
+Limits:
+- The saved campaign disallows job changes before resuming departure. Modern-job build foldout, all 12 jobs,
+  actual boss combat, multiplayer and alternate screen aspect ratios are not visually verified in this pass.
+- Editor preview labels are prefab sample values; live values refresh in Play.
+
+Recovery:
+Logs/UIRepairBackups/astella-combat-* contains scene, HUD prefab and theme snapshots.
+Logs/UIRepairBackups/astella-embedded-menu-* contains the separate and embedded menu prefab snapshots.
+
+Authoring entry point: Tools > RaidRogue > UI > Apply Astella Combat HUD (Alt+F9)
+This is explicit; no import-time scene rewrite or per-frame theme reset was added.

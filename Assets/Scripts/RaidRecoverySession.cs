@@ -33,12 +33,14 @@ namespace RaidRogue
         {
             if (peer.Id == 0) return;
             Debug.Log($"[Raid {SessionTag}] epoch={BattleEpoch} actor={peer.Id} disconnected; voluntary={peer.Voluntary} phase={BattlePhase}");
-            if (UsesSteam && !peer.Voluntary && _recovery.Actor(peer.Id) != null)
+            if (UsesSteam && (!peer.Voluntary || CampaignRuntime.Instance?.RunStarted == true || _campaignResumed) && _recovery.Actor(peer.Id) != null)
             {
                 bool wasHuman = _recovery.Actor(peer.Id).State == RaidControlState.Connected;
                 bool changed = _recovery.Reserve(peer.Id, ServerTime, BattlePhase == RaidBattlePhase.Reward ? BattleEpoch : -1);
                 if (changed && _avatars.TryGetValue(peer.Id, out var avatar))
                 {
+                    StageManager.Instance?.boss?.MarionetteControlOwnerDisconnected(avatar.transform);
+                    if (CampaignBuildLocked) _recovery.Actor(peer.Id).Deadline = float.MaxValue;
                     avatar.Automated = true; avatar.MotionVersion++;
                     if (wasHuman)
                     {
@@ -52,8 +54,9 @@ namespace RaidRogue
                 }
                 return;
             }
+            if(_avatars.TryGetValue(peer.Id,out var leaving))StageManager.Instance?.boss?.MarionetteControlOwnerDisconnected(leaving.transform);
             _recovery.Remove(peer.Id); _roster.Remove(peer.Id); OnNetworkDeparture(peer.Id); RemoveAvatar(peer.Id);
-            if (CanJoinBattle) ReconcileBots();
+            if (CanChooseRole) ReconcileBots();
         }
         private bool TryResumePeer(Peer peer)
         {
@@ -108,12 +111,13 @@ namespace RaidRogue
                     var peer = _peers.Find(p => p.Id == slot.Actor); if (peer != null) Reject(peer, "복귀 가능 시간이 지났습니다.");
                     var member = _roster.Members.Find(m => m.Id == slot.Actor); member.Loaded = true; SyncLobbyAvatar(member);
                 }
-                if (BattlePhase != RaidBattlePhase.Reward || !slot.Automated || _rewards.Chosen(slot.Actor)) continue;
+                if (BattlePhase != RaidBattlePhase.Reward || !slot.Automated || RewardComplete(slot.Actor)) continue;
                 _recovery.BeginReward(slot, BattleEpoch, ServerTime);
                 int[] cards = _rewards.Cards(slot.Actor);
-                if (cards.Length == 0 || !_recovery.RewardDue(slot, BattleEpoch, ServerTime) || !_rewards.Choose(BattleEpoch, slot.Actor, cards[0])) continue;
-                _avatars[slot.Actor].GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)cards[0]);
-                _recovery.AutoSelected(slot, cards[0]);
+                if (!_recovery.RewardDue(slot, BattleEpoch, ServerTime)) continue;
+                if(cards.Length>0&&_rewards.Choose(BattleEpoch, slot.Actor, cards[0]))
+                {CampaignRuntime.Instance?.CardChosen(_avatars[slot.Actor].GetComponent<PlayerController>(), cards[0], cards);_avatars[slot.Actor].GetComponent<PlayerController>().cardManager.ApplyNetworkCard((RoguelikeCardId)cards[0]);_recovery.AutoSelected(slot, cards[0]);}
+                AutoChooseSkillRewards(slot.Actor);
             }
             FinishRewardsIfReady();
         }
@@ -141,12 +145,18 @@ namespace RaidRogue
             RaidSteamRuntime.Instance?.ConnectionRestored();
             Send(_server, new RaidPacket { Kind = RaidPacketKind.RestoreComplete, Id = frame.epoch, Tick = frame.serial, Role = (int)_localLease }, true);
             var local = Array.Find(frame.party, a => a.id == _localId);
+            var recoveryNotices=new List<string>();
             if (local != null && local.autoRevision > _autoRevisionSeen && local.autoCards != null)
             {
                 var names = new List<string>(); for (int i = Mathf.Clamp(_autoRevisionSeen, 0, local.autoCards.Length); i < local.autoCards.Length; i++) names.Add(_player.cardManager.NetworkCardName(local.autoCards[i]));
-                ShowPartyNotice("연결 중 자동 선택된 카드: " + string.Join(", ", names)); _autoRevisionSeen = local.autoRevision;
+                recoveryNotices.Add("연결 중 자동 선택된 카드: " + string.Join(", ", names)); _autoRevisionSeen = local.autoRevision;
             }
-            else ShowPartyNotice("현재 게임으로 복귀했습니다");
+            if(local?.character?.automaticChoices?.Length>0)
+            {
+                var definition=CharacterCatalog.Find(local.character.jobId);
+                recoveryNotices.Add("현재 런의 자동 선택 스킬: "+string.Join(", ",System.Array.ConvertAll(local.character.automaticChoices,id=>definition.Skill(id)?.name??id)));
+            }
+            ShowPartyNotice(recoveryNotices.Count>0?string.Join("\n",recoveryNotices):"현재 게임으로 복귀했습니다");
         }
         public void BeginRecoveryLookup()
         {

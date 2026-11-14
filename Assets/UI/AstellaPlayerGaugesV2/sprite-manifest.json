@@ -1,0 +1,200 @@
+{
+  "version": 2,
+  "canvas": [
+    1000,
+    64
+  ],
+  "geometry": {
+    "outerPath": "M22 10H978L996 32L978 54H22L4 32Z",
+    "fillPath": "M23 14H977L991 32L977 50H23L9 32Z",
+    "fillBounds": [
+      9,
+      14,
+      982,
+      36
+    ],
+    "fillDirection": "left to right",
+    "ratioDefinition": "current / maximum",
+    "hpExampleRatio": 0.842,
+    "ultimateExampleRatio": 0.6,
+    "previewUltimateTip": "HP and ultimate both use the same pointed advancing-edge geometry",
+    "ultimateTip": {
+      "width": 12,
+      "height": 36,
+      "maskPurpose": "alpha mask only, not a visible white triangle",
+      "frontX": "9 + 982 * ratio",
+      "maskPosition": [
+        "frontX - 12",
+        14
+      ],
+      "highlightPosition": [
+        "frontX - 13",
+        13
+      ],
+      "clipping": "solid rectangle to frontX - 12, then triangular alpha mask sampling the original full-width fill at the same coordinates",
+      "nearZero": "hide both fill and tip at zero; reduce tip width to the available filled width when below 12px",
+      "mask": "ultimate-tip-mask.png",
+      "highlight": "ultimate-tip-highlight.png"
+    },
+    "leadingEdges": {
+      "hp": "pointed",
+      "ultimate": "pointed"
+    },
+    "hpTip": {
+      "width": 12,
+      "height": 36,
+      "maskPurpose": "alpha mask only, not a visible white triangle",
+      "frontX": "9 + 982 * ratio",
+      "maskPosition": [
+        "frontX - 12",
+        14
+      ],
+      "highlightPosition": [
+        "frontX - 13",
+        13
+      ],
+      "clipping": "solid rectangle to frontX - 12, then triangular alpha mask sampling the original full-width fill at the same coordinates",
+      "nearZero": "hide both fill and tip at zero; reduce tip width to the available filled width when below 12px",
+      "mask": "hp-tip-mask.png",
+      "highlight": "hp-tip-highlight.png"
+    },
+    "commonTipRules": {
+      "width": "min(12, 982 * ratio)",
+      "atZero": "hide fill, mask and highlight",
+      "atFull": "use the original full inner shape; hide moving highlight",
+      "underOnePercent": "intersect the left pointed end and scaled right tip; never draw outside the inner frame"
+    }
+  },
+  "material": {
+    "frame": "3D-lighted slim metal lip: warm-gold face, pale specular upper rim, dark inner bevel, bronze lower edge",
+    "fill": "multi-stop horizontal colors + vertical depth + broad uneven reflected washes + deterministic cloud and fine grain",
+    "textureAlreadyIncludedInFill": true,
+    "optionalGloss": "fill-gloss is already baked into hp-fill and ultimate-fill; do not stack it unless an extra highlight is intended"
+  },
+  "layerOrder": [
+    "track-inset",
+    "hp-fill or ultimate-fill, clipped with a pointed advancing edge",
+    "matching hp-tip-highlight or ultimate-tip-highlight for 0 < ratio < 1",
+    "frame-gold",
+    "runtime text"
+  ],
+  "import": {
+    "textureType": "Sprite (2D and UI)",
+    "mesh": "Full Rect",
+    "alpha": "Input Texture Alpha",
+    "mipmaps": false,
+    "filter": "Bilinear",
+    "compression": "None"
+  },
+  "assets": [
+    {
+      "name": "frame-gold",
+      "width": 1000,
+      "height": 64,
+      "hasAlpha": true,
+      "transparentPixels": 48863,
+      "translucentPixels": 7250,
+      "borderLBRTop": [
+        34,
+        22,
+        34,
+        22
+      ],
+      "optional": false,
+      "mask": false
+    },
+    {
+      "name": "track-inset",
+      "width": 1000,
+      "height": 64,
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 34908,
+      "borderLBRTop": [
+        34,
+        22,
+        34,
+        22
+      ],
+      "optional": false,
+      "mask": false
+    },
+    {
+      "name": "hp-fill",
+      "width": 1000,
+      "height": 64,
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 120,
+      "borderLBRTop": null,
+      "optional": false,
+      "mask": false
+    },
+    {
+      "name": "ultimate-fill",
+      "width": 1000,
+      "height": 64,
+      "hasAlpha": true,
+      "transparentPixels": 29092,
+      "translucentPixels": 120,
+      "borderLBRTop": null,
+      "optional": false,
+      "mask": false
+    },
+    {
+      "name": "fill-gloss",
+      "width": 1000,
+      "height": 64,
+      "hasAlpha": true,
+      "transparentPixels": 29104,
+      "translucentPixels": 34896,
+      "borderLBRTop": null,
+      "optional": true,
+      "mask": false
+    },
+    {
+      "name": "hp-tip-mask",
+      "width": 12,
+      "height": 36,
+      "hasAlpha": true,
+      "transparentPixels": 192,
+      "translucentPixels": 48,
+      "borderLBRTop": null,
+      "optional": true,
+      "mask": true
+    },
+    {
+      "name": "hp-tip-highlight",
+      "width": 14,
+      "height": 38,
+      "hasAlpha": true,
+      "transparentPixels": 434,
+      "translucentPixels": 98,
+      "borderLBRTop": null,
+      "optional": true,
+      "mask": false
+    },
+    {
+      "name": "ultimate-tip-mask",
+      "width": 12,
+      "height": 36,
+      "hasAlpha": true,
+      "transparentPixels": 192,
+      "translucentPixels": 48,
+      "borderLBRTop": null,
+      "optional": true,
+      "mask": true
+    },
+    {
+      "name": "ultimate-tip-highlight",
+      "width": 14,
+      "height": 38,
+      "hasAlpha": true,
+      "transparentPixels": 434,
+      "translucentPixels": 98,
+      "borderLBRTop": null,
+      "optional": true,
+      "mask": false
+    }
+  ]
+}

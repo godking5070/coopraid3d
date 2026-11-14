@@ -1,0 +1,75 @@
+힐러 3직업·9루트 구현 완료 감사 — 2026-11-05
+
+범위와 판정
+최신 사용자 명세를 기준으로 코드 구현, 실사용 카탈로그 전환, 저장·네트워크·대체 AI·HUD 연결과 명령 검사를 완료했다.
+이 문서는 실제 플레이, 회복량 균형, 실접속 동기화의 검증 완료를 의미하지 않는다.
+Unity/Steam/게임 실행, 화면 조작, 씬·프리팹 YAML 편집, 병합·푸시는 수행하지 않았다.
+
+요구사항과 구현 위치 (Assets/Scripts 기준)
+1. NineKeyHealerData.cs / CharacterDefinitions.cs
+   실반 오라클·세라픽 바드·블러드 아포테카리의 실사용 정의.
+   1/2/3/4/Q/Space/R/F/V, 2·3 각각 3개 선택, 직업별 3루트,
+   루트별 핵심 특성 2개 후보와 공용 보조 6개 중 서로 다른 2개.
+   구형 정의·저장 이전, 기존 V 해금 호환, 별도 필살기 게이지.
+2. NineKeyHealerResources.cs / CharacterActor.cs / CharacterFrameworkData.cs
+   독립 콤보, 2의 매 입력 무료 직접 치유, 유효 완주·과치유 자원 획득,
+   다단히트 중복 방지, Q 충전·순차 재충전·특성별 용량, 별도 지원 대상.
+   전투 밖 자원 파밍 차단은 기존 호스트 전투 실행 게이트를 따른다.
+3. NineKeyHealerKit.cs / NineKeyHealerRoutes.cs / NineKeyHealerSupport.cs
+   기본 2/Q/F, 교체 3, V, 직접 치유·정화·유한 HoT·보호·협공.
+   성장/공간 중계/수확, 호출·응답/다층 보호/연주,
+   연결 재배정/성분 비율 배합/후속 처치 배분의 9루트.
+   공격 대상이 없어도 지원 경로 작동. 자동 효과는 직접 행동을 재생성하지 않는다.
+4. HealerPreparationState.cs / HealerSequenceState.cs / HealerLinkState.cs / HealerLayerState.cs
+   유한 상태·대상·시간·예약 자원·취소와 일회성 소비.
+   NineKeyHealerLayers.cs와 CombatShieldLedger는 출처별 실제 보호 예산,
+   한 피해 판정에서 한 층 소비, 다른 시전자 보호 보존과 자기 잔량 정산을 연결한다.
+5. NineKeyHealerInput.cs / NineKeyHealerPresentation.cs
+   지상 이동, R 짧게/길게, 꽃 설치·교체·이동 미리보기, 실제 이동 성공 후 기동 지원.
+   Q/F/4/Space 및 기본 입력의 연주 중단과 미완료 악절 1회 반환.
+6. NineKeyHealerSnapshot.cs / RaidCombatSession.cs / RaidNetworkProtocol.cs / RaidNetworkMotor.cs
+   호스트 실행, 상태 복제·재적용 검증, 지원 대상 전송과 이동 지원 대상 연결.
+   프로토콜 28. 이전 프로토콜과 혼용하지 않는다. 복원 자체로 회복·환급·타격하지 않는다.
+7. CampaignSaveData.cs / CampaignAdapters.cs / CharacterFrameworkUI.cs / SkillHotbarUI.cs
+   빌드·진행 저장/복원·구형 이전, 선택 콤보 이름, 실제 Q 용량, 루트 상태 HUD.
+8. RaidReplacementAI.cs
+   새 직업을 사용하는 호스트 대체 AI의 치유·정화·광역·루트·카운터 판단.
+   공격 불가 상태만으로 치유를 정지하지 않으며 새 직업에 구형 자동 부활을 부여하지 않는다.
+   기존 역할 전용 PartyBotAI NPC를 12직업 체계로 전환하는 작업은 이번 범위가 아니다.
+
+명령 검사 결과
+- Tests/Run-NineKeyHealerChecks.ps1: 상태·정의·이전 801개 + 실제 실행 메서드 209개 통과.
+  실제 메서드 검사는 9루트/18핵심의 R, 취소·만료·초기화, 기본 치유,
+  자원·대상, 스냅샷, 기동 지원을 포함한다.
+- Tests/Run-NineKeyTankChecks.ps1: 공유 변경 회귀 2119개 + 실제 어댑터 134개 통과.
+- Tests/Run-CampaignSaveChecks.ps1: 실제 파일 IO 포함 38904개,
+  진행·재시도 1003개, 새 게임 16개 통과. 힐러 선택 조합과 구형 파일 이전 포함.
+- Tests/Run-NetworkChecks.ps1 -OriginalProject C:/coopraid/coopraid3d:
+  프로토콜·전투·파티·이동·행동·공유 전투 관련 종속 검사 및
+  Assembly-CSharp / Assembly-CSharp-Editor 관리 컴파일 통과.
+  최종 로그: %TEMP%/Coopraid-Healer-FinalAudit.log.
+  컴파일에는 기존 씬 바인딩 등의 필드 경고가 남는다. 오류는 없다.
+- 마지막 감사 수정: CharacterActor.OwnsDirectSkillHit에서 새 힐러의
+  실행 중인 수동 R/V 직접 타격도 협공에 참여. 연주 틱은 Extra이며,
+  실행이 끝난 자동 타격·재귀 효과를 직접 입력으로 허용하지 않는다.
+
+검사의 한계 / 플레이 미검증
+실제 메서드 fixture의 월드·물리·대상·시간은 대역이다.
+관리 JSON fixture는 Unity JsonUtility 및 실제 전송을 대신 검증하지 않는다.
+원본 Unity에서 아래 순서로 사용자가 확인해야 한다. 상세 절차는 PLAYTEST.md 맨 위에 있다.
+1. 세 직업 빌드 선택·저장/재개, 키·Q 충전·콤보·자원·상태 HUD.
+2. 적 없는 구간의 2/Q/F/R, 과치유 자원, 무효 지원 대상 차단과 F 사용.
+3. 오라클 3루트의 성장·꽃 위치/중복·수확과 실제 표시.
+4. 바드 응답/만료, 타 보호막과 층 소비, 연주 중 긴급 입력의 즉시 실행.
+5. 약사 연결/분기, 네 처방과 성분 교정, 후속 시술/타힐러 예후 완성.
+6. 4인 및 8인 동일 직업 2힐의 호스트/클라이언트, 늦은 접속·AI 대체·재접속·재시도.
+7. 입력 체감, UI 가독성, 프레임 부하, 정화 충전 수요와 실제 단독 힐 가능 여부.
+
+미확정 수치와 정책 (사용자 확정·밸런스 검증값이 아님)
+치유·피해·보호 계수와 최대 HP 기반 초기 계수 기준, 모든 사거리·범위,
+GCD·쿨타임·Q 재충전·채널/요청/표식 지속·입력 간격,
+시작 자원·V 수급, 핵심/보조 특성의 이득과 대가,
+출처별 보호 합산 상한과 소모 정책의 실제 균형,
+4인·8인 지원 총량·협공 예산·기본 Q 정화 요구량은 조정·검증 대상이다.
+현재 0 시작 자원, Q 18초·F 20초 등은 구현용 초기 설정이다.
+전투 부활과 스토리 해금의 새 정책은 미정이다. 기존 해금을 호환 보존했으며 새 정책으로 확정하지 않았다.

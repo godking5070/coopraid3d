@@ -87,13 +87,14 @@ namespace RaidRogue
         public bool centerBeforePartyMechanics;
         private bool _isChasing;
         private BossSkillEntry _pendingPositionedSkill;
-        public float CombatRadius => CombatRangeMath.ResolveBossCombatRadius(currentStageNumber,
-            currentStageNumber == 1 ? stage1CombatRadius : currentStageNumber == 2 ? stage2CombatRadius : stage3CombatRadius);
+        public float CombatRadius => CombatRangeMath.ResolveBossCombatRadius(EncounterTemplate,
+            EncounterTemplate == 1 ? stage1CombatRadius : EncounterTemplate == 2 ? stage2CombatRadius : stage3CombatRadius);
         public bool CanPursue => isMeleeBoss && fsmState == BossFSMState.IdleChasing &&
             currentHp > 0 && !IsTetherActive && !IsSpreadMechanicActive && !IsStackMechanicActive &&
             (stageManager == null || !stageManager.IsStageTransitioning);
         [Header("Stage & Boss Identity (Step 6)")]
         public int currentStageNumber = 1;
+        public int EncounterTemplate => CampaignCatalog.EncounterTemplate(currentStageNumber);
         public string currentBossTitle = "STAGE 1 : 공허의 파수꾼";
         public float stageCastSpeedMultiplier = 1.0f; // Stage 3에서 1.25배 가속 (시전시간 * 0.8)
 
@@ -154,7 +155,14 @@ namespace RaidRogue
         public StageManager stageManager;
         public BossAddSpawner addSpawner;
 
+        [Header("All stages: party-wide attack between mechanics")]
+        public BossRaidwideSettings raidwide = new BossRaidwideSettings();
+        private readonly BossRaidwideState _raidwide = new BossRaidwideState();
+        private readonly BossTransformationHealthState _transformationHealth = new BossTransformationHealthState();
         public bool IsCasting => fsmState == BossFSMState.CastingSkill;
+        public bool HardTransformationActive => GuardianHardTransformationActive || FloraHardTransformationActive ||
+            CampanellaHardTransformationActive || MarionetteHardTransformationActive || JustitiaHardTransformationActive || JanusHardTransformationActive;
+        public bool HpDamageBlocked => HardTransformationActive || GuardianHardAerialAirborne || FloraHard && _floraStep==FloraStep.RootCores;
         public bool IsGroggy => fsmState == BossFSMState.Groggy;
         public bool IsBossDefeatedCollapse => fsmState == BossFSMState.Defeated;
         public Transform StackTarget => _stackTarget;
@@ -173,7 +181,19 @@ namespace RaidRogue
                 return mult;
             }
         }
-        public string CurrentCastSkillName => _currentCastSkillName;
+        private string _presentedCastSource,_presentedCastName;
+        private bool _presentedTraining;
+        public string CurrentCastSkillName
+        {
+            get
+            {
+                bool training=CharacterTrainingSession.Active;
+                if(_presentedCastSource!=_currentCastSkillName||_presentedTraining!=training||_presentedCastName==null)
+                {_presentedCastSource=_currentCastSkillName;_presentedTraining=training;_presentedCastName=BossCastPresentation.Name(_currentCastSkillName,training);}
+                return _presentedCastName;
+            }
+        }
+        public float GroggyRemainingTime => _groggyRemainingTime;
         public float CastRemainingTime => _castRemainingTime;
         public float CastProgress => _castTotalDuration > 0.01f ? Mathf.Clamp01(1f - (_castRemainingTime / _castTotalDuration)) : 0f;
         public string AggroTargetName => aggroTarget != null ? aggroTarget.name : (targetPlayer != null ? targetPlayer.name : "없음");
@@ -430,6 +450,9 @@ namespace RaidRogue
         /// </summary>
         public void SetupBossForStage(int stageNumber)
         {
+            _transformationHealth.Reset();
+            raidwide = raidwide ?? new BossRaidwideSettings();
+            _raidwide.Reset(raidwide);
             _counterGroggy=false; GetComponent<CombatCounterTarget>()?.ResetState();
             _combatThreat.Clear(); _tetherInterceptingPlayer = null;
             _isChasing = false;
@@ -442,16 +465,16 @@ namespace RaidRogue
                 _collapseCoroutine = null;
             }
 
-            currentStageNumber = Mathf.Clamp(stageNumber, 1, 3);
+            currentStageNumber = Mathf.Clamp(stageNumber, 1, CampaignCatalog.StageCount(CampaignCatalog.PartOne));
             InitializeDefaultSkillTable();
 
             float scaleMultiplier = 1.0f;
 
-            switch (currentStageNumber)
+            switch (EncounterTemplate)
             {
                 case 1:
                     // Stage 1 보스 (보라색, 크기 1.0배, HP 3,000 - 입문용)
-                    currentBossTitle = "STAGE 1 : 공허의 파수꾼 (입문)";
+                    currentBossTitle = $"STAGE {currentStageNumber} : 공허의 파수꾼";
                     maxHp = 3000f;
                     scaleMultiplier = 1.0f;
                     stageCastSpeedMultiplier = 1.0f;
@@ -461,7 +484,7 @@ namespace RaidRogue
 
                 case 2:
                     // Stage 2 보스 (청록색, 크기 1.2배, HP 6,000 - 중급 기믹: 4인 산개 & 4인 쉐어 추가)
-                    currentBossTitle = "STAGE 2 : 심연의 집행자 (중급 - 산개 & 쉐어)";
+                    currentBossTitle = $"STAGE {currentStageNumber} : 심연의 집행자 (산개 & 쉐어)";
                     maxHp = 6000f;
                     scaleMultiplier = 1.2f;
                     stageCastSpeedMultiplier = 1.0f;
@@ -472,7 +495,7 @@ namespace RaidRogue
                 case 3:
                 default:
                     // Stage 3 최종 보스 (적금색, 크기 1.5배, HP 10,000 - 시전 25% 가속 & 복합 기믹)
-                    currentBossTitle = "STAGE 3 : 종말의 황제 (최종 보스 - 복합 기믹)";
+                    currentBossTitle = $"STAGE {currentStageNumber} : 종말의 황제 (복합 기믹)";
                     maxHp = 10000f;
                     scaleMultiplier = 1.5f;
                     stageCastSpeedMultiplier = 0.75f; // 시전 시간 25% 단축!
@@ -485,7 +508,7 @@ namespace RaidRogue
             currentPhase = BossPhase.Phase1_100To50;
             fsmState = BossFSMState.IdleChasing;
             _hasTriggeredGroggy = false;
-            _forceSignatureMechanicNext = currentStageNumber >= 2;
+            _forceSignatureMechanicNext = EncounterTemplate >= 2;
             _patternWaitTimer = 1.6f;
 
             transform.position = Vector3.zero;
@@ -505,7 +528,7 @@ namespace RaidRogue
             }
 
             Transform visorTr = GetBossVisorTransform();
-            Color visorColor = currentStageNumber == 3
+            Color visorColor = EncounterTemplate == 3
                 ? new Color(1.0f, 0.85f, 0.15f, 1f) // Stage 3 적금색 보스는 황금빛 바이저
                 : new Color(1.0f, 0.22f, 0.22f, 1f);
             if (visorTr != null)
@@ -559,22 +582,22 @@ namespace RaidRogue
                 aggroTarget = targetPlayer;
             }
 
-            string stageIntroMsg = currentStageNumber switch
-            {
-                1 => "★ STAGE 1 전투 시작! (HP 3,000) 보스를 처치하면 클리어 보상 로그라이크 카드 3택이 열립니다! ★",
-                2 => "★ STAGE 2 보스 등장! (청록색 1.2배 / HP 6,000) 신규 파티 기믹 [4인 산개] & [4인 쉐어]가 추가됩니다! ★",
-                3 => "★ FINAL STAGE 3 최종 보스 등장!! (적금색 1.5배 / HP 10,000) 시전 속도 +25% 가속 & [도넛+산개 / 넉백+쉐어] 복합 기믹 발동! ★",
-                _ => ""
-            };
-
-            SetMechanicAlert(stageIntroMsg, new Color(1f, 0.9f, 0.3f, 1f), 4.5f);
+            string stageIntroMsg = $"★ 1부 STAGE {currentStageNumber} / 6 · {currentBossTitle}" +
+                (currentStageNumber > 5 && !JanusEncounter ? $" · 기존 Stage {EncounterTemplate} 구성 재사용" : "") + " ★";
+            if (CharacterTrainingSession.Active) { SetMechanicAlert(stageIntroMsg, new Color(1f, 0.9f, 0.3f, 1f), 4.5f);
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * popupHeightOffset,
                 $"{currentBossTitle} 등장!! (HP {Mathf.RoundToInt(maxHp)})",
                 new Color(1f, 0.88f, 0.25f, 1f),
                 true
-            );
+            ); }
 
+            ResetGuardian();
+            ResetFlora();
+            ResetCampanella();
+            ResetMarionette();
+            ResetJustitia();
+            ResetJanus();
             UpdateTopBossUI();
         }
 
@@ -666,15 +689,32 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (RaidCombatAuthority.Replica) { UpdateReplicaBoss(); UpdateTopBossUI(); UpdateCastBanner(); return; }
+            // Impact afterimages must expire even when a raidwide or another state
+            // returns before the guardian pattern tick.
+            TickHardImpactAfterimage(RaidCombatAuthority.ServerTime);
+            UpdateGuardianPresentation();
+            if (RaidCombatAuthority.Replica) { UpdateReplicaBoss(); UpdateTopBossUI(); UpdateCastBanner(); UpdateCampanellaCastUI(); UpdateMarionetteCastUI(); UpdateJustitiaCastUI(); return; }
             if (Time.timeScale <= 0.001f || StageManager.CombatSuspended || currentHp <= 0)
             {
                 return;
             }
 
+            if (CharacterTrainingSession.Active)
+            {
+                if (IsGroggy) UpdateGroggyState();
+                UpdateAlertBannerTimer(); UpdateTopBossUI(); return;
+            }
             HandleDebugShortcuts();
             UpdateAlertBannerTimer();
 
+            if (TickBossRaidwide()) return;
+
+            if (GuardianNormal) { TickGuardian(); return; }
+            if (FloraEncounter) { TickFlora(); return; }
+            if (CampanellaEncounter) { TickCampanella(); return; }
+            if (MarionetteEncounter) { TickMarionette(); return; }
+            if (JustitiaEncounter) { TickJustitia(); return; }
+            if (JanusEncounter) { TickJanus(); return; }
             switch (fsmState)
             {
                 case BossFSMState.IdleChasing:
@@ -700,9 +740,36 @@ namespace RaidRogue
                     break;
             }
 
-            UpdateCastBanner();
             UpdateTopBossUI();
+            UpdateCastBanner();
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Temporary test control: uses the same authoritative defeat path as Shift+F1.
+        // It is intentionally absent from release builds and never grants campaign progress.
+        private void OnGUI()
+        {
+            var session = RaidNetworkSession.Instance;
+            var stage = StageManager.Instance;
+            if (session == null || session.Mode != RaidSessionMode.Single || stage == null ||
+                stage.boss != this || stage.Progress.Phase != RaidBattlePhase.Combat ||
+                StageManager.CombatSuspended || CharacterTrainingSession.Active ||
+                LocalGameplayInput.ModalCovered || currentHp <= 0f ||
+                fsmState == BossFSMState.Defeated) return;
+
+            var bounds = new Rect(Screen.width - 206f, 12f, 194f, 38f);
+            if (bounds.Contains(Event.current.mousePosition))
+                LocalGameplayInput.SuppressPointerThisFrame();
+            if (!GUI.Button(bounds, "TEST  보스 클리어")) return;
+
+            LocalGameplayInput.SuppressThisFrame();
+            LocalGameplayInput.SuppressPointerThisFrame();
+            LocalInputBindings.QuarantineHeld();
+            DevBugReportUI.NoteCommand("TEST boss clear button");
+            CampaignRuntime.Instance?.MarkDevelopmentUse();
+            ApplyBossHpDamage(currentHp + 99999f);
+        }
+#endif
 
         private void HandleDebugShortcuts()
         {
@@ -753,6 +820,13 @@ namespace RaidRogue
             }
 #endif
 
+            if (toggleRot || instantKillBoss || forceTether || forceSpread || forceStack || forceStage3Combo || forceSummonAdds)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                DevBugReportUI.NoteCommand("Boss debug shortcut");
+#endif
+                CampaignRuntime.Instance?.MarkDevelopmentUse();
+            }
             if (toggleRot)
             {
                 enableRotation = !enableRotation;
@@ -813,6 +887,8 @@ namespace RaidRogue
             LastHitColor = color;
         }
 
+        public void ClearCharacterThreat(Transform unit){if(!RaidCombatAuthority.Replica)_combatThreat.Remove(unit);}
+
         public void SetAggroTarget(Transform newAggroTarget)
         {
             if (CombatRange.LivingPartyMember(newAggroTarget))
@@ -823,7 +899,7 @@ namespace RaidRogue
 
         public void ShowExternalAlert(string message, Color color, float duration)
         {
-            SetMechanicAlert(message, color, duration);
+            SetAlertBanner(message, color, duration);
         }
 
         private void RotateTowardsAggroTargetXZ()
@@ -947,13 +1023,13 @@ namespace RaidRogue
             if (_forceSignatureMechanicNext)
             {
                 _forceSignatureMechanicNext = false;
-                if (currentStageNumber == 2)
+                if (EncounterTemplate == 2)
                 {
                     BossSkillId sigId = UnityEngine.Random.value < 0.5f ? BossSkillId.PartySpread_4P : BossSkillId.PartyStack_4P;
                     BossSkillEntry sig = skillTable.Find(s => s.skillId == sigId);
                     if (sig != null) return sig;
                 }
-                else if (currentStageNumber >= 3)
+                else if (EncounterTemplate >= 3)
                 {
                     BossSkillId sigId = UnityEngine.Random.value < 0.5f ? BossSkillId.Combo_DonutPlusSpread : BossSkillId.Combo_KnockbackIntoStack;
                     BossSkillEntry sig = skillTable.Find(s => s.skillId == sigId);
@@ -972,7 +1048,7 @@ namespace RaidRogue
 
             foreach (BossSkillEntry entry in skillTable)
             {
-                if (entry.minStage > currentStageNumber)
+                if (entry.minStage > EncounterTemplate)
                 {
                     continue;
                 }
@@ -1006,7 +1082,7 @@ namespace RaidRogue
                 float earliestTime = float.MaxValue;
                 foreach (BossSkillEntry entry in skillTable)
                 {
-                    if (entry.minStage > currentStageNumber) continue;
+                    if (entry.minStage > EncounterTemplate) continue;
                     if (entry.phase2Only && currentPhase != BossPhase.Phase2_50To0) continue;
 
                     if (entry.nextAvailableTime < earliestTime)
@@ -1053,7 +1129,7 @@ namespace RaidRogue
 
             // Stage 3에서는 시전 속도가 25% 빨라짐 (단, 4인 산개 3초 / 4인 쉐어 4초도 Stage 3에서는 긴박하게 가속)
             float effectiveDuration = skill.castDuration;
-            if (currentStageNumber >= 3 &&
+            if (EncounterTemplate >= 3 &&
                 skill.skillId != BossSkillId.PartySpread_4P &&
                 skill.skillId != BossSkillId.PartyStack_4P)
             {
@@ -1234,7 +1310,7 @@ namespace RaidRogue
                 transform.position + Vector3.up * (popupHeightOffset + 0.4f),
                 "충격파 외곽 넉백!! → 즉시 4인 쉐어 집결!",
                 new Color(1f, 0.65f, 0.15f, 1f),
-                true
+                true, important: true
             );
         }
 
@@ -1327,7 +1403,7 @@ namespace RaidRogue
             SetMechanicAlert("줄 가로채기 성공! [3]번 생존기를 켜세요!",
                 new Color(0.2f, 1f, 0.45f, 1f), _castRemainingTime + 1.5f);
             FloatingTextPopup.Spawn(player.transform.position + Vector3.up * 2.5f,
-                "줄 가로채기 성공! [3]번 생존기를 켜세요!", new Color(0.2f, 1f, 0.45f, 1f), true);
+                "줄 가로채기 성공! [3]번 생존기를 켜세요!", new Color(0.2f, 1f, 0.45f, 1f), true, important: true);
         }
 
         private void UpdateTetherInterceptMechanic()
@@ -1412,6 +1488,7 @@ namespace RaidRogue
 
         private void ResolveCompletedSkillCast()
         {
+            if(_activeSkill!=null)NotifyDamageCastEnded();
             BossSkillEntry completedSkill = _activeSkill;
             AoETelegraph finishedTelegraph = _activeTelegraph;
             bool wasTetherIntercepted = _isTetherInterceptedByPlayer;
@@ -1628,6 +1705,8 @@ namespace RaidRogue
 
         private void CheckPhaseTransition()
         {
+            if (GuardianNormal) return;
+            if (FloraEncounter || CampanellaEncounter || MarionetteEncounter || JustitiaEncounter || JanusEncounter) return;
             if (fsmState == BossFSMState.Defeated)
             {
                 return;
@@ -1636,7 +1715,7 @@ namespace RaidRogue
             if (!_hasTriggeredGroggy && HpRatio <= 0.50f && currentHp > 0.1f)
             {
                 _hasTriggeredGroggy = true;
-                EnterGroggyTransition();
+                currentPhase = BossPhase.Phase2_50To0;
             }
         }
 
@@ -1658,7 +1737,7 @@ namespace RaidRogue
                 transform.position + Vector3.up * (popupHeightOffset + 0.5f),
                 "PHASE TRANSITION! 5초간 그로기 폭딜 타임!! (받는 피해 +50%)",
                 new Color(1f, 0.85f, 0.15f, 1f),
-                true
+                true, important: true
             );
 
             SetMechanicAlert(
@@ -1774,7 +1853,7 @@ namespace RaidRogue
             bool hasMasterOfRearBonus = false,
             Transform source = null)
         {
-            if (fsmState == BossFSMState.Defeated)
+            if (fsmState == BossFSMState.Defeated || HpDamageBlocked)
             {
                 return false;
             }
@@ -1805,8 +1884,10 @@ namespace RaidRogue
                 damageCalc *= 1.5f;
             }
 
-            int finalDamage = Mathf.RoundToInt(damageCalc * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,damageCalc,CombatDamageKind.Direct) * DamageTakenMultiplier);
+            float beforeHitHp=currentHp;
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer,"input.legacy.skill",CombatDamageKind.Direct);
+            finalDamage=Mathf.RoundToInt(beforeHitHp-currentHp);
 
             string popupText = isPositionalCrit
                 ? $"POSITIONAL CRIT!! - {finalDamage}"
@@ -1824,7 +1905,7 @@ namespace RaidRogue
             LastHitColor = popupColor;
 
             Vector3 spawnPos = transform.position + Vector3.up * popupHeightOffset;
-            FloatingTextPopup.Spawn(spawnPos, popupText, popupColor, isPositionalCrit);
+            FloatingTextPopup.SpawnDamage(spawnPos, finalDamage, popupText, popupColor, isPositionalCrit);
 
             TriggerHitFlash(isPositionalCrit);
             return isPositionalCrit;
@@ -1843,7 +1924,7 @@ namespace RaidRogue
             bool hasMasterOfRearBonus,
             Transform source = null)
         {
-            if (fsmState == BossFSMState.Defeated)
+            if (fsmState == BossFSMState.Defeated || HpDamageBlocked)
             {
                 return false;
             }
@@ -1874,8 +1955,10 @@ namespace RaidRogue
                 damageCalc *= 1.5f;
             }
 
-            int finalDamage = Mathf.RoundToInt(damageCalc * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,damageCalc,CombatDamageKind.Direct) * DamageTakenMultiplier);
+            float beforeHitHp=currentHp;
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer,"input.legacy.skill",CombatDamageKind.Direct);
+            finalDamage=Mathf.RoundToInt(beforeHitHp-currentHp);
 
             string popupText;
             Color popupColor;
@@ -1909,7 +1992,7 @@ namespace RaidRogue
             LastHitColor = popupColor;
 
             Vector3 spawnPos = transform.position + Vector3.up * popupHeightOffset;
-            FloatingTextPopup.Spawn(spawnPos, popupText, popupColor, isPositionalCrit || comboStage == 3);
+            FloatingTextPopup.SpawnDamage(spawnPos, finalDamage, popupText, popupColor, isPositionalCrit || comboStage == 3);
 
             TriggerHitFlash(isPositionalCrit || comboStage == 3);
             return isPositionalCrit;
@@ -1920,13 +2003,15 @@ namespace RaidRogue
         /// </summary>
         public void ReceiveOGcdAbilityAttack(string abilityName, int baseDamage, Transform source = null)
         {
-            if (fsmState == BossFSMState.Defeated)
+            if (fsmState == BossFSMState.Defeated || HpDamageBlocked)
             {
                 return;
             }
 
-            int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
-            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,CombatDamageKind.Direct) * DamageTakenMultiplier);
+            float beforeHitHp=currentHp;
+            ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer,"input.legacy.skill",CombatDamageKind.Direct);
+            finalDamage=Mathf.RoundToInt(beforeHitHp-currentHp);
 
             string popupText = $"oGCD [{abilityName}]!! - {finalDamage}";
             if (addSpawner != null && addSpawner.HasLivingPowerSupplier)
@@ -1939,7 +2024,7 @@ namespace RaidRogue
             LastHitColor = popupColor;
 
             Vector3 spawnPos = transform.position + Vector3.up * (popupHeightOffset + 0.35f);
-            FloatingTextPopup.Spawn(spawnPos, popupText, popupColor, true);
+            FloatingTextPopup.SpawnDamage(spawnPos, finalDamage, popupText, popupColor, true);
             TriggerHitFlash(true);
         }
 
@@ -1954,15 +2039,18 @@ namespace RaidRogue
             Color popupColor,
             bool isBigHighlight = false,
             string extraNote = "",
-            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct)
+            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct,bool scaleAttack=true)
         {
-            if (fsmState == BossFSMState.Defeated)
+            if (fsmState == BossFSMState.Defeated || HpDamageBlocked)
             {
                 return 0;
             }
 
-            int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,kind,scaleAttack) * DamageTakenMultiplier);
+            float beforeHitHp=currentHp;
+            if(string.IsNullOrEmpty(origin)&&comboStage>=1&&comboStage<=3&&source?.GetComponent<CharacterActor>()?.Definition?.legacyRole>0)origin="input.legacy.skill";
             ApplyBossHpDamage(finalDamage, source != null ? source : targetPlayer,origin,kind);
+            finalDamage=Mathf.RoundToInt(beforeHitHp-currentHp);
 
             string stagePrefix = comboStage > 0 ? $"{comboStage}단 " : "";
             string popupText = $"[{roleTag}] {stagePrefix}{skillName}!! - {finalDamage}";
@@ -1983,14 +2071,14 @@ namespace RaidRogue
             LastHitColor = popupColor;
 
             Vector3 spawnPos = transform.position + Vector3.up * popupHeightOffset;
-            FloatingTextPopup.Spawn(spawnPos, popupText, popupColor, isBigHighlight || comboStage == 3);
+            FloatingTextPopup.SpawnDamage(spawnPos, finalDamage, popupText, popupColor, isBigHighlight || comboStage == 3);
             TriggerHitFlash(isBigHighlight || comboStage == 3);
             return finalDamage;
         }
 
         public void ReceiveBotAttackDamage(int baseDamage, bool isRanged, Transform source)
         {
-            if (StageManager.CombatSuspended || currentHp <= 0 || !CombatRange.LivingPartyMember(source)) return;
+            if (StageManager.CombatSuspended || currentHp <= 0 || HpDamageBlocked || !CombatRange.LivingPartyMember(source)) return;
             var attacker = source != null ? source.GetComponent<PartyBotAI>() : null;
             if (!isRanged && attacker != null && (attacker.role == PartyBotRole.Tank || attacker.role == PartyBotRole.MeleeDPS) && !attacker.CanMeleeHit(transform)) return;
             if (fsmState == BossFSMState.Defeated)
@@ -1999,13 +2087,15 @@ namespace RaidRogue
             }
 
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
-            int finalDamage = Mathf.RoundToInt(baseDamage * DamageTakenMultiplier);
+            int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,CombatDamageKind.Direct) * DamageTakenMultiplier);
+            float beforeHitHp=currentHp;
             ApplyBossHpDamage(finalDamage, source);
+            finalDamage=Mathf.RoundToInt(beforeHitHp-currentHp);
 
             if (isRanged)
             {
                 Vector3 spawnPos = transform.position + new Vector3(UnityEngine.Random.Range(-0.8f, 0.8f), popupHeightOffset - 0.6f, 0f);
-                FloatingTextPopup.Spawn(spawnPos, $"RANGED - {finalDamage}", new Color(1f, 0.72f, 0.35f, 0.9f), false);
+                FloatingTextPopup.SpawnDamage(spawnPos, finalDamage, $"RANGED - {finalDamage}", new Color(1f, 0.72f, 0.35f, 0.9f), false);
             }
         }
 
@@ -2013,37 +2103,49 @@ namespace RaidRogue
         /// Step 6 핵심: 보스 체력 중간에는 절대 카드가 뜨지 않으며,
         /// 오직 보스를 완전히 처치(HP 0 도달)했을 때만 StageManager.NotifyBossDefeated()를 호출합니다!
         /// </summary>
-        public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind)
+        public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind,bool alreadyScaled=false)
         {
-            float before=currentHp;ApplyBossHpDamage(amount,source,origin,kind);float actual=Mathf.Max(0,before-currentHp);
+            float before=currentHp;ApplyBossHpDamage(amount,source,origin,kind,alreadyScaled);float actual=Mathf.Max(0,before-currentHp);
             if(actual>0)FloatingTextPopup.Spawn(transform.position+Vector3.up*2.6f,(kind==CombatDamageKind.Extra?"태양 불꽃 ":"반사 ")+actual.ToString("0.#"),Color.yellow,false);
             return actual;
         }
         public bool GuardableAttackImminent(Transform victim,float within)
         {
             if(!CombatRange.LivingPartyMember(victim)||StageManager.CombatSuspended)return false;
+            if(GuardianNormal && GuardianPatternNow==GuardianPattern.Punishment) return _guardianVictim==victim && _guardian.Remaining(GuardianNow)<=within;
             if(fsmState==BossFSMState.IdleChasing)return ResolveLivingAggroTarget()==victim&&autoAttackInterval-_autoAttackTimer<=within&&(!isMeleeBoss||CombatRange.InRange(transform,victim,MeleeAttackRange));
             return fsmState==BossFSMState.CastingSkill&&_activeSkill!=null&&_castRemainingTime<=within&&
                 (_activeSkill.skillId==BossSkillId.SingleTankbuster&&ResolveLivingAggroTarget()==victim||_activeSkill.skillId==BossSkillId.DoubleTankbuster_Tether&&_tetherTankTarget==victim);
         }
-        private void ApplyBossHpDamage(float damage, Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
+        private void ApplyBossHpDamage(float damage, Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified,bool alreadyScaled=false,bool viaJanusOmega=false)
         {
-            if (RaidCombatAuthority.Replica || fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0)
+            if (RaidCombatAuthority.Replica || fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0 ||
+                HpDamageBlocked)
             {
                 return;
             }
 
+            if(JanusEncounter&&!JanusAcceptAreaHit(source,origin,kind,damage,viaJanusOmega))return;
+            damage = AiSpectatorDamage.AtHp(source,damage,alreadyScaled);
+            if (damage <= 0) return;
             float hpBefore = currentHp;
             currentHp = Mathf.Max(0f, currentHp - damage);
             if (currentHp <= 0.1f) currentHp = 0f;
             // Single accounting point for skills, projectiles, reflection and card damage.
             // Debug instant-kill has no source and intentionally earns no party credit.
             CombatMetricsManager.Damage(source, hpBefore, currentHp, false,origin,kind);
+            CharacterKit.AfterAttack(source,transform,hpBefore-currentHp,origin,kind);
             AddCombatThreat(source, hpBefore - currentHp);
 
             if (currentHp <= 0.1f)
             {
                 currentHp = 0f;
+                if (GuardianNormal) { _guardian.Stop(); ClearHardStoneRain(); ClearGuardianMechanics(); CleanupActiveTelegraphAndTether(); }
+                if (FloraEncounter) ClearFlora(true);
+                if (CampanellaEncounter) ClearCampanella(true);
+                if (MarionetteEncounter) ClearMarionette(true);
+                if (JustitiaEncounter) ClearJustitia(true);
+                if (JanusEncounter) ClearJanus(true);
                 UpdateTopBossUI();
 
                 if (stageManager == null)
@@ -2065,8 +2167,75 @@ namespace RaidRogue
             CheckPhaseTransition();
         }
 
+        private bool RaidwideReady => fsmState == BossFSMState.IdleChasing && currentStageNumber switch
+        {
+            1 => _guardian.Step == GuardianStep.Rest && !HardStoneRainActive &&
+                !(GuardianHard && _guardianHard.HasPendingMilestone(HpRatio)),
+            2 => _floraStep == FloraStep.Rest,
+            3 => _campStep == CampanellaStep.Rest && !_campHardRestProtected,
+            4 => _marStep == MarionetteStep.Rest && !_marHardRestProtected,
+            5 => _justStep == JustitiaStep.Rest,
+            6 => _janusStep == JanusStep.Rest,
+            _ => false
+        };
+        private void RestoreHardTransformationHealth()
+        {
+            bool hard = GuardianHard || FloraHard || CampanellaHard || MarionetteHard || JustitiaHard || JanusHard;
+            if (!_transformationHealth.TryRestore(!RaidCombatAuthority.Replica,hard,currentHp,maxHp,out float health)) return;
+            currentHp = health;
+            if (JanusEncounter && _janusOmega != null)
+            { _janusOmega.maxHp=maxHp;_janusOmega.currentHp=currentHp; }
+            CombatMetricsManager.Event("하드 변신 · 보스 체력 100% 회복");
+            UpdateTopBossUI();
+        }
+        private bool TickBossRaidwide()
+        {
+            if (CharacterTrainingSession.Active || currentStageNumber < 1 || currentStageNumber > 6) return false;
+            var next = _raidwide.Advance(Time.deltaTime, RaidwideReady, raidwide);
+            if (next == BossRaidwideEvent.Begin)
+            {
+                // Consume the remaining idle pause; the original pattern cursor is untouched.
+                if (currentStageNumber == 1) _guardian.Enter(GuardianStep.Rest, GuardianNow, 0);
+                _floraRest = _campRest = _marRest = _justRest = _janusRest = 0;
+                _networkCastStarted = RaidCombatAuthority.ServerTime;
+                _castTotalDuration = _raidwide.Remaining;
+                _currentCastSkillName = raidwide.Name(currentStageNumber) + " · 전원 피격 / 방어·회복";
+                SetMechanicAlert(_currentCastSkillName, new Color(1,.45f,.15f), _castTotalDuration);
+                _isChasing = false;
+            }
+            if (_raidwide.Active)
+            {
+                fsmState = BossFSMState.CastingSkill;
+                _castRemainingTime = _raidwide.Remaining;
+                UpdateTopBossUI(); UpdateCastBanner();
+                return true;
+            }
+            if (next != BossRaidwideEvent.Hit) return false;
+            // No position/range test: every living party member receives one mitigatable hit.
+            fsmState = BossFSMState.IdleChasing;
+            _castRemainingTime = 0;
+            bool hard = GuardianHard || FloraHard || CampanellaHard || MarionetteHard || JustitiaHard || JanusHard;
+            float damage = raidwide.Damage(hard);
+            var members = GetLivingPartyMemberTransforms();
+            foreach (var member in members)
+            {
+                if (currentHp <= 0 || StageManager.CombatSuspended) break;
+                DamagePartyMember(member, damage, CombatDamageKind.Area, "boss.raidwide.stage" + currentStageNumber);
+            }
+            FloatingTextPopup.Spawn(transform.position + Vector3.up * 3, raidwide.Name(currentStageNumber), new Color(1,.45f,.15f), true, important: true);
+            _currentCastSkillName = "";
+            UpdateTopBossUI(); UpdateCastBanner();
+            return true;
+        }
         public void StopEncounterEffects()
         {
+            _raidwide.Reset(raidwide ?? new BossRaidwideSettings());
+            ClearFlora(currentStageNumber==2 && currentHp<=0);
+            ClearCampanella(currentStageNumber==3 && currentHp<=0);
+            ClearMarionette(currentStageNumber==4 && currentHp<=0);
+            ClearJustitia(currentStageNumber==5 && currentHp<=0);
+            ClearJanus(currentStageNumber==6 && currentHp<=0);
+            ClearHardStoneRain(); ClearGuardianMechanics(); ClearHardCorruption(); _guardian.Stop(); _guardianCombatStarted = false;
             _counterGroggy=false; GetComponent<CombatCounterTarget>()?.ResetState();
             CleanupActiveTelegraphAndTether();
             StopAllCoroutines(); _collapseCoroutine = null;
@@ -2084,6 +2253,7 @@ namespace RaidRogue
             for (int i = _activePartyMarkers.Count - 1; i >= 0; i--)
                 if (_activePartyMarkers[i] != null && _activePartyMarkers[i].followTarget == member)
                 { Destroy(_activePartyMarkers[i].gameObject); _activePartyMarkers.RemoveAt(i); }
+            if (GuardianNormal || FloraEncounter || CampanellaEncounter || MarionetteEncounter || JustitiaEncounter) return; // Dedicated encounters manage their own targets.
             // Personal stack/tether ends when its designated recipient dies. Other patterns continue.
             if ((_isTetherActive && _tetherTankTarget == member) || (_isStackActive && _stackTarget == member))
             {
@@ -2095,11 +2265,11 @@ namespace RaidRogue
             { _isTetherInterceptedByPlayer = false; _tetherInterceptingBot = null; }
         }
 
-        private void DamagePartyMember(Transform member, float damage,CombatDamageKind kind=CombatDamageKind.Area)
+        private void DamagePartyMember(Transform member, float damage,CombatDamageKind kind=CombatDamageKind.Area,string origin="boss.pattern")
         {
             if (!CombatRange.LivingPartyMember(member)) return;
             var player = member.GetComponent<PlayerController>();
-            var hit=new CombatHitContext(transform,"boss.pattern",kind);
+            var hit=new CombatHitContext(transform,origin,kind);
             if (player != null) player.TakeDamage(damage,hit);
             else member.GetComponent<PartyBotAI>()?.TakeDamage(damage,true,hit);
         }
@@ -2142,12 +2312,20 @@ namespace RaidRogue
 
         private void SetMechanicAlert(string message, Color color, float duration)
         {
+            // Boss solution banners are for explicit character training, not live encounters.
+            // Ground telegraphs, target markers, audio and cast timing retain their own presenters.
+            if(!CharacterTrainingSession.Active)return;
+            SetAlertBanner(message,color,duration);
+        }
+
+        private void SetAlertBanner(string message, Color color, float duration)
+        {
             if (mechanicAlertBannerText == null)
             {
                 return;
             }
             mechanicAlertBannerText.text = message;
-            mechanicAlertBannerText.color = color;
+            RaidUIStyle.Color(mechanicAlertBannerText, color);
             _alertBannerClearTimer = duration;
         }
 
@@ -2165,21 +2343,22 @@ namespace RaidRogue
 
         private void UpdateTopBossUI()
         {
+            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible && !CharacterTrainingSession.Active) return;
             if (bossHpFillImage != null)
             {
                 bossHpFillImage.fillAmount = HpRatio;
-                bossHpFillImage.color = currentPhase switch
+                RaidUIStyle.Color(bossHpFillImage, currentPhase switch
                 {
                     BossPhase.Phase1_100To50 => new Color(0.85f, 0.18f, 0.28f, 1f),
                     BossPhase.GroggyTransition => new Color(1.0f, 0.80f, 0.15f, 1f),
                     BossPhase.Phase2_50To0 => new Color(0.75f, 0.12f, 0.88f, 1f),
                     _ => Color.red
-                };
+                });
             }
 
             if (bossHpText != null)
             {
-                bossHpText.text = $"{currentBossTitle}   |   HP : {Mathf.CeilToInt(currentHp)} / {Mathf.CeilToInt(maxHp)} ({HpRatio * 100f:F1}%)";
+                bossHpText.text = $"{currentBossTitle}   |   HP : {Mathf.CeilToInt(currentHp)} / {Mathf.CeilToInt(maxHp)} ({HpRatio * 100f:F1}%)  |  {StaggerHudText()}";
             }
 
             if (bossPhaseText != null)
@@ -2190,19 +2369,11 @@ namespace RaidRogue
                 }
                 else
                 {
-                    string stageMechanicHint = currentStageNumber switch
-                    {
-                        1 => "입문 기믹: 원형/부채꼴/탱버 (2페이즈: 도넛 장판 & 줄 가로채기)",
-                        2 => "중급 기믹 추가: ① [4인 산개(분홍 원)] & ② [4인 쉐어(노란 화살표)]",
-                        3 => "최종 보스 (시전 +25% 가속): [도넛+4인 산개 동시] & [외곽 넉백+4인 쉐어]",
-                        _ => ""
-                    };
-
                     bossPhaseText.text = currentPhase switch
                     {
-                        BossPhase.Phase1_100To50 => $"1페이즈 (100%~50%) — {stageMechanicHint}",
+                        BossPhase.Phase1_100To50 => "1페이즈",
                         BossPhase.GroggyTransition => $"★ 그로기 폭딜 타임!! (남은 시간 {_groggyRemainingTime:F1}s | 받는 피해 +50% 증가!) ★",
-                        BossPhase.Phase2_50To0 => $"2페이즈 (50%~0%) — {stageMechanicHint}",
+                        BossPhase.Phase2_50To0 => "2페이즈",
                         _ => ""
                     };
                 }
@@ -2210,40 +2381,42 @@ namespace RaidRogue
 
             if (bossCastBarRoot != null)
             {
-                bool showCastBar = IsCasting || IsGroggy;
+                bool showCastContent = IsCasting || IsGroggy;
+                bool showCastBar = showCastContent && !AstellaOrnateHUD.HasBossCastPresentation(this,bossCastBarRoot);
                 if (bossCastBarRoot.activeSelf != showCastBar)
                 {
                     bossCastBarRoot.SetActive(showCastBar);
                 }
 
-                if (showCastBar)
+                if (showCastContent)
                 {
                     if (bossCastFillImage != null)
                     {
                         if (IsGroggy)
                         {
                             bossCastFillImage.fillAmount = _groggyRemainingTime / Mathf.Max(0.1f, groggyDuration);
-                            bossCastFillImage.color = new Color(1f, 0.85f, 0.2f, 1f);
+                            RaidUIStyle.Color(bossCastFillImage, new Color(1f, 0.85f, 0.2f, 1f));
                         }
                         else
                         {
                             bossCastFillImage.fillAmount = CastProgress;
-                            bossCastFillImage.color = _isTetherActive
+                            RaidUIStyle.Color(bossCastFillImage, _isTetherActive
                                 ? (_isTetherInterceptedByPlayer ? new Color(0.2f, 0.95f, 0.4f, 1f) : new Color(1f, 0.15f, 0.15f, 1f))
                                 : (_isStackActive ? new Color(1f, 0.85f, 0.15f, 1f)
                                 : (_isSpreadActive ? new Color(1f, 0.35f, 0.8f, 1f)
-                                : new Color(1f, 0.55f, 0.12f, 1f)));
+                                : new Color(1f, 0.55f, 0.12f, 1f))));
                         }
                     }
 
                     if (bossCastText != null)
                     {
                         bossCastText.text = IsGroggy
-                            ? $"무력화 (GROGGY - 받는 피해 +50%)  [{_groggyRemainingTime:F1}s]"
-                            : $"시전 중: {_currentCastSkillName}  ({CastProgress * 100f:F0}% | {_castRemainingTime:F1}s)";
+                            ? $"그로기 (받는 피해 +50%)  [{_groggyRemainingTime:F1}s]"
+                            : $"시전 중: {CurrentCastSkillName}  ({CastProgress * 100f:F0}% | {_castRemainingTime:F1}s)";
                     }
                 }
             }
+            GuardianUI();
         }
 
         private void TriggerHitFlash(bool isCrit)
@@ -2291,12 +2464,25 @@ namespace RaidRogue
 
         private void UpdateCastBanner()
         {
+            if(AstellaOrnateHUD.HasBossCastPresentation(this))
+            {if(_castBannerRoot!=null)_castBannerRoot.gameObject.SetActive(false);return;}
+            // The HUD already presents phase, cast progress and groggy state.
+            // Avoid duplicating that information as oversized world text behind the HUD.
+            // The cast bar is intentionally inactive between casts. In that state
+            // the phase HUD alone covers the banner's idle information.
+            bool needsCastPresentation = IsCasting || IsGroggy;
+            if (bossPhaseText != null && bossPhaseText.isActiveAndEnabled &&
+                (!needsCastPresentation || (bossCastText != null && bossCastText.isActiveAndEnabled)))
+            { if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(false); return; }
+            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible && !CharacterTrainingSession.Active)
+            { if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(false); return; }
+            if (_castBannerRoot != null && !_castBannerRoot.gameObject.activeSelf) _castBannerRoot.gameObject.SetActive(true);
             if (_castBannerRoot == null || _castBannerText == null)
             {
                 return;
             }
 
-            float scaleMult = currentStageNumber == 3 ? 1.5f : (currentStageNumber == 2 ? 1.2f : 1.0f);
+            float scaleMult = EncounterTemplate == 3 ? 1.5f : (EncounterTemplate == 2 ? 1.2f : 1.0f);
             bool is2D = ViewModeManager.Is2DViewActive;
             _castBannerRoot.position = transform.position + (is2D
                 ? new Vector3(0f, 3.8f, 2.5f * scaleMult)
@@ -2320,7 +2506,7 @@ namespace RaidRogue
             }
             else if (IsCasting)
             {
-                _castBannerText.text = $"[시전 중: {_currentCastSkillName} ({_castRemainingTime:F1}s) - 시선 고정!]";
+                _castBannerText.text = $"{CurrentCastSkillName} ({_castRemainingTime:F1}s)";
                 _castBannerText.color = new Color(1f, 0.45f, 0.2f, 1f);
             }
             else
@@ -2328,6 +2514,12 @@ namespace RaidRogue
                 _castBannerText.text = $"STAGE {currentStageNumber} BOSS [{(currentPhase == BossPhase.Phase2_50To0 ? "2페이즈" : "1페이즈")}] (어그로: {AggroTargetName})";
                 _castBannerText.color = new Color(0.85f, 0.85f, 1f, 0.95f);
             }
+        }
+
+        public void ShowArrivalName(bool visible)
+        {
+            if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(visible);
+            if (visible) UpdateCastBanner();
         }
 
         private void SetBossBodyColor(Color color)

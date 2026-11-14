@@ -67,9 +67,24 @@ internal static class RaidNetworkTests
         Check(!copy.Poses[0].MovementLocked && copy.Poses[1].MovementLocked, "host movement lock reaches owner prediction");
         var welcome = RoundTrip(new RaidPacket { Kind = RaidPacketKind.Welcome, Id = 4, Speed = 7.8f, Radius = 0.5f, Arena = 18, TurnSpeed = 720 });
         Equal(5, welcome.Dash.cooldown, "host tuning delivered");
+        input.SupportId=17;
         var packet = new RaidPacket { Kind = RaidPacketKind.Input }; packet.Inputs.Add(input);
+        Check(RoundTrip(packet).Inputs[0].SupportId==17,"movement preserves explicitly selected support for host validation");
         Check(RoundTrip(packet).Inputs[0].Dash, "dash edge delivered");
-        Check(RoundTrip(new RaidPacket { Kind = RaidPacketKind.Hello, Text = "Step9_TestScene\nPlayer" }).Text.Contains("Player"), "handshake payload");
+        Check(RoundTrip(new RaidPacket { Kind = RaidPacketKind.Hello, Text = "SampleScene\nPlayer" }).Text.Contains("Player"), "handshake payload");
+        // The shipped 2026-10-25 build used protocol 16. LAN's scene-only HelloTag
+        // must not allow that build to reach roster admission or restore a new JSON schema.
+        foreach (var legacyPacket in new[] {
+            new RaidPacket { Kind = RaidPacketKind.Hello, Text = "SampleScene\nLegacy player" },
+            new RaidPacket { Kind = RaidPacketKind.ResumeHello, Text = "SampleScene\nLegacy player" },
+            new RaidPacket { Kind = RaidPacketKind.CombatFrame, Tick = 1, Id = 0, Role = 1, Bytes = new byte[] { 123, 125 } }
+        })
+        {
+            byte[] legacy = RaidWire.Encode(legacyPacket);
+            Check(legacy[0] != 16, "Current encoder does not advertise shipped legacy protocol 16");
+            legacy[0] = 16;
+            Check(!RaidWire.Decode(legacy, out _), "Legacy " + legacyPacket.Kind + " rejected before LAN or Steam session dispatch");
+        }
         Check(RoundTrip(new RaidPacket { Kind = RaidPacketKind.Notice, Text = "종료:정원 초과" }).Text.Contains("정원"), "rejection explanation");
         Equal(3, RoundTrip(new RaidPacket { Kind = RaidPacketKind.Role, Role = 3 }).Role, "role request");
         byte[] valid = RaidWire.Encode(snapshot);

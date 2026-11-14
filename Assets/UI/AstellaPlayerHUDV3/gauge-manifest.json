@@ -1,0 +1,146 @@
+{
+  "version": 3,
+  "canvas": [
+    560,
+    72
+  ],
+  "recommendedDisplay": [
+    280,
+    36
+  ],
+  "geometry": {
+    "outerPath": "M26 10H534L552 36L534 62H26L8 36Z",
+    "fillPath": "M28 16H532L545 36L532 56H28L15 36Z",
+    "fillBounds": [
+      15,
+      16,
+      530,
+      40
+    ],
+    "frameFaceThickness": 6,
+    "frameVisibleHeight": 52,
+    "fillDirection": "left to right",
+    "endX": "15+530*ratio",
+    "tipWidth": "min(18,530*ratio)",
+    "tipHeight": 40,
+    "tipHighlightOffset": [
+      "endX-tipWidth-tipWidth/18",
+      15
+    ],
+    "tipHighlightDisplaySize": [
+      "20*tipWidth/18",
+      42
+    ],
+    "ratioZero": "hide fill and tip",
+    "ratioOne": "use full inner shape; hide moving highlight",
+    "fillClip": "Reveal fixed full-width material through rectangle plus triangle, intersect with inner polygon; do not squeeze texture"
+  },
+  "material": {
+    "gold": "Approved champagne metallic gold bevel",
+    "fills": [
+      "green HP",
+      "violet ultimate"
+    ],
+    "originalGrainAndCloudFiltersPreserved": true,
+    "textureAlreadyIncluded": true
+  },
+  "layerOrder": [
+    "track-inset",
+    "fill clipped by ratio",
+    "optional tip highlight",
+    "frame-gold",
+    "runtime text"
+  ],
+  "textBakedIntoAssets": false,
+  "frameCenterTransparent": true,
+  "import": {
+    "type": "Sprite (2D and UI)",
+    "mesh": "Full Rect",
+    "alpha": true,
+    "mipmaps": false,
+    "filter": "Bilinear",
+    "compression": "None"
+  },
+  "assets": [
+    {
+      "name": "frame-gold",
+      "canvas": [
+        560,
+        72
+      ],
+      "png": "sprites/frame-gold.png",
+      "svg": "source/frame-gold.svg",
+      "transparentPixels": 29618
+    },
+    {
+      "name": "track-inset",
+      "canvas": [
+        560,
+        72
+      ],
+      "png": "sprites/track-inset.png",
+      "svg": "source/track-inset.svg",
+      "transparentPixels": 19578
+    },
+    {
+      "name": "hp-fill",
+      "canvas": [
+        560,
+        72
+      ],
+      "png": "sprites/hp-fill.png",
+      "svg": "source/hp-fill.svg",
+      "transparentPixels": 19578
+    },
+    {
+      "name": "ultimate-fill",
+      "canvas": [
+        560,
+        72
+      ],
+      "png": "sprites/ultimate-fill.png",
+      "svg": "source/ultimate-fill.svg",
+      "transparentPixels": 19578
+    },
+    {
+      "name": "hp-tip-mask",
+      "canvas": [
+        18,
+        40
+      ],
+      "png": "sprites/hp-tip-mask.png",
+      "svg": "source/hp-tip-mask.svg",
+      "transparentPixels": 324
+    },
+    {
+      "name": "hp-tip-highlight",
+      "canvas": [
+        20,
+        42
+      ],
+      "png": "sprites/hp-tip-highlight.png",
+      "svg": "source/hp-tip-highlight.svg",
+      "transparentPixels": 710
+    },
+    {
+      "name": "ultimate-tip-mask",
+      "canvas": [
+        18,
+        40
+      ],
+      "png": "sprites/ultimate-tip-mask.png",
+      "svg": "source/ultimate-tip-mask.svg",
+      "transparentPixels": 324
+    },
+    {
+      "name": "ultimate-tip-highlight",
+      "canvas": [
+        20,
+        42
+      ],
+      "png": "sprites/ultimate-tip-highlight.png",
+      "svg": "source/ultimate-tip-highlight.svg",
+      "transparentPixels": 710
+    }
+  ]
+}

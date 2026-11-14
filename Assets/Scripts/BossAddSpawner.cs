@@ -7,7 +7,11 @@ namespace RaidRogue
     public enum AddMinionType
     {
         PowerSupplier_BossTether = 0, // 쫄 A: [동력 공급체] - 보스에게 보라색 레이저 줄을 연결해 보스가 받는 피해를 80% 감소시킴
-        Assassin_HealerHunter = 1     // 쫄 B: [암살자] - 소환 즉시 힐러를 어그로 1순위로 잡고 추격하여 강공격/자폭 시도
+        Assassin_HealerHunter = 1,    // 쫄 B: [암살자]
+        FloraRootCore = 2,            // Stage 2 hard: stationary destructible root core
+        CampanellaGearCore = 3,       // Stage 3 hard: exposed stationary drive core
+        MarionetteString = 4,        // Stage 4 normal: destructible rescue target
+        JanusOmega = 5              // Stage 6 normal: second target with shared boss HP
     }
 
     /// <summary>
@@ -25,6 +29,31 @@ namespace RaidRogue
         public float maxHp = 850f;
         public float currentHp = 850f;
         public bool isDead;
+        public bool IsLobbyDummy { get; private set; }
+
+        public void InitializeLobbyDummy()
+        {
+            IsLobbyDummy = true; ownerBoss = null; spawner = null;
+            addDisplayName = "연습용 허수아비"; maxHp = currentHp = 1000000;
+            moveSpeed = attackDamage = 0; combatRadius = .8f;
+            _baseColor = new Color(.7f, .5f, .22f);
+            _currentCastSkillName = "스킬 연습 · 출발 시 자원 초기화";
+            var collider = gameObject.AddComponent<CapsuleCollider>();
+            collider.height = 2.8f; collider.radius = .8f;
+            // Simple wooden silhouette; no attack AI or boss ownership.
+            for (int i = 0; i < 4; i++)
+            {
+                var part = RaidPrimitive.Create(i == 0 ? PrimitiveType.Sphere : PrimitiveType.Cube);
+                part.name = i == 0 ? "Straw head" : i == 1 ? "Wooden post" : i == 2 ? "Crossbar" : "Straw body";
+                part.transform.SetParent(transform, false);
+                part.transform.localPosition = i == 0 ? new Vector3(0, 1.1f, 0) : i == 2 ? new Vector3(0, .5f, 0) : Vector3.zero;
+                part.transform.localScale = i == 0 ? Vector3.one * .65f : i == 1 ? new Vector3(.2f, 2.2f, .2f) : i == 2 ? new Vector3(2.2f, .18f, .18f) : new Vector3(.85f, 1.1f, .5f);
+                part.GetComponent<Collider>().enabled = false;
+                SetRendererColor(part.GetComponent<Renderer>(), i == 1 || i == 2 ? new Color(.35f, .2f, .09f) : _baseColor);
+                if (i == 3) bodyRenderer = part.GetComponent<Renderer>();
+            }
+            CreateOverheadHpBar();
+        }
 
         [Header("References")]
         public BossController ownerBoss;
@@ -51,8 +80,10 @@ namespace RaidRogue
         private TextMesh _nameLabelText;
         private Color _baseColor;
         private Coroutine _hitFlashCoroutine;
+        private readonly HashSet<Material> _ownedMaterials = new HashSet<Material>();
 
         public float HpRatio => maxHp > 0f ? Mathf.Clamp01(currentHp / maxHp) : 0f;
+        public GameObject JanusAuthoredVisual { get; private set; }
         public string CurrentCastOrStatusText => _currentCastSkillName;
         public float CastProgress => _castProgress;
         public bool IsCastingSkill => _isCastingHeavyStrike;
@@ -71,7 +102,41 @@ namespace RaidRogue
 
             float stageHpScale = stageNum == 1 ? 1.0f : (stageNum == 2 ? 1.35f : 1.75f);
 
-            if (type == AddMinionType.PowerSupplier_BossTether)
+            if(type == AddMinionType.JanusOmega)
+            {
+                addDisplayName="야누스 오메가 · 공용 HP";
+                maxHp=boss!=null?boss.maxHp:60000;currentHp=boss!=null?boss.currentHp:maxHp;
+                moveSpeed=0;attackDamage=0;combatRadius=1.6f;
+                _baseColor=new Color(.19f,.2f,.25f);_currentCastSkillName="할버드 · 공용 HP";aggroTarget=null;
+            }
+            else if(type == AddMinionType.FloraRootCore)
+            {
+                addDisplayName="기생 뿌리핵";
+                maxHp=boss!=null?boss.floraHard.rootCoreHealth:1800;
+                currentHp=maxHp; moveSpeed=0; attackDamage=0;
+                _baseColor=new Color(.48f,.16f,.58f);
+                _currentCastSkillName="오염핵 · 파괴 대상";
+                aggroTarget=null;
+            }
+            else if(type == AddMinionType.CampanellaGearCore)
+            {
+                addDisplayName="노출된 오염 구동부";
+                maxHp=boss!=null?boss.campanellaHard.lockCoreHealth:2400;
+                currentHp=maxHp;moveSpeed=0;attackDamage=0;
+                _baseColor=new Color(.55f,.32f,.72f);
+                _currentCastSkillName="종치 봉쇄 · 구동부 파괴";
+                aggroTarget=null;
+            }
+            else if(type == AddMinionType.MarionetteString)
+            {
+                addDisplayName="인형의 실";
+                maxHp=boss!=null?(boss.MarionetteHard?boss.marionetteHard.stringHealth:boss.marionette.stringHealth):2000;
+                currentHp=maxHp;moveSpeed=0;attackDamage=0;
+                _baseColor=new Color(.95f,.72f,.15f);
+                _currentCastSkillName="동료 구출 · 황금 실 절단";
+                aggroTarget=null;
+            }
+            else if (type == AddMinionType.PowerSupplier_BossTether)
             {
                 addDisplayName = "쫄 A : 동력 공급체";
                 maxHp = Mathf.RoundToInt(650f * stageHpScale);
@@ -96,6 +161,16 @@ namespace RaidRogue
             transform.position = new Vector3(spawnPos.x, 1.0f, spawnPos.z);
 
             BuildAddDualVisuals();
+            if(type==AddMinionType.JanusOmega&&boss?.JanusSettings?.omegaVisualPrefab!=null)
+            {JanusAuthoredVisual=Instantiate(boss.JanusSettings.omegaVisualPrefab,transform);
+             foreach(var collider in JanusAuthoredVisual.GetComponentsInChildren<Collider>())collider.enabled=false;}
+            else if(type==AddMinionType.JanusOmega)
+            {JanusAuthoredVisual=new GameObject("Temporary black-iron halberd · replace in janus settings");
+             JanusAuthoredVisual.transform.SetParent(transform,false);
+             var shaft=RaidPrimitive.Create(PrimitiveType.Cube);shaft.name="Temporary halberd shaft";
+             shaft.transform.SetParent(JanusAuthoredVisual.transform,false);
+             shaft.transform.localPosition=new Vector3(1,1.5f,.4f);shaft.transform.localScale=new Vector3(.16f,3.5f,.16f);
+             shaft.GetComponent<Collider>().enabled=false;}
             CreateTetherOrAttackLine();
             CreateOverheadHpBar();
         }
@@ -195,7 +270,7 @@ namespace RaidRogue
 
             Shader shader = Shader.Find("Sprites/Default");
             if (shader == null) shader = Shader.Find("Universal Render Pipeline/Unlit");
-            _tetherOrAttackLine.sharedMaterial = new Material(shader) { color = Color.white };
+            _tetherOrAttackLine.sharedMaterial = OwnMaterial(new Material(shader) { color = Color.white });
             _tetherOrAttackLine.enabled = addType == AddMinionType.PowerSupplier_BossTether;
         }
 
@@ -237,6 +312,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (IsLobbyDummy) { currentHp = maxHp; UpdateOverheadHpBar(); return; }
             if (RaidCombatAuthority.Replica) { UpdateReplicaAdd(); return; }
             if (StageManager.CombatSuspended) return;
             if (isDead || Time.timeScale <= 0.001f)
@@ -244,12 +320,18 @@ namespace RaidRogue
                 return;
             }
 
-            if (ownerBoss == null || ownerBoss.IsBossDefeatedCollapse)
+            if (ownerBoss == null || ownerBoss.IsBossDefeatedCollapse && addType!=AddMinionType.JanusOmega)
             {
                 KillAddMinion(silent: true);
                 return;
             }
 
+            if(addType==AddMinionType.MarionetteString)
+            {UpdateMarionetteStringLine();UpdateOverheadHpBar();return;}
+            if(addType==AddMinionType.JanusOmega)
+            {if(ownerBoss!=null){maxHp=ownerBoss.maxHp;currentHp=ownerBoss.currentHp;}
+             UpdateOverheadHpBar();return;}
+            if(addType==AddMinionType.FloraRootCore || addType==AddMinionType.CampanellaGearCore) return;
             if (addType == AddMinionType.PowerSupplier_BossTether)
             {
                 UpdatePowerSupplierBehavior();
@@ -436,16 +518,17 @@ namespace RaidRogue
             int damage,
             Color popupColor,
             bool isBigHighlight = false,
-            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct)
+            Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Direct,bool scaleAttack=true)
         {
-            if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
+            if (RaidCombatAuthority.Replica || isDead || (IsLobbyDummy ? !RaidLobbyRoom.PracticeActive : StageManager.CombatSuspended) || !gameObject.activeInHierarchy) return;
 
             float mult = ownerBoss != null ? ownerBoss.DamageTakenMultiplier : 1.0f;
-            int finalDmg = Mathf.RoundToInt(damage * mult);
-            ApplyAddHpDamage(finalDmg,source != null ? source : (ownerBoss != null ? ownerBoss.targetPlayer : null),origin,kind);
+            int finalDmg = Mathf.RoundToInt(CombatAttackModifiers.Apply(source,transform,damage,kind,scaleAttack) * mult);
+            finalDmg=Mathf.RoundToInt(ApplyAddHpDamage(finalDmg,source != null ? source : (ownerBoss != null ? ownerBoss.targetPlayer : null),origin,kind));
 
-            FloatingTextPopup.Spawn(
+            FloatingTextPopup.SpawnDamage(
                 transform.position + Vector3.up * 2.35f,
+                finalDmg,
                 $"[{roleTag}] {skillName} - {finalDmg}",
                 popupColor,
                 isBigHighlight
@@ -475,22 +558,34 @@ namespace RaidRogue
             if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
-            ApplyAddHpDamage(damage,source);
+            ApplyAddHpDamage(CombatAttackModifiers.Apply(source,transform,damage,CombatDamageKind.Direct),source);
             if (currentHp <= 0.1f)
             {
                 KillAddMinion(silent: false);
             }
         }
 
-        private float ApplyAddHpDamage(float amount,Transform source,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
+        private float ApplyAddHpDamage(float amount,Transform source,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified,bool alreadyScaled=false)
         {
-            if(RaidCombatAuthority.Replica||isDead||StageManager.CombatSuspended||amount<=0)return 0;
+            if(RaidCombatAuthority.Replica||isDead||(IsLobbyDummy ? !RaidLobbyRoom.PracticeActive : StageManager.CombatSuspended)||amount<=0)return 0;
+            if(IsLobbyDummy)
+            {
+                if(!CombatRange.LivingPartyMember(source)||float.IsNaN(amount)||float.IsInfinity(amount))return 0;
+                float practiceDamage=Mathf.Min(amount,Mathf.Max(0,currentHp-1));currentHp-=practiceDamage;
+                CharacterKit.AfterAttack(source,transform,practiceDamage,origin,kind);
+                return practiceDamage;
+            }
+            if(addType==AddMinionType.JanusOmega&&ownerBoss!=null)
+            {float sharedActual=ownerBoss.ReceiveJanusOmegaDamage(amount,source,origin,kind,alreadyScaled);
+             currentHp=ownerBoss.currentHp;maxHp=ownerBoss.maxHp;return sharedActual;}
+            amount=AiSpectatorDamage.AtHp(source,amount,alreadyScaled);
+            if(amount<=0)return 0;
             float before=currentHp;currentHp=Mathf.Max(0,currentHp-amount);if(currentHp<=.1f)currentHp=0;
-            CombatMetricsManager.Damage(source,before,currentHp,true,origin,kind);return before-currentHp;
+            float actual=before-currentHp;CombatMetricsManager.Damage(source,before,currentHp,true,origin,kind);CharacterKit.AfterAttack(source,transform,actual,origin,kind);return actual;
         }
-        public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind)
+        public float ReceiveConfirmedSecondary(float amount,Transform source,string origin,CombatDamageKind kind,bool alreadyScaled=false)
         {
-            float actual=ApplyAddHpDamage(amount,source,origin,kind);
+            float actual=ApplyAddHpDamage(amount,source,origin,kind,alreadyScaled);
             if(actual>0)FloatingTextPopup.Spawn(transform.position+Vector3.up*2.6f,(kind==CombatDamageKind.Extra?"태양 불꽃 ":"반사 ")+actual.ToString("0.#"),Color.yellow,false);
             if(currentHp<=0&&!isDead)KillAddMinion(false);return actual;
         }
@@ -499,6 +594,9 @@ namespace RaidRogue
             if (isDead) return;
             isDead = true;
             currentHp = 0f;
+            if(addType==AddMinionType.FloraRootCore && ownerBoss!=null)ownerBoss.NotifyFloraCoreDestroyed(this);
+            if(addType==AddMinionType.CampanellaGearCore && ownerBoss!=null)ownerBoss.NotifyCampanellaCoreDestroyed(this);
+            if(addType==AddMinionType.MarionetteString && ownerBoss!=null)ownerBoss.NotifyMarionetteStringDestroyed(this);
 
             if (_tetherOrAttackLine != null)
             {
@@ -507,7 +605,9 @@ namespace RaidRogue
 
             if (!silent)
             {
-                string deathMsg = addType == AddMinionType.PowerSupplier_BossTether
+                string deathMsg = addType==AddMinionType.FloraRootCore ? "기생 뿌리핵 파괴" :
+                    addType==AddMinionType.CampanellaGearCore ? "오염 구동부 파괴 · 종치 봉쇄" :
+                    addType==AddMinionType.MarionetteString ? "인형의 실 절단 · 동료 구출" : addType == AddMinionType.PowerSupplier_BossTether
                     ? "★ [동력 공급체] 처치 완료! 보스의 80% 피해 감소 보호막이 해제되었습니다! ★"
                     : "★ [암살자] 처치 완료! 힐러가 위협에서 벗어났습니다! ★";
 
@@ -575,26 +675,61 @@ namespace RaidRogue
 
             if (_nameLabelText != null)
             {
-                _nameLabelText.text = addType == AddMinionType.PowerSupplier_BossTether
+                _nameLabelText.text = addType == AddMinionType.MarionetteString
+                    ? $"인형의 실 · 절단 대상 (HP {Mathf.CeilToInt(currentHp)})"
+                    : addType == AddMinionType.PowerSupplier_BossTether
                     ? $"[쫄 A] 동력 공급체 (보스 뎀감 80% | HP {Mathf.CeilToInt(currentHp)})"
                     : $"[쫄 B] 암살자 (표적: {GetAggroTargetDisplayName()} | HP {Mathf.CeilToInt(currentHp)})";
             }
         }
 
-        private static void SetUnlitColor(Renderer r, Color color)
+        private void UpdateMarionetteStringLine()
+        {
+            if(_tetherOrAttackLine==null)return;
+            _tetherOrAttackLine.enabled=!isDead && aggroTarget!=null;
+            if(!_tetherOrAttackLine.enabled)return;
+            _tetherOrAttackLine.startWidth=.1f;_tetherOrAttackLine.endWidth=.06f;
+            _tetherOrAttackLine.startColor=new Color(1,.78f,.2f);
+            _tetherOrAttackLine.endColor=new Color(1,.9f,.55f);
+            _tetherOrAttackLine.SetPosition(0,transform.position+Vector3.up);
+            _tetherOrAttackLine.SetPosition(1,aggroTarget.position+Vector3.up*1.4f);
+        }
+
+        private Material OwnMaterial(Material material)
+        {
+            if (material != null) _ownedMaterials.Add(material);
+            return material;
+        }
+
+        private void OnDestroy()
+        {
+            // Only materials allocated here or instantiated for our generated renderers.
+            // Primitive meshes, authored prefab assets and other shared materials are not owned.
+            foreach (var material in _ownedMaterials)
+                if (material != null) Destroy(material);
+            _ownedMaterials.Clear();
+        }
+
+        private void SetUnlitColor(Renderer r, Color color)
         {
             if (r == null) return;
             Shader s = Shader.Find("Sprites/Default");
             if (s == null) s = Shader.Find("Universal Render Pipeline/Unlit");
-            r.sharedMaterial = new Material(s) { color = color };
+            r.sharedMaterial = OwnMaterial(new Material(s) { color = color });
         }
 
-        private static void SetRendererColor(Renderer r, Color color)
+        private void SetRendererColor(Renderer r, Color color)
         {
-            if (r == null || r.material == null) return;
-            r.material.color = color;
-            if (r.material.HasProperty("_BaseColor")) r.material.SetColor("_BaseColor", color);
-            if (r.material.HasProperty("_Color")) r.material.SetColor("_Color", color);
+            if (r == null) return;
+            // These calls target the body/visor created by BuildAddDualVisuals. The first
+            // material getter instantiates their material; later hit flashes reuse it.
+            var material = OwnMaterial(r.material);
+            if (material == null) return;
+            var shader = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline?.defaultShader;
+            if (shader != null && shader.isSupported) material.shader = shader;
+            material.color = color;
+            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
+            if (material.HasProperty("_Color")) material.SetColor("_Color", color);
         }
     }
 
@@ -680,6 +815,7 @@ namespace RaidRogue
                 return;
             }
 
+            if(boss.JanusEncounter){_lastObservedStage=boss.currentStageNumber;return;}
             // 스테이지 전환 시 웨이브 트리거 초기화
             if (_lastObservedStage != boss.currentStageNumber)
             {
@@ -693,6 +829,10 @@ namespace RaidRogue
                 return;
             }
 
+            if (boss.GuardianNormal) { ClearAllActiveAdds(); return; }
+            if (boss.FloraEncounter) return;
+            if (boss.CampanellaEncounter) return; // Stage 3 owns its optional hard drive core.
+            if (boss.MarionetteEncounter) return; // Stage 4 owns its rescue string.
             CleanupNullOrDeadAdds();
 
             // 보스 체력 70%, 30% 구간 도달 시 자동으로 '권속 소환 (Summon Adds)' 발동!
@@ -748,7 +888,7 @@ namespace RaidRogue
                 if (m.addType == AddMinionType.Assassin_HealerHunter) hasAssassin = true;
             }
 
-            int stageNum = boss.currentStageNumber;
+            int stageNum = boss.EncounterTemplate;
 
             if (!hasSupplier)
             {
@@ -811,12 +951,29 @@ namespace RaidRogue
         /// </summary>
         public BossAddMinion GetPriorityAddForBot(PartyBotRole botRole)
         {
+            if(boss!=null&&boss.JanusEncounter)return null;
             CleanupNullOrDeadAdds();
             if (activeAdds.Count == 0)
             {
                 return null;
             }
 
+            if(boss!=null && boss.FloraHard)
+            {
+                int preferred=botRole==PartyBotRole.Tank||botRole==PartyBotRole.MeleeDPS?0:1;
+                var cores=activeAdds.FindAll(a=>a!=null&&!a.isDead&&a.addType==AddMinionType.FloraRootCore);
+                if(cores.Count>0)return cores[Mathf.Min(preferred,cores.Count-1)];
+            }
+            if(boss!=null && boss.CampanellaHard)
+            {
+                var core=activeAdds.Find(a=>a!=null&&!a.isDead&&a.addType==AddMinionType.CampanellaGearCore);
+                if(core!=null)return core;
+            }
+            if(boss!=null && boss.MarionetteEncounter)
+            {
+                var rescue=activeAdds.Find(a=>a!=null&&!a.isDead&&a.addType==AddMinionType.MarionetteString);
+                if(rescue!=null)return rescue;
+            }
             AddMinionType preferredType = botRole == PartyBotRole.Tank
                 ? AddMinionType.Assassin_HealerHunter
                 : AddMinionType.PowerSupplier_BossTether;

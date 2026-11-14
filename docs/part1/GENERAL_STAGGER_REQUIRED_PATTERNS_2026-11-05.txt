@@ -1,0 +1,52 @@
+일반 무력화와 필수 패턴 잠금 — 2026-11-05
+상태: 사용자 선택 반영, 코드/명령 검증 완료. 실플레이·밸런스·실제 멀티플레이 미검증.
+
+확정된 동작
+- 일반 전투에서 무력화 누적. 필수 상태에는 신규 수치를 버리고 이전 잔량은 보존한다.
+- 잠금 중 누적값을 예약하거나 종료 시 몰아서 적용하지 않는다. 종료 후 새 유효 공격부터 재개.
+- 임계치 도달 시 일반 무력화 그로기 1회. 성공한 진입에만 게이지0/카운터창 종료. 그로기중 재누적 금지.
+- 같은 피해가 필수 HP조건을 충족하면 누적 전에 잠금. 일반 무력화 그로기 도중 필수 HP조건을 충족하면 해당 그로기를 끝내고 기존 필수 진행을 우선한다.
+- 카운터는 별도 신호/정면/담당권한 규칙을 유지한다. 필수 상태라도 허용된 카운터창은 사용 가능하며 기존 카운터/기믹보상 그로기 시간은 변경하지 않는다.
+- 야누스 Omega 타격의 무력화는 살아있는 원본 대상 확인 후 Alpha의 공유 게이지·잠금으로 전달.
+- 새런/재도전/전투종료의 기존 ResetState로 게이지 초기화. 호스트만 누적·그로기 확정.
+
+필수 패턴 선정
+공통: 변신·피해차단 전환, 전원 피격 raidwide 예고~타격. 예고가 시작될 동일 프레임도 우선한다.
+1 가디언: 봉쇄(Lockdown), 변신/힘겨루기(Transformation), 완전 봉쇄(FullLockdown), 하드70/40/25% 필수 진입 대기.
+2 플로라: 기생 덩굴, 영원의 정원, 변신, 뿌리핵, 재배치/최종 정원 연쇄 및 각 미완료 HP조건.
+3 캄파넬라: 침묵의 조율, 변신, 봉쇄 준비→카운터→유지→개방→회복, 최종 재배치/연쇄 및 필수 HP조건. 완료 후 일반 Rest는 누적 재개.
+4 마리오네트: 배신자/조종·구출·반동, 재집결, 재연/황금 교차, 변신, 필수 클라이맥스 준비/연쇄와 미완료 HP조건.
+5 저스티티아: 천칭/불공정 저울과 재측정, 재집결, 변신 및 미완료 HP조건.
+6 야누스: 기둥 배정, 쌍카운터 준비/창, 변신/재집결 및 미완료 기둥·변신 HP조건.
+과거 비활성인 Overload/ForcedBell/Climax/Verdict 진입을 이번 변경으로 재활성화하지 않았다. 잔존/복원된 해당 필수 상태에서도 안전하게 잠그는 방어조건은 유지한다.
+일반 공격·일반 후속타는 기존 End/cleanup 경로로 중단해 보스별 Groggy에 진입하고 기존 종료 경로로 돌아간다. 배치된 세계 효과의 실제 잔상 정리는 플레이 확인 대상.
+
+초기 수치와 UI/네트워크
+- BossController.normalStaggerThreshold=1000, normalStaggerGroggySeconds=8. 사용자 설정 가능한 초기 튜닝값이며 4/8인 균형은 미검증.
+- 기존 bossHpText 동적 내용에 10칸 문자 게이지·잔량/임계치 추가. 잠금은 회색 '누적 불가'. 사용자 프리팹/배치/폰트/테마 자산 직접 수정 없음. 표시폭/폰트 가독성은 사용자 확인 필요.
+- RaidCombatEnemy에 host staggerLocked/staggerThreshold 전송. 클라이언트는 수신값으로 표시하고 독립 누적하지 않는다. RaidWire.Version32(호스트/클라이언트 동일 빌드 필요).
+- 실제 네트워크 전송·재접속 표시는 미검증. 저장 빌드 포맷 변경 없음.
+
+변경 파일
+CombatCounterTarget.cs, BossController.cs, RaidRunFlow.cs, RaidCombatProtocol.cs, RaidCombatWorld.cs, RaidNetworkProtocol.cs.
+BossGuardianNormal.cs, BossFloraNormal.cs, BossCampanellaNormal.cs, BossMarionetteNormal.cs, BossJustitiaNormal.cs, BossJanusNormal.cs.
+Tests/StaggerAdapterTests.cs, StaggerBossFirstTests.cs, StaggerBossLastTests.cs와 각 Run-*Checks.ps1.
+
+검증
+- Run-StaggerChecks.ps1:32 PASS. 실제 공용 누적/Reset/Restore와 raidwide 스케줄러. 사망Omega/권한/잘못된수치/잠금보존/임계치/그로기중차단.
+- Run-StaggerBossFirstChecks.ps1:93 PASS. 1~3 실제 조건/진입/종료/HP우선 분기.
+- Run-StaggerBossLastChecks.ps1:106 PASS. 4~6 실제 조건/진입/종료/HP우선 분기.
+- 월드 cleanup/연출 및 Unity컴포넌트는 대역이며 전체 엔진tick을 실행한 검사가 아니다.
+- 기존6보스Normal PASS, StudioChecks BossHard7스크립트 PASS(raidwide107 포함).
+- StudioChecks Network PASS, Assembly-CSharp 및 Editor 관리컴파일 PASS.
+- 전체 Run-NineKeyDamageChecks PASS. git diff --check PASS.
+- 로그: %TEMP%/Coopraid-Stagger-Final.log, Coopraid-StaggerBossFirst-Final.log, Coopraid-StaggerBossLast-Final.log, Coopraid-Stagger-Network.log, Coopraid-Stagger-Normal.log, Coopraid-Stagger-Hard.log, Coopraid-Stagger-Damage.log.
+
+사용자 플레이 순서(원본 Unity에서 사용자가 수행)
+1 일반 공격에 누적→임계치→그로기→게이지0과 다음공격 누적 재개 확인.
+2 게이지를 채우다 필수 진입→회색잠금과 이전잔량유지, 그 동안 공격해도 증가없음→종료후 다음공격만 누적.
+3 필수 HP 임계와 게이지 완성이 같은 타격에 겹칠 때 필수진입 우선. 일반그로기중 임계통과도 확인.
+4 필수 카운터 신호에서는 정상 카운터 가능. 그로기 중 추가 무력화로 반복중단 불가.
+5 6보스 노멀/하드 각각 정리된 공격 잔상·구출/천칭/봉쇄 완료, 야누스 양쪽 게이지 공유 확인.
+6 호스트/클라이언트의 회색잠금·잔량 동기화, 재접속·재도전 상태초기화 확인.
+Unity/Steam/게임 실행·화면조작·씬/프리팹 YAML 수정·자동병합·푸시를 수행하지 않았다.

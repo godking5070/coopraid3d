@@ -7,7 +7,8 @@ namespace RaidRogue
     {
         Circle_Radius6,         // 원형 장판 (보스 주변 반경 6m)
         Donut_Inner4_Outer12,   // 도넛 장판 (내경 4m ~ 외경 12m, 보스 발밑 안전지대)
-        FrontCone_120Deg        // 전방 120도 부채꼴 장판
+        Rectangle = 8,
+        FrontCone_120Deg = 2        // 전방 120도 부채꼴 장판
     }
 
     /// <summary>
@@ -27,12 +28,46 @@ namespace RaidRogue
         public Color baseFillColor = new Color(1.0f, 0.12f, 0.12f, 0.32f);
         public Color progressFillColor = new Color(1.0f, 0.18f, 0.10f, 0.55f);
         public Color borderColor = new Color(1.0f, 0.30f, 0.20f, 0.95f);
+        public bool guideOnly, guideLocked, tankGuide;
+        public bool thornStyle;
+
+        public void SetGuideStyle(bool locked)
+        {
+            guideOnly = true; guideLocked = locked;
+            baseFillColor = locked ? new Color(1f, .72f, .12f, .15f) : new Color(1f, .58f, .12f, .07f);
+            progressFillColor = locked ? new Color(1f, .83f, .22f, .18f) : new Color(1f, .65f, .2f, .09f);
+            borderColor = locked ? new Color(1f, .9f, .32f, 1f) : new Color(1f, .63f, .2f, .95f);
+            if (_baseMeshRenderer != null) RefreshColors();
+        }
+        public void SetTankGuideStyle()
+        {
+            guideOnly = true; guideLocked = false; tankGuide = true;
+            baseFillColor = new Color(.08f, .34f, 1f, .13f);
+            progressFillColor = new Color(.12f, .7f, 1f, .42f);
+            borderColor = new Color(.3f, .8f, 1f, 1f);
+            if (_baseMeshRenderer != null) RefreshColors();
+        }
+        public void SetThornStyle()
+        {
+            thornStyle=true;
+            baseFillColor = new Color(.08f,.04f,.12f,.55f);
+            progressFillColor = new Color(.18f,.03f,.2f,.78f);
+            borderColor = new Color(.4f,.12f,.45f,1f);
+            if (_baseMeshRenderer != null) RefreshColors();
+        }
 
         private MeshFilter _baseMeshFilter;
         private MeshRenderer _baseMeshRenderer;
         private MeshFilter _progressMeshFilter;
         private MeshRenderer _progressMeshRenderer;
         private readonly List<LineRenderer> _borderLines = new List<LineRenderer>();
+        private readonly List<Material> _ownedMaterials = new List<Material>();
+        private Mesh _baseMesh, _progressMesh;
+        private Vector3[] _progressVertices;
+        private Color[] _progressColors;
+        private Vector2[] _progressUvs;
+        private int[] _progressTriangles;
+        private int _progressTopology = -1, _progressSegments = -1;
 
         private float _duration = 2.5f;
         private float _elapsed;
@@ -78,6 +113,8 @@ namespace RaidRogue
 
             switch (type)
             {
+                case AoETelegraphType.Rectangle:
+                    innerRadius = customInnerRadius; outerRadius = customOuterRadius; coneAngleDeg = 0; break;
                 case AoETelegraphType.Circle_Radius6:
                     innerRadius = 0f;
                     outerRadius = customOuterRadius > 0f ? customOuterRadius : 6f;
@@ -125,6 +162,9 @@ namespace RaidRogue
 
             switch (telegraphType)
             {
+                case AoETelegraphType.Rectangle:
+                    Vector3 local = transform.InverseTransformPoint(worldPos);
+                    return GuardianNormalState.InRectangle(local.x, local.z, innerRadius, outerRadius);
                 case AoETelegraphType.Circle_Radius6:
                     return dist <= outerRadius;
 
@@ -156,7 +196,7 @@ namespace RaidRogue
             baseObj.transform.localPosition = new Vector3(0f, groundY, 0f);
             _baseMeshFilter = baseObj.AddComponent<MeshFilter>();
             _baseMeshRenderer = baseObj.AddComponent<MeshRenderer>();
-            _baseMeshRenderer.sharedMaterial = CreateTransparentTelegraphMaterial(baseFillColor);
+            _baseMeshRenderer.sharedMaterial = CreateOwnedMaterial(baseFillColor);
             _baseMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             _baseMeshRenderer.receiveShadows = false;
 
@@ -165,7 +205,7 @@ namespace RaidRogue
             progObj.transform.localPosition = new Vector3(0f, groundY + 0.01f, 0f);
             _progressMeshFilter = progObj.AddComponent<MeshFilter>();
             _progressMeshRenderer = progObj.AddComponent<MeshRenderer>();
-            _progressMeshRenderer.sharedMaterial = CreateTransparentTelegraphMaterial(progressFillColor);
+            _progressMeshRenderer.sharedMaterial = CreateOwnedMaterial(progressFillColor);
             _progressMeshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             _progressMeshRenderer.receiveShadows = false;
         }
@@ -175,11 +215,26 @@ namespace RaidRogue
             int segments = telegraphType == AoETelegraphType.FrontCone_120Deg ? 48 : 72;
             float halfAngle = coneAngleDeg * 0.5f;
 
-            Mesh fullMesh = BuildSectorOrRingMesh(innerRadius, outerRadius, -halfAngle, halfAngle, segments, baseFillColor);
-            _baseMeshFilter.sharedMesh = fullMesh;
+            Mesh fullMesh = telegraphType == AoETelegraphType.Rectangle ? RectangleMesh(innerRadius, outerRadius, baseFillColor) : BuildSectorOrRingMesh(innerRadius, outerRadius, -halfAngle, halfAngle, segments, baseFillColor);
+            if (_baseMesh != null) Destroy(_baseMesh);
+            _baseMesh = fullMesh;
+            _baseMeshFilter.sharedMesh = _baseMesh;
 
             BuildBorders(segments, halfAngle);
             UpdateProgressVisual(progress);
+        }
+
+        public void RefreshColors()
+        {
+            if (_baseMeshRenderer != null) _baseMeshRenderer.sharedMaterial.color = baseFillColor;
+            if (_progressMeshRenderer != null) _progressMeshRenderer.sharedMaterial.color = progressFillColor;
+            RebuildVisuals(Mathf.Clamp01(_elapsed / _duration));
+        }
+        public void SetRectangleLength(float length)
+        {
+            if (telegraphType != AoETelegraphType.Rectangle || Mathf.Abs(outerRadius-length) < .001f) return;
+            outerRadius = Mathf.Max(.1f, length);
+            RebuildVisuals(Mathf.Clamp01(_elapsed / _duration));
         }
 
         private void UpdateProgressVisual(float progress)
@@ -193,28 +248,122 @@ namespace RaidRogue
             float halfAngle = coneAngleDeg * 0.5f;
             float currentOuter = Mathf.Lerp(innerRadius, outerRadius, Mathf.Clamp01(progress));
 
-            if (_progressMeshFilter.sharedMesh != null)
+            if (_progressMesh == null)
             {
-                Destroy(_progressMeshFilter.sharedMesh);
+                _progressMesh = new Mesh { name = "TelegraphProgressMesh" };
+                _progressMesh.MarkDynamic();
+                _progressMeshFilter.sharedMesh = _progressMesh;
+                _progressTopology = -1;
             }
 
+            bool rectangle = telegraphType == AoETelegraphType.Rectangle;
+            // The old sector builder returned an empty mesh at zero thickness.
+            // Hide it without discarding the mesh or its reusable buffers.
+            bool visible = rectangle || currentOuter > innerRadius + .001f;
+            _progressMeshRenderer.enabled = visible;
+            if (!visible) return;
+
+            int topology = rectangle ? 0 : innerRadius > .001f ? 2 : 1;
+            bool topologyChanged = EnsureProgressBuffers(topology, segments);
             Color dynamicColor = progressFillColor;
-            if (progress > 0.8f)
+            if (!guideOnly && progress > 0.8f)
             {
                 float pulse = Mathf.PingPong(Time.time * 12f, 1f);
                 dynamicColor = Color.Lerp(progressFillColor, new Color(1f, 0.45f, 0.2f, 0.72f), pulse);
             }
 
-            _progressMeshFilter.sharedMesh = BuildSectorOrRingMesh(
-                innerRadius,
-                currentOuter,
-                -halfAngle,
-                halfAngle,
-                segments,
-                dynamicColor
-            );
+            if (rectangle)
+            {
+                float length = outerRadius * progress;
+                _progressVertices[0] = new Vector3(-innerRadius, 0, 0);
+                _progressVertices[1] = new Vector3(-innerRadius, 0, length);
+                _progressVertices[2] = new Vector3(innerRadius, 0, length);
+                _progressVertices[3] = new Vector3(innerRadius, 0, 0);
+            }
+            else
+            {
+                if (topology == 1)
+                {
+                    _progressVertices[0] = Vector3.zero;
+                    _progressUvs[0] = new Vector2(.5f, .5f);
+                }
+                for (int i = 0; i <= segments; i++)
+                {
+                    float t = (float)i / segments;
+                    float rad = Mathf.Lerp(-halfAngle, halfAngle, t) * Mathf.Deg2Rad;
+                    float sin = Mathf.Sin(rad), cos = Mathf.Cos(rad);
+                    if (topology == 2)
+                    {
+                        int inner = i * 2, outer = inner + 1;
+                        _progressVertices[inner] = new Vector3(sin * innerRadius, 0, cos * innerRadius);
+                        _progressVertices[outer] = new Vector3(sin * currentOuter, 0, cos * currentOuter);
+                        _progressUvs[inner] = new Vector2(t, 0);
+                        _progressUvs[outer] = new Vector2(t, 1);
+                    }
+                    else
+                    {
+                        float x = sin * currentOuter, z = cos * currentOuter;
+                        _progressVertices[i + 1] = new Vector3(x, 0, z);
+                        _progressUvs[i + 1] = new Vector2(x / (currentOuter * 2) + .5f, z / (currentOuter * 2) + .5f);
+                    }
+                }
+            }
+            for (int i = 0; i < _progressColors.Length; i++) _progressColors[i] = dynamicColor;
+            _progressMesh.vertices = _progressVertices;
+            _progressMesh.colors = _progressColors;
+            if (!rectangle) _progressMesh.uv = _progressUvs;
+            if (topologyChanged) _progressMesh.triangles = _progressTriangles;
+            _progressMesh.RecalculateNormals();
+            _progressMesh.RecalculateBounds();
         }
 
+        private bool EnsureProgressBuffers(int topology, int segments)
+        {
+            if (_progressTopology == topology && _progressSegments == segments) return false;
+            _progressTopology = topology;
+            _progressSegments = segments;
+            _progressMesh.Clear(false);
+            int vertexCount = topology == 0 ? 4 : topology == 2 ? (segments + 1) * 2 : segments + 2;
+            _progressVertices = new Vector3[vertexCount];
+            _progressColors = new Color[vertexCount];
+            _progressUvs = topology == 0 ? null : new Vector2[vertexCount];
+            _progressTriangles = new int[topology == 0 ? 6 : segments * (topology == 2 ? 6 : 3)];
+            if (topology == 0)
+            {
+                _progressTriangles[0] = 0; _progressTriangles[1] = 1; _progressTriangles[2] = 2;
+                _progressTriangles[3] = 0; _progressTriangles[4] = 2; _progressTriangles[5] = 3;
+            }
+            else for (int i = 0; i < segments; i++)
+            {
+                if (topology == 2)
+                {
+                    int tri = i * 6, inner = i * 2, outer = inner + 1;
+                    int nextInner = inner + 2, nextOuter = inner + 3;
+                    _progressTriangles[tri] = inner;
+                    _progressTriangles[tri + 1] = outer;
+                    _progressTriangles[tri + 2] = nextOuter;
+                    _progressTriangles[tri + 3] = inner;
+                    _progressTriangles[tri + 4] = nextOuter;
+                    _progressTriangles[tri + 5] = nextInner;
+                }
+                else
+                {
+                    int tri = i * 3;
+                    _progressTriangles[tri] = 0;
+                    _progressTriangles[tri + 1] = i + 1;
+                    _progressTriangles[tri + 2] = i + 2;
+                }
+            }
+            return true;
+        }
+
+        private static Mesh RectangleMesh(float width, float length, Color color)
+        {
+            var mesh = new Mesh { name = "ChargeRectangle" };
+            mesh.vertices = new[] {new Vector3(-width,0,0), new Vector3(-width,0,length),new Vector3(width,0,length),new Vector3(width,0,0)};
+            mesh.triangles = new[] {0,1,2,0,2,3}; mesh.colors = new[] {color,color,color,color};
+            mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
+        }
         public static Mesh BuildSectorOrRingMesh(
             float rInner,
             float rOuter,
@@ -332,12 +481,19 @@ namespace RaidRogue
             {
                 if (lr != null)
                 {
+                    var material = lr.sharedMaterial;
+                    if (material != null && _ownedMaterials.Remove(material)) Destroy(material);
                     Destroy(lr.gameObject);
                 }
             }
             _borderLines.Clear();
 
-            if (telegraphType == AoETelegraphType.Circle_Radius6)
+            if (telegraphType == AoETelegraphType.Rectangle)
+            {
+                float y = groundY + .02f;
+                CreateLineRendererObject("ChargeBorder",new[] {new Vector3(-innerRadius,y,0),new Vector3(-innerRadius,y,outerRadius),new Vector3(innerRadius,y,outerRadius),new Vector3(innerRadius,y,0)},true,borderColor,.11f);
+            }
+            else if (telegraphType == AoETelegraphType.Circle_Radius6)
             {
                 CreateArcBorder("Border_Outer", outerRadius, 0f, 360f, segments, true, borderColor);
             }
@@ -396,8 +552,25 @@ namespace RaidRogue
             lr.numCornerVertices = 4;
             lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             lr.receiveShadows = false;
-            lr.sharedMaterial = CreateTransparentTelegraphMaterial(Color.white);
+            lr.sharedMaterial = CreateOwnedMaterial(Color.white);
             _borderLines.Add(lr);
+        }
+
+        private Material CreateOwnedMaterial(Color color)
+        {
+            var material = CreateTransparentTelegraphMaterial(color);
+            _ownedMaterials.Add(material);
+            return material;
+        }
+
+        private void OnDestroy()
+        {
+            // Keep ownership independent of child renderers, which may already be destroyed.
+            if (_baseMesh != null) Destroy(_baseMesh);
+            if (_progressMesh != null) Destroy(_progressMesh);
+            foreach (var material in _ownedMaterials)
+                if (material != null) Destroy(material);
+            _ownedMaterials.Clear();
         }
 
         public static Material CreateTransparentTelegraphMaterial(Color color)
@@ -425,7 +598,10 @@ namespace RaidRogue
         public Transform followTarget;
         public float radius = 2.6f;
         public bool isStackMarker;
+        public bool isTargetMarker;
         private Transform _overheadArrow;
+        private Mesh _floorMesh;
+        private readonly List<Material> _ownedMaterials = new List<Material>();
 
         public static AttachedPartyMechanicMarker SpawnSpreadMarker(Transform target, float radius, float duration = 0f)
         {
@@ -455,6 +631,16 @@ namespace RaidRogue
             return marker;
         }
 
+        public static AttachedPartyMechanicMarker SpawnTargetMarker(Transform target, float radius)
+        {
+            GameObject go = new GameObject($"TargetMarker_{target.name}");
+            AttachedPartyMechanicMarker marker = go.AddComponent<AttachedPartyMechanicMarker>();
+            marker.isTargetMarker = true;
+            marker.Initialize(target, radius, false,
+                new Color(1f, .12f, .12f, .3f), new Color(1f, .22f, .18f, 1f));
+            return marker;
+        }
+
         private void Initialize(Transform target, float r, bool isStack, Color fillCol, Color borderCol)
         {
             followTarget = target;
@@ -466,13 +652,36 @@ namespace RaidRogue
                 transform.position = new Vector3(followTarget.position.x, 0.08f, followTarget.position.z);
             }
 
+            if (isTargetMarker)
+            {
+                _overheadArrow = new GameObject("OverheadTargetMarker").transform;
+                _overheadArrow.SetParent(transform, false);
+                _overheadArrow.localPosition = new Vector3(0f, 3.2f, 0f);
+                var arrow = _overheadArrow.gameObject.AddComponent<LineRenderer>();
+                arrow.useWorldSpace = false; arrow.loop = true; arrow.positionCount = 4;
+                arrow.SetPositions(new[] { new Vector3(0,.55f,0), new Vector3(.5f,0,0),
+                    new Vector3(0,-.55f,0), new Vector3(-.5f,0,0) });
+                arrow.startWidth = arrow.endWidth = .16f;
+                arrow.startColor = arrow.endColor = new Color(1f,.18f,.12f,1f);
+                arrow.sharedMaterial = CreateOwnedMaterial(Color.white);
+                var label = new GameObject("TargetLabel").AddComponent<TextMesh>();
+                label.transform.SetParent(_overheadArrow, false);
+                label.transform.localPosition = new Vector3(0f,.9f,0);
+                label.transform.localScale = Vector3.one * .1f;
+                label.text = "표적"; label.fontSize = 44; label.fontStyle = FontStyle.Bold;
+                label.anchor = TextAnchor.MiddleCenter; label.alignment = TextAlignment.Center;
+                label.color = new Color(1f,.23f,.17f,1f);
+                return;
+            }
+
             // 바닥 원형 반투명 메쉬
             GameObject meshObj = new GameObject("FloorCircleMesh");
             meshObj.transform.SetParent(transform, false);
             MeshFilter mf = meshObj.AddComponent<MeshFilter>();
             MeshRenderer mr = meshObj.AddComponent<MeshRenderer>();
-            mf.sharedMesh = AoETelegraph.BuildSectorOrRingMesh(0f, radius, 0f, 360f, 48, fillCol);
-            mr.sharedMaterial = AoETelegraph.CreateTransparentTelegraphMaterial(fillCol);
+            _floorMesh = AoETelegraph.BuildSectorOrRingMesh(0f, radius, 0f, 360f, 48, fillCol);
+            mf.sharedMesh = _floorMesh;
+            mr.sharedMaterial = CreateOwnedMaterial(fillCol);
             mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             mr.receiveShadows = false;
 
@@ -493,7 +702,7 @@ namespace RaidRogue
             lr.endWidth = 0.12f;
             lr.startColor = borderCol;
             lr.endColor = borderCol;
-            lr.sharedMaterial = AoETelegraph.CreateTransparentTelegraphMaterial(Color.white);
+            lr.sharedMaterial = CreateOwnedMaterial(Color.white);
 
             // 4인 쉐어(Stack) 마커일 경우: 플레이어 머리 위에 아래를 가리키는 큼직한 노란색 화살표(Chevron) + 안쪽 모임 화살표 생성!
             if (isStack)
@@ -519,7 +728,7 @@ namespace RaidRogue
                 Color yellowBright = new Color(1f, 0.92f, 0.15f, 1f);
                 arrowLr.startColor = yellowBright;
                 arrowLr.endColor = yellowBright;
-                arrowLr.sharedMaterial = AoETelegraph.CreateTransparentTelegraphMaterial(Color.white);
+                arrowLr.sharedMaterial = CreateOwnedMaterial(Color.white);
 
                 // 텍스트 안내
                 GameObject txtObj = new GameObject("StackLabel");
@@ -534,6 +743,22 @@ namespace RaidRogue
                 tm.alignment = TextAlignment.Center;
                 tm.color = yellowBright;
             }
+        }
+
+        private Material CreateOwnedMaterial(Color color)
+        {
+            var material = AoETelegraph.CreateTransparentTelegraphMaterial(color);
+            _ownedMaterials.Add(material);
+            return material;
+        }
+
+        private void OnDestroy()
+        {
+            if (_floorMesh != null) Destroy(_floorMesh);
+            // TextMesh font materials are shared assets and are deliberately not owned here.
+            foreach (var material in _ownedMaterials)
+                if (material != null) Destroy(material);
+            _ownedMaterials.Clear();
         }
 
         private void LateUpdate()

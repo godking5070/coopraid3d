@@ -1,0 +1,40 @@
+요청: astella-skillbar-v1.zip의 공통 버튼 그림으로 교체. 스킬 아이콘은 미정.
+
+가져온 자산: Assets/UI/AstellaSkillbarV1/Sprites (16개 PNG).
+팔라딘 예시 스킬 그림은 가져오거나 직업에 배정하지 않았다.
+공통 남색 배경, 금속 프레임, 작은/넓은 키 배지, 실제 방사형 쿨타임,
+마우스 오버·누름·키보드 포커스·사용 불가 상태를 별도 레이어로 구성한다.
+샘플 쿨타임 PNG 25/50/75는 실시간 쿨타임에 사용하지 않는다.
+
+기존 슬롯 버튼의 위치·크기·스케일·게임 동작·단축키 연결을 유지한다.
+정규 9키의 스킬과 이동기를 공통 스킨으로 교체한다.
+기존 테스트 직업의 추가 슬롯은 해당 직업의 기존 활성 규칙을 유지한다.
+포션과 공유 부활은 별도 소모품/파티 영역의 디자인을 유지한다.
+
+스킬 아이콘 미정 처리:
+이전 임시 일러스트는 'Pending icon binding (hidden)' 아래에 비활성 보관한다.
+HUD의 기존 artwork 데이터 참조는 보존하되 화면에는 '+' 빈 슬롯 표식만 표시한다.
+키 표시와 쿨타임은 아이콘과 독립적으로 실제 값이 표시된다.
+아이콘이 확정되면 Skin의 Masked interior 아래로 승인된 일러스트를 연결하고
+'Icon pending marker'를 숨기면 된다. PNG에 키 글자나 쿨타임 숫자를 그리지 않는다.
+
+편집 도구:
+Tools / RaidRogue / UI / Apply Skillbar v1 (Icons Pending)
+Tools / RaidRogue / UI / Apply All Requested UI Resources
+
+앞서 요청된 플레이어 게이지 v2와 파티 HUD v4도 함께 적용하도록 준비했다.
+원본 Astella 프로젝트의 SampleScene이 편집 모드로 열리고 컴파일/가져오기가 끝나면
+AstellaRequestedUIResourceSwap이 빠진 교체만 한 번 적용한다. Play를 자동 종료하지 않는다.
+사용자의 HP/필살기/아덴/스킬/파티 외부 레이아웃 루트 위치·크기·스케일을 유지한다.
+영향받는 그래픽 속성만 씬의 프리팹 오버라이드와 동기화한다.
+
+적용 완료 확인 파일:
+Logs/RequestedUIResources-player2-party4-skillbar1.applied.txt
+실패 시 확인 파일:
+Logs/RequestedUIResources-error.txt
+기존 디자인 백업:
+Logs/UIRepairBackups/player-party-v2-v4-*, skillbar-v1-*
+
+명령 검사: 16개 PNG의 manifest 치수/RGBA 일치, 예시 아이콘 미가져오기 확인.
+기존 CombatMetrics 검사 및 런타임/에디터 관리 코드 컴파일 통과.
+Unity 적용 및 실제 화면 검증 여부는 위 완료 파일과 에디터 로그로 별도 확인한다.

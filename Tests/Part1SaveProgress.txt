@@ -1,0 +1,15 @@
+Task: Part 1 four-player six-stage save/continue
+Base: a4b8a2bf9f818b9216308d40233d329d5b2cdc46
+Branch: feature/part1-save-continue
+Worktree: C:/coopraid/coopraid3d-part1
+Original Unity folder/branch/dirty files untouched. No Unity or Library in worktree.
+Inspected AGENTS.md, campaign save, stage flow, Iris, network/recovery and reward adapters.
+Existing content has three boss templates only. Stages 4/5/6 will explicitly reuse templates
+1/2/3 with their original stats/patterns; this task does not author new bosses.
+Completed: chapter catalog/six-stage flow, attempt-owned atomic four-coin budget,
+save schema v2/cumulative usage, fresh attempt on disk continue, live reconnect unchanged.
+Fixed: long stable-ID network requests exceeding 240 bytes; delayed final-save timing;
+AI pursuing unavailable revivals; final remote confirmation outbox surviving completed/new runs.
+Final validation: campaign 31,878 assertions; all suites 147,722 assertions; runtime/Editor compile PASS.
+Original 309 baseline hashes unchanged. No worktree Library. No Unity/Steam live execution.
+Review, limitations and original Unity steps: Tests/Part1SaveReview.txt.
