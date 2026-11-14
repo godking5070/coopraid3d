@@ -36,7 +36,7 @@ namespace RaidRogue.Editor
 
         static SceneAutoBuilder()
         {
-            EditorApplication.delayCall += AutoSetupIfNeeded;
+            // Scene creation is explicit. Importing scripts must never replace an artist's UI or scene.
         }
 
         private static void AutoSetupIfNeeded()

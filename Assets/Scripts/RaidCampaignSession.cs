@@ -13,6 +13,12 @@ namespace RaidRogue
         private float _nextCampaignReceipt;
         private bool CampaignRemoteContext => UsesSteam && !IsHostAuthority && (Mode == RaidSessionMode.Client || IsRecovering || Mode == RaidSessionMode.Connecting);
         public bool CampaignRemoteSaveFailed => CampaignRemoteContext && _latestCombatFrame?.campaignSaveFailed == true;
+        // Only the locally controlled authenticated participant earns this account's unlock.
+        // A replicated combat phase alone is insufficient during reconnect/AI control.
+        internal bool RegularCampaignParticipant => UsesSteam && CombatRunning && ControlsReady &&
+            _avatars.TryGetValue(_localId, out var avatar) && !avatar.Automated && !avatar.IsBot &&
+            (avatar.SteamId == RaidSteamRuntime.Instance.UserId || IsHost && avatar.IsLocal) &&
+            (IsHost ? CampaignRuntime.Instance?.RunStarted == true && CampaignRuntime.Instance.Eligible : _latestCombatFrame?.campaignEligible == true);
         public string CampaignExitSaveLabel
         {
             get
@@ -51,9 +57,23 @@ namespace RaidRogue
                 c.Bind(bots[i].transform, botSlots[i]);
             }
             StageManager.Instance.RestoreCampaignHeader(saved);
-            if (!StageManager.Instance.PrepareCampaignEncounter()) { FailSession("체크포인트 준비 실패"); return; }
+            c.RestoreMetrics();
+            // File continuation enters the same walkable lobby as a fresh run. The north
+            // door starts a new attempt at the saved stage; live reconnect uses another path.
+        }
+        internal void ContinueSavedSingleFromDoor()
+        {
+            var campaign = CampaignRuntime.Instance;
+            if (Mode != RaidSessionMode.Single || campaign?.Resume == null ||
+                StageManager.Instance == null || !RaidLobbyRoom.HostAtDoor) return;
+            if (campaign.ResumingSettlement)
+            {
+                if (StageManager.Instance.RestoreSettlementFromLobby()) campaign.RestoreFinished();
+                return;
+            }
+            if (!StageManager.Instance.PrepareCampaignEncounter()) return;
             if (Ending) return;
-            c.RestoreFinished();
+            campaign.RestoreFinished();
             StageManager.Instance.ContinueCampaignCountdown();
         }
         private void RestoreCampaignLobby()

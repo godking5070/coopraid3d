@@ -8,7 +8,8 @@ namespace RaidRogue
     public static class CampaignCatalog
     {
         public const string Prototype = "main", PartOne = "campaign.part1", PartTwo = "campaign.part2";
-        public const string Normal = "normal", ContentRevision = "part1-6-reused-encounters-v2";
+        public const string Normal = "normal", Hard = "hard", ContentRevision = "part1-6-reused-encounters-v2";
+        public static bool SupportedDifficulty(string difficulty) => difficulty == Normal || difficulty == Hard;
         public const int SaveVersion = 2;
         public static int[] Stages(string chapter) => Enumerable.Range(1, StageCount(chapter)).ToArray();
         public static int EncounterTemplate(int stage) => stage >= 1 && stage <= 6 ? (stage - 1) % 3 + 1 : 0;
@@ -32,6 +33,16 @@ namespace RaidRogue
         public string owner;
         public CampaignClearReceipt[] clears = Array.Empty<CampaignClearReceipt>();
         public string[] unlocks = Array.Empty<string>();
+        // Optional personal-v1 field. Old files remain valid; a real Part 1 clear also
+        // proves participation. Checkpoint existence alone never unlocks training.
+        public bool enteredRegularBattle;
+        public bool TrainingUnlocked => enteredRegularBattle || clears.Any(c => c.eligible && c.chapterId == CampaignCatalog.PartOne);
+        public bool RecordBattleParticipation(string authenticatedUser, string chapter, int stage, bool eligible, bool localControl)
+        {
+            if (TrainingUnlocked || owner != authenticatedUser || !CampaignIdentity.Valid(owner) ||
+                chapter != CampaignCatalog.PartOne || stage < 1 || stage > CampaignCatalog.StageCount(chapter) || !eligible || !localControl) return false;
+            enteredRegularBattle = true; return true;
+        }
         // Optional v1 additive field: confirmed remote clear deliveries survive completion and
         // replacement of a run checkpoint. They never grant this host personal progress.
         public CampaignClearReceipt[] deliveries = Array.Empty<CampaignClearReceipt>();
@@ -105,6 +116,31 @@ namespace RaidRogue
         public string BoundaryKey => runId + "/" + chapterId + "/start/" + nextStage + (completed ? "/complete" : "");
     }
 
+    // Durable transaction between an authoritative kill and the next stage boundary.
+    // Unlike a checkpoint, this snapshot may contain unfinished skill/card choices.
+    [Serializable] public sealed class CampaignSettlement
+    {
+        public int version = 1;
+        public string owner, runId, savedUtc;
+        public int stage;
+        public bool presentationComplete;
+        public CampaignCheckpoint run;
+        public CampaignSettlementOffer[] offers = Array.Empty<CampaignSettlementOffer>();
+    }
+    [Serializable] public sealed class CampaignSettlementOffer
+    {
+        public string slotId;
+        public string[] cardIds = Array.Empty<string>();
+    }
+
+    public static class CampaignRecovery
+    {
+        // A confirmed clear can be durable even when the earlier stage-start checkpoint
+        // failed. Continue must use the journal's run and transport in that case.
+        public static CampaignCheckpoint ContinueSource(CampaignSettlement settlement, CampaignCheckpoint checkpoint) =>
+            settlement?.run ?? checkpoint;
+    }
+
     public static class CampaignIdentity
     {
         public static string ForSteam(ulong id) => id == 0 ? "offline-local" : "steam-" + id.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -144,8 +180,76 @@ namespace RaidRogue
 
     public static class CampaignValidation
     {
+        // A durable post-clear journal supersedes an older unsaved stage-start snapshot.
+        // A pending next-stage checkpoint must still finish its own atomic save.
+        public static bool SettlementSupersedesPending(CampaignSettlement settlement, CampaignCheckpoint pending) =>
+            settlement != null && settlement.run != null && pending != null && !pending.completed &&
+            pending.runId == settlement.runId && pending.chapterId == settlement.run.chapterId &&
+            pending.nextStage <= settlement.stage;
+
+        public static string Settlement(CampaignSettlement s, string owner, Func<string, CharacterDefinition> find)
+        {
+            if (s == null || s.version != 1 || s.run == null || !CampaignIdentity.Valid(owner) || s.owner != owner ||
+                s.run.owner != owner || s.runId != s.run.runId || !Guid.TryParseExact(s.runId, "N", out _) ||
+                !DateTimeOffset.TryParse(s.savedUtc, out _) || !CampaignCatalog.Available(s.run.chapterId) ||
+                s.run.version != CampaignCatalog.SaveVersion || s.run.content != CampaignCatalog.ContentRevision ||
+                !CampaignCatalog.SupportedDifficulty(s.run.difficultyId) || s.run.transport != "single" && s.run.transport != "steam" ||
+                s.run.completed || !s.run.eligible || s.stage < 1 || s.stage > CampaignCatalog.StageCount(s.run.chapterId) || s.run.nextStage != s.stage ||
+                s.run.randomState == 0 || s.run.retries < 0 || s.run.attemptsStarted < s.stage + s.run.retries ||
+                s.run.totalRevives < 0 || s.run.totalRevives > (long)s.run.attemptsStarted * IrisRescueState.DefaultCoins ||
+                s.run.party == null || s.run.party.Length != CampaignCatalog.PartySize(s.run.chapterId) ||
+                s.run.party.Any(p => p == null || !Guid.TryParseExact(p.slotId, "N", out _) || p.role < 1 || p.role > 4 ||
+                    p.bot && p.userId != "" || !p.bot && !CampaignIdentity.Valid(p.userId) ||
+                    float.IsNaN(p.healthFraction) || p.healthFraction < 0 || p.healthFraction > 1 ||
+                    p.character == null || p.character.runId != s.runId || p.character.chapterId != s.run.chapterId ||
+                    p.character.clearedStage != s.stage || p.cards == null || p.cards.Any(c => c == null || !CampaignCardIds.Fits(c.id, p.character.jobId) || c.stacks < 1 || c.stacks > 5) ||
+                    find(p.character.jobId) == null || !new CharacterRuntimeState(find(p.character.jobId)).Restore(p.character)) ||
+                s.run.party.Select(p => p.slotId).Distinct().Count() != s.run.party.Length ||
+                s.run.party.Select(p => p.role).Distinct().Count() != s.run.party.Length ||
+                s.run.party.Count(p => !p.bot && p.userId == owner) != 1 ||
+                s.run.processedStages == null || !s.run.processedStages.SequenceEqual(Enumerable.Range(1, s.stage).Select(n => CharacterRewardKey.Stage(s.runId, s.run.chapterId, n))) ||
+                !SettlementRewardsValid(s) ||
+                s.run.receipts == null || s.run.receipts.Any(r => !Receipt(r, r?.userId) || !r.eligible || r.runId != s.runId ||
+                    r.chapterId != s.run.chapterId || r.userId == owner || !s.run.party.Any(p => !p.bot && p.userId == r.userId)) ||
+                s.offers == null || s.offers.Any(o => o == null || !s.run.party.Any(p => p.slotId == o.slotId) ||
+                    o.cardIds == null || o.cardIds.Length != 3 || o.cardIds.Distinct().Count() != 3 || o.cardIds.Any(id => CampaignCardIds.Index(id) < 0)) ||
+                s.offers.Select(o => o.slotId).Distinct().Count() != s.offers.Length ||
+                s.run.clears == null || s.run.clears.Length != s.stage || s.run.failures == null || s.run.failures.Length != s.run.retries)
+                return "Invalid pending-clear settlement";
+            return null;
+        }
+        private static bool SettlementRewardsValid(CampaignSettlement s)
+        {
+            int lastCardStage = CampaignCatalog.StageCount(s.run.chapterId) - 1;
+            int prior = Math.Min(s.stage - 1, lastCardStage);
+            foreach (var reward in s.run.rewards ?? Array.Empty<CampaignRewardRecord>())
+            {
+                var slot = s.run.party.FirstOrDefault(p => p.slotId == reward?.slotId);
+                if (slot == null || slot.bot || reward.offeredIds == null || reward.offeredIds.Length != 3 ||
+                    reward.offeredIds.Distinct().Count() != 3 ||
+                    reward.offeredIds.Any(id => !CampaignCardIds.Fits(id, slot.character.jobId)) ||
+                    !reward.offeredIds.Contains(reward.selectedId) ||
+                    !Enumerable.Range(1, Math.Min(s.stage, lastCardStage)).Any(n =>
+                        reward.key == CharacterRewardKey.Stage(s.runId, s.run.chapterId, n) + "/card/" + slot.slotId)) return false;
+            }
+            if (s.run.rewards == null || s.run.rewards.Select(r => r.key).Distinct().Count() != s.run.rewards.Length) return false;
+            foreach (var slot in s.run.party)
+            {
+                var records = s.run.rewards.Where(r => r.slotId == slot.slotId).ToArray();
+                if (slot.bot) { if (records.Length != 0 || slot.cards.Length != 0) return false; continue; }
+                if (records.Length < prior || records.Length > Math.Min(s.stage, lastCardStage) ||
+                    Enumerable.Range(1, prior).Any(n => !records.Any(r =>
+                        r.key == CharacterRewardKey.Stage(s.runId, s.run.chapterId, n) + "/card/" + slot.slotId)) ||
+                    slot.cards.Sum(c => c.stacks) != records.Length ||
+                    slot.cards.Any(c => records.Count(r => r.selectedId == c.id) != c.stacks)) return false;
+                var current = records.FirstOrDefault(r => r.key == CharacterRewardKey.Stage(s.runId, s.run.chapterId, s.stage) + "/card/" + slot.slotId);
+                var offer = s.offers?.FirstOrDefault(o => o.slotId == slot.slotId);
+                if (current != null && (offer == null || !current.offeredIds.SequenceEqual(offer.cardIds))) return false;
+            }
+            return true;
+        }
         public static bool Receipt(CampaignClearReceipt r, string owner) => r != null && CampaignIdentity.Valid(owner) && r.userId == owner &&
-            Guid.TryParseExact(r.runId, "N", out _) && r.difficultyId == CampaignCatalog.Normal && r.stage > 0 && r.stage <= CampaignCatalog.StageCount(r.chapterId) && r.final == (r.stage == CampaignCatalog.StageCount(r.chapterId));
+            Guid.TryParseExact(r.runId, "N", out _) && CampaignCatalog.SupportedDifficulty(r.difficultyId) && r.stage > 0 && r.stage <= CampaignCatalog.StageCount(r.chapterId) && r.final == (r.stage == CampaignCatalog.StageCount(r.chapterId));
         public static bool Personal(CampaignPersonalProgress p, string owner) => p != null && p.version == 1 && p.owner == owner && CampaignIdentity.Valid(owner) && p.clears != null && p.clears.Length <= 50000 &&
             p.clears.All(c => Receipt(c, owner) && c.eligible) && p.clears.Select(c => c.Key).Distinct().Count() == p.clears.Length && p.unlocks != null && p.unlocks.All(u => u == CampaignCatalog.PartTwo && p.PartOneComplete) &&
             p.deliveries != null && p.deliveries.Length <= 50000 && p.deliveries.All(r => CampaignIdentity.Steam(owner) != 0 && Receipt(r, r?.userId) && r.eligible && CampaignIdentity.Steam(r.userId) != 0 && r.userId != owner) &&
@@ -154,7 +258,7 @@ namespace RaidRogue
         {
             if (c == null || c.version != CampaignCatalog.SaveVersion || c.content != CampaignCatalog.ContentRevision) return "지원하지 않는 저장 버전 또는 콘텐츠입니다";
             if (!CampaignIdentity.Valid(owner) || c.owner != owner || !Guid.TryParseExact(c.runId, "N", out _) || !DateTimeOffset.TryParse(c.savedUtc, out _) ||
-                !CampaignCatalog.Available(c.chapterId) || c.difficultyId != CampaignCatalog.Normal || c.transport != "single" && c.transport != "steam") return "계정/런/챕터/난이도 정보가 유효하지 않습니다";
+                !CampaignCatalog.Available(c.chapterId) || !CampaignCatalog.SupportedDifficulty(c.difficultyId) || c.transport != "single" && c.transport != "steam") return "계정/런/챕터/난이도 정보가 유효하지 않습니다";
             int last = CampaignCatalog.StageCount(c.chapterId);
             if (!c.eligible || c.nextStage < 1 || c.nextStage > last || c.completed && c.nextStage != last || c.retries < 0 || c.retries > 100000 || !Finite(c.runSeconds) || c.runSeconds < 0 || c.randomState == 0 || c.irisCoins != IrisRescueState.DefaultCoins ||
                 c.attemptsStarted < c.nextStage + c.retries || c.attemptsStarted > 1000000 || c.totalRevives < 0 || c.totalRevives > (long)c.attemptsStarted * IrisRescueState.DefaultCoins) return "스테이지 경계 상태가 유효하지 않습니다";

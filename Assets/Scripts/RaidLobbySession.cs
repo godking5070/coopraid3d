@@ -50,7 +50,12 @@ namespace RaidRogue
                 if (Ending) return Status;
                 if (Mode == RaidSessionMode.Connecting || IsRecovering) return Status;
                 if (!Multiplayer) return "";
+                if (BattlePhase == RaidBattlePhase.BossClear) return "보스 처치 연출 중 · 참가자 전원 상호작용으로 건너뛰기";
+                if ((BattlePhase == RaidBattlePhase.Reward || BattlePhase == RaidBattlePhase.Victory) && RaidApproachField.Instance?.PortalActive == true)
+                    return "보상 완료 · 중앙 귀환 포탈에서 상호작용해 대기실로 복귀";
                 if (BattlePhase == RaidBattlePhase.Loading) return $"참가자 로딩 대기 · {Mathf.Max(0, Mathf.CeilToInt(PhaseDeadline - ServerTime))}초 후 시간 초과 처리";
+                if (BattlePhase == RaidBattlePhase.Approach) return "진입로 이동 · 플레이어가 전투장 입구에 들어가면 파티 소환";
+                if (BattlePhase == RaidBattlePhase.Arrival) return "보스 등장 중 · 상호작용 키로 건너뛰기 투표";
                 if (BattlePhase == RaidBattlePhase.Countdown) return $"전투 시작까지 {Mathf.Max(0, Mathf.CeilToInt(CountdownEnd - ServerTime))}초";
                 if (BattlePhase == RaidBattlePhase.Reward) return $"카드 선택 대기 · {Mathf.Max(0, Mathf.CeilToInt(PhaseDeadline - ServerTime))}초 후 미선택자의 첫 카드 자동 선택";
                 if (BattlePhase == RaidBattlePhase.Wiped) return IsHost ? "전멸 · 현재 보스 재도전 또는 메뉴 복귀" : "전멸 · 호스트 재도전 대기";
@@ -84,9 +89,9 @@ namespace RaidRogue
                 }
                 if (built && BattlePhase == RaidBattlePhase.Loading && _roster.AllLoaded && _peers.TrueForAll(p => p.CloseAt == 0))
                 {
-                    if (!StageManager.Instance.BeginPreparedCountdown()) { FailSession("준비 상태가 일치하지 않습니다."); return; }
-                    CountdownEnd = ServerTime + StageManager.Instance.FlowSettings.countdownSeconds; PhaseDeadline = CountdownEnd;
-                    SetBattlePhase(RaidBattlePhase.Countdown, "loading barrier complete");
+                    if (!StageManager.Instance.BeginPreparedApproach()) { FailSession("Approach state mismatch."); return; }
+                    PhaseDeadline = 0;
+                    SetBattlePhase(RaidBattlePhase.Approach, "loading barrier complete; approach opened");
                 }
             }
             else if (built && ControlsReady && _latestCombatFrame != null && _latestCombatFrame.epoch == BattleEpoch && System.Array.TrueForAll(_latestCombatFrame.party, a => _avatars.ContainsKey(a.id)) && Time.unscaledTime >= _nextLoadedAck)

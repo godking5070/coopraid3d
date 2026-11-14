@@ -176,9 +176,9 @@ namespace RaidRogue
                 viewToggleButtonText.text = is2D
                     ? $"[뷰 전환: 현재 2D ({LocalInputBindings.Label("View")})]"
                     : $"[뷰 전환: 현재 3D ({LocalInputBindings.Label("View")})]";
-                viewToggleButtonText.color = is2D
+                RaidUIStyle.Color(viewToggleButtonText, is2D
                     ? new Color(0.35f, 1.0f, 0.88f, 1f)
-                    : new Color(1.0f, 0.94f, 0.45f, 1f);
+                    : new Color(1.0f, 0.94f, 0.45f, 1f));
             }
 
             if (viewToggleSubHintText != null)
@@ -190,9 +190,9 @@ namespace RaidRogue
 
             if (viewToggleButtonBg != null)
             {
-                viewToggleButtonBg.color = is2D
+                RaidUIStyle.Color(viewToggleButtonBg, is2D
                     ? new Color(0.08f, 0.28f, 0.34f, 0.95f)
-                    : new Color(0.14f, 0.18f, 0.30f, 0.95f);
+                    : new Color(0.14f, 0.18f, 0.30f, 0.95f));
             }
         }
 

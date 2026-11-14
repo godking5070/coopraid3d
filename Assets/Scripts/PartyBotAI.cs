@@ -169,6 +169,7 @@ namespace RaidRogue
 
         public void ConfigureBotRoleDynamic(PartyBotRole newRole, Vector3 spawnPos, bool reposition = true)
         {
+            _guardianCounterReady = _guardianDefenseReady = 0;
             Life?.ClearDeadForStagePlacement();
             Potion?.EndRevivalProtection();
             role = newRole;
@@ -383,6 +384,7 @@ namespace RaidRogue
             }
 
             if (CharacterTrainingSession.Active) { UpdateOverheadHpBar(); return; }
+            UpdateGuardianActions();
             switch (role)
             {
                 case PartyBotRole.Tank:
@@ -559,6 +561,7 @@ namespace RaidRogue
 
         private float GetMoveSpeedMultiplier(float baseMult = 1.0f)
         {
+            if (targetBoss != null && targetBoss.GuardianNormal) baseMult = 1;
             float rescueBonus = _rescueSpeedBoostTimer > 0f ? 1.4f : 1.0f;
             return baseMult * rescueBonus;
         }
@@ -569,6 +572,7 @@ namespace RaidRogue
         private bool TryGetPartyMechanicDestinationXZ(out Vector3 mechanicDestXZ)
         {
             mechanicDestXZ = transform.position;
+            if (targetBoss != null && targetBoss.GuardianNormal) return targetBoss.GuardianDestination(transform, (int)role+1, out mechanicDestXZ);
             if (RaidNetworkSession.Multiplayer && targetBoss != null) return PartyAiTactics.PartyMechanic(transform, (int)role + 1, targetBoss, out mechanicDestXZ);
             if (targetBoss == null)
             {
@@ -905,7 +909,7 @@ namespace RaidRogue
                 if ((human != null ? human.HpRatio : bot.HpRatio) <= 0.25f) { emergency = true; break; }
             }
             if (mechanic || emergency) Resurrection?.Cancel();
-            CheckAndTriggerHealerRescue(safePos);
+            if (!targetBoss.GuardianNormal) CheckAndTriggerHealerRescue(safePos);
             bool holdingOrApproaching = !mechanic && !emergency && TryHandleResurrection(hazard);
             if (!holdingOrApproaching)
                 MoveTowardsXZ(safePos, BossLookPointXZ(), GetMoveSpeedMultiplier(mechanic ? 1.3f : 1f));
@@ -1148,7 +1152,7 @@ namespace RaidRogue
                 float step = Mathf.Min(distXZ, moveSpeed * speedMultiplier * Time.deltaTime);
                 transform.position = new Vector3(
                     currentPos.x + moveDir.x * step,
-                    destinationWorld.y,
+                    currentPos.y,
                     currentPos.z + moveDir.z * step
                 );
 

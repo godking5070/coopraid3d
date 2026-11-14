@@ -71,10 +71,25 @@ namespace RaidRogue
         }
 
         public Camera UnityCamera => _cam != null ? _cam : (_cam = GetComponent<Camera>());
+        private bool _arrivalCamera;
+        private Vector3 _arrivalPosition, _arrivalLookAt, _arrivalCurrentPosition;
+        public void SetArrivalCamera(Vector3 position, Vector3 lookAt)
+        {
+            if ((lookAt - position).sqrMagnitude < .01f) lookAt = position + Vector3.forward;
+            if (_arrivalCamera && _arrivalPosition == position && _arrivalLookAt == lookAt) return;
+            ReleaseOrbit();
+            _arrivalCamera = true; _arrivalPosition = position; _arrivalLookAt = lookAt;
+            _arrivalCurrentPosition = position + new Vector3(0, 2, -4);
+        }
+        public void ClearArrivalCamera()
+        {
+            if (!_arrivalCamera) return;
+            _arrivalCamera = false; SnapToTargetImmediate();
+        }
         public bool Is2DMode => currentViewMode == CameraViewMode.View2D_TopDown;
         public bool IsOrbitDragging => _drag.Active;
         public float MovementYaw => (float)CameraControlMath.MovementYaw(Is2DMode, yawAngle);
-        private float ArenaRadius => _player != null ? _player.arenaBoundaryRadius : 18f;
+        private float ArenaRadius => RaidApproachField.Instance?.Walking == true ? RaidApproachField.Instance.FieldRadius : _player != null ? _player.arenaBoundaryRadius : 18f;
         public float DefaultOrthoSize => (float)CameraControlMath.ArenaOrthoSize(ArenaRadius, UnityCamera.aspect, arenaPadding);
 
         private void Awake()
@@ -129,6 +144,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (_arrivalCamera) { ReleaseOrbit(); return; }
             bool blocked = LocalGameplayInput.Blocked;
             bool overUI = !_drag.Active && LocalGameplayInput.PointerOverUI(LocalGameplayInput.MousePosition);
             ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape);
@@ -170,6 +186,14 @@ namespace RaidRogue
 
         private void LateUpdate()
         {
+            if (_arrivalCamera)
+            {
+                UnityCamera.orthographic = false;
+                _arrivalCurrentPosition = Vector3.Lerp(_arrivalCurrentPosition, _arrivalPosition, 1f - Mathf.Exp(-1.8f * Time.unscaledDeltaTime));
+                transform.position = _arrivalCurrentPosition;
+                transform.rotation = Quaternion.LookRotation(_arrivalLookAt - _arrivalCurrentPosition);
+                return;
+            }
             if (_spectatorTarget != null && (_player == null || !_player.IsDead || !CombatRange.LivingPartyMember(_spectatorTarget) || StageManager.CombatSuspended))
                 Spectate(null);
             // A menu can open after this camera's Update, including on a UI click.
@@ -200,12 +224,13 @@ namespace RaidRogue
         {
             var focusTarget = _spectatorTarget != null ? _spectatorTarget : target;
             Vector3 playerPosition = focusTarget != null ? focusTarget.position : Vector3.zero;
+            if (RaidApproachField.Instance?.Walking == true) return new Vector3(playerPosition.x, 0, playerPosition.z);
             if (!Is2DMode) return playerPosition + targetOffset;
             float visibleZoom = Mathf.InverseLerp(DefaultOrthoSize, minimumOrthoSize, _orthoSize);
             float follow = (float)CameraControlMath.FollowBlend(visibleZoom);
             return ClampTopDownFocus(new Vector3(playerPosition.x * follow, 0, playerPosition.z * follow));
         }
-        private Vector3 ClampTopDownFocus(Vector3 point) => new Vector3(
+        private Vector3 ClampTopDownFocus(Vector3 point) => RaidApproachField.Instance?.Walking == true ? point : new Vector3(
             (float)CameraControlMath.ClampFocusAxis(point.x, ArenaRadius + arenaPadding, _orthoSize * UnityCamera.aspect), 0,
             (float)CameraControlMath.ClampFocusAxis(point.z, ArenaRadius + arenaPadding, _orthoSize));
         private void ApplyCameraPose()
@@ -298,7 +323,7 @@ namespace RaidRogue
         }
         private void OnApplicationPause(bool paused) { if (paused) ReleaseOrbit(false); }
         private void OnDisable() { ReleaseOrbit(); SaveLocalPreferences(); }
-        private void OnDestroy() { ReleaseOrbit(); if (LocalCamera == this) LocalCamera = null; }
+        private void OnDestroy() { ClearArrivalCamera(); ReleaseOrbit(); if (LocalCamera == this) LocalCamera = null; }
         private void OnApplicationQuit() { ReleaseOrbit(); SaveLocalPreferences(); }
 
         private static void ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape)

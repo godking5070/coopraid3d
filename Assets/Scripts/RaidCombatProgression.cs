@@ -7,6 +7,9 @@ namespace RaidRogue
     public partial class StageManager
     {
         private RaidBattlePhase? _presentedNetworkPhase;
+        private int _replicaDefeatEpoch = -1;
+        private int _replicaArrivalRevealEpoch = -1;
+        private int _replicaDefeatCleanedEpoch = -1;
         public float NetworkRunTime => _totalPlayTime;
         public bool PrepareNetworkEncounter(int stage, bool retry)
         { return RaidCombatAuthority.Host && PrepareEncounter(stage, retry, !_hasStartedEncounter); }
@@ -19,8 +22,67 @@ namespace RaidRogue
         {
             _totalPlayTime = frame.runTime;
             RunId=frame.runId;
-            currentStage = frame.stage; IsWiped = frame.phase == RaidBattlePhase.Wiped; IsPreparing = frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Loading;
+            currentStage = frame.stage; IsWiped = frame.phase == RaidBattlePhase.Wiped; IsPreparing = frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Loading || frame.phase == RaidBattlePhase.Approach || frame.phase == RaidBattlePhase.Arrival;
             _isAllStagesCleared = frame.phase == RaidBattlePhase.Victory; _isStageTransitioning = frame.phase == RaidBattlePhase.Reward || frame.phase == RaidBattlePhase.BossClear;
+            var approach = RaidApproachField.Instance;
+            if (RaidCombatAuthority.Replica && approach != null)
+            {
+                if (frame.phase != RaidBattlePhase.Lobby && frame.phase != RaidBattlePhase.Closed)
+                    GetComponent<RaidLobbyRoom>()?.HideForDeparture();
+                if (frame.phase == RaidBattlePhase.Approach) approach.EnterApproach();
+                else if (frame.phase == RaidBattlePhase.Loading) { approach.Show(true); approach.SetBossVisible(false); }
+                else if (frame.phase == RaidBattlePhase.Arrival || frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Combat)
+                { approach.Show(true); approach.SealField(false); }
+                else if (frame.phase == RaidBattlePhase.Lobby || frame.phase == RaidBattlePhase.Closed) approach.Show(false);
+                if (frame.phase == RaidBattlePhase.Approach || frame.phase == RaidBattlePhase.Arrival || frame.phase == RaidBattlePhase.Countdown || frame.phase == RaidBattlePhase.Combat)
+                    approach.SetBossVisible(frame.bossVisible);
+                if (frame.phase == RaidBattlePhase.BossClear || frame.phase == RaidBattlePhase.Reward || frame.phase == RaidBattlePhase.Victory)
+                { approach.Show(true); approach.SealField(false); approach.SetBossVisible(frame.bossVisible); }
+                approach.SetPortalActive(frame.portalActive);
+                approach.SetBossCombatReady(frame.phase == RaidBattlePhase.Combat);
+            }
+            if (frame.phase == RaidBattlePhase.Arrival)
+            {
+                var layout = approach?.Arrival(currentStage);
+                if (RaidCombatAuthority.Replica && frame.bossVisible && _replicaArrivalRevealEpoch != frame.epoch)
+                {
+                    _replicaArrivalRevealEpoch = frame.epoch;
+                    if (layout?.presentationPrefab?.HasBossAnimationTrack != true)
+                        PlayConfiguredBossTrigger(layout?.arrivalAnimationTrigger);
+                }
+                bool playing = false;
+                bool presentationFinished = false;
+                if (RaidCombatAuthority.Replica && layout != null)
+                {
+                    double remaining = frame.phaseDeadline - RaidCombatAuthority.ServerTime;
+                    if (remaining > layout.afterCutsceneSeconds + .05f)
+                        playing = BeginStagePresentation(frame.phase, frame.epoch,
+                            layout.Duration + layout.afterCutsceneSeconds - remaining);
+                    else { presentationFinished = layout.presentationPrefab != null && layout.presentationPrefab.ConfigurationError == null; EndStagePresentation(); }
+                }
+                if (presentationFinished) QuarterViewCamera.LocalCamera?.ClearArrivalCamera();
+                else if (!playing && layout != null) QuarterViewCamera.LocalCamera?.SetArrivalCamera(layout.cameraPosition, layout.cameraLookAt);
+            }
+            else if (frame.phase == RaidBattlePhase.BossClear)
+            {
+                var layout = approach?.Defeat(currentStage);
+                bool playing = RaidCombatAuthority.Replica && layout != null &&
+                    BeginStagePresentation(frame.phase, frame.epoch,
+                        layout.Duration - (frame.phaseDeadline - RaidCombatAuthority.ServerTime));
+                if (RaidCombatAuthority.Replica && _replicaDefeatEpoch != frame.epoch)
+                {
+                    _replicaDefeatEpoch = frame.epoch;
+                    bool animated = playing && _activeCutscene != null && _activeCutscene.HasBossAnimationTrack;
+                    if (!animated) animated = PlayConfiguredBossTrigger(layout?.deathAnimationTrigger);
+                    if (!animated) boss?.PlayBossCollapseAnimation();
+                }
+                if (!playing && layout != null) QuarterViewCamera.LocalCamera?.SetArrivalCamera(layout.cameraPosition, layout.cameraLookAt);
+            }
+            else { if (RaidCombatAuthority.Replica) EndStagePresentation(); QuarterViewCamera.LocalCamera?.ClearArrivalCamera(); }
+            if (RaidCombatAuthority.Replica && !frame.bossVisible &&
+                (frame.phase == RaidBattlePhase.Reward || frame.phase == RaidBattlePhase.Victory) &&
+                _replicaDefeatCleanedEpoch != frame.epoch)
+            { _replicaDefeatCleanedEpoch = frame.epoch; TargetingManager.Instance?.ClearTarget(); }
             UpdateStageHeaderUI();
         }
         public void PresentNetworkPhase(RaidBattlePhase phase, int seconds)
@@ -30,6 +92,8 @@ namespace RaidRogue
             if (phase == RaidBattlePhase.BossClear && bossClearBannerText != null) bossClearBannerText.text = $"STAGE {currentStage} BOSS CLEAR!";
             if (phase == RaidBattlePhase.Loading) { _wipeUI.ShowNetworkLoading(); _presentedNetworkPhase = phase; return; }
             if (phase == RaidBattlePhase.Countdown) { _wipeUI.ShowCountdown(Mathf.Max(1, seconds)); _presentedNetworkPhase = phase; return; }
+            if (phase == RaidBattlePhase.Approach) { _wipeUI.Hide(); _presentedNetworkPhase = phase; return; }
+            if (phase == RaidBattlePhase.Arrival) { _wipeUI.Hide(); _presentedNetworkPhase = phase; return; }
             if (_presentedNetworkPhase == phase) return;
             _presentedNetworkPhase = phase; _wipeUI.Hide(); GetComponent<CombatMetricsUI>()?.CloseResults();
             if (phase == RaidBattlePhase.Wiped) _wipeUI.ShowWipe();
@@ -68,6 +132,12 @@ namespace RaidRogue
             }
             if (modalHeaderText != null) modalHeaderText.text = "보스 토벌 보상 · 나의 카드 선택";
             _isSelectionOpen = true; if (cardSelectionModalRoot != null) cardSelectionModalRoot.SetActive(true);
+        }
+        public void ShowRestoredSingleOffer(int[] ids, Action chosen)
+        {
+            if (ids == null || ids.Length != 3) return;
+            _onCardSelectedCallback = chosen;
+            ShowNetworkOffer(ids, -2);
         }
         public void CloseNetworkOffer()
         {

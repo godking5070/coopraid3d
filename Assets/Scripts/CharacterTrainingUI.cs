@@ -26,20 +26,22 @@ namespace RaidRogue
             var canvas = FindFirstObjectByType<SkillHotbarUI>()?.GetComponentInParent<Canvas>();
             if (canvas == null) return;
             _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _root = Rect(canvas.transform, "Character training panel");
+            if(RaidUIView.Attach(this,"training",canvas.transform)){BindAuthoredTraining();Rebuild();return;}
+            var viewParent=RaidUIView.Begin(this,"training",canvas.transform);
+            _root = Rect(viewParent, "Character training panel");
             _root.anchorMin = new Vector2(1, .24f); _root.anchorMax = Vector2.one; _root.pivot = Vector2.one;
             // Leave the existing view/settings controls above the training panel.
             _root.offsetMin = new Vector2(-464, 8); _root.offsetMax = new Vector2(-12, -228);
             _root.gameObject.AddComponent<Image>().color = new Color(.025f, .045f, .07f, .97f);
             var column = _root.gameObject.AddComponent<VerticalLayoutGroup>(); column.padding = new RectOffset(10, 10, 8, 8); column.spacing = 5; column.childControlHeight = column.childControlWidth = true; column.childForceExpandHeight = false;
             var header = Row(_root);
-            Button(header, "훈련장 패널 접기 / 펼치기", () => { _folded = !_folded; _body.SetActive(!_folded); _root.anchorMin = new Vector2(1, _folded ? 1 : .24f); _root.offsetMin = new Vector2(-464, _folded ? -282 : 8); });
-            Button(header, "메인 메뉴", () => { _session.StopAttacks(); RaidNetworkSession.Instance.Disconnect(); });
+            StaticButton(header, "훈련장 패널 접기 / 펼치기", () => { _folded = !_folded; _body.SetActive(!_folded); RaidUILayout.Fold(_root,_folded); });
+            StaticButton(header, "메인 메뉴", () => { _session.StopAttacks(); RaidNetworkSession.Instance.Disconnect(); });
             _body = Rect(_root, "Training body").gameObject;
             var bodyLayout = _body.AddComponent<VerticalLayoutGroup>(); bodyLayout.spacing = 6; bodyLayout.childControlHeight = bodyLayout.childControlWidth = true; bodyLayout.childForceExpandHeight = false;
             _body.AddComponent<LayoutElement>().flexibleHeight = 1;
             var tabs = Row(_body.transform);
-            Button(tabs, "구성", () => { _tab = 0; Rebuild(); }); Button(tabs, "시험 / 초기화", () => { _tab = 1; Rebuild(); }); Button(tabs, "실제 수치 / 기록", () => { _tab = 2; Rebuild(); });
+            StaticButton(tabs, "구성", () => { _tab = 0; Rebuild(); }); StaticButton(tabs, "시험 / 초기화", () => { _tab = 1; Rebuild(); }); StaticButton(tabs, "실제 수치 / 기록", () => { _tab = 2; Rebuild(); });
             _message = Label(_body.transform, "", 16, 50);
             var scrollRoot = Rect(_body.transform, "Scroll"); scrollRoot.gameObject.AddComponent<LayoutElement>().flexibleHeight = 1;
             scrollRoot.gameObject.AddComponent<Image>().color = new Color(.05f, .07f, .09f);
@@ -49,6 +51,18 @@ namespace RaidRogue
             var layout = _content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.padding = new RectOffset(6, 6, 6, 12); layout.childControlHeight = layout.childControlWidth = true; layout.childForceExpandHeight = false;
             _content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize; scroll.content = _content;
             Rebuild();
+        }
+        private Button StaticButton(Transform parent,string caption,UnityEngine.Events.UnityAction action)
+        {
+            var button=Button(parent,caption,action);button.onClick.RemoveAllListeners();return RaidUIView.Bind(this,caption,action,button);
+        }
+        private void BindAuthoredTraining()
+        {
+            RaidUIView.Bind(this,"훈련장 패널 접기 / 펼치기",() => { _folded = !_folded; _body.SetActive(!_folded); RaidUILayout.Fold(_root,_folded); });
+            RaidUIView.Bind(this,"메인 메뉴",() => { _session.StopAttacks(); RaidNetworkSession.Instance.Disconnect(); });
+            RaidUIView.Bind(this,"구성",() => { _tab = 0; Rebuild(); });
+            RaidUIView.Bind(this,"시험 / 초기화",() => { _tab = 1; Rebuild(); });
+            RaidUIView.Bind(this,"실제 수치 / 기록",() => { _tab = 2; Rebuild(); });
         }
         private void Rebuild()
         {
@@ -212,12 +226,21 @@ namespace RaidRogue
         }
         private Text Label(Transform parent, string value, int size, float height = -1)
         {
+            var template=RaidUIRepeatedItem.Create(RaidUIPresentation.Settings?.formTextTemplate,parent);
+            if(template!=null && template.label!=null){template.label.text=value;return template.label;}
             var r = Rect(parent, "Text"); var t = r.gameObject.AddComponent<Text>(); t.font = _font; t.fontSize = size; t.color = Color.white; t.text = value; t.raycastTarget = false; t.supportRichText = false; t.alignment = TextAnchor.MiddleLeft;
             if (height > 0) r.gameObject.AddComponent<LayoutElement>().preferredHeight = height;
             return t;
         }
         private Button Button(Transform parent, string text, UnityEngine.Events.UnityAction action)
         {
+            var template=RaidUIRepeatedItem.Create(RaidUIPresentation.Settings?.formButtonTemplate,parent);
+            if(template!=null && template.button!=null)
+            {
+                if(template.label!=null)template.label.text=text;
+                template.button.onClick.AddListener(()=>{LocalGameplayInput.SuppressThisFrame();LocalInputBindings.QuarantineHeld();EventSystem.current?.SetSelectedGameObject(null);action();});
+                return template.button;
+            }
             var r = Rect(parent, text); r.gameObject.AddComponent<LayoutElement>().minHeight = 38;
             var image = r.gameObject.AddComponent<Image>(); image.color = new Color(.12f, .25f, .32f);
             var button = r.gameObject.AddComponent<Button>(); button.targetGraphic = image; button.navigation = new Navigation { mode = Navigation.Mode.None };

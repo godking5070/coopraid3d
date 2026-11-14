@@ -106,6 +106,14 @@ namespace RaidRogue
                 RefreshSceneReferences();
             }
 
+            if (!CharacterTrainingSession.Active && StageManager.Instance != null &&
+                (RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.BattlePhase : StageManager.Instance.Progress.Phase) == RaidBattlePhase.Arrival)
+            {
+                if (currentTarget != null) ClearTarget();
+                UpdateVisualIndicators(); UpdateTargetInfoHUD();
+                return;
+            }
+
             ValidateCurrentTarget();
             if (!LocalGameplayInput.Blocked)
             {
@@ -165,6 +173,11 @@ namespace RaidRogue
         private void ValidateCurrentTarget()
         {
             if (currentTarget == null) return;
+            if (currentTarget.GetComponent<BossController>() != null && !BossCanBeTargeted())
+            {
+                ClearTarget();
+                return;
+            }
 
             BossAddMinion add = currentTarget.GetComponent<BossAddMinion>();
             if (add != null && add.isDead)
@@ -183,7 +196,7 @@ namespace RaidRogue
                 if (CombatRange.LivingEnemy(enemy)) return enemy;
             }
             // Preserve Step 9's no-target / friendly-target boss fallback.
-            return fallbackBoss != null && CombatRange.LivingEnemy(fallbackBoss.transform) ? fallbackBoss.transform : null;
+            return fallbackBoss != null && BossCanBeTargeted() && CombatRange.LivingEnemy(fallbackBoss.transform) ? fallbackBoss.transform : null;
         }
 
         public void AutoSwitchTargetAfterEnemyDeath()
@@ -238,9 +251,13 @@ namespace RaidRogue
 
             Transform resolved = ResolveUnitRoot(newTarget);
             if (resolved == null) return;
+            if (resolved.GetComponent<BossController>() != null && !BossCanBeTargeted()) return;
 
             currentTarget = resolved;
         }
+
+        private static bool BossCanBeTargeted() =>
+            RaidApproachField.Instance?.Showing != true || RaidApproachField.Instance.BossVisible;
 
         public void ClearTarget()
         {
@@ -1012,6 +1029,20 @@ namespace RaidRogue
         {
             Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
+
+            // RaidUIRoot restores these explicit references from the authored HUD before Start.
+            // Keep the artist's layout instead of deleting it and building a default copy.
+            if (_targetHudRoot != null && _targetHudRoot.GetComponentInParent<Canvas>() == canvas &&
+                _floatingMarkerRect != null && _floatingMarkerRect.GetComponentInParent<Canvas>() == canvas &&
+                _targetHudOutline != null && _targetNameText != null && _targetHpFill != null &&
+                _targetHpText != null && _targetStatusText != null && _totBoxRoot != null &&
+                _totButton != null && _totNameText != null && _totHpText != null &&
+                _floatingMarkerArrowText != null && _floatingMarkerLabelText != null)
+            {
+                _totButton.onClick.RemoveListener(SwapToTargetOfTarget);
+                _totButton.onClick.AddListener(SwapToTargetOfTarget);
+                return;
+            }
 
             Transform oldMarker = canvas.transform.Find("TargetFloatingArrowUI");
             if (oldMarker != null) DestroyImmediate(oldMarker.gameObject);

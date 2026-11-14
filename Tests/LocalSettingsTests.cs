@@ -22,6 +22,7 @@ internal static class LocalSettingsTests
     private static void BindingTests()
     {
         var b = LocalBindingRules.Defaults(); ValidBindings(b);
+        Check(b[Row(b,"Interact")].primary == "g", "lobby interaction has a distinct default key");
         Check(LocalBindingRules.Conflicts(b, Row(b,"Skill1"), 0, "digit1").Count == 0, "combat and choices share context safely");
         Check(LocalBindingRules.Conflicts(b, Row(b,"Settings"), 0, "digit1").Count == 2, "global key collides with both contexts");
         string before = Fingerprint(b);
@@ -61,12 +62,13 @@ internal static class LocalSettingsTests
     }
     private static LocalKeyBinding[] OldDefaults()
     {
-        var old=LocalBindingRules.Defaults().Where(b=>Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate"},b.action)<0).ToArray();
+        var old=LocalBindingRules.Defaults().Where(b=>Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate","Interact"},b.action)<0).ToArray();
         old[Row(old,"Potion")].primary="q";old[Row(old,"Skill4")].primary="digit4";old[Row(old,"Skill4")].secondary="numpad4";old[Row(old,"View")].primary="v";return old;
     }
     private static void MigrationTests()
     {
         var data=new LocalSettingsData{version=1,bindings=OldDefaults()};data.Normalize();
+        Check(data.bindings[Row(data.bindings,"Interact")].primary == "g", "old settings gain interaction without losing migrated bindings");
         Check(data.bindings[Row(data.bindings,"Potion")].primary=="x"&&data.bindings[Row(data.bindings,"Skill4")].primary=="q"&&data.bindings[Row(data.bindings,"View")].primary=="f12","factory Q potion/X and V view migration");
         ValidBindings(data.bindings);string first=Fingerprint(data.bindings);data.Normalize();Check(Fingerprint(data.bindings)==first&&data.version==2,"migration is versioned and idempotent");
         var custom=OldDefaults();custom[Row(custom,"Skill1")].primary="x";

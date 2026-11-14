@@ -19,6 +19,7 @@ namespace RaidRogue
         public RaidCombatEnemy CaptureNetworkCombat() => new RaidCombatEnemy
         {
             brandEnd=GetComponent<CombatStatusEffects>()?.BrandEnd??0, stagger=GetComponent<CombatCounterTarget>()?.Stagger??0, counterWindowEnd=GetComponent<CombatCounterTarget>()?.WindowEnd??0,
+            guardianPattern=(int)GuardianPatternNow, guardianStep=(int)GuardianStepNow, guardianStarted=_guardianStarted, guardianEnds=_guardianEnds, guardianStagger=_guardianStagger,
             id = -1, stage = currentStageNumber, phase = (int)currentPhase, state = (int)fsmState,
             target = RaidCombatAuthority.Id(aggroTarget), name = name, x = transform.position.x, y = transform.position.y, z = transform.position.z,
             yaw = transform.eulerAngles.y, hp = currentHp, maxHp = maxHp, radius = CombatRadius, dead = currentHp <= 0,
@@ -28,9 +29,11 @@ namespace RaidRogue
         public void ApplyNetworkCombat(RaidCombatEnemy state, float sampledTime)
         {
             if (state == null) return;
+            if (currentStageNumber != state.stage) SetupBossForStage(state.stage);
             CombatCounterTarget.Ensure(transform).Restore(state.stagger,state.counterWindowEnd);
             CombatStatusEffects.Ensure(gameObject).RestoreBrand(state.brandEnd);
-            if (currentStageNumber != state.stage) SetupBossForStage(state.stage);
+            _guardianReplicaPattern=(GuardianPattern)state.guardianPattern; _guardianReplicaStep=(GuardianStep)state.guardianStep;
+            _guardianStarted=state.guardianStarted; _guardianEnds=state.guardianEnds; _guardianStagger=state.guardianStagger;
             bool collapse = state.dead && !IsBossDefeatedCollapse;
             currentHp = state.hp; maxHp = state.maxHp; currentPhase = (BossPhase)state.phase; fsmState = (BossFSMState)state.state;
             _replicaPosition = new Vector3(state.x, state.y, state.z); _replicaYaw = state.yaw;
@@ -164,7 +167,7 @@ namespace RaidRogue
             {
                 if (ServerTime >= state.end + .15f) continue;
                 live.Add(state.id); Transform target = CombatTarget(state.target);
-                if (state.kind <= 2 || state.kind == 6)
+                if (state.kind <= 2 || state.kind == 6 || state.kind == 8)
                 {
                     if (!_replicaTelegraphs.TryGetValue(state.id, out var aoe) || aoe == null)
                     {

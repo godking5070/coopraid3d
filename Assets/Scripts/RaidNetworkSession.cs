@@ -86,12 +86,21 @@ namespace RaidRogue
         }
         public void EnterTraining()
         {
+            if (CampaignRuntime.Instance?.TrainingUnlocked != true)
+            { Status = "훈련소는 정규 전투에 한 번 참여하면 해금됩니다."; return; }
             if (Ending || Mode != RaidSessionMode.Menu || _player == null || StageManager.Instance == null ||
                 RaidSteamRuntime.Instance?.Busy == true || GetComponent<CharacterTrainingSession>() != null) return;
             // Only a fresh main menu can enter. No regular run is started, saved, or rewarded.
             Mode = RaidSessionMode.Training; MenuOpen = false;
             RoleSelectionManager.Instance?.CloseRoleSelectionModal();
             gameObject.AddComponent<CharacterTrainingSession>();
+        }
+        public void EnterTrainingFromLobby()
+        {
+            if (Mode != RaidSessionMode.Single || StageManager.Instance?.Progress.Phase != RaidBattlePhase.Lobby ||
+                CampaignRuntime.Instance?.Resume != null || !RaidLobbyRoom.Active) return;
+            Mode = RaidSessionMode.Menu;
+            EnterTraining(); // Reuse the existing isolated practice session and unlock check.
         }
         public void SinglePlay()
         {

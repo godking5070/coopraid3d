@@ -56,16 +56,41 @@ internal static class Part1SaveTests
             for (int stage = start; stage <= 6; stage++)
             {
                 int rev = flow.Revision;
-                check(flow.TryCountdown(rev) && flow.TryStart(rev), "boundary goes through countdown");
+                check(flow.TryApproach(rev) && flow.TryArrival(rev) && flow.TryCountdown(rev) && flow.TryStart(rev), "boundary goes through arrival and countdown");
                 check(flow.Resolve(rev, false, 0, 4) == EncounterOutcome.Wiped, "existing wipe policy");
                 check(flow.TryPrepare(stage, 6, true), "same-stage retry"); rev = flow.Revision;
-                check(flow.TryCountdown(rev) && flow.TryStart(rev), "retry countdown");
+                check(flow.TryApproach(rev) && flow.TryArrival(rev) && flow.TryCountdown(rev) && flow.TryStart(rev), "retry arrival and countdown");
                 check(flow.Resolve(rev, true, 0, 4) == EncounterOutcome.Cleared, "simultaneous boss death and wipe clears");
                 check(flow.Resolve(rev, true, 4, 4) == EncounterOutcome.None, "duplicate clear ignored");
                 check(flow.FinishClear(rev, 6), "confirmed clear completes presentation");
                 if (stage < 6) check(flow.Phase == RaidBattlePhase.Reward && flow.TryPrepare(stage + 1, 6, false), "stages1-5 reward then next boundary");
                 else check(flow.Phase == RaidBattlePhase.Victory && !flow.TryPrepare(7, 6, false) && !flow.FinishClear(rev, 6), "stage6 terminal, no forced cards or stage7");
             }
+        }
+        var portalFlow = new RaidRunFlow();
+        check(portalFlow.TryPrepare(1, 6, false), "new raid starts stage one");
+        int portalRevision = portalFlow.Revision;
+        check(portalFlow.TryApproach(portalRevision) && portalFlow.TryArrival(portalRevision) &&
+            portalFlow.TryCountdown(portalRevision) && portalFlow.TryStart(portalRevision), "walkway and arrival precede portal test combat");
+        check(portalFlow.Resolve(portalRevision, true, 1, 4) == EncounterOutcome.Cleared &&
+            portalFlow.FinishClear(portalRevision, 6), "kill settles after presentation");
+        check(portalFlow.TryIntermission(portalRevision, 6) && !portalFlow.TryIntermission(portalRevision, 6),
+            "portal returns once to the walkable lobby");
+        check(portalFlow.TryPrepare(2, 6, false) && !portalFlow.TryPrepare(2, 6, false),
+            "north door launches exactly the next stage");
+        for (int cleared = 1; cleared <= 6; cleared++)
+        {
+            var pendingFlow = new RaidRunFlow();
+            check(pendingFlow.TryRestoreSettlement(cleared, 6) && pendingFlow.Phase == RaidBattlePhase.Reward &&
+                !pendingFlow.TryRestoreSettlement(cleared, 6) && !pendingFlow.TryResume(cleared, 6),
+                "disk pending clear resumes rewards once, without replaying stage " + cleared);
+            if (cleared < 6)
+                check(pendingFlow.TryIntermission(pendingFlow.Revision, 6) && pendingFlow.TryPrepare(cleared + 1, 6, false),
+                    "settled reward resumes at exactly the next stage " + cleared);
+            else
+                check(pendingFlow.FinishFinalRewards(pendingFlow.Revision, 6) &&
+                    !pendingFlow.TryPrepare(7, 6, false) && pendingFlow.ReturnToLobby(),
+                    "final pending reward completes once and cannot create stage seven");
         }
     }
 }

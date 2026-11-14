@@ -83,6 +83,7 @@ namespace RaidRogue
                 new Definition("Forward", "앞으로 이동", "w", "upArrow"), new Definition("Back", "뒤로 이동", "s", "downArrow"),
                 new Definition("Left", "왼쪽 이동", "a", "leftArrow"), new Definition("Right", "오른쪽 이동", "d", "rightArrow"),
                 new Definition("Dash", "대쉬", "space"), new Definition("Potion", "포션", "x") };
+            a.Add(new Definition("Interact", "상호작용", "g"));
             for (int i = 1; i <= 5; i++) a.Add(new Definition("Skill" + i, i == 5 ? "힐러 부활 (기존 유틸리티)" : i == 4 ? "직업 스킬 1" : "스킬 " + i, i == 4 ? "q" : "digit" + i, i == 4 ? "" : "numpad" + i));
             a.Add(new Definition("Counter", "카운터", "digit4", "numpad4"));
             a.Add(new Definition("JobSkill2", "직업 스킬 2", "e"));
@@ -157,7 +158,7 @@ namespace RaidRogue
             var old = new List<LocalKeyBinding>();
             foreach (var d in Actions)
             {
-                if (Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate"}, d.Id) >= 0) continue;
+                if (Array.IndexOf(new[]{"Counter","JobSkill2","Identity","SelectedActive","SelectedOffGcd","Ultimate","Interact"}, d.Id) >= 0) continue;
                 old.Add(new LocalKeyBinding { action=d.Id, primary=d.Id=="Potion"?"q":d.Id=="Skill4"?"digit4":d.Id=="View"?"v":d.Key,
                     secondary=d.Id=="Skill4"?"numpad4":d.Alternate });
             }

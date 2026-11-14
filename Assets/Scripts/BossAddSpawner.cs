@@ -693,6 +693,7 @@ namespace RaidRogue
                 return;
             }
 
+            if (boss.GuardianNormal) { ClearAllActiveAdds(); return; }
             CleanupNullOrDeadAdds();
 
             // 보스 체력 70%, 30% 구간 도달 시 자동으로 '권속 소환 (Summon Adds)' 발동!

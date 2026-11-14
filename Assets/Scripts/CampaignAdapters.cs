@@ -32,6 +32,12 @@ namespace RaidRogue
             _previous = transform.position; _singleCastTarget = null; _identityHeld = false;
             GetComponent<AegisPaladin>()?.RecalculateStats(); GetComponent<CharacterKit>()?.Recalculate();
             if (_player != null) { _player.currentHp = _player.maxHp; _player.playerRoleDisplayName = definition.name; }
+            if (CampaignRuntime.Instance?.ResumingSettlement == true)
+            {
+                if (_player != null) _player.currentHp = _player.maxHp * Mathf.Clamp01(slot.healthFraction);
+                var bot = GetComponent<PartyBotAI>();
+                if (bot != null) bot.currentHp = bot.maxHp * Mathf.Clamp01(slot.healthFraction);
+            }
             return true;
         }
         internal bool RestoreCampaignState(CharacterStateSnapshot snapshot)

@@ -11,6 +11,7 @@ namespace RaidRogue
         public static bool PartyMechanic(Transform actor, int role, BossController boss, out Vector3 destination)
         {
             destination = actor.position;
+            if (boss.GuardianNormal) return boss.GuardianDestination(actor,role,out destination);
             if (boss.IsStackMechanicActive && boss.StackTarget != null)
             {
                 if (boss.StackTarget != actor)
@@ -28,7 +29,7 @@ namespace RaidRogue
         }
         public static bool HazardDestination(Transform actor, BossController boss, float range, out Vector3 destination)
         {
-            destination = actor.position; var aoe = boss.ActiveTelegraph;
+            destination = actor.position; if (boss.GuardianNormal) return false; var aoe = boss.ActiveTelegraph;
             if (aoe == null) return false;
             Vector3 direction = actor.position - aoe.transform.position; direction.y = 0;
             if (direction.sqrMagnitude < .001f) direction = -boss.transform.forward;
