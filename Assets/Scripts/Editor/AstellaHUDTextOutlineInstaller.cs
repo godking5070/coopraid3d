@@ -15,6 +15,7 @@ namespace RaidRogue.Editor
         private const string Stamp = "Logs/HUD-text-outline-v1.applied.txt";
         [InitializeOnLoadMethod] private static void Schedule()
         {
+            if (Application.isBatchMode) return;
             if (!File.Exists(Stamp)) EditorApplication.update += WhenIdle;
         }
         private static void WhenIdle()

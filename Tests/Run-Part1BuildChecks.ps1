@@ -52,6 +52,36 @@ try {
     $next = Get-Part1SourceDifferences $taskCandidate $taskOriginal
     Assert-BuildCheck ($next.Count -eq $result.Count) 'Meta ownership is not rewritten by source parity checks.'
     Assert-BuildCheck ([IO.File]::ReadAllText((Join-Path $taskOriginal 'Assets/Runtime/NewActor.cs.meta')) -eq 'guid: user-owned') 'Original meta remains intact.'
+
+    $fingerprintBefore = Get-Part1ProjectFingerprint $taskOriginal
+    Write-Fixture $taskOriginal 'Assets/Runtime/NewActor.cs.meta' 'guid: changed-reference'
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -ne $fingerprintBefore.sha256) 'A changed GUID must invalidate build provenance.'
+    Write-Fixture $taskOriginal 'Assets/Runtime/NewActor.cs.meta' 'guid: user-owned'
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -eq $fingerprintBefore.sha256) 'Restoring the same inputs restores the fingerprint.'
+    Write-Fixture $taskOriginal 'Assets/Scene.unity' "object: 1`n"
+    $sceneFingerprint = (Get-Part1ProjectFingerprint $taskOriginal).sha256
+    Write-Fixture $taskOriginal 'Assets/Scene.unity' "object: 1`r`n" $true
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -eq $sceneFingerprint) 'Text BOM/newlines do not change equivalent authored inputs.'
+    Write-Fixture $taskOriginal 'Assets/Scene.unity' "object: 2`n"
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -ne $sceneFingerprint) 'Changed authored scene content must block source parity.'
+    $binaryPath = Join-Path $taskOriginal 'Assets/Icon.png'
+    [IO.File]::WriteAllBytes($binaryPath, [byte[]]@(0, 13, 10, 255))
+    $binaryFingerprint = (Get-Part1ProjectFingerprint $taskOriginal).sha256
+    [IO.File]::WriteAllBytes($binaryPath, [byte[]]@(0, 10, 255))
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -ne $binaryFingerprint) 'Binary assets must never receive text normalization.'
+    $settingsFingerprint = (Get-Part1ProjectFingerprint $taskOriginal).sha256
+    Write-Fixture $taskOriginal 'ProjectSettings/QualitySettings.asset' 'quality: changed'
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -ne $settingsFingerprint) 'Render/project settings belong to the build inputs.'
+    Write-Fixture $taskOriginal 'Assets/Material.mat' "%YAML 1.1`ncolor: 1`n"
+    Write-Fixture $taskOriginal 'Assets/Controls.inputactions' "{`n  actions: []`n}`n"
+    $unityTextFingerprint = (Get-Part1ProjectFingerprint $taskOriginal).sha256
+    Write-Fixture $taskOriginal 'Assets/Material.mat' "%YAML 1.1`r`ncolor: 1`r`n" $true
+    Write-Fixture $taskOriginal 'Assets/Controls.inputactions' "{`r`n  actions: []`r`n}`r`n"
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -eq $unityTextFingerprint) 'Git newline conversion of materials and input assets is equivalent.'
+    [IO.File]::WriteAllBytes((Join-Path $taskOriginal 'Assets/Binary.asset'), [byte[]]@(0, 13, 10, 255))
+    $serializedBinaryFingerprint = (Get-Part1ProjectFingerprint $taskOriginal).sha256
+    [IO.File]::WriteAllBytes((Join-Path $taskOriginal 'Assets/Binary.asset'), [byte[]]@(0, 10, 255))
+    Assert-BuildCheck ((Get-Part1ProjectFingerprint $taskOriginal).sha256 -ne $serializedBinaryFingerprint) 'Binary serialized assets are hashed without decoding.'
     Write-Output "PASS: $script:taskChecks build preflight checks; real temporary file IO, no Unity or build execution."
 } finally {
     # Delete only this test's verified unique temporary directory, using one shell.

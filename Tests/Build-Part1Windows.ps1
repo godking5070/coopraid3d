@@ -20,6 +20,15 @@ if (!(Test-Path -LiteralPath $Unity)) { $taskProblems.Add("Unity editor not foun
 # Read-only comparison. Never copy, stash, reset, switch branches, or alter user source files.
 . (Join-Path $PSScriptRoot 'Part1BuildPreflight.ps1')
 $taskDifference = Get-Part1SourceDifferences -SourceProject $taskSource -OriginalProject $taskOriginal
+$taskSourceFingerprint = Get-Part1ProjectFingerprint -Project $taskSource
+$taskOriginalFingerprint = Get-Part1ProjectFingerprint -Project $taskOriginal
+if ($taskSourceFingerprint.sha256 -ne $taskOriginalFingerprint.sha256) {
+    $taskProblems.Add('Original authored assets/settings differ from the candidate. Review them before building; no files were copied.')
+}
+$taskCandidateChanges = @(& git -C $taskSource status --porcelain -- Assets Packages ProjectSettings)
+if ($taskCandidateChanges.Count -gt 0) { $taskProblems.Add('Commit the reviewed candidate build inputs before producing a versioned build.') }
+$taskSourceCommit = (& git -C $taskSource rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0) { throw 'Cannot identify the candidate Git commit.' }
 if ($taskDifference.Count -gt 0) {
     $taskProblems.Add("Original source: $($taskDifference.Missing.Count) missing, $($taskDifference.Changed.Count) changed, $($taskDifference.Unexpected.Count) additional compile inputs. Review/apply the playable branch before building. No source was changed.")
     $taskDifference.Missing | Select-Object -First 8 | ForEach-Object { Write-Output "Missing: $_" }
@@ -34,16 +43,18 @@ $taskOutput = Join-Path $taskOriginal 'Builds/AstellaWindows'
 Write-Output "Original: $taskOriginal"
 Write-Output "Unity: $Unity"
 Write-Output "Output: $(Join-Path $taskOutput 'Astella.exe')"
+Write-Output "Source commit: $taskSourceCommit"
+Write-Output "Project input SHA256: $($taskSourceFingerprint.sha256) ($($taskSourceFingerprint.count) files)"
 if ($taskProblems.Count -gt 0) {
     foreach ($taskProblem in $taskProblems) { Write-Output "BLOCKED: $taskProblem" }
     if ($CheckOnly) { exit 2 }
     throw 'Preflight failed; Unity was not launched.'
 }
-if ($CheckOnly) { Write-Output 'PASS: read-only preflight. No build or gameplay executed.'; exit 0 }
+if ($CheckOnly) { Write-Output 'PASS: read-only source/asset preflight. No build or gameplay executed.'; exit 0 }
 [IO.Directory]::CreateDirectory($taskOutput) | Out-Null
 $taskLog = Join-Path $taskOutput 'UnityBuild.log'
 if ($taskOriginal.Contains('"') -or $taskLog.Contains('"')) { throw 'Unsupported quote in path.' }
-$taskArguments = '-batchmode -quit -projectPath "' + $taskOriginal + '" -executeMethod RaidRogue.EditorTools.RaidMultiplayerBuild.BuildPartOne -logFile "' + $taskLog + '"'
+$taskArguments = '-batchmode -nographics -quit -projectPath "' + $taskOriginal + '" -executeMethod RaidRogue.EditorTools.RaidMultiplayerBuild.BuildPartOne -logFile "' + $taskLog + '"'
 $taskStarted = [DateTime]::UtcNow
 $taskProcess = Start-Process -FilePath $Unity -ArgumentList $taskArguments -WindowStyle Hidden -PassThru
 $taskProcess.WaitForExit()
@@ -53,5 +64,27 @@ if (!(Test-Path -LiteralPath (Join-Path $taskOutput 'Astella.exe')) -or !(Test-P
 }
 if ((Get-Item -LiteralPath (Join-Path $taskOutput 'BUILD_INFO.txt')).LastWriteTimeUtc -lt $taskStarted) {
     throw 'The build receipt is from an older build. Do not report the old executable as this build result.'
+}
+$taskAfterFingerprint = Get-Part1ProjectFingerprint -Project $taskOriginal
+[IO.File]::AppendAllText((Join-Path $taskOutput 'BUILD_INFO.txt'),
+    "Source commit: $taskSourceCommit`nProject input SHA256: $($taskSourceFingerprint.sha256)`n", [Text.UTF8Encoding]::new($false))
+$taskArtifactNames = @('Astella.exe', 'UnityPlayer.dll', 'Astella_Data/Managed/Assembly-CSharp.dll', 'BUILD_INFO.txt')
+$taskArtifacts = @($taskArtifactNames | ForEach-Object {
+    $taskArtifact = Join-Path $taskOutput $_
+    if (!(Test-Path -LiteralPath $taskArtifact -PathType Leaf)) { throw "Missing build artifact: $taskArtifact" }
+    [pscustomobject]@{ path = $_; bytes = (Get-Item -LiteralPath $taskArtifact).Length; sha256 = (Get-FileHash -LiteralPath $taskArtifact).Hash.ToLowerInvariant() }
+})
+[pscustomobject]@{
+    version = 1; sourceCommit = $taskSourceCommit; sourceProject = $taskSource; originalProject = $taskOriginal
+    startedUtc = $taskStarted.ToString('O'); finishedUtc = [DateTime]::UtcNow.ToString('O')
+    inputSha256 = $taskSourceFingerprint.sha256; inputFileCount = $taskSourceFingerprint.count
+    postBuildInputSha256 = $taskAfterFingerprint.sha256
+    inputsPreserved = ($taskAfterFingerprint.sha256 -eq $taskSourceFingerprint.sha256)
+    buildInfo = [IO.File]::ReadAllText((Join-Path $taskOutput 'BUILD_INFO.txt'))
+    artifacts = $taskArtifacts; gameplayVerified = $false; liveSteamVerified = $false
+} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $taskOutput 'BUILD_RECEIPT.json') -Encoding UTF8
+$taskSourceFingerprint.files | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $taskOutput 'BUILD_INPUTS.json') -Encoding UTF8
+if ($taskAfterFingerprint.sha256 -ne $taskSourceFingerprint.sha256) {
+    throw 'Unity changed authored build inputs. The build receipt preserves both fingerprints; review before treating this as the candidate build.'
 }
 Write-Output "PASS: Windows executable built at $taskOutput. Gameplay and Steam connections still require the manual checklist."

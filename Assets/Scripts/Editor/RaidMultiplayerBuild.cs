@@ -38,6 +38,7 @@ namespace RaidRogue.EditorTools
                     throw new BuildFailedException("메인 씬이 없습니다: " + MainScene + ". 백업에서 복구하세요.");
                 EditorSceneManager.OpenScene(MainScene, OpenSceneMode.Single);
                 ValidatePartOneScene(SceneManager.GetActiveScene());
+                RaidRogue.Editor.RaidUIAuthoring.Validate(RaidUIPresentation.Settings);
                 Directory.CreateDirectory(output);
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
                     scenes = new[] { MainScene }, locationPathName = Path.Combine(output, "Astella.exe"),

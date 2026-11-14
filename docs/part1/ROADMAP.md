@@ -1,3 +1,5 @@
+현재 재개 기준과 검증 단계는 [RESUME_STATUS.md](RESUME_STATUS.md)를 먼저 확인한다. 아래 날짜별 기록은 당시 이력이다.
+
 ## 2026-11-05 힐러 실사용 카탈로그 전환·파일 저장 검증
 
 - CharacterDefinitions.RegisterAssets가 실반오라클/세라픽바드/블러드아포테카리를 NineKeyHealerData.Build로 등록하도록 전환했다. 더 이상 opt-in/구형등록 상태가 아니다. 프로토콜28/Actor핸들러/지원입력/상태복제/HUD/대체AI는 새정의 경로를 사용한다.

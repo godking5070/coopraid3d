@@ -30,6 +30,7 @@ namespace RaidRogue.Editor
         [InitializeOnLoadMethod]
         private static void Schedule()
         {
+            if (Application.isBatchMode) return;
             if (File.Exists(Stamp)) return;
             EditorApplication.update -= WhenIdle; EditorApplication.update += WhenIdle;
         }

@@ -25,7 +25,7 @@ namespace RaidRogue.Editor
             public Object target;
         }
         [InitializeOnLoadMethod]
-        private static void Schedule() { EditorApplication.update-=WhenSafe;EditorApplication.update+=WhenSafe; }
+        private static void Schedule() { if(Application.isBatchMode)return;EditorApplication.update-=WhenSafe;EditorApplication.update+=WhenSafe; }
         private static void WhenSafe()
         {
             if(EditorApplication.isPlayingOrWillChangePlaymode||EditorApplication.isCompiling||EditorApplication.isUpdating||PrefabStageUtility.GetCurrentPrefabStage()!=null)return;

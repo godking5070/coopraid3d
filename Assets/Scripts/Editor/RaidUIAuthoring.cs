@@ -18,6 +18,7 @@ namespace RaidRogue.Editor
         [InitializeOnLoadMethod]
         private static void ScheduleMissingMinimapUpgrade()
         {
+            if (Application.isBatchMode) return;
             // Upgrade the existing artist-editable HUD once, after script import. Never
             // touch a prefab while Play Mode, compilation, or Prefab Mode is active.
             if (_minimapUpgradePending) return;

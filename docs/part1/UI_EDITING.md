@@ -1,5 +1,7 @@
 # UI 편집 경로와 현재 확인 범위
 
+2026-11-14 현재 원본은 `C:/Astella/Astella`이고 활성 HUD는 `Assets/UI/AstellaOrnate/Applied-20261106-131209-797/RaidHUD.prefab`이다. 활성 프로필은 `Assets/Resources/UI/RaidUIPresentation.asset`이다. 아래 예전 Generated HUD 경로는 작업 이력이며 새 편집 대상으로 사용하지 않는다. 최신 빌드/검사 상태는 [RESUME_STATUS.md](RESUME_STATUS.md)를 따른다.
+
 원본 프로젝트: `C:/coopraid/coopraid3d`. worktree를 Unity로 열지 않는다.
 
 ## 지금 열 파일

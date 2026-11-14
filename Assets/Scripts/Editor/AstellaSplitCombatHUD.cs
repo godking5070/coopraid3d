@@ -46,6 +46,7 @@ namespace RaidRogue.Editor
         [InitializeOnLoadMethod]
         private static void Schedule()
         {
+            if (Application.isBatchMode) return;
             EditorApplication.update-=WhenIdle;EditorApplication.update+=WhenIdle;
             EditorApplication.playModeStateChanged-=OnPlayMode;EditorApplication.playModeStateChanged+=OnPlayMode;
         }

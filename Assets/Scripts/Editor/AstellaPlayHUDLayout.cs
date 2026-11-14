@@ -31,6 +31,7 @@ namespace RaidRogue.Editor
         private static bool _captured,_busy;
         [InitializeOnLoadMethod] private static void Initialize()
         {
+            if (Application.isBatchMode) return;
             EditorApplication.update-=Tick;EditorApplication.update+=Tick;
             EditorApplication.playModeStateChanged-=OnMode;EditorApplication.playModeStateChanged+=OnMode;
         }

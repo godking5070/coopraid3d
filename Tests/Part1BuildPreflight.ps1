@@ -32,3 +32,34 @@ function Get-Part1SourceDifferences {
     [pscustomobject]@{ Missing = $missing.ToArray(); Changed = $changed.ToArray();
         Unexpected = @($unexpected.ToArray() | Sort-Object); Count = $missing.Count + $changed.Count + $unexpected.Count }
 }
+
+# Normalize text line endings/BOM; binary assets are hashed byte-for-byte.
+function Get-Part1ProjectFingerprint {
+    param([Parameter(Mandatory = $true)][string]$Project)
+    $fingerprintRoot = (Resolve-Path -LiteralPath $Project).Path.TrimEnd('\', '/')
+    $fingerprintFiles = @(& rg --files (Join-Path $fingerprintRoot 'Assets') (Join-Path $fingerprintRoot 'Packages') (Join-Path $fingerprintRoot 'ProjectSettings'))
+    if ($LASTEXITCODE -gt 1) { throw 'Cannot enumerate project build inputs.' }
+    $textExtensions = @('.cs', '.meta', '.unity', '.prefab', '.asset', '.mat', '.inputactions', '.wlt', '.json', '.txt', '.asmdef', '.asmref', '.rsp', '.shader', '.hlsl', '.cginc', '.shadersubgraph', '.shadergraph', '.anim', '.controller', '.playable', '.overridecontroller')
+    $fingerprintEntries = [System.Collections.Generic.List[object]]::new()
+    $fingerprintHash = [Security.Cryptography.SHA256]::Create()
+    try {
+        foreach ($fingerprintFile in $fingerprintFiles) {
+            $fingerprintRelative = $fingerprintFile.Substring($fingerprintRoot.Length + 1).Replace([IO.Path]::DirectorySeparatorChar, '/')
+            if ([IO.Path]::GetExtension($fingerprintFile).ToLowerInvariant() -in $textExtensions) {
+                try {
+                    $fingerprintText = [IO.File]::ReadAllText($fingerprintFile, [Text.UTF8Encoding]::new($false, $true))
+                    if ($fingerprintText.IndexOf([char]0) -ge 0) { throw [Text.DecoderFallbackException]::new('Binary serialized asset') }
+                    $fingerprintBytes = [Text.Encoding]::UTF8.GetBytes($fingerprintText.Replace("`r`n", "`n"))
+                    $fingerprintDigest = [BitConverter]::ToString($fingerprintHash.ComputeHash($fingerprintBytes)).Replace('-', '').ToLowerInvariant()
+                } catch [Text.DecoderFallbackException] {
+                    $fingerprintDigest = (Get-FileHash -LiteralPath $fingerprintFile -Algorithm SHA256).Hash.ToLowerInvariant()
+                }
+            } else { $fingerprintDigest = (Get-FileHash -LiteralPath $fingerprintFile -Algorithm SHA256).Hash.ToLowerInvariant() }
+            $fingerprintEntries.Add([pscustomobject]@{ path = $fingerprintRelative; sha256 = $fingerprintDigest })
+        }
+        $fingerprintLines = [string[]]@($fingerprintEntries | ForEach-Object { $_.path + "`t" + $_.sha256 + "`n" })
+        [Array]::Sort($fingerprintLines, [StringComparer]::Ordinal)
+        $fingerprintDigest = [BitConverter]::ToString($fingerprintHash.ComputeHash([Text.Encoding]::UTF8.GetBytes(($fingerprintLines -join '')))).Replace('-', '').ToLowerInvariant()
+        [pscustomobject]@{ sha256 = $fingerprintDigest; count = $fingerprintEntries.Count; files = @($fingerprintEntries.ToArray()) }
+    } finally { $fingerprintHash.Dispose() }
+}
