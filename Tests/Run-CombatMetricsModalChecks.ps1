@@ -25,7 +25,9 @@ $taskStart = $taskSource.IndexOf('private static CombatMetricsUI _resultsOwner;'
 $taskEnd = $taskSource.IndexOf('private CombatMetricsManager _metrics;', [StringComparison]::Ordinal)
 if ($taskStart -lt 0 -or $taskEnd -le $taskStart) { throw 'Modal source state boundaries missing.' }
 $taskState = $taskSource.Substring($taskStart, $taskEnd - $taskStart)
-$taskMethods = (@('private void OnDisable()', 'private void OpenResultsOverlay()', 'public void CloseResults()') | ForEach-Object { Read-SourceMethod $_ }) -join "`n"
+$taskMethods = (@('private void OnDisable()', 'private void OpenResultsOverlay()', 'public void CloseResults()',
+    'private void EnsureUI()', 'private Button AuthoredResultButton(', 'public void BindResultButtons()',
+    'private void ShowLatestResults()', 'private void ShowRunResults()') | ForEach-Object { Read-SourceMethod $_ }) -join "`n"
 $taskTemplate = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'CombatMetricsModalTests.cs'))
 $taskOutput = Join-Path ([IO.Path]::GetTempPath()) ('RaidRogue-Modal-' + [Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($taskOutput) | Out-Null

@@ -130,16 +130,32 @@ namespace RaidRogue
             if (_results == null) BuildResults();
             if (_rewardButton == null && _stage.cardManager != null && _stage.cardManager.cardSelectionModalRoot != null)
             {
-                _rewardButton = ButtonAt(_stage.cardManager.cardSelectionModalRoot.transform, "CombatResults", "전투 결과",
+                _rewardButton = AuthoredResultButton(nameof(_rewardButton)) ?? ButtonAt(_stage.cardManager.cardSelectionModalRoot.transform, "CombatResults", "전투 결과",
                     new Vector2(0.5f, 0.5f), new Vector2(0, -285), new Vector2(230, 46), ShowLatestResults);
                 BindResultButtons();
             }
             if (_victoryButton == null && _stage.restartButton != null)
             {
-                _victoryButton = ButtonAt(_stage.restartButton.transform.parent, "RunResults", "전체 런 전투 결과",
+                _victoryButton = AuthoredResultButton(nameof(_victoryButton)) ?? ButtonAt(_stage.restartButton.transform.parent, "RunResults", "전체 런 전투 결과",
                     new Vector2(0.5f, 0), new Vector2(325, 65), new Vector2(230, 66), ShowRunResults);
                 BindResultButtons();
             }
+        }
+
+        private Button AuthoredResultButton(string field)
+        {
+            // Metrics can initialize one frame before RaidUIRoot's deferred restoration.
+            // Reuse its external buttons now; a generated duplicate would remain on top
+            // without a listener after BindResultButtons switches to the authored button.
+            var root = _canvas != null ? _canvas.GetComponentInParent<RaidUIRoot>() : null;
+            if (root == null) return null;
+            foreach (var binding in root.presenters)
+            {
+                if (binding.typeName != GetType().AssemblyQualifiedName) continue;
+                foreach (var reference in binding.references)
+                    if (reference.path == field && reference.target is Button button && button != null) return button;
+            }
+            return null;
         }
 
         private void BuildMeter()
