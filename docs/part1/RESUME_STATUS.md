@@ -1,122 +1,121 @@
-# 아스텔라 재개 기준 — 2026-11-14
+# 아스텔라 재개 기준 — 2026-11-15
 
-현재 상태는 이 문서를 먼저 확인한다. HANDOFF/ROADMAP의 날짜별 항목은 당시 작업 이력이다. 자동 검사, 실제 Unity 빌드, 사람 플레이, 실제 Steam 연결의 완료 여부를 각각 기록한다.
+현재 상태는 이 문서를 먼저 확인한다. HANDOFF/ROADMAP의 날짜별 항목은 당시 이력이다. 11월 15일 실제 Windows 빌드와 마우스 조작을 검사했다. 자동 검사, 화면을 켠 AI 전투, 직접 마우스 조작, 물리 키보드 플레이, 실제 Steam 연결은 각각 구분한다.
+
+**현재 Windows 빌드: `18a790ed1f46ba3525c6dc511d90157e2cc66d29`.** 11월15일13:51 KST 원본 프로젝트 빌드 성공, 입력 SHA256 `5407e9e7246191a66c42f5acfc172795f86570379bf5d141340a89b14f0444cd`(2,179파일), 빌드 전후 입력 보존 및 산출물4개 해시 확인. 후속 Network 검사 체인·런타임/에디터 관리 컴파일, 실제 Stage6 개발 preset 승리→결과 재열기→방 나가기→정상 종료가 통과했다. `e552781`은 이전 자동 검사와 최초 GUI 실행의 빌드다. 문서만 바뀐 후속 커밋은 빌드 입력을 바꾸지 않는다.
+
+## 현재 결과와 남은 확인
+
+| 항목 | 확인한 결과 | 남은 확인 |
+| --- | --- | --- |
+| 보존·통합 | 원본 브랜치·인덱스·작성 자산 보존, 통합 worktree에서 스크립트 수정. 11/14 `d41e38a` All 31/31 통과 | 후속 UI/종료 수정은 관련 회귀·Network 체인·실제 빌드/GUI로 검증. All31을 최종 커밋에서 반복한 것은 아님. 원격 병합·푸시하지 않음 |
+| 노멀 1부 | 11/15 `e552781` 화면 실행에서 이지스·오라클·나이트블레이드·건슬링어 AI 1~6 완주: 637.12초, 재시도0, 부활0 | 사람 4인 전투·물리 키보드 조작·모든 빌드/난수의 검증은 아님 |
+| 하드 | 이전 레인저 고정 파티의 무화면 1~6 완주 증거 유지. 11/15 건슬링어 GUI 파티는 Stage 1에서 341.24초 자연 전멸 | 조합·난수를 맞춘 재현과 하드 AI 생존 안정성 조사 필요 |
+| 직접 UI·마우스 | 메뉴·직업/기원·우클릭 이동·허수아비 공격, 수정 후 조작표·타겟 유지 카운터·그로기 HUD·화면 복원·HUD 크기 취소·최종 결과 재열기·전투 메뉴·세션 정리 확인 | HUD 드래그는 최신 빌드도 Sky 수신을 관측하지 못해 물리 입력 확인 필요 |
+| 키보드 | 설정 파일의 기본 키는 정상. Sky 키 입력은 게임 및 재지정 창에서 수신을 관측하지 못함 | 물리 키보드로 이동·스킬·단축키·재바인딩 확인 필요. 게임 키 버그로 단정하지 않음 |
+| 저장·복원 | `e552781` 일반/하드 첫 출발 저장·프로세스 재시작 통과. 생성한 Stage 4/6 경계 샘플 복원 통과 | 샘플 복원은 실제 싱글 후기 전투 완주와 구분 |
+| 연결 | 실제 2/4프로세스 UDP 접속·직업/기원/교체/준비 복제 통과 | Steam App ID 0, 별도 계정·PC 미제공으로 실제 Steam 준비/전투/재접속 미완료 |
+| 성능·종료 | 실제 D3D12/RTX 3070 Ti 화면과 OS CPU/메모리 표본 확인. 첫 긴 실행 종료 대기1회, 이후 새 메뉴 DX11/DX12 및 긴 `7a219fb`, 후속 `d9160fb`/`18a790e` 실행은 자연 종료 | FPS·GPU 프레임·GC·누수 미측정. 최초 종료 대기 원인 미확정 |
 
 ## 보존한 기준
 
-- 원본: `C:/Astella/Astella`. 원본 브랜치 `feature/aegis-paladin-routes`와 기존 인덱스를 보존했다.
-- 통합 작업: `integration/astella-resume-20261114`, `C:/Astella/Astella-resume`. Unity로 열지 않는다.
-- 원본 전체 기준 커밋: `295ab332c018ca590bb04b8d129ae1d06fc20e3a`. 최신 playable 커밋을 부모로 두고 현재 원본 소스·씬·프리팹·GUID·자산을 그대로 포함한다.
-- 원본 2,404파일의 실제 바이트 백업: `C:/Astella/branch-backups/resume-20261114-200225/original-working-files.tar.gz`.
-- 파일별 SHA256, 원래 HEAD/인덱스 해시, 미커밋 작업 16폴더의 보존 커밋: 같은 폴더 `manifest.json`. 백업 Git 참조는 `backup/resume-20261114-200225/worktree-*`다.
-- 이전 UI 프로토타입·보스 콘셉트의 전체 변경은 백업 참조로 보존했다. 현재 HUD와 보스 코드를 이전 버전으로 덮어쓰지 않았다. playable에만 있던 오류 보고 검사·로컬 큐 도구를 검토해 가져왔다.
+- 원본은 `C:/Astella/Astella`, 브랜치는 `feature/aegis-paladin-routes`다. 원본 HEAD와 기존 인덱스를 보존하며 검토한 스크립트·검사·문서만 작업 파일에 적용한다. 인덱스 SHA256은 `ce345c2144a658aa620262e9f99f1b5c0fa36a1ea44789cb5a51ea857cc59c48`이다.
+- 통합은 `integration/astella-resume-20261114`, `C:/Astella/Astella-resume`다. Unity로 열거나 worktree에 Library를 생성·복사하지 않는다. 씬·프리팹 YAML과 기존 GUID를 직접 수정하지 않았다.
+- 전체 기준 커밋은 `295ab332c018ca590bb04b8d129ae1d06fc20e3a`. `C:/Astella/branch-backups/resume-20261114-200225/`에 원본 2,404파일 바이트 백업, `manifest.json`, 미커밋 작업 16폴더의 스냅샷과 `backup/resume-20261114-200225/worktree-*` 참조를 남겼다.
+- 다른 브랜치도 대조했다. GitHub 브랜치 검색과 `git ls-remote --heads origin`은 원격 `ingame-move-system` 하나만 반환했고 HEAD `f80d0c5476cd1e6f49be2adde3e39610c810014e`(10월21일)는 로컬 캐시와 같았다. 최근 개발은 보존한 로컬 브랜치/worktree에 분산돼 있다. 근거는 `remote-audit.json`이며 원격 변경·병합·푸시는 하지 않았다.
+- CharacterMatched/ModelingRedesign 이미지15개는 manifest 해시와 일치한다. ConceptArt의 생산용 mesh/rig는 미제공이다. `art-audit.json`과 11/15 `cleanup-build/`의 보존 감사는 기준2,404파일을 검토 적용 목록과 대조하고, 작성된 비스크립트 자산1,896파일과 원본 HEAD·브랜치·인덱스 보존을 확인한다. 새 worktree Library는 없다(기존 기준에 있던 Library와 구분). 기존 UI나 임시 3D 비주얼을 임의 이미지로 교체하지 않았다.
+- 11/15 전체 GUI 검사 종료 후 일반 저장/로그6파일의 추가·삭제·변경이 없음을 최종 대조했다(`cleanup-build/ordinary-data-preservation.json`). 검사 프로필은 캠페인·로컬 설정·HUD 배치를 일반 사용자 파일과 분리한다. 엔진 소유 Unity 캐시는 별도 범위다.
 
-## 검증할 고정 파티
+## 11월 15일 실제 화면·입력 검사
 
-`Tests/Scenarios/Part1-FourPlayer.json`은 팔라딘·오라클·나이트블레이드·레인저 4직업, 노멀/하드, 1~6스테이지를 지정한다. 각 직업의 첫 기원/첫 교체 선택과 기본 보조 2개를 재현용 초기 빌드로 사용한다. 이는 게임의 직업 선택 제한이나 사용자 확정 밸런스가 아니다. 실제 사람 플레이는 보류다.
+증거 루트는 `C:/Astella/branch-backups/manual-20261115-123623/`다. 최초 `initial-manual-results.json`, 수정 빌드 `fixed-build/manual-observations.json`, 각 `Player.log`와 빌드 영수증을 함께 읽는다. 마지막 수정 검증은 `cleanup-build/manual-observations.json`, 관련 Network 검사와 관리 컴파일은 `cleanup-build/network-checks.log`다.
 
-| 단계 | 현재 증거 | 남은 확인 |
+최초 `e552781` 실행에서 메인 메뉴→혼자 시작→이지스/불멸의 성벽 선택, 우클릭 이동 적용, 허수아비·조율대로 이동, 허수아비 선택과 마우스 기본 공격100 피해를 확인했다. 이어 화면을 켠 AI 관전 파티가 노멀 1~6을 637.12초에 완주했다. 재시도0·부활0·클리어6·보상20개이며 `normal-six-checkpoint.json`/`normal-six-progress.json`에 완료 상태를 보존했다. 파티는 이지스·실반 오라클·나이트블레이드·건슬링어로, 이전 고정 레인저 시나리오와 다르다. 자동으로 열린 전체 런 결과창의 Stage 6 탭과 닫기는 작동했으나 PART 1 CLEAR 패널의 결과 재열기 버튼은 반응하지 않았다.
+
+| 수정 | 원인·변경 | 실제 GUI 상태 |
 | --- | --- | --- |
-| 원본 보존·통합 기준 | 기준 커밋, 바이트 백업, 16폴더 스냅샷 완료. `d41e38a`의 All 31묶음 통과 | 원격 병합·푸시는 하지 않음 |
-| 최신 빌드 | `e552781`, 2026-11-14 23:40 KST 원본 Windows 배치 빌드·필수 HUD 참조 검사 성공. 프로토콜34, 입력2,179파일 지문 전후 일치 | 사람 화면/GPU 검증 보류 |
-| 1스테이지 파티 | 고정 빌드/격리 601개, 실제 출발·봇 준비 메서드 917개 명령 검사 통과. 고정4직업 노멀/하드 실제 AI 클리어 | 사람 입력·화면·밸런스는 보류 |
-| 1부 완주·복원 | 노멀 `d41e38a`, 하드 `2480522` 실제 AI 1~6 연속 완주·완료 저장 통과. `e552781` 일반/하드 실제 첫 출발 저장·앱 재시작 및 생성된4/6경계 샘플 복원 통과 | 후기 샘플 복원은 실제 싱글 전투 완주와 구분. 사람 플레이는 보류 |
-| 2→4인 연결·성능 | 실제 게임 2인/4인 UDP 연결·직업/기원/교체/준비 복제 통과. 무화면 프레임/GC/메모리 기록 | 실제 Steam·다른 PC·GPU 성능 미확인 |
+| `8302dfa` 조작표 | 이동방식 등록 키 prefix 불일치로 재열기마다90px 이동. Interact 삽입 공간이 없어 스킬1 행과 G 행 겹침. 기존 폼에 한 번만 공간을 추가 | `7a219fb`에서 G와1/NUM1 분리, 재열기 위치 유지 확인 |
+| `8302dfa` 그로기 HUD | 보스의 그로기 시전바와 공격 대상 줄의 겹침 방지 | 하드1 그로기6.1초/2.1초에서 분리 표시 확인 |
+| `52fe69a` 카운터 UI | 아군을 선택해도 기억한 적을 쓰는 실행 경로와 버튼 유효성 판정을 일치시킴 | 허수아비→자신 선택 후 마우스 카운터160 피해와9.8초 쿨타임 확인 |
+| `7a219fb` 결과 재열기 | HUD deferred 복원 전에 외부 결과 버튼을 중복 생성하고 뒤에 그 콜백을 제거하던 순서 수정. 활성 HUD의 직렬화 참조 재사용 | 소스 회귀27개 및 관리 컴파일 통과. `d9160fb` Stage6 개발 preset 승리 후 PART1CLEAR의 실제 버튼으로 재열기·Stage6 탭·닫기 통과 |
+| `299f68a` HUD 드래그 | 시작 threshold를 넘은 현재 위치 대신 최초 pressPosition을 원점으로 사용해 첫 구간 유실 가능성 보완 | 기존 HUD 배치 검사818개와 단독 컴파일 통과. `d9160fb`에서도 Sky.drag의 이동·선택 미수신. 실제 해결 판정하지 않음 |
+| `d9160fb` 메뉴 버튼 | Single/Host/Client/AiSpectator에서 상태 문구가 비어도 메뉴 버튼 유지. 결과창·메뉴·복구·Training의 숨김 조건 유지 | 관리 컴파일 통과. 실제 Stage6 Combat에서 표시·메뉴 열기·전투 복귀 및 결과창 닫기 후 복구 확인 |
+| `18a790e` 세션 정리 | 씬 unload 때 `OrderedParty`가 파괴된 avatar의 transform을 읽던 예외 수정. Unity null 검사로 생존자만 반환 | 수정 전 회귀 재현·실제 메서드21개 통과. Network 체인 연결. 새 빌드의 승리→방 나가기→확인→메뉴→종료에서 예외0 |
 
-## 재현 명령
+수정 빌드에서 HUD 크기110% 미리보기 후 취소하면100%로 복원되고 배치 파일을 만들지 않는 것, 창 모드 적용 확인15초를 기다리면1920×1080 테두리 없는 창으로 복원되는 것도 확인했다. 같은 Sky 드래그로 IMGUI 상태창은432px 이동했지만 HUD 핸들은 움직이지 않았다. pressPosition 수정 후 `d9160fb`에서도 Sky.drag는 HUD 이동·선택을 관측하지 못했고 같은 지점의 Sky.click은 파티 목록을 즉시 선택했다. 입력 도구 수신 한계 가능성과 근본 원인은 미확정이며 물리 입력으로 확인해야 한다. 키보드 F10/Tab/4/G 및 재바인딩 J도 수신을 관측하지 못했으므로 물리 키보드 판정은 보류한다.
 
-원본 Unity 참조는 읽기만 하며 worktree에 Library를 만들지 않는다.
+`final-build/manual-observations.json`의 Stage6 개발 preset은 114.73초·재시도0·부활0으로 승리했다. 이전 단계 카드와 V 권리를 생성한 UI 회귀용 실행이므로 정상1~6 완주나 일반 싱글 후기 저장 검증으로 집계하지 않는다. 결과 재열기와 메뉴 기능은 통과했지만, 방 나가기 확인 후 씬 정리에서 이미 파괴된 파티원을 조회하는 `OrderedParty` 예외가1건 나왔다. 실패 로그를 보존했다. `18a790e` cleanup 빌드에서 새 격리 프로필로 Stage6 개발 preset을112.56초·재시도0·부활0으로 승리한 뒤 같은 결과 재열기와 방 나가기 확인을 다시 실행했다. 깨끗한 시작 화면으로 복귀했고 전체 로그의 예외 헤더0, 실제 종료 버튼으로 자연 종료했다. 이는 개발 preset의 UI/정리 회귀이며 정상1~6 완주로 합치지 않는다.
+
+핫바의 `+`는 미승인 스킬 아트를 숨기고 남긴 의도된 pending 표시이고, `E`는 기술·클릭·입력 매핑이 없는 시각적 예약 슬롯이다. 새9키 직업은 기본 `1/2/3/4/Q/R/F/V`, Space 이동기, X 포션을 사용한다. 이 미완성 아트·예약 표시를 연결 실패로 오인해 변경하지 않았다. 상단 ‘공격 대상’은 내 선택 대상이 아니라 보스의 적개심 대상이다.
+
+## 하드 Stage 1 자연 전멸: 통과 기록과 구분
+
+`fixed-build/hard-one-failure-analysis.json`과 `hard-one-wipe.zip`에 `7a219fb` 실제 GUI 하드1 실패를 보존했다. 이지스/오라클/나이트블레이드/건슬링어, seed `-1644250258`, 자동 재도전 꺼짐, 공격 피해100%를 시작부터 종료까지 유지했다. 341.24초에 전원 사망·공유 부활4회 소진, 변신한 보스48,668/80,000HP(60.835%)가 남았다. 이것은 성공이나 강제 전멸이 아니다. 검색한 엔진 예외 패턴과 ZIP 오류 이벤트는0건이며 실제 전투 실패와 별개다.
+
+- 약174.23초 탱커 맞대결 카운터 성공 뒤 해방 충격파 로그가 나오고14ms 후 힐러 부활이 기록됐다. 근딜·건슬링어 부활은 약180.15초였다. 최초 힐러 치명 구간과 해방 피해의 시간적 연관은 강하지만 세 명이 동시에 같은 공격으로 죽었다고 단정하지 않는다.
+- 약223.49초 Sweep 피격 이벤트3회 뒤13.5ms 후 힐러에게 마지막 부활을 사용했다. 약341.26초 공명은 범위 내1명에게2,000 피해를 기록했고15.2ms 후 Wiped로 전환됐다. 피격 이벤트는 고유 인원/사망 수가 아니고 공명 인원은 대상 중심 범위 안 생존자 수이므로 전원 생존 수와 같다고 해석하지 않는다.
+- 돌진 카운터4회·탱커 맞대결 카운터1회·무력화4회 성공이 있었다. 봉쇄1회/LineFracture5회의 종료 피격은0이며 FullLockdown 종료 기록은 없다. 따라서 이번 실패를 이전 봉쇄 탈출 문제와 동일 원인으로 보지 않는다. 정확한 사망 순서·위치·피격 전 HP·개별 치유 시각은 로그만으로 미확정이다.
+
+이전 하드 완주(`2480522`, `native-hard-extended-six/`)는 레인저 파티와 seed `1979741927`의 무화면 연속 실행이다. 이번 건슬링어 GUI 실행과 조합·난수·실행 이력이 다르다. 선택한 보스/AI 파일 대조에는 전투 수치 변경이 없었지만, 어느 조건이 실패를 만들었는지는 확정하지 않았다. 피해·HP·시간·AI 반응을 낮춰 통과시키지 않는다.
+
+전멸 뒤 실제 ‘현재 보스 재도전’ 버튼은4명 HP100%, 공유 부활4/4, 보스80,000/80,000과 새 Arrival을 복원했다. 두 번째 시도는 다음 UI 빌드를 위해 의도적으로 중단했으며 승리로 집계하지 않는다. 오류 보고 ZIP은 존재하지 않는 백업/개인진행/이전 세션 파일 때문에 partial로 표시됐고 보고서·시작 체크포인트·현재 로그는 포함한다.
+
+## 성능 관측과 종료
+
+`perf-and-exit-audit.json`은 최초 실행의 서로 다른 세 구간에서 각1분 OS 표본을 대조했다. 실제 D3D12/RTX 3070 Ti 화면 실행이며 WorkingSet 약875~923MiB, PrivateBytes 약1,213~1,346MiB 범위였다. 프로세스 CPU·메모리 관측을 FPS·GPU 프레임 시간·GC·VRAM·누수 진단으로 바꾸지 않는다. 이전 평균26.31ms·로딩 포함 최대835.63ms·Unity 할당 메모리 최대100.03MiB는 **`2990c59` 무화면 노멀 실행**에 귀속한다. 11/15 GUI나 후속 routing 실행의 성능 수치가 아니다.
+
+첫 `e552781` 긴 노멀 실행은 GUI 종료 후 Physics/InputSystem shutdown까지 진행했지만 PID가 수분간 남아 소유 테스트 프로세스만 강제 정리했다(`exit-initial.json`). 같은 바이너리의 새 메뉴 DX11/DX12 비교는 둘 다 PlayerConnection::Cleanup 후 자연 종료했다. 이어 약19분의 `7a219fb` GUI 세션도 `fixed-build/run.json`과 로그에서 강제 종료 없이 자연 종료했다. 최초 종료 대기는 실제 실패1회로 남기며, 후속 종료 성공을 근거로 DX12 원인이나 수정 완료를 선언하지 않는다. native stack/wait-chain으로 확인한 원인은 없다. `d9160fb`에서 발견한 별도의 C# 씬 정리 예외는 `18a790e`와 실제 방 나가기 회귀로 해결했으며, 최초 native 종료 대기와 같은 원인으로 취급하지 않는다.
+
+## 이전 명령·실제 프로세스 검증
+
+아래 경로는 `C:/Astella/branch-backups/resume-20261114-200225/` 아래다. 현재 GUI 결과와 별도의 증거다.
+
+| 증거 | 결과와 범위 |
+| --- | --- |
+| `checks-guardian-routing-all/results.json` | `d41e38a` All31/31. 이후 `e552781` 관리 컴파일/복원 검사는 `checks-late-restore-committed/`에 기록 |
+| `native-final-lan-two/`, `native-final-lan-four/` | `10c9b17` 실제2/4프로세스 UDP 접속·빌드·준비 복제·정상 종료. Steam·다른 PC 전투 검증은 아님 |
+| `native-save-resume-deep/` | `e552781` 일반/하드4case의 실제 첫 출발 저장→앱 정상 종료→새 프로세스 이어하기. 비기본 빌드·전투 상태·파일 보존 확인 |
+| `native-restore-fixture-four/`, `native-restore-fixture-six/` | `e552781` 생성한 Stage4/6 경계8case 복원. 카드3/5개·V 해금·진행/파티 상태 확인. `generatedFixture=true`, 후기 전투로 얻은 진행은 아님 |
+| `native-normal-routing-six/` | `d41e38a` 무화면 노멀 AI1~6 완주: 약636초, 재시도0·부활0·클리어6·카드20 |
+| `native-hard-extended-six/` | `2480522` 무화면 하드 AI1~6 완주: 약2,375초, 재시도0·부활7회(단계별4회 예산 안), 클리어6·카드20·완료 저장 |
+| `native-ai-normal-six/` | `2990c59` 무화면 노멀618.26초, 재시도0·부활1회·완료 저장. 위26.31ms 관측의 원 실행 |
+
+이전 하드 약140/161/167초 실패와1,800초 검사 제한 종료도 원래 case에 보존했다. 봉쇄 경로 수정 후 완주가 과거 실패를 지우거나 모든 조합/난수의 안정성을 증명하지 않는다. 출발 빌드 유실은 모든 새9키 정의의 빌드 보존으로 수정했고901개 회귀를 통과했다. 네이티브 봇 준비 GCD 때문에 첫 저장이 거절되던 문제도 준비 상태 초기화로 수정했으며 실제 준비/출발 메서드917개 검사를 통과했다. 저장 검증을 완화하지 않았다.
+
+원본 빌드 경로는 `C:/Astella/Astella/Builds/AstellaWindows/Astella.exe`다. `BUILD_INFO.txt`, `BUILD_RECEIPT.json`, `BUILD_INPUTS.json`의 코드·입력·실행 파일 지문을 실행 전에 대조한다. 배치 빌드는 UI 자동 설치·재배치를 하지 않는다. 검사 프로필이 없는 명시적 headless 요청은 일반 저장으로 대체하지 않고 거절한다.
 
 ```powershell
 cd C:/Astella/Astella-resume
 ./Tests/Run-StudioChecks.ps1 -Group All -OriginalProject C:/Astella/Astella
 ./Tests/Build-Part1Windows.ps1 -OriginalProject C:/Astella/Astella -CheckOnly
-```
-
-`All`은 노멀/하드 6보스, 무력화, 새 직업, 우클릭 이동, HUD/로비, 오류 보고, Steam→Network→Compile/저장 종속 체인, 고정 파티 및 빌드 사전 검사를 포함한다. 각 하위 검사 로그와 종료 코드가 `results.json`에 남는다. 이전 `All`의 9묶음만으로 새 직업·이동까지 확인됐다고 해석하지 않는다.
-
-추가로 확인한 실제 결함: `CharacterActor.ResetEncounter(NewRun)`이 새 딜러만 빌드를 보존하고 탱커·힐러는 기원만 재선택해 비기본 교체 스킬/핵심/보조를 잃었다. 수정 전 실제 메서드 기반 검사에서 팔라딘 첫 기원·변경 빌드 유실을 재현했다. 모든 새 9키 정의가 새 런 빌드 보존 경로를 사용하도록 수정했으며, 탱커3종·힐러3종·각3기원·기본/변경 선택의 901개 검사가 통과했다. 이전 런의 V 권리·카드 효과·진행·전투 수치는 전달하지 않는다. `Run-DepartureBuildChecks.ps1`를 Characters/Progression/All에 연결해 All은 31묶음이 된다.
-
-일반 싱글의 실제 출발 검사에서 추가 결함을 재현했다. 네이티브 파티 봇의 `RestorePartyLife(resetCooldowns: true)`가 행동 타이머를 0으로 두고, `CaptureNetworkCombat`는 이를 1.25~1.45초 남은 GCD로 기록했다. 따라서 출발 직후의 체크포인트가 안전 경계 검증에 거절됐다. `PartyBotAI.cs`와 `RaidCombatWorld.cs`에서 같은 행동 간격을 사용하고 전투 준비 때 준비 완료 상태로 초기화한다. 일반 부활은 기존 지연·구출 쿨타임을 유지한다. 실제 복구/캡처 메서드와 실제 런타임 정의를 사용하는 16개 회귀검사를 추가해 총917개가 통과했다. 저장 검증을 완화하지 않았다. 거절된 원본 상태는 `native-single-diagnostic/case-bc77d779361643e0936c4aa95220925d/rejected-working-checkpoint.json`에 보존했다.
-
-콘셉트 작업 대조: CharacterMatched와 ModelingRedesign의 이미지15개가 각 manifest SHA256과 모두 일치한다. ConceptArt 아래 실제 mesh 파일은 없으며 두 manifest도 생산용 mesh/rig 미제공 상태를 명시한다. `C:/Astella/branch-backups/resume-20261114-200225/art-audit.json`에 원본 경로와 지문을 기록했다. 기존 활성 HUD나 임시 3D 비주얼을 이미지로 임의 대체하지 않았다.
-
-새 빌드 경로는 `C:/Astella/Astella/Builds/AstellaWindows/Astella.exe`다. 빌드는 원본의 단일 메인 씬을 사용하고 UI 필수 참조를 검사한다. 배치 모드에서는 UI 자동 설치/재배치 도구가 실행되지 않는다. `BUILD_INFO.txt`, `BUILD_RECEIPT.json`, `BUILD_INPUTS.json`으로 커밋·소스/자산 지문·실행 파일/게임 어셈블리 해시와 빌드 전후 입력 보존 여부를 확인한다.
-
-## 입력 없는 격리 실행
-
-새 `Run-HeadlessResumeChecks.ps1`는 현재 소스/자산 지문과 실행 파일 해시가 빌드 영수증과 일치해야 실행한다. 개발 빌드·batchmode·명시적인 `--astella-check`와 전용 프로필이 모두 필요하다. 일반 실행과 배포 빌드에서는 검사 드라이버가 켜지지 않는다. 키보드·마우스 입력을 주입하지 않는다.
-
-```powershell
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode LAN -Players 2 -TimeoutSeconds 120
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode LAN -Players 4 -TimeoutSeconds 120
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 1
 ./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode AI -Difficulty both -ThroughStage 6 -TimeoutSeconds 3600
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode SaveResume -Difficulty both -ThroughStage 1
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode RestoreFixture -FixtureStage 4 -Difficulty both -ThroughStage 1
-./Tests/Run-HeadlessResumeChecks.ps1 -OriginalProject C:/Astella/Astella -Mode RestoreFixture -FixtureStage 6 -Difficulty both -ThroughStage 1
 ```
 
-LAN은 실제 게임 프로세스와 UDP를 사용해 연결·직업/기원/교체 선택·준비 상태 복제를 확인한다. 실제 전투·Steam 재접속·다른 PC 지연 검증과 구분한다. AI는 기본 피해100%의 실제 엔진 전투와 Unity JsonUtility 체크포인트를 검사하며, 전멸/정체/엔진 오류를 성공으로 처리하거나 피해·보스 수치를 바꾸지 않는다.
+실행기에는 LAN2/4, SaveResume, RestoreFixture4/6 모드도 있다. 반복 검사 전에는 기존 영수증을 확인한다. 문까지 이동/직접 입력, 실제 후기 전투 진행, 화면 렌더링은 각 검사의 명시된 범위와 구분한다.
 
-SaveResume은 일반 단일 플레이의 첫 출발 체크포인트에 비기본 빌드를 저장하고 프로세스를 정상 종료한 뒤, 같은 테스트 프로필의 별도 프로세스에서 실제 이어하기 경로를 실행한다. 같은 런·프로필, 다른 프로세스 세션·도전 ID, 빌드·HP·쿨타임·부활4회를 대조한다. 문까지의 이동은 검사 대상에서 제외하고 해당 위치에서 기존 문 출발 함수를 호출한다. 이후 스테이지 카드 정산/사람 입력 검증을 이 첫 경계 검사로 대체하지 않는다.
+## 이번 GUI 검사 후 수정 파일
 
-RestoreFixture는 실제 첫 출발 체크포인트를 기반으로 **생성한** 일반 싱글 저장 샘플을 격리 프로필에 기록한다. 4/6스테이지 입장 샘플에 카드3/5개(일반/직업 전용), V 해금, 이전 스테이지 기록을 넣고 새 프로세스의 일반 이어하기/문 출발 API로 복원한다. 현재 팔라딘 V는 단일 해금형이며 비기본 선택은 출발 스킬/핵심/보조 빌드다. `generatedFixture=true`와 경계 스테이지를 영수증에 명시한다. 실제 전투로 얻은 싱글 후기 진행도나 전투 완주를 입증하는 검사가 아니다. 실제 AI 전투 완주는 별도의 노멀/하드 캠페인 영수증으로 확인한다.
-
-테스트 프로필은 캠페인뿐 아니라 로컬 설정과 HUD 배치 파일도 분리한다. 프로필 없는 검사 요청은 일반 저장으로 대체하지 않고 거절한다. 각 실행 전후 일반 저장·설정 등 파일을 백업하고 지문을 대조한다. Unity/ 아래 엔진 분석·셰이더 캐시는 별도의 전후 지문으로 기록한다. 첫 검사에서 이 엔진 캐시 추가가 전체 폴더 지문 차이로 잡혔으며, 제품 저장과 혼동하지 않도록 보고서를 구분했다. 검사 도구는 자신이 생성한 프로세스만 종료하며 Steam이나 사용자 게임을 종료하지 않는다. 기록된 프레임 간격·GC·메모리는 무화면 조건의 관측값이고, GPU/사람4인 성능이나 밸런스 판정이 아니다.
-
-격리 실행 중 발견한 도구 문제도 보완했다. Null 그래픽 장치에서는 물리 도형만 생성하고 렌더 재질 설정을 하지 않는다. 실제 그래픽 장치의 셰이더 오류 검사는 유지한다. UTF-8 결과 파일의 한글 경로를 명시적으로 디코딩한다. 자동 종료는 기존 `DisconnectConfirmed` 세션 정리를 거쳐 일반 종료 확인창에 막히지 않게 했다. 실패했던 실행과 영수증은 별도 case 폴더에 그대로 남긴다.
-
-기본 Steam App ID는 0이며 임의 샘플 ID를 설정하지 않는다. 실제 마우스/키보드 조작·사람 플레이는 사용자 보류 상태다. 명령 검사 통과를 실제 플레이·연결·성능 검증으로 대체하지 않는다.
-
-## 실제 실행 결과와 남은 단계
-
-아래 경로는 모두 `C:/Astella/branch-backups/resume-20261114-200225/` 아래다. 각 `results.json`은 커밋·입력 지문·프로세스 종료 코드·일반 저장 보존 지문과 개별 case 경로를 포함한다. case의 원본 UTF-8 JSON과 전체 로그를 근거로 사용한다.
-
-- `checks-guardian-routing-all/results.json`: 전투 수정 커밋 `d41e38a`, 31/31 통과, 실패0. 이후 개발 검사 도구 변경은 `checks-late-restore-committed/results.json`의 `e552781` 관리 런타임/에디터 컴파일 및 아래 실제 프로세스 검사로 확인했다.
-- `native-final-lan-two/results.json` 및 `native-final-lan-four/results.json`: `10c9b17` 빌드의 실제 2/4프로세스 UDP 연결·준비 복제·정상 종료 통과. 최초 동시 접속 fixture는 역할 도착 순서가 뒤바뀌어 실패했고, 역할/빌드/준비 확정 후 다음 클라이언트를 실행하도록 수정했다. 제품의 역할 중복 제한은 유지했다. 이후 전투 AI/검사 도구 변경은 전송·로비·역할 소유 규칙을 변경하지 않았다.
-- `native-save-resume-deep/results.json`: 최종 `e552781` 빌드에서 일반/하드 각각 실제 출발 저장→정상 종료→새 프로세스 이어하기 통과. 4개 case 모두 생성 데이터 표시false, 일반 사용자 파일 지문 보존, 종료코드0. 같은 런/프로필과 다른 세션/도전 ID, 비기본 빌드·파티 HP/자원/충전·이전 기록·난수/시간·개인 보상/파일 불변을 대조했다. 첫 준비 경계 검증이다. 이전 `native-single-fixed/`도 보존했다.
-- `native-restore-fixture-four/results.json`, `native-restore-fixture-six/results.json`: 최종 `e552781`에서 생성된 4/6스테이지 샘플을 일반/하드 각각 새 프로세스로 복원했다. 8개 case 모두 성공/일반 파일 보존/종료코드0. 카드3/5개와 극복/극대화 효과, V 해금, 파티 빌드·자원/충전·스테이지 기록/보스·난이도/난수/런 시간, 파일/개인 보상 불변을 검사했다. `generatedFixture=true`이며 실제 싱글 전투로 얻은 진행도로 해석하지 않는다.
-- `native-normal-routing-six/results.json`: `d41e38a` 노멀 실제 AI 1~6 연속 완주. 약636초, 재시도0/부활0, 클리어6/카드20(파티원별5), 완료 저장/정상 종료/일반 파일 보존/엔진 오류0.
-- `native-hard-extended-six/results.json`: `2480522` 하드 실제 AI 1~6 연속 완주. 약2,375초(39분35초), 재시도0/부활7회(각 스테이지의 부활4회 예산 안), 도전6회, 클리어6/카드20(파티원별5), 각 파티원 V 해금1개. 완료 저장/정상 종료/일반 파일 보존/엔진 오류0. 피해100%와 보스 수치를 유지했다.
-- `native-ai-normal-six/results.json`: `2990c59`, 기본 피해100%, 노멀 1~6 연속 완주. 실제 시간618.26초, 재시도0, 부활1회, 클리어6개, 확정 카드20개(파티원별5개), 파티원 모두 3스테이지 V 해금. Unity JSON 완료 체크포인트 검증 및 정상 종료 통과. 엔진 오류0.
-- `native-ai-hard-six/results.json`: 이전 `10c9b17`에서는 약140초에 1스테이지 AI 전멸로 실패했다. 엔진 오류0, 부활4회 소진, 일반 파일 지문 보존. 앞선 `final-ai-stage-one/results.json`의 약161초 전멸도 보존했다. 후속 통과가 이 실패 기록을 대체하거나 밸런스 검증을 뜻하지 않는다.
-
-하드 실패 로그에는 카운터3회·무력화2회 성공, 봉쇄 피격3회, 힐러에 부활3회/레인저에1회 사용, 이후 공명 분담 인원4→2→1 감소가 기록됐다. 피격 횟수는 공격 이벤트이며 고유 인원 수와 구분한다. 단순히 카운터가 전혀 실행되지 않은 상태는 아니다. `GuardianHardDestination`의 봉쇄 탈출은 열린 균열 밖 한 점으로 직진하고, 네이티브 충돌은 벽을 막으므로 경유 이동/사전 위치 선정이 다음 AI 조사 지점이다. 실제 피격 순간 위치·치유 내역을 이 로그만으로 확정할 수 없어 원인 가설로 남긴다. 보스 체력·피해·공격 간격을 변경해 성공으로 만들지 않았다.
-
-### 하드 AI 후속 조사·수정
-
-`00e492f`의 `native-hard-tactic-trace/`에 0.25초 간격 실제 위치·HP·시전·단계·열린 균열 위치를 기록했다. `tactics.csv`는 명시적인 격리 개발 검사에서만 생성하고 AI 목적지 함수를 호출하지 않는 관측이다. 해당 실행도 1스테이지 약167초에 전멸했다. 봉쇄 종료 직전 근딜 `(-11.2201,-1.2960)`, 원딜 `(-10.4910,-3.5507)`이 벽 안쪽에 남고 열린 균열은 `(-11.5911,-3.1058)`에 있는 것을 확인했다.
-
-`d41e38a`에서 `GuardianNormalData.cs`/`BossGuardianHard.cs`의 AI 경로를 보완했다. 조준선의 같은 쪽에서 균열 근처로 미리 모이고, 벽 안쪽 경유점에 맞춘 뒤 열린 틈으로 나온다. 이미 밖으로 나간 AI는 안으로 되돌아오지 않는다. `RaidReplacementAI.cs`는 기존 직업만 적용하던 이동기 선택 조건에 새 9키 직업도 포함한다. 보스 수치·공격 시간·회전 제한·AI 반응 설정·플레이어 입력/이동 충돌은 유지한다.
-
-하드 상태/기하2,547개, 노멀20,048개 및 `checks-guardian-routing-all/results.json`의 31/31 묶음이 통과했다. 순수 계산 검사는 실제 기록의 시작점과 기존 6초 창을 사용하고, 벽 회전별 조준선/캐릭터 반경·균열 폭·벽 내부 경유를 검사한다. 이를 실제 엔진 충돌 검증과 구분한다.
-
-후속 실제 실행은 `native-hard-routing-six/`, `native-normal-routing-six/`다. 노멀은 약636초에 재시도0/부활0, 클리어6/카드20, 파티원별 카드5개, 완료 저장/정상 종료/일반 파일 보존으로 통과했다. 하드는 1~5 클리어 뒤 6스테이지 전투 중 검사 자체의1,800초 제한으로 종료됐다. 전멸이나 엔진 오류가 아니라 시간 제한 실패이며, 완료 판정은 하지 않는다. 이 실측에 맞춰 개발 검사/launcher의 허용 상한을3,600초로 늘리고, AI 6단계 검사의 기본 제한도3,600초로 정한다. 게임 전투 시간·체력·피해는 유지한다.
-
-하드 첫 봉쇄는 균열 유도 실패로 피격4회였으므로 모든 AI 기믹을 해결했다고 주장하지 않는다. 두 번째 완전 봉쇄에서는 실제 열린 균열 `(0,-12)`을 통해 4명이 모두 반경12.65~14.88로 벽 밖에 나가고 피격0회가 기록됐다. 최종 하드 완주/저장은 `2480522`의 `native-hard-extended-six/`에서 통과했다. 전투 코드/수치는 `d41e38a`와 같다. `2480522`는 개발 검사 시간 상한/기본 제한 변경이고, `e552781`의 추가 변경은 생성 데이터 복원 검사/영수증이다. 이후 전투 코드는 바꾸지 않았다.
-
-원격도 추가 대조했다. GitHub 브랜치 검색의 끝 페이지와 `git ls-remote --heads origin` 모두 `ingame-move-system` 하나만 반환했다. HEAD는 로컬 캐시와 같은 `f80d0c5476cd1e6f49be2adde3e39610c810014e`(2026-10-21)이며 `remote-audit.json`에 기록했다. 최근 개발 변경은 원격의 별도 최신 브랜치가 아니라 보존한 로컬 브랜치/worktree에 있다.
-
-노멀 완주 과정의 무화면 관측은 평균 프레임 간격26.31ms, 시작 로딩 포함 최대835.63ms, Unity 할당 메모리 최대100.03MiB였다. 이 실행은 AI·로그·컴파일 검사 병행 환경이며 GPU 렌더링과 사람 입력이 없다. 출시 성능 기준이나 4인 실플레이 FPS 판정으로 사용하지 않는다.
-
-Steam 2→4인 검증에는 유효한 아스텔라 App ID, 서로 다른 테스트 계정과 PC가 필요하다. 현재 설정은0이고 프로세스/사용자/시스템 환경에도 App ID가 없다. 환경 정보는 요청한 상태이며 실제 Steam 연결은 미완료다. 실제 사람 플레이·마우스/키보드·HUD 가독성·공격 예고 시각·GPU 성능은 사용자 보류를 유지한다. 고정4직업 한 초기 빌드의 AI 완주를 모든 직업/기원·모든 난수·사람 플레이·밸런스 검증으로 해석하지 않는다.
-
-원본에서 추후 확인할 때는 `Builds/AstellaWindows/BUILD_RECEIPT.json`과 빌드 입력 지문을 먼저 대조한다. 사용자 보류가 해제된 뒤 원본 폴더에서 비기본 탱커/힐러 빌드 출발·이어하기, 노멀/하드 공격 예고와 HUD, Steam 2→4인 준비/전투/재접속을 순서대로 확인한다. 통합 worktree를 Unity로 열지 않는다.
-
-## 변경 검토 위치
+스크립트는 모두 `Assets/Scripts/` 아래다. 씬·프리팹·GUID 수정은 없다.
 
 | 파일 | 검토할 변경 |
 | --- | --- |
-| `Assets/Scripts/CharacterActor.cs` | 모든 새 9키 직업의 출발 빌드 보존. 이전 런 진행/카드/V 해금은 초기화 |
-| `Assets/Scripts/PartyBotAI.cs`, `RaidCombatWorld.cs` | 전투 준비에서 네이티브 봇 GCD를 준비 상태로 초기화. 일반 부활은 쿨타임을 유지 |
-| `Assets/Scripts/GuardianNormalData.cs`, `BossGuardianHard.cs`, `RaidReplacementAI.cs` | 하드 봉쇄 AI의 조준선 옆 사전 이동·벽 안 경유·균열 탈출 및 새 9키 직업 이동기 선택 |
-| `Assets/Scripts/AiSpectatorDevelopment.cs`, `RaidPrimitive.cs` | 명시적인 격리 개발 검사와 Null 그래픽 장치 처리. 일반/릴리스 입력 흐름과 실제 GPU 셰이더 검사는 유지 |
-| `Assets/Scripts/CampaignStorage.cs`, `LocalSettingsRuntime.cs`, `LocalHUDLayoutController.cs` | 검사 프로필 없는 실행 거절, 일반 저장/설정/HUD와 테스트 데이터 분리 |
-| `Assets/Scripts/Editor/RaidMultiplayerBuild.cs` 및 UI 자동 설치 도구 | 활성 HUD 필수 연결 검사, 배치 빌드 중 사용자 편집 UI 자동 설치/재배치 방지 |
-| `Tests/Run-StudioChecks.ps1`, `Build-Part1Windows.ps1`, `Run-HeadlessResumeChecks.ps1` | 전체 검사 선택, 원본만 빌드, 소스/자산/산출물 지문, 실행 중 출력 파일 보호, 격리 실제 프로세스 영수증 |
-| `Tests/DepartureBuildTests.cs`, `ResumeScenarioTests.cs` 및 오류 보고 검사 | 발견 결함 회귀, 고정 4직업 6단계 상태/파일 왕복, 기존 오류 보고 회귀 |
+| `LocalCameraSettingsUI.cs` | 기존 조작표 확장·재열기 위치와 G/스킬1 행 분리 |
+| `AstellaBossHUDV4.cs` | 그로기 때 시전바와 공격 대상 줄 분리 |
+| `CharacterFrameworkUI.cs` | 적 대상 스킬 버튼과 기억한 공격 대상의 판정 일치 |
+| `CombatMetricsUI.cs` | 직렬화된 결과 버튼을 초기 연결 시 재사용 |
+| `LocalHUDDragHandle.cs` | 드래그 원점을 pressPosition으로 보완. 실제 드래그는 미확정 |
+| `RaidConnectionUI.cs` | 안내 문구가 없어도 전투 메뉴 표시 |
+| `RaidNetworkSession.cs` | 씬 정리 중 파괴된 avatar 제외 |
 
-원본 HEAD와 인덱스는 기존 상태를 보존했다. 검토한 파일만 원본 작업 파일에 반영했으며, 원본 인덱스 SHA256은 `ce345c2144a658aa620262e9f99f1b5c0fa36a1ea44789cb5a51ea857cc59c48`이다. 작업 worktree에는 Library를 만들지 않았다. 씬·프리팹 YAML/기존 GUID는 수정하지 않았다.
+`Tests/ControlsFormLayoutTests.cs`, `CombatMetricsModalTests.cs`, `OrderedPartyTests.cs`와 각 실행기에서 관련 회귀를 확인한다. 조작표 검사는 ClickMove 체인에, 파티 정리는 Network 체인에 연결했다. 최신 Network 체인에서는 프로토콜·파티/부활·이동·결과 모달·실제 행동/대상 선택 회귀와 관리 런타임/에디터 컴파일이 통과했다. 실제 Unity의 입력·씬 수명 확인은 별도 GUI 실행으로 대조했다.
 
-현재 빌드 입력 SHA256은 `9863cee4ba2836814ac55fc57aa2f92fe4939f1919b46a6cbedac0fb99bd9676`다. 빌드 영수증의 코드 커밋은 `e552781d565bbbbb096bc181428ac81a4c091aae`다. 이후 문서 변경은 같은 빌드 입력을 유지한다. 이전 빌드와 실행 증거도 별도로 보존했다. 실제 Steam 연결이 남아 있으므로 전체 재개 목표는 완료로 처리하지 않는다.
+## 다음 확인
+
+1. 하드의 이번 건슬링어 조합·난수를 고정해 사망 직전 위치/HP/피해/치유를 조사한다. 힘겨루기 해제 충격파·Sweep 이후 힐러 생존이 우선 조사 구간이다. 다른 조합·난수의 결과는 분리한다.
+2. 물리 키보드로 이동·스킬·상호작용·단축키·재바인딩, 물리 마우스로 HUD 드래그를 확인한다. 이번 자동화 입력 미수신을 게임 입력 결함으로 확정하지 않는다.
+3. 유효한 아스텔라 Steam App ID와 별도 테스트 계정·PC로 실제2→4인 준비·전투·재접속을 검증한다. 현재 App ID는0이며 임의 샘플 ID를 넣지 않는다.
+4. 사람 조작의 일반 싱글 후기 전투·저장, 모든 직업/기원, 공격 예고/HUD 가독성, 실제 FPS·GPU 프레임·GC를 확인한다. 스킬 아이콘·최종 캐릭터/보스 mesh·rig 등 생산용 아트도 남아 있다.
+
+원본에서 확인할 때는 `Builds/AstellaWindows/BUILD_RECEIPT.json`과 입력 지문을 대조한다. 마우스 재현은 설정→조작창 반복 열기, 혼자 시작→이지스/불멸의 성벽→허수아비 선택→자신 선택→카운터, 개발 Stage6 preset→결과 닫기/재열기→메뉴/나가기→방 나가기 확인 순서다. 개발 preset은 UI 검사용이다. Unity가 필요한 검사는 원본 `C:/Astella/Astella`에서만 수행한다.
+
+개발 전체 완료나 출시 준비 완료로 판정하지 않는다. 실행·노멀 진행의 기반은 확인했지만 실제 Steam 연결, 하드 AI 안정성, 물리 입력과 사람4인 성능이 남아 있다.
