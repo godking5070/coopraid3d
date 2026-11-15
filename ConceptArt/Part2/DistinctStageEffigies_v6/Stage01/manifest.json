@@ -1,0 +1,76 @@
+{
+    "stage":  "01",
+    "title_ko":  "기억을 흘리는 정찰병",
+    "version":  "DistinctStageEffigies_v6",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "three_distinct_humanoid_subconcepts_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "family_reference":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+    "reference_policy":  "Selected Stage01 base visually inspected and supplied in each initial generation as style/human-proportion/theme family reference only. Head, chest shell and functional measuring artifact deliberately redesigned per concept; not three poses of identical unit. No other-stage image input.",
+    "design_comparison":  "01 hood/three closed slats + palm memory-sampling disk + protective curved ribs; 02 overlapping oval seal + asymmetric ribs + forearm caliper/latch; 03 flat twin-capped-optics cowl + convex side ribs + waist/wrist triangulation. Same humanoid scout/hourglass theme, clearly different appearances and small concepts.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "기억 수집의 봉인 정찰자",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-217d7f0e-5fe8-4e07-93b3-68a1a76edbdf.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+                                              "role":  "Same Stage01 family/style and human proportions only. Circular radial head and identical body plate template explicitly not preserved; each new design changes sealing head, chest shell and functional artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: new tapered observation hood with closed three-horizontal-slat inset replaces radial round source head. Palm measuring disk and curved protective rib leaves express memory collection. Broader thigh planes and overlapping shin shell distinguish appearance; human neck/chest/waist/pelvis and long legs retained. Chest-sized hourglass intact/aligned/internal sand. Complete hands, hood and feet inside frame; planted stance and connected palm/back parts. No natural face, source head copy or other-stage theme.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1702992,
+                       "sha256":  "5b7f975bf18bc5c9a49803bec919cb30ec82ce0beaeb3b008d7a32f970c436e6"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "감각을 잠그는 계측 봉인체",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-f17f59d6-1faa-405b-b849-60a50fe3b337.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+                                              "role":  "Same Stage01 family/style and human proportions only. Circular radial head and identical body plate template explicitly not preserved; each new design changes sealing head, chest shell and functional artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: split vertically overlapping oval seal mask with top physical latch is a genuinely different head from01/source. Asymmetric three oblique ribs versus curved opposite shell surround hourglass. Attached forearm caliper with jaws and waist link rods reads as perception measuring/shutoff function. Long human body, narrow waist, pelvis and full legs clear. Hourglass intact and aligned with internal sand only, all device ends and limbs in frame. No human face or same-pose-only clone.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1712116,
+                       "sha256":  "65cc40f5b14bcb9e53ad140b69b0eee613c4c3a2d563409363e13dd2ee8e732e"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "모래 분신의 차이를 재는 정찰상",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1caea-9904-7080-83f5-512095548110/exec-c03757ac-bbb5-45fe-ad28-9975240b706e.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage01/03-effigy.png",
+                                              "role":  "Same Stage01 family/style and human proportions only. Circular radial head and identical body plate template explicitly not preserved; each new design changes sealing head, chest shell and functional artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: low trapezoidal navy cowl with two small capped circular optics is distinct from01 horizontal slat hood and02 oval cover mask. Two convex side-rib shells, four upright waist measuring plates, wrist calibration blocks and connected wrist-to-waist cables create a sand-double triangulation function. Human proportions and long limbs preserved; hourglass intact/aligned/internal sand. Both open palms, feet and apparatus inside frame; no floating parts, face or unrelated stage mechanism.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1769404,
+                       "sha256":  "1f4bc3c0dbd7c1eb866bbf4e895ada798ddd4997cd8204dc43d059495f46207c"
+                   }
+               ],
+    "common_visual_qa":  "Three PNGs generated separately and individually visually inspected, then compared for changed head appearance, chest structure, leg shell and functional concept. All remain humanoid ritual scouts with chest-sized closed intact hourglass and internal golden sand, normal human waist/pelvis and long thighs/calves. Complete single full-body illustrations with grounded contacts and attached mechanisms. Existing files preserved. No actual 3D mesh or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

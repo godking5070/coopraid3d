@@ -1,0 +1,600 @@
+{
+    "project":  "ASTELLA",
+    "part":  1,
+    "stage":  5,
+    "difficulty":  "hard",
+    "version":  "JustitiaHardEvolution_v1",
+    "created_date":  "2026-11-14",
+    "status":  "generation_visual_qa_gallery_and_package_complete",
+    "objective":  "Part1JustitiaHard larger volume,bizarre and grotesque;5visualmutationtiers,3conceptseach",
+    "tool":  "built-in image_gen",
+    "isInline":  false,
+    "tier_count":  5,
+    "concepts_per_tier":  3,
+    "final_image_count":  15,
+    "generation_calls":  20,
+    "exact_prompt_files":  20,
+    "tiers":  [
+                  {
+                      "level":  1,
+                      "title":  "비대화의 시작",
+                      "scale":  "Already~1.5x old-hard torso volume. Shoulder/chest width~4original mask widths, much larger heavy hips/forearms/thighs, still immediately recognisable judicial statue."
+                  },
+                  {
+                      "level":  2,
+                      "title":  "불균형의 침식",
+                      "scale":  "~2x old-hard body volume, visibly heavier and less human than tier1. Shoulder/chest width~4.7original mask widths, strongly unequal limb masses."
+                  },
+                  {
+                      "level":  3,
+                      "title":  "판결기관으로 변이",
+                      "scale":  "~3x old-hard volume, clear body-horror artifact silhouette. Chest width~5.5original mask widths; enlarged torso itself, not just adornments."
+                  },
+                  {
+                      "level":  4,
+                      "title":  "성상의 붕괴",
+                      "scale":  "~4.5x old-hard volume, towering/monumental and visibly less human than tier3. Original mask looks tiny, body width~6.5mask widths, major shell deformation."
+                  },
+                  {
+                      "level":  5,
+                      "title":  "재판소의 괴물",
+                      "scale":  "~6x old-hard body volume, extreme terminal grotesque mutation. Preserve small original band-mask remnant for visual scale, huge deep torso/hip masses, silhouette mostly transformed."
+                  }
+              ],
+    "families":  [
+                     {
+                         "key":  "A",
+                         "id":  "overburden",
+                         "name":  "불균형 거신",
+                         "theme":  "Scale load deforms a bulky two-legged statue. Always EXACTLY TWO arms and TWO legs; one arm can become far larger, but both remain clearly rooted. One greatsword held in one or both hands, exactly two scale pans on rear beam. Strong diagonal unequal mass."
+                     },
+                     {
+                         "key":  "B",
+                         "id":  "hollow-verdict",
+                         "name":  "공허의 판결체",
+                         "theme":  "Opening blindfold/mask and rib shell turn a two-legged judging statue into a giant hollow judicial mouth/face-cage. Always EXACTLY TWO arms and TWO legs. No realistic biological mouth/teeth or human expression; serrated porcelain slabs, hinges and black voids. One sword, two balance pans, original blindfold fragment."
+                     },
+                     {
+                         "key":  "C",
+                         "id":  "tribunal-fusion",
+                         "name":  "재판소 융합체",
+                         "theme":  "Body fuses with tribunal throne and balance apparatus; mobile statue body progressively becomes a monstrous moving judicial reliquary. Tiers1-2 two arms/two legs; tiers3-5 EXACTLY FOUR support legs and TWO execution arms, with all roots/joints clearly visible. One greatsword, two pans and blindfolded mask remnant."
+                     }
+                 ],
+    "references":  {
+                       "normal":  "References/normal-reference.jpg",
+                       "hard":  "References/old-hard-reference.jpg"
+                   },
+    "source_originals":  [
+                             "../CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                             "../CharacterMatched/Stage5/02-justitia-hard-v1.png"
+                         ],
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "images":  [
+                   {
+                       "id":  "A-overburden",
+                       "tier":  1,
+                       "tier_title":  "비대화의 시작",
+                       "lineage":  "A",
+                       "lineage_name":  "불균형 거신",
+                       "title_ko":  "비대화의 시작 · 불균형 거신",
+                       "image":  "Level01/A-overburden.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-ac22ad4c-74c1-4f42-b613-1851771f4e0b.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-33aaa30b-f043-4e60-89e0-c825a5549099.png",
+                       "prompts":  [
+                                       "Level01/A-overburden.prompt.txt",
+                                       "Level01/A-overburden.refine.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity and cel rendering, not anatomy lock"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity; user requested substantially more bulk and grotesque mutation"
+                                          }
+                                      ],
+                       "visual_qa":  "Final framed image visually inspected against old hard: vastly broadened asymmetric torso and hips, enlarged unequal arms/gauntlets, two thick rooted legs, tiny blindfold mask and open rib spindle. One large sword, exactly two hanging scale pans, one loaded weight. Selected ivory/navy/brass cel family maintained. Whole beam/pans/sword/head/feet now contained with ample margins.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2003296,
+                       "sha256":  "6da0a163b4bb79f05722429489d67940029070a5f3ffdac7899d0e758f603515",
+                       "notes_ko":  "크게 팽창한 흉곽·골반과 비대칭 팔. 한쪽 접시의 추로 무게가 기울어진 시작형.",
+                       "manifest":  "Level01/manifest.json"
+                   },
+                   {
+                       "id":  "B-hollow-verdict",
+                       "tier":  1,
+                       "tier_title":  "비대화의 시작",
+                       "lineage":  "B",
+                       "lineage_name":  "공허의 판결체",
+                       "title_ko":  "비대화의 시작 · 공허의 판결체",
+                       "image":  "Level01/B-hollow-verdict.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-0ae6f47b-d6f2-421f-b8bd-9205a1d83548.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-68b1c45d-9c7a-47c3-9a4c-41d23fd7968a.png",
+                       "prompts":  [
+                                       "Level01/B-hollow-verdict.prompt.txt",
+                                       "Level01/B-hollow-verdict.refine.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity and cel rendering, not anatomy lock"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity; user requested substantially more bulk and grotesque mutation"
+                                          }
+                                      ],
+                       "visual_qa":  "Final framed image inspected: broad swollen crescent chest shells open to one deep navy cavity, small hinged eye-band with dark face slit, enlarged collar/arms/hips/thighs. Two arms/two legs, one sword and two empty scale pans visible. Much bulkier than old slim hard, mild opening/deformation appropriate to first tier. Whole outline and apparatus framed.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2103032,
+                       "sha256":  "4c0ca8fb395c4655b73d25d69da6ce96d911eecc18bb8dd9c51f470144e4f9d7",
+                       "notes_ko":  "눈가리개가 열리고 흉부 외피 사이에 남색 공동이 드러난 형태.",
+                       "manifest":  "Level01/manifest.json"
+                   },
+                   {
+                       "id":  "C-tribunal-fusion",
+                       "tier":  1,
+                       "tier_title":  "비대화의 시작",
+                       "lineage":  "C",
+                       "lineage_name":  "재판소 융합체",
+                       "title_ko":  "비대화의 시작 · 재판소 융합체",
+                       "image":  "Level01/C-tribunal-fusion.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-fff110cc-a916-4da6-9086-3815d743efd5.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-f373f826-b813-41b3-bcb8-c559de3c30b5.png",
+                       "prompts":  [
+                                       "Level01/C-tribunal-fusion.prompt.txt",
+                                       "Level01/C-tribunal-fusion.refine.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity and cel rendering, not anatomy lock"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity; user requested substantially more bulk and grotesque mutation"
+                                          }
+                                      ],
+                       "visual_qa":  "Final framed image inspected: bulky throne/coffin-like back/torso shell and widened plate hips, tiny blindfold mask, two rooted arms and two thick articulated legs. One sword across low front, two chain-hung pans at different heights, thick spinal scale support. Clear branch identity distinct from A/B; full beam/pans/body/sword contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2050387,
+                       "sha256":  "3f05b516639e93f2657670588719f5ce28f9949a5b0f64676ecbce0ed770fd85",
+                       "notes_ko":  "왕좌 같은 등판과 두꺼워진 몸통·골반. 아직 두 다리의 성상 흔적을 유지.",
+                       "manifest":  "Level01/manifest.json"
+                   },
+                   {
+                       "id":  "A-overburden",
+                       "tier":  2,
+                       "tier_title":  "불균형의 침식",
+                       "lineage":  "A",
+                       "lineage_name":  "불균형 거신",
+                       "title_ko":  "불균형의 침식 · 불균형 거신",
+                       "image":  "Level02/A-overburden.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-98c368da-c5ae-4e98-81e1-2db47191c3df.png",
+                       "prompts":  [
+                                       "Level02/A-overburden.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity, slim tame anatomy to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level01/A-overburden.png",
+                                              "role":  "Previous tier of same lineage, directly evolved in mass and deformation"
+                                          }
+                                      ],
+                       "visual_qa":  "Compared with tier1A: one forearm/gauntlet grows almost to ground and dwarfs opposite sword arm; loaded pan hangs low beside giant arm, torso/scapular mass visibly leans diagonally, head displaced toward smaller side. Two rooted legs, two actual arms, one sword, two pans, no duplicated limbs. Clearly greater asymmetry and body deformation. Entire beam/pans/sword/feet inside frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2037915,
+                       "sha256":  "10f9b5ee8b2adf8e2f472f8864f697a05746222f0cbbe96f3c0bbf11e45169e1",
+                       "notes_ko":  "지면 가까이 내려오는 거대 팔과 몸을 비트는 천칭의 무게.",
+                       "manifest":  "Level02/manifest.json"
+                   },
+                   {
+                       "id":  "B-hollow-verdict",
+                       "tier":  2,
+                       "tier_title":  "불균형의 침식",
+                       "lineage":  "B",
+                       "lineage_name":  "공허의 판결체",
+                       "title_ko":  "불균형의 침식 · 공허의 판결체",
+                       "image":  "Level02/B-hollow-verdict.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-5e4686f6-9a71-4b1c-a98d-9c0a5a563307.png",
+                       "prompts":  [
+                                       "Level02/B-hollow-verdict.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity, slim tame anatomy to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level01/B-hollow-verdict.png",
+                                              "role":  "Previous tier of same lineage, directly evolved in mass and deformation"
+                                          }
+                                      ],
+                       "visual_qa":  "Compared with tier1B: original eye-band/mask halves open on side hinges to a wholly empty navy face, no pretty human features; expanded hunch/collar, broad cavity rib torso, enlarged abdomen/hip bearing and heavier thighs/arms. Exactly2arms/2legs,1sword/2pans. Full silhouette safely contained, stronger hollow-body grotesque direction than tier1.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2143597,
+                       "sha256":  "7e41c327aeb5687313fc86bb8a96a1a7371d767d200a165e031a39ef4af83a0e",
+                       "notes_ko":  "갈라진 안면과 비어 있는 얼굴, 더 두꺼운 흉곽·복부.",
+                       "manifest":  "Level02/manifest.json"
+                   },
+                   {
+                       "id":  "C-tribunal-fusion",
+                       "tier":  2,
+                       "tier_title":  "불균형의 침식",
+                       "lineage":  "C",
+                       "lineage_name":  "재판소 융합체",
+                       "title_ko":  "불균형의 침식 · 재판소 융합체",
+                       "image":  "Level02/C-tribunal-fusion.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-e4751d9e-2998-47fd-beb8-a1e6527dbc8e.png",
+                       "prompts":  [
+                                       "Level02/C-tribunal-fusion.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity, slim tame anatomy to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level01/C-tribunal-fusion.png",
+                                              "role":  "Previous tier of same lineage, directly evolved in mass and deformation"
+                                          }
+                                      ],
+                       "visual_qa":  "Compared with tier1C: torso and pelvic throne-coffin casing are markedly deeper/wider, massive layered side shells, tiny blindfold-mask set into upper front and broad central coffin plate. Exactly2arms/2legs at this tier, one sword held across low front with readable hands, two large hanging pans. Coherent expanded judicial mass; whole body/beam/weapon/feet visible.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2136766,
+                       "sha256":  "0f1e7613c9403affaf6946d296781ed502cff3a697067a95d884b06b80a2a31f",
+                       "notes_ko":  "관처럼 부푼 몸통과 측면 외피, 작아진 얼굴과 육중한 두 다리.",
+                       "manifest":  "Level02/manifest.json"
+                   },
+                   {
+                       "id":  "A-overburden",
+                       "tier":  3,
+                       "tier_title":  "판결기관으로 변이",
+                       "lineage":  "A",
+                       "lineage_name":  "불균형 거신",
+                       "title_ko":  "판결기관으로 변이 · 불균형 거신",
+                       "image":  "Level03/A-overburden.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-83895861-9d63-4d61-80cb-e670ecc1e7dd.png",
+                       "prompts":  [
+                                       "Level03/A-overburden.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level02/A-overburden.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Tier3 compared with tier2A: much smaller trapped band-mask relative to massive swollen asymmetric upper body, deep oblique open split/bridged brass fulcrum, giant grounded counterweight arm with clear digits and separate sword arm. Two broad leg roots and feet, one greatsword and two pans (one weighted). Increased body mass and dehumanisation read beyond armor size. Full silhouette and beam/pans complete.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2067151,
+                       "sha256":  "9174a2c5fcde66335622ed638834b1c2571e72d3369c539eafe0fbdc2021434e",
+                       "notes_ko":  "작은 얼굴이 큰 몸 안으로 파묻히고 하중축이 비틀어진 거신.",
+                       "manifest":  "Level03/manifest.json"
+                   },
+                   {
+                       "id":  "B-hollow-verdict",
+                       "tier":  3,
+                       "tier_title":  "판결기관으로 변이",
+                       "lineage":  "B",
+                       "lineage_name":  "공허의 판결체",
+                       "title_ko":  "판결기관으로 변이 · 공허의 판결체",
+                       "image":  "Level03/B-hollow-verdict.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-f2e031f7-375a-470b-9be2-aafec8d6de17.png",
+                       "prompts":  [
+                                       "Level03/B-hollow-verdict.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level02/B-hollow-verdict.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Tier3 compared with tier2B: small blindfold-mask withdrawn into hollow upper chest collar, large fixed ivory jaw-like collar doors frame it; broader open ribcage, thick hip bearing and rooted forearms/legs. One hand grips sword hilt, other braces shell edge, exactly2arms/2legs/2pans. Clear head displacement and shell-body fusion; all body/weapon/beam ends visible.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2140025,
+                       "sha256":  "a60aaaf7152a320c03059547eb902f28b54e9534f2bc13970d2f596620b48976",
+                       "notes_ko":  "머리가 흉부로 함몰되고, 목둘레의 가면이 크게 벌어진 판결체.",
+                       "manifest":  "Level03/manifest.json"
+                   },
+                   {
+                       "id":  "C-tribunal-fusion",
+                       "tier":  3,
+                       "tier_title":  "판결기관으로 변이",
+                       "lineage":  "C",
+                       "lineage_name":  "재판소 융합체",
+                       "title_ko":  "판결기관으로 변이 · 재판소 융합체",
+                       "image":  "Level03/C-tribunal-fusion.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-633cfd5e-acdd-47f1-be5e-028f4222e7dd.png",
+                       "prompts":  [
+                                       "Level03/C-tribunal-fusion.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level02/C-tribunal-fusion.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Tier3 compared with tier2C: lower/deeper coffin-throne torso with FOUR distinct huge articulated support legs and grounded feet at separate corner sockets, two actual execution arms, one greatsword, two pans. Small banded mask embedded in front court-niche, body no longer ordinary human proportions. Four-leg change is explicit with coherent count, not duplicate accidental limbs. Full figure and relic complete.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2141617,
+                       "sha256":  "fa4a170c4557b01335050dc758970ba5e62aacc711cb194558499df143f33fa3",
+                       "notes_ko":  "네 개의 굵은 지지 다리가 전개된 이동식 재판소 형태.",
+                       "manifest":  "Level03/manifest.json"
+                   },
+                   {
+                       "id":  "A-overburden",
+                       "tier":  4,
+                       "tier_title":  "성상의 붕괴",
+                       "lineage":  "A",
+                       "lineage_name":  "불균형 거신",
+                       "title_ko":  "성상의 붕괴 · 불균형 거신",
+                       "image":  "Level04/A-overburden.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-88ba038b-5b41-4750-a7d4-aa9e26549159.png",
+                       "prompts":  [
+                                       "Level04/A-overburden.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level03/A-overburden.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Tier4 compared with tier3A: one very high swollen torso lobe/shoulder counter-tilts over tiny trapped band-mask and lowered opposite sword shoulder; enormous uneven arms and twisted open navy/brass load spine, pelvis counter-tilt, two huge rooted legs. One low-guard greatsword and exactly2weighted pans. Stronger anatomical imbalance, not only added plates. Whole beam/pans/body/sword inside frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2112213,
+                       "sha256":  "55720f70a7f6e379de65e2c10b3565ce1ecb689ed111757af40770c092e321b3",
+                       "notes_ko":  "높낮이가 극단적으로 다른 몸통과 한쪽으로 쏠린 거대 손.",
+                       "manifest":  "Level04/manifest.json"
+                   },
+                   {
+                       "id":  "B-hollow-verdict",
+                       "tier":  4,
+                       "tier_title":  "성상의 붕괴",
+                       "lineage":  "B",
+                       "lineage_name":  "공허의 판결체",
+                       "title_ko":  "성상의 붕괴 · 공허의 판결체",
+                       "image":  "Level04/B-hollow-verdict.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-832b2b59-31b4-4796-be03-bb6265c95a8a.png",
+                       "prompts":  [
+                                       "Level04/B-hollow-verdict.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level03/B-hollow-verdict.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Tier4 compared with tier3B: expanded torso is a giant architectural gaping mask-arch with large fixed hinged ivory jaw-doors and vast navy interior, original tiny blindfold-mask imprisoned much lower. Two giant rooted execution arms, one sword, two broad legs and two pans. One hand visibly opens shell door, no normal head/neck above. Full outline shown.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2157510,
+                       "sha256":  "6c57a638e1ed60f8262adb40e091547d90b52950fd5d9b685ced1f69c9849e17",
+                       "notes_ko":  "몸통 전면이 거대한 빈 가면 입구로 변하고 원래 얼굴은 아래에 갇힘.",
+                       "manifest":  "Level04/manifest.json"
+                   },
+                   {
+                       "id":  "C-tribunal-fusion",
+                       "tier":  4,
+                       "tier_title":  "성상의 붕괴",
+                       "lineage":  "C",
+                       "lineage_name":  "재판소 융합체",
+                       "title_ko":  "성상의 붕괴 · 재판소 융합체",
+                       "image":  "Level04/C-tribunal-fusion.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-8a7c31b8-814a-4778-887d-a02b25654cf5.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-27fd740e-ec63-4668-840d-dbd06b17525a.png",
+                       "correction_reference":  {
+                                                    "path":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-27fd740e-ec63-4668-840d-dbd06b17525a.png",
+                                                    "role":  "Initial tier4C torso too upright; targeted whole carapace/posture correction"
+                                                },
+                       "refinement":  "Anatomy/posture redesigned into low horizontal four-legged relic, not merely a framing edit",
+                       "prompts":  [
+                                       "Level04/C-tribunal-fusion.prompt.txt",
+                                       "Level04/C-tribunal-fusion.redesign.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level03/C-tribunal-fusion.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Initial tier4C was too upright/armored; final targeted anatomy redesign reviewed. Body is now a low horizontal swollen judicial coffin/carapa​ce with large asymmetrical hollow fissures, brass spinal fulcrum, tiny banded face trapped under low front brow, no human rider/upright torso. FOUR distinct grounded pillar legs at separate roots, TWO upper-front execution arms, one low greatsword and two hanging cage-bowl pans. All major tips visible; broader crouching silhouette strongly differs from tier3.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2227574,
+                       "sha256":  "1d1d548116722a475d553cf27dc2adaffaf376b1cf41c6629164024d0e0eef35",
+                       "notes_ko":  "몸통이 가로로 접혀 낮게 기어가는 관·재판소 융합 괴물.",
+                       "manifest":  "Level04/manifest.json"
+                   },
+                   {
+                       "id":  "A-overburden",
+                       "tier":  5,
+                       "tier_title":  "재판소의 괴물",
+                       "lineage":  "A",
+                       "lineage_name":  "불균형 거신",
+                       "title_ko":  "재판소의 괴물 · 불균형 거신",
+                       "image":  "Level05/A-overburden.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-3222c28a-e288-4cf6-bc75-6fe1f6072662.png",
+                       "prompts":  [
+                                       "Level05/A-overburden.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level04/A-overburden.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Final tier5 compared with tier4A: much tinier imprisoned blindfold-mask relative to expanded paired torso lobes, deepest oblique navy hollow/central fulcrum, colossal counterweight arm and massive articulated hand almost body-sized. Separate sword arm and two huge bowed legs remain clear. Exactly one greatsword and two weighted scale pans, no new anatomy debris. Strongest asymmetric mass endpoint; entire beam/pans/sword/hands/feet contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2191202,
+                       "sha256":  "945290190b567b0539ddb9051e14eee34acee7728bb5a9b03c7b2d9b6235a57c",
+                       "notes_ko":  "한쪽 팔이 몸체에 가까운 규모로 커진, 가장 불균형한 거신.",
+                       "manifest":  "Level05/manifest.json"
+                   },
+                   {
+                       "id":  "B-hollow-verdict",
+                       "tier":  5,
+                       "tier_title":  "재판소의 괴물",
+                       "lineage":  "B",
+                       "lineage_name":  "공허의 판결체",
+                       "title_ko":  "재판소의 괴물 · 공허의 판결체",
+                       "image":  "Level05/B-hollow-verdict.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-b14919eb-c916-4fc4-bb04-573a605d4fa4.png",
+                       "prompts":  [
+                                       "Level05/B-hollow-verdict.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level04/B-hollow-verdict.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Final tier5 compared with tier4B: entire hugely expanded swollen torso is a giant deep gaping judicial mask-cage with layered fixed porcelain jaw shells, small original mask trapped deepest near lower sternum, huge shoulder lobes and distorted pillar legs. Two actual rooted arms, one greatsword, two scale pans. More nonhuman and hollow volumetric than prior tiers, no ordinary head/hero torso. Full outline and all tips contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2234419,
+                       "sha256":  "67e400175b1c3b9119bcb26afbd629dc4e83a0d476b519ceec07141460f1c5f4",
+                       "notes_ko":  "흉곽 전체가 깊게 빈 가면 구조가 된 최대 변이형.",
+                       "manifest":  "Level05/manifest.json"
+                   },
+                   {
+                       "id":  "C-tribunal-fusion",
+                       "tier":  5,
+                       "tier_title":  "재판소의 괴물",
+                       "lineage":  "C",
+                       "lineage_name":  "재판소 융합체",
+                       "title_ko":  "재판소의 괴물 · 재판소 융합체",
+                       "image":  "Level05/C-tribunal-fusion.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-f12735fb-25bd-4695-82d6-8c70faaa6646.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-9d2b6c45-34b4-4a87-a07a-3008eb3e4576.png",
+                       "correction_reference":  {
+                                                    "path":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-9d2b6c45-34b4-4a87-a07a-3008eb3e4576.png",
+                                                    "role":  "Tier5C initial full design, framing-only pullback"
+                                                },
+                       "refinement":  "Camera widened to give both outside foot tips safe margins; design/pose/counts unchanged.",
+                       "prompts":  [
+                                       "Level05/C-tribunal-fusion.prompt.txt",
+                                       "Level05/C-tribunal-fusion.refine.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "Original normal identity/rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/CharacterMatched/Stage5/02-justitia-hard-v1.png",
+                                              "role":  "Old hard identity to supersede"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/orca/workspaces/coopraid3d/보스-컨셉아트/ConceptArt/JustitiaHardEvolution_v1/Level04/C-tribunal-fusion.png",
+                                              "role":  "Previous tier of same lineage, directly evolved"
+                                          }
+                                      ],
+                       "visual_qa":  "Final tier5 compared with corrected tier4C: still low horizontal and four-legged, now enormously deep/wide swollen tribunal/coffin carapace with multiple huge hollow fissures, exposed towering central brass fulcrum, tiny imprisoned low-front blindfold-mask. FOUR grounded support legs and TWO front execution arms remain distinct; one low greatsword and two hanging cage-like pans. Framing-only pullback reviewed after initial left/right margins were tight; final whole body/sword/pans/feet safely contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2197744,
+                       "sha256":  "123ab07c5072159a7b5bd7af3d0cda4f550f431a4fb34eca06a56d776b32a071",
+                       "notes_ko":  "네 다리로 버티는 거대한 판결 성유물. 몸과 재판소 장치의 완전한 융합.",
+                       "manifest":  "Level05/manifest.json"
+                   }
+               ],
+    "progression_audit":  "A:bulk and asymmetrical arm/load increase,mask progressively dwarfed. B:eye/mask opening,head recess,giant torso void/jaw-door mutation. C:throne/coffin body thickens,4support legs at3,low horizontal creature at4,huge4leg tribunal at5. Every final visually reviewed against original and prior same-lineage tier.",
+    "image_qa":  "All15completebosses visually inspected;one sword,two pans,blindfold motif and cel palette. A/B2arms2legs. Ctiers1-2twoarms2legs,tiers3-5twoarms4clear support legs. Tier1framing3corrections,tier4Canatomyredesign,tier5Cframingcorrection completed.",
+    "file_qa":  "All15PNGdecoded1536x1024andSHA256matchedtiermanifests. Originalnormal/hardhashesmatchedandremainunchanged.",
+    "limitations":  "Visual art progression,not measured mesh volume or verified3Drigs;all15newconcepts pendinguserselection. Previous preferred gallery and fixed selections preserved.",
+    "verification":  "verification.json",
+    "package":  "../JustitiaHardEvolution_v1.zip"
+}

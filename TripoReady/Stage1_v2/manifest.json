@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 2,
+  "project": "ASTELLA",
+  "stage": 1,
+  "boss": "마을의 수호 석상",
+  "date": "2026-11-10",
+  "generator": "built-in image_gen; deterministic fixed-slot raster assembly",
+  "views": [
+    "front",
+    "left",
+    "right",
+    "back"
+  ],
+  "cameraConvention": {
+    "up": "+Y",
+    "front": "+Z",
+    "characterRight": "+X",
+    "left": "camera at subject -X; face points screen right",
+    "right": "camera at subject +X; face points screen left"
+  },
+  "inputGroups": [
+    {
+      "id": "normal-body",
+      "folder": "Bodies/Normal",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "hard-body",
+      "folder": "Bodies/Hard",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false,
+      "wings": false
+    },
+    {
+      "id": "accessory-set",
+      "folder": "Accessories",
+      "count": 4,
+      "size": [
+        3200,
+        1800
+      ],
+      "contents": [
+        "stone club",
+        "shield",
+        "one hard wing module"
+      ],
+      "layout": "accessory-layout.json",
+      "slotOrderFixedAcrossViews": true,
+      "wholeSheetMirrored": false
+    },
+    {
+      "id": "clock-gate",
+      "folder": "Buildings/ClockGate",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "house",
+      "folder": "Buildings/House",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "plinth",
+      "folder": "Buildings/Plinth",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    }
+  ],
+  "floor": {
+    "path": "Floor/top.png",
+    "count": 1,
+    "size": [
+      1254,
+      1254
+    ],
+    "use": "flat floor layout/color reference",
+    "seamless": false,
+    "pbrSet": false
+  },
+  "modelingInputPngCount": 25,
+  "referenceOnlyPngCount": 3,
+  "guide": "START_HERE_KO.txt",
+  "prompts": "GenerationPrompts",
+  "qa": "verification.json",
+  "limitations": [
+    "AI-generated view references, not calibrated renders of one 3D mesh",
+    "Fixed sheet coordinates do not guarantee exact geometry across views",
+    "Accessories may need separation and cleanup after reconstruction",
+    "Wing joints and animation require DCC work after humanoid rigging"
+  ],
+  "performed": {
+    "tripoGeneration": false,
+    "mixamoRigging": false,
+    "gameCodeChanges": false
+  }
+}

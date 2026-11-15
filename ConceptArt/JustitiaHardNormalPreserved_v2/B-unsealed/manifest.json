@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "direction": "B-unsealed",
+  "mode": "built-in image_gen",
+  "images": [
+    {
+      "id": "B",
+      "title_ko": "개방된 판결",
+      "image": "01-boss.png",
+      "prompts": [
+        "01-boss.prompt.txt",
+        "01-boss.refine.prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1dd47-cf4a-79c0-b762-79fbe42bee6c/exec-ba523926-4ee4-4c6a-a7e8-d1c5926ffc1b.png",
+      "initial_source": "C:/Users/godki/.codex/generated_images/01a1dd47-cf4a-79c0-b762-79fbe42bee6c/exec-a3995ce1-51d9-4adb-bc55-2e629dc2e275.png",
+      "references": [
+        {
+          "path": "ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+          "role": "sole initial identity reference and edit target"
+        },
+        {
+          "path": "C:/Users/godki/.codex/generated_images/01a1dd47-cf4a-79c0-b762-79fbe42bee6c/exec-a3995ce1-51d9-4adb-bc55-2e629dc2e275.png",
+          "role": "single targeted framing-correction edit target"
+        }
+      ],
+      "visual_qa": {
+        "status": "pass",
+        "reviewed_against": "ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+        "identity": "Same sculpted wavy ivory hairstyle, gold-edged blindfold and calm visible lower face; normal-size head; narrow waist and slender long limbs; tall navy collar and ivory/navy/gold star-accented ceremonial robe retained.",
+        "hard_changes": "Two modestly opened ivory chest panels expose a narrow brass spindle with restrained lavender light. Sharpened separated robe panels enlarge silhouette; rear beam has strained offset joints and exactly two unequal-height pans.",
+        "anatomy_equipment": "Exactly two arms, two legs, delicate hands, two feet, one broad greatsword and two chain-hung scale pans. No extra limbs, giant torso or hollow ring cavity.",
+        "framing": "1536x1024 landscape, one full-body character. Hair top approximately y=89; bottommost sword point approximately y=883. Beam tips, both pans, weapon and feet fully enclosed with comfortable margins.",
+        "style": "Clean polished 2D concept with ivory/navy/brass palette, lavender cel shadows and pale quiet backdrop. No text, inset, source sheet, gore, rust or photorealistic texture.",
+        "correction": "One targeted framing correction only; entire assembled subject reduced while design identity was preserved."
+      },
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1553085,
+      "sha256": "219a9f9124e485891eb0d00db016d27e9cbc291889ed2cad89aad734b0891ad3"
+    }
+  ]
+}

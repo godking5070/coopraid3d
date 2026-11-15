@@ -1,0 +1,72 @@
+{
+  "stage": 6,
+  "source": "C:/Astella/Astella/docs/part1/JANUS_NORMAL.md",
+  "units": "meters",
+  "up": "+Y",
+  "north": "+Z",
+  "footprint": {
+    "shape": "semicircle",
+    "center": [
+      0,
+      0,
+      0
+    ],
+    "radius": 20,
+    "validSide": "Z <= 0",
+    "flatNorthBoundary": "Z = 0",
+    "diameter": 40
+  },
+  "posts": [
+    {
+      "id": "post1",
+      "position": [
+        -12,
+        0,
+        -8
+      ]
+    },
+    {
+      "id": "post2",
+      "position": [
+        -5,
+        0,
+        -15
+      ]
+    },
+    {
+      "id": "post3",
+      "position": [
+        5,
+        0,
+        -15
+      ]
+    },
+    {
+      "id": "post4",
+      "position": [
+        12,
+        0,
+        -8
+      ]
+    }
+  ],
+  "initialBossPositions": {
+    "alpha": [
+      -5,
+      1,
+      -4
+    ],
+    "omega": [
+      5,
+      1,
+      -4
+    ]
+  },
+  "modules": {
+    "gate": "Buildings/GrandGate",
+    "repeatingBoundary": "Buildings/BoundaryRail",
+    "post": "Buildings/WinchPost"
+  },
+  "floorImage": "Floor/top.png",
+  "note": "World coordinates/footprint are authoritative layout references. AI floor inlay pixels are approximate; do not derive metric coordinates directly from the image."
+}

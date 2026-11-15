@@ -1,0 +1,84 @@
+﻿{
+    "status":  "passed",
+    "scope":  "All remaining Part1 stages 2-6",
+    "modelingPngCount":  133,
+    "promptCount":  191,
+    "stages":  [
+                   {
+                       "stage":  2,
+                       "inputPngCount":  25,
+                       "referencePngCount":  3,
+                       "promptCount":  33,
+                       "fourViewGroups":  6,
+                       "stageFiles":  65,
+                       "independentAuditStatus":  "passed_with_declared_reference_limits",
+                       "individualZip":  "astella-stage2-tripo-mixamo-4views-v1.zip",
+                       "zipSha256":  "b02d78a850827cd09aebca193801791db2c6d2f752c746c494caf9da551d2a22",
+                       "zipEveryFileMatchesSource":  true
+                   },
+                   {
+                       "stage":  3,
+                       "inputPngCount":  25,
+                       "referencePngCount":  3,
+                       "promptCount":  43,
+                       "fourViewGroups":  6,
+                       "stageFiles":  76,
+                       "independentAuditStatus":  "passed_with_declared_reference_limits",
+                       "individualZip":  "astella-stage3-tripo-4views-v1.zip",
+                       "zipSha256":  "fe8007d52dc0cb38e06891ee02147c354f73d320ad30963a1877953e388222ba",
+                       "zipEveryFileMatchesSource":  true
+                   },
+                   {
+                       "stage":  4,
+                       "inputPngCount":  25,
+                       "referencePngCount":  3,
+                       "promptCount":  35,
+                       "fourViewGroups":  6,
+                       "stageFiles":  67,
+                       "independentAuditStatus":  "passed",
+                       "individualZip":  "astella-stage4-tripo-mixamo-4views-v1.zip",
+                       "zipSha256":  "eb41a419af2fc1a0e38a257d299c1291e5e98fc220d8266918c38256b3eaaa9b",
+                       "zipEveryFileMatchesSource":  true
+                   },
+                   {
+                       "stage":  5,
+                       "inputPngCount":  25,
+                       "referencePngCount":  3,
+                       "promptCount":  41,
+                       "fourViewGroups":  6,
+                       "stageFiles":  73,
+                       "independentAuditStatus":  "passed",
+                       "individualZip":  "astella-stage5-tripo-mixamo-4views-v1.zip",
+                       "zipSha256":  "369e1229992b7c6dd5cf031e1c798949e97b634d17002db885ca7c978392275e",
+                       "zipEveryFileMatchesSource":  true
+                   },
+                   {
+                       "stage":  6,
+                       "inputPngCount":  33,
+                       "referencePngCount":  3,
+                       "promptCount":  39,
+                       "fourViewGroups":  8,
+                       "stageFiles":  80,
+                       "independentAuditStatus":  "passed_with_declared_reference_limits",
+                       "individualZip":  "astella-stage6-tripo-mixamo-4views-v1.zip",
+                       "zipSha256":  "a32c3d57253a1dce5e668f654ae08deaf2c8b35a585498768a833727d811b6f6",
+                       "zipEveryFileMatchesSource":  true
+                   }
+               ],
+    "requirements":  [
+                         "Every stage includes normal/hard bodies in four separate views",
+                         "Janus Alpha/Omega each have normal/hard four-view bodies",
+                         "All accessories together in four fixed-layout sheets per stage",
+                         "Each stage has three architecture modules in four views plus one floor top view",
+                         "Independent visual and pixel audits passed for all five stages",
+                         "All five individual ZIPs rehashed and every entry equals current workspace source",
+                         "Stage3 custom mechanical rig and Stage4 additional-arm work explicitly documented"
+                     ],
+    "performed":  {
+                      "imageGeneration":  "built-in image_gen",
+                      "mixamoRigging":  false,
+                      "tripoGeneration":  false,
+                      "gameProjectEdits":  false
+                  },
+    "limitations":  "AI concept turnarounds; remaining projection and DCC assembly limitations are documented in each guide."
+}

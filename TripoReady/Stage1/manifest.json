@@ -1,0 +1,155 @@
+{
+  "scope": "Stage1 normal/hard Tripo inputs for subsequent Mixamo rigging",
+  "date": "2026-11-10",
+  "image_tool": "built-in image_gen",
+  "upload_image_count": 9,
+  "separate_model_generation_jobs": 5,
+  "jobs": [
+    {
+      "id": "01_Normal",
+      "kind": "humanoid_body",
+      "pose": "T_POSE",
+      "primary": "01_Normal/front.png",
+      "optional_multiview": true,
+      "images": [
+        {
+          "file": "01_Normal/front.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1316573,
+          "sha256": "06342ea158eb1275c7aeee516384e95ae70b21d54ca09963442ea51d5fc035d6"
+        },
+        {
+          "file": "01_Normal/left.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1201780,
+          "sha256": "85d388c399631a0a65836ff4320e4147a316d8dd3adc391d928d8e851608f67c"
+        },
+        {
+          "file": "01_Normal/back.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1294109,
+          "sha256": "9f69756cee18ce853105f8790747a30446348b6adfc45d05a9c8b56a6073db50"
+        }
+      ],
+      "separate_generation_job": true
+    },
+    {
+      "id": "02_Hard",
+      "kind": "wingless_humanoid_body",
+      "pose": "T_POSE",
+      "primary": "02_Hard/front.png",
+      "optional_multiview": true,
+      "images": [
+        {
+          "file": "02_Hard/front.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1312747,
+          "sha256": "5bd620dfd939ec08e00c201aabdf8d152247b50ed656a0b14b46f684f507543b"
+        },
+        {
+          "file": "02_Hard/left.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1169672,
+          "sha256": "192234bfc4e2c12613a6a2695e6237dfc10f65851f742fdc67909602e5bb5e79"
+        },
+        {
+          "file": "02_Hard/back.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1306267,
+          "sha256": "d9cd5018c1bfd7a9076db46e66c60006f3112c9f9e5ec47600601a5188e2461d"
+        }
+      ],
+      "separate_generation_job": true
+    },
+    {
+      "id": "03_Club",
+      "kind": "rigid_prop",
+      "pose": null,
+      "primary": "03_Club/input.png",
+      "optional_multiview": false,
+      "images": [
+        {
+          "file": "03_Club/input.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1127231,
+          "sha256": "b59d8a1ab80ee5d9025f2a2b83913ca761a3eb673b894c2bef67aad2d9c53497"
+        }
+      ],
+      "separate_generation_job": true
+    },
+    {
+      "id": "04_Shield",
+      "kind": "rigid_prop",
+      "pose": null,
+      "primary": "04_Shield/input.png",
+      "optional_multiview": false,
+      "images": [
+        {
+          "file": "04_Shield/input.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1239038,
+          "sha256": "d4fe6f26e39a4bf53db1d926e2c15f9f6e937080f0ad7f569d0bdb89381b6022"
+        }
+      ],
+      "separate_generation_job": true
+    },
+    {
+      "id": "05_Wing",
+      "kind": "rigid_wing_module",
+      "pose": null,
+      "primary": "05_Wing/input.png",
+      "optional_multiview": false,
+      "images": [
+        {
+          "file": "05_Wing/input.png",
+          "width": 1254,
+          "height": 1254,
+          "mode": "RGB",
+          "bytes": 1240722,
+          "sha256": "2c7933134f6e7260aab8bc26a4e3fd58852a83badeffbd37c18a7aa4ac7b42bc"
+        }
+      ],
+      "separate_generation_job": true
+    }
+  ],
+  "reference_only": [
+    "ReferenceOnly/normal-concept-do-not-upload.png",
+    "ReferenceOnly/hard-concept-do-not-upload.png"
+  ],
+  "orientation": {
+    "up": "+Y",
+    "front": "+Z",
+    "character_right": "+X",
+    "left.png": "Camera on character left (-X), character faces screen right."
+  },
+  "pose_change": "A-pose drafts excluded; final body inputs T-pose; hard body excludes wings.",
+  "quality_review": "All final images visually reviewed: one isolated subject, no text/collage, bodies unarmed, hard wingless. PNG resolution/mode/size and archive CRC verified.",
+  "limits": [
+    "AI-generated matched views are not measured projections from one mesh.",
+    "Tripo model generation/export and Mixamo rigging have not been executed.",
+    "Wing needs DCC mirroring/attachment and separate bones for motion."
+  ],
+  "official_sources": [
+    "https://www.tripo3d.ai/help/features/how-to-get-better-image-to-3d-results",
+    "https://www.tripo3d.ai/help/features/how-to-use-multi-view-input-effectively",
+    "https://www.tripo3d.ai/product-doc/export-and-integration/export-dcc",
+    "https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html",
+    "https://helpx.adobe.com/creative-cloud/help/mixamo-rigging-animation.html"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "stage":  5,
+    "title_ko":  "무너진 천구를 떠받치는 부단장 — 천구 자오선 고정틀",
+    "version":  "Stage05BodyLockedArtifact_v14",
+    "created_date":  "2026-11-13",
+    "tool":  "built-in image_gen",
+    "status":  "generation_visual_qa_and_file_validation_complete",
+    "user_request":  "MajesticStage02to06_v9/Stage05/01-boss.png의 몸은 좋고 뒤 아티팩트가 별로였다.",
+    "body_reference":  "../MajesticStage02to06_v9/Stage05/01-boss.png",
+    "change":  "Return to user-linked v9 physique/armor/pose/spear. Replace only rear solid star-map panel with a coherent open fractured celestial-meridian frame. v13 bent-body dome is not used as generation input.",
+    "images":  [
+                   {
+                       "id":  "01-boss",
+                       "image":  "01-boss.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-893c9d30-29db-4a5c-b180-d75cd5bc3222.png",
+                       "prompts":  [
+                                       "01-boss.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../MajesticStage02to06_v9/Stage05/01-boss.png",
+                                              "role":  "Exact user-linked edit target and liked body/armor/pose/weapon. Only the rear artifact is redesigned; do not transfer v13 stooping pose/pistons/dome."
+                                          }
+                                      ],
+                       "visual_qa":  "Output visually compared with user-linked v9: same tall substantial humanoid build, pointed closed navy visor, fractured star cuirass, armor family, upright braced leg arrangement/foot placement, two arms/hands and spear-held angles preserved. Straight two-ended hour-hand spear retains rear small hoop/star finial, central clamp/pennant and planted round-aperture front point. Rear solid crescent star-map shield removed, replaced by open broken C-meridian arch with finite ends, large brass locks/ticks and short perpendicular arc at axial bearing. Shoulder-back saddles and rear waist V-braces read as attached mechanism, no globe/floating halo/dome or new front torso pistons. Entire subject/arch/weapon/feet fit frame; top arch has tighter but uncropped margin. Existing cosmic arena/cel palette retained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2128339,
+                       "sha256":  "fefd3ce58158f14e55a1cd8640f4734d9608c9b476a570f0684725ab202adfc8"
+                   }
+               ],
+    "limits":  "Single-view concept illustration, no3D mesh/rigging check. Previous images preserved. User liked v9 body; this new artifact remains pending user choice."
+}

@@ -1,0 +1,72 @@
+{
+    "stage":  "05",
+    "title_ko":  "무너진 천구를 떠받치는 부단장",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "scope":  "Three different appearances and sub-concepts. Humanoid stage identity retained; not three poses of the same shell.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "천구 역류를 버티는 시침 성상",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-73556260-ef33-4822-8c41-e421943d551c.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\HumanoidStageEffigies_v4\\Stage05\\02-effigy.png",
+                                              "role":  "Family, stage identity, human proportions and clean cel art reference. Head/chest/armor/mechanism deliberately redesigned per option, not locked identity."
+                                          }
+                                      ],
+                       "visual_qa":  "New tiered sealed helmet, three horizontal astrolabe chest ribs, angular limb plates and two open shoulder load ribs with compact globe. Original two-ended hour-hand spear retained in both hands. Human waist/pelvis/long legs, faceless surfaces, complete weapon/globe/body within frame. New appearance differs from B/C.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2110021,
+                       "sha256":  "af29a2dbc7ccecaf237c33898cc7bb53c2dd22efdbc9b7d1faa060063a7d38b9"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "천구 낙하를 멈추는 중력 봉인상",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-828d8922-de51-4af5-b2bb-6b3649f17902.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\HumanoidStageEffigies_v4\\Stage05\\02-effigy.png",
+                                              "role":  "Family, stage identity, human proportions and clean cel art reference. Head/chest/armor/mechanism deliberately redesigned per option, not locked identity."
+                                          }
+                                      ],
+                       "visual_qa":  "New concentric circular instrument mask in rectangular hood, X-crossing chest guards, dual shoulder saddles and open rectangular back support. Original hour-hand spear and compact globe retained. Kneeling humanoid body, both hands connected, complete silhouette. Different head and torso from A/C.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2013425,
+                       "sha256":  "6b5e2842a7dfe579ea24418e1cc7941e264379f85ff6b4b22bd4d0304c487055"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "구속을 끊기 직전의 별흉갑 의례체",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-5a4b70a8-dddc-47c8-9392-7ae8c7c881e2.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\HumanoidStageEffigies_v4\\Stage05\\02-effigy.png",
+                                              "role":  "Family, stage identity, human proportions and clean cel art reference. Head/chest/armor/mechanism deliberately redesigned per option, not locked identity."
+                                          }
+                                      ],
+                       "visual_qa":  "Long narrow sealed visor, five asymmetrical star-derived chest plates, layered offset shoulders, tapered arm/knee shells and spear-side clamp with small red restraint remnant. Same original two-ended hour-hand spear and compact shoulder globe, human proportions and attached two hands. Whole figure/rings/weapon in frame, no human face.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2060999,
+                       "sha256":  "e80d0345c9e1ae2eb0f3e0ffce1b812c3fa0daaf885371f103dd18a58bd0f7e7"
+                   }
+               ],
+    "limits":  "Single-view concept art; no actual mesh, UV or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

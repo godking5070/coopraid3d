@@ -1,0 +1,78 @@
+{
+    "stage":  "03",
+    "title_ko":  "얼어붙은 혈관의 연금술사",
+    "version":  "DistinctStageEffigies_v6",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "three_distinct_mercury_artifact_effigies_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "수은 맥박의 성유물 보유자",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-162521bc-7b17-461d-b0aa-e6d88da72a3d.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage03/01-effigy.png",
+                                              "role":  "Selected Stage03 family/style/slender human-proportion reference supplied for initial generation. Unlike v5, head shell/chest shell and large mercury artifact construction deliberately redesigned per concept."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: flat silver medical cap and squared short veil differ from original; smooth chest halves house a sealed sternum chalice supported by hands. Major artifacts: sealed pulse chalice, paired tall scapular mercury reservoirs with spinal/shoulder support, two wrist sealed glass bead circuits joined to forearm veins. Opaque silver levels and empty clear glass distinguished; beads contained inside rings. Delicate long human body, two arms/hands, long legs/feet and no natural facial features maintained. Whole body and all devices in frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1797829,
+                       "sha256":  "b7ba0246ee99541837b9348d2d9a9ea817a8ae9f118b5ef8f8ecebd2106f5a53"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "수은 증류 응급치유사",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt",
+                                       "02-effigy.refine.prompt.txt",
+                                       "02-effigy.cleanup.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-ed69995f-f6d4-4863-913f-a40ccedba9dc.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage03/01-effigy.png",
+                                              "role":  "Selected Stage03 family/style/slender human-proportion reference supplied for initial generation. Unlike v5, head shell/chest shell and large mercury artifact construction deliberately redesigned per concept."
+                                          }
+                                      ],
+                       "visual_qa":  "Final corrected image visually inspected: offset closed clinical cowl with short side tabs, separated curved ribs and sternum valve. Major artifacts: paired pear-shaped distillation vessels/upper bridge/spinal manifold, three sealed ampoules in one hip rack, one large blunt syringe healing rod. Each device supported and mercury opaque gray below level with empty clear glass above. Two targeted corrections removed an accidental extra arm and extra chest hand; final has exactly TWO shoulder-connected arms and TWO hands: chest-valve hand and syringe hand. Complete human waist/pelvis/long two legs/feet, all tips inside frame.",
+                       "initial_generated_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-07198503-ae52-483d-a6cf-fe98614aa813.png",
+                       "intermediate_refinement_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-ba63e219-0c04-4268-8102-e357f8f8b852.png",
+                       "refinement_reason":  "Initial generation duplicated arm anatomy. First targeted edit corrected shoulder/forearm routing but retained an extra upper chest hand. Second targeted cleanup removed that extra hand and restored chest shell. Final exact two arms/two hands verified.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1720685,
+                       "sha256":  "1cb72f5e88dc918519a1da64ac34bedacab2054cf3b4947409c36fa651316560"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "수은 생명저울의 역류 조율자",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-270b16ec-0fd2-4da0-a87d-364b6c926a47.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../HumanoidStageEffigies_v4/Stage03/01-effigy.png",
+                                              "role":  "Selected Stage03 family/style/slender human-proportion reference supplied for initial generation. Unlike v5, head shell/chest shell and large mercury artifact construction deliberately redesigned per concept."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: short veil with closed concentric round dial mask, half-moon rib shell and three-tab sternum reverse-flow valve. Major artifacts: compact scapular balance yoke carrying two unequal-level round mercury flasks and return lines, forearm-length U-shaped manometer held in hand with unequal opaque silver levels, sternum backflow valve adjusted by other hand. No music bars, celestial sphere, original U backloop or duplicate person. Human anatomy complete, two arms/hands, long two legs grounded; body and full scale/tool silhouette inside frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1833732,
+                       "sha256":  "03f649dd8739b7d40189e02a141f14c7a3921813b853d39e16567c3da1146ffb"
+                   }
+               ],
+    "common_qa":  "All three final PNGs directly visually inspected and compared for head/chest/major artifact differences. Distinct concepts: pulse reliquary/paired reservoirs/wrist bead circuit; emergency distillation/ampoules/healing syringe; life-scale/level manometer/reverse-flow valve. Original selected Stage03 supplied as family/style/proportion reference, not a locked identity target. No other stage input. Human seven-to-eight-head body remains clear under devices; normal mercury glass intact and silver opaque below visible levels, empty transparent glass above. No natural face/eyes/hair. Initial #02 duplicate limb/hand repaired through two targeted built-in edits, final correct anatomy verified. No mesh/UV/rigging validation. Existing art/other folders untouched.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

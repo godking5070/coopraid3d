@@ -1,0 +1,73 @@
+{
+    "stage":  "04",
+    "title_ko":  "영원히 타오르는 가마의 수호자",
+    "version":  "ObjectBossExploration_v1",
+    "created_date":  "2026-11-11",
+    "tool":  "built-in image_gen",
+    "status":  "three_concepts_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "scope":  "Three full-body object-boss concept illustrations. Monster / hybrid / sealed effigy.",
+    "reviewed_project_reference_set":  [
+                                           "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                           "../../../CharacterMatched/02-guardian-hard-v1.png",
+                                           "../../../CharacterMatched/03-flora-normal-v1.png",
+                                           "../../../CharacterMatched/04-flora-hard-v1.png",
+                                           "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                           "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                           "../../../CharacterMatched/07-village-square-v1.png",
+                                           "../../../CharacterMatched/08-glasshouse-v1.png",
+                                           "../../../CharacterMatched/09-silent-belfry-v1.png"
+                                       ],
+    "reference_roles":  "The project reference set was visually reviewed for large carved masses, fixed statue/doll surfaces, functional object bodies, controlled contours, ivory/gold/navy planes and lavender cel shadows. The three environment images guide architecture and floor hierarchy. This is the reviewed direction set, not a claim that every reference was submitted in every call. Final corrections use the corresponding initial generated image as the edit target.",
+    "images":  [
+                   {
+                       "id":  "01-monster",
+                       "title_ko":  "살아 있는 가마 방벽",
+                       "image":  "01-monster.png",
+                       "prompts":  [
+                                       "01-monster.prompt.txt",
+                                       "01-monster.refine.prompt.txt"
+                                   ],
+                       "initial_generated_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-218ea4c0-1c1d-449a-a1e2-3ccfde48963e.png",
+                       "selected_generated_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-f6d2eab1-b26d-4bd3-8a0e-04d43d2c8797.png",
+                       "refinement_reason":  "Initial distribution was three left and five right chains. Corrected to four separate runs and posts on each side, total eight.",
+                       "visual_qa":  "Headless walking kiln with four thick buttress legs, three broad heat-shield slabs, a sheltered rear arch and supported axial bearing. Four left and four right red chains lead to eight distinct cooling posts. No face, human skin, eyes, hair or player costume. All boss body parts, feet and shield tips inside canvas. The environmental power shaft intentionally continues beyond the upper edge.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2335800,
+                       "sha256":  "46a956010f272f81c31739972b736b93dd1ada2fef3400327450c2a1f9392659"
+                   },
+                   {
+                       "id":  "02-hybrid",
+                       "title_ko":  "봉인틀에 잠긴 방패의 잔재",
+                       "image":  "02-hybrid.png",
+                       "prompts":  [
+                                       "02-hybrid.prompt.txt",
+                                       "02-hybrid.refine.prompt.txt"
+                                   ],
+                       "initial_generated_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-89c2b93b-faba-4bb1-8080-f5f53e0310b5.png",
+                       "selected_generated_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-7b33a42a-f166-409d-b098-ee78402a6434.png",
+                       "refinement_reason":  "Added two missing chains to reach eight, provided fingertip margins and replaced the direct guardian castle motif on the shield with heat vents.",
+                       "visual_qa":  "A single large carved palm and kneeling remnants have merged into a furnace cradle with broad shield. Sealed pressure cap has no human face. Three main supporting contacts, attached hand and shield, and eight red chains (four each side) are readable. All fingertips and shield edges contained in frame; clean Part I cel surfaces retained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2312998,
+                       "sha256":  "fef45208ec41833e59d4dbe5eddc625650eac1519c66c1371da301a4045f8bb1"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "맹목의 용광로 봉인상",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "selected_generated_source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-dd0083fd-7f94-4eff-a081-b278cc9b0c73.png",
+                       "visual_qa":  "Sealed geometric vent cap, octagonal furnace-door torso, two pillar legs, two clamp arms and integrated heat shield form a non-character effigy. No human eyes, nose, lips, scalp or natural hair. Eight red chains, four per side. Full silhouette and main contacts are inside frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2313271,
+                       "sha256":  "a6590723a51ae41003ddbdcd8a4846706f513cd799f7700cc580b1fe29a27330"
+                   }
+               ],
+    "common_visual_qa":  "All three final PNGs visually inspected. Large connected stone/ceramic shells are the body rather than armor on a human. Protective shield, furnace load and restraint chain themes retained. Single concept shots only; no 3D mesh, mechanical simulation, rigging or animation validation performed."
+}

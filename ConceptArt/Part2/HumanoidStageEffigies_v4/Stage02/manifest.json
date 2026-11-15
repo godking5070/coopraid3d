@@ -1,0 +1,85 @@
+{
+    "stage":  "02",
+    "title_ko":  "끝나지 않는 진혼곡의 무희",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "body_policy":  "Clearly human-shaped ceremonial effigies: attached head/neck, ribcage, waist, pelvis, two arms, two long legs. Stage identity through shell/device/pose, not replacing body with giant objects.",
+    "reference_policy":  "Actual Part I PNGs submitted as initial generation references. Original Stage02 effigy was visually reviewed for human proportions only, not supplied to these calls. v2/v3 images not used.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "등태엽에 결속된 진혼의 인형",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-8eaf8679-1269-4761-8e7f-477afd95810f.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Clear humanoid neck, ribcage, narrow waist, pelvis, long thighs/shins, two arms and two legs. Both arms bend around one shoulderblade winding case, attached hands grip its axle. Three external tone reeds, closed featureless oval mask. No barrel body or internal music cylinder. All major parts inside frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1885373,
+                       "sha256":  "77e05f83c61371746550781ad51b1359ab3761192b9b256b50e2db48556ea399"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "멈추지 않는 회전의 봉인무희",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-484e39b6-4804-48a3-a747-46e4a03e48bc.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Round blank sealed disc mask, humanoid ribcage-waist-pelvis and two long legs in forced turning lunge. Two raised attached arms/hands. Compact back drive, rear rotation support, four external tone plaques. No natural face or object-shaped torso. Full silhouette visible.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1927309,
+                       "sha256":  "8f2ad06f9df425e22ccb6f8f529346c383f7208836385ea10663edb83790597b"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "자신의 연주를 막는 애도의 의례체",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-58bf1fa8-8ad2-49ef-9514-f896ebcf6c5f.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/04-flora-hard-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/05-campanella-normal-v1.png",
+                                              "role":  "Actual Part I sculpted shell surfaces, joints, clean lines and soft cel materials only. Character face/hair/costume/source weapons/layout excluded."
+                                          }
+                                      ],
+                       "visual_qa":  "Closed louver theatre mask, human torso/waist/pelvis and long legs. One hand across collar, other presses external resonance rails, back winding housing and side phase linkage. Two arms/two legs; no face, barrel body or displayed internal pin drum. Complete figure within frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1854907,
+                       "sha256":  "1a6cb28d78e7b929eafe73dcac526c6b19e95533c08ec328da74062613dcbb08"
+                   }
+               ],
+    "limits":  "Concept illustrations; no 3D mesh or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

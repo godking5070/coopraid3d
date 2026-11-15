@@ -1,0 +1,85 @@
+{
+    "stage":  "03",
+    "title_ko":  "얼어붙은 혈관의 연금술사",
+    "version":  "StageIdentityEffigies_v3",
+    "created_date":  "2026-11-11",
+    "tool":  "built-in image_gen",
+    "status":  "three_stage_specific_effigy_concepts_completed_pending_user_selection",
+    "brief":  "../ART_DIRECTION.txt",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "빈 자비의 성유물좌",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-baf5f878-402a-4401-a7e9-01ef2d873c9b.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I broad carved planes, grounded limb masses and clean cel shadows only; no face/costume/weapon copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Actual Part I functional hollow object-body and fixed shell/support construction, controlled contours only; no bell/sheet/six-leg anatomy copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: wide spherical seated reliquary with large empty circular chest, dark empty medical-veil hood, two short thick arms/open healing palms and two broad half-disc feet. Back mercury arches grow through its ribs, silver opaque liquid below visible menisci, clear empty upper glass. Head, palms and feet complete inside canvas. Cold rounded medical-sacrifice identity, no Stage02 dancer template, natural face/hair or armor costume.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1959239,
+                       "sha256":  "75c1a669ea6795b497439c7a7349e79268f84d25bd17a064f6e5b17c59ca878e"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "혈관을 비운 안치관",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-f2de4ee3-ffa5-4851-a893-0647e9b92223.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I broad carved planes, grounded limb masses and clean cel shadows only; no face/costume/weapon copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Actual Part I functional hollow object-body and fixed shell/support construction, controlled contours only; no bell/sheet/six-leg anatomy copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: tall oval upright sarcophagus effigy has three rib segments framing empty chest, two large wrapped protective hands, simple round chalice-lid head and two short sturdy column shins/plinth feet. Tall embedded horseshoe back circuit contains opaque mercury below horizontal level and clear empty glass above. No diamond head, V-chest, spindly limbs, eye/face, natural hair or music mechanism. All body parts and tube crown inside canvas.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1922743,
+                       "sha256":  "c07b8da9befbe4f6f96a57466c0370b2110d6fa9310519f0850bdfa14caf6e21"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "역류를 삼키는 정화성배",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1caea-de93-7d60-a04a-23742a6a76ea\\exec-8b1b2ded-7ec8-4dc5-a2c3-0329669ba436.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../../CharacterMatched/01-guardian-normal-v1.png",
+                                              "role":  "Actual Part I broad carved planes, grounded limb masses and clean cel shadows only; no face/costume/weapon copied."
+                                          },
+                                          {
+                                              "path":  "../../../CharacterMatched/06-campanella-hard-v1.png",
+                                              "role":  "Actual Part I functional hollow object-body and fixed shell/support construction, controlled contours only; no bell/sheet/six-leg anatomy copied."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually inspected: low crouched chalice-body purification figure with large scalloped empty upper vessel, round sealed relic mask beneath rim, two thick arms ending in cupped half-cylinder palms, two widely planted bent column legs/feet. One broad glass return loop is enclosed by three rear vertebral ribs, opaque silver-gray below meniscus and empty clear glass above. Entire head/vessel, hands, feet and loop inside canvas. Distinct low ritual-purification silhouette, no mannequin template or human portrait.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1899157,
+                       "sha256":  "571e047fd786b39d7e4cf6560054184fa5a4935c43da1bf5fca54a4c4c51758a"
+                   }
+               ],
+    "common_qa":  "All three PNGs generated anew with ONLY two actual Part I reference PNGs supplied, and directly visually inspected. Previous Stage02 and EffigyExploration_v2 pictures were NOT generation inputs. Abandoned slender dancer mannequin, diamond head, V-chest and gold ball-joint template. Three distinct cold rounded medical-relic silhouettes: broad hollow sphere/mercy seat, tall empty sarcophagus, low crouched purification chalice. Normal glass intact with silver opaque mercury under visible horizontal levels. Exact prompts persisted, no targeted correction needed. No mesh, UV, rig or animation verification. Other stage folders and older assets untouched.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

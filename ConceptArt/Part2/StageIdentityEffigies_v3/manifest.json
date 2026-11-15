@@ -1,0 +1,243 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "version":  "StageIdentityEffigies_v3",
+    "created_date":  "2026-11-11",
+    "status":  "generation_visual_qa_and_packaging_complete",
+    "tool":  "built-in image_gen",
+    "stage_count":  5,
+    "concepts_per_stage":  3,
+    "final_image_count":  15,
+    "concept_family":  "Stage-specific sealed ritual bodies",
+    "user_correction":  "Do not follow Stage02 as a template; design three effigies for each stage based on its own identity.",
+    "reference_policy":  "Actual PartI CharacterMatched PNGs only as style/form inputs. No previous Stage02 or EffigyExploration_v2 image input. Shared diamond-head, slender-joint, V-shaped mannequin templates rejected.",
+    "stage_identity":  {
+                           "Stage04":  "Massive refractory shield, heat and power-shaft burden",
+                           "Stage03":  "Cold mercury reliquary, empty vessels and distorted healing",
+                           "Stage01":  "Memory gravestone / interment vessel / sealed scout watchpost",
+                           "Stage05":  "Gravity-crushed celestial Atlas and hour-hand spear",
+                           "Stage02":  "Eternal funeral music and forced dance"
+                       },
+    "differentiation":  "Heads, body mass, support anatomy, posture and material color temperature are specific to each stage. No shared dancer mannequin anatomy.",
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "direction":  "ART_DIRECTION.txt",
+    "qa":  "All 15 final PNGs visually inspected by the root and/or assigned stage agents. Full PNG decode, 1536x1024 dimensions, bytes and SHA256 verified. Individual stage manifests retain exact references, generation and targeted correction records. Existing earlier concepts preserved; user selection is not assumed.",
+    "limits":  "Single-view concept illustrations. No 3D mesh, UV, rigging or animation verification.",
+    "images":  [
+                   {
+                       "stage":  1,
+                       "id":  "01-effigy",
+                       "title_ko":  "기억 묘비의 파수상",
+                       "image":  "Stage01/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1933774,
+                       "sha256":  "a8afedfd82eef9a7d85774f65149c9ecacd9970fe6d2cfb2aa2a8925e8777bb5",
+                       "prompts":  [
+                                       "Stage01/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "02-effigy",
+                       "title_ko":  "모래 장례의 안치관",
+                       "image":  "Stage01/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1947904,
+                       "sha256":  "77e6f8193998e56f660ebf24baad7406c6bff52653458ce0a8f99b1652da2c82",
+                       "prompts":  [
+                                       "Stage01/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "03-effigy",
+                       "title_ko":  "폐쇄된 정찰 초소 의례체",
+                       "image":  "Stage01/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1838205,
+                       "sha256":  "8bbd472849e60798ba65b72f37b9b14534edc00b6c395e0e927c3daaaf9454a9",
+                       "prompts":  [
+                                       "Stage01/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "01-effigy",
+                       "title_ko":  "진혼 행렬의 오르간상",
+                       "image":  "Stage02/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2101292,
+                       "sha256":  "fb7f483c76b32124631545d00d262e11c1639c60342a4fa2c6e9f7432e26df09",
+                       "prompts":  [
+                                       "Stage02/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "02-effigy",
+                       "title_ko":  "끊기지 않는 장송의 집전자",
+                       "image":  "Stage02/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2048725,
+                       "sha256":  "8439fcd75e264906721e9dafecbe04abc525c07404913cceca48e29e63a7b330",
+                       "prompts":  [
+                                       "Stage02/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "03-effigy",
+                       "title_ko":  "파열된 무대의 결속 인형",
+                       "image":  "Stage02/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1953415,
+                       "sha256":  "163f6abb7faa9bd875be4675fbbf66b2ff73a3601f56341c5b2772a710b254e8",
+                       "prompts":  [
+                                       "Stage02/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "01-effigy",
+                       "title_ko":  "빈 자비의 성유물좌",
+                       "image":  "Stage03/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1959239,
+                       "sha256":  "75c1a669ea6795b497439c7a7349e79268f84d25bd17a064f6e5b17c59ca878e",
+                       "prompts":  [
+                                       "Stage03/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "02-effigy",
+                       "title_ko":  "혈관을 비운 안치관",
+                       "image":  "Stage03/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1922743,
+                       "sha256":  "c07b8da9befbe4f6f96a57466c0370b2110d6fa9310519f0850bdfa14caf6e21",
+                       "prompts":  [
+                                       "Stage03/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "03-effigy",
+                       "title_ko":  "역류를 삼키는 정화성배",
+                       "image":  "Stage03/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1899157,
+                       "sha256":  "571e047fd786b39d7e4cf6560054184fa5a4935c43da1bf5fca54a4c4c51758a",
+                       "prompts":  [
+                                       "Stage03/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "01-effigy",
+                       "title_ko":  "냉각심장을 감싼 무릎의 방벽",
+                       "image":  "Stage04/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2235890,
+                       "sha256":  "f898ba70af18c4430c688651f1a51610e78a57a5b9ef8d8a302534e83af4eb9a",
+                       "prompts":  [
+                                       "Stage04/01-effigy.prompt.txt",
+                                       "Stage04/01-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "02-effigy",
+                       "title_ko":  "동력축 아래 잠긴 가마의 성상",
+                       "image":  "Stage04/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2282520,
+                       "sha256":  "d7637b679d680e7e72889c48419fa79b850ed18b7476688436bed0fe159b1545",
+                       "prompts":  [
+                                       "Stage04/02-effigy.prompt.txt",
+                                       "Stage04/02-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "03-effigy",
+                       "title_ko":  "열문을 펼쳐 동료를 덮는 전굴상",
+                       "image":  "Stage04/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2412658,
+                       "sha256":  "d228edbd57d2986c0e015199c91a860905b325fc5170f98fa5b549e011b51758",
+                       "prompts":  [
+                                       "Stage04/03-effigy.prompt.txt",
+                                       "Stage04/03-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "01-effigy",
+                       "title_ko":  "천구의 무게를 짊어진 기둥성상",
+                       "image":  "Stage05/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2267603,
+                       "sha256":  "3051e382652f160732624e0689782a3483f99996ee189066157b2ca1d58ab521",
+                       "prompts":  [
+                                       "Stage05/01-effigy.prompt.txt",
+                                       "Stage05/01-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "02-effigy",
+                       "title_ko":  "추락한 별을 막는 전쟁 봉인상",
+                       "image":  "Stage05/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2086375,
+                       "sha256":  "16fe629e660db30ee1bae9bd69a4b817fc583a8f6ea04d081693433e18bd920c",
+                       "prompts":  [
+                                       "Stage05/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "03-effigy",
+                       "title_ko":  "명령을 거부하는 천구의 순교상",
+                       "image":  "Stage05/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2153305,
+                       "sha256":  "de6ee9aee6c33179535cd992d15894b1b3b9e90a638c18469e2f0d00f03f45df",
+                       "prompts":  [
+                                       "Stage05/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   }
+               ]
+}

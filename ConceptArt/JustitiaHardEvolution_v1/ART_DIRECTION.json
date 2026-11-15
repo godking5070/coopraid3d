@@ -1,0 +1,67 @@
+{
+  "project": "ASTELLA",
+  "scope": "Part1 Stage05 Justitia HARD only",
+  "created_date": "2026-11-14",
+  "user_request": "1부 유스티티아 하드를 더 부피가 크고 기괴/그로테스크하게,5단계 각3컨셉",
+  "deliverables": 15,
+  "tiers": [
+    {
+      "level": 1,
+      "title": "비대화의 시작",
+      "scale": "Already~1.5x old-hard torso volume. Shoulder/chest width~4original mask widths, much larger heavy hips/forearms/thighs, still immediately recognisable judicial statue."
+    },
+    {
+      "level": 2,
+      "title": "불균형의 침식",
+      "scale": "~2x old-hard body volume, visibly heavier and less human than tier1. Shoulder/chest width~4.7original mask widths, strongly unequal limb masses."
+    },
+    {
+      "level": 3,
+      "title": "판결기관으로 변이",
+      "scale": "~3x old-hard volume, clear body-horror artifact silhouette. Chest width~5.5original mask widths; enlarged torso itself, not just adornments."
+    },
+    {
+      "level": 4,
+      "title": "성상의 붕괴",
+      "scale": "~4.5x old-hard volume, towering/monumental and visibly less human than tier3. Original mask looks tiny, body width~6.5mask widths, major shell deformation."
+    },
+    {
+      "level": 5,
+      "title": "재판소의 괴물",
+      "scale": "~6x old-hard body volume, extreme terminal grotesque mutation. Preserve small original band-mask remnant for visual scale, huge deep torso/hip masses, silhouette mostly transformed."
+    }
+  ],
+  "lineages": [
+    {
+      "key": "A",
+      "id": "overburden",
+      "name": "불균형 거신",
+      "theme": "Scale load deforms a bulky two-legged statue. Always EXACTLY TWO arms and TWO legs; one arm can become far larger, but both remain clearly rooted. One greatsword held in one or both hands, exactly two scale pans on rear beam. Strong diagonal unequal mass."
+    },
+    {
+      "key": "B",
+      "id": "hollow-verdict",
+      "name": "공허의 판결체",
+      "theme": "Opening blindfold/mask and rib shell turn a two-legged judging statue into a giant hollow judicial mouth/face-cage. Always EXACTLY TWO arms and TWO legs. No realistic biological mouth/teeth or human expression; serrated porcelain slabs, hinges and black voids. One sword, two balance pans, original blindfold fragment."
+    },
+    {
+      "key": "C",
+      "id": "tribunal-fusion",
+      "name": "재판소 융합체",
+      "theme": "Body fuses with tribunal throne and balance apparatus; mobile statue body progressively becomes a monstrous moving judicial reliquary. Tiers1-2 two arms/two legs; tiers3-5 EXACTLY FOUR support legs and TWO execution arms, with all roots/joints clearly visible. One greatsword, two pans and blindfolded mask remnant."
+    }
+  ],
+  "tool": "built-in image_gen",
+  "source_roles": [
+    {
+      "path": "../CharacterMatched/Stage5/01-justitia-normal-v1.png",
+      "role": "Original identity and cel rendering, not anatomy lock"
+    },
+    {
+      "path": "../CharacterMatched/Stage5/02-justitia-hard-v1.png",
+      "role": "Old hard identity; explicitly too tame/slim and to be heavily deformed"
+    }
+  ],
+  "invariants": "One greatsword, two scale pans, blindfold fragment, judicial statue, ivory/navy/brass/lavender cel. Body mass and grotesquerie escalate across5tiers. A/B2arms2legs; Ctiers1-2twolegs,tiers3-5four clear support legs plus2executionarms. Human face/hair not locked. New concepts supersede old rig counts as necessary.",
+  "workflow": "3lineages developed across5sequential tiers using original normal/hard references plus each preceding lineage output. Inspect every output for actual mass/deformation and full framing; targeted fix where needed. Preserve old files and pending user choices; no updates to fixed selections."
+}

@@ -1,0 +1,79 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "stage":  3,
+    "version":  "Stage03RearArtifacts_v11",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "generation_visual_qa_and_file_validation_complete",
+    "user_request":  "뒤에 아티팩트만 3가지 컨셉으로 만들어봐",
+    "locked_body":  "Stage03Slender_v10/01-boss.png: slim body, closed medical mask/veil, chest/arm components, hands, pose, full-body framing and setting.",
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "images":  [
+                   {
+                       "id":  "01-circulation",
+                       "title_ko":  "폐순환 분기관",
+                       "description":  "Y자 순환실과 갈라지는 유리 혈관을 한 덩어리로 연결한 개방형 장치.",
+                       "image":  "01-circulation.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-0c621bb6-ec0f-428c-bffe-8bfd563af7f3.png",
+                       "prompts":  [
+                                       "01-circulation.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../Stage03Slender_v10/01-boss.png",
+                                              "role":  "Exact edit target. Preserve slender body, mask, internal components, pose, scale and environment; replace only rear mercury apparatus."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually compared to slender v10 target: same narrow body, closed medical mask/veil, chest core, arm channels, wrist beads, open/downward hands, long thin legs, articulated feet and pose retained. Old oval loop fully replaced by asymmetrical two-branch closed glass circulation vessel with central spine casting and low angular opaque-silver collection sump; broad spine and diagonal pelvic attachments visible. No old two-flask balance or hand U-tool. Full subject and all branches contained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1844507,
+                       "sha256":  "99de7e6958baf624d3a0d35cbb3886f03ec158c13e9a32253efc83556adc807c"
+                   },
+                   {
+                       "id":  "02-distillation",
+                       "title_ko":  "수은 증류 척추",
+                       "description":  "세 개의 증류실과 우회관을 척추 축에 쌓은 수직형 장치.",
+                       "image":  "02-distillation.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-a058de02-3bd1-42d5-bac5-5a03186cba85.png",
+                       "prompts":  [
+                                       "02-distillation.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../Stage03Slender_v10/01-boss.png",
+                                              "role":  "Exact edit target. Preserve slender body, mask, internal components, pose, scale and environment; replace only rear mercury apparatus."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually compared to v10 target: slender proportions and head/body/pose preserved. New rear spinal tower contains exactly three vertically stacked faceted glass distillation cells and one continuous external return tube, brass neck unions and spine/pelvic support casting. No wide oval halo, old two-flask balance or held tool. Silver levels opaque in lower cell sections, upper glass clear; whole tower/head/hands/feet fit frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1832626,
+                       "sha256":  "21c6b59d4546cc7f0ebc93a97e2aad465cda985082f648cb8a87ba3a946dc5aa"
+                   },
+                   {
+                       "id":  "03-sealplate",
+                       "title_ko":  "혈관 봉인판",
+                       "description":  "수은 혈관과 하부 집수조를 봉인한 납작한 임상 성유물 판.",
+                       "image":  "03-sealplate.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-d8149e12-332d-4583-9a5f-b8b926b430f8.png",
+                       "prompts":  [
+                                       "03-sealplate.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../Stage03Slender_v10/01-boss.png",
+                                              "role":  "Exact edit target. Preserve slender body, mask, internal components, pose, scale and environment; replace only rear mercury apparatus."
+                                          }
+                                      ],
+                       "visual_qa":  "Visually compared to v10 target: same narrow body, mask/veil, chest core, two hands, slim long legs and pose. Old oval vessel replaced by one thin angular vascular seal frame with two clear clinical panes, broad branching silver vascular channels and bottom collection trough, upper latch and short pelvic braces. Not handheld shield/wing or old hanging-flask scale. Opaque silver liquid below clear upper glass; complete panel and full body in frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1868332,
+                       "sha256":  "d79b3c17b5927c94866027abcc350457654c587e60dc93ae984718f50b51b65f"
+                   }
+               ],
+    "limits":  "Three single-view concept illustrations for rear artifact comparison; no 3D mesh/rigging verification. Prior files preserved. Pending user choice."
+}

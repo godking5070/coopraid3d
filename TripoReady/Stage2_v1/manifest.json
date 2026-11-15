@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "project": "ASTELLA",
+  "stage": 2,
+  "boss": "플로라 기어",
+  "map": "기억의 유리 온실",
+  "date": "2026-11-10",
+  "generator": "built-in image_gen; deterministic fixed-slot raster assembly",
+  "views": [
+    "front",
+    "left",
+    "right",
+    "back"
+  ],
+  "cameraConvention": {
+    "up": "+Y",
+    "front": "+Z",
+    "characterRight": "+X",
+    "left": "subject-left camera, face points screen right",
+    "right": "subject-right camera, face points screen left"
+  },
+  "inputGroups": [
+    {
+      "id": "normal-body",
+      "folder": "Bodies/Normal",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false
+    },
+    {
+      "id": "hard-body",
+      "folder": "Bodies/Hard",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "equipment": false,
+      "wings": false
+    },
+    {
+      "id": "accessory-set",
+      "folder": "Accessories",
+      "count": 4,
+      "size": [
+        3600,
+        1800
+      ],
+      "contents": [
+        "pruning shears",
+        "one hard spring blade module",
+        "normal winding key"
+      ],
+      "layout": "accessory-layout.json",
+      "slotOrderFixedAcrossViews": true,
+      "wholeSheetMirrored": false
+    },
+    {
+      "id": "entrance-bay",
+      "folder": "Buildings/EntranceBay",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "balcony-stairs",
+      "folder": "Buildings/BalconyStairs",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "vent-cabinet",
+      "folder": "Buildings/VentCabinet",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    }
+  ],
+  "floor": {
+    "path": "Floor/top.png",
+    "count": 1,
+    "size": [
+      1254,
+      1254
+    ],
+    "use": "35m circular arena flat color/layout reference",
+    "seamless": false,
+    "pbrSet": false
+  },
+  "modelingInputPngCount": 25,
+  "referenceOnlyPngCount": 3,
+  "promptCount": 33,
+  "guide": "START_HERE_KO.txt",
+  "prompts": "GenerationPrompts",
+  "qa": "verification.json",
+  "limitations": [
+    "AI-generated views, not measured renders of one source mesh",
+    "Minor view-to-view shape/projection differences require 3D cleanup",
+    "Back spring blade assembly and shears need separate joints after humanoid rigging"
+  ],
+  "performed": {
+    "tripoGeneration": false,
+    "mixamoRigging": false,
+    "gameCodeChanges": false
+  }
+}

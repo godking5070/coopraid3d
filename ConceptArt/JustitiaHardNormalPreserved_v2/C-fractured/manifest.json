@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "mode": "built-in image_gen",
+  "direction": "C-fractured",
+  "images": [
+    {
+      "id": "C",
+      "title_ko": "봉인 균열",
+      "image": "01-boss.png",
+      "prompts": [
+        "01-boss.prompt.txt",
+        "01-boss.refine.prompt.txt"
+      ],
+      "source": "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-4a6a109d-d248-4147-8a8b-3bd18a06daf7.png",
+      "initial_source": "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-751eb52f-58cd-4a5d-9f38-1d96cd036b85.png",
+      "references": [
+        {
+          "path": "../../CharacterMatched/Stage5/01-justitia-normal-v1.png",
+          "role": "sole initial identity/style reference; normal face, wavy hair, blindfold, slender proportions, robe, sword and scale apparatus"
+        },
+        {
+          "path": "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-751eb52f-58cd-4a5d-9f38-1d96cd036b85.png",
+          "role": "single framing correction edit target"
+        }
+      ],
+      "visual_qa": {
+        "status": "pass",
+        "identity": "Wavy ivory hair, gold-edged blindfold, calm pale lower face, slender waist and long legs, navy high collar, star robe and original sword retained.",
+        "hard_changes": "One-sided hinged shell exposes a slender dark inner frame. Taut back-mast chains connect to real elbow and hip sockets. Asymmetric segmented formal robe, tilted scale and one weighted pan.",
+        "anatomy_equipment": "Exactly two arms, two legs, one head, one sword, one back mast/beam and exactly two pans. No bulk increase or new monster anatomy.",
+        "framing": "Entire full-body silhouette, beam, both pans, sword and robe held within ample margins, approximately 110px top and 150px bottom.",
+        "style": "Polished 2D cel concept with ivory/navy/gold and lavender, fine controlled lines and pale quiet backdrop, no text or insets.",
+        "correction": "One framing-only correction reduced complete subject, preserved the design."
+      },
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1665845,
+      "sha256": "314993b68b1ab2a0ec71ea5db200eb1333b6455ea7094f031f517b8ba87f6091"
+    }
+  ]
+}

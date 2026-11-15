@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "tool": "built-in image_gen",
+  "direction": "A-imbalanced",
+  "images": [
+    {
+      "id": "justitia-hard-normal-preserved-a",
+      "title_ko": "무너진 균형",
+      "image": "01-boss.png",
+      "prompts": [
+        "01-boss.prompt.txt",
+        "01-boss.refine.prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1dd47-2592-72f3-942d-4da2f84dac23/exec-a4ffbf1c-8fc5-44fe-b406-75c6502333be.png",
+      "initial_source": "C:/Users/godki/.codex/generated_images/01a1dd47-2592-72f3-942d-4da2f84dac23/exec-d2751804-a0bf-4484-92ad-9b6a4b1466dc.png",
+      "references": [
+        {
+          "path": "../../CharacterMatched/Stage5/01-justitia-normal-v1.png",
+          "role": "sole initial image input; normal Justitia character identity, body proportions, face, hairstyle, blindfold, costume, sword, back scale and clean rendering"
+        },
+        {
+          "path": "C:/Users/godki/.codex/generated_images/01a1dd47-2592-72f3-942d-4da2f84dac23/exec-d2751804-a0bf-4484-92ad-9b6a4b1466dc.png",
+          "role": "single framing correction edit target; no design changes requested"
+        }
+      ],
+      "visual_qa": {
+        "status": "pass",
+        "identity": "Normal blindfolded pale face and side-swept sculpted ivory curls retained. Slender feminine torso, narrow waist, long slim legs, high navy collar, formal ivory/navy/gold robe and star fastenings remain recognizable.",
+        "hard_transformation": "Strongly tilted expanded articulated rear beam, heavy single judicial weight inside lower pan, higher empty pan, sharpened enlarged ceremonial robe tails and restrained lavender shell stress cracks.",
+        "anatomy_and_props": "Exactly two arms and two legs; two delicate hands grasp one original broad down-pointing sword. One back scale beam and exactly two chain-hung pans, one loaded and one empty.",
+        "framing": "Final 1536x1024 landscape. One full-body hero. Both beam ends, hair, chains, pans, sword point/hilt, hands, robe hems and both feet contained. Approximately 90 px top and 100 px bottom clearance; wide lateral clearance.",
+        "style": "Clean polished 2D game concept, smooth ivory/navy/brass, lavender cel shadows, fine lines, quiet pale lavender backdrop; no text, sheet views, collage, rust, gore or PBR.",
+        "correction": "One targeted framing correction after initial image clipped the upper beam tip and had tight lower clearance; final design retained."
+      },
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1765803,
+      "sha256": "834b7405141f6ddcda98391a82edadd24d3613523864157fbabdd69e16a448fe"
+    }
+  ]
+}

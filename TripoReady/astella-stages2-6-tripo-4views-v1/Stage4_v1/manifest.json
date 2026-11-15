@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 2,
+  "project": "ASTELLA",
+  "stage": 4,
+  "boss": "기억의 인형사, 마리오네트",
+  "date": "2026-11-10",
+  "generator": "built-in image_gen; deterministic fixed-slot raster assembly",
+  "views": [
+    "front",
+    "left",
+    "right",
+    "back"
+  ],
+  "cameraConvention": {
+    "up": "+Y",
+    "front": "+Z",
+    "subjectRight": "+X",
+    "left": "camera at -X, face points screen right",
+    "right": "camera at +X, face points screen left"
+  },
+  "inputGroups": [
+    {
+      "id": "normal-body",
+      "folder": "Bodies/Normal",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "armsInRigInput": 2,
+      "finalArmsAfterAssembly": 4
+    },
+    {
+      "id": "hard-body",
+      "folder": "Bodies/Hard",
+      "count": 4,
+      "pose": "T",
+      "size": [
+        2048,
+        1600
+      ],
+      "armsInRigInput": 2,
+      "finalArmsAfterAssembly": 4,
+      "backReelFrame": false
+    },
+    {
+      "id": "accessory-set",
+      "folder": "Accessories",
+      "count": 4,
+      "size": [
+        3200,
+        1800
+      ],
+      "contents": [
+        "one additional arm module, duplicate/mirror for lower pair",
+        "one cross controller",
+        "one hard upper-back four-spool frame"
+      ],
+      "layout": "accessory-layout.json",
+      "slotOrderFixedAcrossViews": true,
+      "wholeSheetMirrored": false
+    },
+    {
+      "id": "puppet-stage",
+      "folder": "Buildings/PuppetStage",
+      "count": 4,
+      "size": [
+        2400,
+        1600
+      ]
+    },
+    {
+      "id": "audience-box",
+      "folder": "Buildings/AudienceBox",
+      "count": 4,
+      "size": [
+        2400,
+        1600
+      ]
+    },
+    {
+      "id": "fly-rig",
+      "folder": "Buildings/FlyRig",
+      "count": 4,
+      "size": [
+        2400,
+        1600
+      ]
+    }
+  ],
+  "floor": {
+    "path": "Floor/top.png",
+    "count": 1,
+    "size": [
+      1254,
+      1254
+    ],
+    "use": "30m square flat opera main-stage layout/color reference",
+    "seamless": false,
+    "pbrSet": false
+  },
+  "modelingInputPngCount": 25,
+  "referenceOnlyPngCount": 3,
+  "promptCount": 35,
+  "guide": "START_HERE_KO.txt",
+  "prompts": "GenerationPrompts",
+  "qa": "verification.json",
+  "designSources": [
+    "ConceptArt/CharacterMatched/Stage4/01-marionette-normal-v1.png",
+    "ConceptArt/CharacterMatched/Stage4/02-marionette-hard-v1.png",
+    "ConceptArt/CharacterMatched/Stage4/03-opera-theatre-v1.png",
+    "C:/Astella/Astella/docs/part1/MARIONETTE_NORMAL.md",
+    "C:/Astella/Astella/docs/part1/MARIONETTE_HARD.md"
+  ],
+  "limitations": [
+    "AI generated reference views, not calibrated renders from one 3D mesh",
+    "Four-arm concept restored by adding two arm modules after humanoid rigging",
+    "Additional-arm bones, control strings and special animation require DCC work",
+    "Projection and decorative differences must be reconciled in final mesh"
+  ],
+  "performed": {
+    "tripoGeneration": false,
+    "mixamoRigging": false,
+    "unityImport": false,
+    "gameCodeChanges": false
+  }
+}

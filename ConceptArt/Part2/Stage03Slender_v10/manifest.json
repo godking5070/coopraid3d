@@ -1,0 +1,38 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "stage":  3,
+    "title_ko":  "얼어붙은 혈관의 연금술사",
+    "version":  "Stage03Slender_v10",
+    "created_date":  "2026-11-12",
+    "tool":  "built-in image_gen",
+    "status":  "generation_visual_qa_and_file_validation_complete",
+    "user_request":  "3스테이지는 체격을 저번 체격으로 바꿔줘.",
+    "change":  "Revert broad armored shoulders/chest/limbs/greaves to the prior slender feminine physique; keep current large closed mercury circulation reliquary, head, mechanism, pose and framing.",
+    "images":  [
+                   {
+                       "id":  "01-boss",
+                       "image":  "01-boss.png",
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1b621-9017-7791-b5f0-ced8ce198bcd/exec-d248b20d-5c55-4c1e-9497-a69b8c623089.png",
+                       "prompts":  [
+                                       "01-boss.prompt.txt"
+                                   ],
+                       "references":  [
+                                          {
+                                              "path":  "../MajesticStage02to06_v9/Stage03/01-boss.png",
+                                              "role":  "Exact edit target. Keep large dorsal mercury artifact, mask, circulation parts, current pose/framing and laboratory setting. Body bulk is deliberately changed."
+                                          },
+                                          {
+                                              "path":  "../DevelopedSelections_v7/Stage03/01-effigy.png",
+                                              "role":  "Prior slender feminine shoulder/chest/arm/leg proportions only; do not restore older smaller dorsal artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Output visually inspected against both inputs: narrow shoulders, small crescent ribcage, thin long arms and legs, slim waist, close-fitting hip shell, slender shins and articulated feet restored. Enlarged shoulder/hip/greave armor removed. Same sealed round medical mask and short veil, same pose, exactly two arms/hands/legs. Large continuous oval glass mercury reliquary retained with clear upper section/opaque cold silver lower fluid and visible spine/pelvis brackets, chest reflux/mercury core and arm channels retained. Entire figure and device fit generous margins; laboratory perspective and cel colors maintained.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1893950,
+                       "sha256":  "e8380febbef963c9a5fe568648c9c4f60b72c2109cc8b54b9c4f360b9c170d16"
+                   }
+               ],
+    "limits":  "Single-view concept art, not 3D mesh/rigging verification. Earlier versions preserved. Only Stage03 changed."
+}

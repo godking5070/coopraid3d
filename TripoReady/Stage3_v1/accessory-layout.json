@@ -1,0 +1,374 @@
+﻿{
+    "canvas":  {
+                   "background":  "#E8E8E8",
+                   "width":  3840,
+                   "height":  1800
+               },
+    "slotOrder":  [
+                      "cloak-normal",
+                      "cloak-hard",
+                      "clapper",
+                      "drive",
+                      "chain"
+                  ],
+    "method":  "Deterministic slot placement. Same per-item bounding-box horizontal center, bottom baseline and fixed height in each view. No whole-sheet mirroring.",
+    "slots":  [
+                  {
+                      "centerX":  400,
+                      "minX":  30,
+                      "id":  "cloak-normal",
+                      "height":  1050,
+                      "maxX":  770
+                  },
+                  {
+                      "centerX":  1170,
+                      "minX":  800,
+                      "id":  "cloak-hard",
+                      "height":  1050,
+                      "maxX":  1540
+                  },
+                  {
+                      "centerX":  1870,
+                      "minX":  1650,
+                      "id":  "clapper",
+                      "height":  1250,
+                      "maxX":  2090
+                  },
+                  {
+                      "centerX":  2480,
+                      "minX":  2120,
+                      "id":  "drive",
+                      "height":  650,
+                      "maxX":  2840
+                  },
+                  {
+                      "centerX":  3340,
+                      "minX":  2910,
+                      "id":  "chain",
+                      "height":  500,
+                      "maxX":  3770
+                  }
+              ],
+    "placements":  [
+                       {
+                           "item":  "cloak-normal",
+                           "view":  "front",
+                           "centerX":  400,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  44,
+                           "y":  550,
+                           "width":  713,
+                           "sourceBounds":  [
+                                                272,
+                                                112,
+                                                705,
+                                                1038
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-hard",
+                           "view":  "front",
+                           "centerX":  1170,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  849,
+                           "y":  550,
+                           "width":  643,
+                           "sourceBounds":  [
+                                                276,
+                                                62,
+                                                699,
+                                                1142
+                                            ]
+                       },
+                       {
+                           "item":  "clapper",
+                           "view":  "front",
+                           "centerX":  1870,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1690,
+                           "y":  350,
+                           "width":  360,
+                           "sourceBounds":  [
+                                                472,
+                                                93,
+                                                307,
+                                                1067
+                                            ]
+                       },
+                       {
+                           "item":  "drive",
+                           "view":  "front",
+                           "centerX":  2480,
+                           "baseline":  1600,
+                           "height":  650,
+                           "x":  2146,
+                           "y":  950,
+                           "width":  669,
+                           "sourceBounds":  [
+                                                180,
+                                                192,
+                                                894,
+                                                868
+                                            ]
+                       },
+                       {
+                           "item":  "chain",
+                           "view":  "front",
+                           "centerX":  3340,
+                           "baseline":  1600,
+                           "height":  500,
+                           "x":  2963,
+                           "y":  1100,
+                           "width":  754,
+                           "sourceBounds":  [
+                                                93,
+                                                157,
+                                                1202,
+                                                797
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-normal",
+                           "view":  "left",
+                           "centerX":  400,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  327,
+                           "y":  550,
+                           "width":  146,
+                           "sourceBounds":  [
+                                                539,
+                                                107,
+                                                143,
+                                                1031
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-hard",
+                           "view":  "left",
+                           "centerX":  1170,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  1078,
+                           "y":  550,
+                           "width":  184,
+                           "sourceBounds":  [
+                                                519,
+                                                59,
+                                                199,
+                                                1135
+                                            ]
+                       },
+                       {
+                           "item":  "clapper",
+                           "view":  "left",
+                           "centerX":  1870,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1692,
+                           "y":  350,
+                           "width":  356,
+                           "sourceBounds":  [
+                                                475,
+                                                94,
+                                                304,
+                                                1066
+                                            ]
+                       },
+                       {
+                           "item":  "drive",
+                           "view":  "left",
+                           "centerX":  2480,
+                           "baseline":  1600,
+                           "height":  650,
+                           "x":  2408,
+                           "y":  950,
+                           "width":  144,
+                           "sourceBounds":  [
+                                                524,
+                                                111,
+                                                221,
+                                                1001
+                                            ]
+                       },
+                       {
+                           "item":  "chain",
+                           "view":  "left",
+                           "centerX":  3340,
+                           "baseline":  1600,
+                           "height":  500,
+                           "x":  3310,
+                           "y":  1100,
+                           "width":  61,
+                           "sourceBounds":  [
+                                                561,
+                                                84,
+                                                132,
+                                                1087
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-normal",
+                           "view":  "right",
+                           "centerX":  400,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  321,
+                           "y":  550,
+                           "width":  159,
+                           "sourceBounds":  [
+                                                549,
+                                                108,
+                                                155,
+                                                1024
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-hard",
+                           "view":  "right",
+                           "centerX":  1170,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  1100,
+                           "y":  550,
+                           "width":  140,
+                           "sourceBounds":  [
+                                                551,
+                                                60,
+                                                151,
+                                                1133
+                                            ]
+                       },
+                       {
+                           "item":  "clapper",
+                           "view":  "right",
+                           "centerX":  1870,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1708,
+                           "y":  350,
+                           "width":  325,
+                           "sourceBounds":  [
+                                                488,
+                                                92,
+                                                278,
+                                                1069
+                                            ]
+                       },
+                       {
+                           "item":  "drive",
+                           "view":  "right",
+                           "centerX":  2480,
+                           "baseline":  1600,
+                           "height":  650,
+                           "x":  2407,
+                           "y":  950,
+                           "width":  146,
+                           "sourceBounds":  [
+                                                498,
+                                                110,
+                                                225,
+                                                1002
+                                            ]
+                       },
+                       {
+                           "item":  "chain",
+                           "view":  "right",
+                           "centerX":  3340,
+                           "baseline":  1600,
+                           "height":  500,
+                           "x":  3311,
+                           "y":  1100,
+                           "width":  59,
+                           "sourceBounds":  [
+                                                563,
+                                                97,
+                                                125,
+                                                1062
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-normal",
+                           "view":  "back",
+                           "centerX":  400,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  43,
+                           "y":  550,
+                           "width":  715,
+                           "sourceBounds":  [
+                                                272,
+                                                111,
+                                                708,
+                                                1039
+                                            ]
+                       },
+                       {
+                           "item":  "cloak-hard",
+                           "view":  "back",
+                           "centerX":  1170,
+                           "baseline":  1600,
+                           "height":  1050,
+                           "x":  847,
+                           "y":  550,
+                           "width":  646,
+                           "sourceBounds":  [
+                                                276,
+                                                63,
+                                                701,
+                                                1139
+                                            ]
+                       },
+                       {
+                           "item":  "clapper",
+                           "view":  "back",
+                           "centerX":  1870,
+                           "baseline":  1600,
+                           "height":  1250,
+                           "x":  1690,
+                           "y":  350,
+                           "width":  361,
+                           "sourceBounds":  [
+                                                473,
+                                                93,
+                                                308,
+                                                1067
+                                            ]
+                       },
+                       {
+                           "item":  "drive",
+                           "view":  "back",
+                           "centerX":  2480,
+                           "baseline":  1600,
+                           "height":  650,
+                           "x":  2144,
+                           "y":  950,
+                           "width":  672,
+                           "sourceBounds":  [
+                                                180,
+                                                194,
+                                                894,
+                                                865
+                                            ]
+                       },
+                       {
+                           "item":  "chain",
+                           "view":  "back",
+                           "centerX":  3340,
+                           "baseline":  1600,
+                           "height":  500,
+                           "x":  2964,
+                           "y":  1100,
+                           "width":  753,
+                           "sourceBounds":  [
+                                                93,
+                                                157,
+                                                1202,
+                                                798
+                                            ]
+                       }
+                   ]
+}

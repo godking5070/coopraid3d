@@ -1,0 +1,1 @@
+document.querySelectorAll('.toolbar button').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.view;document.querySelectorAll('.toolbar button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelector('.cards').classList.toggle('focus',id!=='all');document.querySelectorAll('.card').forEach(x=>x.hidden=id!=='all'&&x.dataset.id!==id)}));

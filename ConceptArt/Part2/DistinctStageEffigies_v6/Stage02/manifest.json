@@ -1,0 +1,72 @@
+{
+    "stage":  "02",
+    "title_ko":  "끝나지 않는 진혼곡의 무희",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "scope":  "Three different appearances and sub-concepts. Humanoid stage identity retained; not three poses of the same shell.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "오르간 목의 진혼 집전자",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-b3d1770e-af47-4a34-b626-9d1c8bafa1d7.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\ObjectBossExploration_v1\\Stage02\\03-effigy.png",
+                                              "role":  "Family, stage identity, human proportions and clean cel art reference. Head/chest/armor/mechanism deliberately redesigned per option, not locked identity."
+                                          }
+                                      ],
+                       "visual_qa":  "Appearance changed to sealed oval funeral mask/canopy and organ-throat collar, vertical rib-shutter humanoid chest, squared hip guards, three curved external resonance tubes and supported back rack. One hand silences throat, other resists winding. Complete two-arm/two-leg body and frame; no human face or internal pin drum. Distinct from B framed plates and C bells.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1901209,
+                       "sha256":  "a9688a31ba4db68e92f857a83fe2c6f8861b8852584e23bcf50a979a408f4b81"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "분할 극장면의 역결속 연주자",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-7eb5a60c-3c19-469b-85c0-b892119153f5.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\ObjectBossExploration_v1\\Stage02\\03-effigy.png",
+                                              "role":  "Family, stage identity, human proportions and clean cel art reference. Head/chest/armor/mechanism deliberately redesigned per option, not locked identity."
+                                          }
+                                      ],
+                       "visual_qa":  "Three offset closed rectangular head slabs, asymmetric navy shutter/ivory rib chest, short rounded pelvis guards, reverse-bound arms and six framed exterior sound plates. Two physical back/hip brackets hold acoustic frame. Side phase cam and back spring visible. Human proportions, full silhouette and no internal gold drum. Distinct head/chest/instrument.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1857074,
+                       "sha256":  "e25db29bca0472da1535c915c9afb390797b485069e310537800684867292154"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "추의 박자를 끊는 장례 무희",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-bf877a8d-477e-450e-824a-9e780f6b4751.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\ObjectBossExploration_v1\\Stage02\\03-effigy.png",
+                                              "role":  "Family, stage identity, human proportions and clean cel art reference. Head/chest/armor/mechanism deliberately redesigned per option, not locked identity."
+                                          }
+                                      ],
+                       "visual_qa":  "Closed round tuning tablet/crescent plates, opposing acoustic chest arches, back spring/key and a supported side frame containing three compact bells and pendulum. One hand at throat, other on clevis. Human waist/pelvis/long legs preserved. Frame ties into hip cam and hand, no floating bells, complete body in canvas. Unique C appearance.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1851067,
+                       "sha256":  "856144e48a79d53b4596d0a9e9222363840c37e7eff5eff065bc55c1f60512fb"
+                   }
+               ],
+    "limits":  "Single-view concept art; no actual mesh, UV or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

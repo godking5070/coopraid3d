@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "project": "ASTELLA",
+  "stage": 3,
+  "boss": "울리지 않는 대종 캄파넬라",
+  "environment": "침묵의 종루",
+  "date": "2026-11-10",
+  "generator": "built-in image_gen; deterministic fixed-slot raster assembly",
+  "views": [
+    "front",
+    "left",
+    "right",
+    "back"
+  ],
+  "cameraConvention": {
+    "up": "+Y",
+    "front": "+Z",
+    "subjectRight": "+X",
+    "left": "camera at -X; front detail points screen right",
+    "right": "camera at +X; front detail points screen left"
+  },
+  "inputGroups": [
+    {
+      "id": "normal-body",
+      "folder": "Bodies/Normal",
+      "count": 4,
+      "size": [
+        2048,
+        1800
+      ],
+      "pose": "neutral six-legged stance",
+      "humanoid": false,
+      "legCount": 6
+    },
+    {
+      "id": "hard-body",
+      "folder": "Bodies/Hard",
+      "count": 4,
+      "size": [
+        2048,
+        1800
+      ],
+      "pose": "neutral six-legged stance",
+      "humanoid": false,
+      "legCount": 6,
+      "shellPanelCount": 4
+    },
+    {
+      "id": "accessory-set",
+      "folder": "Accessories",
+      "count": 4,
+      "size": [
+        3840,
+        1800
+      ],
+      "contents": [
+        "normal expedition cloak",
+        "hard torn cloak",
+        "pendulum clapper",
+        "rear drive cassette",
+        "sealing chain harness"
+      ],
+      "layout": "accessory-layout.json",
+      "slotOrderFixedAcrossViews": true,
+      "wholeSheetMirrored": false
+    },
+    {
+      "id": "belfry-arch",
+      "folder": "Buildings/BelfryArch",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "railing",
+      "folder": "Buildings/Railing",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    },
+    {
+      "id": "winding-station",
+      "folder": "Buildings/WindingStation",
+      "count": 4,
+      "size": [
+        1600,
+        1600
+      ]
+    }
+  ],
+  "floor": {
+    "path": "Floor/top.png",
+    "count": 1,
+    "size": [
+      1254,
+      1254
+    ],
+    "use": "flat arena layout/color guide with four resonance plate motifs",
+    "arenaRadiusDesignMeters": 18,
+    "seamless": false,
+    "pbrSet": false
+  },
+  "modelingInputPngCount": 25,
+  "referenceOnlyPngCount": 3,
+  "promptCount": 43,
+  "guide": "START_HERE_KO.txt",
+  "prompts": "GenerationPrompts",
+  "qa": "verification.json",
+  "sourceOverrides": {
+    "hard-front": "hard-front-fixed",
+    "drive-right": "drive-right-fixed"
+  },
+  "discardedPromptRecords": [
+    "hard-front.txt",
+    "drive-right.txt"
+  ],
+  "rigging": {
+    "mixamoHumanoidSuitable": false,
+    "required": "custom mechanical/spider rig; separate clapper and shell flap joints"
+  },
+  "designReferences": [
+    "C:/Astella/Astella/docs/part1/CAMPANELLA_NORMAL.md",
+    "C:/Astella/Astella/docs/part1/CAMPANELLA_HARD.md"
+  ],
+  "limitations": [
+    "AI view references, not calibrated renders of one source mesh",
+    "Fixed coordinates guarantee layout, not exact geometry correspondence",
+    "Cloth must be posed onto bell after reconstruction",
+    "Chain is a connected rigid relief harness, not individual simulated links",
+    "No actual 3D generation or rigging performed"
+  ],
+  "performed": {
+    "tripoGeneration": false,
+    "mixamoRigging": false,
+    "customRigging": false,
+    "gameCodeChanges": false
+  }
+}

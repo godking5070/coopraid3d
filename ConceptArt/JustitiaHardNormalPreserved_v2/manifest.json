@@ -1,0 +1,130 @@
+{
+    "schema_version":  1,
+    "title_ko":  "유스티티아 하드 — 노멀 계승 3안",
+    "created":  "2026-11-15",
+    "mode":  "built-in image_gen",
+    "scope":  "Three full-body HARD concepts derived solely from NORMAL Justitia identity. Comparison candidates, not selected/fixed.",
+    "normal_reference":  {
+                             "image":  "Reference/01-normal.png",
+                             "original":  "ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                             "role":  "sole initial identity/style reference",
+                             "sha256":  "3b4313ed4aef27fe210e9f4eb9d19fdf67ed8e563ac8e84344bae239e41ef93a"
+                         },
+    "images":  [
+                   {
+                       "id":  "justitia-hard-normal-preserved-a",
+                       "title_ko":  "무너진 균형",
+                       "image":  "A-imbalanced/01-boss.png",
+                       "prompts":  [
+                                       "A-imbalanced/01-boss.prompt.txt",
+                                       "A-imbalanced/01-boss.refine.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1dd47-2592-72f3-942d-4da2f84dac23/exec-a4ffbf1c-8fc5-44fe-b406-75c6502333be.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1dd47-2592-72f3-942d-4da2f84dac23/exec-d2751804-a0bf-4484-92ad-9b6a4b1466dc.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "sole initial image input; normal Justitia character identity, body proportions, face, hairstyle, blindfold, costume, sword, back scale and clean rendering"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/.codex/generated_images/01a1dd47-2592-72f3-942d-4da2f84dac23/exec-d2751804-a0bf-4484-92ad-9b6a4b1466dc.png",
+                                              "role":  "single framing correction edit target; no design changes requested"
+                                          }
+                                      ],
+                       "visual_qa":  {
+                                         "status":  "pass",
+                                         "identity":  "Normal blindfolded pale face and side-swept sculpted ivory curls retained. Slender feminine torso, narrow waist, long slim legs, high navy collar, formal ivory/navy/gold robe and star fastenings remain recognizable.",
+                                         "hard_transformation":  "Strongly tilted expanded articulated rear beam, heavy single judicial weight inside lower pan, higher empty pan, sharpened enlarged ceremonial robe tails and restrained lavender shell stress cracks.",
+                                         "anatomy_and_props":  "Exactly two arms and two legs; two delicate hands grasp one original broad down-pointing sword. One back scale beam and exactly two chain-hung pans, one loaded and one empty.",
+                                         "framing":  "Final 1536x1024 landscape. One full-body hero. Both beam ends, hair, chains, pans, sword point/hilt, hands, robe hems and both feet contained. Approximately 90 px top and 100 px bottom clearance; wide lateral clearance.",
+                                         "style":  "Clean polished 2D game concept, smooth ivory/navy/brass, lavender cel shadows, fine lines, quiet pale lavender backdrop; no text, sheet views, collage, rust, gore or PBR.",
+                                         "correction":  "One targeted framing correction after initial image clipped the upper beam tip and had tight lower clearance; final design retained."
+                                     },
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1765803,
+                       "sha256":  "834b7405141f6ddcda98391a82edadd24d3613523864157fbabdd69e16a448fe",
+                       "number":  1,
+                       "description_ko":  "기울어진 대형 저울과 무거운 추. 넓어진 예복과 균열로 판결의 무게를 강조."
+                   },
+                   {
+                       "id":  "B",
+                       "title_ko":  "개방된 판결",
+                       "image":  "B-unsealed/01-boss.png",
+                       "prompts":  [
+                                       "B-unsealed/01-boss.prompt.txt",
+                                       "B-unsealed/01-boss.refine.prompt.txt"
+                                   ],
+                       "source":  "C:/Users/godki/.codex/generated_images/01a1dd47-cf4a-79c0-b762-79fbe42bee6c/exec-ba523926-4ee4-4c6a-a7e8-d1c5926ffc1b.png",
+                       "initial_source":  "C:/Users/godki/.codex/generated_images/01a1dd47-cf4a-79c0-b762-79fbe42bee6c/exec-a3995ce1-51d9-4adb-bc55-2e629dc2e275.png",
+                       "references":  [
+                                          {
+                                              "path":  "ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "sole initial identity reference and edit target"
+                                          },
+                                          {
+                                              "path":  "C:/Users/godki/.codex/generated_images/01a1dd47-cf4a-79c0-b762-79fbe42bee6c/exec-a3995ce1-51d9-4adb-bc55-2e629dc2e275.png",
+                                              "role":  "single targeted framing-correction edit target"
+                                          }
+                                      ],
+                       "visual_qa":  {
+                                         "status":  "pass",
+                                         "reviewed_against":  "ConceptArt/CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                         "identity":  "Same sculpted wavy ivory hairstyle, gold-edged blindfold and calm visible lower face; normal-size head; narrow waist and slender long limbs; tall navy collar and ivory/navy/gold star-accented ceremonial robe retained.",
+                                         "hard_changes":  "Two modestly opened ivory chest panels expose a narrow brass spindle with restrained lavender light. Sharpened separated robe panels enlarge silhouette; rear beam has strained offset joints and exactly two unequal-height pans.",
+                                         "anatomy_equipment":  "Exactly two arms, two legs, delicate hands, two feet, one broad greatsword and two chain-hung scale pans. No extra limbs, giant torso or hollow ring cavity.",
+                                         "framing":  "1536x1024 landscape, one full-body character. Hair top approximately y=89; bottommost sword point approximately y=883. Beam tips, both pans, weapon and feet fully enclosed with comfortable margins.",
+                                         "style":  "Clean polished 2D concept with ivory/navy/brass palette, lavender cel shadows and pale quiet backdrop. No text, inset, source sheet, gore, rust or photorealistic texture.",
+                                         "correction":  "One targeted framing correction only; entire assembled subject reduced while design identity was preserved."
+                                     },
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1553085,
+                       "sha256":  "219a9f9124e485891eb0d00db016d27e9cbc291889ed2cad89aad734b0891ad3",
+                       "number":  2,
+                       "description_ko":  "노멀에 가까운 자세. 갈라진 흉부 외피 사이로 가는 시계축이 드러나는 변형."
+                   },
+                   {
+                       "id":  "C",
+                       "title_ko":  "봉인 균열",
+                       "image":  "C-fractured/01-boss.png",
+                       "prompts":  [
+                                       "C-fractured/01-boss.prompt.txt",
+                                       "C-fractured/01-boss.refine.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-4a6a109d-d248-4147-8a8b-3bd18a06daf7.png",
+                       "initial_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-751eb52f-58cd-4a5d-9f38-1d96cd036b85.png",
+                       "references":  [
+                                          {
+                                              "path":  "../../CharacterMatched/Stage5/01-justitia-normal-v1.png",
+                                              "role":  "sole initial identity/style reference; normal face, wavy hair, blindfold, slender proportions, robe, sword and scale apparatus"
+                                          },
+                                          {
+                                              "path":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-751eb52f-58cd-4a5d-9f38-1d96cd036b85.png",
+                                              "role":  "single framing correction edit target"
+                                          }
+                                      ],
+                       "visual_qa":  {
+                                         "status":  "pass",
+                                         "identity":  "Wavy ivory hair, gold-edged blindfold, calm pale lower face, slender waist and long legs, navy high collar, star robe and original sword retained.",
+                                         "hard_changes":  "One-sided hinged shell exposes a slender dark inner frame. Taut back-mast chains connect to real elbow and hip sockets. Asymmetric segmented formal robe, tilted scale and one weighted pan.",
+                                         "anatomy_equipment":  "Exactly two arms, two legs, one head, one sword, one back mast/beam and exactly two pans. No bulk increase or new monster anatomy.",
+                                         "framing":  "Entire full-body silhouette, beam, both pans, sword and robe held within ample margins, approximately 110px top and 150px bottom.",
+                                         "style":  "Polished 2D cel concept with ivory/navy/gold and lavender, fine controlled lines and pale quiet backdrop, no text or insets.",
+                                         "correction":  "One framing-only correction reduced complete subject, preserved the design."
+                                     },
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1665845,
+                       "sha256":  "314993b68b1ab2a0ec71ea5db200eb1333b6455ea7094f031f517b8ba87f6091",
+                       "number":  3,
+                       "description_ko":  "한쪽 외피의 분절과 구속 사슬. 비대칭 예복으로 긴장감을 만든 변형."
+                   }
+               ],
+    "independent_review":  {
+                               "status":  "pass",
+                               "checked":  "Original NORMAL and all three final images",
+                               "findings":  "All preserve normal identity and valid full-body construction. C offers the strongest balance of source identity and cursed HARD transformation; A has the strongest enlarged silhouette; B is most conservative.",
+                               "gallery":  "Local HTML rendered and visually inspected; all four image paths present; JavaScript syntax checked."
+                           }
+}

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "project": "ASTELLA",
+  "scope": "Remaining Part1 stages 2-6, matching Stage1_v2 resource standard",
+  "date": "2026-11-10",
+  "imageTool": "built-in image_gen",
+  "modelingPngCount": 133,
+  "bodyPngCount": 48,
+  "accessorySheetPngCount": 20,
+  "architecturePngCount": 60,
+  "floorPngCount": 5,
+  "referencePngCount": 15,
+  "promptCount": 191,
+  "standard": {
+    "views": [
+      "front",
+      "left",
+      "right",
+      "back"
+    ],
+    "fullBodyImagesSeparate": true,
+    "accessoriesAllInOneSheetPerView": true,
+    "accessorySlotsAndScaleFixedAcrossViews": true,
+    "architecturalModulesPerStage": 3,
+    "architecturalViewsPerModule": 4,
+    "floorTopViewsPerStage": 1
+  },
+  "stages": [
+    {
+      "stage": 2,
+      "name": "플로라 기어 — 기억의 유리 온실",
+      "folder": "Stage2_v1",
+      "modelingPngCount": 25,
+      "bodyVariants": 2,
+      "accessoryObjects": 3,
+      "prompts": 33
+    },
+    {
+      "stage": 3,
+      "name": "캄파넬라 — 침묵의 종루",
+      "folder": "Stage3_v1",
+      "modelingPngCount": 25,
+      "bodyVariants": 2,
+      "accessoryObjects": 5,
+      "prompts": 43,
+      "rigging": "Non-humanoid 6-legged bell; custom mechanical rig required"
+    },
+    {
+      "stage": 4,
+      "name": "마리오네트 — 오페라 극장",
+      "folder": "Stage4_v1",
+      "modelingPngCount": 25,
+      "bodyVariants": 2,
+      "accessoryObjects": 3,
+      "prompts": 35,
+      "rigging": "Two-arm T-pose base; reconstruct lower pair using duplicated arm module with custom bones"
+    },
+    {
+      "stage": 5,
+      "name": "유스티티아 — 성채 재판소",
+      "folder": "Stage5_v1",
+      "modelingPngCount": 25,
+      "bodyVariants": 2,
+      "accessoryObjects": 5,
+      "prompts": 41
+    },
+    {
+      "stage": 6,
+      "name": "야누스 알파 & 오메가 — 시계탑 정문",
+      "folder": "Stage6_v1",
+      "modelingPngCount": 33,
+      "bodyVariants": 4,
+      "accessoryObjects": 6,
+      "prompts": 39
+    }
+  ],
+  "included": "Five complete stage folders, each with Korean guide, prompts, reference concepts, manifests, layouts and verification; independent cross-audit reports",
+  "limitations": [
+    "AI-generated multiview concept references, not renders calibrated from a single 3D mesh",
+    "Tripo upload/reconstruction and Mixamo rigging not executed",
+    "Additional arms, wings, cloth, sliding mechanisms and non-humanoid bodies need DCC work",
+    "Floor images are flat layout/color guides; not seamless textures or PBR sets"
+  ],
+  "unchanged": "Previously completed Stage1_v2 and game project code/scenes"
+}

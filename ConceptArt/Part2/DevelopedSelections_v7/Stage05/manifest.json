@@ -1,0 +1,75 @@
+{
+    "stage":  "05",
+    "title_ko":  "무너진 천구를 떠받치는 부단장",
+    "tool":  "built-in image_gen",
+    "status":  "generated_and_visually_reviewed",
+    "brief":  "../ART_DIRECTION.txt",
+    "scope":  "Three developed sub-concepts from the chosen v6 look. Liked humanoid identity retained and rejected rear mechanisms fully replaced by coherent functional artifacts.",
+    "images":  [
+                   {
+                       "id":  "01-effigy",
+                       "title_ko":  "천구의 반구를 짊어진 별흉갑 성상",
+                       "image":  "01-effigy.png",
+                       "prompts":  [
+                                       "01-effigy.prompt.txt",
+                                       "01-effigy.refine.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-92ba767f-d045-49c9-ba09-4207e9e9df61.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\DistinctStageEffigies_v6\\Stage05\\03-effigy.png",
+                                              "role":  "User-selected v6 concept. Preserve liked head/body/style and replace explicitly rejected rear artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Selected long visor, fractured-star chest, human body and original two-ended hour-hand spear retained. Old complete planet ball/orbit rings/thin stalk removed. New concave celestial hemisphere shard has star map, thick ivory rim, broad brass ribs, shoulder saddles and pelvis/spear brace. Final framing correction reduced shell and restored full rim/margins.",
+                       "initial_source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-f3211f76-9b69-4b76-a8a4-b548edc41178.png",
+                       "refinement_reason":  "Initial half-shell upper rim too tight/clipped. Reduced shell assembly slightly and pulled camera back, completing rim while retaining body and spear.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2118076,
+                       "sha256":  "92db4e8fb2d1ec793598d7f56b599b33be4dd507f92523af9f893767145b1351"
+                   },
+                   {
+                       "id":  "02-effigy",
+                       "title_ko":  "낙하한 천구환을 붙잡는 시침 수호상",
+                       "image":  "02-effigy.png",
+                       "prompts":  [
+                                       "02-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-0b8cdf50-dba2-4eda-a68b-75fa8cb80e56.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\DistinctStageEffigies_v6\\Stage05\\03-effigy.png",
+                                              "role":  "User-selected v6 concept. Preserve liked head/body/style and replace explicitly rejected rear artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Original visor/star armor/spear preserved. Old planet carrier replaced by a thick broken celestial load ring with fixed star-chart fragments/spokes, broad shoulder contacts, spine-to-pelvis support and spear clamp. Two hands/legs, complete artifact/spear endpoints inside frame.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2115800,
+                       "sha256":  "de2ffc56d88ef9546f86cdd3bf25bd871b555d27da2a5ae322c247d2412b7e5c"
+                   },
+                   {
+                       "id":  "03-effigy",
+                       "title_ko":  "붕괴 성도를 봉인한 구속절단의 성상",
+                       "image":  "03-effigy.png",
+                       "prompts":  [
+                                       "03-effigy.prompt.txt"
+                                   ],
+                       "source":  "C:\\Users\\godki\\.codex\\generated_images\\01a1b621-9017-7791-b5f0-ced8ce198bcd\\exec-d90b1122-fbda-488f-bb2d-dc33977cfe21.png",
+                       "references":  [
+                                          {
+                                              "path":  "C:\\Users\\godki\\orca\\workspaces\\coopraid3d\\보스-컨셉아트\\ConceptArt\\Part2\\DistinctStageEffigies_v6\\Stage05\\03-effigy.png",
+                                              "role":  "User-selected v6 concept. Preserve liked head/body/style and replace explicitly rejected rear artifact."
+                                          }
+                                      ],
+                       "visual_qa":  "Selected humanoid/star-chest/long visor and exact spear retained. Old sphere/rings/pole replaced by concave asymmetrical star-chart shell shard with reinforced ribs, axial seal, shoulder lock, lumbar anchor and spear load brace. Whole artifact/body/weapon visible.",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2039687,
+                       "sha256":  "1e509e2600fb1065fa182f71ebab213f4e012c8a9d43733c19acaf334ed98449"
+                   }
+               ],
+    "limits":  "Concept illustrations only; no 3D mesh, UV or rig validation.",
+    "file_validation":  "Three PNGs decoded at 1536x1024; bytes and SHA256 computed and existing hashes matched."
+}

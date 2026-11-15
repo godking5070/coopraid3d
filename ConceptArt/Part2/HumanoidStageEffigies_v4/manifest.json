@@ -1,0 +1,244 @@
+{
+    "project":  "ASTELLA",
+    "part":  2,
+    "version":  "HumanoidStageEffigies_v4",
+    "created_date":  "2026-11-12",
+    "status":  "generation_visual_qa_and_packaging_complete",
+    "tool":  "built-in image_gen",
+    "stage_count":  5,
+    "concepts_per_stage":  3,
+    "final_image_count":  15,
+    "concept_family":  "Humanoid stage-specific sealed ritual bodies",
+    "user_correction":  "Body shape should be humanoid like the previously liked concept, while preserving each stage identity.",
+    "human_proportion_rule":  "About 7 to 8 heads tall, readable head/neck/shoulders/ribcage/waist/pelvis/upper arms/forearms/hands/long thighs/calves/feet. v3 giant tombstone, barrel, chalice and architectural object bodies rejected.",
+    "proportion_visual_reference":  "../ObjectBossExploration_v1/Stage02/03-effigy.png",
+    "reference_policy":  "Original favored Stage02 viewed to understand human proportions only, not copied across stages. Initial generation reference images are actual PartI CharacterMatched assets. No v2/v3 designs supplied as templates.",
+    "stage_identity":  {
+                           "Stage04":  "Broad-shouldered humanoid furnace guardian, distinct waist and long legs, shield and eight chains",
+                           "Stage03":  "Slender humanoid healing effigy with integrated rear mercury circulation",
+                           "Stage01":  "Human-proportioned memory scout, sealed observation head and chest-sized intact hourglass",
+                           "Stage05":  "Human-proportioned veteran effigy with shoulder celestial supports and hour-hand spear",
+                           "Stage02":  "Human-proportioned forced funeral dancer, back winding drive and external sound organs"
+                       },
+    "differentiation":  "Each stage uses distinct shell design, pose, torso-scale organs, rear mechanisms and material rhythm without replacing the human silhouette.",
+    "gallery":  "INDEX.html",
+    "prompts":  "prompts-all.txt",
+    "direction":  "ART_DIRECTION.txt",
+    "qa":  "All 15 final PNGs visually inspected by the root and/or assigned stage agents. Full PNG decode, 1536x1024 dimensions, bytes and SHA256 verified. Individual stage manifests retain exact reference, generation and correction records. Existing earlier concepts preserved; user selection is not assumed.",
+    "limits":  "Single-view concept illustrations. No 3D mesh, UV, rigging or animation verification.",
+    "images":  [
+                   {
+                       "stage":  1,
+                       "id":  "01-effigy",
+                       "title_ko":  "잃어버린 맥박의 관측자",
+                       "image":  "Stage01/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1774795,
+                       "sha256":  "1f47b330a93a0cf51ef329954aab9f686ddc390a2c7486657cf6390bb3dfd213",
+                       "prompts":  [
+                                       "Stage01/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "02-effigy",
+                       "title_ko":  "감각을 닫는 봉인 정찰병",
+                       "image":  "Stage01/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1786136,
+                       "sha256":  "35ce79237efa566d94bf048ea8a77368b659bbf7433658ebbc5347263bee08d6",
+                       "prompts":  [
+                                       "Stage01/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  1,
+                       "id":  "03-effigy",
+                       "title_ko":  "기억 경계의 순찰 의례체",
+                       "image":  "Stage01/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1753728,
+                       "sha256":  "a3481a1a8480afe178b2d0a25caff979bcb41fe35cfe00bb0a0312bd9c66fcac",
+                       "prompts":  [
+                                       "Stage01/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage01/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "01-effigy",
+                       "title_ko":  "등태엽에 결속된 진혼의 인형",
+                       "image":  "Stage02/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1885373,
+                       "sha256":  "77e05f83c61371746550781ad51b1359ab3761192b9b256b50e2db48556ea399",
+                       "prompts":  [
+                                       "Stage02/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "02-effigy",
+                       "title_ko":  "멈추지 않는 회전의 봉인무희",
+                       "image":  "Stage02/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1927309,
+                       "sha256":  "8f2ad06f9df425e22ccb6f8f529346c383f7208836385ea10663edb83790597b",
+                       "prompts":  [
+                                       "Stage02/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  2,
+                       "id":  "03-effigy",
+                       "title_ko":  "자신의 연주를 막는 애도의 의례체",
+                       "image":  "Stage02/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1854907,
+                       "sha256":  "1a6cb28d78e7b929eafe73dcac526c6b19e95533c08ec328da74062613dcbb08",
+                       "prompts":  [
+                                       "Stage02/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage02/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "01-effigy",
+                       "title_ko":  "맥박을 감싼 백금 기도체",
+                       "image":  "Stage03/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1780550,
+                       "sha256":  "dd529023f4c48e443f4e690aaa1683cb7de3d27b4c1f6589f529933ff35d31f6",
+                       "prompts":  [
+                                       "Stage03/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "02-effigy",
+                       "title_ko":  "금지된 치유의 반저항체",
+                       "image":  "Stage03/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1819555,
+                       "sha256":  "2953b7996d0607d54c7ae62f54662d3e0a237540d2f1b9ee30b03cfb9b84900e",
+                       "prompts":  [
+                                       "Stage03/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  3,
+                       "id":  "03-effigy",
+                       "title_ko":  "잔열을 건네는 소진체",
+                       "image":  "Stage03/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  1892512,
+                       "sha256":  "5be604931253a5772e021f31e85648e82eedac5be9b7f85500d7fff44acb144d",
+                       "prompts":  [
+                                       "Stage03/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage03/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "01-effigy",
+                       "title_ko":  "동료 뒤를 지키는 잿불 봉인상",
+                       "image":  "Stage04/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2172249,
+                       "sha256":  "eb77c32c2dd189e6dccc6175e5e8d41b2b7316a361bdc8ff8b049f4a7ba70560",
+                       "prompts":  [
+                                       "Stage04/01-effigy.prompt.txt",
+                                       "Stage04/01-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "02-effigy",
+                       "title_ko":  "동력의 무게를 버티는 가마 수문자",
+                       "image":  "Stage04/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2307315,
+                       "sha256":  "2930710885365bddec39cfc0fe9ec71b4988d050444e4079bb4f54a2aa92f2a3",
+                       "prompts":  [
+                                       "Stage04/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  4,
+                       "id":  "03-effigy",
+                       "title_ko":  "마지막 열기를 가리는 비호의 의례체",
+                       "image":  "Stage04/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2169188,
+                       "sha256":  "3c6d159162f6cee7ecf4e69ed473531b9d200f68a175cd90e7393bfea3d23c7c",
+                       "prompts":  [
+                                       "Stage04/03-effigy.cleanup.prompt.txt",
+                                       "Stage04/03-effigy.prompt.txt",
+                                       "Stage04/03-effigy.refine.prompt.txt"
+                                   ],
+                       "manifest":  "Stage04/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "01-effigy",
+                       "title_ko":  "천구를 떠받치는 맹목의 부단장상",
+                       "image":  "Stage05/01-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2206733,
+                       "sha256":  "080e382f20dea851ce90b0183d589f9052db71eb94e2beccc94a93f62324d1ae",
+                       "prompts":  [
+                                       "Stage05/01-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "02-effigy",
+                       "title_ko":  "기울어진 천구를 버티는 전쟁 의례체",
+                       "image":  "Stage05/02-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2023913,
+                       "sha256":  "ddd6eb5052630477c4f1db8e86b0ecbf4d0dcbd6ccf08713cba6940e5078badf",
+                       "prompts":  [
+                                       "Stage05/02-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   },
+                   {
+                       "stage":  5,
+                       "id":  "03-effigy",
+                       "title_ko":  "동료를 지키려 명령을 거부하는 성상",
+                       "image":  "Stage05/03-effigy.png",
+                       "width":  1536,
+                       "height":  1024,
+                       "bytes":  2145313,
+                       "sha256":  "ea036682e43f185e32e3a57b7968167e43ca758cab8db433b10bbfea25affe7d",
+                       "prompts":  [
+                                       "Stage05/03-effigy.prompt.txt"
+                                   ],
+                       "manifest":  "Stage05/manifest.json"
+                   }
+               ]
+}
