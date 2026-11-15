@@ -30,7 +30,7 @@ namespace RaidRogue
 
         private void Update()
         {
-            Ledger.Advance(Time.unscaledDeltaTime, Time.timeScale > 0.001f && _stage != null &&
+            Ledger.Advance(Time.unscaledDeltaTime, !StageManager.CombatSuspended && Time.timeScale > 0.001f && _stage != null &&
                 _stage.boss != null && !_stage.boss.IsBossDefeatedCollapse && !_stage.IsStageTransitioning);
         }
 

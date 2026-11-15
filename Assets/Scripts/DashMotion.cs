@@ -14,6 +14,22 @@ namespace RaidRogue
     // Pure state used by the actual movement controller and standalone regression checks.
     public sealed class DashMotion
     {
+        // Only authoritative snapshots are restored; clients never send these values to the host.
+        public struct Snapshot
+        {
+            public bool Active;
+            public float Cooldown, CooldownTotal, Time, Distance, Speed, X, Z;
+        }
+        public Snapshot Capture() => new Snapshot { Active = Active, Cooldown = (float)CooldownRemaining,
+            CooldownTotal = (float)CooldownDuration, Time = (float)_timeRemaining, Distance = (float)_distanceRemaining,
+            Speed = (float)_speed, X = (float)DirectionX, Z = (float)DirectionZ };
+        public void Restore(Snapshot state)
+        {
+            Active = state.Active; CooldownRemaining = state.Cooldown; CooldownDuration = state.CooldownTotal;
+            _timeRemaining = state.Time; _distanceRemaining = state.Distance; _speed = state.Speed;
+            DirectionX = state.X; DirectionZ = state.Z;
+        }
+
         public bool Active { get; private set; }
         public double CooldownRemaining { get; private set; }
         public double CooldownDuration { get; private set; }

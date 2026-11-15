@@ -96,14 +96,14 @@ namespace RaidRogue
         public bool IsBeingKnockedBack => _isBeingKnockedBack;
         public bool HasTacticalRescueBuff => _tacticalRescueBuffTimer > 0f;
         public bool IsMovingXZ { get; private set; }
-        public bool IsDashing => _dash.Active;
-        public float DashCooldownRemaining => (float)_dash.CooldownRemaining;
-        public float DashCooldownFraction => _dash.CooldownDuration > 0
+        public bool IsDashing => RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.LocalMotor?.Dash.Active == true : _dash.Active;
+        public float DashCooldownRemaining => (float)(RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.LocalMotor?.Dash.CooldownRemaining ?? 0 : _dash.CooldownRemaining);
+        public float DashCooldownFraction => RaidNetworkSession.Multiplayer ? Mathf.Clamp01(DashCooldownRemaining / Mathf.Max(0.001f, (float)(RaidNetworkSession.Instance.LocalMotor?.Dash.CooldownDuration ?? 0))) : _dash.CooldownDuration > 0
             ? Mathf.Clamp01((float)(_dash.CooldownRemaining / _dash.CooldownDuration)) : 0;
         // Shared voluntary-movement gates for status effects; the current encounters do not apply stuns/roots yet.
         public bool IsStunned { get; set; }
         public bool IsMovementLocked { get; set; }
-        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && !StageManager.CombatSuspended && !IsStunned && !IsMovementLocked &&
+        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer) && !IsStunned && !IsMovementLocked &&
             !IsBeingRescued && !IsBeingKnockedBack && !LocalGameplayInput.Blocked;
         public bool CanDash => CanMoveVoluntarily && !IsDashing && DashCooldownRemaining <= 0;
         public bool HasMovementIntent => !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
@@ -207,6 +207,17 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidNetworkSession.Multiplayer)
+            {
+                bool allowed = !LocalGameplayInput.Blocked && RaidNetworkSession.Instance.HasLocalAvatar;
+                bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed);
+                if (pressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
+                Vector3 direction = allowed ? GetMoveDirectionXZ(ReadMoveInput()) : Vector3.zero;
+                RaidNetworkSession.Instance.SampleInput(direction, pressed);
+                IsMovingXZ = allowed && (direction.sqrMagnitude > 0.0001f || IsDashing);
+                UpdateOverheadHpBar(); UpdateHUD();
+                return;
+            }
             if (IsDead || StageManager.CombatSuspended)
             {
                 _dash.Cancel(); IsMovingXZ = false;
@@ -262,6 +273,7 @@ namespace RaidRogue
 
         public bool TryStartDash()
         {
+            if (RaidNetworkSession.CombatPreview) return false; // Multiplayer dash is consumed as a host-validated input command.
             Vector3 direction = GetMoveDirectionXZ(ReadMoveInput());
             Vector3 facing = transform.forward;
             if (!_dash.TryStart(dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
@@ -319,6 +331,13 @@ namespace RaidRogue
             {
                 _rescueSpeedBoostTimer = Mathf.Max(0f, _rescueSpeedBoostTimer - Time.deltaTime);
             }
+        }
+
+        public void SetNetworkDisplayName(string displayName, Color color)
+        {
+            if (_overheadNameText == null) return;
+            _overheadNameText.text = displayName;
+            _overheadNameText.color = color;
         }
 
         /// <summary>

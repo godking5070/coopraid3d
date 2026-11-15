@@ -46,7 +46,7 @@ namespace RaidRogue
                 if (_roles == null) _roles = Object.FindFirstObjectByType<RoleSelectionManager>();
                 if (_cards == null) _cards = Object.FindFirstObjectByType<RoguelikeCardManager>();
                 if (_stages == null) _stages = Object.FindFirstObjectByType<StageManager>();
-                if (!Application.isFocused || Time.timeScale <= 0.001f || IsTyping ||
+                if (RaidNetworkSession.BlocksInput || !Application.isFocused || Time.timeScale <= 0.001f || IsTyping ||
                     CombatMetricsUI.BlocksUnderlyingInput || LocalCameraSettingsUI.IsOpen ||
                     (_roles != null && _roles.IsRoleModalOpen) || (_cards != null && _cards.IsSelectionOpen) ||
                     (_stages != null && _stages.IsStageTransitioning)) SuppressThisFrame();

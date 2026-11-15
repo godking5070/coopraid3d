@@ -23,7 +23,7 @@ namespace RaidRogue
         public PotionSettings potionSettings = new PotionSettings();
         public ResurrectionSettings resurrectionSettings = new ResurrectionSettings();
         public static StageManager Instance { get; private set; }
-        public static bool CombatSuspended => Instance != null && (Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared);
+        public static bool CombatSuspended => RaidNetworkSession.CombatPreview || Instance != null && (Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared);
         public bool IsWiped { get; private set; }
         public bool IsPreparing { get; private set; }
         private bool _pendingBossClear;
@@ -61,6 +61,7 @@ namespace RaidRogue
 
         private void Start()
         {
+            RaidNetworkSession.Ensure(this);
             _wipeUI = gameObject.AddComponent<PartyWipeUI>();
             if (boss == null) boss = FindFirstObjectByType<BossController>();
             if (player == null) player = FindFirstObjectByType<PlayerController>();

@@ -217,6 +217,7 @@ namespace RaidRogue
         public TargetFaction GetTargetFaction(Transform t)
         {
             if (t == null) return TargetFaction.None;
+            if (t.GetComponent<NetworkRaidAvatar>() != null) return TargetFaction.Friendly;
             if (t.GetComponent<PlayerController>() != null || t.GetComponent<PartyBotAI>() != null)
                 return TargetFaction.Friendly;
             if (t.GetComponent<BossController>() != null || t.GetComponent<BossAddMinion>() != null)
@@ -249,6 +250,8 @@ namespace RaidRogue
         private Transform ResolveUnitRoot(Transform hitTransform)
         {
             if (hitTransform == null) return null;
+            var network = hitTransform.GetComponentInParent<NetworkRaidAvatar>();
+            if (network != null) return network.transform;
 
             BossAddMinion add = hitTransform.GetComponentInParent<BossAddMinion>();
             if (add != null && !add.isDead) return add.transform;
@@ -271,6 +274,7 @@ namespace RaidRogue
         public Transform GetTargetOfTarget(Transform unit)
         {
             if (unit == null) return null;
+            if (RaidNetworkSession.Multiplayer) return null; // Aggro/target-of-target is part of the later combat synchronization.
 
             // 1. 보스 -> 보스의 어그로 1순위 대상 (탱커 등)
             BossController b = unit.GetComponent<BossController>();
@@ -314,6 +318,8 @@ namespace RaidRogue
         public string GetUnitDisplayName(Transform unit)
         {
             if (unit == null) return "없음";
+            var network = unit.GetComponent<NetworkRaidAvatar>();
+            if (network != null) return network.DisplayName + " · " + network.RoleName;
 
             BossController b = unit.GetComponent<BossController>();
             if (b != null)
@@ -348,6 +354,7 @@ namespace RaidRogue
             maxHp = 1f;
             shield = 0f;
             if (unit == null) return;
+            if (unit.GetComponent<NetworkRaidAvatar>() != null) { currentHp = maxHp = 1f; return; }
 
             BossController b = unit.GetComponent<BossController>();
             if (b != null)
@@ -387,6 +394,7 @@ namespace RaidRogue
         public string GetUnitStatusSummary(Transform unit)
         {
             if (unit == null) return "";
+            if (unit.GetComponent<NetworkRaidAvatar>() != null) return "접속 중 · 이동 동기화 / 전투 미동기화";
 
             BossController b = unit.GetComponent<BossController>();
             if (b != null)
@@ -541,6 +549,7 @@ namespace RaidRogue
 
         public List<Transform> GetOrderedPartyMembers()
         {
+            if (RaidNetworkSession.Multiplayer) return RaidNetworkSession.Instance.OrderedParty();
             List<Transform> list = new List<Transform>(8);
             if (player != null)
             {

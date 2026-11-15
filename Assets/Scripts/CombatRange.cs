@@ -7,6 +7,8 @@ namespace RaidRogue
         public static float Radius(Transform unit)
         {
             if (unit == null) return 0;
+            var network = unit.GetComponent<NetworkRaidAvatar>();
+            if (network != null) return network.CombatRadius;
             var boss = unit.GetComponent<BossController>();
             if (boss != null) return boss.CombatRadius;
             var add = unit.GetComponent<BossAddMinion>();
@@ -30,6 +32,7 @@ namespace RaidRogue
         public static bool LivingPartyMember(Transform unit)
         {
             if (unit == null || !unit.gameObject.activeInHierarchy) return false;
+            if (unit.GetComponent<NetworkRaidAvatar>() != null) return true;
             var player = unit.GetComponent<PlayerController>();
             if (player != null) return !player.IsDead;
             var bot = unit.GetComponent<PartyBotAI>();
