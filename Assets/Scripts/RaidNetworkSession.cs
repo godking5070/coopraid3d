@@ -416,7 +416,11 @@ namespace RaidRogue
         {
             var ids = new List<int>(_avatars.Keys); ids.Sort();
             if (ids.Remove(_localId)) ids.Insert(0, _localId);
-            var result = new List<Transform>(); foreach (int id in ids) result.Add(_avatars[id].transform); return result;
+            var result = new List<Transform>();
+            // OnDisable cleanup can query the party while scene unload destroys its avatars.
+            foreach (int id in ids)
+                if (_avatars.TryGetValue(id, out var avatar) && avatar != null) result.Add(avatar.transform);
+            return result;
         }
         public void SelectRole(int role)
         {
