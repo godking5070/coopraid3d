@@ -11,13 +11,13 @@ namespace RaidRogue
         public static LocalSettingsRuntime Instance { get; private set; }
         public LocalSettingsData Applied { get; private set; }
         public string Notice { get; private set; } = "";
-        public string FilePath => Path.Combine(Application.persistentDataPath, "local-settings.json");
+        public string FilePath => Path.Combine(CampaignStorage.RootFor(Application.persistentDataPath, Environment.GetCommandLineArgs(), Debug.isDebugBuild), "local-settings.json");
         public readonly DisplayConfirmation Confirmation = new DisplayConfirmation();
         public LocalSettingsData Previewed { get; private set; }
         private LocalSettingsData _candidate, _beforeDisplay;
         public LocalSettingsData LastRevertedDisplay { get; private set; }
         private float _nextAudioScan;
-        public bool CanChangeDisplay => !Application.isEditor && (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.OSXPlayer);
+        public bool CanChangeDisplay => !Application.isEditor && !Application.isBatchMode && (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.OSXPlayer);
         public bool CanExclusive => Application.platform == RuntimePlatform.WindowsPlayer;
         public bool CanVSync => Application.platform != RuntimePlatform.Android && Application.platform != RuntimePlatform.IPhonePlayer;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

@@ -138,7 +138,34 @@ internal static class DashTests
 
     public static void Main()
     {
-        MotionAndCooldown(); InputGate(); Arena(); Tethers();
+        MotionAndCooldown(); InputGate(); Arena(); Tethers(); JobProfiles();
         Console.WriteLine($"PASS: {_checks} dash state, direction, input and swept geometry checks.");
+    }
+    private static void JobProfiles()
+    {
+        for(int i=0;i<12;i++)
+        {
+            var settings=CharacterDashProfiles.ForJob(i);
+            Check(settings!=null&&settings.maximumCharges>=1&&settings.maximumCharges<=3,"valid job dash profile");
+            var motion=new DashMotion();
+            Check(motion.TryStart(settings,true,1,0,0,1),"job dash starts with input against facing");
+            Near(motion.DirectionX,i==0?0:1,"backstep overrides input only for shield tank");
+            Near(motion.DirectionZ,i==0?-1:0,"tank moves opposite facing");
+            Near(motion.Step(10),settings.distance,"job distance is bounded and independent of frame duration");
+            Check(motion.Charges==settings.maximumCharges-1,"one use consumes exactly one charge");
+            for(int n=1;n<settings.maximumCharges;n++)
+            {Check(motion.TryStart(settings,true,1,0,0,1),"remaining short step can start");motion.Step(10);}
+            Check(!motion.TryStart(settings,true,1,0,0,1),"empty job charges block dash");
+            motion.TickCooldown(settings.cooldown);
+            Check(motion.Charges==1,"multi-charge profile recovers sequentially");
+            var restored=new DashMotion();restored.Restore(motion.Capture());
+            Check(restored.Charges==motion.Charges&&restored.MaximumCharges==motion.MaximumCharges,"job charge snapshot roundtrip");
+            Check(settings.preserveCast==(i==10),"only existing caster retains cast movement");
+        }
+        var back=new DashMotion();var config=CharacterDashProfiles.ForJob(0);
+        Check(back.TryStart(config,true,-1,0,3,4),"rotated backstep starts");
+        Near(back.DirectionX,-.6,"backstep captures facing X");Near(back.DirectionZ,-.8,"backstep captures facing Z");
+        Check(!back.TryStart(config,true,1,0,-3,-4),"active backstep cannot turn or retrigger");
+        Check(CharacterDashProfiles.ForJob(10).distance>CharacterDashProfiles.ForJob(6).distance,"long single warp differs from short triple step");
     }
 }

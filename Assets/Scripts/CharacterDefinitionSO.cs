@@ -2,7 +2,7 @@ using UnityEngine;
 namespace RaidRogue
 {
     // Authoring only. No resource amount, timers, charges or per-player build state lives in assets.
-    [CreateAssetMenu(menuName="Raid Rogue/Character Definition")]
+    [CreateAssetMenu(menuName="Astella/Character Definition")]
     public sealed class CharacterDefinitionSO : ScriptableObject
     {
         public bool implementsRegisteredJob; // Explicitly replaces one unimplemented registry entry; duplicate assets are rejected.

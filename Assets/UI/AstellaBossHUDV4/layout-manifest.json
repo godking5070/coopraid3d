@@ -1,0 +1,157 @@
+{
+  "version": 4,
+  "purpose": "Artwork resources, not a gameplay implementation.",
+  "canvas": [
+    1280,
+    280
+  ],
+  "recommendedDisplay": [
+    640,
+    140
+  ],
+  "safeMargin": 54,
+  "textBakedIntoSprites": false,
+  "materialManifest": "materials-manifest.json",
+  "layout": {
+    "header": {
+      "anchor": [
+        640,
+        29
+      ],
+      "fontSize": 18
+    },
+    "bossName": {
+      "anchor": [
+        640,
+        77
+      ],
+      "fontSize": 42,
+      "maxWidth": 352
+    },
+    "hp": {
+      "rect": [
+        98,
+        92,
+        1032,
+        48
+      ],
+      "percentageCenterBaseline": [
+        614,
+        125
+      ],
+      "percentageFontSize": 26,
+      "percentageAnchor": "middle",
+      "percentageLayer": "Above gauge fill and frame; fixed at gauge center, independent of filled width.",
+      "emblemRect": [
+        54,
+        74,
+        84,
+        84
+      ]
+    },
+    "cast": {
+      "panel": null,
+      "icon": null,
+      "nameBaseline": [
+        640,
+        181
+      ],
+      "nameAnchor": "middle",
+      "nameMaxWidth": 480,
+      "timeCenterBaseline": [
+        640,
+        213
+      ],
+      "timeAnchor": "middle",
+      "timeFontSize": 20,
+      "timeFontWeight": 700,
+      "timeLayer": "Above gauge fill and frame; fixed at gauge center.",
+      "labelFontSize": 22,
+      "bar": [
+        378,
+        190,
+        524,
+        32
+      ]
+    },
+    "target": {
+      "markerRect": [
+        514,
+        240,
+        20,
+        16
+      ],
+      "labelBaseline": [
+        546,
+        254
+      ],
+      "nameBaseline": [
+        646,
+        254
+      ],
+      "visibleWhen": "Actual target is known; update from game data.",
+      "withoutCastBaseline": 182
+    }
+  },
+  "gaugeGeometry": {
+    "canvas": [
+      1000,
+      64
+    ],
+    "fillBounds": [
+      9,
+      14,
+      982,
+      36
+    ],
+    "ratio": "HP: current / max. Cast: elapsed / duration; show remaining time separately.",
+    "tipWidth": "min(12,982*ratio)",
+    "endX": "9+982*ratio",
+    "atZero": "Hide fill and tip.",
+    "atFull": "Use full inner polygon; hide moving tip highlight.",
+    "clipping": "Preserve full-width texture. Reveal with a rectangle plus pointed leading edge and intersect with the inner polygon.",
+    "fillOrigin": "Left",
+    "warning": "Horizontal rectangle cropping alone produces a blunt leading edge."
+  },
+  "runtime": {
+    "bossName": "Replace sample; shorten or reduce font before colliding with title ornaments.",
+    "hp": "Display percentage centered inside the full gauge. Keep text separate from the fill mask and stationary as HP changes.",
+    "casting": "Center skill name above gauge, and remaining time inside gauge. Keep time separate from fill mask. Hide the complete cast group when not casting.",
+    "target": "Sample player name is illustrative. Reposition marker/label as a group if target text is longer.",
+    "stageDifficulty": "Sample STAGE 01 · NORMAL; actual state drives these labels.",
+    "noNewBossMechanics": true
+  },
+  "examples": {
+    "hp": [
+      1,
+      0.76,
+      0.01,
+      0
+    ],
+    "castProgress": 0.5,
+    "remainingSeconds": 2.4,
+    "notice": "Cast name, time and target are display samples; not balance or combat specifications."
+  },
+  "assets": [
+    {
+      "id": "title-divider",
+      "png": "sprites/title-divider.png",
+      "svg": "source/title-divider.svg",
+      "canvas": [
+        628,
+        24
+      ],
+      "transparentPixels": 14680
+    },
+    {
+      "id": "target-marker",
+      "png": "sprites/target-marker.png",
+      "svg": "source/target-marker.svg",
+      "canvas": [
+        20,
+        16
+      ],
+      "transparentPixels": 224
+    }
+  ]
+}

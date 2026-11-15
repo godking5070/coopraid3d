@@ -7,6 +7,7 @@ namespace RaidRogue
     // Values/IDs are protocol and authoring identities, never display names or array indexes.
     public enum CharacterSlot { Gcd1=1, Gcd2=2, OffGcd1=3, Counter=4, Job1=5, Job2=6, Movement=7, Identity=8, Active=9, OffGcd2=10, Ultimate=11, Potion=12 }
     public enum CharacterRole { Tank=1, Healer=2, Damage=3 }
+    public enum CharacterControlLayout { Legacy, NineKey }
     public enum AttackClassification { Melee, RangedPhysical, Caster }
     public enum SkillTargetRule { None, Self, LivingEnemy, LivingAlly, DeadAlly }
     public enum CharacterReset { Retry, NextStage, NewRun }
@@ -14,13 +15,23 @@ namespace RaidRogue
     { public string id, name; public float maximum=100, initial; public bool integer, resetOnRetry=true, resetOnStage=true; }
     [Serializable] public sealed class ResourceCost { public string resourceId; public float amount; }
     [Serializable] public sealed class JobMovementDefinition
-    { public float distance=4, duration=.2f; public bool preserveCast; }
+    {
+        public float distance=4, duration=.2f, commonDistanceMultiplier=1;
+        public bool preserveCast, useCommonDistance;
+        public float ResolveDistance(float commonDistance)=>(useCommonDistance?commonDistance:distance)*commonDistanceMultiplier;
+    }
     [Serializable] public sealed class CharacterSkillDefinition
     {
         public string id, name, description, handlerId, iconKey;
         public bool implemented, usesGcd, cancelOnMovement=true, usableWhileCasting;
+        public bool isCounter; // Capability metadata; independent of cooldown or the name of the equipped slot.
         public float range=20, castTime, cooldown, gcd=2, comboWindow=8;
         public int maximumCharges=1, comboChain, legacyAction;
+        public string chargeTraitId="";
+        public int chargeTraitBonus;
+        public float chargeTraitCooldownScale=1;
+        public string coreChargeTraitId="";
+        public int coreChargeBonus;
         public SkillTargetRule target;
         public ResourceCost[] costs=Array.Empty<ResourceCost>();
         public JobMovementDefinition movement;
@@ -28,24 +39,46 @@ namespace RaidRogue
     [Serializable] public sealed class CharacterSlotDefinition
     { public CharacterSlot slot; public string skillId; public bool initiallyUnlocked=true; }
     [Serializable] public sealed class CharacterRouteDefinition
-    { public string id, name, identitySkillId; public string[] unlockSkills=Array.Empty<string>(); }
+    { public string id, name, identitySkillId; public string[] unlockSkills=Array.Empty<string>(); public ResourceCost[] capacityOverrides=Array.Empty<ResourceCost>(); }
     [Serializable] public sealed class CharacterUnlockDefinition
-    { public string id; public CharacterSlot slot; public int afterStage; public string[] choices=Array.Empty<string>(); }
+    { public string id; public string chapterId=CharacterRewardKey.CurrentChapter; public CharacterSlot slot; public int afterStage; public string[] choices=Array.Empty<string>(); }
+    // Slot zero is a passive core choice; it never adds an input key.
+    [Serializable] public sealed class CharacterLoadoutDefinition
+    { public string id, name, routeId; public CharacterSlot slot; public string[] choices=Array.Empty<string>(); }
+    [Serializable] public sealed class CharacterAuxiliaryDefinition
+    { public string id, name, description; }
     [Serializable] public sealed class CharacterDefinition
     {
         public string id, name, description, visualKey, iconKey;
         public bool playable; public int legacyRole;
+        public CharacterControlLayout controlLayout;
+        // Trusted catalog migration; never serialized or supplied by a network request.
+        [NonSerialized] public Func<CharacterStateSnapshot,CharacterStateSnapshot> migrateSnapshot;
+        [NonSerialized] public Func<CharacterStateSnapshot,string> buildCompatibility;
+        [NonSerialized] public Func<CharacterStateSnapshot,string,float,float> resourceCapacity;
         public CharacterRole role; public AttackClassification classification;
         public float baseHp=1000, moveSpeed=7.8f, combatRadius=.55f;
+        public float moveSpeedMultiplier=1, physicalDefense, magicDefense, tenacity;
         public CharacterSlotDefinition[] slots=Array.Empty<CharacterSlotDefinition>();
         public CharacterSkillDefinition[] skills=Array.Empty<CharacterSkillDefinition>();
         public JobResourceDefinition[] resources=Array.Empty<JobResourceDefinition>();
         public CharacterRouteDefinition[] routes=Array.Empty<CharacterRouteDefinition>();
         public CharacterUnlockDefinition[] unlocks=Array.Empty<CharacterUnlockDefinition>();
+        public CharacterLoadoutDefinition[] loadouts=Array.Empty<CharacterLoadoutDefinition>();
+        public CharacterAuxiliaryDefinition[] auxiliaryTraits=Array.Empty<CharacterAuxiliaryDefinition>();
         public CharacterSkillDefinition Skill(string skillId) => Array.Find(skills, s => s != null && s.id == skillId);
     }
     public static class CharacterSlots
     {
+        // Keep protocol/save slot IDs stable while new definitions opt into nine keys.
+        public static bool IsNineKey(CharacterDefinition definition) => definition?.controlLayout==CharacterControlLayout.NineKey;
+        public static bool Enabled(CharacterDefinition definition,CharacterSlot slot) => !IsNineKey(definition) ||
+            slot!=CharacterSlot.Job2&&slot!=CharacterSlot.Active;
+        public static bool InterruptsCast(CharacterDefinition definition,CharacterSlot slot) => IsNineKey(definition) &&
+            (slot==CharacterSlot.Job1||slot==CharacterSlot.Counter||slot==CharacterSlot.Movement||
+             slot==CharacterSlot.OffGcd2&&definition.role!=CharacterRole.Damage);
+        public static string Binding(CharacterDefinition definition,CharacterSlot slot) =>
+            !Enabled(definition,slot)?"":IsNineKey(definition)&&slot==CharacterSlot.Identity?"SelectedActive":Binding(slot);
         public static readonly CharacterSlot[] All = (CharacterSlot[])Enum.GetValues(typeof(CharacterSlot));
         public static string Binding(CharacterSlot slot) => slot switch {
             CharacterSlot.Gcd1=>"Skill1", CharacterSlot.Gcd2=>"Skill2", CharacterSlot.OffGcd1=>"Skill3", CharacterSlot.Counter=>"Counter",
@@ -65,7 +98,11 @@ namespace RaidRogue
             foreach (var d in definitions)
             {
                 if (d == null || string.IsNullOrWhiteSpace(d.id) || !ids.Add(d.id)) { errors.Add("중복/누락 직업 ID"); continue; }
-                if(d.resources==null||d.skills==null||d.slots==null||d.routes==null||d.unlocks==null){errors.Add(d.id+": 정의 배열 누락");continue;}
+                if(d.resources==null||d.skills==null||d.slots==null||d.routes==null||d.unlocks==null||d.auxiliaryTraits==null){errors.Add(d.id+": 정의 배열 누락");continue;}
+                var auxiliaryIds=new HashSet<string>();
+                if(d.auxiliaryTraits.Length==1)errors.Add(d.id+": 보조 특성은 서로 다른 두 후보 이상 필요");
+                foreach(var trait in d.auxiliaryTraits)
+                    if(trait==null||string.IsNullOrWhiteSpace(trait.id)||!auxiliaryIds.Add(trait.id))errors.Add(d.id+": 보조 특성 ID 누락/중복");
                 var skills = new HashSet<string>(); var resources = new HashSet<string>(); var slots = new HashSet<CharacterSlot>();
                 foreach (var r in d.resources ?? Array.Empty<JobResourceDefinition>())
                     if (r == null || string.IsNullOrEmpty(r.id) || !resources.Add(r.id) || !Finite(r.maximum) || r.maximum <= 0 || !Finite(r.initial) || r.initial < 0 || r.initial > r.maximum || r.integer && (r.maximum != Math.Floor(r.maximum) || r.initial != Math.Floor(r.initial))) errors.Add(d.id+": 잘못된 자원");
@@ -73,21 +110,48 @@ namespace RaidRogue
                 {
                     if (s == null || string.IsNullOrEmpty(s.id) || !skills.Add(s.id)) { errors.Add(d.id+": 중복/누락 스킬 ID"); continue; }
                     if (!Finite(s.range) || s.range < 0 || !Finite(s.cooldown) || s.cooldown < 0 || !Finite(s.castTime) || s.castTime < 0 || !Finite(s.gcd) || s.gcd < 0 || !Finite(s.comboWindow) || s.comboWindow < 0 || s.maximumCharges < 1 || s.maximumCharges > 10 || s.comboChain < 0 || s.comboChain > 2) errors.Add(d.id+": 잘못된 스킬 수치");
+                    if(s.chargeTraitBonus<0||s.maximumCharges+s.chargeTraitBonus>10||!Finite(s.chargeTraitCooldownScale)||s.chargeTraitCooldownScale<=0||
+                        !string.IsNullOrEmpty(s.chargeTraitId)&&!(d.auxiliaryTraits??Array.Empty<CharacterAuxiliaryDefinition>()).Any(t=>t?.id==s.chargeTraitId))errors.Add(d.id+": 잘못된 충전 특성");
+                    if(s.coreChargeBonus<0||s.maximumCharges+s.chargeTraitBonus+s.coreChargeBonus>10||
+                        !string.IsNullOrEmpty(s.coreChargeTraitId)&&!(d.loadouts??Array.Empty<CharacterLoadoutDefinition>()).Any(l=>l!=null&&(int)l.slot==0&&l.choices?.Contains(s.coreChargeTraitId)==true))errors.Add(d.id+": 잘못된 핵심 충전 특성");
                     if (s.costs == null) errors.Add(d.id+": 자원 비용 배열 누락");
                     if (s.legacyAction < 0 || s.legacyAction > 6 || s.legacyAction == 5 || d.legacyRole == 0 && s.legacyAction > 0 && s.legacyAction != 6) errors.Add(d.id+": 기존 테스트 전용 실행기는 테스트 직업에서만 사용합니다");
                     if (s.implemented && string.IsNullOrWhiteSpace(s.handlerId)) errors.Add(d.id+": 실행 처리기 누락");
                     foreach (var c in s.costs ?? Array.Empty<ResourceCost>()) if (c == null || !resources.Contains(c.resourceId) || !Finite(c.amount) || c.amount < 0) errors.Add(d.id+": 잘못된 자원 비용");
-                    if (s.movement != null && (!Finite(s.movement.distance) || s.movement.distance <= 0 || !Finite(s.movement.duration) || s.movement.duration <= 0)) errors.Add(d.id+": 잘못된 이동기");
+                    if (s.movement != null && (!Finite(s.movement.distance) || s.movement.distance <= 0 || !Finite(s.movement.duration) || s.movement.duration <= 0 || !Finite(s.movement.commonDistanceMultiplier) || s.movement.commonDistanceMultiplier<=0)) errors.Add(d.id+": 잘못된 이동기");
                 }
                 foreach (var slot in d.slots ?? Array.Empty<CharacterSlotDefinition>())
                     if (slot == null || !Enum.IsDefined(typeof(CharacterSlot),slot.slot) || !slots.Add(slot.slot) || !skills.Contains(slot.skillId)) errors.Add(d.id+": 중복 슬롯/누락 스킬 참조");
+                if(!Enum.IsDefined(typeof(CharacterControlLayout),d.controlLayout))errors.Add(d.id+": 알 수 없는 키 구성");
+                if(CharacterSlots.IsNineKey(d))
+                {
+                    if(d.legacyRole!=0||slots.Contains(CharacterSlot.Job2)||slots.Contains(CharacterSlot.Active))errors.Add(d.id+": 9키에 구형 슬롯/실행기 혼합");
+                    foreach(var required in CharacterSlots.All.Where(s=>s!=CharacterSlot.Potion&&CharacterSlots.Enabled(d,s)))
+                        if(!slots.Contains(required))errors.Add(d.id+": 9키 슬롯 누락 "+required);
+                    foreach(var entry in d.slots.Where(s=>s!=null))
+                    {
+                        var skill=d.Skill(entry.skillId);if(skill==null)continue;
+                        if(CharacterSlots.InterruptsCast(d,entry.slot)&&(skill.castTime>0||skill.usesGcd||skill.costs?.Any(c=>c!=null&&c.amount>0)==true))
+                            errors.Add(d.id+": 필수 대응은 즉발/논글쿨/직업 자원 무소비여야 합니다");
+                    }
+                }
                 var options = new HashSet<string>();
                 foreach (var route in d.routes ?? Array.Empty<CharacterRouteDefinition>())
                     if (route == null || route.unlockSkills == null || string.IsNullOrEmpty(route.id) || !options.Add(route.id) || (!string.IsNullOrEmpty(route.identitySkillId) && (!skills.Contains(route.identitySkillId)||!slots.Contains(CharacterSlot.Identity))) || (route.unlockSkills ?? Array.Empty<string>()).Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 루트 참조");
+                foreach(var route in d.routes??Array.Empty<CharacterRouteDefinition>())if(route?.capacityOverrides!=null)
+                {
+                    var seenCaps=new HashSet<string>();
+                    foreach(var cap in route.capacityOverrides)
+                    {
+                        var resource=Array.Find(d.resources??Array.Empty<JobResourceDefinition>(),v=>v?.id==cap?.resourceId);
+                        if(cap==null||resource==null||!seenCaps.Add(cap.resourceId)||!Finite(cap.amount)||cap.amount<=0||resource.integer&&cap.amount!=Math.Floor(cap.amount))errors.Add(d.id+": 잘못된 루트 자원 상한");
+                    }
+                }
                 options.Clear();
                 foreach (var rule in d.unlocks ?? Array.Empty<CharacterUnlockDefinition>())
-                    if (rule == null || string.IsNullOrEmpty(rule.id) || !options.Add(rule.id) || rule.afterStage < 0 || !slots.Contains(rule.slot) || rule.choices == null || rule.choices.Length == 0 || rule.choices.Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 성장 참조");
+                    if (rule == null || string.IsNullOrEmpty(rule.id) || !CharacterRewardKey.ValidId(rule.chapterId) || !options.Add(rule.id) || rule.afterStage < 1 || !slots.Contains(rule.slot) || rule.choices == null || rule.choices.Length == 0 || rule.choices.Distinct().Count()!=rule.choices.Length || rule.choices.Any(s => !skills.Contains(s))) errors.Add(d.id+": 잘못된 성장 참조");
                 if (!Finite(d.combatRadius) || d.combatRadius <= 0 || !Finite(d.baseHp) || d.baseHp <= 0 || !Finite(d.moveSpeed) || d.moveSpeed <= 0) errors.Add(d.id+": 잘못된 기본 스탯");
+                if(!Finite(d.moveSpeedMultiplier)||d.moveSpeedMultiplier<=0||!Finite(d.physicalDefense)||d.physicalDefense<0||!Finite(d.magicDefense)||d.magicDefense<0||!Finite(d.tenacity)||d.tenacity<0)errors.Add(d.id+": 잘못된 방어/이동 보정");
             }
             return errors.ToArray();
         }
@@ -133,12 +197,15 @@ namespace RaidRogue
             {
                 int action=slot==CharacterSlot.Gcd1?1:slot==CharacterSlot.Gcd2?2:slot==CharacterSlot.OffGcd1?3:slot==CharacterSlot.Job1?4:slot==CharacterSlot.Potion?6:0;
                 if(!legacy&&slot!=CharacterSlot.Potion)action=0;
-                bool implemented=slot==CharacterSlot.Potion || legacy && (action>0||slot==CharacterSlot.Movement);
-                var skill=new CharacterSkillDefinition { id=id+".slot."+slot.ToString().ToLowerInvariant(),name=CharacterSlots.Name(slot),implemented=implemented,
-                    handlerId=action>0?"legacy.action."+action:slot==CharacterSlot.Movement&&legacy?"legacy.dash":"",legacyAction=action,
+                bool implemented=slot==CharacterSlot.Potion || legacy && (action>0||slot==CharacterSlot.Movement||slot==CharacterSlot.Counter);
+                string counterName=role==1?"수호 방패치기":role==2?"정화의 역풍":role==3?"칼날 받아치기":"마력 역전";
+                var skill=new CharacterSkillDefinition { id=id+".slot."+slot.ToString().ToLowerInvariant(),name=legacy&&slot==CharacterSlot.Counter?counterName:CharacterSlots.Name(slot),implemented=implemented,
+                    handlerId=action>0?"legacy.action."+action:slot==CharacterSlot.Movement&&legacy?"legacy.dash":slot==CharacterSlot.Counter&&legacy?"legacy.counter":"",legacyAction=action,
                     usableWhileCasting=slot==CharacterSlot.Movement||slot==CharacterSlot.Potion,usesGcd=slot==CharacterSlot.Gcd1||slot==CharacterSlot.Gcd2,comboChain=slot==CharacterSlot.Gcd1?1:slot==CharacterSlot.Gcd2?2:0,
-                    target=slot==CharacterSlot.Gcd1||slot==CharacterSlot.Gcd2?SkillTargetRule.LivingEnemy:SkillTargetRule.Self,
-                    cooldown=slot==CharacterSlot.Movement?5:slot==CharacterSlot.Potion?30:0,movement=slot==CharacterSlot.Movement?new JobMovementDefinition():null };
+                    target=slot==CharacterSlot.Gcd1||slot==CharacterSlot.Gcd2||slot==CharacterSlot.Counter?SkillTargetRule.LivingEnemy:SkillTargetRule.Self,
+                    range=slot==CharacterSlot.Counter?(role==1||role==3?3:15):20,
+                    cooldown=slot==CharacterSlot.Counter?10:slot==CharacterSlot.Movement?5:slot==CharacterSlot.Potion?30:0,movement=slot==CharacterSlot.Movement?new JobMovementDefinition():null };
+                if(legacy&&slot==CharacterSlot.Counter){skill.isCounter=true;skill.description="⚔ 보스 정면의 금색 약점이 열린 동안 적중하면 일반 카운터 · 그 외에는 일반 타격과 무력화";}
                 skills.Add(skill); slots.Add(new CharacterSlotDefinition { slot=slot,skillId=skill.id,initiallyUnlocked=slot<CharacterSlot.Identity||slot==CharacterSlot.Potion });
             }
             d.skills=skills.ToArray();d.slots=slots.ToArray();
@@ -154,5 +221,12 @@ namespace RaidRogue
             }
             return d;
         }
+    }
+    public static class CharacterRewardKey
+    {
+        public const string CurrentChapter="campaign.part1";
+        public static string Stage(string run,string chapter,int stage)=>run+"/"+chapter+"/"+stage;
+        public static string Choice(string run,string chapter,int stage,string rule)=>Stage(run,chapter,stage)+"/"+rule;
+        public static bool ValidId(string id)=>!string.IsNullOrWhiteSpace(id)&&id.Length<=100&&!id.Contains("/");
     }
 }

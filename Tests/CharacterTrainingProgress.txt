@@ -1,0 +1,37 @@
+12직업 훈련장 작업 기록
+기준: feature/twelve-character-roster @27d107dcf475221f5e934670f43c9597b47e7e60
+작업: feature/character-training-validation / C:/coopraid/coopraid3d-training
+원본: C:/coopraid/coopraid3d, branch feature/aegis-paladin-routes; 사용자 변경 보존.
+원본 파일 SHA256 기준: C:/coopraid/character-training-original-baseline.json
+명세: 대화에 제공된 최신 12직업 마스터 및 좌클릭 선택/우클릭 카메라/X 포션 합의.
+
+구현 완료 상태:
+- 독립 로컬 Training 모드, 메인 메뉴 진입, 기존 자동 생성 씬의 바닥/카메라/파티/HUD 재사용.
+- 정규 RunFlow는 Lobby 유지, 스테이지 시작/진행/클리어/해금 호출 차단; 종료는 기존 씬 reload.
+- 12직업/36기원/R3 F3 V2/극복·극대화 카드 구성; fresh actor state, 이전 효과 정리.
+- 기존 보스 표적의 패턴만 중단; 다수 표적 2개 추가, 타겟 링/정지·이동/HP 복원.
+- 1.5초 예고 및 반복·중지: 직접/강타/광역/카운터/정화 속박/넉백/투사체/시스템 피해.
+- 기존 아군 3명 HP/보호막/위치/정화 시험. 이동/구출/넉백 업데이트 보존, 자율 공격 AI만 정지.
+- 실제 자원 commit event, 유효 회복/초과 회복/흡수/피해/무력화/카운터 집계; 기존 미터 재사용.
+- 첫 관리형 컴파일 통과 (기존 미사용 필드 경고 1개).
+- 순수 roster 테스트 1089 통과 (추가 수정 후 전체 재검증 필요).
+발견·수정:
+  일반 런 종료 CharacterKit 정리 누락; 직업 변경 거부 전 스탯 변경;
+  측후면 각도 60/120과 표시 45/135 불일치;
+  부분 충전 쿨감 무시; 다음 공격 버프의 광역/다단히트 첫 타격 편중;
+  바드 단일힐 음파 범위 우회; 아포테카리 GCD2 장판 회복 두 번;
+  빈 화살비 자원 생성; 미러 반복 동일 콤보 자원/합동 Z 분신 중복;
+  카운터의 일반 무력화가 카운터 기회를 먼저 닫음;
+  드래곤 Z 비용의 탄창 고갈 과열 누락, V 초기화 충전 부족;
+  버서커 강화된 피흡의 초과 보호막 계산 불일치.
+
+추가 수정: 역할 재설정 HP 보정 분모, 팔라딘 파티 공속, 훈련 위치 이동의 HP/보호막 유지,
+바드 채널 범위와 카드, 건슬링어 봉인 무기 표현, 레인저 관통 Z/미러 프리즘 다단,
+미러 빙의 자연 종료 피니시. 수치 및 임시 정책은 CharacterTrainingReview.txt 참조.
+
+검증: CharacterTrainingTests 723개 추가, 전체 기존 포함 115,843개 검사 통과.
+Assembly-CSharp/Editor 관리 코드 컴파일 통과, 기존 미사용 필드 경고 1개.
+원본 SHA256 기준 309개 파일 변경 0. git diff --check 통과, worktree Library 없음.
+직업별 표/수정 목록/임시값/원본 확인 순서는 Tests/CharacterTrainingReview.txt에 기록.
+Unity Play 및 실제 Steam/다중 계정 네트워크 실행은 미실행. 보고서의 우선 검증 항목으로 남김.
+검토 가능한 로컬 브랜치에 남기고 종료. 병합/원격 push/원본 반영 없음.

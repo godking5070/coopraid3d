@@ -1,0 +1,41 @@
+아스텔라 프로젝트 이름 전환 / 2026-11-05
+
+완료
+- Unity productName: 아스텔라. companyName DefaultCompany와 productGUID, 직렬화 클래스/namespace/GUID는 유지.
+- 게임 메뉴: 아스텔라 / ASTELLA. 에디터 메뉴: Astella 및 Tools/Astella.
+- 다음 Windows 빌드: Builds/AstellaWindows/Astella.exe. LAN/Steam 빌드의 실행파일도 Astella.exe.
+- Steam 로비 게임 식별자 astella. Steam App ID는 그대로 유지. Steam 상품 페이지 이름을 외부에서 변경한 것은 아님.
+- Build-Part1Windows.ps1 및 Run-StudioChecks.ps1 기본 원본 경로를 고정 문자열 대신 실행 스크립트의 프로젝트 루트로 계산.
+- 기존 로컬 저장/설정 폴더를 DefaultCompany/아스텔라로 복사하고 각 파일 SHA256 일치 확인. 기존 coopraid3d 데이터는 보존.
+- 에디터/실행파일 PlayerPrefs 키를 새 제품명으로 복사. 기존 키는 보존. 값은 로그에 출력하지 않음.
+
+실제 폴더 이동: 아직 미완료
+현재 원본은 C:/coopraid/coopraid3d에 그대로 있다. 사용자가 Unity를 종료한 뒤에도 디렉터리 사용 중 오류가 발생했다.
+처음 상위 폴더 전체 Move-Item은 별도 구형2D 프로젝트 coopraid/.git의 읽기 전용 항목에서 중단됨.
+일부 이동된 구형 프로젝트 파일 128개는 원위치에 복구·해시 대조했고 회복 사본은 C:/Astella/LegacyCoopraid-RenameRecovery에 보존.
+현재 메인 프로젝트/23개 Git worktree는 기존 위치에 있으며 HEAD도 유지. 재귀 삭제/캐시 복사/Unity 실행/강제 프로세스 종료는 하지 않음.
+
+준비된 전환
+외부 스크립트: C:/Astella/Complete-AstellaRename.ps1
+저장소 원본: Tests/Rename-AstellaWorkspace.ps1
+목표 원본: C:/Astella/Astella
+연결 작업 폴더: C:/Astella/Astella-기존접미사
+23개 디렉터리를 같은 드라이브에서 직접 이동한 뒤 git worktree repair로 양방향 Git 연결을 복구.
+기존 Assembly-CSharp*.csproj의 절대 참조를 갱신, coopraid3d.sln을 Astella.sln으로 이동. Library를 복사하거나 새로 만들지 않음.
+옛 원본 경로 C:/coopraid/coopraid3d는 현재 Codex 세션과 구 도구를 위한 호환 junction으로 연결 예정.
+이동과 관련 없는 구형 coopraid 프로젝트는 원래 경로에 보존.
+
+사용자 마무리 순서
+1. Unity와 현재 프로젝트를 열고 있는 Codex/편집기를 닫는다.
+2. 새 PowerShell 창에서 다음 명령 실행:
+   Set-Location C:/
+   powershell -NoProfile -ExecutionPolicy Bypass -File C:/Astella/Complete-AstellaRename.ps1
+3. PASS 출력과 git worktree repair 완료를 확인한다.
+4. Unity Hub에서 C:/Astella/Astella를 기존 프로젝트로 추가한다. 코딩 작업 공간도 새 경로로 연다.
+5. 새 경로에서 Tests/Run-StudioChecks.ps1 -Group Compile 실행.
+6. Unity에서 새 제목, 저장 이어하기, 로컬 설정, 캐릭터/핫바를 확인한다. 실제 실행은 사용자 담당.
+
+검증 한계
+이름/빌드 경로의 명령검사와 실제 폴더 이동은 구분한다. 외부 전환 스크립트의 정적 preflight는 통과했으나 활성 디렉터리 핸들 때문에 실제 이동은 완료되지 않았다.
+실행파일은 새로 빌드하지 않았다. 기존 Builds의 예전 실행파일을 이름만 바꾸어 새 빌드로 취급하지 않는다.
+저장/PlayerPrefs 이전 스크립트는 중복 실행 시 새 경로를 덮어쓰지 않고 중단한다.

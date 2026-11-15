@@ -26,6 +26,16 @@ internal static class CombatMetricsTests
         ledger.Register(4, "Caster bot", 4);
         return ledger;
     }
+    private static void FactualEventsFollowAttempt()
+    {
+        var ledger = Party();
+        ledger.BeginStage(1);
+        ledger.RecordEvent("탱커 카운터 미성공");
+        var failed = ledger.Snapshot();
+        _checks++; if (failed.Events.Count != 1 || !failed.Events[0].Contains("미성공")) throw new Exception("factual event captured");
+        ledger.FailAttempt(); ledger.BeginStage(1);
+        _checks++; if (ledger.Snapshot().Events.Count != 0 || failed.Events.Count != 1) throw new Exception("retry clears only current events");
+    }
 
     private static void AppliedAmountsAndOwnership()
     {
@@ -162,9 +172,28 @@ internal static class CombatMetricsTests
 
     public static int Main()
     {
+        var layered=new CombatShieldLedger();
+        layered.GrantTimed(1,"other",25,1000,10);
+        layered.GrantTimed(2,"layers",100,1000,12);
+        layered.GrantTimed(3,"layers",100,1000,12);
+        int callbacks=0;double actualLayerDamage=0;
+        layered.Absorb(30,null,(source,key,amount)=>
+        {
+            callbacks++;
+            if(source!=2)return;
+            actualLayerDamage+=amount;
+            Equal(95,layered.RemoveEffect(2,"layers"),"discard only current caster layer residue after hit");
+            layered.GrantTimed(2,"layers",100,1000,12);
+        });
+        Equal(2,callbacks,"key callback only for effects actually absorbing");
+        Equal(5,actualLayerDamage,"newly activated layer never absorbs same hit");
+        Equal(100,layered.RemainingFor(3,"layers"),"same name other caster untouched");
+        Equal(100,layered.RemainingFor(2,"layers"),"next layer remains for next hit");
+        Equal(200,layered.Remaining,"ledger remains coherent after callback mutation");
         AppliedAmountsAndOwnership();
         Shields();
         DurationSnapshotsAndReset();
+        FactualEventsFollowAttempt();
         ShieldConservation();
         Console.WriteLine("PASS: " + _checks + " combat metrics assertions.");
         return 0;

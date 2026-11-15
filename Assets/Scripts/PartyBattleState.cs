@@ -12,7 +12,8 @@ namespace RaidRogue
     public sealed class PartyLifeState
     {
         public bool Dead { get; private set; }
-        public bool Die() { if (Dead) return false; Dead = true; return true; }
+        public int DeathGeneration { get; private set; }
+        public bool Die() { if (Dead) return false; Dead = true; DeathGeneration++; return true; }
         public bool Revive() { if (!Dead) return false; Dead = false; return true; }
         public void Reset() => Dead = false;
     }

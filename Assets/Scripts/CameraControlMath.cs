@@ -4,6 +4,13 @@ namespace RaidRogue
 {
     public static class CameraControlMath
     {
+        // Stable party order; a removed/dead subject falls back to the first living member.
+        public static int SpectatorIndex(int current, int count, int direction)
+        {
+            if (count <= 0) return -1;
+            if (current < 0 || current >= count) return 0;
+            return (current + (direction < 0 ? count - 1 : 1)) % count;
+        }
         public static double MovementYaw(bool is2D, double yaw3D) => is2D ? 0 : yaw3D;
         public static void MovementXZ(double horizontal, double vertical, double yawDegrees, out double x, out double z)
         {

@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 namespace RaidRogue
 {
     public enum CameraViewMode { View3D_Quarter = 0, View2D_TopDown = 1 }
+    public enum AiSpectatorView { Party, Boss, Arena, Free }
 
     [Serializable]
     public sealed class LocalCameraPreferences
@@ -57,12 +58,57 @@ namespace RaidRogue
         private Vector2 _cursorBeforeDrag;
         private bool _ownsCursor;
         private bool _restoreCursorPending;
+        private Transform _spectatorTarget;
+        private AiSpectatorView _aiSpectatorView;
+        private Vector3 _aiFreeFocus;
+        private float _aiBeforeArenaDistance = -1f;
+        public AiSpectatorView DevelopmentView => _aiSpectatorView;
+        public void SetDevelopmentView(AiSpectatorView mode,Transform member=null)
+        {
+            if(RaidNetworkSession.Instance?.AiSpectatorActive!=true)return;
+            if(mode==AiSpectatorView.Arena&&_aiSpectatorView!=AiSpectatorView.Arena)
+            {_aiBeforeArenaDistance=_targetDistance;_targetDistance=maxDistance;}
+            else if(mode!=AiSpectatorView.Arena&&_aiSpectatorView==AiSpectatorView.Arena&&_aiBeforeArenaDistance>0)
+            {_targetDistance=_aiBeforeArenaDistance;_aiBeforeArenaDistance=-1f;}
+            if(mode==AiSpectatorView.Free)_aiFreeFocus=_focus;
+            _aiSpectatorView=mode;_spectatorTarget=mode==AiSpectatorView.Party?member:null;
+            ReleaseOrbit();SnapToTargetImmediate();
+        }
+        public Transform SpectatorTarget => _spectatorTarget;
+
+        // Presentation only: never replace target, the controlled player or the combat selection.
+        public void Spectate(Transform member)
+        {
+            // Development viewing owns its target, including while the local AI is alive.
+            // The resurrection UI also calls this method when clearing death spectating.
+            if (RaidNetworkSession.Instance?.AiSpectatorActive == true) return;
+            if (_player == null || !_player.IsDead || !CombatRange.LivingPartyMember(member)) member = null;
+            if (_spectatorTarget == member) return;
+            _spectatorTarget = member;
+            ReleaseOrbit();
+            SnapToTargetImmediate();
+        }
 
         public Camera UnityCamera => _cam != null ? _cam : (_cam = GetComponent<Camera>());
+        private bool _arrivalCamera;
+        private Vector3 _arrivalPosition, _arrivalLookAt, _arrivalCurrentPosition;
+        public void SetArrivalCamera(Vector3 position, Vector3 lookAt)
+        {
+            if ((lookAt - position).sqrMagnitude < .01f) lookAt = position + Vector3.forward;
+            if (_arrivalCamera && _arrivalPosition == position && _arrivalLookAt == lookAt) return;
+            ReleaseOrbit();
+            _arrivalCamera = true; _arrivalPosition = position; _arrivalLookAt = lookAt;
+            _arrivalCurrentPosition = position + new Vector3(0, 2, -4);
+        }
+        public void ClearArrivalCamera()
+        {
+            if (!_arrivalCamera) return;
+            _arrivalCamera = false; SnapToTargetImmediate();
+        }
         public bool Is2DMode => currentViewMode == CameraViewMode.View2D_TopDown;
         public bool IsOrbitDragging => _drag.Active;
         public float MovementYaw => (float)CameraControlMath.MovementYaw(Is2DMode, yawAngle);
-        private float ArenaRadius => _player != null ? _player.arenaBoundaryRadius : 18f;
+        private float ArenaRadius => RaidApproachField.Instance?.Walking == true ? RaidApproachField.Instance.FieldRadius : _player != null ? _player.arenaBoundaryRadius : 18f;
         public float DefaultOrthoSize => (float)CameraControlMath.ArenaOrthoSize(ArenaRadius, UnityCamera.aspect, arenaPadding);
 
         private void Awake()
@@ -117,7 +163,8 @@ namespace RaidRogue
 
         private void Update()
         {
-            bool blocked = LocalGameplayInput.Blocked;
+            if (_arrivalCamera) { ReleaseOrbit(); return; }
+            bool blocked = RaidNetworkSession.Instance?.AiSpectatorActive==true ? LocalGameplayInput.ModalCovered : LocalGameplayInput.Blocked;
             bool overUI = !_drag.Active && LocalGameplayInput.PointerOverUI(LocalGameplayInput.MousePosition);
             ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape);
             if (_drag.Active && ((escape && !LocalGameplayInput.EscapeConsumed) || Cursor.lockState != CursorLockMode.Locked))
@@ -151,15 +198,28 @@ namespace RaidRogue
                     _zoom2D = Mathf.InverseLerp(wide, minimumOrthoSize, desired);
                 }
                 else _targetDistance = (float)CameraControlMath.Zoom(_targetDistance, scroll, Mathf.Clamp(preferences.zoomSensitivity3D, 0.25f, 5f), minDistance, maxDistance);
-                SaveLocalPreferences();
+                if(RaidNetworkSession.Instance?.AiSpectatorActive!=true)SaveLocalPreferences();
             }
             transform.rotation = DesiredRotation();
+            if(RaidNetworkSession.Instance?.AiSpectatorActive==true && _aiSpectatorView==AiSpectatorView.Free && !blocked)
+                _aiFreeFocus+=GetMovementDirection(LocalInputBindings.Movement)*12f*Time.unscaledDeltaTime;
         }
 
         private void LateUpdate()
         {
+            if (_arrivalCamera)
+            {
+                UnityCamera.orthographic = false;
+                _arrivalCurrentPosition = Vector3.Lerp(_arrivalCurrentPosition, _arrivalPosition, 1f - Mathf.Exp(-1.8f * Time.unscaledDeltaTime));
+                transform.position = _arrivalCurrentPosition;
+                transform.rotation = Quaternion.LookRotation(_arrivalLookAt - _arrivalCurrentPosition);
+                return;
+            }
+            if (_spectatorTarget != null && RaidNetworkSession.Instance?.AiSpectatorActive!=true &&
+                (_player == null || !_player.IsDead || !CombatRange.LivingPartyMember(_spectatorTarget) || StageManager.CombatSuspended))
+                Spectate(null);
             // A menu can open after this camera's Update, including on a UI click.
-            if (LocalGameplayInput.Blocked) ReleaseOrbit();
+            if (RaidNetworkSession.Instance?.AiSpectatorActive==true ? LocalGameplayInput.ModalCovered : LocalGameplayInput.Blocked) ReleaseOrbit();
             float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
             float blend = 1f - Mathf.Exp(-followSmoothSpeed * dt);
             distance = Mathf.Lerp(distance, _targetDistance, blend);
@@ -184,13 +244,23 @@ namespace RaidRogue
         }
         private Vector3 DesiredFocus()
         {
-            Vector3 playerPosition = target != null ? target.position : Vector3.zero;
+            if(RaidNetworkSession.Instance?.AiSpectatorActive==true)
+            {
+                if(_aiSpectatorView==AiSpectatorView.Free)return _aiFreeFocus;
+                if(_aiSpectatorView==AiSpectatorView.Arena)return Vector3.zero;
+                if(_aiSpectatorView==AiSpectatorView.Boss)return StageManager.Instance?.boss?.transform.position??Vector3.zero;
+                if(_spectatorTarget!=null)return _spectatorTarget.position+targetOffset;
+                return Vector3.zero;
+            }
+            var focusTarget = _spectatorTarget != null ? _spectatorTarget : target;
+            Vector3 playerPosition = focusTarget != null ? focusTarget.position : Vector3.zero;
+            if (RaidApproachField.Instance?.Walking == true) return new Vector3(playerPosition.x, 0, playerPosition.z);
             if (!Is2DMode) return playerPosition + targetOffset;
             float visibleZoom = Mathf.InverseLerp(DefaultOrthoSize, minimumOrthoSize, _orthoSize);
             float follow = (float)CameraControlMath.FollowBlend(visibleZoom);
             return ClampTopDownFocus(new Vector3(playerPosition.x * follow, 0, playerPosition.z * follow));
         }
-        private Vector3 ClampTopDownFocus(Vector3 point) => new Vector3(
+        private Vector3 ClampTopDownFocus(Vector3 point) => RaidApproachField.Instance?.Walking == true ? point : new Vector3(
             (float)CameraControlMath.ClampFocusAxis(point.x, ArenaRadius + arenaPadding, _orthoSize * UnityCamera.aspect), 0,
             (float)CameraControlMath.ClampFocusAxis(point.z, ArenaRadius + arenaPadding, _orthoSize));
         private void ApplyCameraPose()
@@ -247,7 +317,7 @@ namespace RaidRogue
         // Pose stays in memory; only preference values are persisted by LocalSettingsRuntime.
         public void SaveLocalPreferences()
         {
-            if (!Application.isPlaying || !_initialized) return;
+            if (!Application.isPlaying || !_initialized || RaidNetworkSession.Instance?.AiSpectatorActive==true) return;
             preferences.distance3D = _targetDistance;
             preferences.pitch3D = pitchAngle3D;
             preferences.yaw3D = yawAngle;
@@ -283,7 +353,7 @@ namespace RaidRogue
         }
         private void OnApplicationPause(bool paused) { if (paused) ReleaseOrbit(false); }
         private void OnDisable() { ReleaseOrbit(); SaveLocalPreferences(); }
-        private void OnDestroy() { ReleaseOrbit(); if (LocalCamera == this) LocalCamera = null; }
+        private void OnDestroy() { ClearArrivalCamera(); ReleaseOrbit(); if (LocalCamera == this) LocalCamera = null; }
         private void OnApplicationQuit() { ReleaseOrbit(); SaveLocalPreferences(); }
 
         private static void ReadPointer(out bool pressed, out bool held, out Vector2 delta, out float scroll, out bool escape)
@@ -292,15 +362,17 @@ namespace RaidRogue
 #if ENABLE_INPUT_SYSTEM
             if (Mouse.current != null)
             {
-                pressed = Mouse.current.rightButton.wasPressedThisFrame;
-                held = Mouse.current.rightButton.isPressed;
+                var orbitButton=LocalMovementPreferences.RightClick?Mouse.current.middleButton:Mouse.current.rightButton;
+                pressed = orbitButton.wasPressedThisFrame;
+                held = orbitButton.isPressed;
                 delta = Mouse.current.delta.ReadValue();
                 float raw = Mouse.current.scroll.ReadValue().y;
                 scroll = Mathf.Abs(raw) > 10f ? raw / 120f : raw;
             }
             escape = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
 #elif ENABLE_LEGACY_INPUT_MANAGER
-            pressed = Input.GetMouseButtonDown(1); held = Input.GetMouseButton(1);
+            int orbitButton=LocalMovementPreferences.RightClick?2:1;
+            pressed = Input.GetMouseButtonDown(orbitButton); held = Input.GetMouseButton(orbitButton);
             delta = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * 10;
             scroll = Input.GetAxis("Mouse ScrollWheel") * 10;
             escape = Input.GetKeyDown(KeyCode.Escape);

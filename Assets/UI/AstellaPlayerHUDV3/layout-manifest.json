@@ -1,0 +1,233 @@
+{
+  "version": 3,
+  "canvas": [
+    1600,
+    300
+  ],
+  "recommendedDisplay": [
+    800,
+    150
+  ],
+  "purpose": "Image resources only; no game code applied.",
+  "layout": {
+    "hp": [
+      100,
+      34,
+      560,
+      72
+    ],
+    "ultimateGauge": [
+      940,
+      34,
+      560,
+      72
+    ],
+    "skillSlots": [
+      {
+        "id": "dawn-swordsmanship",
+        "keyExample": "1",
+        "rect": [
+          100,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "shield-combo",
+        "keyExample": "2",
+        "rect": [
+          244,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "guardians-hand",
+        "keyExample": "3",
+        "rect": [
+          388,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "judgement-shield-bash",
+        "keyExample": "4",
+        "rect": [
+          532,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "unyielding-faith",
+        "keyExample": "Q",
+        "rect": [
+          940,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "surge-of-light",
+        "keyExample": "Space",
+        "rect": [
+          1084,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "dawn-citadel",
+        "keyExample": "R",
+        "rect": [
+          1228,
+          110,
+          128,
+          128
+        ]
+      },
+      {
+        "id": "dawn-call",
+        "keyExample": "F",
+        "rect": [
+          1372,
+          110,
+          128,
+          128
+        ]
+      }
+    ],
+    "centralUltimate": {
+      "frameRect": [
+        672,
+        14,
+        256,
+        256
+      ],
+      "iconRect": [
+        688,
+        30,
+        224,
+        224
+      ],
+      "keyBadge": [
+        772,
+        6,
+        56,
+        36
+      ],
+      "keyBaseline": [
+        800,
+        33
+      ],
+      "keyExample": "V",
+      "keyBadgePlacement": "Above center icon, overlapping top rim; no badge below.",
+      "iconByClass": "ultimate-icons/icons-manifest.json"
+    },
+    "text": {
+      "hpCenterBaseline": [
+        380,
+        80
+      ],
+      "ultimateCenterBaseline": [
+        1220,
+        80
+      ],
+      "fontSize": 28
+    }
+  },
+  "geometry": {
+    "gaugeSource": [
+      560,
+      72
+    ],
+    "fillBounds": [
+      15,
+      16,
+      530,
+      40
+    ],
+    "tipWidth": "min(18,530*ratio)",
+    "goldRim": 6,
+    "recommendedUniformScale": 0.5
+  },
+  "resources": {
+    "gaugeManifest": "gauges/sprite-manifest.json",
+    "skillFrameManifest": "skill-buttons/frames-reference-manifest.json",
+    "ultimateManifest": "ultimate-icons/icons-manifest.json"
+  },
+  "textBakedIntoSprites": false,
+  "bindings": "1/2/3/4/Q/Space/R/F around center V are planning examples; display actual configured bindings at runtime.",
+  "samples": {
+    "class": "이지스 팔라딘",
+    "origin": "불멸의 성벽",
+    "hp": "1000/1000",
+    "ultimate": "60/100",
+    "valuesAreIllustrative": true
+  },
+  "behavior": {
+    "center": "Replace only the ultimate artwork by class. Keep common circular frame and top key badge.",
+    "skillCount": "Eight square skill buttons plus the central ultimate = nine action slots.",
+    "charge": "Actual ultimate charge and availability come from gameplay data. The circle does not introduce an extra resource.",
+    "dynamicText": "Labels are outside fill masks and stay fixed as fill changes."
+  },
+  "assets": [
+    {
+      "id": "ultimate-circle-frame",
+      "png": "sprites/ultimate-circle-frame.png",
+      "svg": "source/ultimate-circle-frame.svg",
+      "canvas": [
+        256,
+        256
+      ],
+      "transparentPixels": 54459
+    },
+    {
+      "id": "ultimate-circle-track",
+      "png": "sprites/ultimate-circle-track.png",
+      "svg": "source/ultimate-circle-track.svg",
+      "canvas": [
+        256,
+        256
+      ],
+      "transparentPixels": 24316
+    },
+    {
+      "id": "ultimate-circle-mask",
+      "png": "sprites/ultimate-circle-mask.png",
+      "svg": "source/ultimate-circle-mask.svg",
+      "canvas": [
+        256,
+        256
+      ],
+      "transparentPixels": 24316
+    },
+    {
+      "id": "ultimate-ready-glow",
+      "png": "sprites/ultimate-ready-glow.png",
+      "svg": "source/ultimate-ready-glow.svg",
+      "canvas": [
+        256,
+        256
+      ],
+      "transparentPixels": 43916
+    },
+    {
+      "id": "ultimate-disabled-overlay",
+      "png": "sprites/ultimate-disabled-overlay.png",
+      "svg": "source/ultimate-disabled-overlay.svg",
+      "canvas": [
+        256,
+        256
+      ],
+      "transparentPixels": 24316
+    }
+  ]
+}

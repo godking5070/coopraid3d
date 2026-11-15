@@ -1,0 +1,10 @@
+Completed implementation and verification, 2026-10-24.
+Base: feature/aegis-paladin-extensions 751b215f05de5ed5f8449c07d4580f7383e0a317
+Work: feature/twelve-character-roster, C:/coopraid/coopraid3d-twelve-characters
+Original: C:/coopraid/coopraid3d stays feature/aegis-paladin-routes, dirty preserved; 309 baseline hashes unchanged.
+Implemented: 11 new class kits + existing Paladin, 36 origins, 3/3/2 R/F/V choices per job, healer awakening, resources/casts/movement/typed effects, 24 evolution cards, Iris coin rescue, primitive natural visuals, generic UI, host state/reconnect/replacement AI adapters and editor candidate previews.
+Validation: full suite 115120 assertions (new roster 1089), managed runtime/editor compile. Final full rerun after UI/immunity/HoT edits also passed.
+No Unity Play / live Steam sessions. No original branch switch/merge/push, Unity/worktree Library, YAML edits, or GUID fabrication.
+Scope maintained: current 4-party/3-stage arena; mouse target/orbit/X potion. No infected bosses/8-player expansion. V arrives at final result; use editor preview for combat tests.
+Review and tuning: Tests/TwelveCharactersReview.txt, Tests/TwelveCharactersTuning.txt.
+Finished: implementation, review/tuning artifacts and final validation. Local review commit/patch export; no merge/push.

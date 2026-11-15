@@ -5,12 +5,31 @@ namespace RaidRogue
     // Shared decisions for regular bots and temporary controllers. No damage or mutable combat state here.
     public static class PartyAiTactics
     {
+        // Only the new DPS layout has an optional counter slot. Preserve the
+        // existing tank/healer/legacy positioning policy, including backups.
+        public static bool CanTakeCounterPosition(Transform member)
+        {
+            if(member==null)return false;
+            var actor=member.GetComponent<CharacterActor>();
+            if(actor==null||!NineKeyDamageKit.Supports(actor.Definition))return true;
+            var skill=actor.Selected(CharacterSlot.Counter);
+            var job=CharacterRosterData.Find(actor.Definition.id);
+            var unlocked=actor.Snapshot?.unlocked;
+            return skill!=null&&skill.implemented&&skill.id==NineKeyDamageData.Id(job,"c0")&&
+                unlocked!=null&&System.Array.IndexOf(unlocked,skill.id)>=0;
+        }
         public static Vector3 TankPosition(Transform actor, BossController boss, float range, float parking)
             => boss.isMeleeBoss && boss.ResolveLivingAggroTarget() == actor ? new Vector3(0, actor.position.y, parking)
                 : CombatRange.AttackPosition(actor, boss.transform, Vector3.forward, range);
         public static bool PartyMechanic(Transform actor, int role, BossController boss, out Vector3 destination)
         {
             destination = actor.position;
+            if (boss.GuardianNormal) return boss.GuardianDestination(actor,role,out destination);
+            if (boss.FloraEncounter) return boss.FloraDestination(actor,role,out destination);
+            if (boss.CampanellaEncounter) return boss.CampanellaDestination(actor,role,out destination);
+            if (boss.MarionetteEncounter) return boss.MarionetteDestination(actor,role,out destination);
+            if (boss.JustitiaEncounter) return boss.JustitiaDestination(actor,role,out destination);
+            if (boss.JanusEncounter) return boss.JanusDestination(actor,role,out destination);
             if (boss.IsStackMechanicActive && boss.StackTarget != null)
             {
                 if (boss.StackTarget != actor)
@@ -28,7 +47,7 @@ namespace RaidRogue
         }
         public static bool HazardDestination(Transform actor, BossController boss, float range, out Vector3 destination)
         {
-            destination = actor.position; var aoe = boss.ActiveTelegraph;
+            destination = actor.position; if (boss.GuardianNormal || boss.FloraEncounter || boss.CampanellaEncounter || boss.MarionetteEncounter || boss.JustitiaEncounter || boss.JanusEncounter) return false; var aoe = boss.ActiveTelegraph;
             if (aoe == null) return false;
             Vector3 direction = actor.position - aoe.transform.position; direction.y = 0;
             if (direction.sqrMagnitude < .001f) direction = -boss.transform.forward;

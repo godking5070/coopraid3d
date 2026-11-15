@@ -105,11 +105,11 @@ namespace RaidRogue
         private bool _externalStun;
         public bool IsStunned { get => _externalStun || GetComponent<CombatStatusEffects>()?.Stunned == true; set => _externalStun=value; }
         private bool _externalRoot;
-        public bool IsMovementLocked { get => _externalRoot || GetComponent<CombatStatusEffects>()?.Rooted == true; set => _externalRoot=value; }
-        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer) && !IsStunned && !IsMovementLocked &&
-            !IsBeingRescued && !IsBeingKnockedBack && !RaidCombatAuthority.InputBlocked(this);
-        public bool CanDash => CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
-        public bool HasMovementIntent => RaidCombatAuthority.Active ? IsMovingXZ : !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
+        public bool IsMovementLocked { get => _externalRoot || GetComponent<CombatStatusEffects>()?.Rooted == true || targetBoss?.GuardianLured(transform)==true; set => _externalRoot=value; }
+        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && targetBoss?.GuardianClashHolding(transform) != true && targetBoss?.CampanellaLockHolding(transform) != true && targetBoss?.MarionetteControlled(transform) != true && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer || RaidLobbyRoom.Active || RaidApproachField.Instance?.Walking == true || RaidApproachField.Instance?.PortalActive == true) && !IsStunned && !IsMovementLocked &&
+            !IsBeingRescued && !IsBeingKnockedBack && !IsSkillRushing && !RaidCombatAuthority.InputBlocked(this);
+        public bool CanDash => RaidApproachField.Instance?.PortalActive != true && CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
+        public bool HasMovementIntent => RaidCombatAuthority.Active ? IsMovingXZ : !LocalGameplayInput.Blocked && ReadDesiredMovementXZ().sqrMagnitude > 0.0001f;
         public bool IsCastInterruptImmune => currentRole == PlayerRole.Archmage_Caster && IsDefensiveBuffActive;
 
         private float _defensiveRemainingTime;
@@ -213,17 +213,40 @@ namespace RaidRogue
 
         private void Update()
         {
+            UpdateClickMovement();
             if (RaidNetworkSession.Multiplayer)
             {
                 if (RaidCombatAuthority.Local(this))
                 {
                     bool allowed = !LocalGameplayInput.Blocked && RaidNetworkSession.Instance.HasLocalAvatar;
-                    bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed);
+                    bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed && RaidApproachField.Instance?.PortalActive != true);
                     if (pressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
-                    RaidNetworkSession.Instance.SampleInput(allowed ? GetMoveDirectionXZ(ReadMoveInput()) : Vector3.zero, pressed);
+                    RaidNetworkSession.Instance.SampleInput(allowed ? ReadDesiredMovementXZ() : Vector3.zero, pressed);
                 }
-                if (RaidCombatAuthority.Host && !StageManager.CombatSuspended) UpdateTimers();
+                if (RaidCombatAuthority.Host && !StageManager.PlayerSkillsSuspended) UpdateTimers();
                 UpdateOverheadHpBar(); if (RaidCombatAuthority.Local(this)) UpdateHUD();
+                return;
+            }
+            if (RaidLobbyRoom.Active || RaidApproachField.Instance?.Walking == true || RaidApproachField.Instance?.PortalActive == true)
+            {
+                bool freeDash = RaidApproachField.Instance?.PortalActive != true;
+                bool allowed = !RaidCombatAuthority.InputBlocked(this) && Time.timeScale > 0.001f;
+                bool lobbyDashPressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed && freeDash);
+                if (!allowed || !CanMoveVoluntarily || !freeDash) _dash.Cancel();
+                if (allowed)
+                {
+                    UpdateTimers();
+                    _dash.TickCooldown(Time.deltaTime);
+                    if (lobbyDashPressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
+                    if (lobbyDashPressed && freeDash) TryStartDash();
+                    Vector3 before = transform.position;
+                    if (IsSkillRushing && RaidLobbyRoom.PracticeActive) StepSkillRush(Time.deltaTime);
+                    else if (IsDashing) UpdateDashMovementXZ(); else HandleMovementXZ();
+                    Vector3 moved = transform.position - before; moved.y = 0;
+                    IsMovingXZ = moved.sqrMagnitude > 0.000001f;
+                }
+                else IsMovingXZ = false;
+                UpdateOverheadHpBar(); UpdateHUD();
                 return;
             }
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended)
@@ -257,6 +280,10 @@ namespace RaidRogue
             {
                 UpdateKnockbackMovementXZ();
             }
+            else if(IsSkillRushing)
+            {
+                StepSkillRush(Time.deltaTime);
+            }
             else if (IsDashing)
             {
                 UpdateDashMovementXZ();
@@ -282,15 +309,27 @@ namespace RaidRogue
         public bool TryStartDash()
         {
             if (RaidCombatAuthority.Active || RaidNetworkSession.CombatPreview) return false; // Multiplayer dash is consumed as a host-validated input command.
-            Vector3 direction = GetMoveDirectionXZ(ReadMoveInput());
+            Vector3 direction = ReadDesiredMovementXZ();
             Vector3 facing = transform.forward;
             var character = CharacterActor.Ensure(gameObject);
             if (!character.Available(CharacterSlot.Movement, out _)) return false;
-            if (!character.StartMovement(_dash, dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
+            if (!character.StartMovement(_dash, dashSettings, CanDash, direction.x, direction.z, facing.x, facing.z)) return false;
             if (!character.MovementSettings(dashSettings).preserveCast) { GetComponent<BattleResurrection>()?.Cancel(); character.InterruptCast(); }
             Potion?.EndRevivalProtection();
             if (_dashPresentation != null) _dashPresentation.BeginDash();
             return true;
+        }
+
+        public void StopForArrival()
+        {
+            _dash.Cancel();
+            _dashPress.RequireRelease();
+            CancelSkillRush();
+            _isBeingRescued = _isBeingKnockedBack = false;
+            GetComponent<BattleResurrection>()?.Cancel();
+            CharacterActor.Ensure(gameObject).InterruptCast();
+            IsMovingXZ = false;
+            _dashPresentation?.ClearTrail();
         }
 
         private void UpdateDashMovementXZ()
@@ -300,21 +339,29 @@ namespace RaidRogue
             Vector3 start = transform.position;
             float distance = (float)_dash.Step(Time.deltaTime);
             transform.position = _movementCollision.Move(this, direction, distance, out bool blocked);
+            if(targetBoss?.MarionetteEncounter==true && RaidApproachField.Instance?.Walking!=true)
+                transform.position=MarionetteNormalRules.ClampToStage(transform.position,targetBoss.MarionetteStageHalfSize,combatRadius+.3f);
+            if(targetBoss?.JustitiaEncounter==true && RaidApproachField.Instance?.Walking!=true)
+                transform.position=JustitiaNormalRules.Clamp(transform.position,targetBoss.JustitiaHalfWidth,targetBoss.JustitiaHalfDepth,combatRadius+.3f);
             if (blocked) _dash.Cancel();
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction),
-                rotationSmoothSpeed * Time.deltaTime);
+            if (character?.MovementSettings(dashSettings).backwardFromFacing != true)
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction),
+                    rotationSmoothSpeed * Time.deltaTime);
             if (_dashPresentation != null) _dashPresentation.RecordMovement(start, transform.position);
         }
 
         private void OnApplicationFocus(bool focused)
         {
             if (focused) return;
+            CancelClickMovement();
             _dash.Cancel();
             _dashPress.RequireRelease();
         }
 
         private void OnDisable()
         {
+            CancelClickMovement();
+            CancelSkillRush();
             _dash.Cancel();
             _dashPress.RequireRelease();
             IsMovingXZ = false;
@@ -357,6 +404,7 @@ namespace RaidRogue
         /// </summary>
         public void ApplyRoleStatsAndVisuals(PlayerRole role, bool restoreFullHp = true)
         {
+            GetComponent<CharacterPartyStats>()?.ResetHealthFactor();
             currentRole = role;
             _defensiveRemainingTime = 0f;
 
@@ -496,6 +544,7 @@ namespace RaidRogue
         /// </summary>
         public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f, bool ignoreImmunity = false)
         {
+            if(!ignoreImmunity&&CharacterEvolutionCards.StationaryBulwark(transform))return;
             if(!CombatDamageRules.CanKnockback(GetComponent<CombatStatusEffects>()?.KnockbackImmunity??0,ignoreImmunity))return;
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             if (_isBeingRescued)
@@ -503,7 +552,8 @@ namespace RaidRogue
                 return;
             }
 
-            _dash.Cancel(); // Rescue > knockback > dash > WASD; only one movement branch runs each frame.
+            GetComponent<CharacterActor>()?.InterruptCast();
+            _dash.Cancel(); // Rescue > knockback > skill rush > dash > WASD.
 
             Vector3 dirXZ = new Vector3(
                 transform.position.x - originXZ.x,
@@ -556,7 +606,9 @@ namespace RaidRogue
 
         public void StartPulledByHealerRescue(Vector3 safeDestinationXZ)
         {
-            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || targetBoss?.GuardianClashHolding(transform)==true || targetBoss?.CampanellaLockHolding(transform)==true || targetBoss?.MarionetteControlled(transform)==true) return;
+            targetBoss?.OnGuardianLureRescue(transform,safeDestinationXZ);
+            GetComponent<CharacterActor>()?.InterruptCast();
             _dash.Cancel();
             _isBeingKnockedBack = false;
             _isBeingRescued = true;
@@ -602,7 +654,8 @@ namespace RaidRogue
                 case RoguelikeCardId.GhostStep:
                     hasGhostStep = true;
                     ghostStepStacks++;
-                    moveSpeed *= 1.30f;
+                    var paladin=GetComponent<AegisPaladin>();
+                    if(paladin?.IsActive==true)paladin.RecalculateStats();else moveSpeed *= 1.30f;
                     positionalAngleBonusDeg += 15f;
                     if (targetBoss != null && !RaidCombatAuthority.Active)
                     {
@@ -643,8 +696,7 @@ namespace RaidRogue
 
         private void HandleMovementXZ()
         {
-            Vector2 moveInput = CanMoveVoluntarily ? ReadMoveInput() : Vector2.zero;
-            Vector3 moveDirXZ = GetMoveDirectionXZ(moveInput);
+            Vector3 moveDirXZ = CanMoveVoluntarily&&GetComponent<AegisExtensions>()?.Channeling!=true&&GetComponent<CharacterKit>()?.MovementBlocked!=true ? ReadDesiredMovementXZ() : Vector3.zero;
 
             if (moveDirXZ.sqrMagnitude > 1f)
             {
@@ -660,6 +712,12 @@ namespace RaidRogue
                 Vector3 delta = new Vector3(bounded.x - transform.position.x, 0, bounded.y - transform.position.z);
                 // Preserve WASD's existing slide along the arena edge, while sharing obstacle sweeps with dash.
                 transform.position = _movementCollision.Move(this, delta, delta.magnitude, out _);
+                if(targetBoss?.MarionetteEncounter==true && RaidApproachField.Instance?.Walking!=true)
+                    transform.position=MarionetteNormalRules.ClampToStage(transform.position,targetBoss.MarionetteStageHalfSize,combatRadius+.3f);
+                if(targetBoss?.JustitiaEncounter==true && RaidApproachField.Instance?.Walking!=true)
+                    transform.position=JustitiaNormalRules.Clamp(transform.position,targetBoss.JustitiaHalfWidth,targetBoss.JustitiaHalfDepth,combatRadius+.3f);
+                if(targetBoss?.JanusEncounter==true&&RaidApproachField.Instance?.Walking!=true)
+                    transform.position=JanusNormalRules.Clamp(transform.position,targetBoss.janus.arenaRadius-combatRadius-.3f);
 
                 Quaternion targetRotation = Quaternion.LookRotation(moveDirXZ.normalized, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(
@@ -684,6 +742,9 @@ namespace RaidRogue
         private void HandleLegacySkillInputs()
         {
             if (LocalGameplayInput.Blocked) return;
+            if (targetBoss?.MarionetteControlled(transform) == true) return;
+            if (targetBoss?.GuardianClashHolding(transform) == true || targetBoss?.CampanellaLockHolding(transform) == true)
+            { if (WasSkill3Pressed()) ActivatePersonalDefensiveBuff(); return; }
             if (WasSkill1Pressed()) UseFlankSlash();
             if (WasSkill2Pressed()) UseRearAmbush();
             if (WasSkill3Pressed()) ActivatePersonalDefensiveBuff();
@@ -721,7 +782,7 @@ namespace RaidRogue
 
         private bool CanUseLegacyMeleeAttack()
         {
-            if (LocalGameplayInput.Blocked || IsDead || StageManager.CombatSuspended) return false;
+            if (LocalGameplayInput.Blocked || IsDead || StageManager.CombatSuspended || targetBoss?.GuardianClashHolding(transform) == true || targetBoss?.CampanellaLockHolding(transform) == true || targetBoss?.MarionetteControlled(transform) == true) return false;
             if (targetBoss == null || !CombatRange.LivingEnemy(targetBoss.transform) || Time.timeScale <= 0.001f) return false;
             var defaults = new MeleeRangeSettings();
             float range = defaults.Get(currentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank);
@@ -732,7 +793,7 @@ namespace RaidRogue
 
         public void TriggerVampiricBladeHeal()
         {
-            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.PlayerSkillsSuspended) return;
             float heal = (currentRole == PlayerRole.Guardian_Tank ? 30f : 15f) * Mathf.Max(1, vampiricBladeStacks);
             float hpBefore = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + heal);
@@ -753,7 +814,7 @@ namespace RaidRogue
         /// </summary>
         public void ActivatePersonalDefensiveBuff()
         {
-            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.PlayerSkillsSuspended) return;
             Potion?.EndRevivalProtection();
             _defensiveRemainingTime = defensiveDuration;
             ApplyBodyColor(defensiveBodyColor);
@@ -773,11 +834,18 @@ namespace RaidRogue
             );
         }
 
-        public float CalculateFinalDamageTaken(float incomingDamage)
+        public float CalculateFinalDamageTaken(float incomingDamage,CombatDefenseType defense=CombatDefenseType.Physical)
         {
             float damage = incomingDamage;
             // 가디언(탱커) 기본 패시브 방어력 적용
-            if (currentRole == PlayerRole.Guardian_Tank)
+            var paladin=GetComponent<AegisPaladin>();
+            if(paladin?.IsActive==true&&defense!=CombatDefenseType.Bypass)
+                damage=AegisRouteData.Mitigate(damage,defense==CombatDefenseType.Magic?paladin.MagicDefense:paladin.PhysicalDefense);
+            else if(GetComponent<CharacterKit>()?.Active==true&&defense!=CombatDefenseType.Bypass)
+                damage=AegisRouteData.Mitigate(damage,GetComponent<CharacterKit>().Defense);
+            else if((GetComponent<NineKeyTankKit>()?.Active==true||GetComponent<NineKeyHealerKit>()?.Active==true||GetComponent<NineKeyDamageKit>()?.Active==true)&&defense!=CombatDefenseType.Bypass)
+                damage=AegisRouteData.Mitigate(damage,defense==CombatDefenseType.Magic?GetComponent<CharacterActor>().Definition.magicDefense:GetComponent<CharacterActor>().Definition.physicalDefense);
+            else if (currentRole == PlayerRole.Guardian_Tank&&defense!=CombatDefenseType.Bypass)
             {
                 damage *= (1f - tankPassiveDefenseRate);
             }
@@ -791,13 +859,13 @@ namespace RaidRogue
         /// </summary>
         public void AddShield(float shieldAmount, Transform source = null)
         {
-            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.PlayerSkillsSuspended) return;
             if (shieldAmount <= 0f)
             {
                 return;
             }
 
-            shieldAmount=CombatStatusEffects.ShieldAmount(shieldAmount,source!=null?source:transform);
+            shieldAmount=CombatStatusEffects.ShieldAmount(shieldAmount,source!=null?source:transform)*CharacterKit.ShieldScale(source,transform);
             _metricsShields.Reconcile(currentShield);
             float shieldBefore = currentShield;
             currentShield = Mathf.Min(maxHp, currentShield + shieldAmount);
@@ -815,11 +883,18 @@ namespace RaidRogue
         {
             LastHitGuarded=false;
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
+            if(!_resolvedCombatHits.Accept(hit.EventId))return;
             if (Potion != null && Potion.HasRevivalProtection) return;
+            if(hit.Kind!=CombatDamageKind.System&&GetComponent<CombatStatusEffects>()?.CombatInvulnerable==true)return;
             ExpireTimedShields();
-            float finalDamage = CalculateFinalDamageTaken(rawDamage);
+            float finalDamage = hit.Kind==CombatDamageKind.Transfer?rawDamage:CalculateFinalDamageTaken(rawDamage,hit.Kind==CombatDamageKind.System?CombatDefenseType.Bypass:hit.Defense);
+            finalDamage*=AegisExtensions.IncomingScale(transform,hit.Kind);
+            finalDamage=CharacterKit.Incoming(transform,finalDamage,hit);
             var aegis = GetComponent<AegisPaladin>();
+            if(aegis!=null&&aegis.IsActive)finalDamage=(float)aegis.DamageState.ReduceIncoming(finalDamage,hit.Kind,hit.Defense);
+            finalDamage=AegisPaladin.ApplyMirrorProtection(transform,finalDamage,hit);
             if(aegis!=null&&aegis.TryGuard(hit,finalDamage)){LastHitGuarded=true;return;}
+            finalDamage=AegisExtensions.SharedDamage(transform,finalDamage,hit);
             float absorbedByShield = 0f;
 
             if (currentShield > 0f && finalDamage > 0f)
@@ -828,11 +903,12 @@ namespace RaidRogue
                 absorbedByShield = Mathf.Min(currentShield, finalDamage);
                 currentShield -= absorbedByShield;
                 finalDamage -= absorbedByShield;
-                _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit));
+                _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit),(id,key,amount)=>NineKeyHealerKit.OnLayerAbsorbed(transform,id,key,(float)amount));
             }
 
             if (aegis != null && aegis.IsActive) finalDamage = (float)aegis.DamageState.Split(finalDamage);
-            currentHp = Mathf.Max(0f, currentHp - finalDamage);
+            GetComponent<CharacterKit>()?.OnDamaged(finalDamage,hit.Kind);
+            currentHp = Mathf.Max(0f,CharacterKit.PreserveLife(transform,currentHp-finalDamage,hit.Kind));
 
             // 가디언(탱커) 또는 생존기 발동 중 [가시 갑옷] 카드 보유 시 피격 반사 피해
             if (CombatDamageRules.CanReact(hit.Kind) && hasThornArmor && (IsDefensiveBuffActive || currentRole == PlayerRole.Guardian_Tank) && targetBoss != null)
@@ -840,7 +916,7 @@ namespace RaidRogue
                 int reflect = Mathf.RoundToInt(thornReflectDamage * (IsDefensiveBuffActive ? 0.6f : 0.25f));
                 if (reflect > 0)
                 {
-                    targetBoss.ReceiveRoleSkillAttack("가시반사", "철벽 가시 갑옷", 0, reflect, new Color(0.35f, 1f, 0.55f, 1f), false, source: transform);
+                    targetBoss.ReceiveRoleSkillAttack("가시반사", "철벽 가시 갑옷", 0, reflect, new Color(0.35f, 1f, 0.55f, 1f), false, source: transform,kind:CombatDamageKind.Reflection);
                 }
             }
 
@@ -864,14 +940,17 @@ namespace RaidRogue
 
         public float ReceiveHeal(float healAmount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
-            if (RaidCombatAuthority.Replica || healAmount <= 0f || IsDead || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || healAmount <= 0f || IsDead || StageManager.PlayerSkillsSuspended)
             {
                 return 0;
             }
 
+            healAmount*=CharacterKit.HealingScale(source,transform);
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + healAmount);
             float actualHealed = currentHp - before;
+            CharacterTrainingSession.Instance?.RecordOverheal(healAmount - actualHealed);
+            CharacterKit.AfterHeal(source,transform,actualHealed,healAmount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 
             if (actualHealed > 0.5f || (kind == HealingKind.Potion && actualHealed > 0))
@@ -910,6 +989,7 @@ namespace RaidRogue
 
         private void ClearInterruptedActions()
         {
+            CancelSkillRush();
             _dash.Cancel(); _dashPress.RequireRelease();
             _isBeingRescued = _isBeingKnockedBack = IsMovingXZ = false;
             IsStunned = IsMovementLocked = false;
@@ -1189,14 +1269,12 @@ namespace RaidRogue
                 ? TargetingManager.Instance.GetUnitDisplayName(TargetingManager.Instance.CurrentTarget)
                 : $"없음 (클릭 / {LocalInputBindings.Label("CycleEnemy")} / {LocalInputBindings.PartyLabels()})";
 
-            string movementHint = ViewModeManager.Is2DViewActive
-                ? $"{LocalInputBindings.MovementLabels} 화면 기준 이동 · 휠 줌 · 기본 시야: 전장 전체 / 확대: 플레이어 추적"
-                : $"{LocalInputBindings.MovementLabels} 카메라 기준 이동 · 우클릭 드래그 회전 · 휠 줌";
+            string movementHint = LocalMovementPreferences.Hint(ViewModeManager.Is2DViewActive);
 
             hudStatusText.text =
-                $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [{LocalInputBindings.Label("Roles")}] | 뷰: {viewModeLabel} [{LocalInputBindings.Label("View")}])]</b>\n" +
+                $"<b>[Project: Astella - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [{LocalInputBindings.Label("Roles")}] | 뷰: {viewModeLabel} [{LocalInputBindings.Label("View")}])]</b>\n" +
                 $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[{LocalInputBindings.PartyLabels()}]</b> 파티원 1~4번 | <b>[{LocalInputBindings.Label("CycleEnemy")}]</b> 적(보스·쫄) 순환 | <b>[{LocalInputBindings.Label("TargetOfTarget")}]</b> 대상의 대상 | <b>[{LocalInputBindings.Label("ClearTarget")}]</b> 타겟 해제 | <b>[ESC]</b> 창 닫기 / 메뉴\n" +
-                $"• <b>이동/카메라</b> : {movementHint} · {LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션{(currentRole == PlayerRole.Oracle_Healer ? $" · {LocalInputBindings.Label("Skill5")} 부활(사망 아군 선택)" : "")} | [{LocalInputBindings.Label("Settings")}] 설정\n" +
+                $"• <b>이동/카메라</b> : {movementHint} · {LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션 · {LocalInputBindings.Label("Skill5")} 이리스 코인(사망 아군 선택) | [{LocalInputBindings.Label("Settings")}] 설정\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
                 $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {LocalInputBindings.SkillText(targetBoss.LastHitMessage)}\n" +

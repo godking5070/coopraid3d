@@ -45,6 +45,9 @@ namespace RaidRogue
 
         private bool _isModalOpen;
         private bool _hasSelectedInitialRole;
+        private RectTransform _selectionPanel;
+        private Button _aegisSelect;
+        private Text _aegisSelectText;
 
         public bool IsRoleModalOpen => _isModalOpen;
 
@@ -109,7 +112,7 @@ namespace RaidRogue
             while (!RaidNetworkSession.Multiplayer && partyBots.Count < 3)
             {
                 int idx = partyBots.Count + 1;
-                GameObject botObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                GameObject botObj = RaidPrimitive.Create(PrimitiveType.Capsule);
                 botObj.name = $"PartyBot_Auto_{idx}";
                 Collider col = botObj.GetComponent<Collider>();
                 if (col != null) Destroy(col);
@@ -163,30 +166,19 @@ namespace RaidRogue
             return true;
         }
 
+        // Compatibility entry point for old scene buttons and lobby callers.
+        // Player-facing selection opens the current roster directly.
         public void OpenRoleSelectionModal()
         {
-            if (RaidNetworkSession.Multiplayer || RaidNetworkSession.CombatPreview || RaidNetworkSession.Instance?.MenuOpen == true)
-            { RaidNetworkSession.Instance.MenuOpen = true; return; }
-            if (CombatMetricsUI.BlocksUnderlyingInput || !CanChangePartyRoles()) return;
-            EnsureUI();
-
-            if (roleModalRoot != null)
+            CloseRoleSelectionModal();
+            if (RaidNetworkSession.Multiplayer)
             {
-                roleModalRoot.SetActive(true);
-                roleModalRoot.transform.SetAsLastSibling();
+                AegisRouteSelectionUI.OpenNetwork();
+                return;
             }
-
-            PlayerRole curRole = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
-            if (roleModalSubtitleText != null)
-            {
-                LocalShortcutText.Set(roleModalSubtitleText,
-                    $"현재 선택된 직업: <color=#FFE055>{GetRoleTitleKor(curRole)}</color>  |  " +
-                    "원하는 직업 카드를 마우스로 클릭하거나 키보드 <b>[{key:Choice1}] · [{key:Choice2}] · [{key:Choice3}] · [{key:Choice4}]</b> 키를 눌러 즉시 플레이하세요! (나머지 3자리는 AI 봇이 자동 편성됩니다)");
-            }
-
-            _isModalOpen = true;
-            Time.timeScale = 0f;
-            UpdateTopButtonLabel();
+            if (RaidNetworkSession.CombatPreview || RaidNetworkSession.Instance?.MenuOpen == true ||
+                CombatMetricsUI.BlocksUnderlyingInput || stageManager?.CanSelectInitialRole != true || player == null) return;
+            AegisRouteSelectionUI.Open(CharacterActor.Ensure(player.gameObject), false);
         }
 
         public void CloseRoleSelectionModal()
@@ -212,17 +204,19 @@ namespace RaidRogue
         {
             if(!CanChangePartyRoles()||stageManager==null||!stageManager.CanSelectInitialRole)return;
             if(player==null)return;
-            if(CharacterActor.Ensure(player.gameObject).Definition.id!=AegisPaladinData.JobId)
-            {
-                ApplySelectedRole(PlayerRole.Guardian_Tank,true,false);
-                if(!CharacterActor.Ensure(player.gameObject).AssignDefinition(CharacterCatalog.Find(AegisPaladinData.JobId)))return;
-            }
             AegisRouteSelectionUI.Open(CharacterActor.Ensure(player.gameObject),false);
+        }
+        public bool SelectRosterJob(string id)
+        {
+            if(!CanChangePartyRoles()||!stageManager.CanSelectInitialRole||player==null)return false;
+            var definition=CharacterCatalog.Find(id);if(definition==null||!definition.playable||definition.legacyRole!=0)return false;
+            ApplySelectedRole((PlayerRole)CharacterRosterData.Role(definition),true,false);
+            return CharacterActor.Ensure(player.gameObject).AssignDefinition(definition);
         }
         public void ConfirmAegisDeparture()
         {
             if(player==null||stageManager==null||!stageManager.CanSelectInitialRole||!CharacterActor.Ensure(player.gameObject).DepartureReady)return;
-            _hasSelectedInitialRole=true;CloseRoleSelectionModal();stageManager.BeginSingleRun();
+            _hasSelectedInitialRole=true;CloseRoleSelectionModal();
         }
         public void SelectRoleByIndex(int roleNumber1To4)
         {
@@ -239,7 +233,6 @@ namespace RaidRogue
             _hasSelectedInitialRole = true;
             ApplySelectedRole(chosen, repositionParty: true, showAlertBanner: true);
             CloseRoleSelectionModal();
-            stageManager?.BeginSingleRun();
         }
 
         /// <summary>
@@ -455,7 +448,9 @@ namespace RaidRogue
             }
 
             PlayerRole cur = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
-            topOpenRoleModalButtonText.text = $"[직업 변경: {GetRoleShortKor(cur)} ({LocalInputBindings.Label("Roles")})]";
+            var character = player != null ? player.GetComponent<CharacterActor>() : null;
+            string currentName = character?.Definition?.legacyRole == 0 ? character.Definition.name : GetRoleShortKor(cur);
+            topOpenRoleModalButtonText.text = $"[직업 변경: {currentName} ({LocalInputBindings.Label("Roles")})]";
         }
 
         public static string GetRoleTitleKor(PlayerRole role)
@@ -541,19 +536,100 @@ namespace RaidRogue
                 }
             }
 
-            // 2. 화면 중앙 [직업 선택 창: 1.가디언 / 2.오라클 / 3.블레이드 / 4.아크메이지] 모달 생성
+            // Keep old serialized references, but never show or build the retired modal.
             if (roleModalRoot == null)
+                roleModalRoot = canvas.transform.Find("RoleSelection_ModalOverlay")?.gameObject;
+            if (roleModalRoot != null) roleModalRoot.SetActive(false);
+        }
+
+        private void EnsureCharacterChoices(Font font)
+        {
+            if (RaidUIStyle.Authored(roleModalRoot != null ? roleModalRoot.transform : null) && _aegisSelect != null)
             {
-                Transform existingModal = canvas.transform.Find("RoleSelection_ModalOverlay");
-                if (existingModal != null)
-                {
-                    roleModalRoot = existingModal.gameObject;
-                }
-                else
-                {
-                    BuildRoleSelectionModalUI(canvas.transform, font);
-                }
+                _aegisSelect.onClick.RemoveAllListeners(); _aegisSelect.onClick.AddListener(SelectAegisPaladin); return;
             }
+            if (roleModalRoot == null) return;
+            _selectionPanel = roleModalRoot.transform.Find("RoleSelection_CenterWindow") as RectTransform;
+            if (_selectionPanel == null) return;
+            _selectionPanel.sizeDelta = new Vector2(1480, 900);
+            var title = _selectionPanel.Find("ModalTitle")?.GetComponent<Text>();
+            if (title != null) title.text = "직업 선택 · 이지스 팔라딘 / 기존 테스트 직업";
+            if (roleModalSubtitleText != null) roleModalSubtitleText.rectTransform.sizeDelta = new Vector2(1400, 52);
+            for (int i = 0; i < roleCardButtons.Length; i++)
+                if (roleCardButtons[i] != null)
+                {
+                    var card = roleCardButtons[i].GetComponent<RectTransform>();
+                    card.anchoredPosition = new Vector2(card.anchoredPosition.x, -62);
+                }
+
+            var choice = _selectionPanel.Find("AegisBasicSelect") as RectTransform;
+            if (choice == null)
+            {
+                // Reuse an existing runtime choice when scripts reload during Play.
+                choice = roleModalRoot.transform.Find("AegisBasicSelect") as RectTransform;
+                if (choice == null) choice = new GameObject("AegisBasicSelect", typeof(RectTransform)).GetComponent<RectTransform>();
+                choice.SetParent(_selectionPanel, false);
+            }
+            choice.anchorMin = choice.anchorMax = choice.pivot = new Vector2(.5f, .5f);
+            choice.anchoredPosition = new Vector2(0, 254); choice.sizeDelta = new Vector2(1400, 76);
+            var image = choice.GetComponent<Image>() ?? choice.gameObject.AddComponent<Image>();
+            image.color = new Color(.32f, .24f, .09f, 1);
+            _aegisSelect = choice.GetComponent<Button>() ?? choice.gameObject.AddComponent<Button>();
+            _aegisSelect.targetGraphic = image;
+            _aegisSelect.onClick.RemoveAllListeners();
+            _aegisSelect.onClick.AddListener(SelectAegisPaladin);
+            _aegisSelectText = ChoiceLabel(choice, font, 24);
+            _aegisSelectText.color = new Color(1, .9f, .5f);
+
+            var catalog = _selectionPanel.Find("RegisteredClasses") as RectTransform;
+            if (catalog == null)
+            {
+                catalog = roleModalRoot.transform.Find("RegisteredClasses") as RectTransform;
+                if (catalog == null) catalog = new GameObject("RegisteredClasses", typeof(RectTransform)).GetComponent<RectTransform>();
+                catalog.SetParent(_selectionPanel, false);
+            }
+            catalog.anchorMin = catalog.anchorMax = catalog.pivot = new Vector2(.5f, .5f);
+            catalog.anchoredPosition = new Vector2(0, -385); catalog.sizeDelta = new Vector2(1400, 80);
+            var names = new List<string>();
+            foreach (var job in CharacterCatalog.All) if (!job.playable) names.Add(job.name);
+            ChoiceLabel(catalog, font, 16).text = "미구현 직업 목록\n" + string.Join(" · ", names);
+            RefreshCharacterChoiceLayout();
+        }
+
+        private static Text ChoiceLabel(RectTransform parent, Font font, int size)
+        {
+            var text = parent.GetComponentInChildren<Text>(true);
+            if (text == null)
+            {
+                var label = new GameObject("Label", typeof(RectTransform));
+                label.transform.SetParent(parent, false);
+                text = label.AddComponent<Text>();
+            }
+            var rect = text.rectTransform;
+            rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(14, 4); rect.offsetMax = new Vector2(-14, -4);
+            text.font = font; text.fontSize = size; text.alignment = TextAnchor.MiddleCenter;
+            text.color = Color.white; text.raycastTarget = false;
+            return text;
+        }
+
+        private void LateUpdate()
+        {
+            if (_isModalOpen) RefreshCharacterChoiceLayout();
+        }
+
+        private void RefreshCharacterChoiceLayout()
+        {
+            if (_selectionPanel == null || roleModalRoot == null) return;
+            var available = ((RectTransform)roleModalRoot.transform).rect.size;
+            if (!RaidUIStyle.Authored(_selectionPanel) && available.x > 0 && available.y > 0)
+                _selectionPanel.localScale = Vector3.one * Mathf.Clamp(Mathf.Min((available.x - 24) / 1480, (available.y - 24) / 900), .01f, 1);
+            if (_aegisSelect == null) return;
+            bool canSelect = stageManager != null && stageManager.CanSelectInitialRole && CharacterCatalog.Find(AegisPaladinData.JobId)?.playable == true;
+            _aegisSelect.interactable = canSelect && !LocalGameplayInput.ModalCovered;
+            _aegisSelectText.text = canSelect
+                ? "▶ 12직업 선택 · 탱커 / 힐러 / 근딜 / 원딜 / 캐스터\n기본기 · 기원 3루트 / Z · 스테이지별 R/F/V 선택"
+                : "12직업 · 새 런 출발 전에 선택할 수 있습니다";
         }
 
         private void BuildRoleSelectionModalUI(Transform canvasTransform, Font font)

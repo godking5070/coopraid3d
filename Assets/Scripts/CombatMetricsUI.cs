@@ -7,15 +7,24 @@ namespace RaidRogue
     // Uses the existing HUD canvas, uGUI buttons and EventSystem in either camera view.
     public sealed class CombatMetricsUI : MonoBehaviour
     {
-        public static bool ResultsOpen { get; private set; }
+        private static CombatMetricsUI _resultsOwner;
+        public static bool ResultsOpen => _resultsOwner != null && _resultsOwner.isActiveAndEnabled &&
+            _resultsOwner._results != null && _resultsOwner._results.activeInHierarchy;
         // Existing manual click fallbacks must also ignore the frame that closes the overlay.
         private static int _lastModalFrame = -1;
         public static bool BlocksUnderlyingInput => ResultsOpen || _lastModalFrame == Time.frameCount;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetModalState()
+        {
+            _resultsOwner = null;
+            _lastModalFrame = -1;
+        }
         private CombatMetricsManager _metrics;
         private StageManager _stage;
         private Canvas _canvas;
         private Font _font;
         private RectTransform _panel;
+        public RectTransform Panel=>_panel;
         private GameObject _body;
         private Text _header;
         private Text _foldLabel;
@@ -24,6 +33,7 @@ namespace RaidRogue
         private RectTransform _resultBox;
         private Text _resultTitle;
         private Text _resultTime;
+        private Text _resultEvents;
         private readonly List<Text[]> _resultRows = new List<Text[]>();
         private RectTransform _tabs;
         private bool _sortByHealing;
@@ -31,6 +41,28 @@ namespace RaidRogue
         private float _nextRefresh;
         private Button _rewardButton;
         private Button _victoryButton;
+        private Button _boundRewardButton, _boundVictoryButton;
+
+        public void BindResultButtons()
+        {
+            if (_boundRewardButton != null) _boundRewardButton.onClick.RemoveListener(ShowLatestResults);
+            if (_boundVictoryButton != null) _boundVictoryButton.onClick.RemoveListener(ShowRunResults);
+            _boundRewardButton = _rewardButton;
+            _boundVictoryButton = _victoryButton;
+            if (_boundRewardButton != null)
+            {
+                _boundRewardButton.onClick.RemoveListener(ShowLatestResults);
+                _boundRewardButton.onClick.AddListener(ShowLatestResults);
+            }
+            if (_boundVictoryButton != null)
+            {
+                _boundVictoryButton.onClick.RemoveListener(ShowRunResults);
+                _boundVictoryButton.onClick.AddListener(ShowRunResults);
+            }
+        }
+
+        private void ShowLatestResults() { ShowResults(false); }
+        private void ShowRunResults() { ShowResults(true); }
 
         public void Initialize(CombatMetricsManager metrics, StageManager stage)
         {
@@ -39,10 +71,13 @@ namespace RaidRogue
             EnsureUI();
         }
 
+        private void OnDisable() { CloseResults(); }
+
         private void OnDestroy()
         {
-            ResultsOpen = false;
-            _lastModalFrame = -1;
+            CloseResults();
+            if (_boundRewardButton != null) _boundRewardButton.onClick.RemoveListener(ShowLatestResults);
+            if (_boundVictoryButton != null) _boundVictoryButton.onClick.RemoveListener(ShowRunResults);
             if (_panel != null) Destroy(_panel.gameObject);
             if (_results != null) Destroy(_results);
         }
@@ -59,12 +94,13 @@ namespace RaidRogue
             {
                 var available = ((RectTransform)_canvas.transform).rect.size;
                 float scale = Mathf.Min(1f, available.x / 1280f, available.y / 630f);
-                _resultBox.localScale = Vector3.one * scale;
+                if (!RaidUIStyle.Authored(_resultBox)) _resultBox.localScale = Vector3.one * scale;
             }
             if (_metrics.Ledger.Active) _metrics.RefreshRoster();
             RefreshMeter();
         }
 
+        private RectTransform _viewParent;
         private void EnsureUI()
         {
             if (_canvas == null)
@@ -73,23 +109,58 @@ namespace RaidRogue
                 if (_canvas == null) return;
             }
             if (_font == null) _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (RaidUIView.For(this)==null)
+            {
+                if (RaidUIView.Attach(this,"metrics",_canvas.transform))
+                {
+                    RaidUIView.Bind(this,"Fold",ToggleFold);
+                    RaidUIView.Bind(this,"DPS",()=>{_sortByHealing=false;RefreshMeter();});
+                    RaidUIView.Bind(this,"HPS",()=>{_sortByHealing=true;RefreshMeter();});
+                    RaidUIView.Bind(this,"Close",CloseResults);
+                    BindResultButtons();
+                    // An authored meter may start folded; retain its full saved size for expansion.
+                    _collapsed = _body != null && !_body.activeSelf;
+                    RaidUILayout.Fold(_panel, _collapsed);
+                    if (_foldLabel != null) _foldLabel.text = _collapsed ? "펼치기" : "접기";
+                    return;
+                }
+                _viewParent=RaidUIView.Begin(this,"metrics",_canvas.transform);
+            }
             if (_panel == null) BuildMeter();
             if (_results == null) BuildResults();
             if (_rewardButton == null && _stage.cardManager != null && _stage.cardManager.cardSelectionModalRoot != null)
             {
-                _rewardButton = ButtonAt(_stage.cardManager.cardSelectionModalRoot.transform, "CombatResults", "전투 결과",
-                    new Vector2(0.5f, 0.5f), new Vector2(0, -285), new Vector2(230, 46), () => ShowResults(false));
+                _rewardButton = AuthoredResultButton(nameof(_rewardButton)) ?? ButtonAt(_stage.cardManager.cardSelectionModalRoot.transform, "CombatResults", "전투 결과",
+                    new Vector2(0.5f, 0.5f), new Vector2(0, -285), new Vector2(230, 46), ShowLatestResults);
+                BindResultButtons();
             }
             if (_victoryButton == null && _stage.restartButton != null)
             {
-                _victoryButton = ButtonAt(_stage.restartButton.transform.parent, "RunResults", "전체 런 전투 결과",
-                    new Vector2(0.5f, 0), new Vector2(325, 65), new Vector2(230, 66), () => ShowResults(true));
+                _victoryButton = AuthoredResultButton(nameof(_victoryButton)) ?? ButtonAt(_stage.restartButton.transform.parent, "RunResults", "전체 런 전투 결과",
+                    new Vector2(0.5f, 0), new Vector2(325, 65), new Vector2(230, 66), ShowRunResults);
+                BindResultButtons();
             }
+        }
+
+        private Button AuthoredResultButton(string field)
+        {
+            // Metrics can initialize one frame before RaidUIRoot's deferred restoration.
+            // Reuse its external buttons now; a generated duplicate would remain on top
+            // without a listener after BindResultButtons switches to the authored button.
+            var root = _canvas != null ? _canvas.GetComponentInParent<RaidUIRoot>() : null;
+            if (root == null) return null;
+            foreach (var binding in root.presenters)
+            {
+                if (binding.typeName != GetType().AssemblyQualifiedName) continue;
+                foreach (var reference in binding.references)
+                    if (reference.path == field && reference.target is Button button && button != null) return button;
+            }
+            return null;
         }
 
         private void BuildMeter()
         {
-            _panel = Box(_canvas.transform, "CombatMetrics_RightHUD", new Vector2(1, 0.5f),
+            _panel = Box(_viewParent, "CombatMetrics_RightHUD", new Vector2(1, 0.5f),
                 new Vector2(-18, 170), new Vector2(380, 440), new Color(0.035f, 0.05f, 0.09f, 0.91f));
             _panel.pivot = new Vector2(1, 1);
             // Keep modal overlays above the meter even if they were created before this component.
@@ -110,7 +181,7 @@ namespace RaidRogue
             if (BlocksUnderlyingInput) return true;
             var metrics = CombatMetricsManager.Instance;
             var ui = metrics != null ? metrics.GetComponent<CombatMetricsUI>() : null;
-            if (ui == null || ui._panel == null) return false;
+            if (ui == null || !ui.isActiveAndEnabled || ui._panel == null || !ui._panel.gameObject.activeInHierarchy || ui._canvas == null) return false;
             Camera camera = ui._canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : ui._canvas.worldCamera;
             return RectTransformUtility.RectangleContainsScreenPoint(ui._panel, screenPosition, camera);
         }
@@ -119,7 +190,7 @@ namespace RaidRogue
         {
             _collapsed = !_collapsed;
             _body.SetActive(!_collapsed);
-            _panel.sizeDelta = new Vector2(380, _collapsed ? 40 : 440);
+            RaidUILayout.Fold(_panel, _collapsed);
             _foldLabel.text = _collapsed ? "펼치기" : "접기";
             RefreshMeter();
         }
@@ -127,9 +198,10 @@ namespace RaidRogue
         private void RefreshMeter()
         {
             if (_header == null) return;
-            var data = _metrics.Ledger.Snapshot();
-            _header.text = $"S{data.Stage} · {data.Seconds:0.0}s · {(_sortByHealing ? "HPS" : "DPS")} · {(_metrics.Ledger.Active ? "전투" : "종료")}";
+            var ledger = _metrics.Ledger;
+            _header.text = $"S{ledger.Stage} · {ledger.Seconds:0.0}s · {(_sortByHealing ? "HPS" : "DPS")} · {(ledger.Active ? "전투" : "종료")}";
             if (_collapsed) return;
+            var data = ledger.Snapshot();
             var sorted = Sorted(data);
             for (int i = 0; i < _rows.Count; i++)
             {
@@ -156,7 +228,7 @@ namespace RaidRogue
 
         private void BuildResults()
         {
-            var overlay = Box(_canvas.transform, "CombatResults_Overlay", Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.01f, 0.02f, 0.04f, 0.94f));
+            var overlay = Box(_viewParent, "CombatResults_Overlay", Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.01f, 0.02f, 0.04f, 0.94f));
             overlay.anchorMax = Vector2.one;
             overlay.offsetMin = overlay.offsetMax = Vector2.zero;
             _results = overlay.gameObject;
@@ -166,6 +238,7 @@ namespace RaidRogue
             _tabs = Rect(box, "Stages", new Vector2(0, 1), new Vector2(28, -84), new Vector2(1180, 40));
             _tabs.pivot = new Vector2(0, 0.5f);
             _resultTime = Label(box, "Time", new Vector2(28, -116), new Vector2(1180, 32), 20);
+            _resultEvents = Label(box, "Events", new Vector2(28, -490), new Vector2(1180, 55), 15);
             string[] headers = { "파티원", "피해량", "DPS", "유효 회복", "HPS", "보호막 흡수", "쓰러짐", "보스 피해", "쫄 피해", "자가회복(포션)" };
             float[] widths = { 200, 120, 85, 120, 85, 120, 65, 115, 115, 145 };
             float x = 20;
@@ -173,7 +246,7 @@ namespace RaidRogue
             {
                 var title = Label(box, "Column" + c, new Vector2(x, -175), new Vector2(widths[c], 32), 17);
                 title.text = headers[c];
-                title.color = new Color(0.55f, 0.8f, 1f);
+                RaidUIStyle.Color(title, new Color(0.55f, 0.8f, 1f));
                 x += widths[c];
             }
             for (int r = 0; r < 4; r++)
@@ -193,6 +266,7 @@ namespace RaidRogue
 
         public void ShowResults(bool runTotal)
         {
+            if (!isActiveAndEnabled) return;
             EnsureUI();
             if (_results == null || _metrics.Ledger.Stages.Count == 0) return;
             foreach (Transform child in _tabs) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
@@ -205,35 +279,52 @@ namespace RaidRogue
             }
             ButtonAt(_tabs, "Total", "전체 런", new Vector2(0, 0.5f), new Vector2(70 + stages.Count * 155, 0), new Vector2(140, 36), () => DisplayResult(_metrics.Ledger.RunTotal()));
             DisplayResult(runTotal ? _metrics.Ledger.RunTotal() : stages[stages.Count - 1]);
-            ResultsOpen = true;
+            OpenResultsOverlay();
+        }
+
+        private void OpenResultsOverlay()
+        {
+            if (!isActiveAndEnabled || _results == null) return;
+            if (_resultsOwner != null && _resultsOwner != this) _resultsOwner.CloseResults();
+            _resultsOwner = this;
             _lastModalFrame = Time.frameCount;
             _results.SetActive(true);
-            _results.transform.SetAsLastSibling();
+            RaidUIOrder.Raise(_results.transform);
         }
 
         public void CloseResults()
         {
-            if (ResultsOpen) _lastModalFrame = Time.frameCount;
-            ResultsOpen = false;
+            if (_resultsOwner == this)
+            {
+                _lastModalFrame = Time.frameCount;
+                _resultsOwner = null;
+            }
             if (_results != null) _results.SetActive(false);
         }
 
         public void ShowFailedResult()
         {
+            if (!isActiveAndEnabled) return;
             EnsureUI();
             var failed = _metrics.Ledger.FailedAttempts;
             if (_results == null || failed.Count == 0) return;
             foreach (Transform child in _tabs) { child.gameObject.SetActive(false); Destroy(child.gameObject); }
             DisplayResult(failed[failed.Count - 1]);
             _resultTitle.text = $"STAGE {failed[failed.Count - 1].Stage} · 실패한 시도 (클리어 합산 제외)";
-            ResultsOpen = true; _lastModalFrame = Time.frameCount;
-            _results.SetActive(true); _results.transform.SetAsLastSibling();
+            OpenResultsOverlay();
         }
 
         private void DisplayResult(CombatEncounterResult data)
         {
             _resultTitle.text = data.Stage == 0 ? "전체 런 · 누적 전투 결과" : $"STAGE {data.Stage} · 전투 결과";
             _resultTime.text = $"전투 시간 {data.Seconds:0.00}초 · 전체 런 재도전 {_metrics.Ledger.RetryCount}회 · 포션/부활 HPS 제외";
+            if (_resultEvents != null)
+            {
+                int first = Mathf.Max(0, data.Events.Count - 3);
+                var recent = new List<string>();
+                for (int i = first; i < data.Events.Count; i++) recent.Add(data.Events[i]);
+                _resultEvents.text = recent.Count == 0 ? "" : "실제 사건 · " + string.Join("  |  ", recent);
+            }
             var members = Sorted(data);
             for (int i = 0; i < _resultRows.Count; i++)
             {
@@ -273,7 +364,7 @@ namespace RaidRogue
             var text = rect.gameObject.AddComponent<Text>();
             text.font = _font;
             text.fontSize = fontSize;
-            text.color = Color.white;
+            RaidUIStyle.Color(text, Color.white);
             text.supportRichText = true;
             text.raycastTarget = false;
             text.alignment = TextAnchor.UpperLeft;
@@ -286,7 +377,7 @@ namespace RaidRogue
             var rect = Box(parent, name, anchor, position, size, new Color(0.13f, 0.26f, 0.4f, 1));
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = rect.GetComponent<Image>();
-            button.onClick.AddListener(action);
+            if (name=="Fold"||name=="DPS"||name=="HPS"||name=="Close") RaidUIView.Bind(this,name,action,button); else button.onClick.AddListener(action);
             var text = Label(rect, "Label", Vector2.zero, Vector2.zero, 17);
             var tr = text.rectTransform;
             tr.anchorMin = Vector2.zero;

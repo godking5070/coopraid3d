@@ -103,6 +103,7 @@ namespace RaidRogue
 
         // 플레이어 힐러의 '구출(Rescue)'에 의해 끌려가는 상태
         private bool _isBeingRescuedByPlayer;
+        public bool IsBeingRescued => _isBeingRescuedByPlayer;
         private Vector3 _rescueByPlayerTargetXZ;
         private float _rescueByPlayerSpeed = 30f;
 
@@ -169,6 +170,7 @@ namespace RaidRogue
 
         public void ConfigureBotRoleDynamic(PartyBotRole newRole, Vector3 spawnPos, bool reposition = true)
         {
+            _guardianCounterReady = _guardianDefenseReady = 0;
             Life?.ClearDeadForStagePlacement();
             Potion?.EndRevivalProtection();
             role = newRole;
@@ -216,6 +218,7 @@ namespace RaidRogue
 
         private void ApplyRoleStatsAndColors(PartyBotRole targetRole)
         {
+            GetComponent<CharacterPartyStats>()?.ResetHealthFactor();
             _defaultBodyColor = GetRoleColor(targetRole);
 
             switch (targetRole)
@@ -317,7 +320,8 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (RaidCombatAuthority.Replica || Time.timeScale <= 0.001f || targetBoss == null || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || Time.timeScale <= 0.001f || targetBoss == null || StageManager.CombatSuspended ||
+                targetBoss.HardTransformationActive)
             {
                 return;
             }
@@ -381,6 +385,17 @@ namespace RaidRogue
                 return;
             }
 
+            if (CharacterTrainingSession.Active) { UpdateOverheadHpBar(); return; }
+            if(targetBoss.MarionetteControlled(transform)) { UpdateOverheadHpBar(); return; }
+            if(targetBoss.GuardianLured(transform)) { UpdateOverheadHpBar(); return; }
+            if (targetBoss.GuardianClashHolding(transform) || targetBoss.CampanellaLockHolding(transform))
+            {
+                if (role == PartyBotRole.Tank && RaidCombatAuthority.ServerTime >= _guardianDefenseReady &&
+                    (targetBoss.GuardianClashPulseImminent(transform) || targetBoss.CampanellaLockPulseImminent(transform)))
+                { ActivateTankDefensive(4.5f, "힘겨루기 맥동 대비 · 방어기"); _guardianDefenseReady = RaidCombatAuthority.ServerTime + 15; }
+                UpdateOverheadHpBar(); return;
+            }
+            UpdateGuardianActions();
             switch (role)
             {
                 case PartyBotRole.Tank:
@@ -440,7 +455,8 @@ namespace RaidRogue
         /// </summary>
         public void StartPulledByPlayerRescue(Vector3 safeDestinationXZ, float invulnDuration = 3.0f)
         {
-            if (isDead || currentHp <= 0 || StageManager.CombatSuspended) return;
+            if (isDead || currentHp <= 0 || StageManager.CombatSuspended || targetBoss?.GuardianClashHolding(transform)==true || targetBoss?.CampanellaLockHolding(transform)==true || targetBoss?.MarionetteControlled(transform)==true) return;
+            targetBoss?.OnGuardianLureRescue(transform,safeDestinationXZ);
             _isBeingKnockedBack = false;
             _isBeingRescuedByPlayer = true;
             _rescueByPlayerTargetXZ = new Vector3(safeDestinationXZ.x, 1.0f, safeDestinationXZ.z);
@@ -542,12 +558,7 @@ namespace RaidRogue
         public void ApplyBerserkerAttackSpeedBoost(float duration)
         {
             _berserkerAttackSpeedTimer = Mathf.Max(_berserkerAttackSpeedTimer, duration);
-            FloatingTextPopup.Spawn(
-                transform.position + Vector3.up * 2.2f,
-                "공격속도 증가! (광전사의 함성)",
-                new Color(1f, 0.4f, 0.45f, 1f),
-                false
-            );
+            // The card owner emits one party-wide notice for this pulse.
         }
 
         private float GetAttackSpeedMultiplier()
@@ -557,6 +568,7 @@ namespace RaidRogue
 
         private float GetMoveSpeedMultiplier(float baseMult = 1.0f)
         {
+            if (targetBoss != null && targetBoss.GuardianNormal) baseMult = 1;
             float rescueBonus = _rescueSpeedBoostTimer > 0f ? 1.4f : 1.0f;
             return baseMult * rescueBonus;
         }
@@ -567,6 +579,12 @@ namespace RaidRogue
         private bool TryGetPartyMechanicDestinationXZ(out Vector3 mechanicDestXZ)
         {
             mechanicDestXZ = transform.position;
+            if (targetBoss != null && targetBoss.GuardianNormal) return targetBoss.GuardianDestination(transform, (int)role+1, out mechanicDestXZ);
+            if (targetBoss != null && targetBoss.FloraEncounter) return targetBoss.FloraDestination(transform, (int)role+1, out mechanicDestXZ);
+            if (targetBoss != null && targetBoss.CampanellaEncounter) return targetBoss.CampanellaDestination(transform, (int)role+1, out mechanicDestXZ);
+            if (targetBoss != null && targetBoss.MarionetteEncounter) return targetBoss.MarionetteDestination(transform,(int)role+1,out mechanicDestXZ);
+            if (targetBoss != null && targetBoss.JustitiaEncounter) return targetBoss.JustitiaDestination(transform,(int)role+1,out mechanicDestXZ);
+            if (targetBoss != null && targetBoss.JanusEncounter) return targetBoss.JanusDestination(transform,(int)role+1,out mechanicDestXZ);
             if (RaidNetworkSession.Multiplayer && targetBoss != null) return PartyAiTactics.PartyMechanic(transform, (int)role + 1, targetBoss, out mechanicDestXZ);
             if (targetBoss == null)
             {
@@ -675,7 +693,10 @@ namespace RaidRogue
             if (TryGetMeleeMechanicDestination(out Vector3 mechanicPos)) desiredPos = mechanicPos;
             desiredPos = CombatRange.ClampToArena(desiredPos, PartyArenaRadius);
 
-            MoveTowardsXZ(desiredPos, BossLookPointXZ(), GetMoveSpeedMultiplier(targetBoss.IsStackMechanicActive || targetBoss.IsSpreadMechanicActive ? 1.25f : 1.0f));
+            var floraCore = targetBoss.FloraHard || targetBoss.CampanellaHard ?
+                BossAddSpawner.Instance?.GetPriorityAddForBot(PartyBotRole.Tank) : null;
+            MoveTowardsXZ(desiredPos, floraCore!=null?floraCore.transform.position:BossLookPointXZ(),
+                GetMoveSpeedMultiplier(targetBoss.IsStackMechanicActive || targetBoss.IsSpreadMechanicActive ? 1.25f : 1.0f));
 
             // Stage setup and taunts own aggro; do not overwrite a valid new target every frame.
 
@@ -876,10 +897,10 @@ namespace RaidRogue
             currentShield = 0;
             currentHp = maxHp * Mathf.Clamp01(fraction);
             ApplyBodyColor(_defaultBodyColor);
-            if (resetCooldowns) { _rescueCooldownTimer = 0; _lastRescuedTelegraph = null; }
+            if (resetCooldowns) { _actionTimer = ActionInterval; _rescueCooldownTimer = 0; _lastRescuedTelegraph = null; }
         }
 
-        public void ReviveBot() => PartyLife.Ensure(gameObject).TryRevive(0.4f);
+        public void ReviveBot() => IrisRescue.TryUse(transform, transform, StageManager.Instance?.AttemptId, PartyLife.Ensure(gameObject).DeathGeneration);
 
         private void UpdateHealerAI()
         {
@@ -903,7 +924,7 @@ namespace RaidRogue
                 if ((human != null ? human.HpRatio : bot.HpRatio) <= 0.25f) { emergency = true; break; }
             }
             if (mechanic || emergency) Resurrection?.Cancel();
-            CheckAndTriggerHealerRescue(safePos);
+            if (!targetBoss.GuardianNormal && !targetBoss.FloraEncounter && !targetBoss.CampanellaEncounter) CheckAndTriggerHealerRescue(safePos);
             bool holdingOrApproaching = !mechanic && !emergency && TryHandleResurrection(hazard);
             if (!holdingOrApproaching)
                 MoveTowardsXZ(safePos, BossLookPointXZ(), GetMoveSpeedMultiplier(mechanic ? 1.3f : 1f));
@@ -920,7 +941,7 @@ namespace RaidRogue
 
         private bool TryHandleResurrection(AoETelegraph hazard)
         {
-            if (Resurrection == null) return false;
+            if (Resurrection == null || StageManager.Instance == null || StageManager.Instance.IrisCoins <= 0) return false;
             if (Resurrection.IsCasting) return true;
             if (Resurrection.Cooldown > 0) return false;
             Transform corpse = Resurrection.ChooseBotTarget();
@@ -1146,15 +1167,23 @@ namespace RaidRogue
                 float step = Mathf.Min(distXZ, moveSpeed * speedMultiplier * Time.deltaTime);
                 transform.position = new Vector3(
                     currentPos.x + moveDir.x * step,
-                    destinationWorld.y,
+                    currentPos.y,
                     currentPos.z + moveDir.z * step
                 );
+                if(targetBoss?.MarionetteEncounter==true)
+                    transform.position=MarionetteNormalRules.ClampToStage(transform.position,targetBoss.MarionetteStageHalfSize,combatRadius+.3f);
+                if(targetBoss?.JustitiaEncounter==true)
+                    transform.position=JustitiaNormalRules.Clamp(transform.position,targetBoss.JustitiaHalfWidth,targetBoss.JustitiaHalfDepth,combatRadius+.3f);
+                if(targetBoss?.JanusEncounter==true)
+                    transform.position=JanusNormalRules.Clamp(transform.position,targetBoss.janus.arenaRadius-combatRadius-.3f);
 
                 Quaternion moveRot = Quaternion.LookRotation(moveDir, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, moveRot, rotationSpeed * Time.deltaTime);
             }
             else
             {
+                if(targetBoss?.JanusEncounter==true&&targetBoss.JanusAiCounterTarget(transform) is Transform janusCounter)
+                {FaceTargetXZ(janusCounter.position);return;}
                 FaceTargetXZ(lookTargetWhenArrived);
             }
         }
@@ -1181,7 +1210,9 @@ namespace RaidRogue
                 return;
             }
 
+            if(!_resolvedCombatHits.Accept(hit.EventId))return;
             if (Potion != null && Potion.HasRevivalProtection) return;
+            if(hit.Kind!=CombatDamageKind.System&&GetComponent<CombatStatusEffects>()?.CombatInvulnerable==true)return;
 
             if (IsInvulnerable)
             {
@@ -1195,7 +1226,11 @@ namespace RaidRogue
             }
 
             ExpireTimedShields();
-            float finalAmount = isTankDefensiveActive ? rawAmount * 0.22f : rawAmount;
+            float finalAmount = hit.Kind!=CombatDamageKind.Transfer&&isTankDefensiveActive ? rawAmount * 0.22f : rawAmount;
+            finalAmount*=AegisExtensions.IncomingScale(transform,hit.Kind);
+            finalAmount=CharacterKit.Incoming(transform,finalAmount,hit);
+            finalAmount=AegisPaladin.ApplyMirrorProtection(transform,finalAmount,hit);
+            finalAmount=AegisExtensions.SharedDamage(transform,finalAmount,hit);
 
             // 노란색 보호막(Shield) 우선 차감
             float absorbedByShield = 0f;
@@ -1205,10 +1240,10 @@ namespace RaidRogue
                 absorbedByShield = Mathf.Min(currentShield, finalAmount);
                 currentShield -= absorbedByShield;
                 finalAmount -= absorbedByShield;
-                _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit));
+                _metricsShields.Absorb(absorbedByShield,(id,amount)=>CombatSecondaryDamage.Absorption(id,amount,hit),(id,key,amount)=>NineKeyHealerKit.OnLayerAbsorbed(transform,id,key,(float)amount));
             }
 
-            currentHp = Mathf.Max(0f, currentHp - finalAmount);
+            currentHp = Mathf.Max(0f,CharacterKit.PreserveLife(transform,currentHp-finalAmount,hit.Kind));
 
             string msg = isTankDefensiveActive
                 ? $"-{Mathf.RoundToInt(finalAmount)} (생존기 방어!)"
@@ -1230,14 +1265,17 @@ namespace RaidRogue
 
         public float ReceiveHeal(float amount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
-            if (isDead || currentHp <= 0 || amount <= 0f || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || isDead || currentHp <= 0 || amount <= 0f || StageManager.PlayerSkillsSuspended)
             {
                 return 0;
             }
 
+            amount*=CharacterKit.HealingScale(source,transform);
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + amount);
             float actualHealed = currentHp - before;
+            CharacterTrainingSession.Instance?.RecordOverheal(amount - actualHealed);
+            CharacterKit.AfterHeal(source,transform,actualHealed,amount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 
             if (actualHealed > 0.5f || (kind == HealingKind.Potion && actualHealed > 0))
@@ -1254,7 +1292,7 @@ namespace RaidRogue
 
         public void AddShield(float shieldAmount, Transform source = null)
         {
-            if (isDead || currentHp <= 0 || shieldAmount <= 0f || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || isDead || currentHp <= 0 || shieldAmount <= 0f || StageManager.PlayerSkillsSuspended)
             {
                 return;
             }
@@ -1578,6 +1616,7 @@ namespace RaidRogue
         private float _speed;
         private int _damage;
         private float _lifetime = 3.0f;
+        private Material _ownedMaterial;
 
         public static RangedBotProjectile Spawn(Vector3 startPos, BossController boss, float speed, int damage, Transform source)
         {
@@ -1592,6 +1631,7 @@ namespace RaidRogue
                 Destroy(col);
             }
 
+            RangedBotProjectile proj = projObj.AddComponent<RangedBotProjectile>();
             Renderer r = projObj.GetComponent<Renderer>();
             if (r != null)
             {
@@ -1600,10 +1640,11 @@ namespace RaidRogue
                 {
                     shader = Shader.Find("Universal Render Pipeline/Unlit");
                 }
-                r.sharedMaterial = new Material(shader)
+                proj._ownedMaterial = new Material(shader)
                 {
                     color = new Color(1f, 0.55f, 0.12f, 1f)
                 };
+                r.sharedMaterial = proj._ownedMaterial;
             }
 
             TrailRenderer trail = projObj.AddComponent<TrailRenderer>();
@@ -1619,7 +1660,6 @@ namespace RaidRogue
                 trail.sharedMaterial = r.sharedMaterial;
             }
 
-            RangedBotProjectile proj = projObj.AddComponent<RangedBotProjectile>();
             proj._targetBoss = boss;
             proj._source = source;
             proj._encounterId = CombatMetricsManager.EncounterId;
@@ -1628,9 +1668,16 @@ namespace RaidRogue
             return proj;
         }
 
+        private void OnDestroy()
+        {
+            // Release Spawn's one owned material, shared by both the sphere and trail.
+            if (_ownedMaterial != null) Destroy(_ownedMaterial);
+            _ownedMaterial = null;
+        }
+
         private void Update()
         {
-            if (_encounterId != CombatMetricsManager.EncounterId || StageManager.CombatSuspended || !CombatRange.LivingPartyMember(_source)) { Destroy(gameObject); return; }
+            if (_encounterId != CombatMetricsManager.EncounterId || StageManager.PlayerSkillsSuspended || !CombatRange.LivingPartyMember(_source)) { Destroy(gameObject); return; }
             if (Time.timeScale <= 0.001f) return;
             _lifetime -= Time.deltaTime;
             if (_lifetime <= 0f || _targetBoss == null || _targetBoss.IsBossDefeatedCollapse)

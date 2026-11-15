@@ -1,0 +1,26 @@
+Scope: latest Aegis basic + origins + Z specification; no R/F/V, other jobs, new boss patterns.
+Original: C:/coopraid/coopraid3d stays feature/aegis-paladin-routes, HEAD 7c57e36.
+Worktree: C:/coopraid/coopraid3d-paladin-spec, feature/aegis-paladin-spec.
+Integration baseline cd86fa2 captures original local UI/test tools/settings and existing Unity-generated metas.
+Original file hashes: C:/coopraid/aegis-spec-original-baseline.json (309 files). Do not alter original.
+Never start Unity or create/copy Library here. No merge/push.
+
+Implemented and verified:
+- Definition movement multiplier .9; movement uses common dash distance *.7, 2 charges / 10s.
+- Physical/magic defense ratings 100, toughness 100, curve K=300; Bulwark defense rating *1.2.
+- Paladin HP/speed recalculation from base, route and GhostStep stacks; no compound application.
+- Counter short swept lunge 2m/.12s through existing movement, cast completion and host forced-motion epoch.
+- CounterOpportunity consumes once before party living member dash charge refill; preserves active dash.
+- Z adds control immunity; guard grants Holy via existing 1s ICD; retaliation is radius6 AoE.
+- Per-recipient combat event gate avoids duplicate damage/reactive callbacks.
+- Protocol 9, common server dash config shared with UI/prediction, armor/penalty display, platinum primitives.
+- Existing GCD card reduction and party haste integrated without accelerating unrelated timers.
+- Cast completion waits for actual fixed-tick lunge completion; cancellation uses existing host motion barriers.
+- Editor skill test tool can open explicit counter window; ordinary bosses still need future authored counter windows.
+
+Checks: Run-SteamChecks.ps1 full regression 108896 assertions passed; Aegis route suite 21562.
+Runtime and Editor managed compilation passed; existing CS0169 warning only.
+Original 309 file hashes unchanged; no Library in worktree. No Unity Play Mode or real Steam session run.
+Review/tuning/manual steps/limitations: Tests/AegisSpecReview.txt.
+Handoff: reviewed local spec commit and baseline-to-result patch; no merge/push/original edits.
+Implementation complete for this scope. Remaining Unity/Steam play checks and counter-pattern authoring are explicitly documented.

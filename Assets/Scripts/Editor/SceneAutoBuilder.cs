@@ -13,34 +13,23 @@ using UnityEngine.InputSystem.UI;
 namespace RaidRogue.Editor
 {
     /// <summary>
-    /// 유니티 에디터 상단 메뉴 클릭 한 번(또는 스크립트 로드 시 자동)으로
-    /// Step 1 ~ Step 6의 모든 오브젝트(전장, 50도 쿼터뷰 카메라, Stage 1~3 보스 + 4분할 타겟 링,
-    /// 내 캐릭터(GCD/oGCD & 3단 진화 콤보) + 3명의 AI 파티원 봇(구출 & 4인 산개/4인 쉐어 협동 AI),
-    /// 상단 STAGE 1/3 표시 및 보스 체력/캐스팅바 UI, 하단 4슬롯 스킬 핫바 UI,
-    /// 보스 처치 시 BOSS CLEAR 배너 -> 1.5초 뒤 로그라이크 3택 카드 모달 UI -> Stage 3 클리어 시 VICTORY 결과창)를
-    /// 100% 자동 생성·연결하는 빌더.
+    /// 명시적으로 호출할 때만 기본 전장과 캐릭터 및 UI를 구성하는 초기 생성 도구.
+    /// 게임 작업과 빌드는 저장된 메인 씬을 사용하며 단계별 복사본을 만들지 않는다.
     /// </summary>
     [InitializeOnLoad]
     public static class SceneAutoBuilder
     {
         private const string GeneratedMaterialFolder = "Assets/Materials";
-        private const string Step1ScenePath = "Assets/Scenes/Step1_TestScene.unity";
-        private const string Step2ScenePath = "Assets/Scenes/Step2_TestScene.unity";
-        private const string Step3ScenePath = "Assets/Scenes/Step3_TestScene.unity";
-        private const string Step4ScenePath = "Assets/Scenes/Step4_TestScene.unity";
-        private const string Step5ScenePath = "Assets/Scenes/Step5_TestScene.unity";
-        private const string Step6ScenePath = "Assets/Scenes/Step6_TestScene.unity";
-        private const string Step7ScenePath = "Assets/Scenes/Step7_TestScene.unity";
-        private const string Step8ScenePath = "Assets/Scenes/Step8_TestScene.unity";
-        private const string Step9ScenePath = "Assets/Scenes/Step9_TestScene.unity";
 
         static SceneAutoBuilder()
         {
-            EditorApplication.delayCall += AutoSetupIfNeeded;
+            // Scene creation is explicit. Importing scripts must never replace an artist's UI or scene.
         }
 
         private static void AutoSetupIfNeeded()
         {
+            // Batch builds generate their own explicit entry scene. Never rewrite an arbitrary scene on import.
+            if (Application.isBatchMode) return;
             BossController existingBoss = Object.FindFirstObjectByType<BossController>();
             RoguelikeCardManager existingCardMgr = Object.FindFirstObjectByType<RoguelikeCardManager>();
             PlayerCombatController existingCombat = Object.FindFirstObjectByType<PlayerCombatController>();
@@ -91,75 +80,23 @@ namespace RaidRogue.Editor
             BuildRaidScene();
         }
 
-        [MenuItem("Tools/RaidRogue/Setup Scene", false, 1)]
-        public static void SetupSceneMenu()
+        public static void BuildPartOneScene()
         {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 1", false, 10)]
-        public static void SetupStep1Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 2", false, 11)]
-        public static void SetupStep2Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 3", false, 12)]
-        public static void SetupStep3Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 4", false, 13)]
-        public static void SetupStep4Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 5", false, 14)]
-        public static void SetupStep5Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 6", false, 15)]
-        public static void SetupStep6Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 7 (2D/3D View Toggle)", false, 16)]
-        public static void SetupStep7Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 8 (4 Roles & Party List UI)", false, 17)]
-        public static void SetupStep8Menu()
-        {
-            RunSetupMenu();
-        }
-
-        [MenuItem("Tools/RaidRogue/Setup Step 9 (FF14 Targeting & Boss Adds)", false, 18)]
-        public static void SetupStep9Menu()
-        {
-            RunSetupMenu();
-        }
-
-        private static void RunSetupMenu()
-        {
-            if (EditorApplication.isPlaying)
-            {
-                EditorApplication.isPlaying = false;
-                EditorApplication.delayCall += BuildRaidScene;
-                return;
-            }
+            string project = System.IO.Directory.GetParent(Application.dataPath).FullName;
+            if (System.IO.File.Exists(System.IO.Path.Combine(project, ".git")))
+                throw new System.InvalidOperationException("Codex worktree에서는 Unity 씬 생성/빌드를 실행하지 마세요.");
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new System.InvalidOperationException("Play 종료 후 씬을 생성하세요.");
+            string scenePath = RaidRogue.EditorTools.RaidMultiplayerBuild.MainScene;
+            if (System.IO.File.Exists(System.IO.Path.Combine(project, scenePath)))
+                throw new System.InvalidOperationException("기존 메인 씬을 보존합니다. 빌드 메뉴는 저장된 씬을 사용하며 자동 재생성하지 않습니다.");
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+                if (SceneManager.GetSceneAt(i).isDirty)
+                    throw new System.InvalidOperationException("열린 씬의 사용자 변경을 먼저 저장하세요.");
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             BuildRaidScene();
+            if (!EditorSceneManager.SaveScene(SceneManager.GetActiveScene(), scenePath))
+                throw new System.IO.IOException("1부 빌드 씬 저장에 실패했습니다.");
         }
 
         public static void BuildRaidScene()
@@ -212,15 +149,6 @@ namespace RaidRogue.Editor
             {
                 EditorSceneManager.SaveScene(activeScene);
             }
-            EditorSceneManager.SaveScene(activeScene, Step1ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step2ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step3ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step4ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step5ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step6ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step7ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step8ScenePath, true);
-            EditorSceneManager.SaveScene(activeScene, Step9ScenePath, true);
             AssetDatabase.Refresh();
 
             Selection.activeGameObject = player.gameObject;
@@ -1630,6 +1558,7 @@ namespace RaidRogue.Editor
         {
             string assetPath = $"{GeneratedMaterialFolder}/{matName}.mat";
             Material mat = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+            if (mat != null) return mat; // Preserve authored shader, colors and surface settings.
 
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null)
@@ -1637,15 +1566,8 @@ namespace RaidRogue.Editor
                 shader = Shader.Find("Standard");
             }
 
-            if (mat == null)
-            {
-                mat = new Material(shader) { name = matName };
-                AssetDatabase.CreateAsset(mat, assetPath);
-            }
-            else
-            {
-                mat.shader = shader;
-            }
+            mat = new Material(shader) { name = matName };
+            AssetDatabase.CreateAsset(mat, assetPath);
 
             mat.color = color;
             if (mat.HasProperty("_BaseColor"))
@@ -1669,6 +1591,7 @@ namespace RaidRogue.Editor
         {
             string assetPath = $"{GeneratedMaterialFolder}/Mat_LineUnlit.mat";
             Material mat = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+            if (mat != null) return mat;
 
             Shader shader = Shader.Find("Sprites/Default");
             if (shader == null)
@@ -1676,20 +1599,12 @@ namespace RaidRogue.Editor
                 shader = Shader.Find("Universal Render Pipeline/Unlit");
             }
 
-            if (mat == null)
+            mat = new Material(shader)
             {
-                mat = new Material(shader)
-                {
-                    name = "Mat_LineUnlit",
-                    color = Color.white
-                };
-                AssetDatabase.CreateAsset(mat, assetPath);
-            }
-            else
-            {
-                mat.shader = shader;
-                mat.color = Color.white;
-            }
+                name = "Mat_LineUnlit",
+                color = Color.white
+            };
+            AssetDatabase.CreateAsset(mat, assetPath);
 
             EditorUtility.SetDirty(mat);
             return mat;

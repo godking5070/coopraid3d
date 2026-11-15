@@ -1,0 +1,352 @@
+{
+  "version": 1,
+  "canvas": [
+    128,
+    128
+  ],
+  "recommendedDisplay": [
+    64,
+    64
+  ],
+  "frameMaterial": "Same champagne gold face, pale upper reflection, dark inset bevel and bronze bottom edge as player gauges v2 and party HUD v4.",
+  "geometry": {
+    "outerPath": "M18 5H110L123 18V110L110 123H18L5 110V18Z",
+    "innerPath": "M20 11H108L117 20V108L108 117H20L11 108V20Z",
+    "iconPlacement": [
+      0,
+      0,
+      128,
+      128
+    ],
+    "iconClip": "slot-inner-mask",
+    "keyBadge": [
+      3,
+      1,
+      42,
+      28
+    ],
+    "wideKeyBadge": [
+      3,
+      1,
+      70,
+      28
+    ],
+    "keyText": {
+      "anchor": "middle",
+      "baseline": 22,
+      "size": 23,
+      "wideSize": 20
+    },
+    "cooldownText": {
+      "x": 64,
+      "baseline": 78,
+      "size": 40
+    }
+  },
+  "layerOrder": [
+    "slot-background",
+    "skill artwork clipped by slot-inner-mask",
+    "state overlay or runtime radial cooldown overlay",
+    "one current frame",
+    "blank key badge",
+    "runtime binding and cooldown text"
+  ],
+  "cooldown": {
+    "origin": "Top",
+    "clockwise": true,
+    "fillAmount": "remaining / total",
+    "staticExamples": [
+      0.25,
+      0.5,
+      0.75
+    ],
+    "number": "Runtime; 2.4 in preview is an illustrative value, not a confirmed skill cooldown."
+  },
+  "bindings": {
+    "status": "Planning defaults only, not verified current in-game bindings.",
+    "source": "SapDev_게임개발_인계_2026-11-03.txt",
+    "textBakedIntoSprites": false,
+    "slots": [
+      {
+        "exampleKey": "1",
+        "id": "dawn-swordsmanship",
+        "name": "여명의 검술"
+      },
+      {
+        "exampleKey": "2",
+        "id": "shield-combo",
+        "name": "방패 연격"
+      },
+      {
+        "exampleKey": "3",
+        "id": "guardians-hand",
+        "name": "수호자의 손길"
+      },
+      {
+        "exampleKey": "4",
+        "id": "judgement-shield-bash",
+        "name": "심판의 방패치기"
+      },
+      {
+        "exampleKey": "Q",
+        "id": "unyielding-faith",
+        "name": "불굴의 신념"
+      },
+      {
+        "exampleKey": "Space",
+        "id": "surge-of-light",
+        "name": "빛의 쇄도"
+      },
+      {
+        "exampleKey": "R",
+        "id": "dawn-citadel",
+        "name": "여명의 성채"
+      },
+      {
+        "exampleKey": "F",
+        "id": "dawn-call",
+        "name": "여명의 부름"
+      },
+      {
+        "exampleKey": "V",
+        "id": "first-morning-sanctuary",
+        "name": "첫 번째 아침의 성역"
+      }
+    ]
+  },
+  "exampleClass": "이지스 팔라딘",
+  "exampleOrigin": "불멸의 성벽",
+  "combos": "Skill 1 and 2 replace artwork within the same slot; do not create additional slots.",
+  "states": {
+    "ready": [
+      "frame-normal"
+    ],
+    "hover": [
+      "overlay-hover",
+      "frame-hover"
+    ],
+    "pressed": [
+      "overlay-pressed",
+      "frame-pressed"
+    ],
+    "keyboardFocus": [
+      "frame-focused"
+    ],
+    "cooldown": [
+      "cooldown-overlay with runtime radial fill",
+      "frame-normal",
+      "runtime number"
+    ],
+    "unavailable": [
+      "desaturate artwork if supported",
+      "overlay-disabled",
+      "frame-disabled"
+    ],
+    "empty": [
+      "slot-background",
+      "frame-normal"
+    ]
+  },
+  "import": {
+    "type": "Sprite (2D and UI)",
+    "mesh": "Full Rect",
+    "alpha": "Input Texture Alpha",
+    "mipmaps": false,
+    "filter": "Bilinear",
+    "compression": "None"
+  },
+  "assets": [
+    {
+      "id": "slot-background",
+      "png": "sprites/slot-background.png",
+      "svg": "source/slot-background.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Dark inset bed; underneath skill artwork.",
+      "transparentPixels": 5292,
+      "translucentPixels": 36
+    },
+    {
+      "id": "frame-normal",
+      "png": "sprites/frame-normal.png",
+      "svg": "source/frame-normal.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Choose one frame for the current state; center remains transparent.",
+      "transparentPixels": 12414,
+      "translucentPixels": 1466
+    },
+    {
+      "id": "frame-hover",
+      "png": "sprites/frame-hover.png",
+      "svg": "source/frame-hover.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Choose one frame for the current state; center remains transparent.",
+      "transparentPixels": 12414,
+      "translucentPixels": 1414
+    },
+    {
+      "id": "frame-pressed",
+      "png": "sprites/frame-pressed.png",
+      "svg": "source/frame-pressed.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Choose one frame for the current state; center remains transparent.",
+      "transparentPixels": 12234,
+      "translucentPixels": 1646
+    },
+    {
+      "id": "frame-focused",
+      "png": "sprites/frame-focused.png",
+      "svg": "source/frame-focused.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Choose one frame for the current state; center remains transparent.",
+      "transparentPixels": 12414,
+      "translucentPixels": 1262
+    },
+    {
+      "id": "frame-disabled",
+      "png": "sprites/frame-disabled.png",
+      "svg": "source/frame-disabled.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Choose one frame for the current state; center remains transparent.",
+      "transparentPixels": 12414,
+      "translucentPixels": 1466
+    },
+    {
+      "id": "overlay-hover",
+      "png": "sprites/overlay-hover.png",
+      "svg": "source/overlay-hover.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Optional light wash over the icon while hovered.",
+      "transparentPixels": 5292,
+      "translucentPixels": 11092
+    },
+    {
+      "id": "overlay-pressed",
+      "png": "sprites/overlay-pressed.png",
+      "svg": "source/overlay-pressed.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Inset shade over icon while pressed.",
+      "transparentPixels": 5292,
+      "translucentPixels": 11092
+    },
+    {
+      "id": "overlay-disabled",
+      "png": "sprites/overlay-disabled.png",
+      "svg": "source/overlay-disabled.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Unavailable shade with small prohibition mark. Desaturate the icon separately if supported.",
+      "transparentPixels": 5292,
+      "translucentPixels": 10816
+    },
+    {
+      "id": "slot-inner-mask",
+      "png": "sprites/slot-inner-mask.png",
+      "svg": "source/slot-inner-mask.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Alpha mask for artwork or full radial cooldown overlay.",
+      "transparentPixels": 5292,
+      "translucentPixels": 36
+    },
+    {
+      "id": "cooldown-overlay",
+      "png": "sprites/cooldown-overlay.png",
+      "svg": "source/cooldown-overlay.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Full overlay for a runtime radial-360 filled image; top origin, clockwise remaining portion.",
+      "transparentPixels": 5292,
+      "translucentPixels": 11092
+    },
+    {
+      "id": "cooldown-example-25",
+      "png": "sprites/cooldown-example-25.png",
+      "svg": "source/cooldown-example-25.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Static remaining-time fraction example only; use continuous runtime fill in the game.",
+      "transparentPixels": 13558,
+      "translucentPixels": 2826
+    },
+    {
+      "id": "cooldown-example-50",
+      "png": "sprites/cooldown-example-50.png",
+      "svg": "source/cooldown-example-50.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Static remaining-time fraction example only; use continuous runtime fill in the game.",
+      "transparentPixels": 10785,
+      "translucentPixels": 5599
+    },
+    {
+      "id": "cooldown-example-75",
+      "png": "sprites/cooldown-example-75.png",
+      "svg": "source/cooldown-example-75.svg",
+      "size": [
+        128,
+        128
+      ],
+      "purpose": "Static remaining-time fraction example only; use continuous runtime fill in the game.",
+      "transparentPixels": 8012,
+      "translucentPixels": 8372
+    },
+    {
+      "id": "key-badge",
+      "png": "sprites/key-badge.png",
+      "svg": "source/key-badge.svg",
+      "size": [
+        42,
+        28
+      ],
+      "purpose": "Blank small key badge. Add binding text separately.",
+      "transparentPixels": 40,
+      "translucentPixels": 1136
+    },
+    {
+      "id": "key-badge-wide",
+      "png": "sprites/key-badge-wide.png",
+      "svg": "source/key-badge-wide.svg",
+      "size": [
+        70,
+        28
+      ],
+      "purpose": "Blank wide key badge; sample Space label.",
+      "transparentPixels": 40,
+      "translucentPixels": 1920
+    }
+  ]
+}

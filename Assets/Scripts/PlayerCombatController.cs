@@ -97,8 +97,8 @@ namespace RaidRogue
         public string InterruptAlertMessage => _interruptAlertMessage;
 
         public PlayerRole CurrentRole => playerController != null ? playerController.currentRole : PlayerRole.Blade_MeleeDPS;
-        private bool CanUseCombatAction => !StageManager.CombatSuspended && playerController != null &&
-            !playerController.IsDead && !playerController.IsStunned && !(GetComponent<BattleResurrection>()?.IsCasting ?? false);
+        private bool CanUseCombatAction => !StageManager.PlayerSkillsSuspended && playerController != null &&
+            !playerController.IsDead && !playerController.IsStunned && playerController.targetBoss?.GuardianLured(transform)!=true && !(GetComponent<BattleResurrection>()?.IsCasting ?? false);
 
         public void InterruptForDeath()
         {
@@ -190,7 +190,7 @@ namespace RaidRogue
         private void Update()
         {
             if (RaidCombatAuthority.Replica) { if (RaidCombatAuthority.Local(this) && !LocalGameplayInput.Blocked) HandleCombatHotkeys(); return; }
-            if (Time.timeScale <= 0.001f || StageManager.CombatSuspended)
+            if (Time.timeScale <= 0.001f || StageManager.PlayerSkillsSuspended)
             {
                 return;
             }
@@ -632,7 +632,7 @@ namespace RaidRogue
                 {
                     targetedAdd.TauntBy(transform, playerController != null ? playerController.playerRoleDisplayName : "가디언");
                 }
-                targetedAdd.ReceivePlayerAttack("가디언", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform);
+                targetedAdd.ReceivePlayerAttack("가디언", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -684,7 +684,7 @@ namespace RaidRogue
             Color hitCol = new Color(0.45f, 0.85f, 1.0f, 1f);
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("투창콤보", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform);
+                targetedAdd.ReceivePlayerAttack("투창콤보", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -721,7 +721,7 @@ namespace RaidRogue
             if (targetedAdd != null)
             {
                 targetedAdd.TauntBy(transform, myName);
-                targetedAdd.ReceivePlayerAttack("oGCD 도발", "도발 (어그로 강탈!)", bonusDmg, new Color(0.25f, 0.95f, 1.0f, 1f), true, source: transform);
+                targetedAdd.ReceivePlayerAttack("oGCD 도발", "도발 (어그로 강탈!)", bonusDmg, new Color(0.25f, 0.95f, 1.0f, 1f), true, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -776,7 +776,7 @@ namespace RaidRogue
             Color hitCol = stage == 3 ? new Color(0.55f, 1.0f, 0.45f, 1f) : new Color(0.35f, 0.95f, 0.55f, 1f);
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("오라클", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform);
+                targetedAdd.ReceivePlayerAttack("오라클", $"{stage}단 {skillName}", finalDmg, hitCol, stage == 3, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -1005,7 +1005,7 @@ namespace RaidRogue
                     finalPositional,
                     new Color(1.0f, 0.85f, 0.15f, 1f),
                     executedStage == 3,
-                    source: transform
+                    source: transform, origin: "input.legacy.skill"
                 );
             }
             else
@@ -1059,7 +1059,7 @@ namespace RaidRogue
                     addDmg,
                     new Color(1.0f, 0.55f, 0.18f, 1f),
                     executedStage == 3,
-                    source: transform
+                    source: transform, origin: "input.legacy.skill"
                 );
             }
             else
@@ -1114,7 +1114,7 @@ namespace RaidRogue
 
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("oGCD 질풍", "질풍 찌르기", finalDmg, new Color(0.30f, 1.0f, 0.90f, 1f), true, source: transform);
+                targetedAdd.ReceivePlayerAttack("oGCD 질풍", "질풍 찌르기", finalDmg, new Color(0.30f, 1.0f, 0.90f, 1f), true, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -1225,7 +1225,7 @@ namespace RaidRogue
 
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("아크메이지", $"{stage}단 {spellName}", finalDmg, fireColor, stage == 3 || wasInstantTriplecast, source: transform);
+                targetedAdd.ReceivePlayerAttack("아크메이지", $"{stage}단 {spellName}", finalDmg, fireColor, stage == 3 || wasInstantTriplecast, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -1272,7 +1272,7 @@ namespace RaidRogue
             Color frostCol = new Color(0.35f, 0.88f, 1.0f, 1f);
             if (targetedAdd != null)
             {
-                targetedAdd.ReceivePlayerAttack("무빙냉기", $"{stage}단 {spellName}", finalDmg, frostCol, stage == 3, source: transform);
+                targetedAdd.ReceivePlayerAttack("무빙냉기", $"{stage}단 {spellName}", finalDmg, frostCol, stage == 3, source: transform, origin: "input.legacy.skill");
             }
             else
             {
@@ -1864,7 +1864,7 @@ namespace RaidRogue
         private void ApplyHealingTick()
         {
             // A lingering zone cannot heal or grant shields in the next encounter.
-            if (_encounterId != CombatMetricsManager.EncounterId || StageManager.CombatSuspended || (_source != null && !CombatRange.LivingPartyMember(_source))) { Destroy(gameObject); return; }
+            if (_encounterId != CombatMetricsManager.EncounterId || StageManager.PlayerSkillsSuspended || (_source != null && !CombatRange.LivingPartyMember(_source))) { Destroy(gameObject); return; }
             Vector2 centerXZ = new Vector2(transform.position.x, transform.position.z);
 
             foreach (var member in PartyLife.OrderedMembers())

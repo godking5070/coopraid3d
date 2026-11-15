@@ -1,0 +1,50 @@
+요청 리소스: astella-boss-hud-v4.zip
+리소스 위치: Assets/UI/AstellaBossHUDV4/Sprites (PNG 14개)
+원본 배치: layout-manifest.json, 1280x280
+원본 게이지: materials-manifest.json, 1000x64 / 내부9,14,982,36
+
+구성:
+- 상단 스테이지·난이도, 짧은 제목 구분선·별·보스 이름.
+- 루비색 체력 바: (98,92,1032,48), 같은 길이의 가로·세로 별 문양84x84.
+- 체력 %: 채움과 분리된 고정 텍스트, 바 중심x614.
+- 보라색 시전 바: (378,190,524,32).
+- 시전명: 시전바 위 중앙, 폭480.
+- 남은 시전 시간: 채움과 분리된 고정 텍스트, 바 중심x640.
+- 공격 대상: 실제 BossController.aggroTarget의 표시명. 정보가 없으면 숨김.
+- 비시전 시 시전 그룹 전체 숨김, 공격 대상 줄은 비시전 위치로 이동.
+- HUD 배치 편집 중에는 시전 예시를 표시하므로 대상 줄도 시전 아래에 배치.
+
+연결:
+기존 AstellaOrnateHUD가 HP 비율·경과 시전 비율·텍스트·가시성을 계속 소유한다.
+기존 bossHpFill, castFill Image는 비활성 렌더러의 데이터 원본으로 유지한다.
+AstellaPointedGauge가 그 값을 읽어 원본 질감을 누르지 않고 삼각형 끝으로 가린다.
+0%에서는 채움과 이동 반사선이 사라지고, 100%에서는 원래 내부 윤곽 전체를 사용한다.
+프레임·숫자는 채움 마스크 바깥에 두므로 체력이 줄어도 움직이거나 잘리지 않는다.
+보스 이름은 제한된 영역 안에서 자동 축소되어 별·구분선과 겹치지 않는다.
+전체 구성을 FitInParent 1280/280 비율로 맞춘다. 대상 줄 크기도 구성 비율을 따른다.
+
+유지:
+기존 bossRoot, castRoot, 상위 Proportional composition 객체와 배치 편집 ID.
+플레이어 게이지·파티 HUD·스킬바 및 게임 전투 데이터.
+이전 v1 그래픽은 삭제하지 않고 렌더러만 비활성 보관한다.
+씬·프리팹 YAML 직접 편집 없이 Editor API로 적용한다.
+
+적용:
+원본 Astella의 SampleScene에서 컴파일/가져오기가 완료된 편집 모드가 되면 한 번 적용.
+Play나 Prefab Mode를 자동 종료하지 않는다.
+수동 메뉴: Tools / RaidRogue / UI / Apply Boss HUD v4
+완료 표식: Logs/BossHUD-v4.applied.txt
+실패 기록: Logs/BossHUD-v4.error.txt
+적용 전 백업: Logs/UIRepairBackups/boss-v4-*
+
+검사:
+- 14개 PNG의 RGBA 및 두 manifest의 픽셀 크기 일치.
+- 뾰족한 채움 형상은 기존 공용 게이지 셰이더와 동일한 원본 좌표.
+- 관리 코드 런타임/에디터 컴파일과 기존 CombatMetrics 검사 통과.
+- 실제 Unity 적용 여부는 완료 표식과 에디터 로그로 별도 확인.
+- 실제 전투·여러 해상도에서의 v4 화면 검증은 별도로 수행해야 한다.
+
+관련 코드:
+Assets/Scripts/Editor/AstellaBossHUDV4Installer.cs
+Assets/Scripts/AstellaBossHUDV4.cs
+Assets/Scripts/AstellaPointedGauge.cs

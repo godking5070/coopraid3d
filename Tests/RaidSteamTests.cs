@@ -9,6 +9,10 @@ public static class RaidSteamTests
     public static void Main()
     {
         ulong lobby = 109775243785000123, host = 76561198012345678;
+        BuildCompatibility(host);
+        Check(RaidSteamPolicy.Game == "astella", "Astella lobby identity");
+        var formerProject = new Dictionary<string, string> { ["game"] = "coopraid3d", ["build"] = "test", ["protocol"] = RaidWire.Version.ToString(), ["host"] = host.ToString() };
+        Check(RaidSteamPolicy.Validate(formerProject, "test", RaidWire.Version, host) != null, "Retired project lobbies are not Astella sessions");
         Check(RaidSteamPolicy.LaunchLobby(new[] { "game.exe", "+connect_lobby", lobby.ToString() }) == lobby, "64-bit cold launch");
         Check(RaidSteamPolicy.LaunchLobby(new[] { "+connect_lobby", "\"" + ulong.MaxValue + "\"" }) == ulong.MaxValue, "No floating-point rounding");
         foreach (string invalid in new[] { "0", "-1", "+1", "1.0", "1e10", "18446744073709551616", "1;quit", "" })
@@ -18,6 +22,24 @@ public static class RaidSteamTests
         Check(RaidSteamPolicy.Validate(metadata, "other", RaidWire.Version, host) != null, "Build mismatch");
         Check(RaidSteamPolicy.Validate(metadata, "test", RaidWire.Version + 1, host) != null, "Protocol mismatch");
         Check(RaidSteamPolicy.Validate(metadata, "test", RaidWire.Version, host + 1) != null, "No owner migration");
+        foreach (string phase in new[] { "lobby", "loading", "approach", "arrival", "countdown", "combat", "bossclear", "reward", "wiped", "victory" })
+        {
+            metadata["phase"] = phase; metadata["ready"] = "0";
+            Check(RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version, host) == null, "Authenticated reserved users may recover into " + phase + " without opening new admission");
+            Check(RaidSteamPolicy.Validate(metadata, "test", RaidWire.Version, host) != null, "Recovery does not relax ordinary admission in " + phase);
+        }
+        Check(RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version, host + 1) != null, "Recovery rejects lobby ownership migration away from original metadata host");
+        Check(RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version, 0) != null, "Recovery rejects missing original lobby owner");
+        metadata["host"] = (host + 1).ToString();
+        Check(RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version, host) != null, "Recovery rejects metadata host differing from authenticated lobby owner");
+        metadata["host"] = host.ToString(); metadata["phase"] = "closed";
+        Check(RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version, host) != null, "Closed original session cannot be recovered");
+        metadata["phase"] = "combat";
+        Check(RaidSteamPolicy.ValidateRecovery(metadata, "other", RaidWire.Version, host) != null && RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version + 1, host) != null, "Recovery preserves build and protocol restrictions");
+        metadata["game"] = "other";
+        Check(RaidSteamPolicy.ValidateRecovery(metadata, "test", RaidWire.Version, host) != null, "Recovery rejects another game's lobby");
+        metadata["game"] = RaidSteamPolicy.Game;
+        metadata["phase"] = "lobby"; metadata["ready"] = "1";
         foreach (var key in new[] { "game", "host", "phase", "ready" })
         { string old = metadata[key]; metadata[key] = "invalid"; Check(RaidSteamPolicy.Validate(metadata, "test", RaidWire.Version, host) != null, "Reject " + key); metadata[key] = old; }
         Check(RaidSteamPolicy.ShouldLeaveLateLobby(lobby, 0, 0), "Cancelled late join cleaned up");
@@ -58,5 +80,32 @@ public static class RaidSteamTests
         packet = new RaidPacket { Kind = RaidPacketKind.Ready, Id = 2 };
         Check(!RaidWire.Decode(RaidWire.Encode(packet), out _), "Malformed readiness rejected");
         Console.WriteLine("PASS: " + _checks + " Steam policy/readiness/protocol checks (no Steam account or native connection exercised).");
+    }
+    private static void BuildCompatibility(ulong host)
+    {
+        var metadata = new Dictionary<string, string> {
+            ["game"] = RaidSteamPolicy.Game, ["build"] = RaidSteamPolicy.CurrentBuild,
+            ["protocol"] = RaidWire.Version.ToString(), ["host"] = host.ToString(),
+            ["phase"] = "lobby", ["ready"] = "1"
+        };
+        Check(RaidSteamPolicy.Validate(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) == null &&
+            RaidSteamPolicy.ValidateRecovery(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) == null,
+            "Current release permits compatible admission and authenticated recovery");
+        metadata["build"] = "steam-combat-1";
+        Check(RaidSteamPolicy.Validate(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) != null &&
+            RaidSteamPolicy.ValidateRecovery(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) != null,
+            "Shipped legacy build tag is rejected independently of protocol");
+        metadata["build"] = RaidSteamPolicy.CurrentBuild; metadata["protocol"] = "16";
+        Check(RaidSteamPolicy.Validate(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) != null &&
+            RaidSteamPolicy.ValidateRecovery(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) != null,
+            "Shipped legacy protocol is rejected even when metadata advertises the current build tag");
+        metadata["build"] = "steam-combat-1";
+        Check(RaidSteamPolicy.Validate(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) != null &&
+            RaidSteamPolicy.ValidateRecovery(metadata, RaidSteamPolicy.CurrentBuild, RaidWire.Version, host) != null,
+            "Actual shipped legacy build and protocol cannot join or recover into this release");
+        metadata["build"] = RaidSteamPolicy.CurrentBuild; metadata["protocol"] = RaidWire.Version.ToString();
+        Check(RaidSteamPolicy.Validate(metadata, "steam-combat-1", 16, host) != null &&
+            RaidSteamPolicy.ValidateRecovery(metadata, "steam-combat-1", 16, host) != null,
+            "Compatibility equality also rejects current metadata for a legacy caller");
     }
 }

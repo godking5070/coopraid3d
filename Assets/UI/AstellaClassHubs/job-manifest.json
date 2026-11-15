@@ -1,0 +1,1611 @@
+{
+  "version": 5,
+  "canvas": [
+    400,
+    240
+  ],
+  "recommendedDisplay": [
+    200,
+    120
+  ],
+  "textBakedIntoAssets": false,
+  "design": "Independent sculpted job instruments. No shared horizontal bar template.",
+  "runtime": {
+    "continuous": "Use each fillBounds and fillDirection. Full artwork is masked; the frame and value remain stationary.",
+    "count": "Activate complete individual tokens. Some token layers already contain their placement on the full canvas; tokenLayers.origin or tokens.placement is [0,0]. Do not apply the descriptive center or transform twice.",
+    "independent": "These job resources are independent of central ultimate charge."
+  },
+  "resourceValuesStatus": "현재 기획 제안. 확정된 구현·밸런스 값으로 취급하지 않음.",
+  "variantCautions": [
+    "V 필살기 전용 충전과 아래 직업 자원은 별개다.",
+    "자원 수치·상한·시간은 프로토타입 제안이며 최종 게임 데이터가 우선한다.",
+    "힐러 별도 공통 마나는 초기안에 없다.",
+    "예약 자원은 사용 가능량과 구분한다. 예약·소비·취소 반환은 한 번만 처리한다.",
+    "직업의 기본 자원 그림만으로 모든 기원의 전용 상태를 충족했다고 표시하지 않는다."
+  ],
+  "classes": [
+    {
+      "classId": "aegis-paladin",
+      "className": "이지스 팔라딘",
+      "resourceName": "성광",
+      "kind": "continuous",
+      "proposedMax": 100,
+      "exampleValue": 60,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "기울어진 태양 제단과 빛으로 차오르는 해시계",
+      "fillBounds": [
+        99,
+        69,
+        202,
+        90
+      ],
+      "fillDirection": "bottom-to-top",
+      "tokenPositions": null,
+      "tokenAngles": null,
+      "tokenCanvas": null,
+      "tokenOrder": null,
+      "valueBaseline": [
+        200,
+        215
+      ],
+      "valueFontSize": 34,
+      "valueAnchor": "middle",
+      "valueFormat": "currentOnly",
+      "labelBaseline": null,
+      "assets": {
+        "track": {
+          "png": "aegis-paladin/track.png",
+          "svg": "aegis-paladin/track.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "fill": {
+          "png": "aegis-paladin/fill.png",
+          "svg": "aegis-paladin/fill.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "frame": {
+          "png": "aegis-paladin/frame.png",
+          "svg": "aegis-paladin/frame.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "mask": {
+          "png": "aegis-paladin/mask.png",
+          "svg": "aegis-paladin/mask.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "example": {
+          "png": "aegis-paladin/example-textless.png",
+          "svg": "aegis-paladin/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        }
+      },
+      "variantCautions": [
+        "불멸의 성벽: 기본 성광 유지. 별도 수호 문양 최대 2개의 사용 가능 수와 수명을 표시(105~108행). 대성채 특성에서는 설치 최대 1개.",
+        "태양의 집행관: 성광 유지, 검/방패 태세와 2 콤보 시작 시 기록한 태세가 필요(117~126행).",
+        "응보의 거울방패: 성광 유지, 별도 응보 최대 2개와 정밀 방어 상태(135~138행)."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_탱커_9키_변경사항_및_스킬명세_2026-11-02.txt",
+        "line": 77
+      }
+    },
+    {
+      "classId": "berserker",
+      "className": "버서커",
+      "resourceName": "혈기",
+      "kind": "continuous",
+      "proposedMax": 100,
+      "exampleValue": 60,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "부러진 양날 사이에서 차오르는 혈기 심장",
+      "fillBounds": [
+        140,
+        48,
+        120,
+        125
+      ],
+      "fillDirection": "bottom-to-top",
+      "tokenPositions": null,
+      "tokenAngles": null,
+      "tokenCanvas": null,
+      "tokenOrder": null,
+      "valueBaseline": [
+        200,
+        224
+      ],
+      "valueFontSize": 34,
+      "valueAnchor": "middle",
+      "valueFormat": "currentOnly",
+      "labelBaseline": null,
+      "assets": {
+        "track": {
+          "png": "berserker/track.png",
+          "svg": "berserker/track.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "fill": {
+          "png": "berserker/fill.png",
+          "svg": "berserker/fill.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "frame": {
+          "png": "berserker/frame.png",
+          "svg": "berserker/frame.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "mask": {
+          "png": "berserker/mask.png",
+          "svg": "berserker/mask.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "example": {
+          "png": "berserker/example-textless.png",
+          "svg": "berserker/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        }
+      },
+      "variantCautions": [
+        "세 기원 모두 혈기 유지. 폭군의 단두대에서는 차징 예약량과 사용 가능 혈기를 구분(188~194행).",
+        "피의 폭풍은 채널 유지/중단과 남은 유지 시간을 별도 표시한다. 고의 피격·저체력으로 자원을 추가 획득하지 않는다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_탱커_9키_변경사항_및_스킬명세_2026-11-02.txt",
+        "line": 150
+      }
+    },
+    {
+      "classId": "dragon-breaker",
+      "className": "드래곤 브레이커",
+      "resourceName": "용염 탄창",
+      "kind": "count",
+      "proposedMax": 4,
+      "exampleValue": 3,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "용의 뿔로 잠근 2×2 포신 약실",
+      "fillBounds": null,
+      "fillDirection": null,
+      "tokenPositions": [
+        [
+          126,
+          48
+        ],
+        [
+          214,
+          48
+        ],
+        [
+          214,
+          120
+        ],
+        [
+          126,
+          120
+        ]
+      ],
+      "tokenAngles": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "tokenCanvas": [
+        60,
+        60
+      ],
+      "tokenOrder": "Top-left, top-right, bottom-right, bottom-left",
+      "valueBaseline": [
+        200,
+        225
+      ],
+      "valueFontSize": 34,
+      "valueAnchor": "middle",
+      "valueFormat": "current/max",
+      "labelBaseline": null,
+      "assets": {
+        "track": {
+          "png": "dragon-breaker/track.png",
+          "svg": "dragon-breaker/track.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "fill": {
+          "png": "dragon-breaker/fill.png",
+          "svg": "dragon-breaker/fill.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "frame": {
+          "png": "dragon-breaker/frame.png",
+          "svg": "dragon-breaker/frame.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "mask": {
+          "png": "dragon-breaker/mask.png",
+          "svg": "dragon-breaker/mask.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "example": {
+          "png": "dragon-breaker/example-textless.png",
+          "svg": "dragon-breaker/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "active-token": {
+          "png": "dragon-breaker/active-token.png",
+          "svg": "dragon-breaker/active-token.svg",
+          "canvas": [
+            60,
+            60
+          ]
+        },
+        "empty-token": {
+          "png": "dragon-breaker/empty-token.png",
+          "svg": "dragon-breaker/empty-token.svg",
+          "canvas": [
+            60,
+            60
+          ]
+        }
+      },
+      "variantCautions": [
+        "포격의 화신은 관통탄/파쇄탄 종류 및 앞에서부터 소비되는 순서가 중요(245~255행). 4칸을 단순 같은 불빛으로만 표시하면 부족하다.",
+        "홍련의 연속검은 탄창 외에 연무 상태·준비된 후속 격발·남은 격발 횟수/시간(265~272행).",
+        "불 꺼지지 않는 가마만 노심 온도 0~100 추가(280행). 다른 기원에 공통 온도 게이지를 붙이지 않는다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_탱커_9키_변경사항_및_스킬명세_2026-11-02.txt",
+        "line": 217
+      }
+    },
+    {
+      "classId": "sylvan-oracle",
+      "className": "실반 오라클",
+      "resourceName": "세계수의 꽃봉오리",
+      "kind": "count",
+      "proposedMax": 3,
+      "exampleValue": 2,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "서로 다른 높이에서 피어나는 세 꽃을 가진 살아 있는 가지",
+      "labelBaseline": null,
+      "valueBaseline": [
+        331,
+        213
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "fillDirection": null,
+      "fillBounds": null,
+      "tokenPositions": [
+        [
+          92,
+          109
+        ],
+        [
+          190,
+          53
+        ],
+        [
+          287,
+          101
+        ]
+      ],
+      "tokenCanvas": [
+        400,
+        240
+      ],
+      "tokenLayers": [
+        {
+          "index": 0,
+          "active": {
+            "png": "sylvan-oracle/active-token-0.png",
+            "svg": "sylvan-oracle/active-token-0.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 89801
+          },
+          "empty": {
+            "png": "sylvan-oracle/empty-token-0.png",
+            "svg": "sylvan-oracle/empty-token-0.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93767
+          },
+          "canvas": [
+            400,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "center": [
+            92,
+            109
+          ]
+        },
+        {
+          "index": 1,
+          "active": {
+            "png": "sylvan-oracle/active-token-1.png",
+            "svg": "sylvan-oracle/active-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 89801
+          },
+          "empty": {
+            "png": "sylvan-oracle/empty-token-1.png",
+            "svg": "sylvan-oracle/empty-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93767
+          },
+          "canvas": [
+            400,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "center": [
+            190,
+            53
+          ]
+        },
+        {
+          "index": 2,
+          "active": {
+            "png": "sylvan-oracle/active-token-2.png",
+            "svg": "sylvan-oracle/active-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 89801
+          },
+          "empty": {
+            "png": "sylvan-oracle/empty-token-2.png",
+            "svg": "sylvan-oracle/empty-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93767
+          },
+          "canvas": [
+            400,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "center": [
+            287,
+            101
+          ]
+        }
+      ],
+      "assets": {
+        "track": {
+          "png": "sylvan-oracle/track.png",
+          "svg": "sylvan-oracle/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 78373
+        },
+        "fill": {
+          "png": "sylvan-oracle/fill.png",
+          "svg": "sylvan-oracle/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 77403
+        },
+        "frame": {
+          "png": "sylvan-oracle/frame.png",
+          "svg": "sylvan-oracle/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 95785
+        },
+        "mask": {
+          "png": "sylvan-oracle/mask.png",
+          "svg": "sylvan-oracle/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 77403
+        },
+        "example": {
+          "png": "sylvan-oracle/example-textless.png",
+          "svg": "sylvan-oracle/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 71083
+        }
+      },
+      "variantCautions": [
+        "세계수의 대리자: 대상별 묘목·성장 단계. 기본 최대 3명, 특성으로 2명 가능.",
+        "계절의 인도자: 설치 계절꽃 기본 최대 2곳과 수명. 특성으로 1곳 가능.",
+        "가시나무 마녀: 별도 수액 저장 시간·성장 기본 최대 3단계. 특성으로 2/4단계. 꽃봉오리 자원과 동일한 칸으로 혼합하지 않는다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_힐러_9키_변경사항_및_스킬명세_2026-11-02.txt",
+        "line": 79
+      }
+    },
+    {
+      "classId": "seraphic-bard",
+      "className": "세라픽 바드",
+      "resourceName": "공명음",
+      "kind": "count",
+      "proposedMax": 3,
+      "exampleValue": 2,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "펼친 악보에서 높낮이를 달리하는 세 개의 공명 음표",
+      "labelBaseline": null,
+      "valueBaseline": [
+        188,
+        211
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "fillDirection": null,
+      "fillBounds": null,
+      "tokenPositions": [
+        [
+          138,
+          120
+        ],
+        [
+          221,
+          82
+        ],
+        [
+          294,
+          111
+        ]
+      ],
+      "tokenCanvas": [
+        400,
+        240
+      ],
+      "tokenLayers": [
+        {
+          "index": 0,
+          "active": {
+            "png": "seraphic-bard/active-token-0.png",
+            "svg": "seraphic-bard/active-token-0.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 92316
+          },
+          "empty": {
+            "png": "seraphic-bard/empty-token-0.png",
+            "svg": "seraphic-bard/empty-token-0.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 94720
+          },
+          "canvas": [
+            400,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "center": [
+            138,
+            120
+          ]
+        },
+        {
+          "index": 1,
+          "active": {
+            "png": "seraphic-bard/active-token-1.png",
+            "svg": "seraphic-bard/active-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 92316
+          },
+          "empty": {
+            "png": "seraphic-bard/empty-token-1.png",
+            "svg": "seraphic-bard/empty-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 94720
+          },
+          "canvas": [
+            400,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "center": [
+            221,
+            82
+          ]
+        },
+        {
+          "index": 2,
+          "active": {
+            "png": "seraphic-bard/active-token-2.png",
+            "svg": "seraphic-bard/active-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 92316
+          },
+          "empty": {
+            "png": "seraphic-bard/empty-token-2.png",
+            "svg": "seraphic-bard/empty-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 94720
+          },
+          "canvas": [
+            400,
+            240
+          ],
+          "origin": [
+            0,
+            0
+          ],
+          "center": [
+            294,
+            111
+          ]
+        }
+      ],
+      "assets": {
+        "track": {
+          "png": "seraphic-bard/track.png",
+          "svg": "seraphic-bard/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 72277
+        },
+        "fill": {
+          "png": "seraphic-bard/fill.png",
+          "svg": "seraphic-bard/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 84948
+        },
+        "frame": {
+          "png": "seraphic-bard/frame.png",
+          "svg": "seraphic-bard/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 93222
+        },
+        "mask": {
+          "png": "seraphic-bard/mask.png",
+          "svg": "seraphic-bard/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 84948
+        },
+        "example": {
+          "png": "seraphic-bard/example-textless.png",
+          "svg": "seraphic-bard/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 68038
+        }
+      },
+      "variantCautions": [
+        "모든 공명음은 같은 자원 단위다. 음표 종류나 순서 퍼즐을 새로 만들지 않는다(147행).",
+        "용맹의 지휘자: 진행 중 협연 요청+보관 화답 합계 최대 3(특성 1). 화답은 공명음과 다른 보조 상태이며 각 요청/화답을 표시한다.",
+        "성역의 수호성가: 대상별 활성/대기 보호층과 실제 남은 자기 보호 예산. 기본 3층, 특성 2/4층.",
+        "발키리의 진혼곡: 다음 악절 예약 공명음과 사용 가능 공명음을 구분. 악절 진행과 남은 악절 표시."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_힐러_9키_변경사항_및_스킬명세_2026-11-02.txt",
+        "line": 146
+      }
+    },
+    {
+      "classId": "blood-apothecary",
+      "className": "블러드 아포테카리",
+      "resourceName": "진홍 영약",
+      "kind": "continuous",
+      "proposedMax": 100,
+      "exampleValue": 60,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "구불구불한 주입관이 달린 비대칭 유리 플라스크의 액면",
+      "labelBaseline": null,
+      "valueBaseline": [
+        297,
+        194
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "fillDirection": "bottom-to-top",
+      "fillBounds": [
+        95,
+        78,
+        125,
+        131
+      ],
+      "tokenPositions": null,
+      "tokenCanvas": null,
+      "tokenLayers": [],
+      "assets": {
+        "track": {
+          "png": "blood-apothecary/track.png",
+          "svg": "blood-apothecary/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 73937
+        },
+        "fill": {
+          "png": "blood-apothecary/fill.png",
+          "svg": "blood-apothecary/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82146
+        },
+        "frame": {
+          "png": "blood-apothecary/frame.png",
+          "svg": "blood-apothecary/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 84131
+        },
+        "mask": {
+          "png": "blood-apothecary/mask.png",
+          "svg": "blood-apothecary/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82146
+        },
+        "example": {
+          "png": "blood-apothecary/example-textless.png",
+          "svg": "blood-apothecary/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 65718
+        }
+      },
+      "variantCautions": [
+        "광기의 연금술사는 영약을 배합 재료 3칸으로 교체한다(219,259행). 영약 게이지를 동시에 요구하지 않는다.",
+        "성분은 빨강(촉진)/파랑(회복)의 비율이 중요하고 순서는 무관하다(260~267행).",
+        "혈류 공명자: 연결 대상과 연결 남은 시간. 기적의 집도의: 후속 처치 2·3단계 권한과 전체 남은 시간."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_힐러_9키_변경사항_및_스킬명세_2026-11-02.txt",
+        "line": 218
+      }
+    },
+    {
+      "classId": "nightblade",
+      "className": "나이트블레이드",
+      "resourceName": "그림자 인장",
+      "kind": "count",
+      "proposedMax": 5,
+      "exampleValue": 3,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "초승달 아래 부채꼴로 매달린 다섯 부적",
+      "labelBaseline": null,
+      "valueBaseline": [
+        200,
+        229
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "valueFormat": "current / max",
+      "fillBounds": [
+        0,
+        0,
+        400,
+        240
+      ],
+      "fillDirection": "individual-token",
+      "runtime": "Tokens are pre-positioned full-canvas layers. Draw active-token-i for each occupied index. Never crop percentage through count tokens.",
+      "tokens": [
+        {
+          "index": 0,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": [
+            72,
+            98,
+            -27
+          ],
+          "active": {
+            "png": "nightblade/active-token-1.png",
+            "svg": "nightblade/active-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93309
+          },
+          "empty": {
+            "png": "nightblade/empty-token-1.png",
+            "svg": "nightblade/empty-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93309
+          }
+        },
+        {
+          "index": 1,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": [
+            132,
+            93,
+            -13
+          ],
+          "active": {
+            "png": "nightblade/active-token-2.png",
+            "svg": "nightblade/active-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93316
+          },
+          "empty": {
+            "png": "nightblade/empty-token-2.png",
+            "svg": "nightblade/empty-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93316
+          }
+        },
+        {
+          "index": 2,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": [
+            200,
+            94,
+            0
+          ],
+          "active": {
+            "png": "nightblade/active-token-3.png",
+            "svg": "nightblade/active-token-3.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93345
+          },
+          "empty": {
+            "png": "nightblade/empty-token-3.png",
+            "svg": "nightblade/empty-token-3.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93345
+          }
+        },
+        {
+          "index": 3,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": [
+            268,
+            93,
+            13
+          ],
+          "active": {
+            "png": "nightblade/active-token-4.png",
+            "svg": "nightblade/active-token-4.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93314
+          },
+          "empty": {
+            "png": "nightblade/empty-token-4.png",
+            "svg": "nightblade/empty-token-4.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93314
+          }
+        },
+        {
+          "index": 4,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": [
+            328,
+            98,
+            27
+          ],
+          "active": {
+            "png": "nightblade/active-token-5.png",
+            "svg": "nightblade/active-token-5.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93306
+          },
+          "empty": {
+            "png": "nightblade/empty-token-5.png",
+            "svg": "nightblade/empty-token-5.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 93306
+          }
+        }
+      ],
+      "assets": {
+        "track": {
+          "png": "nightblade/track.png",
+          "svg": "nightblade/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 78090
+        },
+        "fill": {
+          "png": "nightblade/fill.png",
+          "svg": "nightblade/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82590
+        },
+        "frame": {
+          "png": "nightblade/frame.png",
+          "svg": "nightblade/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 86935
+        },
+        "mask": {
+          "png": "nightblade/mask.png",
+          "svg": "nightblade/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82590
+        },
+        "example": {
+          "png": "nightblade/example-textless.png",
+          "svg": "nightblade/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 74276
+        }
+      },
+      "variantCautions": [
+        "무한 그림자 춤은 인장을 춤의 박자 0~3으로 교체(64행). 짧은 무곡 특성 상한 2. 인장 5칸과 박자 3칸을 동시 자원으로 보이지 않는다.",
+        "사각의 집행자: 적별 약점 정보 기본 최대 2(특성1/3), 인장과 별도. 유효한 방향도 표시한다.",
+        "인술의 달인: 적에게 활성 부적 최대 1개, 부적 유형과 종료 조건 대기 상태."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_딜러_6직업_18루트_9키_설계_2026-11-02.txt",
+        "line": 43
+      }
+    },
+    {
+      "classId": "tempest-lancer",
+      "className": "템페스트 랜서",
+      "resourceName": "뇌룡의 전류",
+      "kind": "continuous",
+      "proposedMax": 100,
+      "exampleValue": 60,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "대각 장창을 지지하는 두 전극과 굵은 번개 코일",
+      "labelBaseline": null,
+      "valueBaseline": [
+        211,
+        224
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "valueFormat": "current",
+      "fillBounds": [
+        155,
+        37,
+        108,
+        146
+      ],
+      "fillDirection": "bottom-to-top",
+      "runtime": "Mask fill with x=bounds.x, y=bounds.y+bounds.height*(1-ratio), width=bounds.width,height=bounds.height*ratio. Then frame and runtime value.",
+      "tokens": [],
+      "assets": {
+        "track": {
+          "png": "tempest-lancer/track.png",
+          "svg": "tempest-lancer/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 77928
+        },
+        "fill": {
+          "png": "tempest-lancer/fill.png",
+          "svg": "tempest-lancer/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 90436
+        },
+        "frame": {
+          "png": "tempest-lancer/frame.png",
+          "svg": "tempest-lancer/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 92274
+        },
+        "mask": {
+          "png": "tempest-lancer/mask.png",
+          "svg": "tempest-lancer/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 90436
+        },
+        "example": {
+          "png": "tempest-lancer/example-textless.png",
+          "svg": "tempest-lancer/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 76620
+        }
+      },
+      "variantCautions": [
+        "여분 축전지 특성은 상한 확대 제안이지만 정확한 확대 수치는 본문에 없다(125행).",
+        "뇌제의 창술은 가속 상태와 콤보 교차 운영 정보가 추가된다.",
+        "태풍의 핵은 활성 폭풍창 최대 2개, 창별 충전 최대 3과 수명(116~118행). F의 별도 개체는 이 충전에 합산하지 않는다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_딜러_6직업_18루트_9키_설계_2026-11-02.txt",
+        "line": 85
+      }
+    },
+    {
+      "classId": "gunslinger",
+      "className": "건슬링어",
+      "resourceName": "마탄",
+      "kind": "count",
+      "proposedMax": 6,
+      "exampleValue": 4,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "탄을 방사형으로 읽는 여섯 약실 리볼버",
+      "fillBounds": null,
+      "fillDirection": null,
+      "tokenPositions": [
+        [
+          178,
+          29
+        ],
+        [
+          230.82754963085074,
+          59.5
+        ],
+        [
+          230.82754963085077,
+          120.5
+        ],
+        [
+          178,
+          151
+        ],
+        [
+          125.17245036914926,
+          120.50000000000003
+        ],
+        [
+          125.17245036914926,
+          59.5
+        ]
+      ],
+      "tokenAngles": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "tokenCanvas": [
+        44,
+        44
+      ],
+      "tokenOrder": "Clockwise from top",
+      "valueBaseline": [
+        200,
+        125
+      ],
+      "valueFontSize": 34,
+      "valueAnchor": "middle",
+      "valueFormat": "currentOnly",
+      "labelBaseline": null,
+      "assets": {
+        "track": {
+          "png": "gunslinger/track.png",
+          "svg": "gunslinger/track.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "fill": {
+          "png": "gunslinger/fill.png",
+          "svg": "gunslinger/fill.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "frame": {
+          "png": "gunslinger/frame.png",
+          "svg": "gunslinger/frame.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "mask": {
+          "png": "gunslinger/mask.png",
+          "svg": "gunslinger/mask.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "example": {
+          "png": "gunslinger/example-textless.png",
+          "svg": "gunslinger/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ]
+        },
+        "active-token": {
+          "png": "gunslinger/active-token.png",
+          "svg": "gunslinger/active-token.svg",
+          "canvas": [
+            44,
+            44
+          ]
+        },
+        "empty-token": {
+          "png": "gunslinger/empty-token.png",
+          "svg": "gunslinger/empty-token.svg",
+          "canvas": [
+            44,
+            44
+          ]
+        }
+      },
+      "variantCautions": [
+        "피스키퍼만 일반 마탄6을 왼손3+오른손3으로 교체(144행). 두 손의 탄 수와 장전 대상/완료 시간은 분리 표시한다. 총 6발만 표시하면 부족하다.",
+        "피스키퍼의 심부 탄창 특성은 손별 용량 확대 제안이나 구체 확대 수치는 미정(154행).",
+        "전술폭파수: 부착 유탄 1개, 남은 기폭 시간과 각 완주 후 예상 시점. 데드아이: 예약 탄과 준비된 저격/남은 보관 시간을 별도로 표시한다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_딜러_6직업_18루트_9키_설계_2026-11-02.txt",
+        "line": 131
+      }
+    },
+    {
+      "classId": "spirit-ranger",
+      "className": "스피릿 레인저",
+      "resourceName": "사계의 풍압",
+      "kind": "continuous",
+      "proposedMax": 100,
+      "exampleValue": 60,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "비대칭 활과 나뭇잎 꼬리에 매달린 바람 유리구",
+      "labelBaseline": null,
+      "valueBaseline": [
+        193,
+        127
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "fillDirection": "bottom-to-top",
+      "fillBounds": [
+        128,
+        50,
+        130,
+        130
+      ],
+      "tokenPositions": null,
+      "tokenCanvas": null,
+      "tokenLayers": [],
+      "assets": {
+        "track": {
+          "png": "spirit-ranger/track.png",
+          "svg": "spirit-ranger/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 74989
+        },
+        "fill": {
+          "png": "spirit-ranger/fill.png",
+          "svg": "spirit-ranger/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82504
+        },
+        "frame": {
+          "png": "spirit-ranger/frame.png",
+          "svg": "spirit-ranger/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 88366
+        },
+        "mask": {
+          "png": "spirit-ranger/mask.png",
+          "svg": "spirit-ranger/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82504
+        },
+        "example": {
+          "png": "spirit-ranger/example-textless.png",
+          "svg": "spirit-ranger/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 67711
+        }
+      },
+      "variantCautions": [
+        "천궁의 명사수: 탄착 예약 상태와 합류 최대3. 질풍의 연사수: 후속 묶음 최대2회·정교한 시위 최대1·보관 시간.",
+        "사계의 마궁사만 봄→여름→가을→겨울 순환과 남은 계절 시간·유예 사용 여부를 표시(214~220행). 풍압 이름이 사계라고 모든 기원에 계절 순환을 붙이지 않는다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_딜러_6직업_18루트_9키_설계_2026-11-02.txt",
+        "line": 180
+      }
+    },
+    {
+      "classId": "astromancer",
+      "className": "아스트로맨서",
+      "resourceName": "성좌 마력",
+      "kind": "continuous",
+      "proposedMax": 100,
+      "exampleValue": 60,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "서로 기울어진 궤도와 수직으로 차오르는 마력 구체",
+      "labelBaseline": null,
+      "valueBaseline": [
+        205,
+        226
+      ],
+      "valueAnchor": "middle",
+      "valueFontSize": 32,
+      "valueFormat": "current",
+      "fillBounds": [
+        139,
+        49,
+        132,
+        132
+      ],
+      "fillDirection": "bottom-to-top",
+      "runtime": "Mask fill with x=bounds.x, y=bounds.y+bounds.height*(1-ratio), width=bounds.width,height=bounds.height*ratio. Then frame and runtime value.",
+      "tokens": [],
+      "assets": {
+        "track": {
+          "png": "astromancer/track.png",
+          "svg": "astromancer/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 74410
+        },
+        "fill": {
+          "png": "astromancer/fill.png",
+          "svg": "astromancer/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82077
+        },
+        "frame": {
+          "png": "astromancer/frame.png",
+          "svg": "astromancer/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 90517
+        },
+        "mask": {
+          "png": "astromancer/mask.png",
+          "svg": "astromancer/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 82077
+        },
+        "example": {
+          "png": "astromancer/example-textless.png",
+          "svg": "astromancer/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 72376
+        }
+      },
+      "variantCautions": [
+        "종말의 메테오: 예약 마력·영창 3구간의 완료 지점/보관 시간. 유성우 지휘자: 즉시시전권 3회와 소비 ON/OFF·보관 시간.",
+        "중력 제어자: 중력장1개, 압축/확산 모드와 남은 시간. 모든 기원에 마력 외 공통 3칸 자원을 추가하지 않는다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_딜러_6직업_18루트_9키_설계_2026-11-02.txt",
+        "line": 225
+      }
+    },
+    {
+      "classId": "mirror-phantom",
+      "className": "미러 팬텀",
+      "resourceName": "거울상 파편",
+      "kind": "count",
+      "proposedMax": 3,
+      "exampleValue": 2,
+      "canvas": [
+        400,
+        240
+      ],
+      "motif": "형태와 높이가 다른 세 조각의 부서진 장식 거울",
+      "labelBaseline": null,
+      "valueBaseline": [
+        355,
+        232
+      ],
+      "valueAnchor": "end",
+      "valueFontSize": 32,
+      "valueFormat": "current / max",
+      "fillBounds": [
+        0,
+        0,
+        400,
+        240
+      ],
+      "fillDirection": "individual-token",
+      "runtime": "Tokens are pre-positioned full-canvas layers. Draw active-token-i for each occupied index. Never crop percentage through count tokens.",
+      "tokens": [
+        {
+          "index": 0,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": null,
+          "active": {
+            "png": "mirror-phantom/active-token-1.png",
+            "svg": "mirror-phantom/active-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 88495
+          },
+          "empty": {
+            "png": "mirror-phantom/empty-token-1.png",
+            "svg": "mirror-phantom/empty-token-1.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 88495
+          }
+        },
+        {
+          "index": 1,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": null,
+          "active": {
+            "png": "mirror-phantom/active-token-2.png",
+            "svg": "mirror-phantom/active-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 89432
+          },
+          "empty": {
+            "png": "mirror-phantom/empty-token-2.png",
+            "svg": "mirror-phantom/empty-token-2.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 89432
+          }
+        },
+        {
+          "index": 2,
+          "canvas": [
+            400,
+            240
+          ],
+          "placement": [
+            0,
+            0
+          ],
+          "transform": null,
+          "active": {
+            "png": "mirror-phantom/active-token-3.png",
+            "svg": "mirror-phantom/active-token-3.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 91508
+          },
+          "empty": {
+            "png": "mirror-phantom/empty-token-3.png",
+            "svg": "mirror-phantom/empty-token-3.svg",
+            "canvas": [
+              400,
+              240
+            ],
+            "transparentPixels": 91508
+          }
+        }
+      ],
+      "assets": {
+        "track": {
+          "png": "mirror-phantom/track.png",
+          "svg": "mirror-phantom/track.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 72798
+        },
+        "fill": {
+          "png": "mirror-phantom/fill.png",
+          "svg": "mirror-phantom/fill.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 77435
+        },
+        "frame": {
+          "png": "mirror-phantom/frame.png",
+          "svg": "mirror-phantom/frame.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 87899
+        },
+        "mask": {
+          "png": "mirror-phantom/mask.png",
+          "svg": "mirror-phantom/mask.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 77435
+        },
+        "example": {
+          "png": "mirror-phantom/example-textless.png",
+          "svg": "mirror-phantom/example-textless.svg",
+          "canvas": [
+            400,
+            240
+          ],
+          "transparentPixels": 69277
+        }
+      },
+      "variantCautions": [
+        "환영의 군단장: 최근 기술 기록 최대2와 잠금 상태·유효 시간. 선명한 잔상 특성은 기록/비용1로 변경.",
+        "사신의 대낫: 투영 준비 여부와 제한 시간. 프리즘 아키텍트: 거울 최대2면과 배치/방향(단일 초점 특성1면). 파편3과 기록/거울 수는 별개다."
+      ],
+      "resourceSource": {
+        "path": "output/handoff/ORCA_딜러_6직업_18루트_9키_설계_2026-11-02.txt",
+        "line": 268
+      }
+    }
+  ]
+}

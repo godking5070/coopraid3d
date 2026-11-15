@@ -19,6 +19,36 @@ if ($LASTEXITCODE -ne 0) { throw 'Metrics tests did not compile.' }
 & $taskTestExe
 if ($LASTEXITCODE -ne 0) { throw 'Metrics tests failed.' }
 
+$taskDamageExe = Join-Path $taskOutput 'AiSpectatorDamageTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskDamageExe" (Join-Path $taskRoot 'Assets/Scripts/AiSpectatorDamageRules.cs') (Join-Path $PSScriptRoot 'AiSpectatorDamageTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'AI spectator damage tests did not compile.' }
+& $taskDamageExe
+if ($LASTEXITCODE -ne 0) { throw 'AI spectator damage tests failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-AiSpectatorProgressChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'AI spectator progress tests failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-UIIconChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'UI icon checks failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-CombatMetricsModalChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'Combat results modal checks failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-PopupAdmissionChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'Popup admission checks failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-CombatActionChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'Combat action rules checks failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-ActionExecutionChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'Action execution checks failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-NineKeyPaladinChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'Nine-key paladin checks failed.' }
+
+& (Join-Path $PSScriptRoot 'Run-TargetSelectionChecks.ps1') -Compiler $Compiler
+if ($LASTEXITCODE -ne 0) { throw 'Target selection checks failed.' }
+
 # Read the original editor-generated reference lists. No editor process, Library copy,
 # Unity import, package restore, or generated project is needed in the worktree.
 $taskSources = @(& rg --files (Join-Path $taskRoot 'Assets') -g '*.cs')

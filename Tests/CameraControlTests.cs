@@ -107,6 +107,12 @@ internal static class CameraControlTests
 
     public static int Main()
     {
+        Check(CameraControlMath.SpectatorIndex(-1, 0, 1) == -1, "wipe leaves no spectator subject");
+        Check(CameraControlMath.SpectatorIndex(-1, 3, -1) == 0, "first death chooses first living member");
+        Check(CameraControlMath.SpectatorIndex(2, 3, 1) == 0, "next subject wraps");
+        Check(CameraControlMath.SpectatorIndex(0, 3, -1) == 2, "previous subject wraps");
+        Check(CameraControlMath.SpectatorIndex(2, 2, 1) == 0, "departed subject resets selection");
+        Check(CameraControlMath.SpectatorIndex(0, 1, 1) == 0, "single survivor remains selected");
         Movement(); FramingAndZoom(); CursorDragLifecycle();
         Console.WriteLine("PASS: " + _checks + " camera movement, framing, zoom and drag lifecycle assertions.");
         return 0;

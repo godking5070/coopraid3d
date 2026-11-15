@@ -1,0 +1,1234 @@
+{
+  "classes": [
+    {
+      "jobId": "job.aegis-paladin",
+      "slug": "aegis-paladin",
+      "job": {
+        "kind": "continuous",
+        "track": "Job/aegis-paladin/track.png",
+        "frame": "Job/aegis-paladin/frame.png",
+        "fill": "Job/aegis-paladin/fill.png",
+        "fillBounds": [
+          99,
+          69,
+          202,
+          90
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          200,
+          215
+        ],
+        "fontSize": 34,
+        "showMaximum": false,
+        "tokens": []
+      },
+      "ultimate": {
+        "chargeBounds": [
+          30,
+          53,
+          300,
+          156
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/aegis-paladin/charging/track.png",
+          "fill": "Ultimate/states/aegis-paladin/charging/fill.png",
+          "frame": "Ultimate/states/aegis-paladin/charging/frame.png",
+          "core": "Ultimate/states/aegis-paladin/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/aegis-paladin/ready/track.png",
+          "fill": "Ultimate/states/aegis-paladin/ready/fill.png",
+          "frame": "Ultimate/states/aegis-paladin/ready/frame.png",
+          "core": "Ultimate/states/aegis-paladin/ready/core.png",
+          "glow": "Ultimate/states/aegis-paladin/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/aegis-paladin/unavailable/track.png",
+          "fill": "Ultimate/states/aegis-paladin/unavailable/fill.png",
+          "frame": "Ultimate/states/aegis-paladin/unavailable/frame.png",
+          "core": "Ultimate/states/aegis-paladin/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/aegis-paladin/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/aegis-paladin/ready-loop-0",
+            "AstellaUltimateMotion/aegis-paladin/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.berserker",
+      "slug": "berserker",
+      "job": {
+        "kind": "continuous",
+        "track": "Job/berserker/track.png",
+        "frame": "Job/berserker/frame.png",
+        "fill": "Job/berserker/fill.png",
+        "fillBounds": [
+          140,
+          48,
+          120,
+          125
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          200,
+          224
+        ],
+        "fontSize": 34,
+        "showMaximum": false,
+        "tokens": []
+      },
+      "ultimate": {
+        "chargeBounds": [
+          58,
+          57,
+          244,
+          158
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/berserker/charging/track.png",
+          "fill": "Ultimate/states/berserker/charging/fill.png",
+          "frame": "Ultimate/states/berserker/charging/frame.png",
+          "core": "Ultimate/states/berserker/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/berserker/ready/track.png",
+          "fill": "Ultimate/states/berserker/ready/fill.png",
+          "frame": "Ultimate/states/berserker/ready/frame.png",
+          "core": "Ultimate/states/berserker/ready/core.png",
+          "glow": "Ultimate/states/berserker/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/berserker/unavailable/track.png",
+          "fill": "Ultimate/states/berserker/unavailable/fill.png",
+          "frame": "Ultimate/states/berserker/unavailable/frame.png",
+          "core": "Ultimate/states/berserker/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/berserker/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/berserker/ready-loop-0",
+            "AstellaUltimateMotion/berserker/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.dragon-breaker",
+      "slug": "dragon-breaker",
+      "job": {
+        "kind": "count",
+        "track": "Job/dragon-breaker/track.png",
+        "frame": "Job/dragon-breaker/frame.png",
+        "fill": "",
+        "fillBounds": [
+          0,
+          0,
+          400,
+          240
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          200,
+          225
+        ],
+        "fontSize": 34,
+        "showMaximum": true,
+        "tokens": [
+          {
+            "active": "Job/dragon-breaker/active-token.png",
+            "empty": "Job/dragon-breaker/empty-token.png",
+            "rect": [
+              126,
+              48,
+              60,
+              60
+            ]
+          },
+          {
+            "active": "Job/dragon-breaker/active-token.png",
+            "empty": "Job/dragon-breaker/empty-token.png",
+            "rect": [
+              214,
+              48,
+              60,
+              60
+            ]
+          },
+          {
+            "active": "Job/dragon-breaker/active-token.png",
+            "empty": "Job/dragon-breaker/empty-token.png",
+            "rect": [
+              214,
+              120,
+              60,
+              60
+            ]
+          },
+          {
+            "active": "Job/dragon-breaker/active-token.png",
+            "empty": "Job/dragon-breaker/empty-token.png",
+            "rect": [
+              126,
+              120,
+              60,
+              60
+            ]
+          }
+        ]
+      },
+      "ultimate": {
+        "chargeBounds": [
+          54,
+          69,
+          252,
+          146
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/dragon-breaker/charging/track.png",
+          "fill": "Ultimate/states/dragon-breaker/charging/fill.png",
+          "frame": "Ultimate/states/dragon-breaker/charging/frame.png",
+          "core": "Ultimate/states/dragon-breaker/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/dragon-breaker/ready/track.png",
+          "fill": "Ultimate/states/dragon-breaker/ready/fill.png",
+          "frame": "Ultimate/states/dragon-breaker/ready/frame.png",
+          "core": "Ultimate/states/dragon-breaker/ready/core.png",
+          "glow": "Ultimate/states/dragon-breaker/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/dragon-breaker/unavailable/track.png",
+          "fill": "Ultimate/states/dragon-breaker/unavailable/fill.png",
+          "frame": "Ultimate/states/dragon-breaker/unavailable/frame.png",
+          "core": "Ultimate/states/dragon-breaker/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/dragon-breaker/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/dragon-breaker/ready-loop-0",
+            "AstellaUltimateMotion/dragon-breaker/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.sylvan-oracle",
+      "slug": "sylvan-oracle",
+      "job": {
+        "kind": "count",
+        "track": "Job/sylvan-oracle/track.png",
+        "frame": "Job/sylvan-oracle/frame.png",
+        "fill": "",
+        "fillBounds": [
+          0,
+          0,
+          400,
+          240
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          331,
+          213
+        ],
+        "fontSize": 32,
+        "showMaximum": true,
+        "tokens": [
+          {
+            "active": "Job/sylvan-oracle/active-token-0.png",
+            "empty": "Job/sylvan-oracle/empty-token-0.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/sylvan-oracle/active-token-1.png",
+            "empty": "Job/sylvan-oracle/empty-token-1.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/sylvan-oracle/active-token-2.png",
+            "empty": "Job/sylvan-oracle/empty-token-2.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          }
+        ]
+      },
+      "ultimate": {
+        "chargeBounds": [
+          28,
+          52,
+          304,
+          155
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/sylvan-oracle/charging/track.png",
+          "fill": "Ultimate/states/sylvan-oracle/charging/fill.png",
+          "frame": "Ultimate/states/sylvan-oracle/charging/frame.png",
+          "core": "Ultimate/states/sylvan-oracle/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/sylvan-oracle/ready/track.png",
+          "fill": "Ultimate/states/sylvan-oracle/ready/fill.png",
+          "frame": "Ultimate/states/sylvan-oracle/ready/frame.png",
+          "core": "Ultimate/states/sylvan-oracle/ready/core.png",
+          "glow": "Ultimate/states/sylvan-oracle/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/sylvan-oracle/unavailable/track.png",
+          "fill": "Ultimate/states/sylvan-oracle/unavailable/fill.png",
+          "frame": "Ultimate/states/sylvan-oracle/unavailable/frame.png",
+          "core": "Ultimate/states/sylvan-oracle/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/sylvan-oracle/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/sylvan-oracle/ready-loop-0",
+            "AstellaUltimateMotion/sylvan-oracle/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.seraphic-bard",
+      "slug": "seraphic-bard",
+      "job": {
+        "kind": "count",
+        "track": "Job/seraphic-bard/track.png",
+        "frame": "Job/seraphic-bard/frame.png",
+        "fill": "",
+        "fillBounds": [
+          0,
+          0,
+          400,
+          240
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          188,
+          211
+        ],
+        "fontSize": 32,
+        "showMaximum": true,
+        "tokens": [
+          {
+            "active": "Job/seraphic-bard/active-token-0.png",
+            "empty": "Job/seraphic-bard/empty-token-0.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/seraphic-bard/active-token-1.png",
+            "empty": "Job/seraphic-bard/empty-token-1.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/seraphic-bard/active-token-2.png",
+            "empty": "Job/seraphic-bard/empty-token-2.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          }
+        ]
+      },
+      "ultimate": {
+        "chargeBounds": [
+          35,
+          69,
+          290,
+          150
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/seraphic-bard/charging/track.png",
+          "fill": "Ultimate/states/seraphic-bard/charging/fill.png",
+          "frame": "Ultimate/states/seraphic-bard/charging/frame.png",
+          "core": "Ultimate/states/seraphic-bard/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/seraphic-bard/ready/track.png",
+          "fill": "Ultimate/states/seraphic-bard/ready/fill.png",
+          "frame": "Ultimate/states/seraphic-bard/ready/frame.png",
+          "core": "Ultimate/states/seraphic-bard/ready/core.png",
+          "glow": "Ultimate/states/seraphic-bard/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/seraphic-bard/unavailable/track.png",
+          "fill": "Ultimate/states/seraphic-bard/unavailable/fill.png",
+          "frame": "Ultimate/states/seraphic-bard/unavailable/frame.png",
+          "core": "Ultimate/states/seraphic-bard/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/seraphic-bard/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/seraphic-bard/ready-loop-0",
+            "AstellaUltimateMotion/seraphic-bard/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.blood-apothecary",
+      "slug": "blood-apothecary",
+      "job": {
+        "kind": "continuous",
+        "track": "Job/blood-apothecary/track.png",
+        "frame": "Job/blood-apothecary/frame.png",
+        "fill": "Job/blood-apothecary/fill.png",
+        "fillBounds": [
+          95,
+          78,
+          125,
+          131
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          297,
+          194
+        ],
+        "fontSize": 32,
+        "showMaximum": false,
+        "tokens": []
+      },
+      "ultimate": {
+        "chargeBounds": [
+          61,
+          51,
+          238,
+          161
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/blood-apothecary/charging/track.png",
+          "fill": "Ultimate/states/blood-apothecary/charging/fill.png",
+          "frame": "Ultimate/states/blood-apothecary/charging/frame.png",
+          "core": "Ultimate/states/blood-apothecary/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/blood-apothecary/ready/track.png",
+          "fill": "Ultimate/states/blood-apothecary/ready/fill.png",
+          "frame": "Ultimate/states/blood-apothecary/ready/frame.png",
+          "core": "Ultimate/states/blood-apothecary/ready/core.png",
+          "glow": "Ultimate/states/blood-apothecary/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/blood-apothecary/unavailable/track.png",
+          "fill": "Ultimate/states/blood-apothecary/unavailable/fill.png",
+          "frame": "Ultimate/states/blood-apothecary/unavailable/frame.png",
+          "core": "Ultimate/states/blood-apothecary/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/blood-apothecary/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/blood-apothecary/ready-loop-0",
+            "AstellaUltimateMotion/blood-apothecary/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.nightblade",
+      "slug": "nightblade",
+      "job": {
+        "kind": "count",
+        "track": "Job/nightblade/track.png",
+        "frame": "Job/nightblade/frame.png",
+        "fill": "",
+        "fillBounds": [
+          0,
+          0,
+          400,
+          240
+        ],
+        "direction": "individual-token",
+        "value": [
+          200,
+          229
+        ],
+        "fontSize": 32,
+        "showMaximum": true,
+        "tokens": [
+          {
+            "active": "Job/nightblade/active-token-1.png",
+            "empty": "Job/nightblade/empty-token-1.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/nightblade/active-token-2.png",
+            "empty": "Job/nightblade/empty-token-2.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/nightblade/active-token-3.png",
+            "empty": "Job/nightblade/empty-token-3.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/nightblade/active-token-4.png",
+            "empty": "Job/nightblade/empty-token-4.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/nightblade/active-token-5.png",
+            "empty": "Job/nightblade/empty-token-5.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          }
+        ]
+      },
+      "ultimate": {
+        "chargeBounds": [
+          40,
+          54,
+          280,
+          160
+        ],
+        "value": [
+          180,
+          241
+        ],
+        "charging": {
+          "track": "Ultimate/states/nightblade/charging/track.png",
+          "fill": "Ultimate/states/nightblade/charging/fill.png",
+          "frame": "Ultimate/states/nightblade/charging/frame.png",
+          "core": "Ultimate/states/nightblade/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/nightblade/ready/track.png",
+          "fill": "Ultimate/states/nightblade/ready/fill.png",
+          "frame": "Ultimate/states/nightblade/ready/frame.png",
+          "core": "Ultimate/states/nightblade/ready/core.png",
+          "glow": "Ultimate/states/nightblade/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/nightblade/unavailable/track.png",
+          "fill": "Ultimate/states/nightblade/unavailable/fill.png",
+          "frame": "Ultimate/states/nightblade/unavailable/frame.png",
+          "core": "Ultimate/states/nightblade/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/nightblade/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/nightblade/ready-loop-0",
+            "AstellaUltimateMotion/nightblade/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.tempest-lancer",
+      "slug": "tempest-lancer",
+      "job": {
+        "kind": "continuous",
+        "track": "Job/tempest-lancer/track.png",
+        "frame": "Job/tempest-lancer/frame.png",
+        "fill": "Job/tempest-lancer/fill.png",
+        "fillBounds": [
+          155,
+          37,
+          108,
+          146
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          211,
+          224
+        ],
+        "fontSize": 32,
+        "showMaximum": false,
+        "tokens": []
+      },
+      "ultimate": {
+        "chargeBounds": [
+          33,
+          47,
+          294,
+          171
+        ],
+        "value": [
+          180,
+          241
+        ],
+        "charging": {
+          "track": "Ultimate/states/tempest-lancer/charging/track.png",
+          "fill": "Ultimate/states/tempest-lancer/charging/fill.png",
+          "frame": "Ultimate/states/tempest-lancer/charging/frame.png",
+          "core": "Ultimate/states/tempest-lancer/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/tempest-lancer/ready/track.png",
+          "fill": "Ultimate/states/tempest-lancer/ready/fill.png",
+          "frame": "Ultimate/states/tempest-lancer/ready/frame.png",
+          "core": "Ultimate/states/tempest-lancer/ready/core.png",
+          "glow": "Ultimate/states/tempest-lancer/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/tempest-lancer/unavailable/track.png",
+          "fill": "Ultimate/states/tempest-lancer/unavailable/fill.png",
+          "frame": "Ultimate/states/tempest-lancer/unavailable/frame.png",
+          "core": "Ultimate/states/tempest-lancer/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/tempest-lancer/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/tempest-lancer/ready-loop-0",
+            "AstellaUltimateMotion/tempest-lancer/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.gunslinger",
+      "slug": "gunslinger",
+      "job": {
+        "kind": "count",
+        "track": "Job/gunslinger/track.png",
+        "frame": "Job/gunslinger/frame.png",
+        "fill": "",
+        "fillBounds": [
+          0,
+          0,
+          400,
+          240
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          200,
+          125
+        ],
+        "fontSize": 34,
+        "showMaximum": false,
+        "tokens": [
+          {
+            "active": "Job/gunslinger/active-token.png",
+            "empty": "Job/gunslinger/empty-token.png",
+            "rect": [
+              178,
+              29,
+              44,
+              44
+            ]
+          },
+          {
+            "active": "Job/gunslinger/active-token.png",
+            "empty": "Job/gunslinger/empty-token.png",
+            "rect": [
+              230.82754963085074,
+              59.5,
+              44,
+              44
+            ]
+          },
+          {
+            "active": "Job/gunslinger/active-token.png",
+            "empty": "Job/gunslinger/empty-token.png",
+            "rect": [
+              230.82754963085077,
+              120.5,
+              44,
+              44
+            ]
+          },
+          {
+            "active": "Job/gunslinger/active-token.png",
+            "empty": "Job/gunslinger/empty-token.png",
+            "rect": [
+              178,
+              151,
+              44,
+              44
+            ]
+          },
+          {
+            "active": "Job/gunslinger/active-token.png",
+            "empty": "Job/gunslinger/empty-token.png",
+            "rect": [
+              125.17245036914926,
+              120.50000000000003,
+              44,
+              44
+            ]
+          },
+          {
+            "active": "Job/gunslinger/active-token.png",
+            "empty": "Job/gunslinger/empty-token.png",
+            "rect": [
+              125.17245036914926,
+              59.5,
+              44,
+              44
+            ]
+          }
+        ]
+      },
+      "ultimate": {
+        "chargeBounds": [
+          40,
+          52,
+          280,
+          150
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/gunslinger/charging/track.png",
+          "fill": "Ultimate/states/gunslinger/charging/fill.png",
+          "frame": "Ultimate/states/gunslinger/charging/frame.png",
+          "core": "Ultimate/states/gunslinger/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/gunslinger/ready/track.png",
+          "fill": "Ultimate/states/gunslinger/ready/fill.png",
+          "frame": "Ultimate/states/gunslinger/ready/frame.png",
+          "core": "Ultimate/states/gunslinger/ready/core.png",
+          "glow": "Ultimate/states/gunslinger/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/gunslinger/unavailable/track.png",
+          "fill": "Ultimate/states/gunslinger/unavailable/fill.png",
+          "frame": "Ultimate/states/gunslinger/unavailable/frame.png",
+          "core": "Ultimate/states/gunslinger/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/gunslinger/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/gunslinger/ready-loop-0",
+            "AstellaUltimateMotion/gunslinger/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.spirit-ranger",
+      "slug": "spirit-ranger",
+      "job": {
+        "kind": "continuous",
+        "track": "Job/spirit-ranger/track.png",
+        "frame": "Job/spirit-ranger/frame.png",
+        "fill": "Job/spirit-ranger/fill.png",
+        "fillBounds": [
+          128,
+          50,
+          130,
+          130
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          193,
+          127
+        ],
+        "fontSize": 32,
+        "showMaximum": false,
+        "tokens": []
+      },
+      "ultimate": {
+        "chargeBounds": [
+          46,
+          61,
+          263,
+          164
+        ],
+        "value": [
+          180,
+          240
+        ],
+        "charging": {
+          "track": "Ultimate/states/spirit-ranger/charging/track.png",
+          "fill": "Ultimate/states/spirit-ranger/charging/fill.png",
+          "frame": "Ultimate/states/spirit-ranger/charging/frame.png",
+          "core": "Ultimate/states/spirit-ranger/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/spirit-ranger/ready/track.png",
+          "fill": "Ultimate/states/spirit-ranger/ready/fill.png",
+          "frame": "Ultimate/states/spirit-ranger/ready/frame.png",
+          "core": "Ultimate/states/spirit-ranger/ready/core.png",
+          "glow": "Ultimate/states/spirit-ranger/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/spirit-ranger/unavailable/track.png",
+          "fill": "Ultimate/states/spirit-ranger/unavailable/fill.png",
+          "frame": "Ultimate/states/spirit-ranger/unavailable/frame.png",
+          "core": "Ultimate/states/spirit-ranger/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/spirit-ranger/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/spirit-ranger/ready-loop-0",
+            "AstellaUltimateMotion/spirit-ranger/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.astromancer",
+      "slug": "astromancer",
+      "job": {
+        "kind": "continuous",
+        "track": "Job/astromancer/track.png",
+        "frame": "Job/astromancer/frame.png",
+        "fill": "Job/astromancer/fill.png",
+        "fillBounds": [
+          139,
+          49,
+          132,
+          132
+        ],
+        "direction": "bottom-to-top",
+        "value": [
+          205,
+          226
+        ],
+        "fontSize": 32,
+        "showMaximum": false,
+        "tokens": []
+      },
+      "ultimate": {
+        "chargeBounds": [
+          60,
+          47,
+          240,
+          169
+        ],
+        "value": [
+          180,
+          241
+        ],
+        "charging": {
+          "track": "Ultimate/states/astromancer/charging/track.png",
+          "fill": "Ultimate/states/astromancer/charging/fill.png",
+          "frame": "Ultimate/states/astromancer/charging/frame.png",
+          "core": "Ultimate/states/astromancer/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/astromancer/ready/track.png",
+          "fill": "Ultimate/states/astromancer/ready/fill.png",
+          "frame": "Ultimate/states/astromancer/ready/frame.png",
+          "core": "Ultimate/states/astromancer/ready/core.png",
+          "glow": "Ultimate/states/astromancer/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/astromancer/unavailable/track.png",
+          "fill": "Ultimate/states/astromancer/unavailable/fill.png",
+          "frame": "Ultimate/states/astromancer/unavailable/frame.png",
+          "core": "Ultimate/states/astromancer/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/astromancer/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/astromancer/ready-loop-0",
+            "AstellaUltimateMotion/astromancer/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    },
+    {
+      "jobId": "job.mirror-phantom",
+      "slug": "mirror-phantom",
+      "job": {
+        "kind": "count",
+        "track": "Job/mirror-phantom/track.png",
+        "frame": "Job/mirror-phantom/frame.png",
+        "fill": "",
+        "fillBounds": [
+          0,
+          0,
+          400,
+          240
+        ],
+        "direction": "individual-token",
+        "value": [
+          355,
+          232
+        ],
+        "fontSize": 32,
+        "showMaximum": true,
+        "tokens": [
+          {
+            "active": "Job/mirror-phantom/active-token-1.png",
+            "empty": "Job/mirror-phantom/empty-token-1.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/mirror-phantom/active-token-2.png",
+            "empty": "Job/mirror-phantom/empty-token-2.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          },
+          {
+            "active": "Job/mirror-phantom/active-token-3.png",
+            "empty": "Job/mirror-phantom/empty-token-3.png",
+            "rect": [
+              0,
+              0,
+              400,
+              240
+            ]
+          }
+        ]
+      },
+      "ultimate": {
+        "chargeBounds": [
+          44,
+          48,
+          272,
+          166
+        ],
+        "value": [
+          180,
+          241
+        ],
+        "charging": {
+          "track": "Ultimate/states/mirror-phantom/charging/track.png",
+          "fill": "Ultimate/states/mirror-phantom/charging/fill.png",
+          "frame": "Ultimate/states/mirror-phantom/charging/frame.png",
+          "core": "Ultimate/states/mirror-phantom/charging/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-charging.png",
+          "symbol": "Ultimate/state-badges/symbol-charging.png"
+        },
+        "ready": {
+          "track": "Ultimate/states/mirror-phantom/ready/track.png",
+          "fill": "Ultimate/states/mirror-phantom/ready/fill.png",
+          "frame": "Ultimate/states/mirror-phantom/ready/frame.png",
+          "core": "Ultimate/states/mirror-phantom/ready/core.png",
+          "glow": "Ultimate/states/mirror-phantom/ready/full-glow.png",
+          "badge": "Ultimate/state-badges/key-ready.png",
+          "symbol": "Ultimate/state-badges/symbol-ready.png"
+        },
+        "unavailable": {
+          "track": "Ultimate/states/mirror-phantom/unavailable/track.png",
+          "fill": "Ultimate/states/mirror-phantom/unavailable/fill.png",
+          "frame": "Ultimate/states/mirror-phantom/unavailable/frame.png",
+          "core": "Ultimate/states/mirror-phantom/unavailable/core.png",
+          "glow": "",
+          "badge": "Ultimate/state-badges/key-unavailable.png",
+          "symbol": "Ultimate/state-badges/symbol-unavailable.png"
+        },
+        "burst": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/mirror-phantom/charge-burst-0"
+          ],
+          "frameCount": 16,
+          "framesPerSheet": 16,
+          "columns": 4,
+          "framesPerSecond": 24
+        },
+        "loop": {
+          "sheetResourcePaths": [
+            "AstellaUltimateMotion/mirror-phantom/ready-loop-0",
+            "AstellaUltimateMotion/mirror-phantom/ready-loop-1"
+          ],
+          "frameCount": 48,
+          "framesPerSheet": 24,
+          "columns": 4,
+          "framesPerSecond": 20
+        }
+      }
+    }
+  ]
+}
