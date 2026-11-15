@@ -86,6 +86,9 @@ namespace RaidRogue
             _modal.SetActive(true);
             _modal.transform.SetAsLastSibling();
         }
+        public static void CloseForSessionEnd()
+        { foreach (var ui in Object.FindObjectsByType<LocalCameraSettingsUI>(FindObjectsSortMode.None)) ui.Close(); }
+
         private void Close()
         {
             if (!_open) return;

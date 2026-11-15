@@ -30,7 +30,7 @@ namespace RaidRogue
         { _recovering = _recoveryConnecting = false; ++_generation; }
         public void RequestRecovery()
         {
-            if (!CanRecover || Session == null || (Session.Mode != RaidSessionMode.Menu && Session.Mode != RaidSessionMode.Disconnected)) return;
+            if (!CanRecover || Session == null || Session.Ending || (Session.Mode != RaidSessionMode.Menu && Session.Mode != RaidSessionMode.Disconnected)) return;
             // A running raid keeps its lobby closed. Steam permits metadata lookup without membership;
             // only the host's authenticated transport identity/slot ledger can authorize a return.
             ulong lobby = PreviousLobby; Session.BeginRecoveryLookup();
@@ -42,7 +42,7 @@ namespace RaidRogue
         }
         private void RecoveryMetadata(bool success)
         {
-            if (!_recovering || _recoveryConnecting || Session == null) return;
+            if (!_recovering || _recoveryConnecting || Session == null || Session.Ending) return;
             if (!success) { RecoveryError("이전 방이 사라졌거나 세션이 종료되었습니다.", true); return; }
             var data = Metadata();
             if (data["game"] != RaidSteamPolicy.Game || data["build"] != Build || data["protocol"] != RaidWire.Version.ToString(CultureInfo.InvariantCulture))

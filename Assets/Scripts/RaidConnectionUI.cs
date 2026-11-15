@@ -3,11 +3,13 @@ using UnityEngine.UI;
 
 namespace RaidRogue
 {
+    [DefaultExecutionOrder(2000)]
     public sealed class RaidConnectionUI : MonoBehaviour
     {
         private RaidNetworkSession _session;
         private GameObject _overlay, _start, _room, _bar;
-        private Text _status, _barText, _roster;
+        private Text _status, _barText, _roster, _flowText;
+        private GameObject _flowBar;
         private InputField _name, _address;
         private readonly Button[] _roles = new Button[4];
         private Font _font;
@@ -73,6 +75,11 @@ namespace RaidRogue
             _bar = bar.gameObject;
             _barText = Label(bar, "", new Vector2(-65, 0), new Vector2(245, 60), 15);
             ButtonAt(bar, "접속 / 역할", new Vector2(125, 0), new Vector2(115, 48), () => _session.MenuOpen = true);
+            var flow = Box(canvas.transform, "RunFlow_Status", Vector2.zero, new Vector2(1000, 52), new Color(.03f, .06f, .1f, .97f));
+            flow.anchorMin = flow.anchorMax = new Vector2(.5f, 1); flow.pivot = new Vector2(.5f, 1); flow.anchoredPosition = new Vector2(0, -8);
+            _flowBar = flow.gameObject;
+            _flowText = Label(flow, "", new Vector2(-90, 0), new Vector2(790, 48), 17);
+            ButtonAt(flow, "메뉴 / 나가기", new Vector2(405, 0), new Vector2(175, 42), () => _session.MenuOpen = true);
         }
         private void Connect(bool host)
         {
@@ -107,7 +114,11 @@ namespace RaidRogue
             _ready.GetComponentInChildren<Text>().text = _session.LocalReady ? "준비 완료 · 취소" : "준비";
             bool starting = _session.Mode == RaidSessionMode.Menu;
             _start.SetActive(starting); _room.SetActive(!starting);
-            _status.text = _session.Status;
+            _status.text = _session.Status + "\n" + _session.FlowStatus;
+            _flowText.text = _session.FlowStatus;
+            bool singleModal = _session.Mode == RaidSessionMode.Single && StageManager.CombatSuspended;
+            if (singleModal) _flowText.text = StageManager.Instance.CanSelectInitialRole ? "직업 선택 후 준비 카운트다운을 시작합니다" : "전투 준비 / 결과 확인 · 메뉴에서 새 런을 시작할 수 있습니다";
+            _flowBar.SetActive(!_session.MenuOpen && !recovering && (_flowText.text.Length > 0 || singleModal));
             _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanJoinBattle);
             _beginBattle.interactable = _session.CanStartLobby;
             _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\nSPACE 대쉬 · Q 포션";
@@ -166,10 +177,12 @@ namespace RaidRogue
         }
         private void LateUpdate()
         {
+            if (_flowBar != null && _flowBar.activeSelf) _flowBar.transform.SetAsLastSibling();
+            if (_overlay != null && _overlay.activeSelf) _overlay.transform.SetAsLastSibling();
             if (_recoveryPanel != null && _recoveryPanel.activeSelf) _recoveryPanel.transform.SetAsLastSibling();
             if (_partyNotice != null && _partyNotice.gameObject.activeSelf) _partyNotice.transform.SetAsLastSibling();
             if (_confirmation != null && _confirmation.activeSelf) _confirmation.transform.SetAsLastSibling();
         }
-        private void OnDestroy() { if (_overlay != null) Destroy(_overlay); if (_bar != null) Destroy(_bar); if (_confirmation != null) Destroy(_confirmation); if (_recoveryPanel != null) Destroy(_recoveryPanel); if (_partyNotice != null) Destroy(_partyNotice.gameObject); }
+        private void OnDestroy() { if (_flowBar != null) Destroy(_flowBar); if (_overlay != null) Destroy(_overlay); if (_bar != null) Destroy(_bar); if (_confirmation != null) Destroy(_confirmation); if (_recoveryPanel != null) Destroy(_recoveryPanel); if (_partyNotice != null) Destroy(_partyNotice.gameObject); }
     }
 }

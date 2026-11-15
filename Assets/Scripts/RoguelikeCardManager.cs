@@ -188,6 +188,7 @@ namespace RaidRogue
         /// </summary>
         public void OpenStageClearCardReward(int clearedStageNumber, Action onCardChosenCallback)
         {
+            if (_isSelectionOpen || StageManager.Instance?.Progress.Phase != RaidBattlePhase.Reward) return;
             _onCardSelectedCallback = onCardChosenCallback;
             OpenCardSelection(
                 $"★ STAGE {clearedStageNumber} 보스 토벌 완료! ★\n다음 스테이지(STAGE {clearedStageNumber + 1}) 진입 전 보상 카드를 1장 선택하세요"
@@ -268,7 +269,7 @@ namespace RaidRogue
 
         public void OnCardButtonClicked(int slotIndex)
         {
-            if (CombatMetricsUI.BlocksUnderlyingInput) return;
+            if (LocalGameplayInput.ModalCovered) return;
             if (RaidCombatAuthority.Active)
             {
                 if (_isSelectionOpen && slotIndex >= 0 && slotIndex < _currentOfferedCards.Count) RaidNetworkSession.Instance.RequestAction(8, (int)_currentOfferedCards[slotIndex].id);
@@ -279,10 +280,10 @@ namespace RaidRogue
                 return;
             }
 
+            if (StageManager.Instance == null || StageManager.Instance.Progress.Phase != RaidBattlePhase.Reward) return;
             RoguelikeCardData chosen = _currentOfferedCards[slotIndex];
+            _isSelectionOpen = false; // Consume before applying or invoking another state transition.
             ApplyCardEffect(chosen);
-
-            _isSelectionOpen = false;
             if (cardSelectionModalRoot != null)
             {
                 cardSelectionModalRoot.SetActive(false);
@@ -293,6 +294,12 @@ namespace RaidRogue
             Action callback = _onCardSelectedCallback;
             _onCardSelectedCallback = null;
             callback?.Invoke();
+        }
+
+        public void CancelPendingSelection()
+        {
+            _onCardSelectedCallback = null; _isSelectionOpen = false; _currentOfferedCards.Clear(); _networkOfferEpoch = -1;
+            if (cardSelectionModalRoot != null) cardSelectionModalRoot.SetActive(false);
         }
 
         private void ApplyCardEffect(RoguelikeCardData card)
@@ -473,38 +480,22 @@ namespace RaidRogue
 
         private void HandleUnscaledCardModalInput()
         {
-            if (CombatMetricsUI.BlocksUnderlyingInput) return;
-            bool mouseClicked = false;
-            Vector2 mousePos = Vector2.zero;
-
+            if (LocalGameplayInput.ModalCovered) return;
 #if ENABLE_INPUT_SYSTEM
-            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
             {
-                mouseClicked = true;
-                mousePos = Mouse.current.position.ReadValue();
+                if (keyboard.digit1Key.wasPressedThisFrame) OnCardButtonClicked(0);
+                else if (keyboard.digit2Key.wasPressedThisFrame) OnCardButtonClicked(1);
+                else if (keyboard.digit3Key.wasPressedThisFrame) OnCardButtonClicked(2);
             }
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            if (Input.GetKeyDown(KeyCode.Alpha1)) OnCardButtonClicked(0);
+            else if (Input.GetKeyDown(KeyCode.Alpha2)) OnCardButtonClicked(1);
+            else if (Input.GetKeyDown(KeyCode.Alpha3)) OnCardButtonClicked(2);
 #endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (!mouseClicked && Input.GetMouseButtonDown(0))
-            {
-                mouseClicked = true;
-                mousePos = Input.mousePosition;
-            }
-#endif
-
-            if (mouseClicked && cardButtons != null)
-            {
-                for (int i = 0; i < cardButtons.Length; i++)
-                {
-                    if (cardButtons[i] == null) continue;
-                    RectTransform rt = cardButtons[i].GetComponent<RectTransform>();
-                    if (rt != null && RectTransformUtility.RectangleContainsScreenPoint(rt, mousePos, null))
-                    {
-                        OnCardButtonClicked(i);
-                        return;
-                    }
-                }
-            }
+            // Pointer clicks go through the existing EventSystem button. A manual screen-rectangle
+            // fallback also clicked cards behind other modals and dispatched a second network request.
         }
 
         public bool HasCard(RoguelikeCardId id)

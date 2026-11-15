@@ -15,17 +15,24 @@ namespace RaidRogue
         private readonly HashSet<int> _expiryNotices = new HashSet<int>();
         public string PartyNotice { get; private set; }
         public bool IsRecovering => Mode == RaidSessionMode.Disconnected || Mode == RaidSessionMode.Restoring || _resumeRequested;
-        public bool ControlsReady => _controlReady && Mode != RaidSessionMode.Disconnected && Mode != RaidSessionMode.Restoring;
+        public bool ControlsReady => !Ending && _controlReady && Mode != RaidSessionMode.Disconnected && Mode != RaidSessionMode.Restoring;
         public bool ResumeRequested => _resumeRequested;
         public string VisiblePartyNotice => Time.unscaledTime < _noticeUntil ? PartyNotice : "";
         public bool KnowsSteamMember(ulong id) => _recovery.Find(id) != null;
+        private readonly RaidAdmissionWait _admissionWait = new RaidAdmissionWait();
         public bool HasUnapprovedLobbyGuests(List<ulong> members)
-        { foreach (var id in members) if (id != RaidSteamRuntime.Instance.UserId && !_roster.Members.Exists(m => m.SteamId == id)) return true; return false; }
+        {
+            _admissionWait.Retain(members); bool waiting = false;
+            foreach (var id in members)
+                waiting |= _admissionWait.Waiting(id, id == RaidSteamRuntime.Instance.UserId || _roster.Members.Exists(m => m.SteamId == id), ServerTime, StageManager.Instance.FlowSettings.lobbyApprovalSeconds);
+            return waiting;
+        }
         private void RegisterRecoveryMember(RaidRoster.Member member)
         { if (UsesSteam && member.Id != _localId) _recovery.Register(member.SteamId, member.Id); }
         private void DropPeer(Peer peer)
         {
             if (peer.Id == 0) return;
+            Debug.Log($"[Raid {SessionTag}] epoch={BattleEpoch} actor={peer.Id} disconnected; voluntary={peer.Voluntary} phase={BattlePhase}");
             if (UsesSteam && !peer.Voluntary && _recovery.Actor(peer.Id) != null)
             {
                 bool wasHuman = _recovery.Actor(peer.Id).State == RaidControlState.Connected;
@@ -84,13 +91,14 @@ namespace RaidRogue
             peer.Inputs.DiscardPending(); _actionGate.Remove(peer.Id);
             avatar.GetComponent<PlayerController>().SetNetworkMoving(false);
             var member = _roster.Members.Find(m => m.Id == peer.Id); member.Loaded = true; SyncLobbyAvatar(member);
+            Debug.Log($"[Raid {SessionTag}] epoch={BattleEpoch} actor={peer.Id} restored lease={peer.Lease} phase={BattlePhase}");
             BroadcastPartyNotice(avatar.DisplayName + " 복귀 성공");
             // The grant is part of a NEW full frame, after the AI-to-owner switch. Never restore client state on the host.
             SendCombatFrame(peer, CaptureCombatFrame());
         }
         private void UpdateRecoveryHost()
         {
-            if (!IsHost) return;
+            if (Ending || !IsHost) return;
             foreach (var slot in _recovery.All)
             {
                 _recovery.Expire(slot, ServerTime);
@@ -142,12 +150,13 @@ namespace RaidRogue
         }
         public void BeginRecoveryLookup()
         {
+            if (Ending) return;
             _steamSession = true; _controlReady = false; Mode = RaidSessionMode.Disconnected; MenuOpen = true;
             Status = "이전 세션을 확인하고 있습니다…";
         }
         public bool StartSteamRecovery(ulong host, string name)
         {
-            if ((Mode != RaidSessionMode.Menu && Mode != RaidSessionMode.Disconnected) || _player == null) return false;
+            if (Ending || (Mode != RaidSessionMode.Menu && Mode != RaidSessionMode.Disconnected) || _player == null) return false;
             _resumeRequested = true; _controlReady = false; _steamSession = true;
             _prediction.Clear(); _frameDirection = Vector3.zero; _dashQueued = false; _sequence = _lastSnapshot = _actionSequence = 0;
             _clockReady = false; _bestRtt = float.MaxValue;
@@ -155,7 +164,9 @@ namespace RaidRogue
         }
         private void UnexpectedClientLoss(string reason)
         {
+            if (Ending) return;
             if (!UsesSteam) { RequestReturn(reason); return; }
+            if (Mode != RaidSessionMode.Disconnected) Debug.LogWarning($"[Raid {SessionTag}] epoch={BattleEpoch} phase={BattlePhase} connection lost: {reason}");
             DisposeDriver(); _controlReady = false; _resumeRequested = false; Mode = RaidSessionMode.Disconnected; MenuOpen = true;
             _prediction.Clear(); _frameDirection = Vector3.zero; _dashQueued = false; _returnRequested = false;
             QuarterViewCamera.LocalCamera?.ReleaseOrbit();

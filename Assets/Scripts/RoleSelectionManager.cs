@@ -59,9 +59,8 @@ namespace RaidRogue
             EnsureUI();
             BindButtons();
 
-            // 기본 초기 세팅 (블레이드 근딜 기준 파티 초기화 후 즉시 직업 선택 창 오픈)
-            ApplySelectedRole(PlayerRole.Blade_MeleeDPS, repositionParty: true, showAlertBanner: false);
-            OpenRoleSelectionModal();
+            // SinglePlay explicitly opens selection; the menu preview must not start/reset a run.
+            CloseRoleSelectionModal();
         }
 
         private void OnDestroy()
@@ -87,7 +86,7 @@ namespace RaidRogue
 
         private void EnsureThreePartyBotsExist()
         {
-            PartyBotAI[] existingBots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
+            PartyBotAI[] existingBots = FindObjectsByType<PartyBotAI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             partyBots.Clear();
             foreach (PartyBotAI b in existingBots)
             {
@@ -99,7 +98,7 @@ namespace RaidRogue
 
             partyBots.Sort((a, b) => string.Compare(a.gameObject.name, b.gameObject.name, StringComparison.Ordinal));
 
-            while (partyBots.Count < 3)
+            while (!RaidNetworkSession.Multiplayer && partyBots.Count < 3)
             {
                 int idx = partyBots.Count + 1;
                 GameObject botObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
@@ -123,7 +122,7 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (LocalGameplayInput.IsTyping || LocalCameraSettingsUI.IsOpen) return;
+            if (LocalGameplayInput.ModalCovered) return;
             if (CombatMetricsUI.BlocksUnderlyingInput) return;
             // 단축키 [P]: 언제든 직업 선택 창 열기/닫기
             if (WasShortcutPPressed())
@@ -147,6 +146,8 @@ namespace RaidRogue
 
         private bool CanChangePartyRoles()
         {
+            if (RaidNetworkSession.Instance?.Ending == true || RaidNetworkSession.Multiplayer) return false;
+            if (stageManager != null && stageManager.CanSelectInitialRole) return true;
             if (StageManager.CombatSuspended) return false;
             foreach (var member in PartyLife.OrderedMembers())
                 if (!CombatRange.LivingPartyMember(member)) return false;
@@ -212,6 +213,7 @@ namespace RaidRogue
             _hasSelectedInitialRole = true;
             ApplySelectedRole(chosen, repositionParty: true, showAlertBanner: true);
             CloseRoleSelectionModal();
+            stageManager?.BeginSingleRun();
         }
 
         /// <summary>

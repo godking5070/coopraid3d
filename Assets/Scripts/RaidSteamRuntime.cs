@@ -82,6 +82,7 @@ namespace RaidRogue
         {
             if (!Available) return;
             SteamAPI.RunCallbacks();
+            if (Session != null && Session.Ending) return;
             if (_recovering) { if (Time.unscaledTime > _deadline) RecoveryError("재접속 시간이 초과되었습니다. 다시 시도해 주세요.", false); return; }
             if (_readOnlyRecovery) return;
             if (_invites.Pending != 0 && !_invites.NeedsConfirmation && !Busy && Session != null && Session.Mode == RaidSessionMode.Menu)
@@ -103,14 +104,14 @@ namespace RaidRogue
         }
         public void CreateRoom()
         {
-            if (!Available || Busy || LobbyId != 0 || Session == null || Session.Mode != RaidSessionMode.Menu) return;
-            _creating = true; _deadline = Time.unscaledTime + 30; int generation = ++_generation;
+            if (!Available || Busy || LobbyId != 0 || Session == null || Session.Ending || Session.Mode != RaidSessionMode.Menu) return;
+            _creating = true; _deadline = Time.unscaledTime + 30; int generation = ++_generation; var expectedSession = Session;
             Status = "친구 전용 Steam 방 생성 중…";
             CallResult<LobbyCreated_t> call = null;
             call = CallResult<LobbyCreated_t>.Create((result, failed) =>
             {
                 _calls.Remove(call); call.Dispose();
-                if (generation != _generation)
+                if (generation != _generation || expectedSession == null || Session != expectedSession || expectedSession.Ending)
                 { if (!failed && result.m_eResult == EResult.k_EResultOK) CleanupLateLobby(result.m_ulSteamIDLobby); return; }
                 _creating = false;
                 if (failed || result.m_eResult != EResult.k_EResultOK) { Fail("Steam 방 생성 실패: " + result.m_eResult); return; }
@@ -127,7 +128,7 @@ namespace RaidRogue
         }
         public void RequestInvite(ulong lobby)
         {
-            if (!Available || !new CSteamID(lobby).IsLobby()) return;
+            if (!Available || Session?.Ending == true || !new CSteamID(lobby).IsLobby()) return;
             if (lobby == PreviousLobby && Session != null && (Session.Mode == RaidSessionMode.Menu || Session.Mode == RaidSessionMode.Disconnected)) { RequestRecovery(); return; }
             bool occupied = LobbyId != 0 || Busy || (Session != null && Session.Mode != RaidSessionMode.Menu);
             if (!_invites.Request(lobby, LobbyId, occupied)) return;
@@ -145,12 +146,12 @@ namespace RaidRogue
         {
             ulong lobbyId = _invites.Begin(); if (lobbyId == 0) return;
             if (lobbyId == PreviousLobby) { _invites.Finish(); RequestRecovery(); return; }
-            int generation = ++_generation; _deadline = Time.unscaledTime + 30; Status = "Steam 로비 참가 중…";
+            int generation = ++_generation; var expectedSession = Session; _deadline = Time.unscaledTime + 30; Status = "Steam 로비 참가 중…";
             CallResult<LobbyEnter_t> call = null;
             call = CallResult<LobbyEnter_t>.Create((result, failed) =>
             {
                 _calls.Remove(call); call.Dispose();
-                if (generation != _generation)
+                if (generation != _generation || expectedSession == null || Session != expectedSession || expectedSession.Ending)
                 { if (!failed && result.m_EChatRoomEnterResponse == (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess) CleanupLateLobby(result.m_ulSteamIDLobby); return; }
                 if (failed || result.m_EChatRoomEnterResponse != (uint)EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess)
                 { Fail("로비 참가 실패: 방이 닫혔거나 정원이 찼거나 참가가 차단되었습니다 (" + result.m_EChatRoomEnterResponse + ")"); return; }
@@ -167,6 +168,7 @@ namespace RaidRogue
         }
         private void CheckHost()
         {
+            if (Session == null || Session.Ending) return;
             var data = Metadata();
             if (string.IsNullOrEmpty(data["game"])) { SteamMatchmaking.RequestLobbyData(new CSteamID(LobbyId)); return; }
             ulong owner = SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID;
@@ -183,7 +185,7 @@ namespace RaidRogue
         }
         public bool Admit(ulong remote)
         {
-            return Available && LobbyId != 0 && HostId == UserId && Session != null && (Session.KnowsSteamMember(remote) || (Session.CanJoinBattle && IsMember(remote) && LobbyCount <= 4)) &&
+            return Available && LobbyId != 0 && HostId == UserId && Session != null && !Session.Ending && (Session.KnowsSteamMember(remote) || (Session.CanJoinBattle && IsMember(remote) && LobbyCount <= 4)) &&
                 SteamMatchmaking.GetLobbyOwner(new CSteamID(LobbyId)).m_SteamID == HostId && remote != UserId;
         }
         public int LobbyCount => Available && LobbyId != 0 ? SteamMatchmaking.GetNumLobbyMembers(new CSteamID(LobbyId)) : 0;
