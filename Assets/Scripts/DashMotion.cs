@@ -58,6 +58,7 @@ namespace RaidRogue
 
         // Interruptions never refund or restart the cooldown.
         public void Cancel() { Active = false; _timeRemaining = _distanceRemaining = 0; }
+        public void ResetForRetry() { Cancel(); CooldownRemaining = CooldownDuration = 0; }
         private static bool PositiveFinite(float value) => value > 0 && !float.IsInfinity(value) && !float.IsNaN(value);
     }
 

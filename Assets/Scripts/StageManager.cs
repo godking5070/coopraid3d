@@ -12,6 +12,7 @@ namespace RaidRogue
     /// 다단계 스테이지(Stage 1 -> Stage 2 -> Stage 3 최종 보스) 보스 러시 루프 및
     /// 보스 처치 연출 -> 1.5초 뒤 로그라이크 카드 3택 보상 -> 파티 정비/재배치 -> 다음 보스 등장을 총괄하는 매니저 (Step 6).
     /// </summary>
+    [DefaultExecutionOrder(1000)]
     public class StageManager : MonoBehaviour
     {
         [Header("Stage Progression")]
@@ -20,6 +21,13 @@ namespace RaidRogue
 
         [Header("Common Potion (shared by all four party members)")]
         public PotionSettings potionSettings = new PotionSettings();
+        public ResurrectionSettings resurrectionSettings = new ResurrectionSettings();
+        public static StageManager Instance { get; private set; }
+        public static bool CombatSuspended => Instance != null && (Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared);
+        public bool IsWiped { get; private set; }
+        public bool IsPreparing { get; private set; }
+        private bool _pendingBossClear;
+        private PartyWipeUI _wipeUI;
 
         [Header("References")]
         public BossController boss;
@@ -45,11 +53,15 @@ namespace RaidRogue
         private bool _isAllStagesCleared;
         private bool _hasStartedEncounter;
 
-        public bool IsStageTransitioning => _isStageTransitioning;
+        public bool IsStageTransitioning => _isStageTransitioning || IsWiped || IsPreparing;
         public float TotalPlayTime => _totalPlayTime;
+
+        private void Awake() { Instance = this; }
+        private void OnDestroy() { if (Instance == this) Instance = null; }
 
         private void Start()
         {
+            _wipeUI = gameObject.AddComponent<PartyWipeUI>();
             if (boss == null) boss = FindFirstObjectByType<BossController>();
             if (player == null) player = FindFirstObjectByType<PlayerController>();
             if (cardManager == null) cardManager = FindFirstObjectByType<RoguelikeCardManager>();
@@ -74,7 +86,7 @@ namespace RaidRogue
                 return;
             }
 
-            if (!_isStageTransitioning && Time.timeScale > 0.01f)
+            if (!CombatSuspended && Time.timeScale > 0.01f)
             {
                 _totalPlayTime += Time.deltaTime;
             }
@@ -85,6 +97,7 @@ namespace RaidRogue
         /// </summary>
         public void StartStage(int stageNumber, bool resetPlayTime = false)
         {
+            IsWiped = IsPreparing = _pendingBossClear = false;
             int nextStage = Mathf.Clamp(stageNumber, 1, maxStage);
             bool retryingCurrentBoss = _hasStartedEncounter && currentStage == nextStage;
             if (resetPlayTime || retryingCurrentBoss)
@@ -129,11 +142,65 @@ namespace RaidRogue
         [ContextMenu("Retry Current Boss (Play Mode)")]
         public void RetryCurrentBoss()
         {
-            if (!Application.isPlaying || boss == null || _isStageTransitioning || _isAllStagesCleared) return;
+            if (!Application.isPlaying || boss == null || IsPreparing || _isStageTransitioning || _isAllStagesCleared || _pendingBossClear || boss.currentHp <= 0) return;
+            var metrics = CombatMetricsManager.Ensure(this);
+            if (!IsWiped) metrics.Ledger.FailAttempt();
+            metrics.Ledger.RegisterRetry();
+            IsPreparing = true; IsWiped = false;
+            StartCoroutine(RetryRoutine());
+        }
+
+        private IEnumerator RetryRoutine()
+        {
+            GetComponent<CombatMetricsUI>()?.CloseResults();
+            Time.timeScale = 1;
+            CleanupAttempt();
             ResetAndHealAllPartyMembers();
-            if (player != null && player.combatController != null)
-                player.combatController.OnPlayerRoleChanged(player.currentRole);
-            StartStage(currentStage); // Discards only this attempt's metrics; keeps prior cleared stages and cards.
+            foreach (var member in PartyLife.OrderedMembers()) PartyLife.Ensure(member.gameObject).ResetForEncounter();
+            cardManager?.ResetTemporaryCombatState();
+            boss.SetupBossForStage(currentStage);
+            for (int seconds = 3; seconds > 0; seconds--)
+            {
+                _wipeUI.ShowCountdown(seconds);
+                yield return new WaitForSecondsRealtime(1);
+            }
+            _wipeUI.Hide();
+            StartStage(currentStage);
+        }
+
+        // Resolve after all combat Updates. A kill and a wipe in one frame always award the clear once.
+        private void LateUpdate()
+        {
+            if (!_hasStartedEncounter || CombatSuspended || boss == null) return;
+            int living = 0;
+            var members = PartyLife.OrderedMembers();
+            foreach (var member in members) if (CombatRange.LivingPartyMember(member)) living++;
+            var outcome = PartyBattleRules.Resolve(_pendingBossClear || boss.currentHp <= 0, living, members.Count);
+            if (outcome == EncounterOutcome.Cleared)
+            {
+                _pendingBossClear = false;
+                CombatMetricsManager.Instance?.Ledger.EndStage();
+                CleanupAttempt();
+                StartCoroutine(BossDefeatedSequenceRoutine());
+            }
+            else if (outcome == EncounterOutcome.Wiped)
+            {
+                IsWiped = true;
+                CombatMetricsManager.Instance?.Ledger.FailAttempt();
+                CleanupAttempt();
+                _wipeUI.ShowWipe();
+            }
+        }
+
+        private void CleanupAttempt()
+        {
+            CombatMetricsManager.Instance?.Ledger.InvalidateEffects();
+            boss?.StopEncounterEffects();
+            boss?.addSpawner?.ResetWaveFlagsAndClearAdds();
+            foreach (var effect in FindObjectsByType<AoETelegraph>(FindObjectsSortMode.None)) { effect.gameObject.SetActive(false); Destroy(effect.gameObject); }
+            foreach (var effect in FindObjectsByType<HealingSanctuaryZone>(FindObjectsSortMode.None)) { effect.gameObject.SetActive(false); Destroy(effect.gameObject); }
+            foreach (var effect in FindObjectsByType<RangedBotProjectile>(FindObjectsSortMode.None)) { effect.gameObject.SetActive(false); Destroy(effect.gameObject); }
+            foreach (var cast in FindObjectsByType<BattleResurrection>(FindObjectsSortMode.None)) cast.Cancel();
         }
 
         /// <summary>
@@ -148,9 +215,7 @@ namespace RaidRogue
                 return;
             }
 
-            // The killing blow is recorded by BossController before this notification.
-            CombatMetricsManager.Instance?.Ledger.EndStage();
-            StartCoroutine(BossDefeatedSequenceRoutine());
+            _pendingBossClear = true;
         }
 
         private IEnumerator BossDefeatedSequenceRoutine()
@@ -266,6 +331,7 @@ namespace RaidRogue
                 victorySummaryText.text =
                     "<size=42><color=#FFE044><b>★ ALL STAGES CLEAR! VICTORY! ★</b></color></size>\n\n" +
                     $"<size=24><b>총 플레이 타임 :</b> <color=#55EEFF>{timeFormatted}</color></size>\n\n" +
+                    $"<size=22>전체 런 재도전: {CombatMetricsManager.Instance?.Ledger.RetryCount ?? 0}회</size>\n" +
                     "<size=22><color=#FFCC66><b>[최종 보유 로그라이크 카드 빌드 요약]</b></color></size>\n" +
                     $"<size=20>{cardsList}</size>";
             }

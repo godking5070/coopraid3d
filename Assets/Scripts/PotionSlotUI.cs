@@ -11,6 +11,7 @@ namespace RaidRogue
         private Image _background;
         private RectTransform _overlay;
         private Text _status;
+        private Text _description;
         private float _nextSearch;
 
         private void Awake() { _potion = GetComponent<CommonPotion>(); }
@@ -26,6 +27,7 @@ namespace RaidRogue
                 Build(hotbar.transform);
             }
             bool ready = _potion.CanUse;
+            _description.text = $"최대 HP {(_potion.Settings != null ? _potion.Settings.healFraction * 100 : 0):0.#}%\n즉시 회복 · GCD 별도";
             _background.color = ready ? new Color(0.12f, 0.32f, 0.2f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
             _overlay.anchorMax = new Vector2(1, _potion.CooldownFraction);
             _status.text = _potion.CooldownRemaining > 0 ? $"{_potion.CooldownRemaining:0.0}s" :
@@ -53,7 +55,7 @@ namespace RaidRogue
             shade.raycastTarget = false;
             Label(root, "Key", "Q 포션", 18, new Vector2(0, 0.72f), Vector2.one);
             _status = Label(root, "Status", "", 18, new Vector2(0, 0.36f), new Vector2(1, 0.72f));
-            Label(root, "Description", "최대 HP 50%\n즉시 회복 · GCD 별도", 12, Vector2.zero, new Vector2(1, 0.36f));
+            _description = Label(root, "Description", "", 12, Vector2.zero, new Vector2(1, 0.36f));
         }
 
         private static RectTransform Rect(string name, Transform parent)

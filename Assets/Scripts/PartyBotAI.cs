@@ -47,6 +47,8 @@ namespace RaidRogue
         private readonly CombatShieldLedger _metricsShields = new CombatShieldLedger();
         public bool isDead;
         public CommonPotion Potion { get; private set; }
+        public PartyLife Life { get; private set; }
+        public BattleResurrection Resurrection { get; private set; }
 
         [Header("Tank Settings (North Z+ Parking & Defensive)")]
         public float tankNorthParkingDistance = 4.8f;
@@ -92,7 +94,6 @@ namespace RaidRogue
         private string _customDisplayName;
         private float _actionTimer;
         private float _strafePhase;
-        private float _deadReviveTimer;
         private float _rescueCooldownTimer;
         private float _berserkerAttackSpeedTimer;
         private float _invulnerableTimer;
@@ -123,6 +124,8 @@ namespace RaidRogue
         private void Start()
         {
             Potion = CommonPotion.Ensure(gameObject);
+            Life = PartyLife.Ensure(gameObject);
+            Resurrection = GetComponent<BattleResurrection>();
             if (targetBoss == null)
             {
                 targetBoss = FindFirstObjectByType<BossController>();
@@ -166,6 +169,7 @@ namespace RaidRogue
 
         public void ConfigureBotRoleDynamic(PartyBotRole newRole, Vector3 spawnPos, bool reposition = true)
         {
+            Life?.ClearDeadForStagePlacement();
             Potion?.EndRevivalProtection();
             role = newRole;
             isDead = false;
@@ -313,7 +317,7 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (Time.timeScale <= 0.001f || targetBoss == null)
+            if (Time.timeScale <= 0.001f || targetBoss == null || StageManager.CombatSuspended)
             {
                 return;
             }
@@ -340,7 +344,6 @@ namespace RaidRogue
 
             if (isDead)
             {
-                UpdateDeadState();
                 UpdateOverheadHpBar();
                 return;
             }
@@ -405,6 +408,7 @@ namespace RaidRogue
         /// </summary>
         public void ResetBotForNewStage(Vector3 spawnPos)
         {
+            Life?.ClearDeadForStagePlacement();
             Potion?.EndRevivalProtection();
             isDead = false;
             CombatMetricsManager.SetDead(transform, false);
@@ -436,11 +440,7 @@ namespace RaidRogue
         /// </summary>
         public void StartPulledByPlayerRescue(Vector3 safeDestinationXZ, float invulnDuration = 3.0f)
         {
-            if (isDead)
-            {
-                return;
-            }
-
+            if (isDead || currentHp <= 0 || StageManager.CombatSuspended) return;
             _isBeingKnockedBack = false;
             _isBeingRescuedByPlayer = true;
             _rescueByPlayerTargetXZ = new Vector3(safeDestinationXZ.x, 1.0f, safeDestinationXZ.z);
@@ -474,6 +474,7 @@ namespace RaidRogue
         /// </summary>
         public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f)
         {
+            if (isDead || currentHp <= 0 || StageManager.CombatSuspended) return;
             if (isDead || _isBeingRescuedByPlayer)
             {
                 return;
@@ -573,9 +574,9 @@ namespace RaidRogue
             Vector3 bossPos = targetBoss.transform.position;
 
             // ① [4인 쉐어 (Stack)] 발동 중 -> 내 캐릭터(플레이어) 위치로 봇 3명이 즉시 달려와 뭉침!
-            if (targetBoss.IsStackMechanicActive && humanPlayer != null)
+            if (targetBoss.IsStackMechanicActive && targetBoss.StackTarget != null)
             {
-                Vector3 playerPos = humanPlayer.transform.position;
+                Vector3 playerPos = targetBoss.StackTarget.position;
                 Vector3 stackOffset = role switch
                 {
                     PartyBotRole.Tank => new Vector3(0f, 0f, 0.85f),
@@ -815,6 +816,8 @@ namespace RaidRogue
                 return;
             }
 
+            if (StageManager.CombatSuspended) return;
+            Potion?.EndRevivalProtection();
             isTankDefensiveActive = true;
             _tankDefensiveTimer = duration;
             ApplyBodyColor(new Color(0.35f, 0.95f, 1f, 1f));
@@ -857,100 +860,72 @@ namespace RaidRogue
 
         public void KillTankByUninterceptedTether()
         {
-            if (isDead)
-            {
-                return;
-            }
+            if (isDead || StageManager.CombatSuspended || IsInvulnerable || (Potion != null && Potion.HasRevivalProtection)) return;
+            currentHp = 0;
+            PartyLife.Ensure(gameObject).Die();
+        }
 
-            currentHp = 0f;
-            currentShield = 0f;
+        public void OnPartyDeath()
+        {
             isDead = true;
-            Potion?.EndRevivalProtection();
-            _metricsShields.Clear();
-            CombatMetricsManager.SetDead(transform, true);
+            currentHp = currentShield = 0;
+            ClearInterruptedActions();
+            ApplyBodyColor(new Color(0.3f, 0.3f, 0.34f, 0.5f));
+        }
+
+        private void ClearInterruptedActions()
+        {
+            _isBeingKnockedBack = _isBeingRescuedByPlayer = _isInterceptingTetherForPlayer = false;
             isTankDefensiveActive = false;
-            _deadReviveTimer = 6.5f;
-
-            transform.position = new Vector3(transform.position.x, 0.5f, transform.position.z);
-            transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-            ApplyBodyColor(new Color(0.25f, 0.25f, 0.28f, 1f));
-
-            FloatingTextPopup.Spawn(
-                transform.position + Vector3.up * 2.4f,
-                $"{role} DEAD!! (줄 가로채기 실패!)",
-                new Color(1f, 0.15f, 0.15f, 1f),
-                true
-            );
-
-            if (targetBoss != null && humanPlayer != null)
-            {
-                targetBoss.SetAggroTarget(humanPlayer.transform);
-            }
-        }
-
-        public void ReviveBot()
-        {
-            isDead = false;
-            CombatMetricsManager.SetDead(transform, false);
+            _tankDefensiveTimer = _invulnerableTimer = _rescueSpeedBoostTimer = _berserkerAttackSpeedTimer = _actionTimer = 0;
+            CurrentActionTarget = null;
             _metricsShields.Clear();
-            currentHp = maxHp;
-            currentShield = 0f;
-            Potion = CommonPotion.Ensure(gameObject);
-            Potion.GrantRevivalProtection(); // Separate from rescue immunity; does not reset potion cooldown.
-            transform.position = new Vector3(transform.position.x, 1.0f, transform.position.z);
-            transform.rotation = Quaternion.identity;
-            ApplyBodyColor(_defaultBodyColor);
-
-            FloatingTextPopup.Spawn(
-                transform.position + Vector3.up * 2.3f,
-                $"{role} 부활 완료!",
-                new Color(0.3f, 1f, 0.55f, 1f),
-                false
-            );
-
-            if (role == PartyBotRole.Tank && targetBoss != null &&
-                (humanPlayer == null || humanPlayer.currentRole != PlayerRole.Guardian_Tank))
-            {
-                targetBoss.SetAggroTarget(transform);
-            }
+            StopAllCoroutines(); _beamCoroutine = null;
+            if (_effectBeam != null) _effectBeam.enabled = false;
+            Resurrection?.Cancel();
         }
 
-        private void UpdateDeadState()
+        public void RestorePartyLife(float fraction, bool resetCooldowns = false)
         {
-            _deadReviveTimer -= Time.deltaTime;
-            if (_deadReviveTimer <= 0f)
-            {
-                ReviveBot();
-            }
+            ClearInterruptedActions();
+            isDead = false;
+            currentShield = 0;
+            currentHp = maxHp * Mathf.Clamp01(fraction);
+            ApplyBodyColor(_defaultBodyColor);
+            if (resetCooldowns) { _rescueCooldownTimer = 0; _lastRescuedTelegraph = null; }
         }
 
-        // =====================================================================
-        // 3. 힐러 봇 AI: 남서쪽 위치 유지, 최저 체력 아군 스마트 회복 & 위험 장판 80% 시 '구출(Rescue)'
-        // =====================================================================
+        public void ReviveBot() => PartyLife.Ensure(gameObject).TryRevive(0.4f);
+
         private void UpdateHealerAI()
         {
             _isInterceptingTetherForPlayer = false;
             Vector3 bossPos = targetBoss.transform.position;
-            Vector3 desiredSafePos = new Vector3(
-                bossPos.x + healerDesiredOffsetXZ.x,
-                1.0f,
-                bossPos.z + healerDesiredOffsetXZ.z
-            );
-
-            if (TryGetPartyMechanicDestinationXZ(out Vector3 mechanicPos))
+            Vector3 safePos = new Vector3(bossPos.x + healerDesiredOffsetXZ.x, 1f, bossPos.z + healerDesiredOffsetXZ.z);
+            bool mechanic = TryGetPartyMechanicDestinationXZ(out Vector3 mechanicPos);
+            if (mechanic) safePos = mechanicPos;
+            var hazard = targetBoss.ActiveTelegraph;
+            if (!mechanic && hazard != null && TryGetMeleeMechanicDestination(out mechanicPos))
             {
-                desiredSafePos = mechanicPos;
+                mechanic = true;
+                safePos = mechanicPos;
             }
-            else if (targetBoss.ActiveTelegraph != null &&
-                     targetBoss.ActiveTelegraph.telegraphType == AoETelegraphType.Donut_Inner4_Outer12)
+            bool emergency = false;
+            foreach (var member in PartyLife.OrderedMembers())
             {
-                desiredSafePos = new Vector3(bossPos.x - 2.1f, 1.0f, bossPos.z - 2.1f);
+                if (!CombatRange.LivingPartyMember(member)) continue;
+                var human = member.GetComponent<PlayerController>();
+                var bot = member.GetComponent<PartyBotAI>();
+                if ((human != null ? human.HpRatio : bot.HpRatio) <= 0.25f) { emergency = true; break; }
             }
+            if (mechanic || emergency) Resurrection?.Cancel();
+            CheckAndTriggerHealerRescue(safePos);
+            bool holdingOrApproaching = !mechanic && !emergency && TryHandleResurrection(hazard);
+            if (!holdingOrApproaching)
+                MoveTowardsXZ(safePos, BossLookPointXZ(), GetMoveSpeedMultiplier(mechanic ? 1.3f : 1f));
+            if (Resurrection != null && Resurrection.IsCasting) return;
 
-            MoveTowardsXZ(desiredSafePos, BossLookPointXZ(), GetMoveSpeedMultiplier(targetBoss.IsStackMechanicActive || targetBoss.IsSpreadMechanicActive ? 1.3f : 1.0f));
-
-            CheckAndTriggerHealerRescue(desiredSafePos);
-
+            // Healing keeps ticking while approaching a corpse, or when resurrection cannot be used.
             _actionTimer += Time.deltaTime * GetAttackSpeedMultiplier();
             if (_actionTimer >= healCheckInterval)
             {
@@ -959,9 +934,43 @@ namespace RaidRogue
             }
         }
 
+        private bool TryHandleResurrection(AoETelegraph hazard)
+        {
+            if (Resurrection == null) return false;
+            if (Resurrection.IsCasting) return true;
+            if (Resurrection.Cooldown > 0) return false;
+            Transform corpse = Resurrection.ChooseBotTarget();
+            if (corpse == null) return false;
+            float range = Resurrection.Settings.range;
+            if (BattleResurrection.FlatDistance(transform.position, corpse.position) <= range)
+            {
+                Resurrection.TryBegin(corpse);
+                return true; // Stand still for the next attempt if we moved earlier this frame.
+            }
+            Vector3 best = transform.position;
+            float closest = float.PositiveInfinity;
+            for (int i = 0; i < 24; i++)
+            {
+                float angle = i * Mathf.PI * 2 / 24;
+                Vector3 candidate = corpse.position + new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * Mathf.Max(0, range - 1f);
+                candidate = CombatRange.ClampToArena(candidate, PartyArenaRadius);
+                candidate.y = transform.position.y;
+                if (BattleResurrection.FlatDistance(candidate, corpse.position) > range - 0.1f) continue;
+                bool safe = true;
+                for (int sample = 1; sample <= 12 && hazard != null; sample++)
+                    if (hazard.IsPointInsideXZ(Vector3.Lerp(transform.position, candidate, sample / 12f))) { safe = false; break; }
+                if (!safe) continue;
+                float distance = (candidate - transform.position).sqrMagnitude;
+                if (distance < closest) { closest = distance; best = candidate; }
+            }
+            if (float.IsPositiveInfinity(closest)) return false;
+            MoveTowardsXZ(best, corpse.position, GetMoveSpeedMultiplier(1f));
+            return true;
+        }
+
         private void CheckAndTriggerHealerRescue(Vector3 healerSafeSpotXZ)
         {
-            if (humanPlayer == null || targetBoss == null || !targetBoss.IsCasting)
+            if (humanPlayer == null || humanPlayer.IsDead || targetBoss == null || !targetBoss.IsCasting)
             {
                 return;
             }
@@ -990,6 +999,8 @@ namespace RaidRogue
 
             if (telegraph.IsPointInsideXZ(humanPlayer.transform.position))
             {
+                Resurrection?.Cancel();
+                Potion?.EndRevivalProtection();
                 _lastRescuedTelegraph = telegraph;
                 _rescueCooldownTimer = rescueCooldown;
 
@@ -1083,14 +1094,14 @@ namespace RaidRogue
             {
                 CurrentActionTarget = humanPlayer.transform;
                 FaceTargetXZ(humanPlayer.transform.position);
-                humanPlayer.ReceiveHeal(healAmount, transform);
+                if (humanPlayer.ReceiveHeal(healAmount, transform) > 0) Potion?.EndRevivalProtection();
                 ShowTrackingHealBeam(humanPlayer.transform, healBeamDuration);
             }
             else if (targetBot != null)
             {
                 CurrentActionTarget = targetBot.transform;
                 FaceTargetXZ(targetBot.transform.position);
-                targetBot.ReceiveHeal(healAmount, transform);
+                if (targetBot.ReceiveHeal(healAmount, transform) > 0) Potion?.EndRevivalProtection();
                 ShowTrackingHealBeam(targetBot.transform, healBeamDuration);
             }
             else if (targetBoss != null)
@@ -1142,11 +1153,8 @@ namespace RaidRogue
 
         private void FireProjectileAtBoss()
         {
-            if (targetBoss == null)
-            {
-                return;
-            }
-
+            if (targetBoss == null || targetBoss.currentHp <= 0 || isDead || StageManager.CombatSuspended) return;
+            Potion?.EndRevivalProtection();
             BossAddMinion priorityAdd = BossAddSpawner.Instance != null
                 ? BossAddSpawner.Instance.GetPriorityAddForBot(PartyBotRole.RangedDPS)
                 : null;
@@ -1227,7 +1235,7 @@ namespace RaidRogue
 
         public void TakeDamage(float rawAmount, bool allowLethal = false)
         {
-            if (isDead)
+            if (isDead || currentHp <= 0 || rawAmount <= 0 || StageManager.CombatSuspended)
             {
                 return;
             }
@@ -1258,8 +1266,7 @@ namespace RaidRogue
                 _metricsShields.Absorb(absorbedByShield, CombatMetricsManager.Absorption);
             }
 
-            float minClamp = allowLethal ? 0f : 120f;
-            currentHp = Mathf.Max(minClamp, currentHp - finalAmount);
+            currentHp = Mathf.Max(0f, currentHp - finalAmount);
 
             string msg = isTankDefensiveActive
                 ? $"-{Mathf.RoundToInt(finalAmount)} (생존기 방어!)"
@@ -1273,15 +1280,15 @@ namespace RaidRogue
 
             FloatingTextPopup.Spawn(transform.position + Vector3.up * 2.0f, msg, col, isTankDefensiveActive);
 
-            if (allowLethal && currentHp <= 0.1f)
+            if (currentHp <= 0f)
             {
-                KillTankByUninterceptedTether();
+                PartyLife.Ensure(gameObject).Die();
             }
         }
 
         public float ReceiveHeal(float amount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
-            if (isDead || amount <= 0f)
+            if (isDead || currentHp <= 0 || amount <= 0f || StageManager.CombatSuspended)
             {
                 return 0;
             }
@@ -1305,7 +1312,7 @@ namespace RaidRogue
 
         public void AddShield(float shieldAmount, Transform source = null)
         {
-            if (isDead || shieldAmount <= 0f)
+            if (isDead || currentHp <= 0 || shieldAmount <= 0f || StageManager.CombatSuspended)
             {
                 return;
             }
@@ -1561,7 +1568,7 @@ namespace RaidRogue
             {
                 if (isDead)
                 {
-                    _nameLabelText.text = $"TANK [사망 - 부활 {_deadReviveTimer:F1}s]";
+                    _nameLabelText.text = "TANK [전투 불능 · 부활 대기]";
                     _nameLabelText.color = new Color(1f, 0.3f, 0.3f, 1f);
                 }
                 else if (isTankDefensiveActive)
@@ -1678,7 +1685,7 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (_encounterId != CombatMetricsManager.EncounterId) { Destroy(gameObject); return; }
+            if (_encounterId != CombatMetricsManager.EncounterId || StageManager.CombatSuspended || !CombatRange.LivingPartyMember(_source)) { Destroy(gameObject); return; }
             if (Time.timeScale <= 0.001f) return;
             _lifetime -= Time.deltaTime;
             if (_lifetime <= 0f || _targetBoss == null || _targetBoss.IsBossDefeatedCollapse)

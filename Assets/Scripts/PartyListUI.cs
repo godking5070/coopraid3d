@@ -456,7 +456,7 @@ namespace RaidRogue
                     player.currentShield,
                     isPlayerAggro,
                     isPlayerTargeted,
-                    isDead: false
+                    isDead: player.IsDead
                 );
             }
 
@@ -543,6 +543,8 @@ namespace RaidRogue
                 string targetPrefix = isTargetedByPlayer ? "<color=#33E6FF>▶ </color>" : "";
                 string aggroTag = isAggroTop && !isDead ? " <color=#FF4444>[어그로1]</color>" : "";
                 string deadTag = isDead ? " <color=#FF3333>(전투불능)</color>" : "";
+                if (!isDead && row.boundTarget != null && row.boundTarget.GetComponent<CommonPotion>()?.HasRevivalProtection == true)
+                    deadTag = " <color=#88FFFF>[부활 보호]</color>";
                 row.memberNameText.text = $"{targetPrefix}{displayName}{aggroTag}{deadTag}";
                 row.memberNameText.color = isDead
                     ? new Color(0.6f, 0.6f, 0.65f, 1f)

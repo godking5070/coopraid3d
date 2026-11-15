@@ -26,7 +26,7 @@ namespace RaidRogue
         public bool HasRevivalProtection => _state.RevivalProtectionRemaining > 0;
         public float CurrentHp => _player != null ? _player.currentHp : _bot != null ? _bot.currentHp : 0;
         public float MaximumHp => _player != null ? _player.maxHp : _bot != null ? _bot.maxHp : 0;
-        public bool IsAlive => CurrentHp > 0 && (_player != null || (_bot != null && !_bot.isDead));
+        public bool IsAlive => CurrentHp > 0 && (_player != null ? !_player.IsDead : _bot != null && !_bot.isDead);
         public PotionSettings Settings
         {
             get
@@ -35,7 +35,7 @@ namespace RaidRogue
                 return _stage != null ? _stage.potionSettings : FallbackSettings;
             }
         }
-        private bool UseBlocked => !isActiveAndEnabled || ItemsBlocked || Time.timeScale <= 0.001f ||
+        private bool UseBlocked => !isActiveAndEnabled || ItemsBlocked || StageManager.CombatSuspended || Time.timeScale <= 0.001f ||
             (_stage != null && (_stage.IsStageTransitioning || (_stage.boss != null && _stage.boss.IsBossDefeatedCollapse))) ||
             (_player != null && (!_player.isActiveAndEnabled || _player.IsStunned || LocalGameplayInput.Blocked)) ||
             (_bot != null && !_bot.isActiveAndEnabled);

@@ -415,6 +415,8 @@ namespace RaidRogue
             if (p != null)
             {
                 List<string> tags = new List<string>();
+                if (p.IsDead) return "전투 불능 · [5] 힐러 부활 대상";
+                if (p.Potion != null && p.Potion.HasRevivalProtection) tags.Add("부활 보호");
                 if (p.IsDefensiveBuffActive) tags.Add($"생존기 ON (피해감소 {Mathf.RoundToInt(p.CurrentDamageReduction * 100f)}%)");
                 if (p.currentShield > 1f) tags.Add($"보호막 +{Mathf.RoundToInt(p.currentShield)}");
                 if (p.HasTacticalRescueBuff) tags.Add("전술적 구출(공격력 2배)");
@@ -426,6 +428,7 @@ namespace RaidRogue
             {
                 if (bot.isDead) return "전투 불능 (부활 대기 중)";
                 List<string> tags = new List<string>();
+                if (bot.Potion != null && bot.Potion.HasRevivalProtection) tags.Add("부활 보호");
                 if (bot.isTankDefensiveActive) tags.Add("철벽 방어 ON");
                 if (bot.IsInvulnerable) tags.Add("구출 무적 ON");
                 if (bot.currentShield > 1f) tags.Add($"보호막 +{Mathf.RoundToInt(bot.currentShield)}");

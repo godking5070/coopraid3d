@@ -43,6 +43,9 @@ namespace RaidRogue
     {
         private readonly Dictionary<int, CombatMemberRecord> _members = new Dictionary<int, CombatMemberRecord>();
         private readonly List<CombatEncounterResult> _stages = new List<CombatEncounterResult>();
+        private readonly List<CombatEncounterResult> _failed = new List<CombatEncounterResult>();
+        public IReadOnlyList<CombatEncounterResult> FailedAttempts => _failed.AsReadOnly();
+        public int RetryCount { get; private set; }
         private readonly HashSet<int> _downMembers = new HashSet<int>();
         public bool Active { get; private set; }
         public int Stage { get; private set; }
@@ -68,6 +71,7 @@ namespace RaidRogue
             _members.Clear();
             _downMembers.Clear();
             _stages.Clear();
+            _failed.Clear(); RetryCount = 0;
         }
 
         public void BeginStage(int stage)
@@ -96,6 +100,17 @@ namespace RaidRogue
             _stages.Add(Snapshot());
             Active = false;
         }
+
+        public void FailAttempt()
+        {
+            if (!Active) return;
+            _failed.Add(Snapshot());
+            Active = false;
+            Generation++; // All delayed effects from the failed attempt become stale immediately.
+        }
+
+        public void RegisterRetry() => RetryCount++;
+        public void InvalidateEffects() => Generation++;
 
         public void RecordDamage(int source, double hpBefore, double hpAfter, bool isAdd)
         {

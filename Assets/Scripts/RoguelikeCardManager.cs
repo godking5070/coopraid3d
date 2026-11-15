@@ -412,6 +412,7 @@ namespace RaidRogue
 
         private void UpdateBerserkerShoutPassive()
         {
+            if (StageManager.CombatSuspended) return;
             if (_partyAttackSpeedBuffTimer > 0f)
             {
                 _partyAttackSpeedBuffTimer -= Time.deltaTime;
@@ -432,6 +433,11 @@ namespace RaidRogue
                 _berserkerShoutTimer = 0f;
                 TriggerBerserkerShoutPulse();
             }
+        }
+
+        public void ResetTemporaryCombatState()
+        {
+            _partyAttackSpeedBuffTimer = _berserkerShoutTimer = 0;
         }
 
         private void TriggerBerserkerShoutPulse()
