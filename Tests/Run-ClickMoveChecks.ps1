@@ -15,3 +15,5 @@ $settingsExe=Join-Path $outDir 'LocalSettingsTests.exe'
 if($LASTEXITCODE -ne 0){throw 'Settings regression failed to compile.'}
 & $settingsExe
 if($LASTEXITCODE -ne 0){throw 'Settings regression failed.'}
+& (Join-Path $PSScriptRoot 'Run-ControlsFormLayoutChecks.ps1') -Compiler $Compiler
+if($LASTEXITCODE -ne 0){throw 'Controls form layout regression failed.'}

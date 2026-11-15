@@ -38,7 +38,7 @@ namespace RaidRogue
                 _boss = FindFirstObjectByType<BossController>();
             }
             bool editing = LocalHUDLayoutController.IsEditing;
-            bool casting = _boss != null && _boss.IsCasting || editing;
+            bool casting = _boss != null && (_boss.IsCasting || _boss.IsGroggy) || editing;
             if (repositionTargetWhenIdle && targetLine != null && _lastCasting != casting)
             {
                 Vector2 anchor = casting ? castingAnchor : idleAnchor;

@@ -258,8 +258,7 @@ namespace RaidRogue
         private void BuildControls(RectTransform parent)
         {
             var form=parent.GetComponent<RaidUIForm>();
-            if(form?.Find<Button>("row.이동 방식")==null)
-                foreach(Transform child in parent)if(child is RectTransform rect)rect.anchoredPosition+=new Vector2(0,-90);
+            ExtendControlsForm(parent, _draft.bindings);
             float height=190+LocalBindingRules.Actions.Length*43;
             if(parent.sizeDelta.y<height)parent.sizeDelta=new Vector2(parent.sizeDelta.x,height);
             Row(parent,5,"이동 방식",()=>_draft.movementMode==1?"우클릭 이동":"키보드 이동",()=>{_draft.movementMode=1-_draft.movementMode;Preview();});
@@ -267,13 +266,41 @@ namespace RaidRogue
             for (int i = 0; i < _draft.bindings.Length; i++)
             {
                 int row = i; var definition = LocalBindingRules.Find(_draft.bindings[i].action); float y = 175 + i * 43;
-                var name = LabelTop(parent, definition.Name, y - 16, 330, 34, 17,"binding."+_draft.bindings[row].action); if(!RaidUIStyle.Authored(name))name.rectTransform.anchoredPosition = new Vector2(-230, -y + 16);
+                bool existingLabel = form?.Find<Text>("label.binding." + _draft.bindings[row].action) != null;
+                var name = LabelTop(parent, definition.Name, y - 16, 330, 34, 17,"binding."+_draft.bindings[row].action); if(!existingLabel||!RaidUIStyle.Authored(name))name.rectTransform.anchoredPosition = new Vector2(-230, -y + 16);
                 for (int slot = 0; slot < 2; slot++)
                 {
                     int captured = slot; var button = ButtonTop(parent, "", slot == 0 ? 35 : 225, y, 170, () => BeginCapture(row, captured),"binding."+_draft.bindings[row].action+"."+captured);
                     var label = button.GetComponent<RaidUIRepeatedItem>().label; _refresh.Add(() => { string key = LocalBindingRules.Get(_draft.bindings[row], captured); bool conflict = LocalBindingRules.Conflicts(_draft.bindings, row, captured, key).Count > 0; label.text = LocalInputBindings.KeyLabel(key) + (conflict ? " ⚠ 충돌" : ""); RaidUIStyle.Color(label, conflict ? new Color(1f,.6f,.3f) : Color.white); });
                 }
                 ButtonTop(parent, "×", 355, y, 60, () => { LocalBindingRules.TryBind(_draft.bindings, row, 1, "", false); Refresh(); },"clear."+_draft.bindings[row].action);
+            }
+        }
+        private static void ExtendControlsForm(RectTransform parent, LocalKeyBinding[] bindings)
+        {
+            var form = parent.GetComponent<RaidUIForm>();
+            if (form == null) return;
+            // Use the same registry key as Row/ButtonTop. Existing authored controls move
+            // only while the new movement row is absent, never on subsequent openings.
+            if (form.Find<Button>("button.row.이동 방식") == null)
+                foreach (Transform child in parent)
+                    if (child is RectTransform rect) rect.anchoredPosition += new Vector2(0, -90);
+
+            if (form.Find<Button>("button.binding.Interact.0") != null) return;
+            bool afterInteraction = false;
+            var moved = new HashSet<RectTransform>();
+            foreach (var binding in bindings)
+            {
+                if (binding.action == "Interact") { afterInteraction = true; continue; }
+                if (!afterInteraction) continue;
+                // Retain each old row's authored offsets, making one row of room for G.
+                foreach (string key in new[] { "label.binding." + binding.action,
+                    "button.binding." + binding.action + ".0", "button.binding." + binding.action + ".1",
+                    "button.clear." + binding.action })
+                {
+                    var rect = form.Find<Component>(key)?.transform as RectTransform;
+                    if (rect != null && moved.Add(rect)) rect.anchoredPosition += new Vector2(0, -43);
+                }
             }
         }
         private void BeginCapture(int row, int slot)
@@ -398,7 +425,8 @@ namespace RaidRogue
         }
         private void Row(Transform p, float y, string title, Func<string> value, UnityEngine.Events.UnityAction click, bool enabled = true)
         {
-            var label = LabelTop(p, title, y, 350, 40, 20); if(!RaidUIStyle.Authored(label))label.rectTransform.anchoredPosition = new Vector2(-205, -y);
+            bool existingLabel = p.GetComponent<RaidUIForm>()?.Find<Text>("label." + title) != null;
+            var label = LabelTop(p, title, y, 350, 40, 20); if(!existingLabel||!RaidUIStyle.Authored(label))label.rectTransform.anchoredPosition = new Vector2(-205, -y);
             var b = ButtonTop(p, "", 205, y + 20, 365, click,"row."+title); b.interactable = enabled; var text = b.GetComponent<RaidUIRepeatedItem>().label; _refresh.Add(() => text.text = value());
         }
         private void SliderAt(Transform parent, float y, string name, float min, float max, Func<float> get, Action<float> set)
