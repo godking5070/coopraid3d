@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -34,6 +35,9 @@ namespace RaidRogue
         public float moveSpeed = 7.8f;
         public float rotationSmoothSpeed = 720f;
         public float arenaBoundaryRadius = 18f;
+
+        [Header("Common SPACE Dash (all jobs, independent of GCD)")]
+        public DashSettings dashSettings = new DashSettings();
 
         [Header("Health (HP) & Shield (Step 8)")]
         public float maxHp = 1000f;
@@ -92,12 +96,26 @@ namespace RaidRogue
         public bool IsBeingKnockedBack => _isBeingKnockedBack;
         public bool HasTacticalRescueBuff => _tacticalRescueBuffTimer > 0f;
         public bool IsMovingXZ { get; private set; }
+        public bool IsDashing => _dash.Active;
+        public float DashCooldownRemaining => (float)_dash.CooldownRemaining;
+        public float DashCooldownFraction => _dash.CooldownDuration > 0
+            ? Mathf.Clamp01((float)(_dash.CooldownRemaining / _dash.CooldownDuration)) : 0;
+        // Shared voluntary-movement gates for status effects; the current encounters do not apply stuns/roots yet.
+        public bool IsStunned { get; set; }
+        public bool IsMovementLocked { get; set; }
+        public bool CanMoveVoluntarily => isActiveAndEnabled && currentHp > 0 && !IsStunned && !IsMovementLocked &&
+            !IsBeingRescued && !IsBeingKnockedBack && !LocalGameplayInput.Blocked;
+        public bool CanDash => CanMoveVoluntarily && !IsDashing && DashCooldownRemaining <= 0;
         public bool HasMovementIntent => !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
         public bool IsCastInterruptImmune => currentRole == PlayerRole.Archmage_Caster && IsDefensiveBuffActive;
 
         private float _defensiveRemainingTime;
         private float _tacticalRescueBuffTimer;
         private float _rescueSpeedBoostTimer;
+        private readonly DashMotion _dash = new DashMotion();
+        private readonly DashPressGate _dashPress = new DashPressGate();
+        private readonly PlayerMovementCollision _movementCollision = new PlayerMovementCollision();
+        private PlayerDashPresentation _dashPresentation;
 
         // 힐러 '구출(Rescue)' 끌려감 상태
         private bool _isBeingRescued;
@@ -161,6 +179,9 @@ namespace RaidRogue
             CreateSlashEffectLine();
             CreateOverheadHpBar("ME (블레이드·근딜)");
             ApplyRoleStatsAndVisuals(currentRole, false);
+            _dashPresentation = GetComponent<PlayerDashPresentation>();
+            if (_dashPresentation == null) _dashPresentation = gameObject.AddComponent<PlayerDashPresentation>();
+            _dashPresentation.Initialize(this);
 
             // Step 9: 통합 타겟팅 매니저 및 좌측 적 목록 UI 자동 보장
             if (FindFirstObjectByType<TargetingManager>() == null)
@@ -181,6 +202,12 @@ namespace RaidRogue
 
         private void Update()
         {
+            bool gameplayAllowed = !LocalGameplayInput.Blocked;
+            bool dashPressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), gameplayAllowed);
+            if (!CanMoveVoluntarily) _dash.Cancel();
+            // Player Update runs before EventSystem: SPACE belongs to dash during gameplay,
+            // never to Submit on a previously clicked skill/settings button. Text/menu input is preserved.
+            if (dashPressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
             if (Time.timeScale <= 0.001f)
             {
                 IsMovingXZ = false;
@@ -188,6 +215,8 @@ namespace RaidRogue
             }
 
             UpdateTimers();
+            _dash.TickCooldown(Time.deltaTime);
+            if (dashPressed) TryStartDash();
             Vector3 positionBeforeMovement = transform.position;
 
             if (_isBeingRescued)
@@ -197,6 +226,10 @@ namespace RaidRogue
             else if (_isBeingKnockedBack)
             {
                 UpdateKnockbackMovementXZ();
+            }
+            else if (IsDashing)
+            {
+                UpdateDashMovementXZ();
             }
             else
             {
@@ -210,8 +243,46 @@ namespace RaidRogue
             Vector3 actualMovement = transform.position - positionBeforeMovement;
             actualMovement.y = 0;
             IsMovingXZ = actualMovement.sqrMagnitude > 0.000001f;
+            if (IsMovingXZ && targetBoss != null)
+                targetBoss.TryInterceptPlayerMovement(this, positionBeforeMovement, transform.position);
             UpdateOverheadHpBar();
             UpdateHUD();
+        }
+
+        public bool TryStartDash()
+        {
+            Vector3 direction = GetMoveDirectionXZ(ReadMoveInput());
+            Vector3 facing = transform.forward;
+            if (!_dash.TryStart(dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
+            if (_dashPresentation != null) _dashPresentation.BeginDash();
+            return true;
+        }
+
+        private void UpdateDashMovementXZ()
+        {
+            Vector3 direction = new Vector3((float)_dash.DirectionX, 0, (float)_dash.DirectionZ);
+            Vector3 start = transform.position;
+            float distance = (float)_dash.Step(Time.deltaTime);
+            transform.position = _movementCollision.Move(this, direction, distance, out bool blocked);
+            if (blocked) _dash.Cancel();
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction),
+                rotationSmoothSpeed * Time.deltaTime);
+            if (_dashPresentation != null) _dashPresentation.RecordMovement(start, transform.position);
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (focused) return;
+            _dash.Cancel();
+            _dashPress.RequireRelease();
+        }
+
+        private void OnDisable()
+        {
+            _dash.Cancel();
+            _dashPress.RequireRelease();
+            IsMovingXZ = false;
+            if (_dashPresentation != null) _dashPresentation.ClearTrail();
         }
 
         private void UpdateTimers()
@@ -354,6 +425,10 @@ namespace RaidRogue
         /// </summary>
         public void ResetToFullHealthAndPosition(Vector3 spawnPos)
         {
+            _dash.Cancel();
+            _dashPress.RequireRelease();
+            IsStunned = IsMovementLocked = false;
+            if (_dashPresentation != null) _dashPresentation.ClearTrail();
             _isBeingRescued = false;
             _isBeingKnockedBack = false;
             currentHp = maxHp;
@@ -378,6 +453,8 @@ namespace RaidRogue
             {
                 return;
             }
+
+            _dash.Cancel(); // Rescue > knockback > dash > WASD; only one movement branch runs each frame.
 
             Vector3 dirXZ = new Vector3(
                 transform.position.x - originXZ.x,
@@ -430,6 +507,7 @@ namespace RaidRogue
 
         public void StartPulledByHealerRescue(Vector3 safeDestinationXZ)
         {
+            _dash.Cancel();
             _isBeingKnockedBack = false;
             _isBeingRescued = true;
             _rescueSpeedBoostTimer = 3.0f;
@@ -515,9 +593,8 @@ namespace RaidRogue
 
         private void HandleMovementXZ()
         {
-            Vector2 moveInput = LocalGameplayInput.Blocked ? Vector2.zero : ReadMoveInput();
-            QuarterViewCamera viewCamera = QuarterViewCamera.LocalCamera;
-            Vector3 moveDirXZ = viewCamera != null ? viewCamera.GetMovementDirection(moveInput) : new Vector3(moveInput.x, 0f, moveInput.y);
+            Vector2 moveInput = CanMoveVoluntarily ? ReadMoveInput() : Vector2.zero;
+            Vector3 moveDirXZ = GetMoveDirectionXZ(moveInput);
 
             if (moveDirXZ.sqrMagnitude > 1f)
             {
@@ -528,18 +605,11 @@ namespace RaidRogue
             {
                 IsMovingXZ = true;
                 float effectiveSpeed = moveSpeed * (_rescueSpeedBoostTimer > 0f ? 1.35f : 1.0f);
-                Vector3 nextPos = transform.position + moveDirXZ * (effectiveSpeed * Time.deltaTime);
-                nextPos.y = transform.position.y;
-
-                Vector2 flatPos = new Vector2(nextPos.x, nextPos.z);
-                if (flatPos.magnitude > arenaBoundaryRadius)
-                {
-                    flatPos = flatPos.normalized * arenaBoundaryRadius;
-                    nextPos.x = flatPos.x;
-                    nextPos.z = flatPos.y;
-                }
-
-                transform.position = nextPos;
+                Vector3 requested = transform.position + moveDirXZ * (effectiveSpeed * Time.deltaTime);
+                Vector2 bounded = Vector2.ClampMagnitude(new Vector2(requested.x, requested.z), arenaBoundaryRadius);
+                Vector3 delta = new Vector3(bounded.x - transform.position.x, 0, bounded.y - transform.position.z);
+                // Preserve WASD's existing slide along the arena edge, while sharing obstacle sweeps with dash.
+                transform.position = _movementCollision.Move(this, delta, delta.magnitude, out _);
 
                 Quaternion targetRotation = Quaternion.LookRotation(moveDirXZ.normalized, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(
@@ -552,6 +622,13 @@ namespace RaidRogue
             {
                 IsMovingXZ = false;
             }
+        }
+
+        private static Vector3 GetMoveDirectionXZ(Vector2 input)
+        {
+            QuarterViewCamera viewCamera = QuarterViewCamera.LocalCamera;
+            Vector3 direction = viewCamera != null ? viewCamera.GetMovementDirection(input) : new Vector3(input.x, 0, input.y);
+            return Vector3.ClampMagnitude(direction, 1f);
         }
 
         private void HandleLegacySkillInputs()
@@ -783,7 +860,7 @@ namespace RaidRogue
         public void FaceAttackTarget(Transform target)
         {
             // Movement owns body facing. Attack effects aim at the target independently.
-            if (target == null || HasMovementIntent || IsMovingXZ || IsBeingRescued || IsBeingKnockedBack) return;
+            if (target == null || HasMovementIntent || IsMovingXZ || IsDashing || IsBeingRescued || IsBeingKnockedBack) return;
             Vector3 direction = target.position - transform.position;
             direction.y = 0;
             if (direction.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
@@ -1021,11 +1098,33 @@ namespace RaidRogue
             hudStatusText.text =
                 $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [P] | 뷰: {viewModeLabel} [V])]</b>\n" +
                 $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[F1~F4]</b> 파티원 1~4번 | <b>[Tab]</b> 적(보스·쫄) 순환 | <b>[T]</b> 대상의 대상 | <b>[ESC]</b> 해제\n" +
-                $"• <b>이동/카메라</b> : {movementHint} | 우측 [카메라 설정]\n" +
+                $"• <b>이동/카메라</b> : {movementHint} · SPACE 대쉬 | 우측 [카메라 설정]\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
                 $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {targetBoss.LastHitMessage}\n" +
                 $"• <b>누적 카드 빌드</b> : <color=#FFE066>{cardsSummary}</color>";
+        }
+
+        private static bool WasDashPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKeyDown(KeyCode.Space);
+#else
+            return false;
+#endif
+        }
+
+        private static bool IsDashKeyHeld()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKey(KeyCode.Space);
+#else
+            return false;
+#endif
         }
 
         private static Vector2 ReadMoveInput()

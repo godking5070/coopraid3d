@@ -1370,6 +1370,24 @@ namespace RaidRogue
             }
         }
 
+        // Called after the player's actual collision-clipped movement, before this boss resolves
+        // its cast. A dash can cross the entire line in one frame without ending near it.
+        public void TryInterceptPlayerMovement(PlayerController player, Vector3 from, Vector3 to)
+        {
+            if (!_isTetherActive || _isTetherInterceptedByPlayer || _tetherTankTarget == null ||
+                player == null || player.currentHp <= 0 || player.transform != targetPlayer || _tetherTankTarget == targetPlayer) return;
+            Vector3 boss = transform.position, tank = _tetherTankTarget.position;
+            if (!DashGeometry.CrossesTether(from.x, from.z, to.x, to.z,
+                boss.x, boss.z, tank.x, tank.z, tetherInterceptRadius)) return;
+
+            _isTetherInterceptedByPlayer = true;
+            _tetherInterceptingBot = null;
+            SetMechanicAlert("줄 가로채기 성공! [3]번 생존기를 켜세요!",
+                new Color(0.2f, 1f, 0.45f, 1f), _castRemainingTime + 1.5f);
+            FloatingTextPopup.Spawn(targetPlayer.position + Vector3.up * 2.5f,
+                "줄 가로채기 성공! [3]번 생존기를 켜세요!", new Color(0.2f, 1f, 0.45f, 1f), true);
+        }
+
         private void UpdateTetherInterceptMechanic()
         {
             if (_tetherLineRenderer == null || _tetherTankTarget == null)
@@ -1386,28 +1404,7 @@ namespace RaidRogue
 
                 if (targetPlayer != null && _tetherTankTarget != targetPlayer)
                 {
-                    // 기존: 탱커 봇에게 연결된 줄을 플레이어가 가로채는 경우
-                    Vector2 pXZ = new Vector2(targetPlayer.position.x, targetPlayer.position.z);
-                    float distToSegment = DistancePointToSegmentXZ(pXZ, aXZ, bXZ, out float tOnSegment);
-
-                    if (distToSegment <= tetherInterceptRadius && tOnSegment >= 0.05f && tOnSegment <= 0.98f)
-                    {
-                        _isTetherInterceptedByPlayer = true;
-                        _tetherInterceptingBot = null;
-
-                        SetMechanicAlert(
-                            "줄 가로채기 성공! [3]번 생존기를 켜세요!",
-                            new Color(0.2f, 1f, 0.45f, 1f),
-                            _castRemainingTime + 1.5f
-                        );
-
-                        FloatingTextPopup.Spawn(
-                            targetPlayer.position + Vector3.up * 2.5f,
-                            "줄 가로채기 성공! [3]번 생존기를 켜세요!",
-                            new Color(0.2f, 1f, 0.45f, 1f),
-                            true
-                        );
-                    }
+                    TryInterceptPlayerMovement(targetPlayer.GetComponent<PlayerController>(), targetPlayer.position, targetPlayer.position);
                 }
                 else if (targetPlayer != null && _tetherTankTarget == targetPlayer)
                 {
