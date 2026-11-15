@@ -23,6 +23,11 @@ namespace RaidRogue
     /// </summary>
     public class PartyBotAI : MonoBehaviour
     {
+        [Header("Combat Body & Melee Ranges (world units)")]
+        [Min(0f)] public float combatRadius = 0.55f;
+        public MeleeRangeSettings meleeRanges = new MeleeRangeSettings();
+        public float MeleeAttackRange => meleeRanges.Get(role == PartyBotRole.Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank);
+        public bool CanMeleeHit(Transform target) => !isDead && CombatRange.LivingEnemy(target) && CombatRange.InRange(transform, target, MeleeAttackRange);
         [Header("Role & References")]
         public PartyBotRole role = PartyBotRole.Tank;
         public BossController targetBoss;
@@ -658,31 +663,16 @@ namespace RaidRogue
         private void UpdateTankAI()
         {
             _isInterceptingTetherForPlayer = false;
-            Vector3 bossPos = targetBoss.transform.position;
-            Vector3 desiredPos = new Vector3(
-                bossPos.x,
-                1.0f,
-                bossPos.z + tankNorthParkingDistance
-            );
-
-            if (TryGetPartyMechanicDestinationXZ(out Vector3 mechanicPos))
-            {
-                desiredPos = mechanicPos;
-            }
-            else if (targetBoss.ActiveTelegraph != null &&
-                     targetBoss.ActiveTelegraph.telegraphType == AoETelegraphType.Donut_Inner4_Outer12)
-            {
-                desiredPos = new Vector3(bossPos.x, 1.0f, bossPos.z + 2.8f);
-            }
+            // A world-space parking point must not move north each time the boss follows us.
+            Vector3 desiredPos = new Vector3(0, 1, tankNorthParkingDistance);
+            if (!targetBoss.isMeleeBoss || targetBoss.ResolveLivingAggroTarget() != transform)
+                desiredPos = CombatRange.AttackPosition(transform, targetBoss.transform, Vector3.forward, MeleeAttackRange);
+            if (TryGetMeleeMechanicDestination(out Vector3 mechanicPos)) desiredPos = mechanicPos;
+            desiredPos = CombatRange.ClampToArena(desiredPos, PartyArenaRadius);
 
             MoveTowardsXZ(desiredPos, BossLookPointXZ(), GetMoveSpeedMultiplier(targetBoss.IsStackMechanicActive || targetBoss.IsSpreadMechanicActive ? 1.25f : 1.0f));
 
-            // 플레이어가 탱커가 아닐 때는 탱커 봇이 어그로 1순위를 유지
-            if ((humanPlayer == null || humanPlayer.currentRole != PlayerRole.Guardian_Tank) &&
-                targetBoss.aggroTarget != transform)
-            {
-                targetBoss.SetAggroTarget(transform);
-            }
+            // Stage setup and taunts own aggro; do not overwrite a valid new target every frame.
 
             BossAddMinion priorityAdd = BossAddSpawner.Instance != null
                 ? BossAddSpawner.Instance.GetPriorityAddForBot(PartyBotRole.Tank)
@@ -694,10 +684,13 @@ namespace RaidRogue
                 priorityAdd.TauntBy(transform, botDisplayName);
             }
 
+            // Hold the boss's parking spot. Taunted adds can approach us; never hit distant stationary adds.
+            if (priorityAdd != null && !CanMeleeHit(priorityAdd.transform)) priorityAdd = null;
+
             CurrentActionTarget = priorityAdd != null ? priorityAdd.transform : targetBoss.transform;
 
-            _actionTimer += Time.deltaTime * GetAttackSpeedMultiplier();
-            if (_actionTimer >= tankAttackInterval)
+            _actionTimer = Mathf.Min(tankAttackInterval, _actionTimer + Time.deltaTime * GetAttackSpeedMultiplier());
+            if (_actionTimer >= tankAttackInterval && CanMeleeHit(CurrentActionTarget))
             {
                 _actionTimer = 0f;
                 if (priorityAdd != null)
@@ -760,43 +753,30 @@ namespace RaidRogue
 
             Vector3 desiredPos;
             Vector3 lookPoint = priorityAdd != null ? priorityAdd.transform.position : BossLookPointXZ();
-            if (TryGetPartyMechanicDestinationXZ(out Vector3 mechanicPos))
+            if (TryGetMeleeMechanicDestination(out Vector3 mechanicPos))
             {
                 desiredPos = mechanicPos;
             }
-            else if (targetBoss.ActiveTelegraph != null &&
-                     targetBoss.ActiveTelegraph.telegraphType == AoETelegraphType.Circle_Radius6)
-            {
-                // 원형 6m 장판 시전 중에는 남서/남동 바깥 안전거리(7.2m)로 잠시 회피
-                Vector3 backDir = -targetBoss.transform.forward;
-                backDir.y = 0f;
-                if (backDir.sqrMagnitude < 0.01f) backDir = Vector3.back;
-                desiredPos = bossPos + backDir.normalized * 7.2f;
-                desiredPos.y = 1.0f;
-            }
-            else if (priorityAdd != null && (targetBoss.ActiveTelegraph == null || targetBoss.ActiveTelegraph.telegraphType != AoETelegraphType.Donut_Inner4_Outer12))
+            else if (priorityAdd != null)
             {
                 // [Step 9] 소환된 쫄(동력 공급체 우선)이 살아있으면 쫄에게 접근하여 집중 타격!
                 Vector3 toAdd = priorityAdd.transform.position - bossPos;
-                toAdd.y = 0f;
-                Vector3 offsetFromAdd = toAdd.sqrMagnitude > 0.01f ? -toAdd.normalized * 1.6f : new Vector3(0f, 0f, -1.6f);
-                desiredPos = priorityAdd.transform.position + offsetFromAdd;
-                desiredPos.y = 1.0f;
+                desiredPos = CombatRange.AttackPosition(transform, priorityAdd.transform, -toAdd, MeleeAttackRange);
             }
             else
             {
-                // 평상시 및 도넛/부채꼴 장판 시에는 보스 후면(Rear 180도, 2.8m)에 위치하여 안전하게 후면 딜링!
+                // Recompute the rear position from the moving boss and its explicit combat radius.
                 Vector3 rearDir = -targetBoss.transform.forward;
                 rearDir.y = 0f;
                 if (rearDir.sqrMagnitude < 0.01f) rearDir = Vector3.back;
-                desiredPos = bossPos + rearDir.normalized * 2.85f;
-                desiredPos.y = 1.0f;
+                desiredPos = CombatRange.AttackPosition(transform, targetBoss.transform, rearDir, MeleeAttackRange);
             }
 
+            desiredPos = CombatRange.ClampToArena(desiredPos, PartyArenaRadius);
             MoveTowardsXZ(desiredPos, lookPoint, GetMoveSpeedMultiplier(1.15f));
 
-            _actionTimer += Time.deltaTime * GetAttackSpeedMultiplier();
-            if (_actionTimer >= meleeAttackInterval)
+            _actionTimer = Mathf.Min(meleeAttackInterval, _actionTimer + Time.deltaTime * GetAttackSpeedMultiplier());
+            if (_actionTimer >= meleeAttackInterval && CanMeleeHit(CurrentActionTarget))
             {
                 _actionTimer = 0f;
                 if (priorityAdd != null)
@@ -845,6 +825,30 @@ namespace RaidRogue
                 new Color(0.3f, 0.95f, 1f, 1f),
                 true
             );
+        }
+
+        private float PartyArenaRadius => Mathf.Max(0, (humanPlayer != null ? humanPlayer.arenaBoundaryRadius : 18f) - combatRadius - 0.5f);
+
+        private bool TryGetMeleeMechanicDestination(out Vector3 destination)
+        {
+            if (TryGetPartyMechanicDestinationXZ(out destination)) return true;
+            AoETelegraph aoe = targetBoss.ActiveTelegraph;
+            if (aoe == null) return false;
+            Vector3 direction = transform.position - aoe.transform.position;
+            direction.y = 0;
+            if (direction.sqrMagnitude < 0.001f) direction = -targetBoss.transform.forward;
+            if (aoe.telegraphType == AoETelegraphType.Circle_Radius6)
+                destination = aoe.transform.position + direction.normalized * (aoe.outerRadius + combatRadius + 0.4f);
+            else if (aoe.telegraphType == AoETelegraphType.Donut_Inner4_Outer12)
+            {
+                float safeRadius = Mathf.Max(0, aoe.innerRadius - combatRadius - 0.2f);
+                destination = aoe.transform.position + direction.normalized * Mathf.Min(safeRadius, targetBoss.CombatRadius + combatRadius + 0.2f);
+            }
+            else if (aoe.telegraphType == AoETelegraphType.FrontCone_120Deg)
+                destination = CombatRange.AttackPosition(transform, targetBoss.transform, -targetBoss.transform.forward, MeleeAttackRange);
+            else return false;
+            destination.y = transform.position.y;
+            return true;
         }
 
         public void KillTankByUninterceptedTether()

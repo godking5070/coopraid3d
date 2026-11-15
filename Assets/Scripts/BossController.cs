@@ -34,7 +34,8 @@ namespace RaidRogue
         IdleChasing,  // 어그로 1순위 추적(초당 90도 회전) 및 다음 스킬 대기
         CastingSkill, // 스킬 시전 중 (회전 완전 정지 & 시선 고정)
         Groggy,       // 50% 페이즈 전환 시 5초간 그로기 (받는 피해 +50%)
-        Defeated      // 보스 HP 0 도달 시 쓰러짐 연출 상태 (1.5초 후 보상 카드 팝업)
+        Defeated,     // 보스 HP 0 도달 시 쓰러짐 연출 상태 (1.5초 후 보상 카드 팝업)
+        MovingToPatternPosition // Reserved movement takes priority over aggro pursuit.
     }
 
     public enum BossSkillId
@@ -70,6 +71,27 @@ namespace RaidRogue
     /// </summary>
     public class BossController : MonoBehaviour
     {
+        [Header("Combat Body & Melee Pursuit (world units)")]
+        public bool isMeleeBoss = true;
+        // Keep the wide positional ring even when Unity restores an older, smaller serialized value.
+        [Tooltip("기존 넓은 원형이 최소 피격 반경입니다. 더 큰 값으로 조절할 수 있습니다.")]
+        [Min(CombatRangeMath.Stage1BossRingRadius)] public float stage1CombatRadius = CombatRangeMath.Stage1BossRingRadius;
+        [Min(CombatRangeMath.Stage2BossRingRadius)] public float stage2CombatRadius = CombatRangeMath.Stage2BossRingRadius;
+        [Min(CombatRangeMath.Stage3BossRingRadius)] public float stage3CombatRadius = CombatRangeMath.Stage3BossRingRadius;
+        // No extra weapon reach beyond the ring: only a small contact tolerance.
+        public float MeleeAttackRange => CombatRangeMath.MeleeContactTolerance;
+        [Min(0f)] public float chaseMoveSpeed = 2.8f;
+        [Min(0.01f)] public float chaseHysteresis = 0.05f;
+        public float arenaBoundaryRadius = 18f;
+        // Optional positional pattern configuration; existing patterns retain their original locations by default.
+        public bool centerBeforePartyMechanics;
+        private bool _isChasing;
+        private BossSkillEntry _pendingPositionedSkill;
+        public float CombatRadius => CombatRangeMath.ResolveBossCombatRadius(currentStageNumber,
+            currentStageNumber == 1 ? stage1CombatRadius : currentStageNumber == 2 ? stage2CombatRadius : stage3CombatRadius);
+        public bool CanPursue => isMeleeBoss && fsmState == BossFSMState.IdleChasing &&
+            currentHp > 0 && !IsTetherActive && !IsSpreadMechanicActive && !IsStackMechanicActive &&
+            (stageManager == null || !stageManager.IsStageTransitioning);
         [Header("Stage & Boss Identity (Step 6)")]
         public int currentStageNumber = 1;
         public string currentBossTitle = "STAGE 1 : 공허의 파수꾼";
@@ -404,6 +426,9 @@ namespace RaidRogue
         /// </summary>
         public void SetupBossForStage(int stageNumber)
         {
+            _isChasing = false;
+            _pendingPositionedSkill = null;
+            _autoAttackTimer = 0f;
             CleanupActiveTelegraphAndTether();
             if (_collapseCoroutine != null)
             {
@@ -510,8 +535,6 @@ namespace RaidRogue
 
             if (targetRing != null)
             {
-                targetRing.outerRadius = 3.2f * Mathf.Lerp(1f, scaleMultiplier, 0.7f);
-                targetRing.innerRadius = 1.4f * Mathf.Lerp(1f, scaleMultiplier, 0.7f);
                 targetRing.BuildTargetRing();
             }
 
@@ -555,6 +578,8 @@ namespace RaidRogue
         public void PlayBossCollapseAnimation()
         {
             CleanupActiveTelegraphAndTether();
+            _isChasing = false;
+            _pendingPositionedSkill = null;
             fsmState = BossFSMState.Defeated;
             _currentCastSkillName = "BOSS CLEAR!!";
 
@@ -647,8 +672,13 @@ namespace RaidRogue
             {
                 case BossFSMState.IdleChasing:
                     RotateTowardsAggroTargetXZ();
+                    UpdateMeleePursuit(Time.deltaTime);
                     UpdateAutoAttack();
-                    UpdatePatternSelection();
+                    if (fsmState == BossFSMState.IdleChasing) UpdatePatternSelection();
+                    break;
+
+                case BossFSMState.MovingToPatternPosition:
+                    UpdatePatternPositionMovement();
                     break;
 
                 case BossFSMState.CastingSkill:
@@ -795,7 +825,7 @@ namespace RaidRogue
                 return;
             }
 
-            Transform currentTarget = aggroTarget != null ? aggroTarget : targetPlayer;
+            Transform currentTarget = ResolveLivingAggroTarget();
             if (currentTarget == null)
             {
                 return;
@@ -822,14 +852,19 @@ namespace RaidRogue
 
         private void UpdateAutoAttack()
         {
-            _autoAttackTimer += Time.deltaTime;
+            if (fsmState != BossFSMState.IdleChasing || (stageManager != null && stageManager.IsStageTransitioning)) return;
+            Transform victim = ResolveLivingAggroTarget();
+            if (victim == null) return;
+            // Keep the timer ready without accumulating multiple swings while chasing.
+            _autoAttackTimer = Mathf.Min(autoAttackInterval, _autoAttackTimer + Time.deltaTime);
+            if (isMeleeBoss && !CombatRange.InRange(transform, victim, MeleeAttackRange)) return;
             if (_autoAttackTimer >= autoAttackInterval)
             {
                 _autoAttackTimer = 0f;
-                PlayerController pc = targetPlayer != null ? targetPlayer.GetComponent<PlayerController>() : null;
-                PartyBotAI tank = FindBotByRole(PartyBotRole.Tank);
+                PlayerController pc = victim.GetComponent<PlayerController>();
+                PartyBotAI bot = victim.GetComponent<PartyBotAI>();
 
-                if (aggroTarget != null && targetPlayer != null && aggroTarget == targetPlayer && pc != null)
+                if (pc != null)
                 {
                     pc.TakeDamage(autoAttackDamageToTank);
                     if (pc.hasThornArmor && pc.IsDefensiveBuffActive)
@@ -838,15 +873,55 @@ namespace RaidRogue
                         ApplyBossHpDamage(reflect, pc.transform);
                     }
                 }
-                else if (tank != null && !tank.isDead)
+                else if (bot != null && !bot.isDead)
                 {
-                    tank.TakeDamage(autoAttackDamageToTank);
-                }
-                else if (pc != null)
-                {
-                    pc.TakeDamage(autoAttackDamageToTank);
+                    bot.TakeDamage(autoAttackDamageToTank);
                 }
             }
+        }
+
+        public Transform ResolveLivingAggroTarget()
+        {
+            if (CombatRange.LivingPartyMember(aggroTarget)) return aggroTarget;
+            var player = targetPlayer != null ? targetPlayer.GetComponent<PlayerController>() : null;
+            PartyBotAI tank = FindBotByRole(PartyBotRole.Tank);
+            if (player != null && player.currentRole == PlayerRole.Guardian_Tank && CombatRange.LivingPartyMember(targetPlayer)) aggroTarget = targetPlayer;
+            else if (tank != null && CombatRange.LivingPartyMember(tank.transform)) aggroTarget = tank.transform;
+            else if (CombatRange.LivingPartyMember(targetPlayer)) aggroTarget = targetPlayer;
+            else
+            {
+                aggroTarget = null;
+                foreach (var bot in FindObjectsByType<PartyBotAI>(FindObjectsSortMode.InstanceID))
+                    if (CombatRange.LivingPartyMember(bot.transform)) { aggroTarget = bot.transform; break; }
+            }
+            return aggroTarget;
+        }
+
+        private void UpdateMeleePursuit(float deltaTime)
+        {
+            if (!CanPursue) { _isChasing = false; return; }
+            Transform target = ResolveLivingAggroTarget();
+            if (target == null) { _isChasing = false; return; }
+            Vector3 direction = target.position - transform.position;
+            direction.y = 0;
+            float distance = direction.magnitude;
+            if (distance < 0.0001f) direction = transform.forward;
+            float step = (float)CombatRangeMath.ChaseStep(distance, CombatRadius + CombatRange.Radius(target),
+                MeleeAttackRange, Mathf.Max(MeleeAttackRange, chaseHysteresis), chaseMoveSpeed * deltaTime, ref _isChasing);
+            Vector3 next = transform.position + direction.normalized * step;
+            transform.position = CombatRange.ClampToArena(next, arenaBoundaryRadius - CombatRadius);
+        }
+
+        private void UpdatePatternPositionMovement()
+        {
+            if (stageManager != null && stageManager.IsStageTransitioning) return;
+            if (_pendingPositionedSkill == null) { fsmState = BossFSMState.IdleChasing; return; }
+            Vector3 center = new Vector3(0, transform.position.y, 0);
+            transform.position = Vector3.MoveTowards(transform.position, center, chaseMoveSpeed * Time.deltaTime);
+            if (Vector3.Distance(transform.position, center) > 0.01f) return;
+            BossSkillEntry skill = _pendingPositionedSkill;
+            _pendingPositionedSkill = null;
+            BeginSkillCast(skill);
         }
 
         private void UpdatePatternSelection()
@@ -958,6 +1033,14 @@ namespace RaidRogue
         private void BeginSkillCast(BossSkillEntry skill)
         {
             CleanupActiveTelegraphAndTether();
+            _isChasing = false;
+            if (centerBeforePartyMechanics && skill.skillId >= BossSkillId.PartySpread_4P &&
+                new Vector2(transform.position.x, transform.position.z).sqrMagnitude > 0.0001f)
+            {
+                _pendingPositionedSkill = skill;
+                fsmState = BossFSMState.MovingToPatternPosition;
+                return;
+            }
 
             _activeSkill = skill;
             _activeSkill.nextAvailableTime = Time.time + (_activeSkill.internalCooldown * stageCastSpeedMultiplier);
@@ -1784,6 +1867,8 @@ namespace RaidRogue
         private void EnterGroggyTransition()
         {
             CleanupActiveTelegraphAndTether();
+            _isChasing = false;
+            _pendingPositionedSkill = null;
 
             currentPhase = BossPhase.GroggyTransition;
             fsmState = BossFSMState.Groggy;
@@ -2123,6 +2208,8 @@ namespace RaidRogue
 
         public void ReceiveBotAttackDamage(int baseDamage, bool isRanged, Transform source)
         {
+            var attacker = source != null ? source.GetComponent<PartyBotAI>() : null;
+            if (!isRanged && attacker != null && (attacker.role == PartyBotRole.Tank || attacker.role == PartyBotRole.MeleeDPS) && !attacker.CanMeleeHit(transform)) return;
             if (fsmState == BossFSMState.Defeated)
             {
                 return;

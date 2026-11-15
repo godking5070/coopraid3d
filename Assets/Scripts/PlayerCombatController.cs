@@ -13,6 +13,13 @@ namespace RaidRogue
     /// </summary>
     public class PlayerCombatController : MonoBehaviour
     {
+        [Header("Melee Reach (combat boundary distance in world units)")]
+        public MeleeRangeSettings meleeRanges = new MeleeRangeSettings();
+        public bool IsMeleeRole => CurrentRole == PlayerRole.Guardian_Tank || CurrentRole == PlayerRole.Blade_MeleeDPS;
+        public float PrimaryMeleeRange => meleeRanges.Get(CurrentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank, _combo1Stage);
+        public string RangeFeedback { get; private set; }
+        private float _rangeFeedbackUntil;
+        public bool HasRangeFeedback => Time.unscaledTime < _rangeFeedbackUntil;
         [Header("References")]
         public PlayerController playerController;
         public BossController targetBoss;
@@ -98,6 +105,7 @@ namespace RaidRogue
 
         private void Start()
         {
+            if (GetComponent<PlayerAttackRangeDisplay>() == null) gameObject.AddComponent<PlayerAttackRangeDisplay>();
             if (playerController == null)
             {
                 playerController = GetComponent<PlayerController>();
@@ -457,6 +465,49 @@ namespace RaidRogue
         // =====================================================================
         private Transform _lastOffensiveVisualTarget;
 
+        // This query is also used by the ring and target HUD. It has no facing/resource side effects.
+        public Transform GetOffensiveTarget()
+        {
+            return TargetingManager.Instance != null
+                ? TargetingManager.Instance.GetLivingOffensiveTarget(targetBoss)
+                : (targetBoss != null && CombatRange.LivingEnemy(targetBoss.transform) ? targetBoss.transform : null);
+        }
+
+        private bool TryBeginMeleeAttack(MeleeSkill skill, int comboStage, out BossAddMinion targetedAdd)
+        {
+            targetedAdd = null;
+            if (Time.timeScale <= 0.001f || CombatMetricsUI.BlocksUnderlyingInput) return false;
+            Transform target = GetOffensiveTarget();
+            if (target == null || !CombatRange.LivingPartyMember(transform))
+            {
+                ShowRangeFeedback("공격할 수 있는 대상이 없습니다");
+                return false;
+            }
+            if (!CombatRange.InRange(transform, target, meleeRanges.Get(skill, comboStage)))
+            {
+                ShowRangeFeedback("대상이 사거리 밖에 있습니다");
+                return false;
+            }
+            targetedAdd = target.GetComponent<BossAddMinion>();
+            FaceOffensiveTarget(target);
+            return true;
+        }
+
+        private void ShowRangeFeedback(string message)
+        {
+            RangeFeedback = message;
+            _rangeFeedbackUntil = Time.unscaledTime + 1.25f;
+        }
+
+        private void FaceOffensiveTarget(Transform target)
+        {
+            _lastOffensiveVisualTarget = target;
+            if (target == null) return;
+            Vector3 direction = target.position - transform.position;
+            direction.y = 0;
+            if (direction.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+        }
+
         /// <summary>
         /// 공격 스킬([1], [2], [4] 딜/도발) 사용 시:
         /// - 현재 타겟이 특정 '쫄(BossAddMinion)'이면 해당 쫄을 공격합니다.
@@ -519,6 +570,7 @@ namespace RaidRogue
         private void ExecuteTankSkill1_ShieldSmashCombo()
         {
             if (targetBoss == null) return;
+            if (!TryBeginMeleeAttack(MeleeSkill.TankPrimary, _combo1Stage, out BossAddMinion targetedAdd)) return;
 
             int stage = _combo1Stage;
             string skillName = GetRoleSkill1StageName(PlayerRole.Guardian_Tank, stage);
@@ -532,8 +584,6 @@ namespace RaidRogue
 
             float buffMult = GetPlayerDamageBuffMultiplier();
             int finalDmg = Mathf.RoundToInt(baseDmg * buffMult);
-
-            ResolveOffensiveTarget(out BossAddMinion targetedAdd, out _);
 
             // 탱커 공격 시 보스 어그로 1순위 유지
             targetBoss.SetAggroTarget(transform);
@@ -987,6 +1037,7 @@ namespace RaidRogue
         private void ExecuteMeleeSkill1_FlankCombo()
         {
             if (targetBoss == null) return;
+            if (!TryBeginMeleeAttack(MeleeSkill.BladeFlank, _combo1Stage, out BossAddMinion targetedAdd)) return;
 
             int executedStage = _combo1Stage;
             string skillName = GetSkill1StageName(executedStage);
@@ -995,8 +1046,6 @@ namespace RaidRogue
             float buffMult = GetPlayerDamageBuffMultiplier();
             int finalNormal = Mathf.RoundToInt(normalDmg * buffMult);
             int finalPositional = Mathf.RoundToInt(positionalDmg * buffMult);
-
-            ResolveOffensiveTarget(out BossAddMinion targetedAdd, out _);
 
             bool isPositionalCrit;
             if (targetedAdd != null)
@@ -1037,6 +1086,7 @@ namespace RaidRogue
         private void ExecuteMeleeSkill2_RearCombo()
         {
             if (targetBoss == null) return;
+            if (!TryBeginMeleeAttack(MeleeSkill.BladeRear, _combo2Stage, out BossAddMinion targetedAdd)) return;
 
             int executedStage = _combo2Stage;
             string skillName = GetSkill2StageName(executedStage);
@@ -1045,8 +1095,6 @@ namespace RaidRogue
             float buffMult = GetPlayerDamageBuffMultiplier();
             int finalNormal = Mathf.RoundToInt(normalDmg * buffMult);
             int finalPositional = Mathf.RoundToInt(positionalDmg * buffMult);
-
-            ResolveOffensiveTarget(out BossAddMinion targetedAdd, out _);
 
             bool hasMasterOfRear = playerController != null && playerController.hasMasterOfRear;
 
@@ -1104,10 +1152,9 @@ namespace RaidRogue
         private void ExecuteMeleeSkill4_GaleThrust()
         {
             if (targetBoss == null) return;
+            if (!TryBeginMeleeAttack(MeleeSkill.BladeGale, 1, out BossAddMinion targetedAdd)) return;
 
             _skill4CooldownRemaining = skill4CooldownTotal;
-
-            ResolveOffensiveTarget(out BossAddMinion targetedAdd, out _);
 
             float buffMult = GetPlayerDamageBuffMultiplier();
             int finalDmg = Mathf.RoundToInt(skill4GaleThrustDamage * buffMult);
