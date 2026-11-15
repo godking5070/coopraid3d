@@ -32,7 +32,7 @@ namespace RaidRogue
         public static bool LivingPartyMember(Transform unit)
         {
             if (unit == null || !unit.gameObject.activeInHierarchy) return false;
-            if (unit.GetComponent<NetworkRaidAvatar>() != null) return true;
+            if (unit.GetComponent<NetworkRaidAvatar>() is NetworkRaidAvatar avatar && avatar.State != null && RaidCombatAuthority.Replica) return !avatar.State.dead;
             var player = unit.GetComponent<PlayerController>();
             if (player != null) return !player.IsDead;
             var bot = unit.GetComponent<PartyBotAI>();

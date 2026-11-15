@@ -69,7 +69,7 @@ namespace RaidRogue
     /// - Stage 1 (보라색, 1.0배, HP 3,000) -> Stage 2 (청록색, 1.2배, HP 6,000, 4인 산개/4인 쉐어) -> Stage 3 (적금색, 1.5배, HP 10,000, 시전속도 +25% & 복합 기믹)
     /// - 보스 처치(HP 0) 시 쓰러지는 연출 및 StageManager.NotifyBossDefeated() 호출 (중간 체력 카드 팝업 완전 제거)
     /// </summary>
-    public class BossController : MonoBehaviour
+    public partial class BossController : MonoBehaviour
     {
         [Header("Combat Body & Melee Pursuit (world units)")]
         public bool isMeleeBoss = true;
@@ -205,6 +205,7 @@ namespace RaidRogue
         private bool _isTetherInterceptedByPlayer;
         private Transform _tetherTankTarget;
         private PartyBotAI _tetherInterceptingBot;
+        private Transform _tetherInterceptingPlayer;
 
         // Step 6: 4인 산개(Spread) 및 4인 쉐어(Stack) 활성 마커 리스트
         private bool _isSpreadActive;
@@ -429,6 +430,7 @@ namespace RaidRogue
         /// </summary>
         public void SetupBossForStage(int stageNumber)
         {
+            _combatThreat.Clear(); _tetherInterceptingPlayer = null;
             _isChasing = false;
             _pendingPositionedSkill = null;
             _autoAttackTimer = 0f;
@@ -663,6 +665,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidCombatAuthority.Replica) { UpdateReplicaBoss(); UpdateTopBossUI(); UpdateCastBanner(); return; }
             if (Time.timeScale <= 0.001f || StageManager.CombatSuspended || currentHp <= 0)
             {
                 return;
@@ -886,19 +889,13 @@ namespace RaidRogue
 
         public Transform ResolveLivingAggroTarget()
         {
-            if (CombatRange.LivingPartyMember(aggroTarget)) return aggroTarget;
-            var player = targetPlayer != null ? targetPlayer.GetComponent<PlayerController>() : null;
-            PartyBotAI tank = FindBotByRole(PartyBotRole.Tank);
-            if (player != null && player.currentRole == PlayerRole.Guardian_Tank && CombatRange.LivingPartyMember(targetPlayer)) aggroTarget = targetPlayer;
-            else if (tank != null && CombatRange.LivingPartyMember(tank.transform)) aggroTarget = tank.transform;
-            else if (CombatRange.LivingPartyMember(targetPlayer)) aggroTarget = targetPlayer;
-            else
+            Transform best = null; float bestThreat = -1;
+            foreach (var member in GetLivingPartyMemberTransforms())
             {
-                aggroTarget = null;
-                foreach (var bot in FindObjectsByType<PartyBotAI>(FindObjectsSortMode.InstanceID))
-                    if (CombatRange.LivingPartyMember(bot.transform)) { aggroTarget = bot.transform; break; }
+                float threat = _combatThreat.TryGetValue(member, out float value) ? value : member.GetComponent<PartyLife>()?.IsTank == true ? 1 : 0;
+                if (threat > bestThreat) { bestThreat = threat; best = member; }
             }
-            return aggroTarget;
+            aggroTarget = best; return best;
         }
 
         private void UpdateMeleePursuit(float deltaTime)
@@ -1036,6 +1033,7 @@ namespace RaidRogue
 
         private void BeginSkillCast(BossSkillEntry skill)
         {
+            _networkCastStarted = RaidCombatAuthority.ServerTime;
             CleanupActiveTelegraphAndTether();
             _isChasing = false;
             if (centerBeforePartyMechanics && skill.skillId >= BossSkillId.PartySpread_4P &&
@@ -1224,22 +1222,11 @@ namespace RaidRogue
         {
             Vector3 bossOriginXZ = transform.position;
 
-            if (targetPlayer != null)
+            foreach (var member in GetLivingPartyMemberTransforms())
             {
-                PlayerController pc = targetPlayer.GetComponent<PlayerController>();
-                if (pc != null)
-                {
-                    pc.StartKnockbackXZ(bossOriginXZ, knockbackDistance, duration);
-                }
-            }
-
-            PartyBotAI[] bots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
-            foreach (PartyBotAI bot in bots)
-            {
-                if (bot != null && !bot.isDead)
-                {
-                    bot.StartKnockbackXZ(bossOriginXZ, knockbackDistance, duration);
-                }
+                var pc = member.GetComponent<PlayerController>();
+                if (pc != null) pc.StartKnockbackXZ(bossOriginXZ, knockbackDistance, duration);
+                else member.GetComponent<PartyBotAI>()?.StartKnockbackXZ(bossOriginXZ, knockbackDistance, duration);
             }
 
             FloatingTextPopup.Spawn(
@@ -1250,30 +1237,13 @@ namespace RaidRogue
             );
         }
 
-        private List<Transform> GetLivingPartyMemberTransforms()
-        {
-            List<Transform> list = new List<Transform>(4);
-            if (CombatRange.LivingPartyMember(targetPlayer))
-            {
-                list.Add(targetPlayer);
-            }
-
-            PartyBotAI[] bots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
-            foreach (PartyBotAI bot in bots)
-            {
-                if (bot != null && !bot.isDead)
-                {
-                    list.Add(bot.transform);
-                }
-            }
-            return list;
-        }
+        private List<Transform> GetLivingPartyMemberTransforms() => PartyLife.OrderedMembers().FindAll(CombatRange.LivingPartyMember);
 
         private void StartDoubleTankbusterTether(float duration)
         {
             _tetherTankTarget = ResolveLivingAggroTarget();
             if (_tetherTankTarget == null) return;
-            _tetherInterceptingBot = null;
+            _tetherInterceptingBot = null; _tetherInterceptingPlayer = null;
             DamagePartyMember(_tetherTankTarget, _tetherTankTarget.GetComponent<PlayerController>() != null ? 420f : 550f);
             if (!CombatRange.LivingPartyMember(_tetherTankTarget))
             {
@@ -1295,13 +1265,13 @@ namespace RaidRogue
                 return false;
             }
 
-            aggroTarget = playerTr;
+            aggroTarget = playerTr; AddCombatThreat(playerTr, 1, true);
 
             if (_isTetherActive)
             {
                 _isTetherInterceptedByPlayer = true;
                 _tetherInterceptingBot = null;
-                _tetherTankTarget = playerTr;
+                _tetherTankTarget = playerTr; _tetherInterceptingPlayer = playerTr;
 
                 SetMechanicAlert(
                     "★ [도발 및 줄 강탈] 발동! 보스 어그로 최우선 고정 + 보스의 줄(Tether)을 내 캐릭터로 즉시 강탈했습니다! ([3] 철벽 방어 권장!) ★",
@@ -1346,16 +1316,16 @@ namespace RaidRogue
         public void TryInterceptPlayerMovement(PlayerController player, Vector3 from, Vector3 to)
         {
             if (!_isTetherActive || _isTetherInterceptedByPlayer || _tetherTankTarget == null ||
-                player == null || player.currentHp <= 0 || player.transform != targetPlayer || _tetherTankTarget == targetPlayer) return;
+                player == null || player.IsDead || _tetherTankTarget == player.transform) return;
             Vector3 boss = transform.position, tank = _tetherTankTarget.position;
             if (!DashGeometry.CrossesTether(from.x, from.z, to.x, to.z,
                 boss.x, boss.z, tank.x, tank.z, tetherInterceptRadius)) return;
 
             _isTetherInterceptedByPlayer = true;
-            _tetherInterceptingBot = null;
+            _tetherInterceptingBot = null; _tetherInterceptingPlayer = player.transform;
             SetMechanicAlert("줄 가로채기 성공! [3]번 생존기를 켜세요!",
                 new Color(0.2f, 1f, 0.45f, 1f), _castRemainingTime + 1.5f);
-            FloatingTextPopup.Spawn(targetPlayer.position + Vector3.up * 2.5f,
+            FloatingTextPopup.Spawn(player.transform.position + Vector3.up * 2.5f,
                 "줄 가로채기 성공! [3]번 생존기를 켜세요!", new Color(0.2f, 1f, 0.45f, 1f), true);
         }
 
@@ -1373,42 +1343,19 @@ namespace RaidRogue
                 Vector2 aXZ = new Vector2(transform.position.x, transform.position.z);
                 Vector2 bXZ = new Vector2(_tetherTankTarget.position.x, _tetherTankTarget.position.z);
 
-                if (targetPlayer != null && _tetherTankTarget != targetPlayer)
+                foreach (var member in GetLivingPartyMemberTransforms())
                 {
-                    TryInterceptPlayerMovement(targetPlayer.GetComponent<PlayerController>(), targetPlayer.position, targetPlayer.position);
-                }
-                else if (targetPlayer != null && _tetherTankTarget == targetPlayer)
-                {
-                    // Step 8 핵심: 플레이어가 '탱커'일 때 나에게 연결된 줄을 '근딜(블레이드) AI 봇'이 자동으로 가로채고 생존기를 켜는 경우!
-                    PartyBotAI[] bots = FindObjectsByType<PartyBotAI>(FindObjectsSortMode.None);
-                    foreach (PartyBotAI bot in bots)
-                    {
-                        if (bot == null || bot.isDead) continue;
-
-                        Vector2 botXZ = new Vector2(bot.transform.position.x, bot.transform.position.z);
-                        float distToSegment = DistancePointToSegmentXZ(botXZ, aXZ, bXZ, out float tOnSegment);
-
-                        if (distToSegment <= tetherInterceptRadius + 0.35f && tOnSegment >= 0.05f && tOnSegment <= 0.98f)
-                        {
-                            _isTetherInterceptedByPlayer = true;
-                            _tetherInterceptingBot = bot;
-                            bot.ActivateBotDefensiveBuff(_castRemainingTime + 1.5f);
-
-                            SetMechanicAlert(
-                                $"★ 역할 교대 협동! [{bot.botDisplayName}] 봇이 나(탱커)의 줄을 가로채고 생존기(80% 감쇄)를 켰습니다! ★",
-                                new Color(0.2f, 1f, 0.45f, 1f),
-                                _castRemainingTime + 1.5f
-                            );
-
-                            FloatingTextPopup.Spawn(
-                                bot.transform.position + Vector3.up * 2.55f,
-                                "줄 가로채기 & 생존기 ON! (탱커 보호!)",
-                                new Color(0.2f, 1f, 0.45f, 1f),
-                                true
-                            );
-                            break;
-                        }
-                    }
+                    if (member == _tetherTankTarget || _isTetherInterceptedByPlayer) continue;
+                    var pc = member.GetComponent<PlayerController>();
+                    if (pc != null) { TryInterceptPlayerMovement(pc, member.position, member.position); continue; }
+                    var bot = member.GetComponent<PartyBotAI>();
+                    if (bot == null) continue;
+                    float distance = DistancePointToSegmentXZ(new Vector2(member.position.x, member.position.z), aXZ, bXZ, out float along);
+                    if (distance > tetherInterceptRadius + .35f || along < .05f || along > .98f) continue;
+                    _isTetherInterceptedByPlayer = true; _tetherInterceptingBot = bot; _tetherInterceptingPlayer = null;
+                    bot.ActivateBotDefensiveBuff(_castRemainingTime + 1.5f);
+                    SetMechanicAlert(bot.botDisplayName + " 줄 가로채기 · 방어기 ON", Color.green, _castRemainingTime + 1.5f);
+                    FloatingTextPopup.Spawn(member.position + Vector3.up * 2.55f, "줄 가로채기 & 방어기 ON", Color.green, true);
                 }
             }
 
@@ -1419,9 +1366,9 @@ namespace RaidRogue
                 {
                     currentEndTarget = _tetherInterceptingBot.transform;
                 }
-                else if (targetPlayer != null)
+                else if (_tetherInterceptingPlayer != null)
                 {
-                    currentEndTarget = targetPlayer;
+                    currentEndTarget = _tetherInterceptingPlayer;
                 }
             }
 
@@ -1496,7 +1443,7 @@ namespace RaidRogue
             }
 
             PartyBotAI tank = FindBotByRole(PartyBotRole.Tank);
-            PlayerController player = targetPlayer != null ? targetPlayer.GetComponent<PlayerController>() : null;
+            PlayerController player = _tetherInterceptingPlayer != null ? _tetherInterceptingPlayer.GetComponent<PlayerController>() : null;
 
             switch (completedSkill.skillId)
             {
@@ -1537,26 +1484,9 @@ namespace RaidRogue
 
         private void ResolveTelegraphAoEDamage(AoETelegraph telegraph, string skillLabel, PlayerController player, PartyBotAI tank)
         {
-            if (telegraph == null)
-            {
-                return;
-            }
-
-            if (player != null && telegraph.IsPointInsideXZ(player.transform.position))
-            {
-                player.TakeDamage(320f);
-                FloatingTextPopup.Spawn(
-                    player.transform.position + Vector3.up * 2.5f,
-                    $"장판 피격! ({skillLabel})",
-                    new Color(1f, 0.3f, 0.3f, 1f),
-                    true
-                );
-            }
-
-            if (tank != null && !tank.isDead && telegraph.IsPointInsideXZ(tank.transform.position))
-            {
-                tank.TakeDamage(220f);
-            }
+            if (telegraph == null) return;
+            foreach (var member in GetLivingPartyMemberTransforms())
+                if (telegraph.IsPointInsideXZ(member.position)) DamagePartyMember(member, member.GetComponent<PlayerController>() != null ? 320f : 220f);
         }
 
         /// <summary>
@@ -1593,27 +1523,8 @@ namespace RaidRogue
 
                 float dmg = hasOverlap ? spreadBaseDamage * 2.0f : spreadBaseDamage;
 
-                if (player != null && mA == player.transform)
-                {
-                    playerOverlapped = hasOverlap;
-                    player.TakeDamage(dmg);
-                    FloatingTextPopup.Spawn(
-                        player.transform.position + Vector3.up * 2.6f,
-                        hasOverlap
-                            ? $"4인 산개 실패 (원 겹침 2배 피해!! -{Mathf.RoundToInt(dmg)})"
-                            : $"4인 산개 성공! (단독 피격 -{Mathf.RoundToInt(dmg)})",
-                        hasOverlap ? new Color(1f, 0.2f, 0.3f, 1f) : new Color(1f, 0.65f, 0.9f, 1f),
-                        true
-                    );
-                }
-                else
-                {
-                    PartyBotAI bot = mA.GetComponent<PartyBotAI>();
-                    if (bot != null && !bot.isDead)
-                    {
-                        bot.TakeDamage(dmg);
-                    }
-                }
+                playerOverlapped |= hasOverlap;
+                DamagePartyMember(mA, dmg);
             }
 
             if (playerOverlapped)
@@ -1668,21 +1579,7 @@ namespace RaidRogue
             int stackCount = Mathf.Max(1, stackedMembers.Count);
             float damagePerMember = stackTotalDamageToSplit / stackCount;
 
-            foreach (Transform member in stackedMembers)
-            {
-                if (player != null && member == player.transform)
-                {
-                    player.TakeDamage(damagePerMember);
-                }
-                else
-                {
-                    PartyBotAI bot = member.GetComponent<PartyBotAI>();
-                    if (bot != null && !bot.isDead)
-                    {
-                        bot.TakeDamage(damagePerMember);
-                    }
-                }
-            }
+            foreach (Transform member in stackedMembers) DamagePartyMember(member, damagePerMember);
 
             bool isFullStackSuccess = stackCount >= 3;
             FloatingTextPopup.Spawn(
@@ -1701,87 +1598,30 @@ namespace RaidRogue
 
         private void ResolveDoubleTankbusterTether(bool wasTetherIntercepted, PlayerController player, PartyBotAI tank, PartyBotAI interceptingBot)
         {
-            Transform victim = wasTetherIntercepted
-                ? (interceptingBot != null ? interceptingBot.transform : player != null ? player.transform : null)
-                : _tetherTankTarget;
+            Transform primary = _tetherTankTarget;
+            Transform victim = wasTetherIntercepted ? (interceptingBot != null ? interceptingBot.transform : _tetherInterceptingPlayer) : primary;
+            _tetherInterceptingPlayer = null;
             if (!CombatRange.LivingPartyMember(victim)) return;
-            tank = _tetherTankTarget != null ? _tetherTankTarget.GetComponent<PartyBotAI>() : null;
-            if (wasTetherIntercepted && interceptingBot != null && !interceptingBot.isDead)
+            var pc = victim.GetComponent<PlayerController>(); var bot = victim.GetComponent<PartyBotAI>();
+            bool defended = wasTetherIntercepted && (pc != null ? pc.IsDefensiveBuffActive : bot != null && bot.isTankDefensiveActive);
+            if (wasTetherIntercepted)
             {
-                // Step 8: 플레이어가 탱커일 때 근딜 AI 봇이 줄을 가로채고 생존기로 막아낸 경우
-                interceptingBot.TakeDamage(1200f);
-
-                if (player != null && !player.IsDead && player.hasThornArmor)
+                DamagePartyMember(victim, pc != null ? (defended ? 1500f : 950f) : 1200f);
+                // Preserve the protected tank's card proc when an ally takes the tether.
+                var protectedPlayer = primary != null && primary != victim ? primary.GetComponent<PlayerController>() : null;
+                if (protectedPlayer != null && !protectedPlayer.IsDead && protectedPlayer.hasThornArmor)
                 {
-                    int reflectDmg = Mathf.RoundToInt(player.thornReflectDamage);
-                    ApplyBossHpDamage(reflectDmg, player.transform);
-                    FloatingTextPopup.Spawn(
-                        transform.position + Vector3.up * (popupHeightOffset + 0.5f),
-                        $"[가시 갑옷] 탱커 수호 반사 피해!! - {reflectDmg}",
-                        new Color(0.35f, 1f, 0.45f, 1f),
-                        true
-                    );
-                }
-
-                FloatingTextPopup.Spawn(
-                    interceptingBot.transform.position + Vector3.up * 2.6f,
-                    "탱크버스터 2타 대신 방어 성공!! (-80% 감쇄)",
-                    new Color(0.3f, 0.95f, 1f, 1f),
-                    true
-                );
-
-                SetMechanicAlert(
-                    $"★ 2연타 탱크버스터 방어 대성공!! [{interceptingBot.botDisplayName}] 봇이 줄을 가로채고 생존기(80% 감쇄)로 나(탱커)를 완벽히 지켰습니다! ★",
-                    new Color(0.25f, 1f, 0.55f, 1f),
-                    4.0f
-                );
-            }
-            else if (wasTetherIntercepted && player != null)
-            {
-                if (player.IsDefensiveBuffActive)
-                {
-                    player.TakeDamage(1500f); // 생존기/철벽방어/마나배리어 감쇄로 안전하게 생존!
-
-                    SetMechanicAlert("2연타 탱크버스터 방어 성공!", new Color(0.25f, 1f, 0.55f), 4f);
-
-                    FloatingTextPopup.Spawn(
-                        player.transform.position + Vector3.up * 2.6f,
-                        "탱크버스터 2타 방어 성공!! (생존기 감쇄)",
-                        new Color(0.3f, 0.95f, 1f, 1f),
-                        true
-                    );
-                }
-                else
-                {
-                    player.TakeDamage(950f);
-                    SetMechanicAlert(
-                        "줄은 가로챘지만 [3]번 생존기를 켜지 않아 큰 피해를 입었습니다!",
-                        new Color(1f, 0.4f, 0.2f, 1f),
-                        4.0f
-                    );
+                    int reflected = Mathf.RoundToInt(protectedPlayer.thornReflectDamage);
+                    ApplyBossHpDamage(reflected, protectedPlayer.transform);
+                    FloatingTextPopup.Spawn(transform.position + Vector3.up * popupHeightOffset,
+                        $"[가시 갑옷] 탱커 수호 반사 -{reflected}", Color.green, true);
                 }
             }
-            else
-            {
-                if (tank != null && !tank.isDead)
-                {
-                    tank.KillTankByUninterceptedTether();
-                    SetMechanicAlert(
-                        "줄 가로채기 실패!! 탱커가 2타에 직격당해 사망했습니다!",
-                        new Color(1f, 0.2f, 0.2f, 1f),
-                        4.5f
-                    );
-                }
-                else if (player != null)
-                {
-                    player.TakeDamage(1100f);
-                    SetMechanicAlert(
-                        "2연타 탱크버스터 2타 직격!!",
-                        new Color(1f, 0.2f, 0.2f, 1f),
-                        4.0f
-                    );
-                }
-            }
+            else if (bot != null) bot.KillTankByUninterceptedTether();
+            else DamagePartyMember(victim, 1100f);
+            SetMechanicAlert(defended ? "2연타 탱크버스터 가로채기 · 방어 성공!" : wasTetherIntercepted
+                ? "줄은 가로챘지만 방어기가 없어 큰 피해를 입었습니다!" : "줄 가로채기 실패 · 탱크버스터 2타 직격!",
+                defended ? Color.green : new Color(1f, .35f, .2f), 4);
         }
 
         private void CheckPhaseTransition()
@@ -1858,7 +1698,7 @@ namespace RaidRogue
 
             _isTetherActive = false;
             _isTetherInterceptedByPlayer = false;
-            _tetherInterceptingBot = null;
+            _tetherInterceptingBot = null; _tetherInterceptingPlayer = null; _tetherTankTarget = null;
             if (_tetherLineRenderer != null)
             {
                 _tetherLineRenderer.enabled = false;
@@ -1938,9 +1778,10 @@ namespace RaidRogue
             float angle = CalculateAngleFromBossFrontXZ(attackerPosition);
             bool isPositionalCrit = false;
 
-            float flankMin = Mathf.Max(15f, 45f - positionalAngleBonus);
-            float flankMax = Mathf.Min(170f, 135f + positionalAngleBonus);
-            float rearMin = Mathf.Max(90f, 135f - positionalAngleBonus);
+            float attackerBonus = source != null && source.GetComponent<PlayerController>() != null ? source.GetComponent<PlayerController>().positionalAngleBonusDeg : positionalAngleBonus;
+            float flankMin = Mathf.Max(15f, 45f - attackerBonus);
+            float flankMax = Mathf.Min(170f, 135f + attackerBonus);
+            float rearMin = Mathf.Max(90f, 135f - attackerBonus);
 
             switch (requirement)
             {
@@ -2006,9 +1847,10 @@ namespace RaidRogue
             float angle = CalculateAngleFromBossFrontXZ(attackerPosition);
             bool isPositionalCrit = false;
 
-            float flankMin = Mathf.Max(15f, 45f - positionalAngleBonus);
-            float flankMax = Mathf.Min(170f, 135f + positionalAngleBonus);
-            float rearMin = Mathf.Max(90f, 135f - positionalAngleBonus);
+            float attackerBonus = source != null && source.GetComponent<PlayerController>() != null ? source.GetComponent<PlayerController>().positionalAngleBonusDeg : positionalAngleBonus;
+            float flankMin = Mathf.Max(15f, 45f - attackerBonus);
+            float flankMax = Mathf.Min(170f, 135f + attackerBonus);
+            float rearMin = Mathf.Max(90f, 135f - attackerBonus);
 
             switch (requirement)
             {
@@ -2169,7 +2011,7 @@ namespace RaidRogue
         /// </summary>
         private void ApplyBossHpDamage(float damage, Transform source = null)
         {
-            if (fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0)
+            if (RaidCombatAuthority.Replica || fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0)
             {
                 return;
             }
@@ -2180,6 +2022,7 @@ namespace RaidRogue
             // Single accounting point for skills, projectiles, reflection and card damage.
             // Debug instant-kill has no source and intentionally earns no party credit.
             CombatMetricsManager.Damage(source, hpBefore, currentHp, false);
+            AddCombatThreat(source, hpBefore - currentHp);
 
             if (currentHp <= 0.1f)
             {
@@ -2216,6 +2059,8 @@ namespace RaidRogue
 
         public void OnPartyMemberDied(Transform member)
         {
+            _combatThreat.Remove(member);
+            if (_tetherInterceptingPlayer == member) { _tetherInterceptingPlayer = null; _isTetherInterceptedByPlayer = false; }
             ResolveLivingAggroTarget();
             _spreadTargets.Remove(member);
             for (int i = _activePartyMarkers.Count - 1; i >= 0; i--)
@@ -2228,7 +2073,7 @@ namespace RaidRogue
                 fsmState = BossFSMState.IdleChasing; _patternWaitTimer = 1f;
             }
             else if (_isTetherInterceptedByPlayer &&
-                ((_tetherInterceptingBot != null && _tetherInterceptingBot.transform == member) || (_tetherInterceptingBot == null && targetPlayer == member)))
+                ((_tetherInterceptingBot != null && _tetherInterceptingBot.transform == member) || (_tetherInterceptingPlayer == member)))
             { _isTetherInterceptedByPlayer = false; _tetherInterceptingBot = null; }
         }
 

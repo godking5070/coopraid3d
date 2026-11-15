@@ -54,7 +54,7 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (_player == null) return;
+            if (_player == null || !RaidCombatAuthority.Local(this)) return;
             if (_slot == null)
             {
                 if (Time.unscaledTime < _nextHotbarSearch) return;

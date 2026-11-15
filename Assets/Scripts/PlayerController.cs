@@ -23,7 +23,7 @@ namespace RaidRogue
     /// - PlayerCombatController와 연동하여 직업별 GCD 3단 진화 콤보, 캐스터 캐스팅 바(이동 시 취소), 힐러 스마트 힐/보호막/성역/구출, 탱커 철벽방어/도발&줄강탈 수행
     /// </summary>
     [DefaultExecutionOrder(-100)]
-    public class PlayerController : MonoBehaviour
+    public partial class PlayerController : MonoBehaviour
     {
         [Header("Combat Body (world units, independent of visual scale)")]
         [Min(0f)] public float combatRadius = 0.55f;
@@ -96,17 +96,17 @@ namespace RaidRogue
         public bool IsBeingKnockedBack => _isBeingKnockedBack;
         public bool HasTacticalRescueBuff => _tacticalRescueBuffTimer > 0f;
         public bool IsMovingXZ { get; private set; }
-        public bool IsDashing => RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.LocalMotor?.Dash.Active == true : _dash.Active;
-        public float DashCooldownRemaining => (float)(RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.LocalMotor?.Dash.CooldownRemaining ?? 0 : _dash.CooldownRemaining);
-        public float DashCooldownFraction => RaidNetworkSession.Multiplayer ? Mathf.Clamp01(DashCooldownRemaining / Mathf.Max(0.001f, (float)(RaidNetworkSession.Instance.LocalMotor?.Dash.CooldownDuration ?? 0))) : _dash.CooldownDuration > 0
+        public bool IsDashing => RaidNetworkSession.Multiplayer ? NetworkMotor?.Dash.Active == true : _dash.Active;
+        public float DashCooldownRemaining => (float)(RaidNetworkSession.Multiplayer ? NetworkMotor?.Dash.CooldownRemaining ?? 0 : _dash.CooldownRemaining);
+        public float DashCooldownFraction => RaidNetworkSession.Multiplayer ? Mathf.Clamp01(DashCooldownRemaining / Mathf.Max(0.001f, (float)(NetworkMotor?.Dash.CooldownDuration ?? 0))) : _dash.CooldownDuration > 0
             ? Mathf.Clamp01((float)(_dash.CooldownRemaining / _dash.CooldownDuration)) : 0;
         // Shared voluntary-movement gates for status effects; the current encounters do not apply stuns/roots yet.
         public bool IsStunned { get; set; }
         public bool IsMovementLocked { get; set; }
         public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer) && !IsStunned && !IsMovementLocked &&
-            !IsBeingRescued && !IsBeingKnockedBack && !LocalGameplayInput.Blocked;
-        public bool CanDash => CanMoveVoluntarily && !IsDashing && DashCooldownRemaining <= 0;
-        public bool HasMovementIntent => !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
+            !IsBeingRescued && !IsBeingKnockedBack && !RaidCombatAuthority.InputBlocked(this);
+        public bool CanDash => CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
+        public bool HasMovementIntent => RaidCombatAuthority.Active ? IsMovingXZ : !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
         public bool IsCastInterruptImmune => currentRole == PlayerRole.Archmage_Caster && IsDefensiveBuffActive;
 
         private float _defensiveRemainingTime;
@@ -140,8 +140,11 @@ namespace RaidRogue
         private Transform _shieldFillBar;
         private TextMesh _overheadNameText;
 
-        private void Start()
+        private bool _initialized;
+        private void Start() => EnsureCombatInitialized();
+        public void EnsureCombatInitialized()
         {
+            if (_initialized) return; _initialized = true;
             Potion = CommonPotion.Ensure(gameObject);
             Life = PartyLife.Ensure(gameObject);
             if (targetBoss == null)
@@ -209,22 +212,24 @@ namespace RaidRogue
         {
             if (RaidNetworkSession.Multiplayer)
             {
-                bool allowed = !LocalGameplayInput.Blocked && RaidNetworkSession.Instance.HasLocalAvatar;
-                bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed);
-                if (pressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
-                Vector3 direction = allowed ? GetMoveDirectionXZ(ReadMoveInput()) : Vector3.zero;
-                RaidNetworkSession.Instance.SampleInput(direction, pressed);
-                IsMovingXZ = allowed && (direction.sqrMagnitude > 0.0001f || IsDashing);
-                UpdateOverheadHpBar(); UpdateHUD();
+                if (RaidCombatAuthority.Local(this))
+                {
+                    bool allowed = !LocalGameplayInput.Blocked && RaidNetworkSession.Instance.HasLocalAvatar;
+                    bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed);
+                    if (pressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
+                    RaidNetworkSession.Instance.SampleInput(allowed ? GetMoveDirectionXZ(ReadMoveInput()) : Vector3.zero, pressed);
+                }
+                if (RaidCombatAuthority.Host && !StageManager.CombatSuspended) UpdateTimers();
+                UpdateOverheadHpBar(); if (RaidCombatAuthority.Local(this)) UpdateHUD();
                 return;
             }
-            if (IsDead || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended)
             {
                 _dash.Cancel(); IsMovingXZ = false;
                 UpdateOverheadHpBar(); UpdateHUD();
                 return;
             }
-            bool gameplayAllowed = !LocalGameplayInput.Blocked;
+            bool gameplayAllowed = !RaidCombatAuthority.InputBlocked(this);
             bool dashPressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), gameplayAllowed);
             if (!CanMoveVoluntarily) _dash.Cancel();
             // Player Update runs before EventSystem: SPACE belongs to dash during gameplay,
@@ -273,7 +278,7 @@ namespace RaidRogue
 
         public bool TryStartDash()
         {
-            if (RaidNetworkSession.CombatPreview) return false; // Multiplayer dash is consumed as a host-validated input command.
+            if (RaidCombatAuthority.Active || RaidNetworkSession.CombatPreview) return false; // Multiplayer dash is consumed as a host-validated input command.
             Vector3 direction = GetMoveDirectionXZ(ReadMoveInput());
             Vector3 facing = transform.forward;
             if (!_dash.TryStart(dashSettings, CanMoveVoluntarily, direction.x, direction.z, facing.x, facing.z)) return false;
@@ -485,7 +490,7 @@ namespace RaidRogue
         /// </summary>
         public void StartKnockbackXZ(Vector3 originXZ, float knockbackDistance, float duration = 0.45f)
         {
-            if (IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             if (_isBeingRescued)
             {
                 return;
@@ -528,11 +533,11 @@ namespace RaidRogue
             );
         }
 
-        private void UpdateKnockbackMovementXZ()
+        private void UpdateKnockbackMovementXZ(float seconds = -1)
         {
             Vector3 current = transform.position;
             Vector3 target = new Vector3(_knockbackTargetXZ.x, current.y, _knockbackTargetXZ.z);
-            transform.position = Vector3.MoveTowards(current, target, _knockbackSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(current, target, _knockbackSpeed * (seconds < 0 ? Time.deltaTime : seconds));
 
             Vector3 diffXZ = new Vector3(target.x - transform.position.x, 0f, target.z - transform.position.z);
             if (diffXZ.sqrMagnitude < 0.04f)
@@ -544,7 +549,7 @@ namespace RaidRogue
 
         public void StartPulledByHealerRescue(Vector3 safeDestinationXZ)
         {
-            if (IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             _dash.Cancel();
             _isBeingKnockedBack = false;
             _isBeingRescued = true;
@@ -561,11 +566,11 @@ namespace RaidRogue
             TriggerTacticalRescueBuff(5.0f);
         }
 
-        private void UpdateRescuePullMovementXZ()
+        private void UpdateRescuePullMovementXZ(float seconds = -1)
         {
             Vector3 current = transform.position;
             Vector3 target = new Vector3(_rescueDestinationXZ.x, current.y, _rescueDestinationXZ.z);
-            transform.position = Vector3.MoveTowards(current, target, _rescuePullSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(current, target, _rescuePullSpeed * (seconds < 0 ? Time.deltaTime : seconds));
 
             Vector3 diffXZ = new Vector3(target.x - transform.position.x, 0f, target.z - transform.position.z);
             if (diffXZ.sqrMagnitude < 0.04f)
@@ -592,7 +597,7 @@ namespace RaidRogue
                     ghostStepStacks++;
                     moveSpeed *= 1.30f;
                     positionalAngleBonusDeg += 15f;
-                    if (targetBoss != null)
+                    if (targetBoss != null && !RaidCombatAuthority.Active)
                     {
                         targetBoss.positionalAngleBonus = positionalAngleBonusDeg;
                     }
@@ -720,7 +725,7 @@ namespace RaidRogue
 
         public void TriggerVampiricBladeHeal()
         {
-            if (IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             float heal = (currentRole == PlayerRole.Guardian_Tank ? 30f : 15f) * Mathf.Max(1, vampiricBladeStacks);
             float hpBefore = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + heal);
@@ -741,7 +746,7 @@ namespace RaidRogue
         /// </summary>
         public void ActivatePersonalDefensiveBuff()
         {
-            if (IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             Potion?.EndRevivalProtection();
             _defensiveRemainingTime = defensiveDuration;
             ApplyBodyColor(defensiveBodyColor);
@@ -779,7 +784,7 @@ namespace RaidRogue
         /// </summary>
         public void AddShield(float shieldAmount, Transform source = null)
         {
-            if (IsDead || StageManager.CombatSuspended) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended) return;
             if (shieldAmount <= 0f)
             {
                 return;
@@ -799,7 +804,7 @@ namespace RaidRogue
 
         public void TakeDamage(float rawDamage)
         {
-            if (IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
+            if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended || rawDamage <= 0) return;
             if (Potion != null && Potion.HasRevivalProtection) return;
             float finalDamage = CalculateFinalDamageTaken(rawDamage);
             float absorbedByShield = 0f;
@@ -821,7 +826,7 @@ namespace RaidRogue
                 int reflect = Mathf.RoundToInt(thornReflectDamage * (IsDefensiveBuffActive ? 0.6f : 0.25f));
                 if (reflect > 0)
                 {
-                    targetBoss.ReceiveRoleSkillAttack("가시반사", "철벽 가시 갑옷", 0, reflect, new Color(0.35f, 1f, 0.55f, 1f), false);
+                    targetBoss.ReceiveRoleSkillAttack("가시반사", "철벽 가시 갑옷", 0, reflect, new Color(0.35f, 1f, 0.55f, 1f), false, source: transform);
                 }
             }
 
@@ -845,7 +850,7 @@ namespace RaidRogue
 
         public float ReceiveHeal(float healAmount, Transform source = null, HealingKind kind = HealingKind.Ability)
         {
-            if (healAmount <= 0f || IsDead || StageManager.CombatSuspended)
+            if (RaidCombatAuthority.Replica || healAmount <= 0f || IsDead || StageManager.CombatSuspended)
             {
                 return 0;
             }
@@ -869,6 +874,7 @@ namespace RaidRogue
 
         public void PlaySkillLineVisual(Vector3 targetWorldPos, Color lineColor)
         {
+            if (RaidCombatAuthority.Host) RaidNetworkSession.Instance.BroadcastEffect(transform.position + Vector3.up, targetWorldPos + Vector3.up, lineColor, "", false, 1);
             if (_slashEffectLine == null)
             {
                 return;

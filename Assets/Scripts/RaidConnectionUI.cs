@@ -11,6 +11,7 @@ namespace RaidRogue
         private InputField _name, _address;
         private readonly Button[] _roles = new Button[4];
         private Font _font;
+        private Button _beginBattle;
         private void Start()
         {
             _session = GetComponent<RaidNetworkSession>();
@@ -30,7 +31,7 @@ namespace RaidRogue
             ButtonAt(_start.transform, "싱글플레이 · AI 파티", new Vector2(0, -20), new Vector2(560, 48), _session.SinglePlay);
             ButtonAt(_start.transform, "방 만들기 · 호스트", new Vector2(-150, -85), new Vector2(280, 48), () => Connect(true));
             ButtonAt(_start.transform, "주소로 참가 · 클라이언트", new Vector2(150, -85), new Vector2(280, 48), () => Connect(false));
-            Label(_start.transform, "멀티플레이: 연결·역할·이동·대쉬 테스트\n전투·보스·카드 동기화는 다음 단계입니다.\n같은 PC: 127.0.0.1 / 같은 LAN: 호스트의 IPv4 주소", new Vector2(0, -185), new Vector2(820, 100), 18);
+            Label(_start.transform, "멀티플레이: 호스트 권한 협동 전투\n준비 상태에서 참가 · 빈 자리는 호스트 AI가 담당\n같은 PC: 127.0.0.1 / 같은 LAN: 호스트의 IPv4 주소", new Vector2(0, -185), new Vector2(820, 100), 18);
             _room = Rect(overlay, "RoomOptions", Vector2.zero, new Vector2(800, 380)).gameObject;
             _roster = Label(_room.transform, "", new Vector2(0, 70), new Vector2(800, 130), 22);
             for (int i = 0; i < 4; i++)
@@ -38,7 +39,8 @@ namespace RaidRogue
                 int role = i + 1;
                 _roles[i] = ButtonAt(_room.transform, CombatMetricsManager.RoleName(role), new Vector2(-285 + i * 190, -50), new Vector2(180, 62), () => _session.SelectRole(role));
             }
-            ButtonAt(_room.transform, "이동 테스트 · 화면으로 돌아가기", new Vector2(0, -130), new Vector2(470, 48), () => _session.MenuOpen = false);
+            _beginBattle = ButtonAt(_room.transform, "전투 시작 (호스트)", new Vector2(-170, -130), new Vector2(325, 48), () => _session.RequestAction(9));
+            ButtonAt(_room.transform, "화면으로 돌아가기", new Vector2(170, -130), new Vector2(325, 48), () => _session.MenuOpen = false);
             ButtonAt(_room.transform, "연결 종료 · 시작 화면", new Vector2(0, -195), new Vector2(470, 48), _session.Disconnect);
             var bar = Box(canvas.transform, "LAN_Status", Vector2.zero, new Vector2(390, 70), new Color(0.04f, 0.08f, 0.13f, 0.94f));
             bar.anchorMin = bar.anchorMax = new Vector2(0, 1); bar.pivot = new Vector2(0, 1); bar.anchoredPosition = new Vector2(15, -64);
@@ -59,7 +61,8 @@ namespace RaidRogue
             bool starting = _session.Mode == RaidSessionMode.Menu;
             _start.SetActive(starting); _room.SetActive(!starting);
             _status.text = _session.Status;
-            _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"LAN 이동 테스트 · {_session.PlayerCount}/4명\n전투 비활성 · SPACE 대쉬";
+            _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanJoinBattle);
+            _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"LAN · {_session.PlayerCount}/4명 · {_session.BattlePhase}\nSPACE 대쉬 · Q 포션";
             if (starting) return;
             if (_session.Mode == RaidSessionMode.Single)
                 _roster.text = "싱글플레이 진행 중\n연결 종료를 누르면 시작 화면으로 돌아갑니다.";
@@ -73,7 +76,7 @@ namespace RaidRogue
                 NetworkRaidAvatar occupant = null;
                 foreach (var avatar in _session.Avatars.Values) if (avatar.Role == i + 1) occupant = avatar;
                 _roles[i].gameObject.SetActive(RaidNetworkSession.Multiplayer);
-                _roles[i].interactable = _session.HasLocalAvatar && (occupant == null || occupant.IsLocal);
+                _roles[i].interactable = _session.HasLocalAvatar && _session.CanChooseRole && (occupant == null || occupant.IsLocal || occupant.IsBot);
                 _roles[i].GetComponentInChildren<Text>().text = CombatMetricsManager.RoleName(i + 1) + "\n" + (occupant != null ? occupant.DisplayName : "선택 가능");
             }
         }

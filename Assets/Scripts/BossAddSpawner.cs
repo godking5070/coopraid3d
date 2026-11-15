@@ -16,7 +16,7 @@ namespace RaidRogue
     /// - 쫄 B [암살자 (힐러 추격 쫄)]: 소환 즉시 힐러(플레이어 힐러 또는 힐러 봇)를 어그로 1순위로 잡고 달려가 강공격/자폭 시전.
     /// - 탱커의 [4]번 '도발' 스킬로 어그로를 강탈할 수 있으며, [Visual_3D]와 [Visual_2D] 이중 외형을 지원합니다.
     /// </summary>
-    public class BossAddMinion : MonoBehaviour
+    public partial class BossAddMinion : MonoBehaviour
     {
         [Min(0f)] public float combatRadius = 0.65f;
         [Header("Add Identity & Stats")]
@@ -237,6 +237,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidCombatAuthority.Replica) { UpdateReplicaAdd(); return; }
             if (StageManager.CombatSuspended) return;
             if (isDead || Time.timeScale <= 0.001f)
             {
@@ -437,7 +438,7 @@ namespace RaidRogue
             bool isBigHighlight = false,
             Transform source = null)
         {
-            if (isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
+            if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             float mult = ownerBoss != null ? ownerBoss.DamageTakenMultiplier : 1.0f;
             int finalDmg = Mathf.RoundToInt(damage * mult);
@@ -474,7 +475,7 @@ namespace RaidRogue
             if (StageManager.CombatSuspended || !CombatRange.LivingPartyMember(source)) return;
             var attacker = source != null ? source.GetComponent<PartyBotAI>() : null;
             if (attacker != null && (attacker.role == PartyBotRole.Tank || attacker.role == PartyBotRole.MeleeDPS) && !attacker.CanMeleeHit(transform)) return;
-            if (isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
+            if (RaidCombatAuthority.Replica || isDead || StageManager.CombatSuspended || !gameObject.activeInHierarchy) return;
 
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
             float hpBefore = currentHp;
@@ -666,6 +667,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            if (RaidCombatAuthority.Replica) return;
             if (StageManager.CombatSuspended) return;
             if (boss == null || Time.timeScale <= 0.001f)
             {

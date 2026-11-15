@@ -5,7 +5,7 @@ using UnityEngine;
 namespace RaidRogue
 {
     [DefaultExecutionOrder(-110)]
-    public sealed class PartyLife : MonoBehaviour
+    public sealed partial class PartyLife : MonoBehaviour
     {
         private readonly PartyLifeState _state = new PartyLifeState();
         private PlayerController _player;
@@ -28,12 +28,12 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (Hp <= 0 && !IsDead) Die();
+            if (!RaidCombatAuthority.Replica && Hp <= 0 && !IsDead) Die();
         }
 
         public void Die()
         {
-            if (!_state.Die()) return;
+            if (RaidCombatAuthority.Replica || !_state.Die()) return;
             var visual = GetComponent<DualVisualController>();
             _body = visual != null && visual.visual3DRoot != null ? visual.visual3DRoot.transform : null;
             if (_body != null) { _upright = _body.localRotation; _body.localRotation = Quaternion.Euler(0, 0, 75) * _upright; }
@@ -48,7 +48,7 @@ namespace RaidRogue
 
         public bool TryRevive(float hpFraction)
         {
-            if (StageManager.CombatSuspended || hpFraction <= 0 || !_state.Revive()) return false;
+            if (RaidCombatAuthority.Replica || StageManager.CombatSuspended || hpFraction <= 0 || !_state.Revive()) return false;
             if (_body != null) _body.localRotation = _upright;
             if (_player != null) _player.RestorePartyLife(hpFraction);
             if (_bot != null) _bot.RestorePartyLife(hpFraction);

@@ -74,6 +74,12 @@ namespace RaidRogue
             _failed.Clear(); RetryCount = 0;
         }
 
+        public void RetainCurrentRoster(IEnumerable<int> ids)
+        {
+            var active = new HashSet<int>(ids);
+            foreach (int id in new List<int>(_members.Keys)) if (!active.Contains(id)) _members.Remove(id);
+        }
+
         public void BeginStage(int stage)
         {
             Generation++;
@@ -164,6 +170,14 @@ namespace RaidRogue
                 }
             }
             return new CombatEncounterResult(0, seconds, totals.Values);
+        }
+
+        // Replica assignment replaces totals; retransmission never increments damage/healing/deaths.
+        public void ReplaceNetworkSnapshot(CombatEncounterResult current, IEnumerable<CombatEncounterResult> clears, IEnumerable<CombatEncounterResult> failures, int retries)
+        {
+            Active = false; Stage = current.Stage; Seconds = current.Seconds; RetryCount = retries;
+            _members.Clear(); foreach (var member in current.Members) _members[member.Id] = member.Copy();
+            _stages.Clear(); _stages.AddRange(clears); _failed.Clear(); _failed.AddRange(failures);
         }
 
         private static double HealthLost(double before, double after)

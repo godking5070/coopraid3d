@@ -8,6 +8,7 @@ namespace RaidRogue
     public struct RaidMoveInput
     {
         public uint Sequence;
+        public int MotionVersion;
         public float X, Z;
         public bool Dash;
         public bool Valid => Sequence > 0 && Finite(X) && Finite(Z) && Math.Abs(X) <= 1.001f && Math.Abs(Z) <= 1.001f;
@@ -26,6 +27,7 @@ namespace RaidRogue
             if (_pending.ContainsKey(input.Sequence)) return false;
             _pending.Add(input.Sequence, input); return true;
         }
+        public void DiscardPending() { foreach (var key in _pending.Keys) Acknowledged = key; _pending.Clear(); }
         public RaidMoveInput Next()
         {
             if (_pending.Count == 0) return default;
@@ -61,20 +63,23 @@ namespace RaidRogue
         }
     }
 
-    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice }
+    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong }
     public sealed class RaidPose
     {
         public int Id, Role;
         public string Name;
         public uint Ack;
         public float X, Z, Yaw;
-        public bool MovementLocked;
+        public bool MovementLocked, Bot;
+        public int MotionVersion;
+        public float MoveSpeed;
         public DashMotion.Snapshot Dash;
     }
     public sealed class RaidPacket
     {
         public RaidPacketKind Kind;
         public string Text = "";
+        public byte[] Bytes;
         public int Id, Role;
         public uint Tick;
         public float Speed, Radius, Arena, TurnSpeed;
@@ -87,7 +92,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 1, MaxBytes = 1100;
+        public const int Version = 2, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -95,21 +100,26 @@ namespace RaidRogue
             w.Write((byte)Version); w.Write((byte)packet.Kind);
             switch (packet.Kind)
             {
-                case RaidPacketKind.Hello: case RaidPacketKind.Notice: WriteText(w, packet.Text); break;
+                case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: WriteText(w, packet.Text); break;
+                case RaidPacketKind.Ping: case RaidPacketKind.Pong:
+                    w.Write(packet.Speed); w.Write(packet.Radius); break;
+                case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
+                    if (packet.Bytes == null || packet.Bytes.Length > 900) throw new InvalidDataException();
+                    w.Write(packet.Tick); w.Write(packet.Id); w.Write(packet.Role); w.Write((ushort)packet.Bytes.Length); w.Write(packet.Bytes); break;
                 case RaidPacketKind.Welcome:
                     w.Write(packet.Id); w.Write(packet.Speed); w.Write(packet.Radius); w.Write(packet.Arena); w.Write(packet.TurnSpeed);
                     w.Write(packet.Dash.distance); w.Write(packet.Dash.duration); w.Write(packet.Dash.cooldown); break;
                 case RaidPacketKind.Role: w.Write(packet.Role); break;
                 case RaidPacketKind.Input:
                     w.Write((byte)packet.Inputs.Count);
-                    foreach (var input in packet.Inputs) { w.Write(input.Sequence); w.Write(input.X); w.Write(input.Z); w.Write(input.Dash); }
+                    foreach (var input in packet.Inputs) { w.Write(input.Sequence); w.Write(input.MotionVersion); w.Write(input.X); w.Write(input.Z); w.Write(input.Dash); }
                     break;
                 case RaidPacketKind.Snapshot:
                     w.Write(packet.Tick); w.Write((byte)packet.Poses.Count);
                     foreach (var pose in packet.Poses)
                     {
                         w.Write(pose.Id); w.Write(pose.Role); WriteText(w, pose.Name); w.Write(pose.Ack);
-                        w.Write(pose.X); w.Write(pose.Z); w.Write(pose.Yaw); w.Write(pose.MovementLocked);
+                        w.Write(pose.X); w.Write(pose.Z); w.Write(pose.Yaw); w.Write(pose.MovementLocked); w.Write(pose.MotionVersion); w.Write(pose.MoveSpeed); w.Write(pose.Bot);
                         w.Write(pose.Dash.Active); w.Write(pose.Dash.Cooldown); w.Write(pose.Dash.CooldownTotal);
                         w.Write(pose.Dash.Time); w.Write(pose.Dash.Distance); w.Write(pose.Dash.Speed); w.Write(pose.Dash.X); w.Write(pose.Dash.Z);
                     }
@@ -130,7 +140,13 @@ namespace RaidRogue
                 var p = new RaidPacket { Kind = (RaidPacketKind)r.ReadByte() };
                 switch (p.Kind)
                 {
-                    case RaidPacketKind.Hello: case RaidPacketKind.Notice: p.Text = ReadText(r); break;
+                    case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: p.Text = ReadText(r); break;
+                    case RaidPacketKind.Ping: case RaidPacketKind.Pong:
+                        p.Speed = Number(r); p.Radius = Number(r); break;
+                    case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
+                        p.Tick = r.ReadUInt32(); p.Id = r.ReadInt32(); p.Role = r.ReadInt32();
+                        int length = r.ReadUInt16(); if (length > 900 || p.Id < 0 || p.Role < 0 || p.Role > 128) return false;
+                        p.Bytes = r.ReadBytes(length); if (p.Bytes.Length != length) return false; break;
                     case RaidPacketKind.Welcome:
                         p.Id = r.ReadInt32(); p.Speed = Number(r); p.Radius = Number(r); p.Arena = Number(r); p.TurnSpeed = Number(r);
                         p.Dash.distance = Number(r); p.Dash.duration = Number(r); p.Dash.cooldown = Number(r);
@@ -141,7 +157,7 @@ namespace RaidRogue
                         int count = r.ReadByte(); if (count > 8) return false;
                         for (int i = 0; i < count; i++)
                         {
-                            var input = new RaidMoveInput { Sequence = r.ReadUInt32(), X = Number(r), Z = Number(r), Dash = r.ReadBoolean() };
+                            var input = new RaidMoveInput { Sequence = r.ReadUInt32(), MotionVersion = r.ReadInt32(), X = Number(r), Z = Number(r), Dash = r.ReadBoolean() };
                             if (!input.Valid) return false; p.Inputs.Add(input);
                         }
                         break;
@@ -150,7 +166,7 @@ namespace RaidRogue
                         var ids = new HashSet<int>(); var roles = new HashSet<int>();
                         for (int i = 0; i < count; i++)
                         {
-                            var pose = new RaidPose { Id = r.ReadInt32(), Role = r.ReadInt32(), Name = ReadText(r), Ack = r.ReadUInt32(), X = Number(r), Z = Number(r), Yaw = Number(r), MovementLocked = r.ReadBoolean() };
+                            var pose = new RaidPose { Id = r.ReadInt32(), Role = r.ReadInt32(), Name = ReadText(r), Ack = r.ReadUInt32(), X = Number(r), Z = Number(r), Yaw = Number(r), MovementLocked = r.ReadBoolean(), MotionVersion = r.ReadInt32(), MoveSpeed = Number(r), Bot = r.ReadBoolean() };
                             if (pose.Id <= 0 || pose.Role < 1 || pose.Role > 4 || !ids.Add(pose.Id) || !roles.Add(pose.Role)) return false;
                             pose.Dash = new DashMotion.Snapshot { Active = r.ReadBoolean(), Cooldown = Number(r), CooldownTotal = Number(r), Time = Number(r), Distance = Number(r), Speed = Number(r), X = Number(r), Z = Number(r) };
                             p.Poses.Add(pose);
