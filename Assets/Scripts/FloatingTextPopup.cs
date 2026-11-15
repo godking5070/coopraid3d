@@ -37,6 +37,7 @@ namespace RaidRogue
 
         private void Initialize(string message, Color color, bool isCrit)
         {
+            message = LocalInputBindings.SkillText(message);
             _baseColor = color;
             float scale = isCrit ? 0.16f : 0.125f;
             _initialScale = Vector3.one * scale;

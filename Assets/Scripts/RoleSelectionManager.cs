@@ -58,6 +58,14 @@ namespace RaidRogue
             RefreshSceneReferences();
             EnsureUI();
             BindButtons();
+            // Also bind UI serialized by earlier SceneAutoBuilder versions, without rebuilding scenes.
+            for (int i = 0; i < 4; i++)
+            {
+                if (roleCardDescTexts != null && i < roleCardDescTexts.Length && roleCardDescTexts[i] != null && roleCardDescTexts[i].GetComponent<LocalShortcutText>() == null)
+                    LocalShortcutText.Set(roleCardDescTexts[i], roleCardDescTexts[i].text);
+                if (roleCardButtons != null && i < roleCardButtons.Length && roleCardButtons[i] != null)
+                    LocalShortcutText.Set(roleCardButtons[i].transform.Find("SelectActionBadge/BadgeText")?.GetComponent<Text>(), "▶ 클릭 또는 [{key:Choice" + (i + 1) + "}]키로 선택");
+            }
 
             // SinglePlay explicitly opens selection; the menu preview must not start/reset a run.
             CloseRoleSelectionModal();
@@ -122,6 +130,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            UpdateTopButtonLabel();
             if (LocalGameplayInput.ModalCovered) return;
             if (CombatMetricsUI.BlocksUnderlyingInput) return;
             // 단축키 [P]: 언제든 직업 선택 창 열기/닫기
@@ -170,9 +179,9 @@ namespace RaidRogue
             PlayerRole curRole = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
             if (roleModalSubtitleText != null)
             {
-                roleModalSubtitleText.text =
+                LocalShortcutText.Set(roleModalSubtitleText,
                     $"현재 선택된 직업: <color=#FFE055>{GetRoleTitleKor(curRole)}</color>  |  " +
-                    "원하는 직업 카드를 마우스로 클릭하거나 키보드 <b>[1] · [2] · [3] · [4]</b> 키를 눌러 즉시 플레이하세요! (나머지 3자리는 AI 봇이 자동 편성됩니다)";
+                    "원하는 직업 카드를 마우스로 클릭하거나 키보드 <b>[{key:Choice1}] · [{key:Choice2}] · [{key:Choice3}] · [{key:Choice4}]</b> 키를 눌러 즉시 플레이하세요! (나머지 3자리는 AI 봇이 자동 편성됩니다)");
             }
 
             _isModalOpen = true;
@@ -182,6 +191,7 @@ namespace RaidRogue
 
         public void CloseRoleSelectionModal()
         {
+            if (_isModalOpen) LocalInputBindings.QuarantineHeld();
             _isModalOpen = false;
             if (roleModalRoot != null)
             {
@@ -428,7 +438,7 @@ namespace RaidRogue
             }
 
             PlayerRole cur = player != null ? player.currentRole : PlayerRole.Blade_MeleeDPS;
-            topOpenRoleModalButtonText.text = $"[직업 변경: {GetRoleShortKor(cur)} (단축키 P)]";
+            topOpenRoleModalButtonText.text = $"[직업 변경: {GetRoleShortKor(cur)} ({LocalInputBindings.Label("Roles")})]";
         }
 
         public static string GetRoleTitleKor(PlayerRole role)
@@ -510,7 +520,7 @@ namespace RaidRogue
                     topOpenRoleModalButtonText.fontStyle = FontStyle.Bold;
                     topOpenRoleModalButtonText.alignment = TextAnchor.MiddleCenter;
                     topOpenRoleModalButtonText.color = new Color(1f, 0.95f, 0.7f, 1f);
-                    topOpenRoleModalButtonText.text = "[직업 변경: 3.블레이드(근딜) (단축키 P)]";
+                    topOpenRoleModalButtonText.text = $"[직업 변경: 3.블레이드(근딜) ({LocalInputBindings.Label("Roles")})]";
                 }
             }
 
@@ -718,7 +728,7 @@ namespace RaidRogue
                 rDescTxt.alignment = TextAnchor.UpperLeft;
                 rDescTxt.lineSpacing = 1.15f;
                 rDescTxt.color = new Color(0.92f, 0.95f, 1.0f, 1f);
-                rDescTxt.text = roleDescs[i];
+                LocalShortcutText.Set(rDescTxt, roleDescs[i]);
                 rDescTxt.raycastTarget = false;
                 roleCardDescTexts[i] = rDescTxt;
 
@@ -748,7 +758,7 @@ namespace RaidRogue
                 badgeTxt.fontStyle = FontStyle.Bold;
                 badgeTxt.alignment = TextAnchor.MiddleCenter;
                 badgeTxt.color = Color.white;
-                badgeTxt.text = $"▶ 클릭 또는 [{i + 1}]키로 선택";
+                LocalShortcutText.Set(badgeTxt, "▶ 클릭 또는 [{key:Choice" + (i + 1) + "}]키로 선택");
                 badgeTxt.raycastTarget = false;
             }
 
@@ -756,46 +766,9 @@ namespace RaidRogue
         }
 
         private static bool WasShortcutPPressed()
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.pKey.wasPressedThisFrame)
-            {
-                return true;
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                return true;
-            }
-#endif
-            return false;
-        }
+        { return LocalInputBindings.Pressed("Roles"); }
 
         private static bool WasDigitPressed(int num)
-        {
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null)
-            {
-                switch (num)
-                {
-                    case 1: return Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame;
-                    case 2: return Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame;
-                    case 3: return Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame;
-                    case 4: return Keyboard.current.digit4Key.wasPressedThisFrame || Keyboard.current.numpad4Key.wasPressedThisFrame;
-                }
-            }
-#endif
-#if ENABLE_LEGACY_INPUT_MANAGER
-            switch (num)
-            {
-                case 1: return Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1);
-                case 2: return Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2);
-                case 3: return Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3);
-                case 4: return Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4);
-            }
-#endif
-            return false;
-        }
+        { return LocalInputBindings.Pressed("Choice" + num); }
     }
 }

@@ -121,7 +121,7 @@ namespace RaidRogue
             _flowBar.SetActive(!_session.MenuOpen && !recovering && (_flowText.text.Length > 0 || singleModal));
             _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanJoinBattle);
             _beginBattle.interactable = _session.CanStartLobby;
-            _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\nSPACE 대쉬 · Q 포션";
+            _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\n{LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션";
             if (starting) return;
             if (_session.Mode == RaidSessionMode.Single)
                 _roster.text = "싱글플레이 진행 중\n연결 종료를 누르면 시작 화면으로 돌아갑니다.";
@@ -175,6 +175,7 @@ namespace RaidRogue
             field.textComponent = Label(rect, "", Vector2.zero, new Vector2(425, 40), 20); field.textComponent.alignment = TextAnchor.MiddleLeft;
             field.textComponent.supportRichText = false; field.characterLimit = limit; field.text = value; return field;
         }
+        private LocalCameraSettingsUI _settingsUI;
         private void LateUpdate()
         {
             if (_flowBar != null && _flowBar.activeSelf) _flowBar.transform.SetAsLastSibling();
@@ -182,6 +183,8 @@ namespace RaidRogue
             if (_recoveryPanel != null && _recoveryPanel.activeSelf) _recoveryPanel.transform.SetAsLastSibling();
             if (_partyNotice != null && _partyNotice.gameObject.activeSelf) _partyNotice.transform.SetAsLastSibling();
             if (_confirmation != null && _confirmation.activeSelf) _confirmation.transform.SetAsLastSibling();
+            if (_settingsUI == null) _settingsUI = FindFirstObjectByType<LocalCameraSettingsUI>();
+            _settingsUI?.RaiseAboveMenus();
         }
         private void OnDestroy() { if (_flowBar != null) Destroy(_flowBar); if (_overlay != null) Destroy(_overlay); if (_bar != null) Destroy(_bar); if (_confirmation != null) Destroy(_confirmation); if (_recoveryPanel != null) Destroy(_recoveryPanel); if (_partyNotice != null) Destroy(_partyNotice.gameObject); }
     }

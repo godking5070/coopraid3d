@@ -43,6 +43,7 @@ namespace RaidRogue
         {
             RefreshPartyReferences();
             EnsureUI();
+            if (panelRoot != null) LocalShortcutText.Set(panelRoot.Find("HeaderTitle")?.GetComponent<Text>(), "◆ PARTY LIST · 클릭 / {key:Party1} {key:Party2} {key:Party3} {key:Party4}");
             EnsureFillSprites();
         }
 
@@ -129,7 +130,7 @@ namespace RaidRogue
                 headerTxt.fontStyle = FontStyle.Bold;
                 headerTxt.alignment = TextAnchor.MiddleLeft;
                 headerTxt.color = new Color(0.85f, 0.92f, 1.0f, 1f);
-                headerTxt.text = "◆ PARTY LIST (클릭 또는 F1~F4 로 아군 타겟 지정)";
+                LocalShortcutText.Set(headerTxt, "◆ PARTY LIST · 클릭 / {key:Party1} {key:Party2} {key:Party3} {key:Party4}");
                 headerTxt.raycastTarget = false;
             }
             else
@@ -449,9 +450,9 @@ namespace RaidRogue
 
                 UpdateRowVisual(
                     memberRows[0],
-                    $"[F1]\n{badgeCode}",
+                    $"[{LocalInputBindings.Label("Party1")}]\n{badgeCode}",
                     roleColor,
-                    $"[F1] {player.playerRoleDisplayName}",
+                    $"[{LocalInputBindings.Label("Party1")}] {player.playerRoleDisplayName}",
                     player.currentHp,
                     player.maxHp,
                     player.currentShield,
@@ -475,7 +476,7 @@ namespace RaidRogue
                     bool isBotTargeted = currentSelectedTarget != null && currentSelectedTarget == bot.transform;
                     GetBotRoleBadge(bot.role, out string badgeCode, out Color roleColor);
 
-                    string fKeyTag = $"[F{i + 2}]";
+                    string fKeyTag = $"[{LocalInputBindings.Label("Party" + (i + 2))}]";
                     UpdateRowVisual(
                         row,
                         $"{fKeyTag}\n{badgeCode}",
@@ -503,8 +504,8 @@ namespace RaidRogue
                 var avatar = row.boundTarget != null ? row.boundTarget.GetComponent<NetworkRaidAvatar>() : null;
                 bool selected = avatar != null && TargetingManager.Instance != null && TargetingManager.Instance.CurrentTarget == avatar.transform;
                 var state = avatar?.State;
-                UpdateRowVisual(row, $"F{i + 1}", avatar != null ? NetworkRaidAvatar.RoleColor(avatar.Role) : Color.gray,
-                    avatar != null ? $"[F{i + 1}] {avatar.DisplayName} · {avatar.RoleName}" : "접속 대기", state?.hp ?? 1, state?.maxHp ?? 1, state?.shield ?? 0,
+                UpdateRowVisual(row, LocalInputBindings.Label("Party" + (i + 1)), avatar != null ? NetworkRaidAvatar.RoleColor(avatar.Role) : Color.gray,
+                    avatar != null ? $"[{LocalInputBindings.Label("Party" + (i + 1))}] {avatar.DisplayName} · {avatar.RoleName}" : "접속 대기", state?.hp ?? 1, state?.maxHp ?? 1, state?.shield ?? 0,
                     avatar != null && boss != null && boss.aggroTarget == avatar.transform, selected, state?.dead == true);
                 if (row.hpValueText != null && state != null)
                 {

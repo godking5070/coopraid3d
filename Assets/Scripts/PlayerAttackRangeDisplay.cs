@@ -10,8 +10,6 @@ namespace RaidRogue
         private PlayerCombatController _combat;
         private LineRenderer _ring;
         private Material _material;
-        private Button _settingsButton;
-        private Text _settingsText;
         private Text _feedback;
         private const int Segments = 96;
 
@@ -38,7 +36,8 @@ namespace RaidRogue
         private void LateUpdate()
         {
             if (_combat == null) return;
-            if (_settingsButton == null) BuildSettingsUI();
+            if (_feedback == null) BuildFeedbackUI();
+            if (LocalSettingsRuntime.Instance != null) showRange = LocalSettingsRuntime.Instance.Previewed.showAttackRange;
             bool melee = _combat.IsMeleeRole && CombatRange.LivingPartyMember(transform);
             _ring.enabled = melee && showRange;
             if (_ring.enabled)
@@ -59,32 +58,12 @@ namespace RaidRogue
             if (_feedback != null) _feedback.text = _combat.HasRangeFeedback ? _combat.RangeFeedback : "";
         }
 
-        private void BuildSettingsUI()
+        private void BuildFeedbackUI()
         {
             Canvas canvas = _combat.hotbarUI != null ? _combat.hotbarUI.GetComponentInParent<Canvas>() : null;
             if (canvas == null) canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            var root = new GameObject("AttackRange_SettingsButton", typeof(RectTransform), typeof(Image), typeof(Button));
-            var rect = root.GetComponent<RectTransform>();
-            rect.SetParent(canvas.transform, false);
-            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(1, 1);
-            rect.anchoredPosition = new Vector2(-24, -138);
-            rect.sizeDelta = new Vector2(310, 34);
-            root.GetComponent<Image>().color = new Color(0.08f, 0.18f, 0.22f, 0.92f);
-            _settingsButton = root.GetComponent<Button>();
-            _settingsButton.targetGraphic = root.GetComponent<Image>();
-            _settingsText = CreateLabel(root.transform, font, 17);
-            _settingsText.rectTransform.anchorMin = Vector2.zero;
-            _settingsText.rectTransform.anchorMax = Vector2.one;
-            _settingsText.rectTransform.offsetMin = _settingsText.rectTransform.offsetMax = Vector2.zero;
-            _settingsButton.onClick.AddListener(() =>
-            {
-                if (CombatMetricsUI.BlocksUnderlyingInput) return;
-                showRange = !showRange;
-                RefreshButton();
-            });
-            RefreshButton();
             _feedback = CreateLabel(canvas.transform, font, 22);
             _feedback.name = "MeleeRange_Feedback";
             _feedback.color = new Color(1, 0.75f, 0.45f);
@@ -92,12 +71,8 @@ namespace RaidRogue
             feedbackRect.anchorMin = feedbackRect.anchorMax = new Vector2(0.5f, 1);
             feedbackRect.anchoredPosition = new Vector2(0, -310);
             feedbackRect.sizeDelta = new Vector2(650, 32);
-            // Existing role/reward/result overlays stay above this small settings control.
-            rect.SetAsFirstSibling();
             feedbackRect.SetAsFirstSibling();
         }
-
-        private void RefreshButton() => _settingsText.text = "공격 범위 표시: " + (showRange ? "켜짐" : "꺼짐");
 
         private static Text CreateLabel(Transform parent, Font font, int size)
         {
@@ -116,7 +91,6 @@ namespace RaidRogue
         private void OnDestroy()
         {
             if (_material != null) Destroy(_material);
-            if (_settingsButton != null) Destroy(_settingsButton.gameObject);
             if (_feedback != null) Destroy(_feedback.gameObject);
         }
     }

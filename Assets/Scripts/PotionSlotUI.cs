@@ -10,7 +10,7 @@ namespace RaidRogue
         private GameObject _slot;
         private Image _background;
         private RectTransform _overlay;
-        private Text _status;
+        private Text _status, _key;
         private Text _description;
         private float _nextSearch;
 
@@ -26,6 +26,7 @@ namespace RaidRogue
                 if (hotbar == null) return;
                 Build(hotbar.transform);
             }
+            _key.text = LocalInputBindings.Label("Potion") + " 포션";
             bool ready = _potion.CanUse;
             _description.text = $"최대 HP {(_potion.Settings != null ? _potion.Settings.healFraction * 100 : 0):0.#}%\n즉시 회복 · GCD 별도";
             _background.color = ready ? new Color(0.12f, 0.32f, 0.2f, 0.96f) : new Color(0.12f, 0.14f, 0.18f, 0.96f);
@@ -53,7 +54,7 @@ namespace RaidRogue
             var shade = _overlay.gameObject.AddComponent<Image>();
             shade.color = new Color(0, 0, 0, 0.6f);
             shade.raycastTarget = false;
-            Label(root, "Key", "Q 포션", 18, new Vector2(0, 0.72f), Vector2.one);
+            _key = Label(root, "Key", "", 18, new Vector2(0, 0.72f), Vector2.one);
             _status = Label(root, "Status", "", 18, new Vector2(0, 0.36f), new Vector2(1, 0.72f));
             _description = Label(root, "Description", "", 12, Vector2.zero, new Vector2(1, 0.36f));
         }
