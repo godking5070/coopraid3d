@@ -15,6 +15,7 @@ namespace RaidRogue
     public sealed class DashMotion
     {
         // Only authoritative snapshots are restored; clients never send these values to the host.
+        [Serializable]
         public struct Snapshot
         {
             public bool Active;

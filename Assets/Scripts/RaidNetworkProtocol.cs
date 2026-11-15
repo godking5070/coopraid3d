@@ -72,7 +72,8 @@ namespace RaidRogue
         }
     }
 
-    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong, Ready, SceneReady }
+    public enum RaidPacketKind : byte { Hello = 1, Welcome, Input, Snapshot, Role, Notice, CombatRequest, CombatFrame, CombatEffect, Ping, Pong, Ready, SceneReady, ResumeHello, RestoreReady, RestoreComplete, Leave, PartyNotice }
+    [Serializable]
     public sealed class RaidPose
     {
         public int Id, Role;
@@ -102,7 +103,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 3, MaxBytes = 1100;
+        public const int Version = 4, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {
@@ -110,15 +111,17 @@ namespace RaidRogue
             w.Write((byte)Version); w.Write((byte)packet.Kind);
             switch (packet.Kind)
             {
-                case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: WriteText(w, packet.Text); break;
+                case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: WriteText(w, packet.Text); break;
                 case RaidPacketKind.Ping: case RaidPacketKind.Pong:
                     w.Write(packet.Speed); w.Write(packet.Radius); break;
                 case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
                     if (packet.Bytes == null || packet.Bytes.Length > 900) throw new InvalidDataException();
                     w.Write(packet.Tick); w.Write(packet.Id); w.Write(packet.Role); w.Write((ushort)packet.Bytes.Length); w.Write(packet.Bytes); break;
                 case RaidPacketKind.Welcome:
-                    w.Write(packet.Id); w.Write(packet.Speed); w.Write(packet.Radius); w.Write(packet.Arena); w.Write(packet.TurnSpeed);
+                    w.Write(packet.Id); w.Write(packet.Tick); w.Write(packet.Role); w.Write(packet.Speed); w.Write(packet.Radius); w.Write(packet.Arena); w.Write(packet.TurnSpeed);
                     w.Write(packet.Dash.distance); w.Write(packet.Dash.duration); w.Write(packet.Dash.cooldown); break;
+                case RaidPacketKind.Leave: break;
+                case RaidPacketKind.RestoreReady: case RaidPacketKind.RestoreComplete: w.Write(packet.Id); w.Write(packet.Tick); w.Write(packet.Role); break;
                 case RaidPacketKind.Ready: case RaidPacketKind.SceneReady: w.Write(packet.Id); break;
                 case RaidPacketKind.Role: w.Write(packet.Role); break;
                 case RaidPacketKind.Input:
@@ -151,7 +154,7 @@ namespace RaidRogue
                 var p = new RaidPacket { Kind = (RaidPacketKind)r.ReadByte() };
                 switch (p.Kind)
                 {
-                    case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: p.Text = ReadText(r); break;
+                    case RaidPacketKind.ResumeHello: case RaidPacketKind.PartyNotice: case RaidPacketKind.Hello: case RaidPacketKind.Notice: case RaidPacketKind.CombatRequest: p.Text = ReadText(r); break;
                     case RaidPacketKind.Ping: case RaidPacketKind.Pong:
                         p.Speed = Number(r); p.Radius = Number(r); break;
                     case RaidPacketKind.CombatFrame: case RaidPacketKind.CombatEffect:
@@ -159,10 +162,12 @@ namespace RaidRogue
                         int length = r.ReadUInt16(); if (length > 900 || p.Id < 0 || p.Role < 0 || p.Role > 128) return false;
                         p.Bytes = r.ReadBytes(length); if (p.Bytes.Length != length) return false; break;
                     case RaidPacketKind.Welcome:
-                        p.Id = r.ReadInt32(); p.Speed = Number(r); p.Radius = Number(r); p.Arena = Number(r); p.TurnSpeed = Number(r);
+                        p.Id = r.ReadInt32(); p.Tick = r.ReadUInt32(); p.Role = r.ReadInt32(); p.Speed = Number(r); p.Radius = Number(r); p.Arena = Number(r); p.TurnSpeed = Number(r);
                         p.Dash.distance = Number(r); p.Dash.duration = Number(r); p.Dash.cooldown = Number(r);
-                        if (p.Id <= 0 || p.Speed <= 0 || p.Radius <= 0 || p.Arena <= 0 || p.TurnSpeed <= 0 || p.Dash.distance <= 0 || p.Dash.duration <= 0 || p.Dash.cooldown < 0) return false;
+                        if (p.Id <= 0 || p.Role < 0 || p.Role > 1 || p.Speed <= 0 || p.Radius <= 0 || p.Arena <= 0 || p.TurnSpeed <= 0 || p.Dash.distance <= 0 || p.Dash.duration <= 0 || p.Dash.cooldown < 0) return false;
                         break;
+                    case RaidPacketKind.Leave: break;
+                    case RaidPacketKind.RestoreReady: case RaidPacketKind.RestoreComplete: p.Id = r.ReadInt32(); p.Tick = r.ReadUInt32(); p.Role = r.ReadInt32(); if (p.Id < 0 || p.Role < 0) return false; break;
                     case RaidPacketKind.Ready: case RaidPacketKind.SceneReady: p.Id = r.ReadInt32(); if (p.Id < 0 || (p.Kind == RaidPacketKind.Ready && p.Id > 1)) return false; break;
                     case RaidPacketKind.Role: p.Role = r.ReadInt32(); if (p.Role < 1 || p.Role > 4) return false; break;
                     case RaidPacketKind.Input:

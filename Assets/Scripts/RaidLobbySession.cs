@@ -9,12 +9,12 @@ namespace RaidRogue
         private float _loadingDeadline, _nextLoadedAck;
         private int _loadFrame;
         public bool LocalReady => _avatars.TryGetValue(_localId, out var avatar) && avatar.Ready;
-        public bool CanStartLobby => IsHost && CanChooseRole && _roster.AllReady && _peers.TrueForAll(p => p.Id != 0 && p.CloseAt == 0) &&
-            (!UsesSteam || RaidSteamRuntime.Instance.LobbyCount == _roster.Members.Count);
+        public bool CanStartLobby => IsHost && CanChooseRole && _roster.Members.TrueForAll(m => (_recovery.Actor(m.Id)?.Automated ?? false) || (m.Ready && m.Loaded)) && _peers.TrueForAll(p => p.Id != 0 && p.CloseAt == 0) &&
+            (!UsesSteam || !HasUnapprovedLobbyGuests(RaidSteamRuntime.Instance.Members()));
         private string HelloTag => SceneManager.GetActiveScene().name + (UsesSteam ? "|" + RaidSteamRuntime.Instance.Build + "|" + RaidSteamRuntime.Instance.LobbyId.ToString(System.Globalization.CultureInfo.InvariantCulture) : "");
         public void ToggleReady()
         {
-            if (!HasLocalAvatar || !CanChooseRole) return;
+            if (!HasLocalAvatar || !ControlsReady || !CanChooseRole) return;
             if (IsHost) SetReady(_localId, !LocalReady);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.Ready, Id = LocalReady ? 0 : 1 }, true);
         }
@@ -37,7 +37,7 @@ namespace RaidRogue
         private void BeginLoadingBarrier()
         {
             _loadFrame = Time.frameCount; _loadingDeadline = Time.unscaledTime + 30;
-            foreach (var member in _roster.Members) { member.Loaded = false; SyncLobbyAvatar(member); }
+            foreach (var member in _roster.Members) { member.Loaded = _recovery.Actor(member.Id)?.Automated ?? false; SyncLobbyAvatar(member); }
             RaidSteamRuntime.Instance?.PublishPhase();
         }
         private void UpdateLoadingBarrier()
@@ -57,7 +57,7 @@ namespace RaidRogue
                     foreach (var peer in _peers)
                         if (peer.CloseAt == 0 && !_roster.Members.Exists(m => m.Id == peer.Id && m.Loaded)) Reject(peer, "전투 준비 시간이 초과되었습니다. 다시 참가하세요.");
             }
-            else if (_latestCombatFrame != null && _latestCombatFrame.epoch == BattleEpoch && System.Array.TrueForAll(_latestCombatFrame.party, a => _avatars.ContainsKey(a.id)) && Time.unscaledTime >= _nextLoadedAck)
+            else if (ControlsReady && _latestCombatFrame != null && _latestCombatFrame.epoch == BattleEpoch && System.Array.TrueForAll(_latestCombatFrame.party, a => _avatars.ContainsKey(a.id)) && Time.unscaledTime >= _nextLoadedAck)
             {
                 _nextLoadedAck = Time.unscaledTime + .5f;
                 Send(_server, new RaidPacket { Kind = RaidPacketKind.SceneReady, Id = BattleEpoch }, true);
@@ -67,17 +67,10 @@ namespace RaidRogue
         {
             var result = new List<ulong>(); foreach (var member in _roster.Members) if (member.SteamId != 0) result.Add(member.SteamId); return result;
         }
-        public void RemoveSteamMember(ulong steamId)
-        {
-            if (!IsHost || !UsesSteam) return;
-            var member = _roster.Members.Find(m => m.SteamId == steamId);
-            var peer = member == null ? null : _peers.Find(p => p.Id == member.Id);
-            if (peer != null && peer.CloseAt == 0) Reject(peer, "Steam 로비에서 나갔습니다.");
-        }
         public void EndSteamSession(string reason)
         {
             Status = reason;
-            if (UsesSteam || Mode == RaidSessionMode.Closing) RequestReturn(reason);
+            if (UsesSteam || Mode == RaidSessionMode.Closing) { RaidSteamRuntime.Instance?.ForgetRecovery(); RequestReturn(reason); }
         }
     }
 }

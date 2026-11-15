@@ -12,6 +12,7 @@ namespace RaidRogue
         private readonly Dictionary<int, HSteamNetConnection> _connections = new Dictionary<int, HSteamNetConnection>();
         private readonly Dictionary<int, ulong> _identities = new Dictionary<int, ulong>();
         private readonly Dictionary<int, Queue<RaidTransportEvent>> _events = new Dictionary<int, Queue<RaidTransportEvent>>();
+        private readonly Dictionary<int, int> _closeCodes = new Dictionary<int, int>();
         private readonly HashSet<int> _exposed = new HashSet<int>();
         private readonly Queue<int> _accepted = new Queue<int>();
         private readonly IntPtr[] _message = new IntPtr[1];
@@ -57,7 +58,7 @@ namespace RaidRogue
                 if (change.m_info.m_hListenSocket != _listen || _connections.ContainsKey(id)) return;
                 ulong remote = change.m_info.m_identityRemote.GetSteamID64();
                 if (remote == 0 || !_admit(remote) || _connections.Count >= 3 || _identities.ContainsValue(remote))
-                { SteamNetworkingSockets.CloseConnection(change.m_hConn, 1001, "Lobby admission denied", false); return; }
+                { SteamNetworkingSockets.CloseConnection(change.m_hConn, _identities.ContainsValue(remote) ? 1003 : 1001, "Lobby admission denied", false); return; }
                 Track(id, change.m_hConn, remote);
                 if (SteamNetworkingSockets.AcceptConnection(change.m_hConn) != EResult.k_EResultOK) { Disconnect(id); return; }
             }
@@ -71,7 +72,7 @@ namespace RaidRogue
             }
             else if (_connections.ContainsKey(id) && (state == ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer ||
                 state == ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ProblemDetectedLocally))
-            { Disconnect(id); }
+            { _closeCodes[id] = change.m_info.m_eEndReason; Disconnect(id); }
         }
         public void Update() { } // RaidSteamRuntime owns SteamAPI.RunCallbacks exactly once per frame.
         public int Accept() => _accepted.Count > 0 ? _accepted.Dequeue() : 0;
@@ -103,19 +104,20 @@ namespace RaidRogue
             finally { pinned.Free(); }
         }
         public ulong RemoteSteamId(int connection) => _identities.TryGetValue(connection, out ulong id) ? id : 0;
-        public void Disconnect(int connection)
+        public int TakeCloseCode(int connection) { _closeCodes.TryGetValue(connection, out int code); _closeCodes.Remove(connection); return code; }
+        public void Disconnect(int connection, bool voluntary = false, bool transient = false)
         {
-            if (_connections.TryGetValue(connection, out var handle)) SteamNetworkingSockets.CloseConnection(handle, 1000, "Session closed", false);
+            if (_connections.TryGetValue(connection, out var handle)) SteamNetworkingSockets.CloseConnection(handle, voluntary ? 1002 : transient ? 1004 : 1000, voluntary ? "Voluntary leave" : "Session closed", false);
             _connections.Remove(connection); _identities.Remove(connection);
             if (_exposed.Contains(connection) && _events.TryGetValue(connection, out var events)) { events.Clear(); events.Enqueue(RaidTransportEvent.Disconnected); }
-            else _events.Remove(connection);
+            else { _events.Remove(connection); _closeCodes.Remove(connection); }
         }
         public void Dispose()
         {
             IsCreated = false; _status?.Dispose(); _status = null;
             foreach (int id in new List<int>(_connections.Keys)) Disconnect(id);
             if (_listen != HSteamListenSocket.Invalid) SteamNetworkingSockets.CloseListenSocket(_listen);
-            _listen = HSteamListenSocket.Invalid; _events.Clear(); _accepted.Clear(); _exposed.Clear();
+            _listen = HSteamListenSocket.Invalid; _events.Clear(); _accepted.Clear(); _exposed.Clear(); _closeCodes.Clear();
         }
     }
 }

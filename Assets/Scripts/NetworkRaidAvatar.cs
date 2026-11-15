@@ -13,6 +13,7 @@ namespace RaidRogue
         // Host-owned movement gate, including combat state, stun, death and forced movement.
         public bool MovementLocked { get; set; }
         public bool IsBot { get; set; }
+        public bool Automated { get; set; }
         public ulong SteamId { get; set; }
         public bool Ready { get; set; }
         public bool Loaded { get; set; }

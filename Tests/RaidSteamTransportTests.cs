@@ -64,6 +64,33 @@ public static class RaidSteamTransportTests
             Check(client.Poll(client.Server, out _) == RaidTransportEvent.Disconnected, "Cancel clears client transport");
         }
         Check(Callback<SteamNetConnectionStatusChangedCallback_t>.Count == 0, "Repeated connect/dispose leaves no callback");
+        var seats = new RaidRecoverySlots(new RaidRecoverySettings()); seats.Register(500, 2); seats.Reserve(2, 0);
+        using (var recoveryHost = new RaidSteamTransport(true, 1, id => seats.Find(id) != null))
+        {
+            SteamNetworkingSockets.Change(71, 501, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting);
+            Check(SteamNetworkingSockets.Reasons[71] == 1001, "Unknown authenticated identity rejected while run lobby is closed");
+            SteamNetworkingSockets.Change(72, 500, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting);
+            SteamNetworkingSockets.Change(72, 500, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected);
+            Check(recoveryHost.Accept() == 72 && recoveryHost.RemoteSteamId(72) == 500, "Reserved authenticated user can connect without open lobby membership");
+            SteamNetworkingSockets.Change(73, 500, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting);
+            Check(SteamNetworkingSockets.Reasons[73] == 1003, "Duplicate native account has a distinct retryable close code");
+            SteamNetworkingSockets.Change(72, 500, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer, true, 1002);
+            Check(recoveryHost.Poll(72, out _) == RaidTransportEvent.Disconnected && recoveryHost.TakeCloseCode(72) == 1002, "Explicit leave survives native callback to session policy");
+            Check(recoveryHost.TakeCloseCode(72) == 0, "Disconnect reason consumed once");
+            SteamNetworkingSockets.Change(72, 500, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer, true, 1002);
+            Check(recoveryHost.Poll(72, out _) == RaidTransportEvent.Empty, "Repeated closed callback cannot process departure twice");
+        }
+        foreach (bool voluntary in new[] { true, false })
+        using (var client = new RaidSteamTransport(false, 76561198012345678, _ => false))
+        {
+            client.Disconnect(client.Server, voluntary, !voluntary);
+            Check(SteamNetworkingSockets.Reasons[(uint)client.Server] == (voluntary ? 1002 : 1004), "Voluntary leave and silence timeout are distinct native reasons");
+        }
+        using (var client = new RaidSteamTransport(false, 76561198012345678, _ => false))
+        {
+            SteamNetworkingSockets.Change((uint)client.Server, 76561198012345678, ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ProblemDetectedLocally, false, 5003);
+            Check(client.Poll(client.Server, out _) == RaidTransportEvent.Disconnected && client.TakeCloseCode(client.Server) == 5003, "Unexpected native network failure remains distinguishable");
+        }
         Console.WriteLine("PASS: " + _checks + " Steam transport adapter checks using a fake native boundary; actual Steam connectivity is not tested.");
     }
 }
@@ -89,7 +116,7 @@ namespace Steamworks
         public override int GetHashCode() => (int)Value;
     }
     public struct SteamNetworkingIdentity { public ulong Value; public void SetSteamID64(ulong value) => Value = value; public ulong GetSteamID64() => Value; }
-    public struct SteamNetConnectionInfo_t { public SteamNetworkingIdentity m_identityRemote; public HSteamListenSocket m_hListenSocket; public ESteamNetworkingConnectionState m_eState; }
+    public struct SteamNetConnectionInfo_t { public int m_eEndReason; public SteamNetworkingIdentity m_identityRemote; public HSteamListenSocket m_hListenSocket; public ESteamNetworkingConnectionState m_eState; }
     public struct SteamNetConnectionStatusChangedCallback_t { public HSteamNetConnection m_hConn; public SteamNetConnectionInfo_t m_info; }
     public sealed class Callback<T> : IDisposable
     {
@@ -116,15 +143,16 @@ namespace Steamworks
         public static HSteamListenSocket CreateListenSocketP2P(int port, int count, object options) => new HSteamListenSocket { Value = 42 };
         public static HSteamNetConnection ConnectP2P(ref SteamNetworkingIdentity host, int port, int count, object options) { ExpectedHost = host.Value; return new HSteamNetConnection { m_HSteamNetConnection = ++_nextClient }; }
         public static EResult AcceptConnection(HSteamNetConnection c) { Accepted.Add(c.m_HSteamNetConnection); return EResult.k_EResultOK; }
-        public static bool CloseConnection(HSteamNetConnection c, int reason, string description, bool linger) { Closed.Add(c.m_HSteamNetConnection); return true; }
+        public static readonly Dictionary<uint, int> Reasons = new Dictionary<uint, int>();
+        public static bool CloseConnection(HSteamNetConnection c, int reason, string description, bool linger) { Closed.Add(c.m_HSteamNetConnection); Reasons[c.m_HSteamNetConnection] = reason; return true; }
         public static bool CloseListenSocket(HSteamListenSocket socket) { ListenerClosed = true; return true; }
         public static bool GetConnectionInfo(HSteamNetConnection c, out SteamNetConnectionInfo_t info) => Info.TryGetValue(c.m_HSteamNetConnection, out info);
         public static EResult SendMessageToConnection(HSteamNetConnection c, IntPtr data, uint size, int flags, out long number) { number = 1; LastFlags = flags; return EResult.k_EResultOK; }
         public static int ReceiveMessagesOnConnection(HSteamNetConnection c, IntPtr[] messages, int max)
         { if (!Messages.TryGetValue((int)c.m_HSteamNetConnection, out var queue) || queue.Count == 0) return 0; messages[0] = queue.Dequeue(); return 1; }
-        public static void Change(uint handle, ulong user, ESteamNetworkingConnectionState state, bool incoming = true)
+        public static void Change(uint handle, ulong user, ESteamNetworkingConnectionState state, bool incoming = true, int reason = 0)
         {
-            var info = new SteamNetConnectionInfo_t { m_identityRemote = new SteamNetworkingIdentity { Value = user }, m_hListenSocket = new HSteamListenSocket { Value = incoming ? 42u : 0u }, m_eState = state };
+            var info = new SteamNetConnectionInfo_t { m_eEndReason = reason, m_identityRemote = new SteamNetworkingIdentity { Value = user }, m_hListenSocket = new HSteamListenSocket { Value = incoming ? 42u : 0u }, m_eState = state };
             Info[handle] = info; Callback<SteamNetConnectionStatusChangedCallback_t>.Raise(new SteamNetConnectionStatusChangedCallback_t { m_hConn = new HSteamNetConnection { m_HSteamNetConnection = handle }, m_info = info });
         }
         public static void Enqueue(int handle, ulong user, byte[] bytes)

@@ -105,14 +105,16 @@ namespace RaidRogue
         }
         public void RequestAction(int skill, int target = 0)
         {
-            if (!HasLocalAvatar) return;
-            var request = new RaidActionRequest { actor = _localId, epoch = BattleEpoch, sequence = ++_actionSequence, skill = skill, target = target };
+            if (!HasLocalAvatar || !ControlsReady) return;
+            var request = new RaidActionRequest { actor = _localId, epoch = BattleEpoch, sequence = ++_actionSequence, lease = _localLease, skill = skill, target = target };
             if (IsHost) ExecuteAction(_localId, request);
             else Send(_server, new RaidPacket { Kind = RaidPacketKind.CombatRequest, Text = JsonUtility.ToJson(request) }, true);
         }
-        private void ExecuteAction(int owner, RaidActionRequest request)
+        private void ExecuteAction(int owner, RaidActionRequest request, bool automatic = false)
         {
-            if (!_actionGate.Accept(owner, BattleEpoch, request) || !_avatars.TryGetValue(owner, out var avatar) || avatar.IsBot) return;
+            if (request == null || !_avatars.TryGetValue(owner, out var avatar) || avatar.IsBot) return;
+            var ownership = _recovery.Actor(owner);
+            if (!automatic && (avatar.Automated || request.lease != (ownership?.Lease ?? 0) || !_actionGate.Accept(owner, BattleEpoch, request))) return;
             if (request.skill == 7) { avatar.CombatTarget = CombatTarget(request.target); return; }
             if (request.skill == 9)
             {
@@ -205,6 +207,8 @@ namespace RaidRogue
         private void LateUpdate()
         {
             if (!Multiplayer) return;
+            UpdateRecoveryHost();
+            if (Mode == RaidSessionMode.Disconnected) return;
             UpdateLoadingBarrier();
             Time.timeScale = 1; // Local menus never stop the authoritative simulation.
             if (IsHost && BattlePhase == RaidBattlePhase.Countdown && ServerTime >= CountdownEnd)
@@ -212,7 +216,7 @@ namespace RaidRogue
                 BattlePhase = RaidBattlePhase.Combat; StageManager.Instance.StartStage(StageManager.Instance.currentStage);
                 foreach (var avatar in _avatars.Values) avatar.MovementLocked = false;
             }
-            if (HasLocalAvatar)
+            if (HasLocalAvatar && ControlsReady)
             {
                 int selected = CombatId(TargetingManager.Instance?.CurrentTarget);
                 if (selected != _lastSentTarget) { _lastSentTarget = selected; RequestAction(7, selected); }
@@ -223,7 +227,7 @@ namespace RaidRogue
             {
                 _nextCombatFrame = Time.unscaledTime + .1f;
                 var frame = CaptureCombatFrame(); _latestCombatFrame = frame;
-                foreach (var peer in _peers) if (peer.Id != 0 && peer.CloseAt == 0) SendCombatFrame(peer, frame);
+                foreach (var peer in _peers) if (peer.Id != 0 && peer.CloseAt == 0) SendCombatFrame(peer, frame, false);
                 PresentBattleState(frame);
             }
         }
@@ -239,7 +243,7 @@ namespace RaidRogue
                 if (pc != null) pc.CaptureNetworkCombat(actor); else avatar.GetComponent<PartyBotAI>()?.CaptureNetworkCombat(actor);
                 avatar.GetComponent<CommonPotion>()?.CaptureNetworkCombat(actor); avatar.GetComponent<BattleResurrection>()?.CaptureNetworkCombat(actor);
                 if (avatar.IsBot) avatar.CombatTarget = CombatTarget(actor.target);
-                avatar.State = actor; actors.Add(actor);
+                CaptureRecovery(actor); avatar.State = actor; actors.Add(actor);
             }
             var adds = new List<RaidCombatEnemy>();
             if (stage.boss.addSpawner != null) foreach (var add in stage.boss.addSpawner.activeAdds)
@@ -249,19 +253,25 @@ namespace RaidRogue
                 countdownEnd = CountdownEnd, runTime = stage.NetworkRunTime, party = actors.ToArray(), boss = stage.boss.CaptureNetworkCombat(), adds = adds.ToArray(), mechanics = CaptureMechanics(),
                 current = CombatMetricsManager.CaptureNetworkResult(ledger.Snapshot()), clears = CombatMetricsManager.CaptureNetworkResults(ledger.Stages), failures = CombatMetricsManager.CaptureNetworkResults(ledger.FailedAttempts) };
         }
-        private void SendCombatFrame(Peer peer, RaidCombatFrame frame)
+        private void SendCombatFrame(Peer peer, RaidCombatFrame frame, bool immediate = true)
         {
+            // Full reliable recovery baselines are capped at 2 Hz; normal combat stays at 10 Hz.
+            if (peer.RecoveryFrame && !immediate && Time.unscaledTime < peer.NextRecoveryFrame) return;
+            if (peer.RecoveryFrame) peer.NextRecoveryFrame = Time.unscaledTime + .5f;
             // Offers are private; the global completion flags remain visible to everyone.
             foreach (var actor in frame.party) actor.offer = actor.id == peer.Id ? _rewards.Cards(actor.id) : Array.Empty<int>();
+            uint id = ++_combatFrameId;
+            frame.serial = id; frame.ownerLease = peer.Lease; frame.effectWatermark = _effectId;
+            frame.controlGranted = PeerControls(peer); frame.recoveryPoses = peer.RecoveryFrame ? RecoveryPoses() : null; frame.poseTick = _tick + 1;
+            if (peer.RecoveryFrame) peer.Barrier.SentFrame(id, peer.Lease, frame.epoch, (int)frame.phase);
             byte[] bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(frame));
             int count = (bytes.Length + RaidFrameAssembler.ChunkBytes - 1) / RaidFrameAssembler.ChunkBytes;
             if (count > RaidFrameAssembler.MaxChunks) { ActionFailure(peer.Id, "전투 상태가 전송 한도를 초과했습니다"); return; }
-            uint id = ++_combatFrameId;
             for (int i = 0; i < count; i++)
             {
                 var chunk = new byte[Math.Min(RaidFrameAssembler.ChunkBytes, bytes.Length - i * RaidFrameAssembler.ChunkBytes)];
                 Array.Copy(bytes, i * RaidFrameAssembler.ChunkBytes, chunk, 0, chunk.Length);
-                Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.CombatFrame, Tick = id, Id = i, Role = count, Bytes = chunk }, false);
+                Send(peer.Connection, new RaidPacket { Kind = RaidPacketKind.CombatFrame, Tick = id, Id = i, Role = count, Bytes = chunk }, peer.RecoveryFrame);
             }
         }
         private void ReceiveCombatPacket(RaidPacket packet)
@@ -276,20 +286,25 @@ namespace RaidRogue
                 byte[] bytes = _combatAssembler.Add(packet.Tick, packet.Id, packet.Role, packet.Bytes);
                 if (bytes == null) return;
                 var frame = JsonUtility.FromJson<RaidCombatFrame>(Encoding.UTF8.GetString(bytes));
-                if (frame == null || frame.epoch < BattleEpoch || frame.party == null || frame.party.Length > 4) return;
+                if (frame == null || frame.ownerLease != _localLease || frame.epoch < BattleEpoch || frame.party == null || frame.party.Length > 4) return;
                 if (!_clockReady) { _serverOffset = frame.time - Time.unscaledTime; _clockReady = true; }
                 ApplyCombatFrame(frame);
             }
             else if (packet.Kind == RaidPacketKind.CombatEffect)
             {
                 var effect = JsonUtility.FromJson<RaidCombatEffect>(Encoding.UTF8.GetString(packet.Bytes));
-                if (effect != null && effect.id > _lastEffect && effect.epoch == BattleEpoch) { _lastEffect = effect.id; PresentNetworkEffect(effect); }
+                if (ControlsReady && effect != null && effect.id > _lastEffect && effect.epoch == BattleEpoch) { _lastEffect = effect.id; PresentNetworkEffect(effect); }
             }
         }
         private void ApplyCombatFrame(RaidCombatFrame frame)
         {
+            if (Mode == RaidSessionMode.Restoring && frame.recoveryPoses != null && frame.poseTick >= _lastSnapshot)
+            {
+                var snapshot = new RaidPacket { Kind = RaidPacketKind.Snapshot, Tick = frame.poseTick }; snapshot.Poses.AddRange(frame.recoveryPoses);
+                ApplySnapshot(snapshot); _lastSnapshot = frame.poseTick;
+            }
             if (frame.epoch != BattleEpoch) { _prediction.Clear(); ClearReplicaMechanics(); _loadFrame = Time.frameCount; }
-            if (frame.phase != BattlePhase) MenuOpen = false;
+            if (frame.phase != BattlePhase && Mode != RaidSessionMode.Restoring) MenuOpen = false;
             BattleEpoch = frame.epoch; BattlePhase = frame.phase; CountdownEnd = frame.countdownEnd; _latestCombatFrame = frame;
             var stage = StageManager.Instance; stage.ApplyNetworkStage(frame);
             stage.boss.ApplyNetworkCombat(frame.boss, frame.time);
@@ -297,13 +312,14 @@ namespace RaidRogue
             foreach (var actor in frame.party)
             {
                 if (!_avatars.TryGetValue(actor.id, out var avatar)) continue;
-                avatar.State = actor; avatar.CombatTarget = CombatTarget(actor.target);
+                avatar.Automated = actor.controlState != 0; avatar.State = actor; avatar.CombatTarget = CombatTarget(actor.target);
                 avatar.GetComponent<PlayerController>()?.ApplyNetworkCombat(actor);
                 avatar.GetComponent<PlayerController>()?.cardManager?.ApplyNetworkCardStacks(actor.cards);
             }
             CombatMetricsManager.Instance.ApplyNetworkMetrics(frame);
             ApplyReplicaMechanics(frame.mechanics);
-            PresentBattleState(frame);
+            ReceiveRecoveryFrame(frame);
+            if (ControlsReady) PresentBattleState(frame);
         }
         private void PresentBattleState(RaidCombatFrame frame)
         {

@@ -119,11 +119,13 @@ namespace RaidRogue
     }
     public sealed partial class RaidNetworkSession
     {
+        private readonly Dictionary<int, RaidReplicaProjectile> _replicaProjectiles = new Dictionary<int, RaidReplicaProjectile>();
         private RaidCombatMechanic[] CaptureMechanics()
         {
             var result = new List<RaidCombatMechanic>();
             foreach (var telegraph in FindObjectsByType<AoETelegraph>(FindObjectsSortMode.None)) result.Add(telegraph.CaptureNetworkMechanic());
             foreach (var zone in FindObjectsByType<HealingSanctuaryZone>(FindObjectsSortMode.None)) result.Add(zone.CaptureNetworkMechanic());
+            foreach (var projectile in FindObjectsByType<RangedBotProjectile>(FindObjectsSortMode.None)) result.Add(projectile.CaptureNetworkMechanic());
             StageManager.Instance.boss.CapturePartyMechanics(result); return result.ToArray();
         }
         private void ApplyNetworkAdds(RaidCombatEnemy[] states)
@@ -163,12 +165,20 @@ namespace RaidRogue
                         aoe.Setup(state.kind == 6 ? AoETelegraphType.Circle_Radius6 : (AoETelegraphType)state.kind, state.end - state.start, state.inner, state.outer, state.angle);
                         _replicaTelegraphs[state.id] = aoe;
                     }
+                    aoe.transform.SetPositionAndRotation(new Vector3(state.x, 0, state.z), Quaternion.Euler(0, state.yaw, 0));
                     aoe.ApplyNetworkTiming(state);
+                }
+                else if (state.kind == 7)
+                {
+                    if (!_replicaProjectiles.TryGetValue(state.id, out var projectile) || projectile == null)
+                        _replicaProjectiles[state.id] = projectile = RaidReplicaProjectile.Create();
+                    projectile.Apply(state, target, ServerTime);
                 }
                 else if ((state.kind == 3 || state.kind == 4) && target != null)
                 {
                     if (!_replicaMarkers.TryGetValue(state.id, out var marker) || marker == null)
                         _replicaMarkers[state.id] = state.kind == 3 ? AttachedPartyMechanicMarker.SpawnSpreadMarker(target, state.outer) : AttachedPartyMechanicMarker.SpawnStackMarker(target, state.outer);
+                    _replicaMarkers[state.id].followTarget = target;
                 }
                 else if (state.kind == 5 && target != null)
                 {
@@ -181,13 +191,13 @@ namespace RaidRogue
                     line.SetPosition(0, new Vector3(state.x, 1.15f, state.z)); line.SetPosition(1, target.position);
                 }
             }
-            RemoveReplicaObjects(_replicaTelegraphs, live); RemoveReplicaObjects(_replicaMarkers, live); RemoveReplicaObjects(_replicaLines, live);
+            RemoveReplicaObjects(_replicaTelegraphs, live); RemoveReplicaObjects(_replicaMarkers, live); RemoveReplicaObjects(_replicaLines, live); RemoveReplicaObjects(_replicaProjectiles, live);
         }
         private static void RemoveReplicaObjects<T>(Dictionary<int, T> objects, HashSet<int> live) where T : Component
         {
             foreach (int id in new List<int>(objects.Keys)) if (!live.Contains(id)) { if (objects[id] != null) { if (objects[id] is LineRenderer line) Destroy(line.sharedMaterial); Destroy(objects[id].gameObject); } objects.Remove(id); }
         }
         private void ClearReplicaMechanics()
-        { var empty = new HashSet<int>(); RemoveReplicaObjects(_replicaTelegraphs, empty); RemoveReplicaObjects(_replicaMarkers, empty); RemoveReplicaObjects(_replicaLines, empty); }
+        { var empty = new HashSet<int>(); RemoveReplicaObjects(_replicaTelegraphs, empty); RemoveReplicaObjects(_replicaMarkers, empty); RemoveReplicaObjects(_replicaLines, empty); RemoveReplicaObjects(_replicaProjectiles, empty); }
     }
 }

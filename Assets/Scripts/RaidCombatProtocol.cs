@@ -6,7 +6,7 @@ namespace RaidRogue
     public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory, Loading }
     [Serializable] public sealed class RaidActionRequest
     {
-        public uint sequence;
+        public uint sequence, lease;
         public int epoch, actor, skill, target; // 1..5 skills, 6 potion, 7 target, 8 reward, 9 start/retry.
     }
     // Connection ownership and epoch are checked before invoking any existing gameplay method.
@@ -63,6 +63,9 @@ namespace RaidRogue
         public int id, role, target, combo1, combo2;
         public bool bot, dead, stunned, rooted, forced, casting, resurrecting, rewardChosen;
         public string name, castName;
+        public int controlState, autoRevision;
+        public float returnDeadline;
+        public int[] autoCards;
         public float hp, maxHp, shield, defense, tactical, haste, speedBoost, speed, protection, potion, potionTotal;
         public float gcd, gcdTotal, cd3, cd3Total, cd4, cd4Total, comboTime1, comboTime2, castRemaining, castTotal, triplecast, resurrection, resurrectionTotal, resurrectionCooldown;
         public int[] cards, offer;
@@ -76,8 +79,8 @@ namespace RaidRogue
     }
     [Serializable] public sealed class RaidCombatMechanic
     {
-        public int id, kind, target; // 0..2 telegraphs, 3 spread, 4 stack, 5 tether, 6 sanctuary.
-        public float x, z, yaw, inner, outer, angle, start, resolve, end;
+        public int id, kind, target; // 0..2 telegraphs, 3 spread, 4 stack, 5 tether, 6 sanctuary, 7 presentation-only projectile.
+        public float x, y, z, yaw, inner, outer, angle, start, resolve, end, speed;
         public bool intercepted;
     }
     [Serializable] public sealed class RaidMetricMember
@@ -92,6 +95,9 @@ namespace RaidRogue
     [Serializable] public sealed class RaidCombatFrame
     {
         public int epoch, stage, retries;
+        public uint serial, ownerLease, effectWatermark, poseTick;
+        public bool controlGranted;
+        public RaidPose[] recoveryPoses;
         public RaidBattlePhase phase;
         public float time, countdownEnd, runTime;
         public RaidCombatActor[] party;
