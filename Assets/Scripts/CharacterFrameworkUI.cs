@@ -307,12 +307,10 @@ namespace RaidRogue
                 if(damageKit?.Active==true&&skill!=null)blocked=DamageSlotUnavailable(actor,skill,slot);
                 if(damageKit?.Active!=true&&skill!=null&&(skill.target==SkillTargetRule.LivingEnemy||skill.target==SkillTargetRule.LivingAlly))
                 {
-                    var target=TargetingManager.Instance?.CurrentTarget;
-                    if(healer?.Active==true)
-                    {
-                        var targeting=TargetingManager.Instance;
-                        target=skill.target==SkillTargetRule.LivingEnemy?targeting?.AttackTarget:targeting!=null&&targeting.HasSupportSelection?targeting.SupportTarget:actor.transform;
-                    }
+                    var targeting=TargetingManager.Instance;
+                    var target=skill.target==SkillTargetRule.LivingEnemy?targeting?.GetLivingOffensiveTarget(StageManager.Instance?.boss):targeting?.CurrentTarget;
+                    if(healer?.Active==true&&skill.target==SkillTargetRule.LivingAlly)
+                        target=targeting!=null&&targeting.HasSupportSelection?targeting.SupportTarget:actor.transform;
                     if(!(skill.target==SkillTargetRule.LivingEnemy?CombatRange.LivingEnemy(target):CombatRange.LivingPartyMember(target)))blocked="유효한 대상 필요";
                     else if(!CombatRange.InRange(actor.transform,target,actor.EffectiveRange(skill)))blocked="사거리 밖";
                 }
