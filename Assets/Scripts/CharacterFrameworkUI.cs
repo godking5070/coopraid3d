@@ -1,17 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 namespace RaidRogue
 {
     // Extra common slots share the existing HUD canvas/input blockers. Existing 1/2/3/Q + movement/potion stay intact.
-    public sealed class CharacterSlotHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
-    {
-        public System.Action enter,leave;
-        public void OnPointerEnter(PointerEventData e)=>enter?.Invoke();
-        public void OnPointerExit(PointerEventData e)=>leave?.Invoke();
-        private void OnDisable()=>leave?.Invoke();
-    }
     public sealed class CharacterFrameworkUI : MonoBehaviour
     {
         private SkillHotbarUI _hotbar;private RectTransform _root;private Text _resources, _deferred, _identity, _stats;
@@ -24,14 +16,16 @@ namespace RaidRogue
         private void Start()
         {
             _hotbar=GetComponent<SkillHotbarUI>();
-            _root=Rect("CharacterSlots",transform,new Vector2(.5f,1),new Vector2(0,72),new Vector2(700,70));
-            var bg=_root.gameObject.AddComponent<Image>();bg.color=new Color(.025f,.045f,.07f,.92f);
+            if (RaidUIView.Attach(this,"character",transform)) { BindSlots(); return; }
+            var viewParent=RaidUIView.Begin(this,"character",transform);
+            _root=Rect("CharacterSlots",viewParent,new Vector2(.5f,1),new Vector2(0,72),new Vector2(700,70));
+            var bg=_root.gameObject.AddComponent<Image>();RaidUIStyle.Color(bg, new Color(.025f,.045f,.07f,.92f));
             var extra=new[]{CharacterSlot.Counter,CharacterSlot.Job2,CharacterSlot.Identity,CharacterSlot.Active,CharacterSlot.OffGcd2,CharacterSlot.Ultimate};
             for(int i=0;i<extra.Length;i++)
             {
                 var slot=extra[i];var r=Rect(slot.ToString(),_root,new Vector2(.5f,.5f),new Vector2(-290+i*116,0),new Vector2(110,62));
-                var image=r.gameObject.AddComponent<Image>();image.color=new Color(.12f,.17f,.22f,.95f);
-                var button=r.gameObject.AddComponent<Button>();button.targetGraphic=image;button.onClick.AddListener(()=>Actor()?.RequestSlot(slot));
+                var image=r.gameObject.AddComponent<Image>();RaidUIStyle.Color(image, new Color(.12f,.17f,.22f,.95f));
+                var button=r.gameObject.AddComponent<Button>();button.targetGraphic=image;RaidUIView.Bind(this,slot.ToString(),()=>Actor()?.RequestSlot(slot),button);
                 var hover=r.gameObject.AddComponent<CharacterSlotHover>();hover.enter=()=>_hover=slot;hover.leave=()=>_hover=null;
                 _buttons[slot]=button;_labels[slot]=Label(r,"",Vector2.zero,new Vector2(106,60),12);
             }
@@ -41,6 +35,16 @@ namespace RaidRogue
             _deferred=Label(_root,"",new Vector2(0,95),new Vector2(900,24),13);
             _identity=Label(_root,"",new Vector2(0,134),new Vector2(900,54),14);
             _stats=Label(_root,"",new Vector2(0,185),new Vector2(1000,44),12);
+        }
+        private void BindSlots()
+        {
+            foreach(var pair in _buttons)
+            {
+                var slot=pair.Key;
+                RaidUIView.Bind(this,slot.ToString(),()=>Actor()?.RequestSlot(slot));
+                var hover=pair.Value.GetComponent<CharacterSlotHover>() ?? pair.Value.gameObject.AddComponent<CharacterSlotHover>();
+                hover.enter=()=>_hover=slot;hover.leave=()=>_hover=null;
+            }
         }
         private CharacterActor Actor()=>_hotbar?.combatController!=null?CharacterActor.Ensure(_hotbar.combatController.gameObject):null;
         private void Update()
@@ -53,18 +57,26 @@ namespace RaidRogue
                 foreach(var fill in _gauges.Values)if(fill!=null)Destroy(fill.transform.parent.gameObject);_gauges.Clear();_lastValues.Clear();_gaugeJob=actor.Definition.id;
                 for(int i=0;i<actor.Definition.resources.Length;i++)
                 {
-                    var d=actor.Definition.resources[i];var bar=Rect("Resource_"+d.id,_root,new Vector2(.5f,1),new Vector2(0,38+i*9),new Vector2(420,5));
+                    var d=actor.Definition.resources[i];
+                    var template=RaidUIRepeatedItem.Create(RaidUIPresentation.Settings?.resourceTemplate,_root);
+                    if(template!=null && template.fill!=null)
+                    {
+                        var layout=template.GetComponent<RectTransform>();layout.anchoredPosition+=new Vector2(0,i*layout.rect.height);
+                        if(template.label!=null)template.label.text=d.name;
+                        _gauges[d.id]=template.fill;continue;
+                    }
+                    var bar=Rect("Resource_"+d.id,_root,new Vector2(.5f,1),new Vector2(0,38+i*9),new Vector2(420,5));
                     bar.gameObject.AddComponent<Image>().color=new Color(.12f,.15f,.18f,.9f);
                     var fill=Rect("Fill",bar,Vector2.zero,Vector2.zero,Vector2.zero);fill.anchorMin=Vector2.zero;fill.anchorMax=Vector2.one;fill.offsetMin=fill.offsetMax=Vector2.zero;
-                    var image=fill.gameObject.AddComponent<Image>();image.color=new Color(.25f,.8f,.75f,.8f);image.raycastTarget=false;_gauges[d.id]=image;
+                    var image=fill.gameObject.AddComponent<Image>();RaidUIStyle.Color(image, new Color(.25f,.8f,.75f,.8f));image.raycastTarget=false;_gauges[d.id]=image;
                 }
             }
             foreach(var r in state.resources)if(_gauges.TryGetValue(r.id,out var fill))
             {
                 var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);
                 if(_lastValues.TryGetValue(r.id,out float previous)&&r.value>previous)_pulseUntil=Time.unscaledTime+.6f;
-                _lastValues[r.id]=r.value;fill.rectTransform.anchorMax=new Vector2(Mathf.Clamp01(r.value/actor.ResourceMaximum(r.id)),1);
-                fill.color=Time.unscaledTime<_pulseUntil?Color.white:r.value>=actor.ResourceMaximum(r.id)?new Color(1,.85f,.2f):new Color(.85f,.73f,.3f);
+                _lastValues[r.id]=r.value;if(fill.type==Image.Type.Filled)fill.fillAmount=Mathf.Clamp01(r.value/actor.ResourceMaximum(r.id));else fill.rectTransform.anchorMax=new Vector2(Mathf.Clamp01(r.value/actor.ResourceMaximum(r.id)),1);
+                RaidUIStyle.Color(fill, Time.unscaledTime<_pulseUntil?Color.white:r.value>=actor.ResourceMaximum(r.id)?new Color(1,.85f,.2f):new Color(.85f,.73f,.3f));
             }
             var resourceText=new List<string>();
             foreach(var r in state.resources){var d=System.Array.Find(actor.Definition.resources,x=>x.id==r.id);resourceText.Add(d.name+" "+r.value.ToString(d.integer?"0":"0.#")+" / "+actor.ResourceMaximum(r.id).ToString("0.#")+(r.value>=actor.ResourceMaximum(r.id)?" MAX":""));}
@@ -109,6 +121,7 @@ namespace RaidRogue
             foreach(var slot in _labels.Keys)
             {
                 var selection=System.Array.Find(state.selections,s=>s.slot==slot);var skill=selection==null?null:actor.Definition.Skill(selection.skillId);
+                _buttons[slot].GetComponent<RaidUIIcon>()?.Show(skill?.id);
                 bool unlocked=skill!=null&&System.Array.IndexOf(state.unlocked,skill.id)>=0;bool ready=unlocked&&skill.implemented;
                 var timing=skill==null?null:System.Array.Find(state.skills,s=>s.id==skill.id);
                 bool alive=CombatRange.LivingPartyMember(actor.transform);
@@ -123,7 +136,7 @@ namespace RaidRogue
                 }
                 string status=!unlocked?actor.SlotUnlockStatus(slot):skill!=null&&!skill.implemented?"미구현":!alive?"사망":timing!=null&&timing.charges==0?timing.recharge.ToString("0.0")+"초":!affordable?"자원 부족":slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true?"효과 진행 중":blocked.Length>0?blocked:timing!=null&&skill.maximumCharges>1?timing.charges+" / "+skill.maximumCharges:"사용 가능";
                 _labels[slot].text="["+LocalInputBindings.Label(CharacterSlots.Binding(slot))+"] "+(ready?skill.name:CharacterSlots.Name(slot))+"\n"+status+(slot==CharacterSlot.Identity&&ready&&skill.costs.Length>0?" · 비용 "+skill.costs[0].amount.ToString("0")+" / CD "+skill.cooldown.ToString("0.#")+"초":"");
-                _labels[slot].resizeTextForBestFit=true;_labels[slot].resizeTextMinSize=9;_labels[slot].resizeTextMaxSize=12;
+                if (!RaidUIStyle.Authored(_labels[slot])) { _labels[slot].resizeTextForBestFit=true;_labels[slot].resizeTextMinSize=9;_labels[slot].resizeTextMaxSize=12; }
                 _buttons[slot].interactable=alive&&ready&&affordable&&timing!=null&&timing.charges>0&&blocked.Length==0&&!(slot==CharacterSlot.Identity&&aegis?.IdentityBlocked==true)&&!LocalGameplayInput.Blocked;
                 if(_hover==slot)_tooltip.text=ready?$"[{LocalInputBindings.Label(CharacterSlots.Binding(slot))}] {skill.name}\n{skill.description}\n{status}":CharacterSlots.Name(slot)+" · "+status;
 
@@ -132,6 +145,6 @@ namespace RaidRogue
         private static RectTransform Rect(string name,Transform parent,Vector2 anchor,Vector2 position,Vector2 size)
         {var go=new GameObject(name,typeof(RectTransform));var r=go.GetComponent<RectTransform>();r.SetParent(parent,false);r.anchorMin=r.anchorMax=anchor;r.anchoredPosition=position;r.sizeDelta=size;return r;}
         private static Text Label(Transform parent,string value,Vector2 position,Vector2 size,int fontSize)
-        {var r=Rect("Label",parent,new Vector2(.5f,.5f),position,size);var t=r.gameObject.AddComponent<Text>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.fontSize=fontSize;t.alignment=TextAnchor.MiddleCenter;t.color=Color.white;t.raycastTarget=false;t.text=value;return t;}
+        {var r=Rect("Label",parent,new Vector2(.5f,.5f),position,size);var t=r.gameObject.AddComponent<Text>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.fontSize=fontSize;t.alignment=TextAnchor.MiddleCenter;RaidUIStyle.Color(t, Color.white);t.raycastTarget=false;t.text=value;return t;}
     }
 }

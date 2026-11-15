@@ -11,6 +11,9 @@ namespace RaidRogue
         private readonly PlayerMovementCollision _collision = new PlayerMovementCollision();
         public void Step(RaidMoveInput input, Transform owner, RaidPacket config, bool allowed)
         {
+            bool approach = RaidNetworkSession.Instance != null && RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Approach;
+            bool portal = RaidApproachField.Instance?.PortalActive == true;
+            if (RaidNetworkSession.Instance != null && (RaidNetworkSession.Instance.BattlePhase == RaidBattlePhase.Lobby || approach || portal)) input.Dash = false;
             Dash.TickCooldown(RaidWire.Step);
             if (!allowed) { Dash.Cancel(); return; }
             var kit=owner.GetComponent<CharacterKit>();
@@ -31,7 +34,9 @@ namespace RaidRogue
             else distance = config.Speed * RaidWire.Step * direction.magnitude;
             if (distance <= 0) return;
             Vector3 before = Position;
-            Position = _collision.Move(owner, Position, config.Radius, config.Arena, direction, distance, out bool blocked);
+            var field = RaidApproachField.Instance;
+            float arena = approach && field != null ? field.MovementRadius : field != null && field.Showing ? field.FieldRadius : config.Arena;
+            Position = _collision.Move(owner, Position, config.Radius, arena, direction, distance, out bool blocked);
             if (blocked) Dash.Cancel();
             if ((Position - before).sqrMagnitude > 0.000001f && kit?.Has("aimLock")!=true)
                 Yaw = Mathf.MoveTowardsAngle(Yaw, Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg, config.TurnSpeed * RaidWire.Step);

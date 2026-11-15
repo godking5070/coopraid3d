@@ -44,12 +44,147 @@ static class CampaignSaveTests
         catch { return CampaignFileState.Corrupt; }
     }
     static CampaignClearReceipt Receipt(string chapter, int stage, bool eligible = true) => new CampaignClearReceipt { runId = Guid.NewGuid().ToString("N"), chapterId = chapter, difficultyId = "normal", stage = stage, final = stage == CampaignCatalog.StageCount(chapter), eligible = eligible, userId = Owner };
-    static void Main()
+    static void TrainingAccess()
     {
+        string normalRoot = Path.Combine(Path.GetTempPath(), "Raid-NormalSave");
+        string testRoot = CampaignStorage.RootFor(normalRoot, new[] { "RaidPart1.exe", "--raid-test-profile=solo-check" }, true);
+        Check(testRoot == Path.Combine(normalRoot, "test-profiles", "solo-check"), "development solo profile isolates campaign files");
+        Check(CampaignStorage.DirectoryFor(testRoot, "offline-local") != CampaignStorage.DirectoryFor(normalRoot, "offline-local"), "test and personal progress do not share account files");
+        bool releaseRejected = false;
+        try { CampaignStorage.RootFor(normalRoot, new[] { "--raid-test-profile=solo-check" }, false); }
+        catch (InvalidOperationException) { releaseRejected = true; }
+        Check(releaseRejected, "release build cannot fall back to personal saves with an explicit test profile");
+        Check(CampaignStorage.RootFor(normalRoot, Array.Empty<string>(), true) == normalRoot, "default save location unchanged");
+        foreach (string invalid in new[] { "", "../normal", "a/b", "a:b", new string('a', 41) })
+        {
+            bool rejected = false;
+            try { CampaignStorage.RootFor(normalRoot, new[] { "--raid-test-profile=" + invalid }, true); }
+            catch (ArgumentException) { rejected = true; }
+            Check(rejected, "invalid explicit test profile is rejected");
+        }
+        var p = new CampaignPersonalProgress { owner = Owner };
+        Check(!p.TrainingUnlocked, "new account starts locked");
+        Check(!p.RecordBattleParticipation("offline-local", CampaignCatalog.PartOne, 1, true, true), "account mismatch cannot unlock");
+        Check(!p.RecordBattleParticipation(Owner, CampaignCatalog.PartOne, 1, false, true), "training/development/ineligible battle cannot unlock");
+        Check(!p.RecordBattleParticipation(Owner, CampaignCatalog.PartOne, 1, true, false), "lobby/loading/AI-controlled/disconnected user cannot unlock");
+        Check(!p.RecordBattleParticipation(Owner, CampaignCatalog.Prototype, 1, true, true), "prototype cannot unlock");
+        Check(!p.RecordBattleParticipation(Owner, CampaignCatalog.PartTwo, 1, true, true), "inactive chapter cannot unlock");
+        foreach (int stage in new[] { 0, 7 }) Check(!p.RecordBattleParticipation(Owner, CampaignCatalog.PartOne, stage, true, true), "invalid stage cannot unlock");
+        Check(p.RecordBattleParticipation(Owner, CampaignCatalog.PartOne, 1, true, true), "actual first battle unlocks without a clear");
+        Check(p.TrainingUnlocked && p.clears.Length == 0 && !p.PartOneComplete, "unlock never awards clears or chapter completion");
+        Check(!p.RecordBattleParticipation(Owner, CampaignCatalog.PartOne, 1, true, true), "repeated frames do not write repeatedly");
+        Check(Copy(p).TrainingUnlocked && CampaignValidation.Personal(Copy(p), Owner), "unlock survives serialization");
+        Check(!CampaignValidation.Personal(p, "offline-local"), "cross-account save rejected");
+        var legacy = Json.Deserialize<CampaignPersonalProgress>("{\"version\":1,\"owner\":\"" + Owner + "\",\"clears\":[],\"unlocks\":[],\"deliveries\":[]}");
+        Check(CampaignValidation.Personal(legacy, Owner) && !legacy.TrainingUnlocked, "old personal v1 without optional field remains valid and locked");
+        legacy.Record(Receipt(CampaignCatalog.Prototype, 1));
+        Check(!legacy.TrainingUnlocked, "old prototype clear is excluded");
+        legacy.Record(Receipt(CampaignCatalog.PartOne, 1));
+        Check(legacy.TrainingUnlocked, "existing genuine Part 1 clear unlocks without replaying rewards");
+        var offline = new CampaignPersonalProgress { owner = "offline-local" };
+        Check(!offline.TrainingUnlocked && offline.RecordBattleParticipation("offline-local", CampaignCatalog.PartOne, 2, true, true), "offline account independently unlocks on continued battle");
+        var folder = Path.Combine(Path.GetTempPath(), "Raid-TrainingAccess-" + Guid.NewGuid().ToString("N"));
+        string path = Path.Combine(CampaignStorage.DirectoryFor(folder, Owner), "progress.json");
+        CampaignFileState InspectPersonal(string value)
+        {
+            try { var data = Json.Deserialize<CampaignPersonalProgress>(value); return data.version != 1 ? CampaignFileState.Incompatible : CampaignValidation.Personal(data, Owner) ? CampaignFileState.Valid : CampaignFileState.Corrupt; }
+            catch { return CampaignFileState.Corrupt; }
+        }
+        try
+        {
+            Check(CampaignStorage.Save(path, Json.Serialize(new CampaignPersonalProgress { owner = Owner }), InspectPersonal, out _), "initial locked progress save");
+            Check(CampaignStorage.Save(path, Json.Serialize(p), InspectPersonal, out _), "atomic unlock save");
+            Check(Json.Deserialize<CampaignPersonalProgress>(CampaignStorage.Read(path, InspectPersonal).text).TrainingUnlocked, "unlock survives process-style file reload");
+            Check(File.Exists(path + ".bak"), "previous normal progress backup retained");
+            File.WriteAllText(path, "{\"version\":999}");
+            string future = File.ReadAllText(path);
+            Check(!CampaignStorage.Save(path, Json.Serialize(p), InspectPersonal, out _), "incompatible progress blocks unlock overwrite");
+            Check(File.ReadAllText(path) == future, "incompatible original preserved");
+            Check(!File.Exists(Path.Combine(CampaignStorage.DirectoryFor(folder, "offline-local"), "progress.json")), "other account untouched");
+            Check(CampaignStorage.Delete(path, out _), "explicit personal reset deletes unlock and backup");
+            Check(CampaignStorage.Read(path, InspectPersonal).state == CampaignFileState.Missing && !new CampaignPersonalProgress { owner = Owner }.TrainingUnlocked, "personal reset relocks training");
+        }
+        finally { if (Directory.Exists(folder)) Directory.Delete(folder, true); }
+    }
+    static void Main(string[] args)
+    {
+        TrainingAccess();
+        if (args.Contains("--training-access")) { Console.WriteLine("PASS: training access / persistence " + checks + " checks"); return; }
         Part1SaveTests.Run(Check);
         CharacterCatalog.Register(AegisPaladinData.Build(), out _, true);
         foreach (var job in CharacterRosterData.Jobs) CharacterCatalog.Register(CharacterRosterData.Definition(job), out _, true);
         var definitions = CharacterCatalog.All.Where(d => d.playable).ToArray();
+        var settledRun = Build(CharacterCatalog.Find(AegisPaladinData.JobId), 0, 1);
+        settledRun.nextStage = 1; settledRun.attemptsStarted = 1;
+        var settlement = new CampaignSettlement { owner = Owner, runId = settledRun.runId, stage = 1,
+            savedUtc = DateTimeOffset.UtcNow.ToString("O"), presentationComplete = true, run = settledRun,
+            offers = new[] { new CampaignSettlementOffer { slotId = settledRun.party.Single(p => !p.bot).slotId,
+                cardIds = new[] { CampaignCardIds.Id(6), CampaignCardIds.Id(0), CampaignCardIds.Id(1) } } } };
+        Check(CampaignValidation.Settlement(settlement, Owner, CharacterCatalog.Find) == null, "durable pending clear accepts settled reward state");
+        var unfinishedSelection = Copy(settlement);
+        unfinishedSelection.run.rewards = Array.Empty<CampaignRewardRecord>();
+        unfinishedSelection.run.party.Single(p => !p.bot).cards = Array.Empty<CampaignCardStack>();
+        unfinishedSelection.run.party.Single(p => !p.bot).character.effects = Array.Empty<JobBuildEffect>();
+        Check(CampaignValidation.Settlement(unfinishedSelection, Owner, CharacterCatalog.Find) == null,
+            "confirmed kill remains recoverable before card selection");
+        var invalidLedger = Copy(settlement); invalidLedger.run.rewards[0].key = "other-run/card";
+        Check(CampaignValidation.Settlement(invalidLedger, Owner, CharacterCatalog.Find) != null,
+            "pending settlement rejects a reward from another clear");
+        invalidLedger = Copy(settlement); invalidLedger.run.party.Single(p => !p.bot).cards[0].stacks++;
+        Check(CampaignValidation.Settlement(invalidLedger, Owner, CharacterCatalog.Find) != null,
+            "pending settlement rejects a duplicate applied card");
+        invalidLedger = Copy(settlement); invalidLedger.offers[0].cardIds[0] = CampaignCardIds.Id(2);
+        Check(CampaignValidation.Settlement(invalidLedger, Owner, CharacterCatalog.Find) != null,
+            "selected card must match its durable offer");
+        Check(CampaignRecovery.ContinueSource(settlement, null)?.runId == settledRun.runId &&
+            CampaignRecovery.ContinueSource(settlement, null)?.transport == "single",
+            "settlement-only continue uses its own run and transport without a checkpoint");
+        Check(CampaignRecovery.ContinueSource(null, settledRun) == settledRun &&
+            CampaignRecovery.ContinueSource(null, null) == null,
+            "ordinary checkpoint continue and missing save remain distinct");
+        var olderBoundary = Copy(settledRun);
+        Check(CampaignValidation.SettlementSupersedesPending(settlement, olderBoundary), "durable clear replaces a pending save for the cleared stage");
+        olderBoundary.nextStage = 2;
+        Check(!CampaignValidation.SettlementSupersedesPending(settlement, olderBoundary), "new next-stage boundary still needs its atomic save");
+        olderBoundary.nextStage = 1; olderBoundary.runId = Guid.NewGuid().ToString("N");
+        Check(!CampaignValidation.SettlementSupersedesPending(settlement, olderBoundary), "clear cannot discard another run's pending save");
+        Check(CampaignValidation.Settlement(Copy(settlement), Owner, CharacterCatalog.Find) == null, "pending clear survives JSON round trip");
+        var tamperedSettlement = Copy(settlement); tamperedSettlement.stage = 2;
+        Check(CampaignValidation.Settlement(tamperedSettlement, Owner, CharacterCatalog.Find) != null, "pending clear cannot jump a stage");
+        tamperedSettlement = Copy(settlement); tamperedSettlement.offers[0].cardIds[1] = "card.unknown";
+        Check(CampaignValidation.Settlement(tamperedSettlement, Owner, CharacterCatalog.Find) != null, "pending clear rejects unknown card IDs");
+        Check(CampaignValidation.Settlement(settlement, "offline-local", CharacterCatalog.Find) != null, "pending clear is account scoped");
+        var settlementRoot = Path.Combine(Path.GetTempPath(), "Raid-Settlement-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var settlementPath = Path.Combine(CampaignStorage.DirectoryFor(settlementRoot, Owner), "settlement.json");
+            var choicePath = Path.Combine(CampaignStorage.DirectoryFor(settlementRoot, Owner), "pending-choice.json");
+            CampaignFileState InspectSettlement(string json)
+            {
+                try { return CampaignValidation.Settlement(Json.Deserialize<CampaignSettlement>(json), Owner, CharacterCatalog.Find) == null ? CampaignFileState.Valid : CampaignFileState.Corrupt; }
+                catch { return CampaignFileState.Corrupt; }
+            }
+            Check(CampaignStorage.Save(choicePath, Json.Serialize(unfinishedSelection), InspectSettlement, out _),
+                "unselected offer survives a durable pending-clear write");
+            Check(CampaignStorage.Save(choicePath, Json.Serialize(settlement), InspectSettlement, out _) &&
+                CampaignStorage.Save(choicePath, Json.Serialize(settlement), InspectSettlement, out _),
+                "repeated confirmation of the same selected reward remains writable");
+            var chosenDisk = Json.Deserialize<CampaignSettlement>(CampaignStorage.Read(choicePath, InspectSettlement).text);
+            Check(chosenDisk.run.rewards.Length == 1 && chosenDisk.run.party.Single(p => !p.bot).cards.Sum(c => c.stacks) == 1 &&
+                chosenDisk.offers[0].cardIds.Contains(chosenDisk.run.rewards[0].selectedId),
+                "disk-selected reward remains exactly one card from the original offer");
+            Check(CampaignStorage.Save(settlementPath, Json.Serialize(settlement), InspectSettlement, out _), "kill result written atomically before reward");
+            var settlementOnly = CampaignStorage.Read(settlementPath, InspectSettlement);
+            Check(CampaignRecovery.ContinueSource(Json.Deserialize<CampaignSettlement>(settlementOnly.text), null)?.runId == settledRun.runId,
+                "settlement-only continue survives an actual file read");
+            var later = Copy(settlement); later.presentationComplete = false;
+            Check(CampaignStorage.Save(settlementPath, Json.Serialize(later), InspectSettlement, out _), "presentation transition keeps a backup");
+            File.WriteAllText(settlementPath, "{broken", System.Text.Encoding.UTF8);
+            var recovered = CampaignStorage.Read(settlementPath, InspectSettlement);
+            Check(recovered.state == CampaignFileState.Backup && Json.Deserialize<CampaignSettlement>(recovered.text).presentationComplete,
+                "corrupt newest settlement recovers last confirmed presentation state");
+        }
+        finally { if (Directory.Exists(settlementRoot)) Directory.Delete(settlementRoot, true); }
         foreach (var job in definitions)
         foreach (var rule in job.unlocks)
         foreach (string choice in rule.choices)
@@ -87,6 +222,12 @@ static class CampaignSaveTests
             }
         }
         var sample = Build(AegisPaladinData.Build(), 1, 2);
+        var hardBoundary = Copy(sample); hardBoundary.difficultyId = CampaignCatalog.Hard;
+        Check(Valid(hardBoundary) && Valid(Copy(hardBoundary)), "hard checkpoint survives validation and serialization");
+        var hardReceipt = Receipt(CampaignCatalog.PartOne, 1); hardReceipt.difficultyId = CampaignCatalog.Hard;
+        Check(CampaignValidation.Receipt(hardReceipt, Owner), "hard clear receipt accepted");
+        hardBoundary.difficultyId = "extreme";
+        Check(!Valid(hardBoundary), "unsupported difficulty still rejected");
         void Reject(Action<CampaignCheckpoint> change, string reason) { var c = Copy(sample); change(c); Check(!Valid(c), reason); }
         Reject(c => c.owner = "offline-local", "cross account");
         Reject(c => c.version = 99, "future version");
@@ -196,7 +337,7 @@ static class CampaignSaveTests
         foreach (int index in Enumerable.Range(0, 31)) Check(CampaignCardIds.Index(CampaignCardIds.Id(index)) == index, "stable card id mapping");
         var flow = new RaidRunFlow(); Check(flow.TryResume(3, 3), "resume boundary enters loading");
         Check(!flow.TryResume(2, 3) && !flow.TryPrepare(2, 3, false), "no double resume or premature stage advance");
-        Check(flow.TryCountdown(flow.Revision) && flow.TryStart(flow.Revision), "resume countdown uses existing flow");
+        Check(flow.TryApproach(flow.Revision) && flow.TryArrival(flow.Revision) && flow.TryCountdown(flow.Revision) && flow.TryStart(flow.Revision), "resume countdown uses existing flow");
         Check(!flow.TryResume(1, 3), "no combat load");
         foreach (var kind in new[] { RaidPacketKind.CampaignClear, RaidPacketKind.CampaignAck })
         { string text = "verified-owner/run/main/1"; Check(RaidWire.Decode(RaidWire.Encode(new RaidPacket { Kind = kind, Text = text }), out var decoded) && decoded.Kind == kind && decoded.Text == text, "receipt wire round trip"); }

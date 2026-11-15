@@ -16,6 +16,27 @@ namespace RaidRogue
     public static class CampaignStorage
     {
         public const int MaximumBytes = 8 * 1024 * 1024;
+        public const string TestProfileArgument = "--raid-test-profile=";
+        // Development builds can keep solo test progress separate from the player's normal save.
+        // An invalid explicit profile must never silently fall back to the real campaign directory.
+        public static string RootFor(string persistentRoot, string[] arguments, bool development)
+        {
+            if (arguments == null) return persistentRoot;
+            string profile = null;
+            foreach (string argument in arguments)
+            {
+                if (argument == null || !argument.StartsWith(TestProfileArgument, StringComparison.Ordinal)) continue;
+                if (profile != null) throw new ArgumentException("Duplicate raid test profile");
+                profile = argument.Substring(TestProfileArgument.Length);
+            }
+            if (profile == null) return persistentRoot;
+            if (!development) throw new InvalidOperationException("Raid test profile requires a development build");
+            if (profile.Length < 1 || profile.Length > 40) throw new ArgumentException("Invalid raid test profile");
+            foreach (char c in profile)
+                if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && !(c >= '0' && c <= '9') && c != '-' && c != '_')
+                    throw new ArgumentException("Invalid raid test profile");
+            return Path.Combine(persistentRoot, "test-profiles", profile);
+        }
         public static string DirectoryFor(string root, string owner)
         {
             if (!CampaignIdentity.Valid(owner)) throw new ArgumentException("Invalid account");

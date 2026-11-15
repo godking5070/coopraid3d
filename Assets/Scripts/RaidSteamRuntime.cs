@@ -215,6 +215,12 @@ namespace RaidRogue
             if (!SteamUtils.IsOverlayEnabled()) { Status = "Steam 오버레이를 사용할 수 없습니다. Steam 실행 및 게임별 오버레이 설정을 확인하세요."; return; }
             SteamFriends.ActivateGameOverlayInviteDialog(new CSteamID(LobbyId));
         }
+        public void OpenFriends()
+        {
+            if (!Available || Busy || Session?.Mode != RaidSessionMode.Menu) return;
+            if (!SteamUtils.IsOverlayEnabled()) { Status = "Steam 오버레이를 사용할 수 없습니다. Steam에서 게임별 오버레이 설정을 확인하세요."; return; }
+            SteamFriends.ActivateGameOverlay("Friends");
+        }
         public void NoteSessionEnd(string reason) => Status = reason;
         public void CancelJoin() { _invites.Decline(); Fail("Steam 접속을 취소했습니다."); }
         private void Fail(string reason)

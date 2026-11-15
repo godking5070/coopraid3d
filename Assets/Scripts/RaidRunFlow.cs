@@ -30,12 +30,16 @@ namespace RaidRogue
         {
             if (stage < 1 || stage > maximum) return false;
             bool valid = retry ? Phase == RaidBattlePhase.Wiped && stage == Stage
-                : (Phase == RaidBattlePhase.Lobby && stage == 1) || (Phase == RaidBattlePhase.Reward && stage == Stage + 1);
+                : (Phase == RaidBattlePhase.Lobby && stage == (Stage == 0 ? 1 : Stage + 1)) || (Phase == RaidBattlePhase.Reward && stage == Stage + 1);
             if (!valid) return false;
             Stage = stage; Revision++; Phase = RaidBattlePhase.Loading; return true;
         }
+        public bool TryApproach(int revision)
+        { if (!IsCurrent(revision, RaidBattlePhase.Loading)) return false; Phase = RaidBattlePhase.Approach; return true; }
+        public bool TryArrival(int revision)
+        { if (!IsCurrent(revision, RaidBattlePhase.Approach)) return false; Phase = RaidBattlePhase.Arrival; return true; }
         public bool TryCountdown(int revision)
-        { if (!IsCurrent(revision, RaidBattlePhase.Loading)) return false; Phase = RaidBattlePhase.Countdown; return true; }
+        { if (!IsCurrent(revision, RaidBattlePhase.Arrival)) return false; Phase = RaidBattlePhase.Countdown; return true; }
         public bool TryStart(int revision)
         { if (!IsCurrent(revision, RaidBattlePhase.Countdown)) return false; Phase = RaidBattlePhase.Combat; return true; }
         public EncounterOutcome Resolve(int revision, bool bossDead, int living, int partySize)
@@ -49,6 +53,21 @@ namespace RaidRogue
         { if (!IsCurrent(revision, RaidBattlePhase.BossClear)) return false; Phase = Stage >= maximum&&!finalChoicePending ? RaidBattlePhase.Victory : RaidBattlePhase.Reward; return true; }
         public bool FinishFinalRewards(int revision,int maximum)
         {if(!IsCurrent(revision,RaidBattlePhase.Reward)||Stage<maximum)return false;Phase=RaidBattlePhase.Victory;return true;}
+        public bool TryIntermission(int revision, int maximum)
+        {
+            if (!IsCurrent(revision, RaidBattlePhase.Reward) || Stage >= maximum) return false;
+            Revision++; Phase = RaidBattlePhase.Lobby; return true;
+        }
+        public bool TryRestoreSettlement(int stage, int maximum)
+        {
+            if (Phase != RaidBattlePhase.Lobby || Stage != 0 || stage < 1 || stage > maximum) return false;
+            Stage = stage; Revision++; Phase = RaidBattlePhase.Reward; return true;
+        }
+        public bool ReturnToLobby()
+        {
+            if (Phase != RaidBattlePhase.Victory) return false;
+            Revision++; Stage = 0; Phase = RaidBattlePhase.Lobby; return true;
+        }
         public bool End()
         { if (Phase == RaidBattlePhase.Closed) return false; Revision++; Phase = RaidBattlePhase.Closed; return true; }
     }

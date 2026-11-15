@@ -229,7 +229,7 @@ namespace RaidRogue
         public void ConfirmAegisDeparture()
         {
             if(player==null||stageManager==null||!stageManager.CanSelectInitialRole||!CharacterActor.Ensure(player.gameObject).DepartureReady)return;
-            _hasSelectedInitialRole=true;CloseRoleSelectionModal();stageManager.BeginSingleRun();
+            _hasSelectedInitialRole=true;CloseRoleSelectionModal();
         }
         public void SelectRoleByIndex(int roleNumber1To4)
         {
@@ -246,7 +246,6 @@ namespace RaidRogue
             _hasSelectedInitialRole = true;
             ApplySelectedRole(chosen, repositionParty: true, showAlertBanner: true);
             CloseRoleSelectionModal();
-            stageManager?.BeginSingleRun();
         }
 
         /// <summary>
@@ -569,6 +568,10 @@ namespace RaidRogue
 
         private void EnsureCharacterChoices(Font font)
         {
+            if (RaidUIStyle.Authored(roleModalRoot != null ? roleModalRoot.transform : null) && _aegisSelect != null)
+            {
+                _aegisSelect.onClick.RemoveAllListeners(); _aegisSelect.onClick.AddListener(SelectAegisPaladin); return;
+            }
             if (roleModalRoot == null) return;
             _selectionPanel = roleModalRoot.transform.Find("RoleSelection_CenterWindow") as RectTransform;
             if (_selectionPanel == null) return;
@@ -643,7 +646,7 @@ namespace RaidRogue
         {
             if (_selectionPanel == null || roleModalRoot == null) return;
             var available = ((RectTransform)roleModalRoot.transform).rect.size;
-            if (available.x > 0 && available.y > 0)
+            if (!RaidUIStyle.Authored(_selectionPanel) && available.x > 0 && available.y > 0)
                 _selectionPanel.localScale = Vector3.one * Mathf.Clamp(Mathf.Min((available.x - 24) / 1480, (available.y - 24) / 900), .01f, 1);
             if (_aegisSelect == null) return;
             bool canSelect = stageManager != null && stageManager.CanSelectInitialRole && CharacterCatalog.Find(AegisPaladinData.JobId)?.playable == true;

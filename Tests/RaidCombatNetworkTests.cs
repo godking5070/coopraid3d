@@ -24,15 +24,17 @@ internal static class RaidCombatNetworkTests
         Check(!gate.Accept(0, 3, Request(0, 3, 1)), "unadmitted peer cannot act");
         Check(!gate.Accept(2, 3, Request(2, 2, 1)), "previous attempt request cannot apply");
         Check(!gate.Accept(2, 3, Request(2, 4, 1)), "future attempt request cannot apply");
-        Check(!gate.Accept(2, 3, Request(2, 3, 1, 14)), "unknown skill rejected");
+        Check(!gate.Accept(2, 3, Request(2, 3, 1, 16)), "unknown skill rejected");
         Check(!gate.Accept(2, 3, Request(2, 3, 0)), "zero sequence rejected");
         Check(gate.Accept(2, 3, Request(2, 3, 1)), "invalid requests did not consume valid sequence");
+        Check(gate.Accept(2, 3, Request(2, 3, 2, 14)), "cutscene skip vote uses the same owner and attempt gate");
+        Check(gate.Accept(2, 3, Request(2, 3, 3, 15)), "return portal uses the same owner and attempt gate");
         for (int i = 0; i < 10; i++) Check(!gate.Accept(2, 3, Request(2, 3, 1)), "retry cannot repeat damage or cooldown");
         Check(gate.Accept(1, 3, Request(1, 3, 1)), "host enters the same one-shot gate");
         Check(!gate.Accept(1, 3, Request(1, 3, 1)), "host is not processed a second time");
-        Check(gate.Accept(2, 3, Request(2, 3, 3, 6)), "potion request has its own sequence");
+        Check(gate.Accept(2, 3, Request(2, 3, 4, 6)), "potion request has its own sequence");
         Check(!gate.Accept(2, 3, Request(2, 3, 2, 5)), "outdated action rejected");
-        Check(gate.Accept(2, 4, Request(2, 4, 4)), "new attempt accepts a new action");
+        Check(gate.Accept(2, 4, Request(2, 4, 5)), "new attempt accepts a new action");
         Check(!gate.Accept(2, 4, Request(2, 3, 5)), "late previous attempt action rejected");
         gate.Remove(2);
         Check(gate.Accept(2, 4, Request(2, 4, 1)), "connection gate can be cleaned up");
@@ -59,6 +61,8 @@ internal static class RaidCombatNetworkTests
         rewards.Begin(9); Check(!rewards.Complete && !rewards.Chosen(1), "new round clears only reward state");
         rewards.Offer(1, new[] { 4, 5, 6 });
         Check(!rewards.Choose(8, 1, 4) && rewards.Choose(9, 1, 4) && rewards.Complete, "new round accepts only its offer and epoch");
+        rewards.Begin(10); rewards.Offer(1, new[] { 4, 5, 6 }); rewards.RestoreChosen(1);
+        Check(rewards.Complete && !rewards.Choose(10, 1, 5), "restored choice cannot grant a second card");
     }
 
     private static void FragmentLossAndReordering()

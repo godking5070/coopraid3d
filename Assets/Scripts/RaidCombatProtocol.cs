@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RaidRogue
 {
-    public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory, Loading, BossClear, Closed }
+    public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory, Loading, BossClear, Closed, Approach, Arrival }
     [Serializable] public sealed class RaidActionRequest
     {
         public uint sequence, lease;
@@ -19,7 +19,7 @@ namespace RaidRogue
         public bool Accept(int connectionOwner, int epoch, RaidActionRequest request)
         {
             if (request == null || connectionOwner <= 0 || request.actor != connectionOwner || request.epoch != epoch ||
-                request.sequence == 0 || request.skill < 1 || request.skill > 13) return false;
+                request.sequence == 0 || request.skill < 1 || request.skill > 15) return false;
             if (_last.TryGetValue(connectionOwner, out uint last) && request.sequence <= last) return false;
             _last[connectionOwner] = request.sequence; return true;
         }
@@ -35,6 +35,7 @@ namespace RaidRogue
         public void Offer(int actor, int[] cards) { if (!_offers.ContainsKey(actor)) _offers.Add(actor, (int[])cards.Clone()); }
         public int[] Cards(int actor) => _offers.TryGetValue(actor, out var cards) ? (int[])cards.Clone() : Array.Empty<int>();
         public bool Chosen(int actor) => _chosen.Contains(actor);
+        public void RestoreChosen(int actor) { if (_offers.ContainsKey(actor)) _chosen.Add(actor); }
         public bool Choose(int epoch, int actor, int card)
         {
             if (epoch != Epoch || _chosen.Contains(actor) || !_offers.TryGetValue(actor, out var cards) || Array.IndexOf(cards, card) < 0) return false;
@@ -82,6 +83,8 @@ namespace RaidRogue
         public float x, y, z, yaw, hp, maxHp, radius, castRemaining, castTotal, groggy;
         public bool dead, casting;
         public float stagger, counterWindowEnd, brandEnd;
+        public int guardianPattern, guardianStep;
+        public float guardianStarted, guardianEnds, guardianStagger;
     }
     [Serializable] public sealed class RaidCombatMechanic
     {
@@ -104,6 +107,7 @@ namespace RaidRogue
         public int campaignSavedStage;
         public string campaignSavedUtc;
         public bool campaignCompleted, campaignSaveFailed;
+        public bool campaignEligible; // Missing in older frames => no first-play unlock from that host.
         public int epoch, stage, retries, irisCoins, totalRevives;
         public string attemptId;
         public string runId,chapterId;
@@ -111,7 +115,8 @@ namespace RaidRogue
         public bool controlGranted;
         public RaidPose[] recoveryPoses;
         public RaidBattlePhase phase;
-        public float time, countdownEnd, runTime, phaseDeadline;
+        public bool bossVisible, portalActive;
+        public float time, countdownEnd, runTime, phaseDeadline, arrivalRevealAt;
         public RaidCombatActor[] party;
         public RaidCombatEnemy boss;
         public RaidCombatEnemy[] adds;

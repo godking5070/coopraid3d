@@ -562,14 +562,15 @@ namespace RaidRogue
 
             string stageIntroMsg = $"★ 1부 STAGE {currentStageNumber} / 6 · {currentBossTitle}" +
                 (currentStageNumber > 3 ? $" · 기존 Stage {EncounterTemplate} 구성 재사용" : "") + " ★";
-            SetMechanicAlert(stageIntroMsg, new Color(1f, 0.9f, 0.3f, 1f), 4.5f);
+            if (CharacterTrainingSession.Active) { SetMechanicAlert(stageIntroMsg, new Color(1f, 0.9f, 0.3f, 1f), 4.5f);
             FloatingTextPopup.Spawn(
                 transform.position + Vector3.up * popupHeightOffset,
                 $"{currentBossTitle} 등장!! (HP {Mathf.RoundToInt(maxHp)})",
                 new Color(1f, 0.88f, 0.25f, 1f),
                 true
-            );
+            ); }
 
+            ResetGuardian();
             UpdateTopBossUI();
         }
 
@@ -661,6 +662,7 @@ namespace RaidRogue
 
         private void Update()
         {
+            UpdateGuardianPresentation();
             if (RaidCombatAuthority.Replica) { UpdateReplicaBoss(); UpdateTopBossUI(); UpdateCastBanner(); return; }
             if (Time.timeScale <= 0.001f || StageManager.CombatSuspended || currentHp <= 0)
             {
@@ -675,6 +677,7 @@ namespace RaidRogue
             HandleDebugShortcuts();
             UpdateAlertBannerTimer();
 
+            if (GuardianNormal) { TickGuardian(); return; }
             switch (fsmState)
             {
                 case BossFSMState.IdleChasing:
@@ -703,6 +706,33 @@ namespace RaidRogue
             UpdateCastBanner();
             UpdateTopBossUI();
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        // Temporary test control: uses the same authoritative defeat path as Shift+F1.
+        // It is intentionally absent from release builds and never grants campaign progress.
+        private void OnGUI()
+        {
+            var session = RaidNetworkSession.Instance;
+            var stage = StageManager.Instance;
+            if (session == null || session.Mode != RaidSessionMode.Single || stage == null ||
+                stage.boss != this || stage.Progress.Phase != RaidBattlePhase.Combat ||
+                StageManager.CombatSuspended || CharacterTrainingSession.Active ||
+                LocalGameplayInput.ModalCovered || currentHp <= 0f ||
+                fsmState == BossFSMState.Defeated) return;
+
+            var bounds = new Rect(Screen.width - 206f, 12f, 194f, 38f);
+            if (bounds.Contains(Event.current.mousePosition))
+                LocalGameplayInput.SuppressPointerThisFrame();
+            if (!GUI.Button(bounds, "TEST  보스 클리어")) return;
+
+            LocalGameplayInput.SuppressThisFrame();
+            LocalGameplayInput.SuppressPointerThisFrame();
+            LocalInputBindings.QuarantineHeld();
+            DevBugReportUI.NoteCommand("TEST boss clear button");
+            CampaignRuntime.Instance?.MarkDevelopmentUse();
+            ApplyBossHpDamage(currentHp + 99999f);
+        }
+#endif
 
         private void HandleDebugShortcuts()
         {
@@ -754,7 +784,12 @@ namespace RaidRogue
 #endif
 
             if (toggleRot || instantKillBoss || forceTether || forceSpread || forceStack || forceStage3Combo || forceSummonAdds)
+            {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                DevBugReportUI.NoteCommand("Boss debug shortcut");
+#endif
                 CampaignRuntime.Instance?.MarkDevelopmentUse();
+            }
             if (toggleRot)
             {
                 enableRotation = !enableRotation;
@@ -1632,6 +1667,7 @@ namespace RaidRogue
 
         private void CheckPhaseTransition()
         {
+            if (GuardianNormal) { if (!GuardianHard) _guardian.ObserveHealth(HpRatio); return; }
             if (fsmState == BossFSMState.Defeated)
             {
                 return;
@@ -2005,6 +2041,7 @@ namespace RaidRogue
             source.GetComponent<CommonPotion>()?.EndRevivalProtection();
             int finalDamage = Mathf.RoundToInt(CombatAttackModifiers.Apply(source != null ? source : targetPlayer,transform,baseDamage,CombatDamageKind.Direct) * DamageTakenMultiplier);
             ApplyBossHpDamage(finalDamage, source);
+            if (GuardianNormal && attacker != null) AddGuardianStagger(attacker.GuardianAttackStagger);
 
             if (isRanged)
             {
@@ -2026,13 +2063,15 @@ namespace RaidRogue
         public bool GuardableAttackImminent(Transform victim,float within)
         {
             if(!CombatRange.LivingPartyMember(victim)||StageManager.CombatSuspended)return false;
+            if(GuardianNormal && GuardianPatternNow==GuardianPattern.Punishment) return _guardianVictim==victim && _guardian.Remaining(GuardianNow)<=within;
             if(fsmState==BossFSMState.IdleChasing)return ResolveLivingAggroTarget()==victim&&autoAttackInterval-_autoAttackTimer<=within&&(!isMeleeBoss||CombatRange.InRange(transform,victim,MeleeAttackRange));
             return fsmState==BossFSMState.CastingSkill&&_activeSkill!=null&&_castRemainingTime<=within&&
                 (_activeSkill.skillId==BossSkillId.SingleTankbuster&&ResolveLivingAggroTarget()==victim||_activeSkill.skillId==BossSkillId.DoubleTankbuster_Tether&&_tetherTankTarget==victim);
         }
         private void ApplyBossHpDamage(float damage, Transform source = null,string origin="",CombatDamageKind kind=CombatDamageKind.Unclassified)
         {
-            if (RaidCombatAuthority.Replica || fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0)
+            if (RaidCombatAuthority.Replica || fsmState == BossFSMState.Defeated || StageManager.CombatSuspended || currentHp <= 0 || damage <= 0 ||
+                GuardianHard && _guardian.Pattern == GuardianPattern.Transformation && _guardian.Step == GuardianStep.Telegraph)
             {
                 return;
             }
@@ -2049,6 +2088,7 @@ namespace RaidRogue
             if (currentHp <= 0.1f)
             {
                 currentHp = 0f;
+                if (GuardianNormal) { _guardian.Stop(); ClearGuardianMechanics(); CleanupActiveTelegraphAndTether(); }
                 UpdateTopBossUI();
 
                 if (stageManager == null)
@@ -2072,6 +2112,7 @@ namespace RaidRogue
 
         public void StopEncounterEffects()
         {
+            ClearGuardianMechanics(); ClearHardCorruption(); _guardian.Stop(); _guardianCombatStarted = false;
             _counterGroggy=false; GetComponent<CombatCounterTarget>()?.ResetState();
             CleanupActiveTelegraphAndTether();
             StopAllCoroutines(); _collapseCoroutine = null;
@@ -2089,6 +2130,7 @@ namespace RaidRogue
             for (int i = _activePartyMarkers.Count - 1; i >= 0; i--)
                 if (_activePartyMarkers[i] != null && _activePartyMarkers[i].followTarget == member)
                 { Destroy(_activePartyMarkers[i].gameObject); _activePartyMarkers.RemoveAt(i); }
+            if (GuardianNormal) return; // Guardian retarget grants a fresh full countdown.
             // Personal stack/tether ends when its designated recipient dies. Other patterns continue.
             if ((_isTetherActive && _tetherTankTarget == member) || (_isStackActive && _stackTarget == member))
             {
@@ -2152,7 +2194,7 @@ namespace RaidRogue
                 return;
             }
             mechanicAlertBannerText.text = message;
-            mechanicAlertBannerText.color = color;
+            RaidUIStyle.Color(mechanicAlertBannerText, color);
             _alertBannerClearTimer = duration;
         }
 
@@ -2170,16 +2212,17 @@ namespace RaidRogue
 
         private void UpdateTopBossUI()
         {
+            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible && !CharacterTrainingSession.Active) return;
             if (bossHpFillImage != null)
             {
                 bossHpFillImage.fillAmount = HpRatio;
-                bossHpFillImage.color = currentPhase switch
+                RaidUIStyle.Color(bossHpFillImage, currentPhase switch
                 {
                     BossPhase.Phase1_100To50 => new Color(0.85f, 0.18f, 0.28f, 1f),
                     BossPhase.GroggyTransition => new Color(1.0f, 0.80f, 0.15f, 1f),
                     BossPhase.Phase2_50To0 => new Color(0.75f, 0.12f, 0.88f, 1f),
                     _ => Color.red
-                };
+                });
             }
 
             if (bossHpText != null)
@@ -2228,16 +2271,16 @@ namespace RaidRogue
                         if (IsGroggy)
                         {
                             bossCastFillImage.fillAmount = _groggyRemainingTime / Mathf.Max(0.1f, groggyDuration);
-                            bossCastFillImage.color = new Color(1f, 0.85f, 0.2f, 1f);
+                            RaidUIStyle.Color(bossCastFillImage, new Color(1f, 0.85f, 0.2f, 1f));
                         }
                         else
                         {
                             bossCastFillImage.fillAmount = CastProgress;
-                            bossCastFillImage.color = _isTetherActive
+                            RaidUIStyle.Color(bossCastFillImage, _isTetherActive
                                 ? (_isTetherInterceptedByPlayer ? new Color(0.2f, 0.95f, 0.4f, 1f) : new Color(1f, 0.15f, 0.15f, 1f))
                                 : (_isStackActive ? new Color(1f, 0.85f, 0.15f, 1f)
                                 : (_isSpreadActive ? new Color(1f, 0.35f, 0.8f, 1f)
-                                : new Color(1f, 0.55f, 0.12f, 1f)));
+                                : new Color(1f, 0.55f, 0.12f, 1f))));
                         }
                     }
 
@@ -2249,6 +2292,7 @@ namespace RaidRogue
                     }
                 }
             }
+            GuardianUI();
         }
 
         private void TriggerHitFlash(bool isCrit)
@@ -2296,6 +2340,9 @@ namespace RaidRogue
 
         private void UpdateCastBanner()
         {
+            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible && !CharacterTrainingSession.Active)
+            { if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(false); return; }
+            if (_castBannerRoot != null && !_castBannerRoot.gameObject.activeSelf) _castBannerRoot.gameObject.SetActive(true);
             if (_castBannerRoot == null || _castBannerText == null)
             {
                 return;
@@ -2333,6 +2380,12 @@ namespace RaidRogue
                 _castBannerText.text = $"STAGE {currentStageNumber} BOSS [{(currentPhase == BossPhase.Phase2_50To0 ? "2페이즈" : "1페이즈")}] (어그로: {AggroTargetName})";
                 _castBannerText.color = new Color(0.85f, 0.85f, 1f, 0.95f);
             }
+        }
+
+        public void ShowArrivalName(bool visible)
+        {
+            if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(visible);
+            if (visible) UpdateCastBanner();
         }
 
         private void SetBossBodyColor(Color color)

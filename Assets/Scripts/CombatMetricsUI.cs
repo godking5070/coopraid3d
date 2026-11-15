@@ -59,12 +59,13 @@ namespace RaidRogue
             {
                 var available = ((RectTransform)_canvas.transform).rect.size;
                 float scale = Mathf.Min(1f, available.x / 1280f, available.y / 630f);
-                _resultBox.localScale = Vector3.one * scale;
+                if (!RaidUIStyle.Authored(_resultBox)) _resultBox.localScale = Vector3.one * scale;
             }
             if (_metrics.Ledger.Active) _metrics.RefreshRoster();
             RefreshMeter();
         }
 
+        private RectTransform _viewParent;
         private void EnsureUI()
         {
             if (_canvas == null)
@@ -73,6 +74,20 @@ namespace RaidRogue
                 if (_canvas == null) return;
             }
             if (_font == null) _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (RaidUIView.For(this)==null)
+            {
+                if (RaidUIView.Attach(this,"metrics",_canvas.transform))
+                {
+                    RaidUIView.Bind(this,"Fold",ToggleFold);
+                    RaidUIView.Bind(this,"DPS",()=>{_sortByHealing=false;RefreshMeter();});
+                    RaidUIView.Bind(this,"HPS",()=>{_sortByHealing=true;RefreshMeter();});
+                    RaidUIView.Bind(this,"Close",CloseResults);
+                    _rewardButton?.onClick.AddListener(()=>ShowResults(false));
+                    _victoryButton?.onClick.AddListener(()=>ShowResults(true));
+                    return;
+                }
+                _viewParent=RaidUIView.Begin(this,"metrics",_canvas.transform);
+            }
             if (_panel == null) BuildMeter();
             if (_results == null) BuildResults();
             if (_rewardButton == null && _stage.cardManager != null && _stage.cardManager.cardSelectionModalRoot != null)
@@ -89,7 +104,7 @@ namespace RaidRogue
 
         private void BuildMeter()
         {
-            _panel = Box(_canvas.transform, "CombatMetrics_RightHUD", new Vector2(1, 0.5f),
+            _panel = Box(_viewParent, "CombatMetrics_RightHUD", new Vector2(1, 0.5f),
                 new Vector2(-18, 170), new Vector2(380, 440), new Color(0.035f, 0.05f, 0.09f, 0.91f));
             _panel.pivot = new Vector2(1, 1);
             // Keep modal overlays above the meter even if they were created before this component.
@@ -119,7 +134,7 @@ namespace RaidRogue
         {
             _collapsed = !_collapsed;
             _body.SetActive(!_collapsed);
-            _panel.sizeDelta = new Vector2(380, _collapsed ? 40 : 440);
+            RaidUILayout.Fold(_panel, _collapsed);
             _foldLabel.text = _collapsed ? "펼치기" : "접기";
             RefreshMeter();
         }
@@ -156,7 +171,7 @@ namespace RaidRogue
 
         private void BuildResults()
         {
-            var overlay = Box(_canvas.transform, "CombatResults_Overlay", Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.01f, 0.02f, 0.04f, 0.94f));
+            var overlay = Box(_viewParent, "CombatResults_Overlay", Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.01f, 0.02f, 0.04f, 0.94f));
             overlay.anchorMax = Vector2.one;
             overlay.offsetMin = overlay.offsetMax = Vector2.zero;
             _results = overlay.gameObject;
@@ -173,7 +188,7 @@ namespace RaidRogue
             {
                 var title = Label(box, "Column" + c, new Vector2(x, -175), new Vector2(widths[c], 32), 17);
                 title.text = headers[c];
-                title.color = new Color(0.55f, 0.8f, 1f);
+                RaidUIStyle.Color(title, new Color(0.55f, 0.8f, 1f));
                 x += widths[c];
             }
             for (int r = 0; r < 4; r++)
@@ -208,7 +223,7 @@ namespace RaidRogue
             ResultsOpen = true;
             _lastModalFrame = Time.frameCount;
             _results.SetActive(true);
-            _results.transform.SetAsLastSibling();
+            RaidUIOrder.Raise(_results.transform);
         }
 
         public void CloseResults()
@@ -227,7 +242,7 @@ namespace RaidRogue
             DisplayResult(failed[failed.Count - 1]);
             _resultTitle.text = $"STAGE {failed[failed.Count - 1].Stage} · 실패한 시도 (클리어 합산 제외)";
             ResultsOpen = true; _lastModalFrame = Time.frameCount;
-            _results.SetActive(true); _results.transform.SetAsLastSibling();
+            _results.SetActive(true); RaidUIOrder.Raise(_results.transform);
         }
 
         private void DisplayResult(CombatEncounterResult data)
@@ -273,7 +288,7 @@ namespace RaidRogue
             var text = rect.gameObject.AddComponent<Text>();
             text.font = _font;
             text.fontSize = fontSize;
-            text.color = Color.white;
+            RaidUIStyle.Color(text, Color.white);
             text.supportRichText = true;
             text.raycastTarget = false;
             text.alignment = TextAnchor.UpperLeft;
@@ -286,7 +301,7 @@ namespace RaidRogue
             var rect = Box(parent, name, anchor, position, size, new Color(0.13f, 0.26f, 0.4f, 1));
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = rect.GetComponent<Image>();
-            button.onClick.AddListener(action);
+            if (name=="Fold"||name=="DPS"||name=="HPS"||name=="Close") RaidUIView.Bind(this,name,action,button); else button.onClick.AddListener(action);
             var text = Label(rect, "Label", Vector2.zero, Vector2.zero, 17);
             var tr = text.rectTransform;
             tr.anchorMin = Vector2.zero;

@@ -17,6 +17,7 @@ namespace RaidRogue
         {
             var boss=GetComponent<BossController>();
             if(RaidCombatAuthority.Replica||!CombatRange.LivingEnemy(transform)||boss!=null&&boss.IsGroggy)return;
+            if(boss != null && boss.GuardianNormal) { boss.AddGuardianStagger(points); return; }
             Stagger+=Mathf.Max(0,points);
             CharacterTrainingSession.Instance?.RecordStagger(Mathf.Max(0,points));
             if(boss!=null&&Stagger>=AegisPaladinData.StaggerThreshold)
@@ -37,8 +38,9 @@ namespace RaidRogue
             CharacterTrainingSession.Instance?.RecordCounter();
             // Consume before reactions: one opportunity yields one party-wide charge restoration.
             foreach(var member in PartyLife.OrderedMembers())if(CombatRange.LivingPartyMember(member))CharacterActor.Ensure(member.gameObject).RefreshMovementCharges();
-            AddStagger(hitStagger+AegisPaladinData.CounterBonusStagger);
-            GetComponent<BossController>()?.ApplyCounterGroggy(AegisPaladinData.CounterGroggy);
+            var boss = GetComponent<BossController>();
+            if(boss != null && boss.GuardianNormal) boss.GuardianCounterSucceeded();
+            else { AddStagger(hitStagger+AegisPaladinData.CounterBonusStagger); boss?.ApplyCounterGroggy(AegisPaladinData.CounterGroggy); }
             FloatingTextPopup.Spawn(transform.position+Vector3.up*3,"COUNTER!",Color.cyan,true);return true;
         }
         public void Restore(float stagger,float window){if(RaidCombatAuthority.Replica){Stagger=stagger;_opportunity.RestoreEnd(window);}}
@@ -48,6 +50,7 @@ namespace RaidRogue
         private bool _counterGroggy;
         public void ApplyCounterGroggy(float seconds)
         {
+            if(GuardianNormal)return;
             if(RaidCombatAuthority.Replica||IsGroggy||IsBossDefeatedCollapse||StageManager.CombatSuspended)return;
             CleanupActiveTelegraphAndTether();_isChasing=false;_pendingPositionedSkill=null;
             _counterGroggy=true;fsmState=BossFSMState.Groggy;_groggyRemainingTime=seconds;

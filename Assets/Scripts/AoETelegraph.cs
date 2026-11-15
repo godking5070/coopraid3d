@@ -7,7 +7,8 @@ namespace RaidRogue
     {
         Circle_Radius6,         // 원형 장판 (보스 주변 반경 6m)
         Donut_Inner4_Outer12,   // 도넛 장판 (내경 4m ~ 외경 12m, 보스 발밑 안전지대)
-        FrontCone_120Deg        // 전방 120도 부채꼴 장판
+        Rectangle = 8,
+        FrontCone_120Deg = 2        // 전방 120도 부채꼴 장판
     }
 
     /// <summary>
@@ -78,6 +79,8 @@ namespace RaidRogue
 
             switch (type)
             {
+                case AoETelegraphType.Rectangle:
+                    innerRadius = customInnerRadius; outerRadius = customOuterRadius; coneAngleDeg = 0; break;
                 case AoETelegraphType.Circle_Radius6:
                     innerRadius = 0f;
                     outerRadius = customOuterRadius > 0f ? customOuterRadius : 6f;
@@ -125,6 +128,9 @@ namespace RaidRogue
 
             switch (telegraphType)
             {
+                case AoETelegraphType.Rectangle:
+                    Vector3 local = transform.InverseTransformPoint(worldPos);
+                    return GuardianNormalState.InRectangle(local.x, local.z, innerRadius, outerRadius);
                 case AoETelegraphType.Circle_Radius6:
                     return dist <= outerRadius;
 
@@ -175,11 +181,26 @@ namespace RaidRogue
             int segments = telegraphType == AoETelegraphType.FrontCone_120Deg ? 48 : 72;
             float halfAngle = coneAngleDeg * 0.5f;
 
-            Mesh fullMesh = BuildSectorOrRingMesh(innerRadius, outerRadius, -halfAngle, halfAngle, segments, baseFillColor);
+            Mesh fullMesh = telegraphType == AoETelegraphType.Rectangle ? RectangleMesh(innerRadius, outerRadius, baseFillColor) : BuildSectorOrRingMesh(innerRadius, outerRadius, -halfAngle, halfAngle, segments, baseFillColor);
             _baseMeshFilter.sharedMesh = fullMesh;
 
             BuildBorders(segments, halfAngle);
             UpdateProgressVisual(progress);
+        }
+
+        public void RefreshColors()
+        {
+            if (_baseMeshRenderer != null) _baseMeshRenderer.sharedMaterial.color = baseFillColor;
+            if (_progressMeshRenderer != null) _progressMeshRenderer.sharedMaterial.color = progressFillColor;
+            if (_baseMeshFilter != null && _baseMeshFilter.sharedMesh != null) Destroy(_baseMeshFilter.sharedMesh);
+            RebuildVisuals(Mathf.Clamp01(_elapsed / _duration));
+        }
+        public void SetRectangleLength(float length)
+        {
+            if (telegraphType != AoETelegraphType.Rectangle || Mathf.Abs(outerRadius-length) < .001f) return;
+            outerRadius = Mathf.Max(.1f, length);
+            if (_baseMeshFilter != null && _baseMeshFilter.sharedMesh != null) Destroy(_baseMeshFilter.sharedMesh);
+            RebuildVisuals(Mathf.Clamp01(_elapsed / _duration));
         }
 
         private void UpdateProgressVisual(float progress)
@@ -205,7 +226,7 @@ namespace RaidRogue
                 dynamicColor = Color.Lerp(progressFillColor, new Color(1f, 0.45f, 0.2f, 0.72f), pulse);
             }
 
-            _progressMeshFilter.sharedMesh = BuildSectorOrRingMesh(
+            _progressMeshFilter.sharedMesh = telegraphType == AoETelegraphType.Rectangle ? RectangleMesh(innerRadius, outerRadius * progress, dynamicColor) : BuildSectorOrRingMesh(
                 innerRadius,
                 currentOuter,
                 -halfAngle,
@@ -215,6 +236,13 @@ namespace RaidRogue
             );
         }
 
+        private static Mesh RectangleMesh(float width, float length, Color color)
+        {
+            var mesh = new Mesh { name = "ChargeRectangle" };
+            mesh.vertices = new[] {new Vector3(-width,0,0), new Vector3(-width,0,length),new Vector3(width,0,length),new Vector3(width,0,0)};
+            mesh.triangles = new[] {0,1,2,0,2,3}; mesh.colors = new[] {color,color,color,color};
+            mesh.RecalculateNormals(); mesh.RecalculateBounds(); return mesh;
+        }
         public static Mesh BuildSectorOrRingMesh(
             float rInner,
             float rOuter,
@@ -337,7 +365,12 @@ namespace RaidRogue
             }
             _borderLines.Clear();
 
-            if (telegraphType == AoETelegraphType.Circle_Radius6)
+            if (telegraphType == AoETelegraphType.Rectangle)
+            {
+                float y = groundY + .02f;
+                CreateLineRendererObject("ChargeBorder",new[] {new Vector3(-innerRadius,y,0),new Vector3(-innerRadius,y,outerRadius),new Vector3(innerRadius,y,outerRadius),new Vector3(innerRadius,y,0)},true,borderColor,.11f);
+            }
+            else if (telegraphType == AoETelegraphType.Circle_Radius6)
             {
                 CreateArcBorder("Border_Outer", outerRadius, 0f, 360f, segments, true, borderColor);
             }

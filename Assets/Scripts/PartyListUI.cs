@@ -39,12 +39,14 @@ namespace RaidRogue
 
         private Sprite _whiteSprite;
         private Text _revivalBudget;
+        [SerializeField] private Text headerTitle;
 
         private void Start()
         {
             RefreshPartyReferences();
             EnsureUI();
-            if (panelRoot != null) LocalShortcutText.Set(panelRoot.Find("HeaderTitle")?.GetComponent<Text>(), "◆ PARTY LIST · 클릭 / {key:Party1} {key:Party2} {key:Party3} {key:Party4}");
+            if(headerTitle==null && panelRoot!=null)headerTitle=panelRoot.Find("HeaderTitle")?.GetComponent<Text>();
+            if (headerTitle != null) LocalShortcutText.Set(headerTitle, "◆ PARTY LIST · 클릭 / {key:Party1} {key:Party2} {key:Party3} {key:Party4}");
             EnsureFillSprites();
         }
 
@@ -110,7 +112,7 @@ namespace RaidRogue
                 panelRoot.sizeDelta = new Vector2(335f, 316f);
 
                 Image panelBg = panelObj.AddComponent<Image>();
-                panelBg.color = new Color(0.05f, 0.07f, 0.12f, 0.88f);
+                RaidUIStyle.Color(panelBg, new Color(0.05f, 0.07f, 0.12f, 0.88f));
                 Outline panelOutline = panelObj.AddComponent<Outline>();
                 panelOutline.effectColor = new Color(0.28f, 0.42f, 0.65f, 0.9f);
                 panelOutline.effectDistance = new Vector2(2f, -2f);
@@ -130,13 +132,13 @@ namespace RaidRogue
                 headerTxt.fontSize = 13;
                 headerTxt.fontStyle = FontStyle.Bold;
                 headerTxt.alignment = TextAnchor.MiddleLeft;
-                headerTxt.color = new Color(0.85f, 0.92f, 1.0f, 1f);
+                RaidUIStyle.Color(headerTxt, new Color(0.85f, 0.92f, 1.0f, 1f));
                 LocalShortcutText.Set(headerTxt, "◆ PARTY LIST · 클릭 / {key:Party1} {key:Party2} {key:Party3} {key:Party4}");
                 headerTxt.raycastTarget = false;
             }
             else
             {
-                panelRoot.anchoredPosition = new Vector2(18f, 65f);
+                if (!RaidUIStyle.Authored(panelRoot)) panelRoot.anchoredPosition = new Vector2(18f, 65f);
             }
 
             memberRows = new PartyMemberRowUI[4];
@@ -180,7 +182,7 @@ namespace RaidRogue
                         row.selectButton = row.rowRoot.AddComponent<Button>();
                     }
                 }
-                row.selectButton.targetGraphic = row.aggroRedBorderImage;
+                if(row.selectButton.targetGraphic==null)row.selectButton.targetGraphic = row.aggroRedBorderImage;
 
                 int capturedIndex = i;
                 PartyMemberRowUI capturedRow = row;
@@ -244,7 +246,7 @@ namespace RaidRogue
 
             // 어그로 1순위 붉은 테두리 배경
             row.aggroRedBorderImage = rowObj.AddComponent<Image>();
-            row.aggroRedBorderImage.color = new Color(0.20f, 0.24f, 0.32f, 0.92f);
+            RaidUIStyle.Color(row.aggroRedBorderImage, new Color(0.20f, 0.24f, 0.32f, 0.92f));
 
             // 타겟 선택 시 밝은 하늘색 아웃라인
             row.targetSelectionOutline = rowObj.AddComponent<Outline>();
@@ -253,7 +255,7 @@ namespace RaidRogue
 
             // 마우스 클릭으로 즉시 해당 파티원 타겟 지정
             row.selectButton = rowObj.AddComponent<Button>();
-            row.selectButton.targetGraphic = row.aggroRedBorderImage;
+            if(row.selectButton.targetGraphic==null)row.selectButton.targetGraphic = row.aggroRedBorderImage;
             int capturedIndex = index;
             PartyMemberRowUI capturedRow = row;
             row.selectButton.onClick.AddListener(() =>
@@ -280,7 +282,7 @@ namespace RaidRogue
             innerRect.offsetMin = new Vector2(3f, 3f);
             innerRect.offsetMax = new Vector2(-3f, -3f);
             Image innerImg = innerBgObj.AddComponent<Image>();
-            innerImg.color = new Color(0.09f, 0.11f, 0.16f, 0.96f);
+            RaidUIStyle.Color(innerImg, new Color(0.09f, 0.11f, 0.16f, 0.96f));
 
             // 좌측 역할군 색상 아이콘 박스
             GameObject roleBoxObj = new GameObject("RoleIconBox");
@@ -292,7 +294,7 @@ namespace RaidRogue
             roleBoxRect.anchoredPosition = new Vector2(6f, 0f);
             roleBoxRect.sizeDelta = new Vector2(44f, 44f);
             row.roleBadgeBgImage = roleBoxObj.AddComponent<Image>();
-            row.roleBadgeBgImage.color = new Color(0.2f, 0.6f, 1f, 1f);
+            RaidUIStyle.Color(row.roleBadgeBgImage, new Color(0.2f, 0.6f, 1f, 1f));
 
             GameObject roleTxtObj = new GameObject("RoleBadgeText");
             roleTxtObj.transform.SetParent(roleBoxObj.transform, false);
@@ -306,7 +308,7 @@ namespace RaidRogue
             row.roleBadgeText.fontSize = 12;
             row.roleBadgeText.fontStyle = FontStyle.Bold;
             row.roleBadgeText.alignment = TextAnchor.MiddleCenter;
-            row.roleBadgeText.color = new Color(0.05f, 0.05f, 0.08f, 1f);
+            RaidUIStyle.Color(row.roleBadgeText, new Color(0.05f, 0.05f, 0.08f, 1f));
             row.roleBadgeText.text = "ROLE";
             row.roleBadgeText.raycastTarget = false;
 
@@ -324,7 +326,7 @@ namespace RaidRogue
             row.memberNameText.fontSize = 13;
             row.memberNameText.fontStyle = FontStyle.Bold;
             row.memberNameText.alignment = TextAnchor.MiddleLeft;
-            row.memberNameText.color = Color.white;
+            RaidUIStyle.Color(row.memberNameText, Color.white);
             row.memberNameText.raycastTarget = false;
 
             // 체력(HP) 게이지 배경
@@ -337,7 +339,7 @@ namespace RaidRogue
             hpBgRect.anchoredPosition = new Vector2(58f, 14f);
             hpBgRect.sizeDelta = new Vector2(-66f, 16f);
             Image hpBgImg = hpBgObj.AddComponent<Image>();
-            hpBgImg.color = new Color(0.04f, 0.05f, 0.08f, 0.95f);
+            RaidUIStyle.Color(hpBgImg, new Color(0.04f, 0.05f, 0.08f, 0.95f));
 
             // 체력(HP) Fill
             GameObject hpFillObj = new GameObject("HP_Fill");
@@ -348,7 +350,7 @@ namespace RaidRogue
             hpFillRect.offsetMin = Vector2.zero;
             hpFillRect.offsetMax = Vector2.zero;
             row.hpFillImage = hpFillObj.AddComponent<Image>();
-            row.hpFillImage.color = new Color(0.25f, 0.9f, 0.45f, 1f);
+            RaidUIStyle.Color(row.hpFillImage, new Color(0.25f, 0.9f, 0.45f, 1f));
 
             // 보호막(Shield) 게이지 배경 (HP 바 바로 아래 노란색 게이지)
             GameObject shBgObj = new GameObject("Shield_BarBg");
@@ -360,7 +362,7 @@ namespace RaidRogue
             shBgRect.anchoredPosition = new Vector2(58f, 5f);
             shBgRect.sizeDelta = new Vector2(-66f, 7f);
             Image shBgImg = shBgObj.AddComponent<Image>();
-            shBgImg.color = new Color(0.08f, 0.08f, 0.10f, 0.9f);
+            RaidUIStyle.Color(shBgImg, new Color(0.08f, 0.08f, 0.10f, 0.9f));
 
             GameObject shFillObj = new GameObject("Shield_Fill");
             shFillObj.transform.SetParent(shBgObj.transform, false);
@@ -370,7 +372,7 @@ namespace RaidRogue
             shFillRect.offsetMin = Vector2.zero;
             shFillRect.offsetMax = Vector2.zero;
             row.shieldFillImage = shFillObj.AddComponent<Image>();
-            row.shieldFillImage.color = new Color(1.0f, 0.90f, 0.18f, 1f);
+            RaidUIStyle.Color(row.shieldFillImage, new Color(1.0f, 0.90f, 0.18f, 1f));
 
             // HP + Shield 수치 텍스트 (HP 바 위에 표시)
             GameObject hpTxtObj = new GameObject("HP_ValueText");
@@ -385,7 +387,7 @@ namespace RaidRogue
             row.hpValueText.fontSize = 11;
             row.hpValueText.fontStyle = FontStyle.Bold;
             row.hpValueText.alignment = TextAnchor.MiddleRight;
-            row.hpValueText.color = Color.white;
+            RaidUIStyle.Color(row.hpValueText, Color.white);
             row.hpValueText.raycastTarget = false;
 
             row.rowRoot = rowObj;
@@ -411,16 +413,16 @@ namespace RaidRogue
                 if (row.hpFillImage != null)
                 {
                     if (row.hpFillImage.sprite == null) row.hpFillImage.sprite = _whiteSprite;
-                    row.hpFillImage.type = Image.Type.Filled;
-                    row.hpFillImage.fillMethod = Image.FillMethod.Horizontal;
-                    row.hpFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                    if(!RaidUIStyle.Authored(row.hpFillImage)) row.hpFillImage.type = Image.Type.Filled;
+                    if(!RaidUIStyle.Authored(row.hpFillImage)) row.hpFillImage.fillMethod = Image.FillMethod.Horizontal;
+                    if(!RaidUIStyle.Authored(row.hpFillImage)) row.hpFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
                 }
                 if (row.shieldFillImage != null)
                 {
                     if (row.shieldFillImage.sprite == null) row.shieldFillImage.sprite = _whiteSprite;
-                    row.shieldFillImage.type = Image.Type.Filled;
-                    row.shieldFillImage.fillMethod = Image.FillMethod.Horizontal;
-                    row.shieldFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                    if(!RaidUIStyle.Authored(row.shieldFillImage)) row.shieldFillImage.type = Image.Type.Filled;
+                    if(!RaidUIStyle.Authored(row.shieldFillImage)) row.shieldFillImage.fillMethod = Image.FillMethod.Horizontal;
+                    if(!RaidUIStyle.Authored(row.shieldFillImage)) row.shieldFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
                 }
             }
         }
@@ -508,7 +510,7 @@ namespace RaidRogue
                 rect.anchoredPosition = new Vector2(0, 4); rect.sizeDelta = new Vector2(0, 42);
                 _revivalBudget.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
                 _revivalBudget.fontSize = 16; _revivalBudget.alignment = TextAnchor.LowerLeft;
-                _revivalBudget.color = new Color(.9f, .85f, 1); _revivalBudget.raycastTarget = false;
+                RaidUIStyle.Color(_revivalBudget, new Color(.9f, .85f, 1)); _revivalBudget.raycastTarget = false;
             }
             var stage = StageManager.Instance;
             _revivalBudget.gameObject.SetActive(stage != null && !CharacterTrainingSession.Active);
@@ -541,9 +543,12 @@ namespace RaidRogue
                     if (row.memberNameText != null)
                     {
                         if (connection.Length > 0) row.memberNameText.text += "\n" + connection;
-                        row.memberNameText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 22);
-                        row.memberNameText.lineSpacing = .85f; row.memberNameText.resizeTextForBestFit = true;
-                        row.memberNameText.resizeTextMinSize = 9; row.memberNameText.resizeTextMaxSize = 13;
+                        if (!RaidUIStyle.Authored(row.memberNameText))
+                        {
+                            row.memberNameText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 22);
+                            row.memberNameText.lineSpacing = .85f; row.memberNameText.resizeTextForBestFit = true;
+                            row.memberNameText.resizeTextMinSize = 9; row.memberNameText.resizeTextMaxSize = 13;
+                        }
                     }
                 }
             }
@@ -561,19 +566,21 @@ namespace RaidRogue
             bool isTargetedByPlayer,
             bool isDead)
         {
+            row.rowRoot?.GetComponent<RaidUIIcon>()?.Show(row.boundTarget?.GetComponent<CharacterActor>()?.Definition?.id);
             if (row.roleBadgeBgImage != null)
             {
-                row.roleBadgeBgImage.color = isDead ? new Color(0.3f, 0.3f, 0.35f, 1f) : roleColor;
+                RaidUIStyle.Color(row.roleBadgeBgImage, isDead ? new Color(0.3f, 0.3f, 0.35f, 1f) : roleColor);
             }
             if (row.roleBadgeText != null)
             {
-                row.roleBadgeText.fontSize = 10;
+                if(!RaidUIStyle.Authored(row.roleBadgeText))row.roleBadgeText.fontSize = 10;
                 row.roleBadgeText.text = badgeText;
             }
 
             if (row.targetSelectionOutline != null)
             {
-                row.targetSelectionOutline.effectColor = isTargetedByPlayer
+                if(RaidUIStyle.Authored(row.targetSelectionOutline)) row.targetSelectionOutline.enabled=isTargetedByPlayer;
+                else row.targetSelectionOutline.effectColor = isTargetedByPlayer
                     ? new Color(0.20f, 0.92f, 1.0f, 1.0f)
                     : new Color(0f, 0f, 0f, 0f);
             }
@@ -583,16 +590,16 @@ namespace RaidRogue
             {
                 if (isTargetedByPlayer)
                 {
-                    row.aggroRedBorderImage.color = new Color(0.18f, 0.85f, 1.0f, 0.96f);
+                    RaidUIStyle.Color(row.aggroRedBorderImage, new Color(0.18f, 0.85f, 1.0f, 0.96f));
                 }
                 else if (isAggroTop && !isDead)
                 {
                     float pulse = 0.78f + Mathf.PingPong(Time.unscaledTime * 3.5f, 0.22f);
-                    row.aggroRedBorderImage.color = new Color(1.0f, 0.16f, 0.16f, pulse);
+                    RaidUIStyle.Color(row.aggroRedBorderImage, new Color(1.0f, 0.16f, 0.16f, pulse));
                 }
                 else
                 {
-                    row.aggroRedBorderImage.color = new Color(0.20f, 0.25f, 0.34f, 0.88f);
+                    RaidUIStyle.Color(row.aggroRedBorderImage, new Color(0.20f, 0.25f, 0.34f, 0.88f));
                 }
             }
 
@@ -604,9 +611,9 @@ namespace RaidRogue
                 if (!isDead && row.boundTarget != null && row.boundTarget.GetComponent<CommonPotion>()?.HasRevivalProtection == true)
                     deadTag = " <color=#88FFFF>[부활 보호]</color>";
                 row.memberNameText.text = $"{targetPrefix}{displayName}{aggroTag}{deadTag}";
-                row.memberNameText.color = isDead
+                RaidUIStyle.Color(row.memberNameText, isDead
                     ? new Color(0.6f, 0.6f, 0.65f, 1f)
-                    : Color.Lerp(roleColor, Color.white, 0.55f);
+                    : Color.Lerp(roleColor, Color.white, 0.55f));
             }
 
             float hpRatio = maxHp > 0.1f ? Mathf.Clamp01(curHp / maxHp) : 0f;
@@ -615,15 +622,15 @@ namespace RaidRogue
             if (row.hpFillImage != null)
             {
                 row.hpFillImage.fillAmount = hpRatio;
-                row.hpFillImage.color = isDead
+                RaidUIStyle.Color(row.hpFillImage, isDead
                     ? new Color(0.35f, 0.15f, 0.15f, 1f)
-                    : (hpRatio < 0.35f ? new Color(1.0f, 0.32f, 0.25f, 1f) : roleColor);
+                    : (hpRatio < 0.35f ? new Color(1.0f, 0.32f, 0.25f, 1f) : roleColor));
             }
 
             if (row.shieldFillImage != null)
             {
                 row.shieldFillImage.fillAmount = shieldRatio;
-                row.shieldFillImage.color = new Color(1.0f, 0.90f, 0.18f, 1f);
+                RaidUIStyle.Color(row.shieldFillImage, new Color(1.0f, 0.90f, 0.18f, 1f));
             }
 
             if (row.hpValueText != null)

@@ -90,24 +90,4 @@ namespace RaidRogue
             return System.Text.RegularExpressions.Regex.Replace(text.Replace("WASD", MovementLabels), @"\{key:(\w+)\}", m => Label(m.Groups[1].Value));
         }
     }
-    // Retains the original template, so swapping number keys never recursively rewrites other labels.
-    public sealed class LocalShortcutText : MonoBehaviour
-    {
-        private UnityEngine.UI.Text _text;
-        private string _template;
-        private int _revision = -1;
-        public static void Set(UnityEngine.UI.Text text, string template)
-        {
-            if (text == null) return;
-            if (!Application.isPlaying) { text.text = LocalInputBindings.SkillText(template); return; }
-            var label = text.GetComponent<LocalShortcutText>() ?? text.gameObject.AddComponent<LocalShortcutText>();
-            label._text = text; label._template = template; label._revision = -1; label.Refresh();
-        }
-        private void LateUpdate() => Refresh();
-        private void Refresh()
-        {
-            if (_text == null || _template == null || _revision == LocalInputBindings.Revision) return;
-            _text.text = LocalInputBindings.SkillText(_template); _revision = LocalInputBindings.Revision;
-        }
-    }
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,7 +33,7 @@ namespace RaidRogue
         internal readonly RaidRunFlow Progress = new RaidRunFlow();
         public readonly RaidFlowSettings FlowSettings = new RaidFlowSettings();
         public bool EncounterActive => RaidCombatAuthority.Replica ? RaidNetworkSession.Instance.CombatRunning : Progress.Phase == RaidBattlePhase.Combat;
-        public bool CanSelectInitialRole => CampaignRuntime.Instance?.BuildLocked != true && !_hasStartedEncounter && Progress.Phase == RaidBattlePhase.Lobby && RaidNetworkSession.Instance?.Mode == RaidSessionMode.Single;
+        public bool CanSelectInitialRole => CampaignRuntime.Instance?.BuildLocked != true && !_hasStartedEncounter && Progress.Stage == 0 && Progress.Phase == RaidBattlePhase.Lobby && RaidNetworkSession.Instance?.Mode == RaidSessionMode.Single;
         private bool _pendingBossClear;
         private PartyWipeUI _wipeUI;
 
@@ -65,7 +66,7 @@ namespace RaidRogue
         public float TotalPlayTime => _totalPlayTime;
 
         private void Awake() { Instance = this; maxStage = CampaignCatalog.StageCount(ChapterId); }
-        private void OnDestroy() { EndSessionProgress(); if (Instance == this) Instance = null; }
+        private void OnDestroy() { EndStagePresentation(); EndSessionProgress(); if (Instance == this) Instance = null; }
 
         private void Start()
         {
@@ -76,6 +77,8 @@ namespace RaidRogue
             if (boss == null) boss = FindFirstObjectByType<BossController>();
             if (player == null) player = FindFirstObjectByType<PlayerController>();
             if (cardManager == null) cardManager = FindFirstObjectByType<RoguelikeCardManager>();
+            if (GetComponent<RaidLobbyRoom>() == null) gameObject.AddComponent<RaidLobbyRoom>();
+            RaidApproachField.Ensure(this);
 
             if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
             if (victoryModalRoot != null) victoryModalRoot.SetActive(false);
@@ -96,6 +99,13 @@ namespace RaidRogue
         {
             if (CharacterTrainingSession.Active) return;
             UpdateSingleRewards();
+            if (!RaidCombatAuthority.Active && (RaidApproachField.Instance?.NearPortal(player?.transform) == true ||
+                player != null && player.IsDead && RaidApproachField.Instance?.PortalActive == true) &&
+                !LocalGameplayInput.ModalCovered && LocalInputBindings.Pressed("Interact"))
+            {
+                if (Progress.Phase == RaidBattlePhase.Reward) ReturnToLobbyIntermission();
+                else if (Progress.Phase == RaidBattlePhase.Victory) ReturnToLobby();
+            }
             if (_isAllStagesCleared)
             {
                 return;
@@ -114,6 +124,7 @@ namespace RaidRogue
         {
             if (CharacterTrainingSession.Active) return;
             if (stageNumber != Progress.Stage || !Progress.TryStart(Progress.Revision)) return;
+            RaidApproachField.Instance?.SetBossCombatReady(true);
             IsWiped = IsPreparing = _pendingBossClear = _isStageTransitioning = _isAllStagesCleared = false;
             _hasStartedEncounter = true;
             if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
@@ -126,8 +137,92 @@ namespace RaidRogue
 
         public void BeginSingleRun()
         {
-            if (!CanSelectInitialRole || player==null || !CharacterActor.Ensure(player.gameObject).DepartureReady || !PrepareEncounter(1, false, true)) return;
+            if (!CanSelectInitialRole || player==null || !CharacterActor.Ensure(player.gameObject).DepartureReady ||
+                CampaignRuntime.Instance?.PrepareFreshRun() == false || !PrepareEncounter(1, false, true)) return;
             StartCoroutine(PreparedCountdown(Progress.Revision));
+        }
+        public void BeginSingleNextStage()
+        {
+            if (Progress.Phase != RaidBattlePhase.Lobby || Progress.Stage < 1 || Progress.Stage >= maxStage ||
+                CampaignRuntime.Instance?.HasSaveFailure == true || !PrepareEncounter(Progress.Stage + 1, false)) return;
+            StartCoroutine(PreparedCountdown(Progress.Revision));
+        }
+        internal bool RestoreSettlementFromLobby()
+        {
+            var campaign = CampaignRuntime.Instance;
+            var settlement = campaign?.Settlement;
+            if (settlement == null || campaign.Resume == null || !Progress.TryRestoreSettlement(settlement.stage, maxStage)) return false;
+            currentStage = settlement.stage;
+            _hasStartedEncounter = true;
+            _isStageTransitioning = true;
+            IsPreparing = IsWiped = false;
+            GetComponent<RaidLobbyRoom>()?.HideForDeparture();
+            var field = RaidApproachField.Ensure(this);
+            field.Begin(false);
+            field.SummonParty();
+            field.SetBossVisible(false);
+            field.SetBossCombatReady(false);
+            _singleRewardRevision = Progress.Revision;
+            _singleRewardDeadline = Time.unscaledTime + FlowSettings.rewardSeconds;
+            var playerSlot = campaign.Resume.party.FirstOrDefault(p => !p.bot && p.userId == campaign.Owner);
+            string cardKey = CharacterRewardKey.Stage(campaign.Resume.runId, campaign.Resume.chapterId, currentStage) + "/card/" + playerSlot?.slotId;
+            _singleCardChosen = currentStage >= maxStage || campaign.Resume.rewards.Any(r => r.key == cardKey);
+            if (!RaidCombatAuthority.Active && !_singleCardChosen)
+            {
+                int[] offer = campaign.SettlementOffer(player.transform);
+                if (offer == null) cardManager.OpenStageClearCardReward(currentStage, () => OnRewardCardChosenAdvanceToNextStage(_singleRewardRevision));
+                else cardManager.ShowRestoredSingleOffer(offer, () => OnRewardCardChosenAdvanceToNextStage(_singleRewardRevision));
+            }
+            UpdateStageHeaderUI();
+            return true;
+        }
+        public bool ReturnToLobbyIntermission()
+        {
+            if (RaidApproachField.Instance?.PortalActive != true || !Progress.TryIntermission(Progress.Revision, maxStage)) return false;
+            EndStagePresentation();
+            StopAllCoroutines(); CancelInvoke(); CleanupAttempt();
+            cardManager?.CancelPendingSelection(); _wipeUI?.Hide();
+            GetComponent<CombatMetricsUI>()?.CloseResults();
+            if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
+            QuarterViewCamera.LocalCamera?.ClearArrivalCamera();
+            RaidApproachField.Instance?.Show(false);
+            _isStageTransitioning = IsPreparing = false;
+            currentStage = Progress.Stage + 1;
+            GetComponent<RaidLobbyRoom>()?.ReturnFromRaid();
+            UpdateStageHeaderUI(); TraceProgress("rewards settled; returned through portal");
+            return true;
+        }
+        public bool ReturnToLobby()
+        {
+            if (!Progress.ReturnToLobby()) return false;
+            EndStagePresentation();
+            StopAllCoroutines(); CancelInvoke(); CleanupAttempt();
+            cardManager?.CancelPendingSelection();
+            if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
+            if (victoryModalRoot != null) victoryModalRoot.SetActive(false);
+            GetComponent<CombatMetricsUI>()?.CloseResults(); _wipeUI?.Hide();
+            Time.timeScale = 1;
+            RunId = System.Guid.NewGuid().ToString("N"); currentStage = 1;
+            _hasStartedEncounter = _isAllStagesCleared = _isStageTransitioning = IsWiped = IsPreparing = _pendingBossClear = false;
+            _singleRewardRevision = -1; _totalPlayTime = 0;
+            var emptyCards = System.Array.Empty<CampaignCardStack>();
+            foreach (var member in PartyLife.OrderedMembers())
+            {
+                var pc = member.GetComponent<PlayerController>();
+                var actor = CharacterActor.Ensure(member.gameObject);
+                if (pc != null) { pc.RestoreCampaignCards(emptyCards); pc.cardManager?.RestoreCampaignCards(emptyCards); }
+                if (pc != null) pc.moveSpeed = actor.Definition.moveSpeed;
+                actor.ResetEncounter(CharacterReset.NewRun);
+                var life = PartyLife.Ensure(member.gameObject); life.ResetForEncounter();
+                if (pc != null) { pc.currentHp = pc.maxHp; pc.currentShield = 0; pc.RefillMovementCharges(); }
+            }
+            cardManager?.RestoreCampaignCards(emptyCards);
+            Iris.BeginAttempt(0, 0);
+            RaidApproachField.Instance?.Show(false);
+            boss?.StopEncounterEffects(); UpdateStageHeaderUI();
+            GetComponent<RaidLobbyRoom>()?.ReturnFromRaid();
+            TraceProgress("returned to lobby after completed run");
+            return true;
         }
         private bool PrepareEncounter(int stage, bool retry, bool newRun = false, bool resume = false)
         {
@@ -135,6 +230,8 @@ namespace RaidRogue
             if (boss == null || player == null || cardManager == null || cardManager.cardSelectionModalRoot == null)
             { RaidNetworkSession.Instance?.FailSession("전투/보상 참조가 누락되었습니다. 원본 프로젝트의 SceneAutoBuilder 구성을 확인하세요."); return false; }
             if (!(resume ? Progress.TryResume(stage, maxStage) : Progress.TryPrepare(stage, maxStage, retry))) return false;
+            EndStagePresentation();
+            GetComponent<RaidLobbyRoom>()?.HideForDeparture();
             var metrics = CombatMetricsManager.Ensure(this);
             if (newRun) { metrics.Ledger.ResetRun(); _totalPlayTime = 0; }
             if (retry) metrics.Ledger.RegisterRetry();
@@ -151,20 +248,82 @@ namespace RaidRogue
                 member.GetComponent<PlayerController>()?.RefillMovementCharges();
                 member.GetComponent<PlayerController>()?.cardManager?.ResetTemporaryCombatState();
             }
-            boss.SetupBossForStage(stage); UpdateStageHeaderUI(); TraceProgress(retry ? "retry prepared; cards retained" : "stage prepared");
+            boss.SetupBossForStage(stage);
+            RaidApproachField.Ensure(this).Begin(retry);
+            UpdateStageHeaderUI(); TraceProgress(retry ? "retry prepared; cards retained" : "stage prepared");
             LastPreparationNewRun = newRun;
             if (!RaidCombatAuthority.Host) CampaignRuntime.Instance?.Prepared(retry, newRun);
             return true;
         }
+        internal bool BeginPreparedApproach()
+        {
+            if (!Progress.TryApproach(Progress.Revision)) return false;
+            RaidApproachField.Ensure(this).EnterApproach();
+            UpdateStageHeaderUI(); TraceProgress("approach opened"); return true;
+        }
+        internal bool BeginPreparedArrival()
+        {
+            if (RaidApproachField.Instance?.HumanEntered() != true || !Progress.TryArrival(Progress.Revision)) return false;
+            RaidApproachField.Instance.SummonParty();
+            var layout = RaidApproachField.Instance.Arrival(currentStage);
+            if (layout.bossAnimatorController != null)
+                RaidStageCutscenePresentation.EnsureBossAnimator(boss, layout.bossAnimatorController);
+            if (!BeginStagePresentation(RaidBattlePhase.Arrival, Progress.Revision))
+                QuarterViewCamera.LocalCamera?.SetArrivalCamera(layout.cameraPosition, layout.cameraLookAt);
+            UpdateStageHeaderUI(); TraceProgress("human entered field; party summoned"); return true;
+        }
+        internal void RevealPreparedBoss()
+        {
+            var approach = RaidApproachField.Instance;
+            if (approach == null || approach.BossVisible || boss == null) return;
+            approach.SetBossVisible(true);
+            var arrival = approach.Arrival(currentStage);
+            if (_activeCutscene == null || !_activeCutscene.HasBossAnimationTrack)
+                PlayConfiguredBossTrigger(arrival.arrivalAnimationTrigger);
+            UpdateStageHeaderUI(); TraceProgress("boss revealed");
+        }
+        private bool PlayConfiguredBossTrigger(string trigger)
+        {
+            if (boss == null || string.IsNullOrWhiteSpace(trigger)) return false;
+            var controller = RaidApproachField.Instance?.Arrival(currentStage).bossAnimatorController;
+            var animator = RaidStageCutscenePresentation.EnsureBossAnimator(boss, controller);
+            if (animator == null || animator.runtimeAnimatorController == null) return false;
+            foreach (var parameter in animator.parameters)
+                if (parameter.type == AnimatorControllerParameterType.Trigger && parameter.name == trigger)
+                { animator.SetTrigger(trigger); return true; }
+            Debug.LogWarning($"Boss cutscene trigger '{trigger}' is missing from the Stage {currentStage} Animator Controller; using fallback where available.");
+            return false;
+        }
         internal bool BeginPreparedCountdown()
         {
             if (!Progress.TryCountdown(Progress.Revision)) return false;
-            TraceProgress("all participants loaded"); return true;
+            RevealPreparedBoss();
+            EndStagePresentation();
+            QuarterViewCamera.LocalCamera?.ClearArrivalCamera();
+            UpdateStageHeaderUI(); TraceProgress("arrival ended; countdown started"); return true;
         }
         private IEnumerator PreparedCountdown(int revision)
         {
             yield return null; // Runtime-created actor Start callbacks complete before the countdown.
-            if (!Progress.IsCurrent(revision, RaidBattlePhase.Loading) || !BeginPreparedCountdown()) yield break;
+            if (!Progress.IsCurrent(revision, RaidBattlePhase.Loading) || !BeginPreparedApproach()) yield break;
+            while (Progress.IsCurrent(revision, RaidBattlePhase.Approach) && RaidApproachField.Instance?.HumanEntered() != true)
+                yield return null;
+            if (!Progress.IsCurrent(revision, RaidBattlePhase.Approach) || !BeginPreparedArrival()) yield break;
+            var arrival = RaidApproachField.Instance.Arrival(currentStage);
+            float began = Time.unscaledTime;
+            float revealAt = began + arrival.RevealAt;
+            float ending = began + arrival.Duration;
+            while (Progress.IsCurrent(revision, RaidBattlePhase.Arrival) && Time.unscaledTime < ending)
+            {
+                if (Time.unscaledTime >= revealAt) RevealPreparedBoss();
+                if (!LocalGameplayInput.ModalCovered && LocalInputBindings.Pressed("Interact")) { RevealPreparedBoss(); EndStagePresentation(); ending = Time.unscaledTime; }
+                yield return null;
+            }
+            if (!Progress.IsCurrent(revision, RaidBattlePhase.Arrival)) { EndStagePresentation(); QuarterViewCamera.LocalCamera?.ClearArrivalCamera(); yield break; }
+            RevealPreparedBoss();
+            float holdUntil = Time.unscaledTime + Mathf.Max(0, arrival.afterCutsceneSeconds);
+            while (Progress.IsCurrent(revision, RaidBattlePhase.Arrival) && Time.unscaledTime < holdUntil) yield return null;
+            if (!Progress.IsCurrent(revision, RaidBattlePhase.Arrival) || !BeginPreparedCountdown()) yield break;
             for (int seconds = FlowSettings.countdownSeconds; seconds > 0; seconds--)
             {
                 if (!Progress.IsCurrent(revision, RaidBattlePhase.Countdown)) yield break;
@@ -205,9 +364,10 @@ namespace RaidRogue
                 _pendingBossClear = false;
                 foreach (var member in members) CharacterActor.Ensure(member.gameObject).ClearedStage(currentStage);
                 CombatMetricsManager.Instance?.Ledger.EndStage();
-                CampaignRuntime.Instance?.Cleared(currentStage);
                 CleanupAttempt();
-                if (RaidCombatAuthority.Host) { boss.PlayBossCollapseAnimation(); RaidNetworkSession.Instance.NetworkEncounterOutcome(true); }
+                CampaignRuntime.Instance?.Cleared(currentStage);
+                BeginBossDefeatCutscene();
+                if (RaidCombatAuthority.Host) { RaidNetworkSession.Instance.NetworkEncounterOutcome(true); }
                 else StartCoroutine(BossDefeatedSequenceRoutine(Progress.Revision));
             }
             else if (outcome == EncounterOutcome.Wiped)
@@ -255,36 +415,57 @@ namespace RaidRogue
             _pendingBossClear = true;
         }
 
-        private IEnumerator BossDefeatedSequenceRoutine(int revision)
+        internal void BeginBossDefeatCutscene()
         {
             _isStageTransitioning = true;
-
-            // 1) 보스가 쓰러지는 연출 및 화면 중앙 "BOSS CLEAR!" 텍스트 표시
-            if (boss != null)
+            RaidApproachField.Instance?.SetPortalActive(false);
+            RaidApproachField.Instance?.SetBossCombatReady(false);
+            var layout = RaidApproachField.Instance?.Defeat(currentStage);
+            var arrival = RaidApproachField.Instance?.Arrival(currentStage);
+            if (arrival?.bossAnimatorController != null)
+                RaidStageCutscenePresentation.EnsureBossAnimator(boss, arrival.bossAnimatorController);
+            bool presenting = BeginStagePresentation(RaidBattlePhase.BossClear, Progress.Revision);
+            bool animated = presenting && _activeCutscene != null && _activeCutscene.HasBossAnimationTrack;
+            if (!animated && layout != null) animated = PlayConfiguredBossTrigger(layout.deathAnimationTrigger);
+            if (!animated) boss?.PlayBossCollapseAnimation();
+            if (layout != null)
             {
-                boss.PlayBossCollapseAnimation();
+                if (!presenting)
+                    QuarterViewCamera.LocalCamera?.SetArrivalCamera(layout.cameraPosition, layout.cameraLookAt);
             }
+            if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(true);
+            if (bossClearBannerText != null) bossClearBannerText.text = currentStage == maxStage
+                ? $"FINAL STAGE {maxStage} BOSS CLEAR!" : $"STAGE {currentStage} BOSS CLEAR!";
+        }
+        internal void EndBossDefeatCutscene()
+        {
+            EndStagePresentation();
+            RaidApproachField.Instance?.SetBossVisible(false);
+            TargetingManager.Instance?.ClearTarget();
+            if (RaidCombatAuthority.Host)
+                foreach (var avatar in RaidNetworkSession.Instance.Avatars.Values) avatar.CombatTarget = null;
+            QuarterViewCamera.LocalCamera?.ClearArrivalCamera();
+            if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
+        }
 
-            if (bossClearBannerRoot != null)
+        private IEnumerator BossDefeatedSequenceRoutine(int revision)
+        {
+            var layout = RaidApproachField.Instance?.Defeat(currentStage);
+            float began = Time.unscaledTime;
+            float end = began + (layout?.Duration ?? FlowSettings.clearSeconds);
+            float vanish = began + (layout?.DepartureAt ?? 1);
+            while (Progress.IsCurrent(revision, RaidBattlePhase.BossClear) && Time.unscaledTime < end)
             {
-                bossClearBannerRoot.SetActive(true);
+                if (Time.unscaledTime >= vanish) RaidApproachField.Instance?.SetBossVisible(false);
+                if (!LocalGameplayInput.ModalCovered && LocalInputBindings.Pressed("Interact")) break;
+                yield return null;
             }
-            if (bossClearBannerText != null)
-            {
-                bossClearBannerText.text = currentStage < maxStage
-                    ? $"★ STAGE {currentStage} BOSS CLEAR! ★\n<size=24>잠시 후 클리어 보상 로그라이크 카드를 선택합니다...</size>"
-                    : $"★ FINAL STAGE {maxStage} BOSS CLEAR!! ★\n<size=24>모든 스테이지 보스를 토벌했습니다!</size>";
-            }
-
-            // 2) 1.5초 대기
-            yield return new WaitForSeconds(FlowSettings.clearSeconds);
+            if (!Progress.IsCurrent(revision, RaidBattlePhase.BossClear)) { EndStagePresentation(); QuarterViewCamera.LocalCamera?.ClearArrivalCamera(); yield break; }
+            EndBossDefeatCutscene();
+            while (Progress.IsCurrent(revision, RaidBattlePhase.BossClear) && CampaignRuntime.Instance?.MarkClearPresentationFinished() == false)
+                yield return null;
             if (!Progress.FinishClear(revision, maxStage,HasPendingSkillChoices)) yield break;
             TraceProgress("clear presentation completed");
-
-            if (bossClearBannerRoot != null)
-            {
-                bossClearBannerRoot.SetActive(false);
-            }
 
             // 최종 스테이지는 다음 전투용 보상을 요구하지 않는다.
             if (Progress.Phase==RaidBattlePhase.Victory)
@@ -326,18 +507,23 @@ namespace RaidRogue
                 if(member.GetComponent<PartyBotAI>()!=null||expired)foreach(var choice in actor.PendingChoices)actor.Choose(choice.id,choice.choices[0],out _,actor.ChoiceKey(choice.id),true);
             }
             if(!_singleCardChosen||HasPendingSkillChoices)return;
+            if (CampaignRuntime.Instance?.SyncSettlement() == false) return;
+            if (currentStage < maxStage && CampaignRuntime.Instance?.CommitNextStageBoundary(currentStage + 1) == false) return;
             _singleRewardRevision=-1;Time.timeScale=1;
             if(currentStage>=maxStage){if(Progress.FinishFinalRewards(Progress.Revision,maxStage))ShowAllStagesClearVictoryScreen();return;}
-            if(PrepareEncounter(currentStage+1,false))StartCoroutine(PreparedCountdown(Progress.Revision));
+            RaidApproachField.Instance?.SetPortalActive(true);
+            UpdateStageHeaderUI(); TraceProgress("rewards complete; return portal opened");
         }
         public void EndSessionProgress()
         {
+            EndStagePresentation();
             if (this == null || !Progress.End()) return;
             StopAllCoroutines(); CancelInvoke(); CleanupAttempt();
             if (cardManager != null) cardManager.CancelPendingSelection();
             var metricsUI = GetComponent<CombatMetricsUI>();
             if (metricsUI != null) metricsUI.CloseResults();
             if (_wipeUI != null) _wipeUI.Hide();
+            RaidApproachField.Instance?.Show(false);
             if (bossClearBannerRoot != null) bossClearBannerRoot.SetActive(false);
             if (victoryModalRoot != null) victoryModalRoot.SetActive(false);
             TraceProgress("session ended");
@@ -380,24 +566,24 @@ namespace RaidRogue
             CampaignRuntime.Instance?.Completed();
             _isAllStagesCleared = true;
             _isStageTransitioning = false;
-            if (!RaidCombatAuthority.Active) Time.timeScale = 0f;
+            if (!RaidCombatAuthority.Active) Time.timeScale = 1f;
 
             int minutes = Mathf.FloorToInt(_totalPlayTime / 60f);
             float seconds = _totalPlayTime % 60f;
-            string timeFormatted = $"{minutes:00}분 {seconds:00.0}초";
+            string timeFormatted = $"{minutes:00}m {seconds:00.0}s";
 
             string cardsList = cardManager != null
                 ? cardManager.GetAcquiredCardsDetailedList()
-                : "• 획득한 카드 없음";
+                : "No cards acquired";
 
             if (victorySummaryText != null)
             {
                 victorySummaryText.text =
-                    "<size=42><color=#FFE044><b>★ ALL STAGES CLEAR! VICTORY! ★</b></color></size>\n\n" +
-                    $"<size=24><b>총 플레이 타임 :</b> <color=#55EEFF>{timeFormatted}</color></size>\n\n" +
-                    $"<size=22>전체 런 재도전: {CombatMetricsManager.Instance?.Ledger.RetryCount ?? 0}회</size>\n" +
-                    $"<size=22>1부 완료 · 누적 공유 부활 사용: {TotalRevives}회</size>\n" +
-                    "<size=22><color=#FFCC66><b>[최종 보유 로그라이크 카드 빌드 요약]</b></color></size>\n" +
+                    "<size=42><color=#FFE044><b>PART 1 CLEAR!</b></color></size>\n\n" +
+                    $"<size=24><b>Play time:</b> <color=#55EEFF>{timeFormatted}</color></size>\n\n" +
+                    $"<size=22>Retries: {CombatMetricsManager.Instance?.Ledger.RetryCount ?? 0}</size>\n" +
+                    $"<size=22>Shared Iris revives used: {TotalRevives}</size>\n" +
+                    "<size=22><color=#FFCC66><b>Final card build</b></color></size>\n" +
                     $"<size=20>{cardsList}</size>";
             }
 
@@ -405,13 +591,35 @@ namespace RaidRogue
             {
                 victoryModalRoot.SetActive(true);
             }
+            if (restartButton != null)
+            {
+                var caption = restartButton.GetComponentInChildren<Text>();
+                if (caption != null) caption.text = "Close results - return at the central portal";
+            }
             GetComponent<CombatMetricsUI>()?.ShowResults(true);
         }
 
         public void RestartFromStage1()
         {
-            if (LocalGameplayInput.ModalCovered) return;
-            RaidNetworkSession.Instance?.Disconnect(); // A new run is a fresh scene/session with no retained cards or statics.
+            var session = RaidNetworkSession.Instance;
+            if (session != null && (Progress.Phase == RaidBattlePhase.Victory ||
+                RaidNetworkSession.Multiplayer && session.BattlePhase == RaidBattlePhase.Victory))
+            {
+                CloseVictoryForPortal();
+                return;
+            }
+            session?.Disconnect();
+        }
+
+        public void CloseVictoryForPortal()
+        {
+            if (Progress.Phase != RaidBattlePhase.Victory && !(RaidCombatAuthority.Replica && RaidNetworkSession.Instance?.BattlePhase == RaidBattlePhase.Victory)) return;
+            if (!RaidCombatAuthority.Replica && CampaignRuntime.Instance?.HasSaveFailure == true) return;
+            if (victoryModalRoot != null) victoryModalRoot.SetActive(false);
+            GetComponent<CombatMetricsUI>()?.CloseResults();
+            Time.timeScale = 1;
+            if (!RaidCombatAuthority.Replica) RaidApproachField.Instance?.SetPortalActive(true);
+            UpdateStageHeaderUI();
         }
 
         public void UpdateStageHeaderUI()
@@ -440,7 +648,15 @@ namespace RaidRogue
             };
 
             stageHeaderText.text = $"1부 STAGE {currentStage} / {maxStage}  —  {stageSubtitle}";
-            stageHeaderText.color = stageColor;
+            if ((RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.BattlePhase : Progress.Phase) == RaidBattlePhase.Approach)
+                stageHeaderText.text += "  -  필드 입구로 이동";
+            if ((RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.BattlePhase : Progress.Phase) == RaidBattlePhase.Arrival)
+                stageHeaderText.text += "  -  보스 등장 (상호작용: 건너뛰기 투표)";
+            if ((RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.BattlePhase : Progress.Phase) == RaidBattlePhase.BossClear)
+                stageHeaderText.text += "  ·  처치 연출 중 (상호작용: 건너뛰기)";
+            if (RaidApproachField.Instance?.PortalActive == true)
+                stageHeaderText.text += "  ·  중앙 귀환 포탈 [상호작용]";
+            RaidUIStyle.Color(stageHeaderText, stageColor);
         }
     }
 }

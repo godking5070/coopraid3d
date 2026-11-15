@@ -66,7 +66,9 @@ namespace RaidRogue
                 if ((RaidSteamRuntime.Instance != null && (RaidSteamRuntime.Instance.OverlayOpen || RaidSteamRuntime.Instance.ConfirmInvite)) || RaidNetworkSession.BlocksInput || !Application.isFocused || Time.timeScale <= 0.001f || IsTyping ||
                     RaidConnectionUI.CampaignDialogOpen || CombatMetricsUI.BlocksUnderlyingInput || LocalInputBindings.Capturing || LocalCameraSettingsUI.IsOpen || AegisRouteSelectionUI.IsOpen || CharacterRewardUI.IsOpen ||
                     (_roles != null && _roles.IsRoleModalOpen) || (_cards != null && _cards.IsSelectionOpen) ||
-                    (_stages != null && _stages.IsStageTransitioning)) SuppressThisFrame();
+                    // The approach is a playable part of stage preparation. Arrival and countdown
+                    // remain blocked, while the existing combat gates still prevent corridor attacks.
+                    (_stages != null && _stages.IsStageTransitioning && RaidApproachField.Instance?.Walking != true && RaidApproachField.Instance?.PortalActive != true)) SuppressThisFrame();
                 return _blockedFrame == Time.frameCount;
             }
         }

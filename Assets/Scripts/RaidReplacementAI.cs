@@ -11,6 +11,15 @@ namespace RaidRogue
                 if (!avatar.Automated || avatar.IsBot) continue;
                 var pc = avatar.GetComponent<PlayerController>(); var combat = pc.combatController;
                 var input = new RaidMoveInput { MotionVersion = avatar.MotionVersion };
+                if (BattlePhase == RaidBattlePhase.Approach && !pc.IsDead)
+                {
+                    Vector3 toRally = RaidApproachField.Instance.RallyPoint(avatar.Role) - pc.transform.position;
+                    toRally.y = 0;
+                    Vector3 approachDirection = toRally.magnitude > .15f ? Vector3.ClampMagnitude(toRally / Mathf.Max(.01f, pc.NetworkMoveSpeed * RaidWire.Step), 1) : Vector3.zero;
+                    input.X = approachDirection.x; input.Z = approachDirection.z;
+                    StepHostAvatar(avatar, input);
+                    continue;
+                }
                 var boss = StageManager.Instance.boss;
                 if (BattlePhase != RaidBattlePhase.Combat || pc.IsDead || pc.IsStunned || pc.IsMovementLocked || !CombatRange.LivingEnemy(boss.transform))
                 { StepHostAvatar(avatar, input); continue; }
@@ -73,7 +82,7 @@ namespace RaidRogue
                         if(kit.Channeling&&!kit.CanWeaveDuringChannel)break;
                     }
                     if(kit.Channeling&&!kit.CanWeaveDuringChannel)continue;
-                    if(enemy.GetComponent<CombatCounterTarget>()?.WindowOpen==true)AutomaticCharacterAction(avatar,CharacterSlot.Counter,enemy);
+                    if(enemy.GetComponent<CombatCounterTarget>()?.WindowOpen==true && (!boss.GuardianNormal || boss.GuardianAiCounterReady(pc.transform)))AutomaticCharacterAction(avatar,CharacterSlot.Counter,enemy);
                     AutomaticCharacterAction(avatar,CharacterSlot.OffGcd1,enemy);
                     var snapshot=character.Snapshot;
                     var combo=snapshot.combo1>1?CharacterSlot.Gcd1:snapshot.combo2>1?CharacterSlot.Gcd2:kit.State.Data.lastCombo==1?CharacterSlot.Gcd2:CharacterSlot.Gcd1;
@@ -93,7 +102,7 @@ namespace RaidRogue
                     if(pc.HpRatio<.75f||boss.IsCasting)AutomaticCharacterAction(avatar,CharacterSlot.Job1,pc.transform);
                     if(boss.ResolveLivingAggroTarget()!=pc.transform||pc.currentShield<pc.maxHp*.05f)AutomaticCharacterAction(avatar,CharacterSlot.Job2,enemy);
                     AutomaticCharacterAction(avatar,CharacterSlot.OffGcd1,enemy);
-                    if(enemy.GetComponent<CombatCounterTarget>()?.WindowOpen==true)AutomaticCharacterAction(avatar,CharacterSlot.Counter,enemy);
+                    if(enemy.GetComponent<CombatCounterTarget>()?.WindowOpen==true && (!boss.GuardianNormal || boss.GuardianAiCounterReady(pc.transform)))AutomaticCharacterAction(avatar,CharacterSlot.Counter,enemy);
                     var state=character.Snapshot;
                     var slot=state.combo1>1?CharacterSlot.Gcd1:state.combo2>1?CharacterSlot.Gcd2:pc.currentShield<pc.maxHp*.1f?CharacterSlot.Gcd2:CharacterSlot.Gcd1;
                     AutomaticCharacterAction(avatar,slot,enemy);continue;

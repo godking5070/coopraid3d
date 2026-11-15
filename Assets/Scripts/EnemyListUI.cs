@@ -19,6 +19,7 @@ namespace RaidRogue
         public BossController boss;
         public PlayerController player;
 
+        [System.Serializable]
         private class EnemyRowUI
         {
             public GameObject rootObj;
@@ -97,15 +98,20 @@ namespace RaidRogue
 
         public void BuildEnemyListHUD()
         {
+            if (_panelRoot != null)
+            {
+                foreach(var row in _rowPool)
+                {
+                    var item=row;
+                    item.selectButton.onClick.RemoveAllListeners();
+                    item.selectButton.onClick.AddListener(()=> { if(item.boundTarget!=null)TargetingManager.Instance?.SetTarget(item.boundTarget); });
+                }
+                return;
+            }
             Canvas canvas = GetComponentInParent<Canvas>();
             if (canvas == null) canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            Transform old = canvas.transform.Find("EnemyList_LeftHUD");
-            if (old != null)
-            {
-                DestroyImmediate(old.gameObject);
-            }
 
             Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (font == null) font = Resources.GetBuiltinResource<Font>("Arial.ttf");
@@ -130,7 +136,7 @@ namespace RaidRogue
             panelRect.sizeDelta = new Vector2(335f, 210f);
 
             Image panelBg = _panelRoot.AddComponent<Image>();
-            panelBg.color = new Color(0.08f, 0.05f, 0.09f, 0.88f);
+            RaidUIStyle.Color(panelBg, new Color(0.08f, 0.05f, 0.09f, 0.88f));
 
             Outline panelOutline = _panelRoot.AddComponent<Outline>();
             panelOutline.effectColor = new Color(0.95f, 0.35f, 0.28f, 0.75f);
@@ -159,7 +165,7 @@ namespace RaidRogue
             spawnBtnRect.sizeDelta = new Vector2(88f, 22f);
 
             Image spawnBtnBg = spawnBtnObj.AddComponent<Image>();
-            spawnBtnBg.color = new Color(0.50f, 0.16f, 0.65f, 0.96f);
+            RaidUIStyle.Color(spawnBtnBg, new Color(0.50f, 0.16f, 0.65f, 0.96f));
             Outline spawnBtnOutline = spawnBtnObj.AddComponent<Outline>();
             spawnBtnOutline.effectColor = new Color(0.9f, 0.6f, 1f, 0.8f);
             spawnBtnOutline.effectDistance = new Vector2(1f, -1f);
@@ -204,7 +210,7 @@ namespace RaidRogue
 
             row.rootObj = rowObj;
             row.bgImage = rowObj.AddComponent<Image>();
-            row.bgImage.color = new Color(0.14f, 0.10f, 0.16f, 0.94f);
+            RaidUIStyle.Color(row.bgImage, new Color(0.14f, 0.10f, 0.16f, 0.94f));
 
             row.selectionOutline = rowObj.AddComponent<Outline>();
             row.selectionOutline.effectColor = new Color(1f, 0.9f, 0.15f, 0f);
@@ -232,7 +238,7 @@ namespace RaidRogue
             aggroRect.sizeDelta = new Vector2(16f, 16f);
 
             row.aggroIconImage = aggroObj.AddComponent<Image>();
-            row.aggroIconImage.color = new Color(0.2f, 0.85f, 0.35f, 1f);
+            RaidUIStyle.Color(row.aggroIconImage, new Color(0.2f, 0.85f, 0.35f, 1f));
             row.aggroIconImage.raycastTarget = false;
 
             row.aggroIconLabel = CreateText(aggroObj.transform, "Dot", "●", font, 11, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
@@ -262,7 +268,7 @@ namespace RaidRogue
             hpBgRect.anchoredPosition = new Vector2(0f, -22f);
             hpBgRect.sizeDelta = new Vector2(-14f, 13f);
             Image hpBgImg = hpBgObj.AddComponent<Image>();
-            hpBgImg.color = new Color(0.06f, 0.06f, 0.09f, 0.96f);
+            RaidUIStyle.Color(hpBgImg, new Color(0.06f, 0.06f, 0.09f, 0.96f));
             hpBgImg.raycastTarget = false;
 
             GameObject hpFillObj = new GameObject("HPBarFill");
@@ -273,7 +279,7 @@ namespace RaidRogue
             hpFillRect.sizeDelta = Vector2.zero;
             row.hpFill = hpFillObj.AddComponent<Image>();
             row.hpFill.sprite = _whiteSprite;
-            row.hpFill.color = new Color(0.92f, 0.25f, 0.22f, 1f);
+            RaidUIStyle.Color(row.hpFill, new Color(0.92f, 0.25f, 0.22f, 1f));
             row.hpFill.type = Image.Type.Filled;
             row.hpFill.fillMethod = Image.FillMethod.Horizontal;
             row.hpFill.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -304,7 +310,8 @@ namespace RaidRogue
             if (_panelRoot == null) return;
 
             List<Transform> livingEnemies = new List<Transform>(MaxRows);
-            if (boss != null && !boss.IsBossDefeatedCollapse)
+            if (boss != null && !boss.IsBossDefeatedCollapse &&
+                (RaidApproachField.Instance?.Showing != true || RaidApproachField.Instance.BossVisible))
             {
                 livingEnemies.Add(boss.transform);
             }
@@ -329,7 +336,8 @@ namespace RaidRogue
 
             RectTransform panelRect = _panelRoot.GetComponent<RectTransform>();
             int visibleCount = Mathf.Clamp(livingEnemies.Count, 1, MaxRows);
-            panelRect.sizeDelta = new Vector2(335f, 36f + visibleCount * 54f);
+            if (!RaidUIStyle.Authored(panelRect))
+                panelRect.sizeDelta = new Vector2(335f, 36f + visibleCount * 54f);
 
             Transform currentSelected = TargetingManager.Instance != null ? TargetingManager.Instance.CurrentTarget : null;
 
@@ -348,12 +356,13 @@ namespace RaidRogue
                 row.boundTarget = enemy;
 
                 bool isSelected = (currentSelected == enemy);
-                row.selectionOutline.effectColor = isSelected
+                if(RaidUIStyle.Authored(row.selectionOutline)) row.selectionOutline.enabled=isSelected;
+                else row.selectionOutline.effectColor = isSelected
                     ? new Color(1.00f, 0.92f, 0.18f, 1.00f)
                     : new Color(0f, 0f, 0f, 0f);
-                row.bgImage.color = isSelected
+                RaidUIStyle.Color(row.bgImage, isSelected
                     ? new Color(0.28f, 0.24f, 0.10f, 0.96f)
-                    : new Color(0.13f, 0.10f, 0.15f, 0.92f);
+                    : new Color(0.13f, 0.10f, 0.15f, 0.92f));
 
                 BossController b = enemy.GetComponent<BossController>();
                 BossAddMinion add = enemy.GetComponent<BossAddMinion>();
@@ -361,14 +370,14 @@ namespace RaidRogue
                 if (b != null)
                 {
                     row.nameText.text = $"{(isSelected ? "▶ " : "")}[BOSS] {b.currentBossTitle}";
-                    row.nameText.color = isSelected ? new Color(1f, 0.95f, 0.45f) : Color.white;
+                    RaidUIStyle.Color(row.nameText, isSelected ? new Color(1f, 0.95f, 0.45f) : Color.white);
 
                     float ratio = b.HpRatio;
                     row.hpFill.fillAmount = ratio;
                     bool shieldProtected = BossAddSpawner.Instance != null && BossAddSpawner.Instance.HasLivingPowerSupplier;
-                    row.hpFill.color = shieldProtected
+                    RaidUIStyle.Color(row.hpFill, shieldProtected
                         ? new Color(0.68f, 0.30f, 0.95f, 1f)
-                        : new Color(0.92f, 0.24f, 0.22f, 1f);
+                        : new Color(0.92f, 0.24f, 0.22f, 1f));
                     row.hpText.text = $"{Mathf.CeilToInt(b.currentHp):N0} ({Mathf.RoundToInt(ratio * 100f)}%)";
 
                     bool aggroOnMe = (player != null && b.aggroTarget == player.transform);
@@ -378,12 +387,12 @@ namespace RaidRogue
                     {
                         int pct = Mathf.Clamp(Mathf.RoundToInt(b.CastProgress * 100f), 0, 100);
                         row.castStatusText.text = $"⚡ 시전: {b.CurrentCastSkillName} ({pct}%)";
-                        row.castStatusText.color = new Color(1f, 0.78f, 0.25f);
+                        RaidUIStyle.Color(row.castStatusText, new Color(1f, 0.78f, 0.25f));
                     }
                     else if (shieldProtected)
                     {
                         row.castStatusText.text = "★ 동력 공급 받는 중 (보스 피해 80% 감소!)";
-                        row.castStatusText.color = new Color(0.90f, 0.55f, 1f);
+                        RaidUIStyle.Color(row.castStatusText, new Color(0.90f, 0.55f, 1f));
                     }
                     else
                     {
@@ -391,28 +400,28 @@ namespace RaidRogue
                             ? TargetingManager.Instance.GetUnitDisplayName(b.aggroTarget)
                             : "탱커";
                         row.castStatusText.text = $"어그로 1순위: {targetLabel}";
-                        row.castStatusText.color = new Color(0.80f, 0.85f, 0.92f);
+                        RaidUIStyle.Color(row.castStatusText, new Color(0.80f, 0.85f, 0.92f));
                     }
                 }
                 else if (add != null)
                 {
                     row.nameText.text = $"{(isSelected ? "▶ " : "")}{add.addDisplayName}";
-                    row.nameText.color = add.addType == AddMinionType.PowerSupplier_BossTether
+                    RaidUIStyle.Color(row.nameText, add.addType == AddMinionType.PowerSupplier_BossTether
                         ? new Color(0.92f, 0.65f, 1f)
-                        : new Color(1f, 0.55f, 0.55f);
+                        : new Color(1f, 0.55f, 0.55f));
 
                     float ratio = add.HpRatio;
                     row.hpFill.fillAmount = ratio;
-                    row.hpFill.color = add.addType == AddMinionType.PowerSupplier_BossTether
+                    RaidUIStyle.Color(row.hpFill, add.addType == AddMinionType.PowerSupplier_BossTether
                         ? new Color(0.75f, 0.25f, 0.95f, 1f)
-                        : new Color(0.95f, 0.30f, 0.25f, 1f);
+                        : new Color(0.95f, 0.30f, 0.25f, 1f));
                     row.hpText.text = $"{Mathf.CeilToInt(add.currentHp):N0} ({Mathf.RoundToInt(ratio * 100f)}%)";
 
                     bool aggroOnMe = (player != null && add.aggroTarget == player.transform);
                     UpdateAggroIcon(row, aggroOnMe);
 
                     row.castStatusText.text = add.CurrentCastOrStatusText;
-                    row.castStatusText.color = new Color(1f, 0.88f, 0.55f);
+                    RaidUIStyle.Color(row.castStatusText, new Color(1f, 0.88f, 0.55f));
                 }
             }
         }
@@ -421,15 +430,15 @@ namespace RaidRogue
         {
             if (isAggroOnPlayer)
             {
-                row.aggroIconImage.color = new Color(0.95f, 0.18f, 0.18f, 1f);
+                RaidUIStyle.Color(row.aggroIconImage, new Color(0.95f, 0.18f, 0.18f, 1f));
                 row.aggroIconLabel.text = "●";
-                row.aggroIconLabel.color = new Color(1f, 0.9f, 0.9f);
+                RaidUIStyle.Color(row.aggroIconLabel, new Color(1f, 0.9f, 0.9f));
             }
             else
             {
-                row.aggroIconImage.color = new Color(0.18f, 0.78f, 0.32f, 1f);
+                RaidUIStyle.Color(row.aggroIconImage, new Color(0.18f, 0.78f, 0.32f, 1f));
                 row.aggroIconLabel.text = "●";
-                row.aggroIconLabel.color = Color.white;
+                RaidUIStyle.Color(row.aggroIconLabel, Color.white);
             }
         }
 
@@ -445,7 +454,7 @@ namespace RaidRogue
             txt.fontSize = size;
             txt.fontStyle = style;
             txt.alignment = align;
-            txt.color = color;
+            RaidUIStyle.Color(txt, color);
             txt.horizontalOverflow = HorizontalWrapMode.Overflow;
             txt.verticalOverflow = VerticalWrapMode.Overflow;
 

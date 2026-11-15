@@ -35,6 +35,7 @@ namespace RaidRogue
             ResourceChanges[id] = totals;
         }
         private readonly List<BossAddMinion> _adds = new List<BossAddMinion>();
+        public IReadOnlyList<BossAddMinion> ExtraTargets => _adds;
         private float _damage;
         private Transform _victim;
         private int _successAtWarning;

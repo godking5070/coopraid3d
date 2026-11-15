@@ -103,7 +103,7 @@ namespace RaidRogue
     // roster so late joins, lost snapshots and disconnects converge without scene/prefab replication.
     public static class RaidWire
     {
-        public const int Version = 13, MaxBytes = 1100;
+        public const int Version = 16, MaxBytes = 1100;
         public const float Step = 1f / 30f;
         public static byte[] Encode(RaidPacket packet)
         {

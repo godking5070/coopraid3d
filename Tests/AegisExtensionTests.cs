@@ -131,7 +131,7 @@ public static class AegisExtensionTests
         var flow=new RaidRunFlow();var actor=Actor();actor.BeginRun("run",CharacterRewardKey.CurrentChapter);var cards=new RaidRewardRound();
         for(int stage=1;stage<=3;stage++)
         {
-            Check(flow.TryPrepare(stage,3,false)&&flow.TryCountdown(flow.Revision)&&flow.TryStart(flow.Revision),"prepare once");
+            Check(flow.TryPrepare(stage,3,false)&&flow.TryApproach(flow.Revision)&&flow.TryArrival(flow.Revision)&&flow.TryCountdown(flow.Revision)&&flow.TryStart(flow.Revision),"prepare once");
             Check(flow.Resolve(flow.Revision,true,0,4)==EncounterOutcome.Cleared,"boss clear wins simultaneous wipe");actor.ClearedStage(stage);
             Check(flow.FinishClear(flow.Revision,3,actor.PendingChoices().Length>0)&&flow.Phase==RaidBattlePhase.Reward,"final stage waits for V too");
             Check(!flow.FinishClear(flow.Revision,3,true),"duplicate clear callback refused");

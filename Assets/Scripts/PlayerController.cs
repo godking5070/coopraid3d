@@ -106,9 +106,9 @@ namespace RaidRogue
         public bool IsStunned { get => _externalStun || GetComponent<CombatStatusEffects>()?.Stunned == true; set => _externalStun=value; }
         private bool _externalRoot;
         public bool IsMovementLocked { get => _externalRoot || GetComponent<CombatStatusEffects>()?.Rooted == true; set => _externalRoot=value; }
-        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer) && !IsStunned && !IsMovementLocked &&
+        public bool CanMoveVoluntarily => isActiveAndEnabled && !IsDead && (!StageManager.CombatSuspended || RaidNetworkSession.Multiplayer || RaidLobbyRoom.Active || RaidApproachField.Instance?.Walking == true || RaidApproachField.Instance?.PortalActive == true) && !IsStunned && !IsMovementLocked &&
             !IsBeingRescued && !IsBeingKnockedBack && !IsSkillRushing && !RaidCombatAuthority.InputBlocked(this);
-        public bool CanDash => CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
+        public bool CanDash => !RaidLobbyRoom.Active && RaidApproachField.Instance?.Walking != true && RaidApproachField.Instance?.PortalActive != true && CanMoveVoluntarily && (!RaidCombatAuthority.Active || GetComponent<NetworkRaidAvatar>()?.MovementLocked == false) && !IsDashing && DashCooldownRemaining <= 0;
         public bool HasMovementIntent => RaidCombatAuthority.Active ? IsMovingXZ : !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
         public bool IsCastInterruptImmune => currentRole == PlayerRole.Archmage_Caster && IsDefensiveBuffActive;
 
@@ -218,12 +218,20 @@ namespace RaidRogue
                 if (RaidCombatAuthority.Local(this))
                 {
                     bool allowed = !LocalGameplayInput.Blocked && RaidNetworkSession.Instance.HasLocalAvatar;
-                    bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed);
+                    bool pressed = _dashPress.Consume(WasDashPressed(), IsDashKeyHeld(), allowed && !RaidLobbyRoom.Active && RaidApproachField.Instance?.Walking != true);
                     if (pressed && EventSystem.current != null) EventSystem.current.SetSelectedGameObject(null);
                     RaidNetworkSession.Instance.SampleInput(allowed ? GetMoveDirectionXZ(ReadMoveInput()) : Vector3.zero, pressed);
                 }
                 if (RaidCombatAuthority.Host && !StageManager.CombatSuspended) UpdateTimers();
                 UpdateOverheadHpBar(); if (RaidCombatAuthority.Local(this)) UpdateHUD();
+                return;
+            }
+            if (RaidLobbyRoom.Active || RaidApproachField.Instance?.Walking == true || RaidApproachField.Instance?.PortalActive == true)
+            {
+                _dash.Cancel();
+                if (!LocalGameplayInput.Blocked && Time.timeScale > 0.001f) HandleMovementXZ();
+                else IsMovingXZ = false;
+                UpdateOverheadHpBar(); UpdateHUD();
                 return;
             }
             if (RaidCombatAuthority.Replica || IsDead || StageManager.CombatSuspended)
@@ -295,6 +303,18 @@ namespace RaidRogue
             Potion?.EndRevivalProtection();
             if (_dashPresentation != null) _dashPresentation.BeginDash();
             return true;
+        }
+
+        public void StopForArrival()
+        {
+            _dash.Cancel();
+            _dashPress.RequireRelease();
+            CancelSkillRush();
+            _isBeingRescued = _isBeingKnockedBack = false;
+            GetComponent<BattleResurrection>()?.Cancel();
+            CharacterActor.Ensure(gameObject).InterruptCast();
+            IsMovingXZ = false;
+            _dashPresentation?.ClearTrail();
         }
 
         private void UpdateDashMovementXZ()
