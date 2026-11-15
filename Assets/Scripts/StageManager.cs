@@ -106,6 +106,7 @@ namespace RaidRogue
                 boss.SetupBossForStage(currentStage);
             }
             CombatMetricsManager.Ensure(this).BeginStage(currentStage, resetPlayTime);
+            QuarterViewCamera.LocalCamera?.BeginCombat(resetPlayTime);
         }
 
         /// <summary>

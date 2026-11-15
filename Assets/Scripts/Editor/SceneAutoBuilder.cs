@@ -628,7 +628,8 @@ namespace RaidRogue.Editor
             qvCam.distance = 17f;
             qvCam.minDistance = 6f;
             qvCam.maxDistance = 30f;
-            qvCam.zoomSpeed = 8f;
+            qvCam.preferences.zoomSensitivity3D = 2f;
+            qvCam.preferences.zoomSensitivity2D = 2f;
             qvCam.SnapToTargetImmediate();
 
             return qvCam;

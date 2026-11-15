@@ -21,6 +21,7 @@ namespace RaidRogue
     /// - RoleSelectionManager와 연동하여 선택한 직업에 따라 3D/2D 외형 색상, 최대 체력, 방어기, 전용 스킬셋 즉시 전환
     /// - PlayerCombatController와 연동하여 직업별 GCD 3단 진화 콤보, 캐스터 캐스팅 바(이동 시 취소), 힐러 스마트 힐/보호막/성역/구출, 탱커 철벽방어/도발&줄강탈 수행
     /// </summary>
+    [DefaultExecutionOrder(-100)]
     public class PlayerController : MonoBehaviour
     {
         [Header("Combat Body (world units, independent of visual scale)")]
@@ -91,6 +92,7 @@ namespace RaidRogue
         public bool IsBeingKnockedBack => _isBeingKnockedBack;
         public bool HasTacticalRescueBuff => _tacticalRescueBuffTimer > 0f;
         public bool IsMovingXZ { get; private set; }
+        public bool HasMovementIntent => !LocalGameplayInput.Blocked && ReadMoveInput().sqrMagnitude > 0.0001f;
         public bool IsCastInterruptImmune => currentRole == PlayerRole.Archmage_Caster && IsDefensiveBuffActive;
 
         private float _defensiveRemainingTime;
@@ -181,19 +183,19 @@ namespace RaidRogue
         {
             if (Time.timeScale <= 0.001f)
             {
+                IsMovingXZ = false;
                 return;
             }
 
             UpdateTimers();
+            Vector3 positionBeforeMovement = transform.position;
 
             if (_isBeingRescued)
             {
-                IsMovingXZ = true;
                 UpdateRescuePullMovementXZ();
             }
             else if (_isBeingKnockedBack)
             {
-                IsMovingXZ = true;
                 UpdateKnockbackMovementXZ();
             }
             else
@@ -205,6 +207,9 @@ namespace RaidRogue
                 }
             }
 
+            Vector3 actualMovement = transform.position - positionBeforeMovement;
+            actualMovement.y = 0;
+            IsMovingXZ = actualMovement.sqrMagnitude > 0.000001f;
             UpdateOverheadHpBar();
             UpdateHUD();
         }
@@ -510,8 +515,9 @@ namespace RaidRogue
 
         private void HandleMovementXZ()
         {
-            Vector2 moveInput = ReadMoveInput();
-            Vector3 moveDirXZ = new Vector3(moveInput.x, 0f, moveInput.y);
+            Vector2 moveInput = LocalGameplayInput.Blocked ? Vector2.zero : ReadMoveInput();
+            QuarterViewCamera viewCamera = QuarterViewCamera.LocalCamera;
+            Vector3 moveDirXZ = viewCamera != null ? viewCamera.GetMovementDirection(moveInput) : new Vector3(moveInput.x, 0f, moveInput.y);
 
             if (moveDirXZ.sqrMagnitude > 1f)
             {
@@ -550,6 +556,7 @@ namespace RaidRogue
 
         private void HandleLegacySkillInputs()
         {
+            if (LocalGameplayInput.Blocked) return;
             if (WasSkill1Pressed()) UseFlankSlash();
             if (WasSkill2Pressed()) UseRearAmbush();
             if (WasSkill3Pressed()) ActivatePersonalDefensiveBuff();
@@ -585,6 +592,7 @@ namespace RaidRogue
 
         private bool CanUseLegacyMeleeAttack()
         {
+            if (LocalGameplayInput.Blocked) return false;
             if (targetBoss == null || !CombatRange.LivingEnemy(targetBoss.transform) || Time.timeScale <= 0.001f) return false;
             var defaults = new MeleeRangeSettings();
             float range = defaults.Get(currentRole == PlayerRole.Guardian_Tank ? MeleeSkill.TankPrimary : MeleeSkill.BladeFlank);
@@ -769,21 +777,16 @@ namespace RaidRogue
 
         public void FaceBossImmediateXZ()
         {
-            if (targetBoss == null)
-            {
-                return;
-            }
+            FaceAttackTarget(targetBoss != null ? targetBoss.transform : null);
+        }
 
-            Vector3 toBossXZ = new Vector3(
-                targetBoss.transform.position.x - transform.position.x,
-                0f,
-                targetBoss.transform.position.z - transform.position.z
-            );
-
-            if (toBossXZ.sqrMagnitude > 0.001f)
-            {
-                transform.rotation = Quaternion.LookRotation(toBossXZ.normalized, Vector3.up);
-            }
+        public void FaceAttackTarget(Transform target)
+        {
+            // Movement owns body facing. Attack effects aim at the target independently.
+            if (target == null || HasMovementIntent || IsMovingXZ || IsBeingRescued || IsBeingKnockedBack) return;
+            Vector3 direction = target.position - transform.position;
+            direction.y = 0;
+            if (direction.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
         }
 
         private void CreateOverheadHpBar(string label)
@@ -1011,10 +1014,14 @@ namespace RaidRogue
                 ? TargetingManager.Instance.GetUnitDisplayName(TargetingManager.Instance.CurrentTarget)
                 : "없음 (클릭 / Tab / F1~F4)";
 
+            string movementHint = ViewModeManager.Is2DViewActive
+                ? "WASD 화면 기준 이동 · 휠 줌 · 기본 시야: 전장 전체 / 확대: 플레이어 추적"
+                : "WASD 카메라 기준 이동 · 우클릭 드래그 회전 · 휠 줌";
+
             hudStatusText.text =
                 $"<b>[Project: Raid Rogue - Step 9 (STAGE {stg}/3 | 내 직업: {roleLabel} [P] | 뷰: {viewModeLabel} [V])]</b>\n" +
                 $"• <b>타겟팅</b> : <b>[마우스 좌클릭]</b> 유닛/UI 선택 | <b>[F1~F4]</b> 파티원 1~4번 | <b>[Tab]</b> 적(보스·쫄) 순환 | <b>[T]</b> 대상의 대상 | <b>[ESC]</b> 해제\n" +
-                "• <b>테스트 키</b> : <b>[Shift+F1]</b> 보스 처치 | <b>[Shift+F2~F5]</b> 기믹 발동 | <b>[Shift+F6]</b> 또는 <b>[+쫄 소환]</b> 버튼으로 쫄 2종 소환!\n" +
+                $"• <b>이동/카메라</b> : {movementHint} | 우측 [카메라 설정]\n" +
                 "--------------------------------------------------------------------------------\n" +
                 $"• <b>내 체력</b> : <b>{Mathf.RoundToInt(currentHp)} / {Mathf.RoundToInt(maxHp)}</b>{shieldStr}   |   <b>현재 타겟</b> : <color=#FFEE55>{currentTargetLabel}</color>\n" +
                 $"• <b>내 각도 (XZ)</b> : <b>{angle:F1}°</b> [{zoneKor}]   |   <b>최근 전투 로그</b> : {targetBoss.LastHitMessage}\n" +
