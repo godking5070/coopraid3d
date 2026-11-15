@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RaidRogue
 {
-    public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory }
+    public enum RaidBattlePhase { Lobby, Countdown, Combat, Reward, Wiped, Victory, Loading }
     [Serializable] public sealed class RaidActionRequest
     {
         public uint sequence;

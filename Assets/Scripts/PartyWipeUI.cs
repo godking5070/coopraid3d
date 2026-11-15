@@ -47,6 +47,13 @@ namespace RaidRogue
             _title.color = Color.white; _title.text = $"전투 준비 · {seconds}";
             _details.text = $"STAGE {_stage.currentStage} · 잠시 후 전투가 시작됩니다";
         }
+        public void ShowNetworkLoading()
+        {
+            if (!Build()) return;
+            _root.SetActive(true); _root.transform.SetAsLastSibling(); _buttons.SetActive(false);
+            _title.color = Color.white; _title.text = "파티 전투 준비 중";
+            _details.text = "모든 참가자의 전장 로딩을 기다립니다";
+        }
         public void Hide() { if (_root != null) _root.SetActive(false); }
         private static Text TextAt(Transform parent, string name, Vector2 pos, Vector2 size, int fontSize)
         {
