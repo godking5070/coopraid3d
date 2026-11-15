@@ -127,7 +127,10 @@ namespace RaidRogue
             _flowText.text = _session.FlowStatus;
             bool singleModal = _session.Mode == RaidSessionMode.Single && StageManager.CombatSuspended;
             if (singleModal) _flowText.text = StageManager.Instance.CanSelectInitialRole ? "직업과 기원을 선택한 뒤 대기실 북쪽 문에서 출발하세요" : "전투 준비 / 결과 확인 · 메뉴에서 새 런을 시작할 수 있습니다";
-            _flowBar.SetActive(!CombatMetricsUI.ResultsOpen && !_session.MenuOpen && !recovering && (_flowText.text.Length > 0 || singleModal));
+            // This bar also owns the menu button, even when no progress message is needed.
+            bool inRun = _session.Mode == RaidSessionMode.Single || _session.Mode == RaidSessionMode.Host ||
+                _session.Mode == RaidSessionMode.Client || _session.Mode == RaidSessionMode.AiSpectator;
+            _flowBar.SetActive(inRun && !CombatMetricsUI.ResultsOpen && !_session.MenuOpen && !recovering);
             _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanChooseRole);
             _beginBattle.interactable = _session.CanStartLobby && RaidLobbyRoom.HostAtDoor;
             _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\n{LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션";
