@@ -11,3 +11,10 @@ The font copyright notice and complete OFL 1.1 text are in `Assets/StreamingAsse
 ## Oxanium Medium
 
 User-selected numeric font (alternative 3), unmodified static TTF version 2.000. Source: https://github.com/sevmeyer/oxanium/blob/master/fonts/ttf/Oxanium-Medium.ttf . Its copyright notice and full OFL 1.1 text are shipped in Assets/StreamingAssets/ThirdPartyLicenses/Oxanium-LICENSE.txt. Use only for numeric fields and supported symbols. MaruBuri remains the heading font. Thicker-outline alternatives are reviewed separately before changing the current effects.
+
+## Pretendard Medium
+
+Unmodified static Korean TTF v1.3.9 (internal1.309), for readable menu descriptions and controls. Source: https://github.com/orioncactus/pretendard/releases/tag/v1.3.9 . Full copyright and OFL text are shipped as Assets/StreamingAssets/ThirdPartyLicenses/Pretendard-LICENSE.txt. Headings remain MaruBuri and explicitly numeric values use Oxanium. Existing symbol-only icon fallback fonts are preserved.
+
+SHA256: 3bae579377eb8e9ac412cb4809ebc3de1d956ed75995c1e346f0c1311053f4e2.
+TTF assets are marked binary in the parent `.gitattributes` so Git preserves their exact bytes. The menu polish also re-stages the unchanged local MaruBuri and Oxanium originals to repair the previous text normalization in their stored Git blobs; their Unity files and metadata remain unchanged.

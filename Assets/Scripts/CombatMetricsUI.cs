@@ -274,10 +274,10 @@ namespace RaidRogue
             for (int i = 0; i < stages.Count; i++)
             {
                 var captured = stages[i];
-                ButtonAt(_tabs, "Stage" + captured.Stage, "STAGE " + captured.Stage,
+                ResultTab(_tabs, "Stage" + captured.Stage, "STAGE " + captured.Stage,
                     new Vector2(0, 0.5f), new Vector2(70 + i * 155, 0), new Vector2(140, 36), () => DisplayResult(captured));
             }
-            ButtonAt(_tabs, "Total", "전체 런", new Vector2(0, 0.5f), new Vector2(70 + stages.Count * 155, 0), new Vector2(140, 36), () => DisplayResult(_metrics.Ledger.RunTotal()));
+            ResultTab(_tabs, "Total", "전체 런", new Vector2(0, 0.5f), new Vector2(70 + stages.Count * 155, 0), new Vector2(140, 36), () => DisplayResult(_metrics.Ledger.RunTotal()));
             DisplayResult(runTotal ? _metrics.Ledger.RunTotal() : stages[stages.Count - 1]);
             OpenResultsOverlay();
         }
@@ -370,6 +370,21 @@ namespace RaidRogue
             text.alignment = TextAnchor.UpperLeft;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             return text;
+        }
+
+        private Button ResultTab(Transform parent, string name, string caption, Vector2 anchor, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction action)
+        {
+            var template = RaidUIPresentation.Settings?.formButtonTemplate;
+            if (template == null || template.button == null || template.label == null)
+                return ButtonAt(parent, name, caption, anchor, position, size, action);
+            var item = RaidUIRepeatedItem.Create(template, parent);
+            item.name = name;
+            var rect = (RectTransform)item.transform;
+            rect.anchorMin = rect.anchorMax = anchor; rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = position; rect.sizeDelta = size;
+            item.label.text = caption;
+            item.button.onClick.AddListener(action);
+            return item.button;
         }
 
         private Button ButtonAt(Transform parent, string name, string caption, Vector2 anchor, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction action)

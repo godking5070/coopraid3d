@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -36,7 +37,9 @@ namespace RaidRogue.Editor
         }
 
         [MenuItem("Tools/Astella/Prism V4/Render Remaining UI Catalog")]
-        public static void RenderCatalog()
+        public static void RenderCatalog() => RenderCatalogTo(Folder);
+
+        public static void RenderCatalogTo(string outputFolder)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Render the catalog in Edit Mode; no gameplay state is required.");
@@ -44,7 +47,7 @@ namespace RaidRogue.Editor
                 throw new InvalidOperationException("A real GPU is required; do not use -nographics.");
             var profile = Resources.Load<RaidUIPresentation>("UI/RaidUIPresentation");
             if (profile == null) throw new InvalidOperationException("Current RaidUIPresentation profile is missing.");
-            Directory.CreateDirectory(Folder);
+            Directory.CreateDirectory(outputFolder);
             var report = new Report { capturedUtc = DateTime.UtcNow.ToString("o") };
             var entries = new List<Entry>(); var errors = new List<string>();
             var original = SceneManager.GetActiveScene(); bool originalDirty = original.IsValid() && original.isDirty;
@@ -109,7 +112,7 @@ namespace RaidRogue.Editor
                             if (graphic.enabled && graphic.color.a > 0) entry.visibleGraphics++;
                         if (entry.visibleGraphics == 0) throw new InvalidOperationException("Selected authored panel contains no active graphics.");
                         image = Capture(camera, target, report);
-                        entry.image = Folder + "/" + (index + 1).ToString("00") + "-" + id + ".png";
+                        entry.image = outputFolder + "/" + (index + 1).ToString("00") + "-" + id + ".png";
                         File.WriteAllBytes(entry.image, image.EncodeToPNG());
                         entry.previewOnlyText = texts.ToArray(); entry.rendered = true;
                         var pixels = new Color32[640 * 360];
@@ -126,7 +129,7 @@ namespace RaidRogue.Editor
                         if (footer != null) Object.DestroyImmediate(footer);
                     }
                 }
-                overview.Apply(); report.overview = Folder + "/catalog-overview.png";
+                overview.Apply(); report.overview = outputFolder + "/catalog-overview.png";
                 File.WriteAllBytes(report.overview, overview.EncodeToPNG());
             }
             catch (Exception error) { errors.Add(error.ToString()); }
@@ -142,10 +145,10 @@ namespace RaidRogue.Editor
                 if (!report.originalActiveSceneRestored || !report.originalSceneDirtyUnchanged)
                     errors.Add("Original scene active/dirty state was not preserved.");
                 report.entries = entries.ToArray(); report.errors = errors.ToArray();
-                File.WriteAllText(Folder + "/catalog-preview.json", JsonUtility.ToJson(report, true) + "\n");
+                File.WriteAllText(outputFolder + "/catalog-preview.json", JsonUtility.ToJson(report, true) + "\n");
             }
             Debug.Log("PRISM REMAINING DESIGN CATALOG: " + entries.FindAll(e => e.rendered).Count + "/" + entries.Count
-                + " authored panels. Design preview, not gameplay certification. " + Folder + "/catalog-preview.json");
+                + " authored panels. Design preview, not gameplay certification. " + outputFolder + "/catalog-preview.json");
         }
 
         private static void Prepare(RaidUIView view, Entry entry, List<string> texts)
@@ -174,8 +177,26 @@ namespace RaidRogue.Editor
             {
                 for (int i = 0; i < 3; i++) Toggle(view, "_routeChoices/[" + i + "]", false);
                 for (int i = 0; i < 12; i++) Toggle(view, "_choices/[" + i + "]", true);
+                var jobs = PreviewDefinitions();
+                for (int i = 0; i < jobs.Length && i < 12; i++)
+                {
+                    var job = jobs[i];
+                    string role = job.role == CharacterRole.Tank ? "탱커" : job.role == CharacterRole.Healer ? "힐러" :
+                        job.classification == AttackClassification.Melee ? "근딜" : job.classification == AttackClassification.RangedPhysical ? "원거리" : "캐스터";
+                    Sample(view, "_choiceLabels/[" + i + "]", job.name + " · " + role + "\n" + job.description, texts);
+                }
             }
-            if (view.viewId == "metrics") { Center(Bound(view, "_resultBox") as RectTransform); Sample(view, "_resultTitle", "전투 결과 · 디자인 미리보기", texts); }
+            if (view.viewId == "metrics")
+            {
+                Center(Bound(view, "_resultBox") as RectTransform);
+                Sample(view, "_resultTitle", "전투 결과 · 디자인 미리보기", texts);
+                Sample(view, "_resultTime", "전투 시간 180.00초 · 전체 런 재도전 2회 · 표시 검사용 샘플", texts);
+                Sample(view, "_resultEvents", "카운터 4회 · 무력화 2회 · 부활 1회 · 표시 검사용 샘플", texts);
+                string[] names = { "이지스 팔라딘", "블러드 아포테카리", "나이트블레이드", "아스트로맨서" };
+                for (int row = 0; row < 4; row++) for (int column = 0; column < 10; column++)
+                    Sample(view, "_resultRows/[" + row + "]/[" + column + "]", column == 0 ? names[row] :
+                        column == 6 ? row.ToString() : column == 2 || column == 4 ? "1,234.5" : "123,456", texts);
+            }
             if (view.viewId == "resurrection") Sample(view, "_deathText", "전투 불능\n동료를 관전하거나 부활을 기다립니다.", texts);
             if (view.viewId == "wipe") { Sample(view, "_title", "파티 전멸", texts); Sample(view, "_details", "디자인 미리보기 · 전투 상태와 무관한 표시용 화면", texts); Toggle(view, "_buttons", true); }
             if (view.viewId == "skill-reward")
@@ -183,8 +204,22 @@ namespace RaidRogue.Editor
                 Center(Bound(view, "_panel") as RectTransform);
                 Sample(view, "_header", "확정 스킬 보상 · 디자인 미리보기", texts);
                 Sample(view, "_status", "보상 카드의 기본 스타일을 확인하는 화면입니다.", texts);
-                for (int i = 0; i < 3; i++) Sample(view, "_labels/[" + i + "]", "선택 " + (i + 1) + "\n\n스킬 설명 표시 영역", texts);
+                var skills = PreviewDefinitions().SelectMany(job => job.skills).Where(skill => skill != null && skill.implemented && !string.IsNullOrEmpty(skill.description))
+                    .OrderByDescending(skill => skill.description.Length).Take(3).ToArray();
+                for (int i = 0; i < skills.Length; i++) Sample(view, "_labels/[" + i + "]", "[" + (i + 1) + "] " + skills[i].name +
+                    "\n\n" + skills[i].description + "\n\n이번 런에서 한 종류만 확정", texts);
             }
+        }
+
+        private static CharacterDefinition[] PreviewDefinitions()
+        {
+            var registered = CharacterCatalog.All.Where(job => job.legacyRole == 0 && job.playable).ToArray();
+            if (registered.Length > 0) return registered;
+            // Pure definition construction only: never register jobs or mutate a runtime catalog to render an Edit Mode preview.
+            return new[] { AegisPaladinData.BuildNineKey() }.Concat(CharacterRosterData.Jobs.Select(job =>
+                NineKeyTankData.Supports(job) ? NineKeyTankData.Build(job) : NineKeyHealerData.Supports(job) ? NineKeyHealerData.Build(job) :
+                NineKeyDamageData.Supports(job) ? NineKeyDamageData.Build(job) : CharacterRosterData.Definition(job)))
+                .Where(job => job.legacyRole == 0 && job.playable).ToArray();
         }
 
         private static Transform Bound(RaidUIView view, string key)

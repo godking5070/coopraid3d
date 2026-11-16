@@ -182,6 +182,10 @@ namespace RaidRogue
         {
             if (_isSelectionOpen)
             {
+                // Keep every reward opening path above the combat HUD, while settings
+                // and the result overlay retain ownership when they cover the picker.
+                if (!LocalGameplayInput.ModalCovered && cardSelectionModalRoot != null)
+                    RaidUIOrder.Raise(cardSelectionModalRoot.transform);
                 HandleUnscaledCardModalInput();
                 return;
             }

@@ -73,7 +73,14 @@ namespace RaidRogue.Editor
             public bool passed;
             public int checks, originalObjects, originalComponents, originalTexts;
             public string[] errors, permittedGeometryChanges;
+            public TypographyChange[] permittedTypographyChanges;
             public string boundary = "Loaded-prefab source/copy contracts only. No callbacks invoked; live pointer behavior and rendering are not certified.";
+        }
+
+        [Serializable] public sealed class TypographyChange
+        {
+            public string address, beforeFont, afterFont, beforeStyle, afterStyle;
+            public int beforeSize, afterSize;
         }
 
         [Serializable] public sealed class Snapshot
@@ -123,10 +130,17 @@ namespace RaidRogue.Editor
             return snapshot;
         }
 
-        public static void AssertPreserved(Snapshot before, GameObject after)
+        public static void AssertPreserved(Snapshot before, GameObject after) => AssertPreserved(before, after, null, null);
+
+        public static void AssertPreserved(Snapshot before, GameObject after, ISet<Text> allowedTypography)
+            => AssertPreserved(before, after, allowedTypography, null);
+
+        public static void AssertPreserved(Snapshot before, GameObject after, ISet<Text> allowedTypography,
+            ISet<RectTransform> allowedAuxiliaryGeometry)
         {
             if (before == null || after == null) throw new ArgumentNullException(before == null ? nameof(before) : nameof(after));
             var errors = new List<string>(); var changedGeometry = new List<string>(); int checks = 0;
+            var changedTypography = new List<TypographyChange>();
             bool sameLoadedRoot = before.loadedRoot != null && before.loadedRoot == after;
             var lookup = after.GetComponentsInChildren<Transform>(true).SelectMany(transform =>
                 new Object[] { transform.gameObject }.Concat(transform.GetComponents<Component>())).Where(value => value != null)
@@ -153,8 +167,16 @@ namespace RaidRogue.Editor
             {
                 var text = Resolve(item.text, after, lookup, sameLoadedRoot) as Text;
                 if (text == null) continue; // Component preservation already reports the missing text.
-                Check(SameReference(item.font, text.font, after, lookup, sameLoadedRoot), item.address + ": original font changed", errors, ref checks);
-                Check(item.fontSize == text.fontSize && item.fontStyle == text.fontStyle, item.address + ": original font size/style changed", errors, ref checks);
+                bool allowed = allowedTypography != null && allowedTypography.Contains(text);
+                bool sameFont = SameReference(item.font, text.font, after, lookup, sameLoadedRoot);
+                bool sameStyle = item.fontSize == text.fontSize && item.fontStyle == text.fontStyle;
+                Check(allowed || sameFont, item.address + ": original font changed", errors, ref checks);
+                Check(allowed || sameStyle, item.address + ": original font size/style changed", errors, ref checks);
+                if (allowed && (!sameFont || !sameStyle))
+                    changedTypography.Add(new TypographyChange { address = item.address,
+                        beforeFont = item.font.address, afterFont = Address(text.font, after),
+                        beforeSize = item.fontSize, afterSize = text.fontSize,
+                        beforeStyle = item.fontStyle.ToString(), afterStyle = text.fontStyle.ToString() });
             }
             foreach (var item in before.contracts)
             {
@@ -171,7 +193,8 @@ namespace RaidRogue.Editor
                 bool equal = Near(item.anchorMin, rect.anchorMin) && Near(item.anchorMax, rect.anchorMax) && Near(item.pivot, rect.pivot) &&
                     Near(item.sizeDelta, rect.sizeDelta) && Near(item.anchoredPosition, rect.anchoredPosition3D) &&
                     Near(item.localScale, rect.localScale) && Quaternion.Angle(item.localRotation, rect.localRotation) < .001f;
-                if (item.corePrism) Check(equal, item.address + ": approved combat Prism geometry changed", errors, ref checks);
+                if (item.corePrism && (allowedAuxiliaryGeometry == null || !allowedAuxiliaryGeometry.Contains(rect)))
+                    Check(equal, item.address + ": approved combat Prism geometry changed", errors, ref checks);
                 else if (!equal) changedGeometry.Add(item.address);
             }
             var originalGraphics = new HashSet<Object>(before.components.Select(item => item.component.value).OfType<Graphic>());
@@ -182,7 +205,8 @@ namespace RaidRogue.Editor
             catch (Exception error) { errors.Add(error.Message); }
             before.report = new Report { rootName = after.name, generatedUtc = DateTime.UtcNow.ToString("O"), checks = checks,
                 originalObjects = before.nodes.Length, originalComponents = before.components.Length, originalTexts = before.typography.Length,
-                passed = errors.Count == 0, errors = errors.ToArray(), permittedGeometryChanges = changedGeometry.ToArray() };
+                passed = errors.Count == 0, errors = errors.ToArray(), permittedGeometryChanges = changedGeometry.ToArray(),
+                permittedTypographyChanges = changedTypography.ToArray() };
             if (errors.Count != 0) throw new InvalidOperationException("Remaining UI preservation failed: " + string.Join(" | ", errors.Take(12)));
         }
 
