@@ -154,7 +154,12 @@ namespace RaidRogue
         {
             var campaign = CampaignRuntime.Instance;
             var settlement = campaign?.Settlement;
-            if (settlement == null || campaign.Resume == null || !Progress.TryRestoreSettlement(settlement.stage, maxStage)) return false;
+            // A stale callback must not replace live attempt history. Check the flow
+            // before restoring counters, and reject bad counters before changing phase.
+            if (settlement == null || campaign.Resume == null || Progress.Phase != RaidBattlePhase.Lobby ||
+                Progress.Stage != 0 || settlement.stage < 1 || settlement.stage > maxStage ||
+                !Iris.TryRestoreCompletedHistory(campaign.Resume.totalRevives, campaign.Resume.attemptsStarted) ||
+                !Progress.TryRestoreSettlement(settlement.stage, maxStage)) return false;
             currentStage = settlement.stage;
             _hasStartedEncounter = true;
             _isStageTransitioning = true;

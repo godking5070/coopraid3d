@@ -195,7 +195,7 @@ namespace RaidRogue
                 s.run.version != CampaignCatalog.SaveVersion || s.run.content != CampaignCatalog.ContentRevision ||
                 !CampaignCatalog.SupportedDifficulty(s.run.difficultyId) || s.run.transport != "single" && s.run.transport != "steam" && s.run.transport != "spectator-test" ||
                 s.run.completed || !s.run.eligible || s.stage < 1 || s.stage > CampaignCatalog.StageCount(s.run.chapterId) || s.run.nextStage != s.stage ||
-                s.run.randomState == 0 || s.run.retries < 0 || s.run.attemptsStarted < s.stage + s.run.retries ||
+                s.run.randomState == 0 || s.run.retries < 0 || s.run.attemptsStarted < s.stage + s.run.retries || s.run.attemptsStarted > IrisRescueState.MaximumRecordedAttempts ||
                 s.run.totalRevives < 0 || s.run.totalRevives > (long)s.run.attemptsStarted * IrisRescueState.DefaultCoins ||
                 s.run.party == null || s.run.party.Length != CampaignCatalog.PartySize(s.run.chapterId) ||
                 s.run.party.Any(p => p == null || !Guid.TryParseExact(p.slotId, "N", out _) || p.role < 1 || p.role > 4 ||
@@ -263,7 +263,7 @@ namespace RaidRogue
             bool spectator=c.transport=="spectator-test";
             int last = CampaignCatalog.StageCount(c.chapterId);
             if (!c.eligible || c.nextStage < 1 || c.nextStage > last || c.completed && c.nextStage != last || c.retries < 0 || c.retries > 100000 || !Finite(c.runSeconds) || c.runSeconds < 0 || c.randomState == 0 || c.irisCoins != IrisRescueState.DefaultCoins ||
-                c.attemptsStarted < c.nextStage + c.retries || c.attemptsStarted > 1000000 || c.totalRevives < 0 || c.totalRevives > (long)c.attemptsStarted * IrisRescueState.DefaultCoins) return "스테이지 경계 상태가 유효하지 않습니다";
+                c.attemptsStarted < c.nextStage + c.retries || c.attemptsStarted > IrisRescueState.MaximumRecordedAttempts || c.totalRevives < 0 || c.totalRevives > (long)c.attemptsStarted * IrisRescueState.DefaultCoins) return "스테이지 경계 상태가 유효하지 않습니다";
             if (c.party == null || c.party.Length != CampaignCatalog.PartySize(c.chapterId) || c.party.Any(p => p == null) || c.party.Select(p => p.slotId).Distinct().Count() != c.party.Length || c.party.Select(p => p.role).Distinct().Count() != c.party.Length || (spectator ? c.party.Any(p=>!p.bot) : c.party.Count(p => p.userId == owner && !p.bot) != 1)) return "원래 파티 구성 정보가 유효하지 않습니다";
             var people = c.party.Where(p => !p.bot).ToArray();
             if (people.Select(p => p.userId).Distinct().Count() != people.Length || c.transport == "single" && people.Length != 1 || c.transport == "steam" && people.Any(p => CampaignIdentity.Steam(p.userId) == 0)) return "사용자 식별 정보가 유효하지 않습니다";

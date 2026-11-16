@@ -27,9 +27,10 @@ if ($LASTEXITCODE -ne 0) { throw 'Raid flow tests failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'New-run confirmation checks failed.' }
 
 # Exercise the real checkpoint adapter and damage-kit registration on a fresh actor.
-function Read-CampaignRestoreMethod([string]$Source,[string]$Signature) {
+function Read-CampaignRestoreMethod([string]$Source,[string]$Signature,[switch]$Expression) {
     $start=$Source.IndexOf($Signature,[StringComparison]::Ordinal)
     if($start -lt 0){throw "Missing method $Signature"}
+    if($Expression){$end=$Source.IndexOf(';',$start)+1;return $Source.Substring($start,$end-$start)}
     $open=$Source.IndexOf('{',$start);$end=$open+1;$depth=1
     while($depth -gt 0 -and $end -lt $Source.Length){if($Source[$end] -eq '{'){$depth++}elseif($Source[$end] -eq '}'){$depth--};$end++}
     if($depth -ne 0){throw 'Incomplete campaign adapter method'}
@@ -47,3 +48,21 @@ $taskAdapterExe=Join-Path $taskOutput 'DamageCampaignRestoreTests.exe'
 if($LASTEXITCODE -ne 0){throw 'DPS campaign restore tests failed to compile.'}
 & $taskAdapterExe
 if($LASTEXITCODE -ne 0){throw 'DPS campaign restore tests failed.'}
+
+# Pending-clear continuation must restore cumulative history before recapturing
+# the real settlement; pure checkpoint fixtures alone cannot exercise this path.
+$taskStageSource=[IO.File]::ReadAllText((Join-Path $taskRoot 'Assets/Scripts/StageManager.cs'))
+$taskCampaignSource=[IO.File]::ReadAllText((Join-Path $taskRoot 'Assets/Scripts/CampaignRuntime.cs'))
+$taskSettlementTemplate=[IO.File]::ReadAllText((Join-Path $PSScriptRoot 'CampaignSettlementRestoreTests.cs'))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_SETTLEMENT_RESTORE */',(Read-CampaignRestoreMethod $taskStageSource 'internal bool RestoreSettlementFromLobby('))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_CARD_CALLBACK */',(Read-CampaignRestoreMethod $taskStageSource 'private void OnRewardCardChosenAdvanceToNextStage('))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_CARD_JOURNAL */',(Read-CampaignRestoreMethod $taskCampaignSource 'public void CardChosen('))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_SETTLEMENT_CAPTURE */',(Read-CampaignRestoreMethod $taskCampaignSource 'private void SaveSettlementSnapshot('))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_METRIC_CAPTURE */',(Read-CampaignRestoreMethod $taskCampaignSource 'private CampaignMetricRecord[] CaptureMetrics(' -Expression))
+$taskSettlementFixture=Join-Path $taskOutput 'CampaignSettlementRestoreFixture.cs'
+[IO.File]::WriteAllText($taskSettlementFixture,$taskSettlementTemplate,[Text.UTF8Encoding]::new($false))
+$taskSettlementExe=Join-Path $taskOutput 'CampaignSettlementRestoreTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe /reference:System.Web.Extensions.dll "/out:$taskSettlementExe" $taskSources $taskSettlementFixture
+if($LASTEXITCODE -ne 0){throw 'Pending settlement restore tests failed to compile.'}
+& $taskSettlementExe
+if($LASTEXITCODE -ne 0){throw 'Pending settlement restore tests failed.'}

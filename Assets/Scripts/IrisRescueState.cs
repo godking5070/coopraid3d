@@ -7,6 +7,7 @@ namespace RaidRogue
     public sealed class IrisRescueState
     {
         public const int DefaultCoins = 4;
+        public const int MaximumRecordedAttempts = 1000000;
         private readonly object _sync = new object();
         private readonly HashSet<string> _handled = new HashSet<string>();
         public string AttemptId { get; private set; } = "";
@@ -14,6 +15,19 @@ namespace RaidRogue
         public int TotalUsed { get; private set; }
         public int AttemptsStarted { get; private set; }
         public int Pending { get; private set; }
+
+        // A pending-clear journal resumes rewards, not another combat attempt.
+        public bool TryRestoreCompletedHistory(int restoredTotal, int restoredAttempts)
+        {
+            lock (_sync)
+            {
+                if (Pending != 0 || restoredTotal < 0 || restoredAttempts < 1 || restoredAttempts > MaximumRecordedAttempts ||
+                    restoredTotal > (long)restoredAttempts * DefaultCoins) return false;
+                TotalUsed = restoredTotal; AttemptsStarted = restoredAttempts;
+                AttemptId = ""; Coins = DefaultCoins; _handled.Clear();
+                return true;
+            }
+        }
 
         // Only encounter preparation calls this; death and control transfer never do.
         public void BeginAttempt(int? restoredTotal = null, int? restoredAttempts = null)
