@@ -50,7 +50,7 @@ namespace RaidRogue
     public sealed class AegisRouteSelectionUI
     {
         public static AegisRouteSelectionUI _instance;
-        public CharacterActor _actor;public bool _routesOnly,_jobs=true;public string _pendingJob;public int refreshes;
+        public CharacterActor _actor;public bool _routesOnly,_jobs=true,_network;public string _pendingJob;public int refreshes;public object _jobDetails;
         public static bool IsOpen;
         public static void Open(CharacterActor actor,bool network){_instance=new AegisRouteSelectionUI{_actor=actor};IsOpen=true;}
         public static void Close(){IsOpen=false;}

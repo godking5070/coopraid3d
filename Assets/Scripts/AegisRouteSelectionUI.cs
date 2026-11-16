@@ -21,6 +21,9 @@ namespace RaidRogue
         private bool _bound;
         private bool _routesOnly;
         private LocalCameraSettingsUI _settingsUI;
+        private AstellaJobSelectionDetails _jobDetails;
+        private CharacterDefinition[] _jobChoices = System.Array.Empty<CharacterDefinition>();
+        private int _previewJobIndex = -1;
         private void Awake(){_instance=this;}
         private bool _jobs=true; private string _pendingJob; private Text _heading;
         private readonly string[] _routes=new string[12];
@@ -51,7 +54,7 @@ namespace RaidRogue
                 _instance=root.gameObject.AddComponent<AegisRouteSelectionUI>();
             }
             if(!_instance._bound)_instance.Build();
-            _instance._actor=actor;_instance._network=network;_instance._opened=Time.unscaledTime;_instance._jobs=true;_instance._routesOnly=false;_instance._pendingJob=null;_instance.RefreshChoices();
+            _instance._actor=actor;_instance._network=network;_instance._opened=Time.unscaledTime;_instance._jobs=true;_instance._routesOnly=false;_instance._pendingJob=null;_instance._previewJobIndex=-1;_instance.RefreshChoices();
             _instance.gameObject.SetActive(true);RaidUIOrder.Raise(_instance.transform);
             QuarterViewCamera.LocalCamera?.ReleaseOrbit();LocalInputBindings.QuarantineHeld();LocalGameplayInput.SuppressThisFrame();
         }
@@ -87,6 +90,7 @@ namespace RaidRogue
             _bound=true;
             if(RaidUIView.Attach(this,"origin",transform))
             {
+                _jobDetails=RaidUIView.For(this).GetComponentInChildren<AstellaJobSelectionDetails>(true);
                 for(int i=0;i<12;i++){int index=i;RaidUIView.Bind(this,"job."+i,()=>Select(index));}
                 for(int i=0;i<3;i++){int index=i;RaidUIView.Bind(this,"route."+i,()=>Select(index));}
                 RaidUIView.Bind(this,"back",Back);RaidUIView.Bind(this,"finish",Finish);return;
@@ -121,7 +125,7 @@ namespace RaidRogue
             if(!lobby||_actor==null||RaidNetworkSession.Instance?.Ending==true){Close();return;}
             bool assigned=_pendingJob==null||_actor.Definition.id==_pendingJob;
             if(!_jobs&&assigned&&_routes[0]!=_actor.Definition.routes.FirstOrDefault()?.id)RefreshChoices();
-            _status.text=!assigned?"호스트 직업 승인 대기 중…":"현재: "+_actor.Definition.name+" · "+(_actor.Definition.routes.FirstOrDefault(r=>r.id==_actor.RouteId)?.name??"기원 선택 필요");
+            _status.text=!assigned?"호스트 직업 승인 대기 중…":_jobs&&_jobDetails!=null?"직업을 살펴보고 다음 단계에서 기원을 선택하세요.":"현재: "+_actor.Definition.name+" · "+(_actor.Definition.routes.FirstOrDefault(r=>r.id==_actor.RouteId)?.name??"기원 선택 필요");
             bool covered=LocalCameraSettingsUI.IsOpen||RaidSteamRuntime.Instance?.ConfirmInvite==true||RaidSteamRuntime.Instance?.OverlayOpen==true;
             for(int i=0;i<12;i++)
             {
@@ -129,11 +133,28 @@ namespace RaidRogue
                 button.interactable=assigned&&!covered;
                 RaidUIStyle.Color(button.targetGraphic, assigned&&_actor.RouteId==_routes[i]?new Color(.24f,.39f,.35f):new Color(.12f,.19f,.28f));
             }
-            _finish.interactable=!_jobs&&assigned&&_actor.DepartureReady&&!covered;
-            _finishCaption.text=_routesOnly?"루트 선택 확인":_network?"선택 확인 · 대기실로":"선택 확정 · 출발";
+            bool previewReady=_jobs&&_jobDetails!=null&&_previewJobIndex>=0&&_previewJobIndex<_jobChoices.Length;
+            _finish.interactable=assigned&&!covered&&(previewReady||!_jobs&&_actor.DepartureReady);
+            _finishCaption.text=_jobs&&_jobDetails!=null?"이 직업으로 기원 선택":_routesOnly?"루트 선택 확인":_network?"선택 확인 · 대기실로":"선택 확정 · 출발";
+            if(_jobDetails!=null)_jobDetails.UpdateSelection(_previewJobIndex,System.Array.FindIndex(_actor.Definition.routes,route=>route.id==_actor.RouteId));
         }
         private void Select(int i)
         {
+            if(_jobs&&_jobDetails!=null){PreviewJob(i);return;}
+            if(_jobs)CommitJob(i);
+            else if(i>=0&&i<3)_actor?.RequestChoice("route",_routes[i]);
+        }
+        private void PreviewJob(int i)
+        {
+            if(i<0||i>=_jobChoices.Length)return;
+            _previewJobIndex=i;
+            _jobDetails.ShowJob(_jobChoices[i]);
+            _jobDetails.UpdateSelection(i,-1);
+        }
+        private void CommitJob(int i)
+        {
+            if(!_jobs||i<0||i>=_routes.Length||string.IsNullOrEmpty(_routes[i]))return;
+            if(_network&&_pendingJob!=null&&_actor.Definition.id!=_pendingJob)return;
             if(_jobs)
             {
                 _pendingJob=_routes[i];
@@ -144,21 +165,37 @@ namespace RaidRogue
                     return;
                 }
                 _jobs=false;RefreshChoices();
+                if(_jobDetails!=null){LocalInputBindings.QuarantineHeld();LocalGameplayInput.SuppressPointerThisFrame();}
             }
-            else _actor?.RequestChoice("route",_routes[i]);
         }
         private void RefreshChoices()
         {
             var jobs=CharacterCatalog.All.Where(j=>j.legacyRole==0&&j.playable).ToArray();
-            _heading.text=_jobs?"자연과 생명의 시간 · 12직업":(_actor?.Definition.name??"")+" · 기원 3택 1";
+            _jobChoices=jobs;
+            _heading.text=_jobs?(_jobDetails!=null?"직업 선택":"자연과 생명의 시간 · 12직업"):
+                (_actor?.Definition.name??"")+(_jobDetails!=null?" · 기원 선택":" · 기원 3택 1");
             for(int i=0;i<12;i++)
             {
                 _choices[i].gameObject.SetActive(_jobs&&i<jobs.Length);
                 if(i<3)_routeChoices[i].gameObject.SetActive(!_jobs&&i<(_actor?.Definition.routes.Length??0));
                 bool visible=_jobs?i<jobs.Length:i<(_actor?.Definition.routes.Length??0);if(!visible)continue;
                 var label=_jobs?_choiceLabels[i]:_routeLabels[i];
-                if(_jobs){_routes[i]=jobs[i].id;label.text=jobs[i].name+" · "+(jobs[i].role==CharacterRole.Tank?"탱커":jobs[i].role==CharacterRole.Healer?"힐러":jobs[i].classification==AttackClassification.Melee?"근딜":jobs[i].classification==AttackClassification.RangedPhysical?"원거리":"캐스터")+"\n"+jobs[i].description;}
+                if(_jobs){_routes[i]=jobs[i].id;label.text=_jobDetails!=null?jobs[i].name+"\n"+AstellaJobSelectionDetails.RoleLabel(jobs[i]):jobs[i].name+" · "+(jobs[i].role==CharacterRole.Tank?"탱커":jobs[i].role==CharacterRole.Healer?"힐러":jobs[i].classification==AttackClassification.Melee?"근딜":jobs[i].classification==AttackClassification.RangedPhysical?"원거리":"캐스터")+"\n"+jobs[i].description;}
                 else{_routes[i]=_actor.Definition.routes[i].id;label.text=CharacterRosterData.RouteDescription(_actor.Definition,_routes[i]);}
+            }
+            if(_jobDetails!=null)
+            {
+                _jobDetails.SetJobsVisible(_jobs);
+                if(_jobs)
+                {
+                    if(_previewJobIndex<0||_previewJobIndex>=jobs.Length)
+                    {
+                        _previewJobIndex=System.Array.FindIndex(jobs,job=>job.id==_actor?.Definition.id);
+                        if(_previewJobIndex<0&&jobs.Length>0)_previewJobIndex=0;
+                    }
+                    _jobDetails.ShowJob(_previewJobIndex>=0?jobs[_previewJobIndex]:null);
+                    _jobDetails.UpdateSelection(_previewJobIndex,-1);
+                }
             }
         }
         private void LateUpdate()
@@ -169,9 +206,16 @@ namespace RaidRogue
             if(_settingsUI==null)_settingsUI=FindFirstObjectByType<LocalCameraSettingsUI>();
             _settingsUI?.RaiseAboveMenus();
         }
-        private void Back(){if(_routesOnly){Close();return;}if(!_jobs){_pendingJob=null;_jobs=true;RefreshChoices();}else Close();}
+        private void Back(){if(_routesOnly){Close();return;}if(!_jobs){if(_jobDetails==null||!_network)_pendingJob=null;_jobs=true;RefreshChoices();}else Close();}
         private void Finish()
-        {if(_actor==null||!_actor.DepartureReady)return;Close();if(!_network)RoleSelectionManager.Instance?.ConfirmAegisDeparture();}
+        {
+            if(_jobs&&_jobDetails!=null)
+            {
+                if(_finish==null||!_finish.interactable)return;
+                CommitJob(_previewJobIndex);return;
+            }
+            if(_actor==null||!_actor.DepartureReady)return;Close();if(!_network)RoleSelectionManager.Instance?.ConfirmAegisDeparture();
+        }
         private void OnDestroy(){if(_instance==this)_instance=null;}
         private static RectTransform Rect(Transform parent,string name,Vector2 pos,Vector2 size)
         {var r=new GameObject(name,typeof(RectTransform)).GetComponent<RectTransform>();r.SetParent(parent,false);r.anchorMin=r.anchorMax=new Vector2(.5f,.5f);r.anchoredPosition=pos;r.sizeDelta=size;return r;}

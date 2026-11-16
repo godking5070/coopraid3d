@@ -23,6 +23,10 @@ function Read-SelectionMethod([string]$File, [string]$Signature) {
 $taskTemplate = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'CharacterSelectionTests.cs'))
 $taskTemplate = $taskTemplate.Replace('/* ACTUAL_HANDLER_VALIDATION */', (Read-SelectionMethod 'Assets/Scripts/CharacterActor.cs' 'private bool HasRequiredSkillHandlers('))
 $taskTemplate = $taskTemplate.Replace('/* ACTUAL_PICKER_SELECT */', (Read-SelectionMethod 'Assets/Scripts/AegisRouteSelectionUI.cs' 'private void Select('))
+$taskTemplate = $taskTemplate.Replace('/* ACTUAL_PICKER_PREVIEW */', (Read-SelectionMethod 'Assets/Scripts/AegisRouteSelectionUI.cs' 'private void PreviewJob('))
+$taskTemplate = $taskTemplate.Replace('/* ACTUAL_PICKER_COMMIT */', (Read-SelectionMethod 'Assets/Scripts/AegisRouteSelectionUI.cs' 'private void CommitJob('))
+$taskTemplate = $taskTemplate.Replace('/* ACTUAL_PICKER_FINISH */', (Read-SelectionMethod 'Assets/Scripts/AegisRouteSelectionUI.cs' 'private void Finish('))
+$taskTemplate = $taskTemplate.Replace('/* ACTUAL_PICKER_BACK */', (Read-SelectionMethod 'Assets/Scripts/AegisRouteSelectionUI.cs' 'private void Back('))
 $taskOutput = Join-Path ([IO.Path]::GetTempPath()) ('Astella-CharacterSelection-' + [Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($taskOutput) | Out-Null
 $taskFixture = Join-Path $taskOutput 'CharacterSelectionFixture.cs'

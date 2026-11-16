@@ -74,7 +74,8 @@ namespace RaidRogue.Editor
                 var blank = new Color32[1920 * 1080];
                 for (int i = 0; i < blank.Length; i++) blank[i] = new Color32(13, 16, 33, 255);
                 overview.SetPixels32(blank);
-                string[] ids = { "settings", "connection", "origin", "character", "metrics", "resurrection", "wipe", "skill-reward", "build-station" };
+                bool revised = AssetDatabase.GetAssetPath(profile.hudPrefab).Contains("/UXRevision/");
+                string[] ids = { "settings", "connection", "origin", revised ? "origin-routes" : "character", "metrics", "resurrection", "wipe", "skill-reward", "build-station" };
                 for (int index = 0; index < ids.Length; index++)
                 {
                     string id = ids[index]; var entry = new Entry { id = id }; entries.Add(entry);
@@ -84,7 +85,7 @@ namespace RaidRogue.Editor
                         var source = id == "build-station"
                             ? (profile.buildStationPrefab != null ? profile.buildStationPrefab.gameObject
                                 : Resources.Load<RaidBuildStationView>("UI/ConstellationBuild")?.gameObject)
-                            : profile.View(id)?.gameObject;
+                            : profile.View(id == "origin-routes" ? "origin" : id)?.gameObject;
                         if (source == null) throw new InvalidOperationException("No authored prefab in the current profile/fallback.");
                         entry.source = AssetDatabase.GetAssetPath(source);
                         clone = Object.Instantiate(source, canvas.transform, false); clone.name = id + " (temporary design preview)";
@@ -165,6 +166,12 @@ namespace RaidRogue.Editor
             {
                 Center(Bound(view, "_panel") as RectTransform); Toggle(view, "_confirmation", false); Toggle(view, "_conflict", false);
                 for (int i = 0; i < 4; i++) Toggle(view, "_tabs/[" + i + "]", i == 0);
+                foreach (var state in view.GetComponentsInChildren<AstellaUITabIndicator>(true))
+                {
+                    bool active = state.tab != null && state.tab.activeSelf;
+                    if (state.indicator != null) state.indicator.enabled = active;
+                    if (state.caption != null) state.caption.color = active ? state.activeCaption : state.idleCaption;
+                }
             }
             if (view.viewId == "connection")
             {
@@ -175,15 +182,32 @@ namespace RaidRogue.Editor
             }
             if (view.viewId == "origin")
             {
-                for (int i = 0; i < 3; i++) Toggle(view, "_routeChoices/[" + i + "]", false);
-                for (int i = 0; i < 12; i++) Toggle(view, "_choices/[" + i + "]", true);
+                bool routes = entry.id == "origin-routes";
+                for (int i = 0; i < 3; i++) Toggle(view, "_routeChoices/[" + i + "]", routes);
+                for (int i = 0; i < 12; i++) Toggle(view, "_choices/[" + i + "]", !routes);
                 var jobs = PreviewDefinitions();
+                var details = view.GetComponentInChildren<AstellaJobSelectionDetails>(true);
                 for (int i = 0; i < jobs.Length && i < 12; i++)
                 {
                     var job = jobs[i];
                     string role = job.role == CharacterRole.Tank ? "탱커" : job.role == CharacterRole.Healer ? "힐러" :
                         job.classification == AttackClassification.Melee ? "근딜" : job.classification == AttackClassification.RangedPhysical ? "원거리" : "캐스터";
-                    Sample(view, "_choiceLabels/[" + i + "]", job.name + " · " + role + "\n" + job.description, texts);
+                    Sample(view, "_choiceLabels/[" + i + "]", details != null ? job.name + "\n" + AstellaJobSelectionDetails.RoleLabel(job) :
+                        job.name + " · " + role + "\n" + job.description, texts);
+                }
+                if (details != null)
+                {
+                    details.SetJobsVisible(!routes); details.ShowJob(jobs.FirstOrDefault()); details.UpdateSelection(0, routes ? 0 : -1);
+                    texts.Add("Job details: first actual definition; preview-only selection, no job committed.");
+                    var caption = Bound(view, "_finishCaption")?.GetComponent<Text>();
+                    if (caption != null) { caption.text = routes ? "선택 확정 · 출발" : "이 직업으로 기원 선택"; texts.Add("Preview-only footer mode."); }
+                }
+                if (routes && jobs.Length > 0)
+                {
+                    var title = Bound(view, "_heading")?.GetComponent<Text>();
+                    if (title != null) { title.text = jobs[0].name + " · 기원 선택"; texts.Add("Preview-only origin heading."); }
+                    for (int i = 0; i < jobs[0].routes.Length && i < 3; i++)
+                        Sample(view, "_routeLabels/[" + i + "]", CharacterRosterData.RouteDescription(jobs[0], jobs[0].routes[i].id), texts);
                 }
             }
             if (view.viewId == "metrics")
