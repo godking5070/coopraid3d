@@ -2,13 +2,15 @@
   "checked_date": "2026-11-16",
   "result": "pass",
   "checks": [
-    "1536x1024 final PNG decoded; saved/generated source SHA256 matched",
-    "Root and independent visual QA: original wings retained, anatomical left hand grips scale ring, right hand retains sword, exactly two pans and no extra arm",
-    "20 overview image hashes and all local links matched",
-    "Chrome desktop/mobile at 1440/390/320px, 9 filter states, latest-image modal and Escape checked",
-    "Prior v5 gallery marked not preferred; original PNGs preserved"
+    "3 final PNGs decoded at 1536x1024 and saved/source/manifest SHA256 matched",
+    "Root and independent visual QA passed for stage identity, transformed silhouette, anatomy, props and framing",
+    "Comparison gallery: all6 images loaded and links resolve",
+    "Chrome 1440/390/320 layouts and 3 latest-image modals verified",
+    "Orca inline comparison: 6 JPEG previews embedded, 736/320px checked, under512KiB; original PNGs unchanged"
   ],
-  "image_sha256": "e0763c2c2879dff6cfd7386649e642045026ee72508093e6f4886dc023da1609",
+  "inline_visual": "part1-hard-234-917ba5.html",
+  "inline_bytes": 170762,
+  "limits": "2D concepts, no 3D mesh/rig or game integration validation.",
   "stage_count": 12,
   "image_count": 20,
   "checksums": [
@@ -34,11 +36,11 @@
       "bytes": 1899801
     },
     {
-      "id": "p1-s2-hard",
-      "sha256": "57b750e8556a9be442d8b79d147324fba35959b7f89f8349fd3c9f49f6ecfa01",
+      "id": "p1-s2-metamorphosis-v1",
+      "sha256": "80a6bd2adcb271d17cb5bc2c0f0b095656f3f6ae0a991386896922d90c55d6b3",
       "width": 1536,
       "height": 1024,
-      "bytes": 1890662
+      "bytes": 1965308
     },
     {
       "id": "p1-s3-normal",
@@ -48,11 +50,11 @@
       "bytes": 1911189
     },
     {
-      "id": "p1-s3-hard",
-      "sha256": "856975e27f84797ffd70a236c1d7f8f3c6b74d4d28303b22e462e1a9e82a73f8",
-      "width": 1774,
-      "height": 887,
-      "bytes": 1794741
+      "id": "p1-s3-metamorphosis-v1",
+      "sha256": "e27b2e0cc438e05fdc918339c5d55e8876537254a167ceee89909f49043b02a4",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1986351
     },
     {
       "id": "p1-s4-normal",
@@ -62,11 +64,11 @@
       "bytes": 1959397
     },
     {
-      "id": "p1-s4-hard",
-      "sha256": "b4f67a80e7e71ac88a12769fdcdc1898e2f7c47171e6601233aeea0f4ac36c22",
+      "id": "p1-s4-metamorphosis-v1",
+      "sha256": "10d3c5d12f6b07d5a80acd7f3985d0f72cfc69c95050e906007623652d1df4dd",
       "width": 1536,
       "height": 1024,
-      "bytes": 2119916
+      "bytes": 2148263
     },
     {
       "id": "p1-s5-normal",

@@ -1,0 +1,42 @@
+{
+  "id": "stage02-predatory-greenhouse-keeper",
+  "part": 1,
+  "stage": 2,
+  "version": "Part1HardMetamorphosis_v1",
+  "title_ko": "포식하는 온실지기",
+  "description_ko": "정원 인형의 꽃 유리보존함과 원예 가위를 이어받은 태엽 사마귀형. 굵은 네 다리와 전면의 하나로 연결된 가위팔이 몸체의 실루엣을 바꾼다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e243-a73c-7a22-86d7-52db35a50b76/exec-7cb4d15e-66ee-4f2d-bbb5-9c1dc20ca677.png",
+  "references": [
+    {
+      "path": "../../BossOverview/originals/p1-s2-normal.png",
+      "role": "Original Flora Gear identity/motif/material reference: gardener cap, swept ivory curls, glass blue-flower core, teal apron and pruning scissors; no anatomy or pose lock"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s2-hard.png",
+      "role": "Previous hard Flora opened shell, back winding drum/teal spring construction and clean rendering; redesigned beyond slender doll anatomy"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s1-hard.png",
+      "role": "Magnitude of hard-boss silhouette/anatomy change and ivory/brass cel rendering only; gargoyle head/wings/armor not copied"
+    }
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 1965308,
+  "sha256": "80a6bd2adcb271d17cb5bc2c0f0b095656f3f6ae0a991386896922d90c55d6b3",
+  "visual_qa": {
+    "status": "pass",
+    "identity": "Deep-teal gardener cap, short carved ivory curls, angular doll face, chest glass chamber with one blue flower and green stem, teal apron-like leaf shell, warm brass and original pruning-scissor blade family retained.",
+    "hard_transformation": "Broad forward-leaning thorax over four thick planted articulated legs. Exactly two armored upper arms become one large pruning-shear mechanism with a single clear brass pivot in front. Original slender two-legged caretaker silhouette changed into a formidable garden predator.",
+    "mechanics": "Two scissor blades join the same front pivot, with both arm linkages readable; no second loose scissors. Large brass back winch and two curled teal spring strips are attached behind the head/shoulders. Four flared chest petal plates frame the intact flower chamber.",
+    "anatomy_and_frame": "One head, two upper arms, four separate planted leg/foot contacts, two scissor blades forming one weapon, one blue flower. All spring, cap, limb and blade tips inside frame. Upper spring tip has a narrow but uncut margin.",
+    "method": "Full image_gen result visually inspected. Saved PNG decoded with System.Drawing at 1536x1024 and SHA256 verified. Saved view_image call displayed a thin lavender strip despite valid PNG decoding; root should independently inspect the image.",
+    "limits": "Single-view 2D concept candidate; not selected and not a validated 3D mesh or rig."
+  }
+}

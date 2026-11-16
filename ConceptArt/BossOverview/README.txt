@@ -6,3 +6,5 @@ INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 20장을
 제작 기록 및 정확한 프롬프트: ../JustitiaHardGargoyleHandScale_v6/manifest.json 및 prompt.txt
 이전 v5 저울결합3안은 사용자 비선호로 보존했습니다. 2부는 전체 재작업 예정입니다.
 이미지 클릭 확대·원본 열기·좌우 방향키·Esc를 지원합니다. 이전 원본 파일은 보존했습니다.
+
+2·3·4스테이지 하드 변형 검토 시안: ../Part1HardMetamorphosis_v1/INDEX.html

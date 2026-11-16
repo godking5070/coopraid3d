@@ -9,7 +9,7 @@
   "fixed_stages": [],
   "source_root": "../보스-컨셉아트/ConceptArt",
   "source_root_base": "workspace_root",
-  "selection_policy": "1부 유스티티아 하드는 선호 가고일의 기존 날개를 유지한 v6 왼손 천칭 수정안이 최신이다. v5 저울 결합 3안은 사용자 비선호로 보존한다. 2부는 전체 재작업 예정 상태다.",
+  "selection_policy": "1부2·3·4스테이지는 고유한 상징을 잇는 새 하드 변형 시안을 검토한다. 유스티티아는 기존 날개/왼손천칭 v6이 최신이며, 2부는 전체 재작업 예정이다. 모든 새 시안은 최종 선택 전이다.",
   "cards": [
     {
       "id": "p1-s1",
@@ -62,15 +62,15 @@
       "stage": 2,
       "title": "플로라 기어",
       "subtitle": "기억의 유리 온실",
-      "notes": "흉부 유리 보존함과 시곗바늘 가위. 하드는 개방 외장과 등 태엽을 강조.",
+      "notes": "꽃 유리보존함·청록 모자·원예 가위를 유지하고, 네 다리와 거대한 포획 가위팔을 가진 태엽 포식형으로 변형.",
       "tags": [
         "유리",
         "가위",
         "태엽"
       ],
-      "status": "basis",
-      "statusLabel": "화풍 기준",
-      "selectionNote": "사용자가 2부 작업의 화풍 참고로 직접 제시한 CharacterMatched 계열.",
+      "status": "review",
+      "statusLabel": "하드 변형 · 검토",
+      "selectionNote": "2026.11.16 변형 가능성을 검토하기 위해 새 하드1안을 제작했다. 기존 노멀과 하드 파일은 보존했고, 새 시안 최종 선택은 미정이다.",
       "images": [
         {
           "id": "p1-s2-normal",
@@ -86,19 +86,33 @@
           "bytes": 1899801
         },
         {
-          "id": "p1-s2-hard",
+          "id": "p1-s2-metamorphosis-v1",
           "mode": "hard",
-          "label": "하드",
-          "src": "originals/p1-s2-hard.png",
-          "sourceManifest": "CharacterMatched/manifest.json",
+          "label": "새 하드 · 포식하는 온실지기",
+          "src": "../Part1HardMetamorphosis_v1/Stage02/01-boss.png",
+          "sourcePath": "ConceptArt/Part1HardMetamorphosis_v1/Stage02/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/Part1HardMetamorphosis_v1/Stage02/manifest.json",
           "width": 1536,
           "height": 1024,
-          "sha256": "57b750e8556a9be442d8b79d147324fba35959b7f89f8349fd3c9f49f6ecfa01",
-          "sourcePath": "CharacterMatched/04-flora-hard-v1.png",
-          "statusLabel": "화풍 기준",
-          "bytes": 1890662
+          "bytes": 1965308,
+          "sha256": "80a6bd2adcb271d17cb5bc2c0f0b095656f3f6ae0a991386896922d90c55d6b3",
+          "statusLabel": "검토 시안"
         }
-      ]
+      ],
+      "previousHardImage": {
+        "id": "p1-s2-hard",
+        "mode": "hard",
+        "label": "하드",
+        "src": "originals/p1-s2-hard.png",
+        "sourceManifest": "CharacterMatched/manifest.json",
+        "width": 1536,
+        "height": 1024,
+        "sha256": "57b750e8556a9be442d8b79d147324fba35959b7f89f8349fd3c9f49f6ecfa01",
+        "sourcePath": "CharacterMatched/04-flora-hard-v1.png",
+        "statusLabel": "화풍 기준",
+        "bytes": 1890662
+      }
     },
     {
       "id": "p1-s3",
@@ -106,16 +120,16 @@
       "stage": 3,
       "title": "캄파넬라",
       "subtitle": "침묵의 종루",
-      "notes": "종과 여섯 다리, 남색 원정대 망토. 하드는 열린 종 외피와 드러난 종치 구조.",
+      "notes": "종·황금 종추·별 망토를 유지하고, 낮고 육중한 종체와 턱처럼 벌어지는 외피, 굵어진 여섯 다리로 변형.",
       "tags": [
         "종",
         "여섯 다리",
         "종치",
         "망토"
       ],
-      "status": "basis",
-      "statusLabel": "화풍 기준",
-      "selectionNote": "사용자가 2부 작업의 화풍 참고로 직접 제시한 CharacterMatched 계열.",
+      "status": "review",
+      "statusLabel": "하드 변형 · 검토",
+      "selectionNote": "2026.11.16 변형 가능성을 검토하기 위해 새 하드1안을 제작했다. 기존 노멀과 하드 파일은 보존했고, 새 시안 최종 선택은 미정이다.",
       "images": [
         {
           "id": "p1-s3-normal",
@@ -131,19 +145,33 @@
           "bytes": 1911189
         },
         {
-          "id": "p1-s3-hard",
+          "id": "p1-s3-metamorphosis-v1",
           "mode": "hard",
-          "label": "하드",
-          "src": "originals/p1-s3-hard.png",
-          "sourceManifest": "CharacterMatched/manifest.json",
-          "width": 1774,
-          "height": 887,
-          "sha256": "856975e27f84797ffd70a236c1d7f8f3c6b74d4d28303b22e462e1a9e82a73f8",
-          "sourcePath": "CharacterMatched/06-campanella-hard-v1.png",
-          "statusLabel": "화풍 기준",
-          "bytes": 1794741
+          "label": "새 하드 · 포식하는 종루",
+          "src": "../Part1HardMetamorphosis_v1/Stage03/01-boss.png",
+          "sourcePath": "ConceptArt/Part1HardMetamorphosis_v1/Stage03/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/Part1HardMetamorphosis_v1/Stage03/manifest.json",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 1986351,
+          "sha256": "e27b2e0cc438e05fdc918339c5d55e8876537254a167ceee89909f49043b02a4",
+          "statusLabel": "검토 시안"
         }
-      ]
+      ],
+      "previousHardImage": {
+        "id": "p1-s3-hard",
+        "mode": "hard",
+        "label": "하드",
+        "src": "originals/p1-s3-hard.png",
+        "sourceManifest": "CharacterMatched/manifest.json",
+        "width": 1774,
+        "height": 887,
+        "sha256": "856975e27f84797ffd70a236c1d7f8f3c6b74d4d28303b22e462e1a9e82a73f8",
+        "sourcePath": "CharacterMatched/06-campanella-hard-v1.png",
+        "statusLabel": "화풍 기준",
+        "bytes": 1794741
+      }
     },
     {
       "id": "p1-s4",
@@ -151,15 +179,15 @@
       "stage": 4,
       "title": "기억의 인형사 마리오네트",
       "subtitle": "버려진 오페라 극장",
-      "notes": "네 팔과 웃음·울음 가면, 황금 조종 실. 하드는 열린 가면과 구동핵.",
+      "notes": "웃음·울음 가면과 조종 실을 유지하고, 넓은 태엽 흉곽·거대한 네 손·비틀린 춤 자세의 대형 인형으로 변형.",
       "tags": [
         "네 팔",
         "가면",
         "황금 실"
       ],
-      "status": "basis",
-      "statusLabel": "기존 제작안",
-      "selectionNote": "동일한 화풍으로 이어진 1부 제작 시트를 함께 정리.",
+      "status": "review",
+      "statusLabel": "하드 변형 · 검토",
+      "selectionNote": "2026.11.16 변형 가능성을 검토하기 위해 새 하드1안을 제작했다. 기존 노멀과 하드 파일은 보존했고, 새 시안 최종 선택은 미정이다.",
       "images": [
         {
           "id": "p1-s4-normal",
@@ -175,19 +203,33 @@
           "bytes": 1959397
         },
         {
-          "id": "p1-s4-hard",
+          "id": "p1-s4-metamorphosis-v1",
           "mode": "hard",
-          "label": "하드",
-          "src": "originals/p1-s4-hard.png",
-          "sourceManifest": "CharacterMatched/Stage4/manifest.json",
+          "label": "새 하드 · 줄에 묶인 대역인형",
+          "src": "../Part1HardMetamorphosis_v1/Stage04/01-boss.png",
+          "sourcePath": "ConceptArt/Part1HardMetamorphosis_v1/Stage04/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/Part1HardMetamorphosis_v1/Stage04/manifest.json",
           "width": 1536,
           "height": 1024,
-          "sha256": "b4f67a80e7e71ac88a12769fdcdc1898e2f7c47171e6601233aeea0f4ac36c22",
-          "sourcePath": "CharacterMatched/Stage4/02-marionette-hard-v1.png",
-          "statusLabel": "기존 제작안",
-          "bytes": 2119916
+          "bytes": 2148263,
+          "sha256": "10d3c5d12f6b07d5a80acd7f3985d0f72cfc69c95050e906007623652d1df4dd",
+          "statusLabel": "검토 시안"
         }
-      ]
+      ],
+      "previousHardImage": {
+        "id": "p1-s4-hard",
+        "mode": "hard",
+        "label": "하드",
+        "src": "originals/p1-s4-hard.png",
+        "sourceManifest": "CharacterMatched/Stage4/manifest.json",
+        "width": 1536,
+        "height": 1024,
+        "sha256": "b4f67a80e7e71ac88a12769fdcdc1898e2f7c47171e6601233aeea0f4ac36c22",
+        "sourcePath": "CharacterMatched/Stage4/02-marionette-hard-v1.png",
+        "statusLabel": "기존 제작안",
+        "bytes": 2119916
+      }
     },
     {
       "id": "p1-s5",
