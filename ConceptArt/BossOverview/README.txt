@@ -20,3 +20,6 @@ INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 20장을
 
 2스테이지 노멀 꽃 유리함 매립 수정: ../Part1Stage02NormalInsetFlower_v1/INDEX.html
 전체 모음의 노멀 표시를 수정본으로 연결했습니다. 이전 원본 PNG는 originals/p1-s2-normal.png에 보존했습니다.
+
+2스테이지 노멀 최신 손 파지 수정: ../Part1Stage02NormalGripFix_v2/INDEX.html
+꽃 매립은 유지하고, 양팔 연결과 두 고리 파지/허벅지 유령손을 수정했습니다. 모음의 노멀 표시를 이 버전으로 연결했습니다.

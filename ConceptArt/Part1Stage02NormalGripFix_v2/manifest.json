@@ -1,0 +1,68 @@
+{
+  "id": "part1-stage02-normal-correct-grip",
+  "part": 1,
+  "stage": 2,
+  "mode": "normal",
+  "title_ko": "플로라 기어 노멀 · 손 파지와 팔 연결 수정",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-character-sheet.png",
+  "prompts": [
+    "refine.prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e20d-a101-74b1-bb96-937bae768ebc/exec-8eb0cd86-e9a2-4ca0-b251-4568529abec1.png",
+  "references": [
+    {
+      "path": "../Part1Stage02NormalInsetFlower_v1/01-character-sheet.png",
+      "role": "Sole accepted-edit target. Preserve recessed flower window and normal sheet while repairing large hero arm/grip anatomy.",
+      "sha256": "9223feb6413d2ceb814f3725d17ec894bc93fae87b0895b6101a03627d1d565a"
+    }
+  ],
+  "user_problem_crops": [
+    {
+      "path": "C:/Users/godki/AppData/Roaming/orca/agent-session-attachments/d4b5bf9d-9ce0-44ce-a4eb-f667b0f09803/orca-paste-1794809783040-1b2ba270-75bf-48ab-92b3-ad9d1233b16e.png",
+      "role": "Actual forearm ends behind the center crossbar.",
+      "sha256": "72f4eea0e6cf02945e9fa46fd0f67af79980f3f340591ec162302ea487ebecc7"
+    },
+    {
+      "path": "C:/Users/godki/AppData/Roaming/orca/agent-session-attachments/345bba6d-eef1-4a55-922a-22a5d5faa48b/orca-paste-1794809786712-aa4d457f-679a-4432-b2b1-57958b24fe4a.png",
+      "role": "Lower handle hand appears to originate from thigh.",
+      "sha256": "9eb0bf8dbd5161987c8b496b90629b8ca38225e773962f0351a0d287ab5c999b"
+    }
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 1890604,
+  "sha256": "b121fb758c7ac8c5550b3c4870b261a73a46c6d28362b27c7c2395e0551bb01d",
+  "transparent_background": false,
+  "generation_history": [
+    {
+      "prompt": "prompt.txt",
+      "source": "C:/Users/godki/.codex/generated_images/01a1e20d-a101-74b1-bb96-937bae768ebc/exec-5380bc3f-fe31-43e2-af2a-4040e1cb97fd.png",
+      "references": [
+        "../Part1Stage02NormalInsetFlower_v1/01-character-sheet.png",
+        "C:/Users/godki/AppData/Roaming/orca/agent-session-attachments/d4b5bf9d-9ce0-44ce-a4eb-f667b0f09803/orca-paste-1794809783040-1b2ba270-75bf-48ab-92b3-ad9d1233b16e.png",
+        "C:/Users/godki/AppData/Roaming/orca/agent-session-attachments/345bba6d-eef1-4a55-922a-22a5d5faa48b/orca-paste-1794809786712-aa4d457f-679a-4432-b2b1-57958b24fe4a.png"
+      ],
+      "status": "rejected; added a bent phantom arm near left hip while actual opposite forearm remained incorrect"
+    },
+    {
+      "prompt": "refine.prompt.txt",
+      "source": "C:/Users/godki/.codex/generated_images/01a1e20d-a101-74b1-bb96-937bae768ebc/exec-8eb0cd86-e9a2-4ca0-b251-4568529abec1.png",
+      "references": [
+        "../Part1Stage02NormalInsetFlower_v1/01-character-sheet.png"
+      ],
+      "status": "accepted; edited original inset-flower sheet again, not the rejected output"
+    }
+  ],
+  "visual_qa": {
+    "status": "pass",
+    "arm_connections": "Two arms only. Image-left shoulder to upper-loop hand and image-right shoulder to lower-loop hand are continuously traceable through upper arm, elbow, forearm and wrist.",
+    "lower_hand": "Moved to right curve of lower loop and visibly connected to image-right forearm. Forearm crosses in front of scissor bars.",
+    "thigh": "Phantom lower hand and cuff removed; ivory thigh/apron area restored.",
+    "grip": "One hand per handle ring, with visible opposing thumbs and fingers contacting and curling around brass rims.",
+    "preserved": "Inset blue-flower chest, normal face/cap/clothes, overall weapon identity, FRONT/SIDE/BACK and weapon detail retained.",
+    "frame": "No cropped major parts or extra limbs."
+  },
+  "limits": "2D edited sheet; no actual 3D hand mesh or scissor rig validation."
+}
