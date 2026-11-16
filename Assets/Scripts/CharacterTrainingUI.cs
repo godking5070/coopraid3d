@@ -51,6 +51,7 @@ namespace RaidRogue
             var layout = _content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing = 6; layout.padding = new RectOffset(6, 6, 6, 12); layout.childControlHeight = layout.childControlWidth = true; layout.childForceExpandHeight = false;
             _content.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize; scroll.content = _content;
             Rebuild();
+            AstellaPrismProceduralSurface.ApplyNew(_root);
         }
         private Button StaticButton(Transform parent,string caption,UnityEngine.Events.UnityAction action)
         {
@@ -203,7 +204,9 @@ namespace RaidRogue
             var row = Row(_content); Label(row, title, 15, 36);
             var rect = Rect(row, "Value"); var sizing = rect.gameObject.AddComponent<LayoutElement>();
             sizing.flexibleWidth = 1; sizing.minHeight = sizing.preferredHeight = 36;
-            rect.gameObject.AddComponent<Image>().color = new Color(.15f, .18f, .23f);
+            var fieldBackground = rect.gameObject.AddComponent<Image>();
+            fieldBackground.color = new Color(.15f, .18f, .23f);
+            AstellaPrismProceduralSurface.ApplyNew(fieldBackground);
             var field = rect.gameObject.AddComponent<InputField>();
             var text = Label(rect, "", 16); Stretch(text.rectTransform); text.supportRichText = false;
             field.textComponent = text; field.contentType = InputField.ContentType.DecimalNumber; field.characterLimit = 8;

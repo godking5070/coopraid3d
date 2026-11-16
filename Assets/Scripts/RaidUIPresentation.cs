@@ -15,6 +15,8 @@ namespace RaidRogue
         public IconEntry[] icons = Array.Empty<IconEntry>();
         public Sprite fallbackIcon;
         public RaidUITheme theme;
+        [Tooltip("Optional authored build-station view. The original Resources view remains the fallback.")]
+        public RaidBuildStationView buildStationPrefab;
         public RaidUIRepeatedItem skillTemplate, hotbarTemplate, partyTemplate, resourceTemplate, statusTemplate;
         public RaidUIRepeatedItem formButtonTemplate, formTextTemplate;
         private static RaidUIPresentation _settings;

@@ -18,6 +18,8 @@ namespace RaidRogue
         [Header("References")]
         public BossController boss;
         public PlayerController player;
+        [Tooltip("Opt in to fit an authored background's height to its visible enemy rows. Authored width and position remain unchanged.")]
+        public bool fitBackgroundToRows = false;
 
         [System.Serializable]
         private class EnemyRowUI
@@ -341,6 +343,8 @@ namespace RaidRogue
             int visibleCount = Mathf.Clamp(livingEnemies.Count, 1, MaxRows);
             if (!RaidUIStyle.Authored(panelRect))
                 panelRect.sizeDelta = new Vector2(335f, 36f + visibleCount * 54f);
+            else if (fitBackgroundToRows)
+                panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 36f + visibleCount * 54f);
 
             Transform currentSelected = TargetingManager.Instance != null ? TargetingManager.Instance.AttackTarget : null;
 

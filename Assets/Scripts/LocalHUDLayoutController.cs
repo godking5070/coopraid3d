@@ -278,6 +278,7 @@ namespace RaidRogue
             Button(_toolbar,"취소",new Vector2(465,-24),140,CancelEdit);
             _notice=MakeText(_overlay.transform,"",new Vector2(0,24),new Vector2(1000,48),15);
             _notice.rectTransform.anchorMin=_notice.rectTransform.anchorMax=new Vector2(.5f,0);
+            AstellaPrismProceduralSurface.ApplyNew(_toolbar);
         }
         private void Cycle(int delta)
         {int at=_items.FindIndex(i=>i.id==_selected);for(int i=0;i<_items.Count;i++){at=(at+delta+_items.Count)%_items.Count;if(_items[at].rect!=null){_selected=_items[at].id;break;}}}

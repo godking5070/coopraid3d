@@ -411,6 +411,7 @@ namespace RaidRogue
         private Button ButtonAt(Transform p, string name, string text, Vector2 pos, Vector2 size, UnityEngine.Events.UnityAction click)
         {
             var r = Box(p, name, pos, size, new Color(.13f, .27f, .36f)); var b = r.gameObject.AddComponent<Button>(); b.targetGraphic = r.GetComponent<Image>();
+            AstellaPrismProceduralSurface.ApplyNew(r.GetComponent<Image>());
             b.navigation = new Navigation { mode = Navigation.Mode.None }; if (_buildingForms) b.onClick.AddListener(click); else RaidUIView.Bind(this,name,click,b); Label(r, text, Vector2.zero, size - Vector2.one * 6, 18); return b;
         }
         private Button ButtonTop(Transform p, string text, float x, float y, float width, UnityEngine.Events.UnityAction click,string id=null)

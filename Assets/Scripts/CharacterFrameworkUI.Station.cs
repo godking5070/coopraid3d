@@ -131,7 +131,8 @@ namespace RaidRogue
             if(!_stationArtResolved){_stationArt=FindFirstObjectByType<AstellaOrnateHUD>();_stationArtResolved=true;}
             if(_stationView==null)
             {
-                var prefab=Resources.Load<RaidBuildStationView>("UI/ConstellationBuild");
+                var prefab=RaidUIPresentation.Settings?.buildStationPrefab;
+                if(prefab==null)prefab=Resources.Load<RaidBuildStationView>("UI/ConstellationBuild");
                 var parent=GetComponentInParent<Canvas>().transform;
                 BindStationView(prefab!=null?Instantiate(prefab,parent,false):CreateDefaultStationView(parent));
             }

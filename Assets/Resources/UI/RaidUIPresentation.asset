@@ -12,28 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 517769c6892e4154b91f72b8ec959748, type: 3}
   m_Name: RaidUIPresentation
   m_EditorClassIdentifier: Assembly-CSharp::RaidRogue.RaidUIPresentation
-  hudPrefab: {fileID: 9192275739591828337, guid: 7cffc98b4342c7e4c9d3c4b71765029d, type: 3}
+  hudPrefab: {fileID: 9192275739591828337, guid: 018d6bb7af057884d9f993535c037575, type: 3}
   views:
   - id: character
-    prefab: {fileID: 5854577931382604109, guid: b0b71d2d188896346b27f878870785e7, type: 3}
+    prefab: {fileID: 5854577931382604109, guid: 6f3842d0a39a53f49a5d8253eabfc301, type: 3}
   - id: dash
-    prefab: {fileID: 9168783352922493735, guid: 1f1795909b6388e4fbcaaeb6283e26b1, type: 3}
+    prefab: {fileID: 9168783352922493735, guid: 193b7b5b6c186174495414f345fc28af, type: 3}
   - id: potion
-    prefab: {fileID: 5308008728275262517, guid: 43db2af794339674ca15e836acf36f17, type: 3}
+    prefab: {fileID: 5308008728275262517, guid: 8f778e7b93c2cda49adc24a6ff16b5e5, type: 3}
   - id: origin
-    prefab: {fileID: 5244134053426297857, guid: b477edad4386f9d4b972d853a3da93e8, type: 3}
+    prefab: {fileID: 5244134053426297857, guid: 348abc54ce6981a4f9463c0bb2452904, type: 3}
   - id: metrics
-    prefab: {fileID: 5068903584265989499, guid: fe0e9c7eea4793842b0e1ee397d98dc2, type: 3}
+    prefab: {fileID: 5068903584265989499, guid: 3f7dd0a393520684ab187b64e1a5ccc3, type: 3}
   - id: resurrection
-    prefab: {fileID: 1182475405713097366, guid: 56000430fe4964c4781797a08bbc3a79, type: 3}
+    prefab: {fileID: 1182475405713097366, guid: f82e021833f7bb4478a91cb520486fb5, type: 3}
   - id: settings
-    prefab: {fileID: 7858003094499278621, guid: 401455e76a915fa4fa3fae2afadf526b, type: 3}
+    prefab: {fileID: 7858003094499278621, guid: 6e80b055a58505843ae42d5e494ad158, type: 3}
   - id: connection
-    prefab: {fileID: 7528381434682125526, guid: 28fc3bc3e56369748b6f25e5f9122c21, type: 3}
+    prefab: {fileID: 7528381434682125526, guid: 357a1b05f138fa94b9ab2ad785b91269, type: 3}
   - id: wipe
-    prefab: {fileID: 451248774632073601, guid: 8c563c2b738606f4aaa0396fd029686e, type: 3}
+    prefab: {fileID: 451248774632073601, guid: c0eb8dd296c44014d91b4e344db545e0, type: 3}
   - id: skill-reward
-    prefab: {fileID: 3723391384957924927, guid: 88e8cdc91f0fac94eb630d025b66fc21, type: 3}
+    prefab: {fileID: 3723391384957924927, guid: 7320a94283fb15b49a11cac1b76cd8ad, type: 3}
   icons:
   - id: job.aegis-paladin.slot.gcd1
     sprite: {fileID: 0}
@@ -640,11 +640,12 @@ MonoBehaviour:
   - id: status.knockback-immunity
     sprite: {fileID: 0}
   fallbackIcon: {fileID: 0}
-  theme: {fileID: 11400000, guid: ba89a27d8013b4c4896b29b0ba624ce3, type: 2}
-  skillTemplate: {fileID: 3890049488590872729, guid: a61c9bc117d1fd84299be5def65dda29, type: 3}
-  hotbarTemplate: {fileID: 774226399376881015, guid: 68337b63cd64c1045a85c527ba979b5b, type: 3}
-  partyTemplate: {fileID: 1982305002540151575, guid: fe518352de63eed45b6e2aa530665aa5, type: 3}
-  resourceTemplate: {fileID: 8583948646502297454, guid: 529e7c94ca953194e939365100220f57, type: 3}
-  statusTemplate: {fileID: 6505712008583019248, guid: 37758f861762bc64bba2a1cd2382c999, type: 3}
-  formButtonTemplate: {fileID: 7849022108032060590, guid: 588c06f9a0d10904089976a673aa5dcc, type: 3}
-  formTextTemplate: {fileID: 5217723982784122997, guid: 04a8a09037d455c46bc6aef0341d26c8, type: 3}
+  theme: {fileID: 11400000, guid: 49eec8f3f268bbb46b34820a316ab8f2, type: 2}
+  buildStationPrefab: {fileID: 6041277238114918147, guid: 8045a82911acdaa409e333330855a475, type: 3}
+  skillTemplate: {fileID: 3890049488590872729, guid: 734ee9a3e79725f4386948524ad2693d, type: 3}
+  hotbarTemplate: {fileID: 774226399376881015, guid: 4bab507fda780e049826e2a148e8ed39, type: 3}
+  partyTemplate: {fileID: 1982305002540151575, guid: 5e42cc9b80ff2b94ca685e4dbca0e0bf, type: 3}
+  resourceTemplate: {fileID: 8583948646502297454, guid: d32ddb04fa59abd43a47ab367a87377a, type: 3}
+  statusTemplate: {fileID: 6505712008583019248, guid: cfd73d6f431d73a4085d0f16ab04b535, type: 3}
+  formButtonTemplate: {fileID: 7849022108032060590, guid: 95d353fcb9a3a5f49b69cd86d8d8e442, type: 3}
+  formTextTemplate: {fileID: 5217723982784122997, guid: 4a7a634980a446d4eb712d5414b33b97, type: 3}

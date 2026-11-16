@@ -232,7 +232,9 @@ namespace RaidRogue
         private Button ButtonAt(Transform parent, string caption, Vector2 pos, Vector2 size, UnityEngine.Events.UnityAction action)
         {
             var rect = Box(parent, caption, pos, size, new Color(0.12f, 0.28f, 0.4f)); var button = rect.gameObject.AddComponent<Button>();
-            button.targetGraphic = rect.GetComponent<Image>(); RaidUIView.Bind(this, caption, action, button); Label(rect, caption, Vector2.zero, size - Vector2.one * 8, 18); return button;
+            button.targetGraphic = rect.GetComponent<Image>();
+            AstellaPrismProceduralSurface.ApplyNew(rect.GetComponent<Image>());
+            RaidUIView.Bind(this, caption, action, button); Label(rect, caption, Vector2.zero, size - Vector2.one * 8, 18); return button;
         }
         private InputField Field(Transform parent, Vector2 pos, string value, int limit)
         {
