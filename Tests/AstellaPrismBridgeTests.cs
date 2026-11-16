@@ -131,7 +131,8 @@ namespace RaidRogue
         public Row[] rows; public GameObject panelRoot;
     }
     public static class LocalHUDLayoutController { public static bool IsEditing; }
-    public sealed class RaidNetworkSession { public static RaidNetworkSession Instance = new RaidNetworkSession(); public bool MenuOpen; }
+    public enum RaidSessionMode { Menu, Single, Training }
+    public sealed class RaidNetworkSession { public static RaidNetworkSession Instance = new RaidNetworkSession(); public bool MenuOpen; public RaidSessionMode Mode = RaidSessionMode.Single; }
     public static class CombatMetricsUI { public static bool ResultsOpen; }
 }
 
@@ -182,6 +183,7 @@ static class AstellaPrismBridgeTests
         var ready = new AstellaPlayerHUDV3();
         var mirror = new AstellaPrismHUDBridge.PartyMirror { sourceIndex = 2, view = partyView, shieldFill = new PrismV4Gauge(), aggroOverlay = new GameObject() };
         var bridge = new AstellaPrismHUDBridge { hud = hud, jobSource = job, ultimateSource = classUltimate, readinessSource = ready, partySource = party, playerView = playerView, bossView = bossView, centerView = centerView, slots = new[] { new AstellaPrismHUDBridge.SlotMirror { sourceIndex = 0, view = slotView } }, partyRows = new[] { mirror } };
+        bridge.presentationRoot = new GameObject();
         playerView.healthFill.sourceFill = new Image { fillAmount = .99f };
         Tick(bridge);
         Check(Near(playerView.healthFill.Ratio, .6f) && playerView.healthFill.sourceFill == null && playerView.valueText.text == "600", "health mirrors the live source and owns an independent Prism gauge input");
@@ -217,12 +219,21 @@ static class AstellaPrismBridgeTests
         Check(centerView.readyGlow.activeSelf && !centerView.unavailableOverlay.activeSelf && centerView.valueText.text == "100%", "existing full-charge percentage policy is preserved at the readiness epsilon");
 
         RaidNetworkSession.Instance.MenuOpen = true; Tick(bridge);
+        Check(!bridge.presentationRoot.activeSelf, "menu hides the complete composition including slot controls and utility actions");
         Check(!playerView.gameObject.activeSelf && !bossView.gameObject.activeSelf && !centerView.gameObject.activeSelf && !partyView.gameObject.activeSelf && !centerView.readyGlow.activeSelf, "menus hide only the mirrored view modules and glow");
         Check(hud.playerRoot.activeSelf && hud.bossRoot.activeSelf && partyOriginal.root.activeSelf, "source object activation and source calculations are untouched");
         RaidNetworkSession.Instance.MenuOpen = false; CombatMetricsUI.ResultsOpen = true; Tick(bridge);
         Check(!playerView.gameObject.activeSelf, "results modal uses existing visibility rules");
         LocalHUDLayoutController.IsEditing = true; Tick(bridge);
-        Check(playerView.gameObject.activeSelf && bossView.gameObject.activeSelf && centerView.gameObject.activeSelf, "HUD editing follows the original preview visibility policy");
+        Check(!bridge.presentationRoot.activeSelf && !playerView.gameObject.activeSelf, "results modal remains above HUD editing preview");
+        CombatMetricsUI.ResultsOpen = false; RaidNetworkSession.Instance.MenuOpen = true; Tick(bridge);
+        Check(!bridge.presentationRoot.activeSelf && !centerView.gameObject.activeSelf, "menu remains above HUD editing preview");
+        RaidNetworkSession.Instance.MenuOpen = false; RaidNetworkSession.Instance.Mode = RaidSessionMode.Menu; LocalHUDLayoutController.IsEditing = false; Tick(bridge);
+        Check(!bridge.presentationRoot.activeSelf, "main menu mode hides controls even if MenuOpen was closed");
+        LocalHUDLayoutController.IsEditing = true; Tick(bridge);
+        Check(bridge.presentationRoot.activeSelf && playerView.gameObject.activeSelf, "explicit layout editing from main menu can preview the authored combat HUD");
+        RaidNetworkSession.Instance.Mode = RaidSessionMode.Training; Tick(bridge);
+        Check(bridge.presentationRoot.activeSelf && playerView.gameObject.activeSelf, "training and in-game HUD editing restore combat presentation");
         LocalHUDLayoutController.IsEditing = false; CombatMetricsUI.ResultsOpen = false; Tick(bridge);
         Check(playerView.gameObject.activeSelf && centerView.readyGlow.activeSelf, "closing overlays restores current presentation state");
 
@@ -244,6 +255,7 @@ static class AstellaPrismBridgeTests
         Check(!job.HasResource && job.ResourceId == "" && !job.ResourceIsInteger && playerView.resourceText.text == "—", "disabled primary source does not leave stale values");
         partyOriginal.gauge.Value = .1f; Tick(bridge);
         typeof(AstellaPrismHUDBridge).GetMethod("OnDisable", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(bridge, null);
+        Check(!bridge.presentationRoot.activeSelf, "bridge disable hides the composition on exiting Play");
         Check(!centerView.readyGlow.activeSelf && partyView.healthFill.sprite == normalFill, "bridge disable retires stale readiness and restores captured party art");
         var order = (DefaultExecutionOrder)Attribute.GetCustomAttribute(typeof(AstellaPrismHUDBridge), typeof(DefaultExecutionOrder));
         Check(order != null && order.order == 13000, "bridge runs after all existing data presenters");

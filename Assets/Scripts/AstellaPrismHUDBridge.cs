@@ -36,12 +36,15 @@ namespace RaidRogue
         public AstellaClassUltimateHUD ultimateSource;
         public AstellaPlayerHUDV3 readinessSource;
         public AstellaPartyHUDV4 partySource;
+        // Separate from this bridge so all authored controls can be hidden on menus.
+        public GameObject presentationRoot;
         public PrismV4Bindings playerView, bossView, centerView;
         public SlotMirror[] slots = Array.Empty<SlotMirror>();
         public PartyMirror[] partyRows = Array.Empty<PartyMirror>();
 
         private void LateUpdate()
         {
+            SetVisible(presentationRoot, PresentationAllowed);
             MirrorPlayer();
             MirrorBoss();
             MirrorCenter();
@@ -51,6 +54,7 @@ namespace RaidRogue
 
         private void OnDisable()
         {
+            SetVisible(presentationRoot, false);
             SetVisible(centerView != null ? centerView.readyGlow : null, false);
             foreach (var row in partyRows ?? Array.Empty<PartyMirror>())
                 if (row?.cachedHealthFill != null && row.normalHealthSprite != null)
@@ -177,10 +181,20 @@ namespace RaidRogue
 
         private static bool MirrorVisibility(PrismV4Bindings view, GameObject sourceRoot)
         {
-            bool visible = sourceRoot != null && sourceRoot.activeInHierarchy &&
-                (LocalHUDLayoutController.IsEditing || RaidNetworkSession.Instance?.MenuOpen != true && !CombatMetricsUI.ResultsOpen);
+            bool visible = PresentationAllowed && sourceRoot != null && sourceRoot.activeInHierarchy;
             if (view != null && view.gameObject != sourceRoot) SetVisible(view.gameObject, visible);
             return visible;
+        }
+
+        private static bool PresentationAllowed
+        {
+            get
+            {
+                var session = RaidNetworkSession.Instance;
+                return !CombatMetricsUI.ResultsOpen &&
+                    (session == null || !session.MenuOpen &&
+                        (session.Mode != RaidSessionMode.Menu || LocalHUDLayoutController.IsEditing));
+            }
         }
 
         private static string FormatPrimary(float value, float maximum, bool integer)
