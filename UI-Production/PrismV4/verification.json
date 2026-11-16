@@ -1,0 +1,553 @@
+{
+  "passed": true,
+  "iconArtworkIncluded": false,
+  "spriteCount": 45,
+  "assets": [
+    {
+      "id": "Boss/boss-frame",
+      "canvas": [
+        1280,
+        96
+      ],
+      "transparentPixels": 100096,
+      "visiblePixels": 22784,
+      "pngSha256": "07a586f646aabc719850ec1f4a1e20dc2d50f37cb701c398bfcbf771414b429f"
+    },
+    {
+      "id": "Boss/boss-track",
+      "canvas": [
+        1280,
+        96
+      ],
+      "transparentPixels": 77068,
+      "visiblePixels": 45812,
+      "pngSha256": "ce361ccca9c350e721099b354979c8524bf9a70f0a745ece0a47e18474e90b39"
+    },
+    {
+      "id": "Boss/boss-fill",
+      "canvas": [
+        1280,
+        96
+      ],
+      "transparentPixels": 77068,
+      "visiblePixels": 45812,
+      "pngSha256": "4090b1618afb9e18852ef828ca071c33f331753669f0154dff684a7f27705e6d"
+    },
+    {
+      "id": "Boss/cast-frame",
+      "canvas": [
+        512,
+        48
+      ],
+      "transparentPixels": 19528,
+      "visiblePixels": 5048,
+      "pngSha256": "1ab03a1ca719ec6e8cca42df8863a0a2a612369a8403802d80b3f2a36d36a739"
+    },
+    {
+      "id": "Boss/cast-track",
+      "canvas": [
+        512,
+        48
+      ],
+      "transparentPixels": 20760,
+      "visiblePixels": 3816,
+      "pngSha256": "2149f3c5dd2a80c3a91f8adcf0d4088d730e88a526a962af780205b829f1c239"
+    },
+    {
+      "id": "Boss/cast-fill",
+      "canvas": [
+        512,
+        48
+      ],
+      "transparentPixels": 20760,
+      "visiblePixels": 3816,
+      "pngSha256": "820a2f3b1bf0eb279433874acf7c74f8333c41a556c8d33086de7cfe9c636ee2"
+    },
+    {
+      "id": "Player/gauge-frame",
+      "canvas": [
+        1024,
+        96
+      ],
+      "transparentPixels": 77752,
+      "visiblePixels": 20552,
+      "pngSha256": "0e77feefc5e7e528372e2bbed75b2c4e230962aa53b2ba3a55c2239a0781be3f"
+    },
+    {
+      "id": "Player/gauge-track",
+      "canvas": [
+        1024,
+        96
+      ],
+      "transparentPixels": 42408,
+      "visiblePixels": 55896,
+      "pngSha256": "83818b8f6e0526f5dabfe1dd61ac2ee99f6d15b6dea739faaebe6526d2953d5d"
+    },
+    {
+      "id": "Player/hp-fill",
+      "canvas": [
+        1024,
+        96
+      ],
+      "transparentPixels": 42408,
+      "visiblePixels": 55896,
+      "pngSha256": "e1e39dfaef9ea659448ab84397c478b62cafe718f28bd5f9d7f9c55183aadad7"
+    },
+    {
+      "id": "Player/resource-fill",
+      "canvas": [
+        1024,
+        96
+      ],
+      "transparentPixels": 42408,
+      "visiblePixels": 55896,
+      "pngSha256": "173591b944b9422cc83818ecb41bea90b1dae5e7e793c0ae8565e7d605618664"
+    },
+    {
+      "id": "Party/bar-frame",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 7804,
+      "visiblePixels": 4996,
+      "pngSha256": "e45332dad675d6d2562e012c359b67326a6efad2c2dbb6fd3e68ed477d89efc4"
+    },
+    {
+      "id": "Party/bar-track",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 8264,
+      "visiblePixels": 4536,
+      "pngSha256": "ad4f6e6e811916c2133fb7ce770c3668366dde7952b92add9df383c64e725a74"
+    },
+    {
+      "id": "Party/bar-fill",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 8264,
+      "visiblePixels": 4536,
+      "pngSha256": "69a431bc09a994b232c99763637ac7aa18a367e82d00e1d4c7c7e287268d3ad5"
+    },
+    {
+      "id": "Boss/boss-gem-left",
+      "canvas": [
+        96,
+        96
+      ],
+      "transparentPixels": 5604,
+      "visiblePixels": 3612,
+      "pngSha256": "d98f0ca48085b6bf3f7f0859df69ed9b90df737bc7ad0667d23836f4b7f4c083"
+    },
+    {
+      "id": "Boss/boss-gem-right",
+      "canvas": [
+        96,
+        96
+      ],
+      "transparentPixels": 5604,
+      "visiblePixels": 3612,
+      "pngSha256": "165190ea4e2e5102b315fde49e813d5f97a5b8bc2ec15b55aeec3c74bf3d40cb"
+    },
+    {
+      "id": "Party/role-frame",
+      "canvas": [
+        96,
+        96
+      ],
+      "transparentPixels": 6696,
+      "visiblePixels": 2520,
+      "pngSha256": "bfddf5dc5f70c5fab1ccc6fb20c35497084fc063f3e99eedf9d6dd6da9dbc21b"
+    },
+    {
+      "id": "Party/role-background",
+      "canvas": [
+        96,
+        96
+      ],
+      "transparentPixels": 4428,
+      "visiblePixels": 4788,
+      "pngSha256": "f33f27214fd47cc4a449ad49742c3665a24c2fd3b49de9bd4639f30530e4d8ac"
+    },
+    {
+      "id": "Party/role-inner-mask",
+      "canvas": [
+        96,
+        96
+      ],
+      "transparentPixels": 4428,
+      "visiblePixels": 4788,
+      "pngSha256": "d0624bbbc7b366dcdbb79091541c72f9b0111fd6dc9775212f0f6431e03bcb5c"
+    },
+    {
+      "id": "Hub/hub-frame",
+      "canvas": [
+        384,
+        384
+      ],
+      "transparentPixels": 124652,
+      "visiblePixels": 22804,
+      "pngSha256": "72542f8dc614d677bb94c04e7c4e06d07afc924051619e7509cef2c065381fa4"
+    },
+    {
+      "id": "Hub/hub-background",
+      "canvas": [
+        384,
+        384
+      ],
+      "transparentPixels": 49512,
+      "visiblePixels": 97944,
+      "pngSha256": "5c10384f509a42e09011d92211e8d168105ff18764b15cba4c5fd4c438c24738"
+    },
+    {
+      "id": "Hub/hub-crystal",
+      "canvas": [
+        384,
+        384
+      ],
+      "transparentPixels": 119488,
+      "visiblePixels": 27968,
+      "pngSha256": "04c4dcaa140731a3bbcaa695ec1177c4bef3c2d28bbe80425368a20faaf49c45"
+    },
+    {
+      "id": "Hub/ultimate-badge",
+      "canvas": [
+        128,
+        80
+      ],
+      "transparentPixels": 3328,
+      "visiblePixels": 6912,
+      "pngSha256": "c53552c1749104be2c7a2d9bf322ccbe36c5bd31d7520310357e77522fa7ea7d"
+    },
+    {
+      "id": "Skills/slot-background",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 11474,
+      "visiblePixels": 25390,
+      "pngSha256": "fdaeeb73f87b616d017f44b2cb2ed921c794a5dbc3959a1bffd53a8b3458d32b"
+    },
+    {
+      "id": "Skills/slot-frame-normal",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 30648,
+      "visiblePixels": 6216,
+      "pngSha256": "f58788cac2d49eef6f2f24ad9f6479aec5a38c62817616ffde29937f3f707c45"
+    },
+    {
+      "id": "Skills/slot-frame-hover",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 30648,
+      "visiblePixels": 6216,
+      "pngSha256": "a36b055855139f9929c6ecc136be5edb58efc06e8057b3503b6fefff16969daa"
+    },
+    {
+      "id": "Skills/slot-frame-pressed",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 30648,
+      "visiblePixels": 6216,
+      "pngSha256": "f3774aafbc3547c928a361de9d6958849e4b0e1648dda7b4e3664fcf228690d4"
+    },
+    {
+      "id": "Skills/slot-frame-focused",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 30648,
+      "visiblePixels": 6216,
+      "pngSha256": "ed0c36a76c659982fd849d4c5a15ba305a3d6bf52c31dd87390c1e9b5b4cbab2"
+    },
+    {
+      "id": "Skills/slot-frame-disabled",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 30648,
+      "visiblePixels": 6216,
+      "pngSha256": "0b563a1fff99331bf9815624a570e041cf8fbe0de41b65cc44857053b3af7617"
+    },
+    {
+      "id": "Skills/slot-inner-mask",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 11684,
+      "visiblePixels": 25180,
+      "pngSha256": "73f2c88eaef0e4217a51a1903f08406bad3d01d00e6e4cb033835b6ff6c9bbfb"
+    },
+    {
+      "id": "Skills/key-badge",
+      "canvas": [
+        72,
+        48
+      ],
+      "transparentPixels": 508,
+      "visiblePixels": 2948,
+      "pngSha256": "ddd0f6ffffe913d95f5219cb09d0d5358f8c3fcc52d2732a15233964c7f1b872"
+    },
+    {
+      "id": "Skills/key-badge-wide",
+      "canvas": [
+        112,
+        48
+      ],
+      "transparentPixels": 588,
+      "visiblePixels": 4788,
+      "pngSha256": "4136413b48b049f69d88afeda20451b875d78641dd1f348f4fa244a7680238c4"
+    },
+    {
+      "id": "States/cooldown-mask",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 11684,
+      "visiblePixels": 25180,
+      "pngSha256": "73f2c88eaef0e4217a51a1903f08406bad3d01d00e6e4cb033835b6ff6c9bbfb"
+    },
+    {
+      "id": "States/cooldown-overlay",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 11684,
+      "visiblePixels": 25180,
+      "pngSha256": "27c8da77130629437ed048c90df10064f82df36304b68058b64e947e968f504a"
+    },
+    {
+      "id": "States/disabled-overlay",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 11684,
+      "visiblePixels": 25180,
+      "pngSha256": "8b4c76cdbd4711e9bff85bd99321d1dde1c4786804c065130ff6fb0a535792a6"
+    },
+    {
+      "id": "States/hover-overlay",
+      "canvas": [
+        192,
+        192
+      ],
+      "transparentPixels": 11684,
+      "visiblePixels": 25180,
+      "pngSha256": "6f49e38bc796246891523352990e7f8826a716f9ba96442b8e5bdfffa10e0eeb"
+    },
+    {
+      "id": "Boss/boss-inner-mask",
+      "canvas": [
+        1280,
+        96
+      ],
+      "transparentPixels": 77068,
+      "visiblePixels": 45812,
+      "pngSha256": "8488cdaa35dab975fde30f2401dc8098db4bcdb9406f850440fb21a9165af5b0"
+    },
+    {
+      "id": "Boss/cast-inner-mask",
+      "canvas": [
+        512,
+        48
+      ],
+      "transparentPixels": 20760,
+      "visiblePixels": 3816,
+      "pngSha256": "a4ef968529f79dc87b943a54bbe6e450b70da73b707e7f0603cf475b7a8434c8"
+    },
+    {
+      "id": "Player/gauge-inner-mask",
+      "canvas": [
+        1024,
+        96
+      ],
+      "transparentPixels": 42408,
+      "visiblePixels": 55896,
+      "pngSha256": "d201717f7d142df43ebeb2ab79047e9ed15f4ab7e2e1be660a43039acc3c0469"
+    },
+    {
+      "id": "Party/bar-inner-mask",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 8264,
+      "visiblePixels": 4536,
+      "pngSha256": "f5a1ca3f612f7dbf510d238f3787e0d934bbfd7166e2b416968bdb1dd0312d2b"
+    },
+    {
+      "id": "Hub/hub-inner-mask",
+      "canvas": [
+        384,
+        384
+      ],
+      "transparentPixels": 49512,
+      "visiblePixels": 97944,
+      "pngSha256": "5838e758937fa1462682aafa804d106df776bad617cd393f0825db40b9b9c4e6"
+    },
+    {
+      "id": "Hub/ready-glow",
+      "canvas": [
+        384,
+        384
+      ],
+      "transparentPixels": 58718,
+      "visiblePixels": 88738,
+      "pngSha256": "f7e76647d8d2cef419da3c523eb0a843d83cee5d4a9ff04df75cf5c3c932c907"
+    },
+    {
+      "id": "Hub/disabled-overlay",
+      "canvas": [
+        384,
+        384
+      ],
+      "transparentPixels": 49512,
+      "visiblePixels": 97944,
+      "pngSha256": "c656f4898695a6164dbc05e9b47ddb83adf6318e505c79adfb95a3ca4611d9cc"
+    },
+    {
+      "id": "Party/bar-fill-critical",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 8264,
+      "visiblePixels": 4536,
+      "pngSha256": "1dcb56cfb8d8db3296afaf112502ab321c630da7df90025535dff5834d130ad6"
+    },
+    {
+      "id": "Party/selected-overlay",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 7684,
+      "visiblePixels": 5116,
+      "pngSha256": "b12fd39004605d4ffb88440318969d2a5b538d847498f67aaf97a702529c189f"
+    },
+    {
+      "id": "Party/dead-overlay",
+      "canvas": [
+        320,
+        40
+      ],
+      "transparentPixels": 8264,
+      "visiblePixels": 4536,
+      "pngSha256": "c76a5f8b2476a577ec6a452e254040cce886cc384fb92f093e706f92f7df03dd"
+    }
+  ],
+  "gauges": [
+    {
+      "id": "Boss/boss-fill",
+      "fullCoverageHoles": 0,
+      "ratios": [
+        {
+          "ratio": 0,
+          "visiblePixels": 0
+        },
+        {
+          "ratio": 0.5,
+          "visiblePixels": 22488
+        },
+        {
+          "ratio": 1,
+          "visiblePixels": 45812
+        }
+      ]
+    },
+    {
+      "id": "Boss/cast-fill",
+      "fullCoverageHoles": 0,
+      "ratios": [
+        {
+          "ratio": 0,
+          "visiblePixels": 0
+        },
+        {
+          "ratio": 0.5,
+          "visiblePixels": 1880
+        },
+        {
+          "ratio": 1,
+          "visiblePixels": 3816
+        }
+      ]
+    },
+    {
+      "id": "Player/hp-fill",
+      "fullCoverageHoles": 0,
+      "ratios": [
+        {
+          "ratio": 0,
+          "visiblePixels": 0
+        },
+        {
+          "ratio": 0.5,
+          "visiblePixels": 26868
+        },
+        {
+          "ratio": 1,
+          "visiblePixels": 55896
+        }
+      ]
+    },
+    {
+      "id": "Player/resource-fill",
+      "fullCoverageHoles": 0,
+      "ratios": [
+        {
+          "ratio": 0,
+          "visiblePixels": 0
+        },
+        {
+          "ratio": 0.5,
+          "visiblePixels": 26868
+        },
+        {
+          "ratio": 1,
+          "visiblePixels": 55896
+        }
+      ]
+    },
+    {
+      "id": "Party/bar-fill",
+      "fullCoverageHoles": 0,
+      "ratios": [
+        {
+          "ratio": 0,
+          "visiblePixels": 0
+        },
+        {
+          "ratio": 0.5,
+          "visiblePixels": 2188
+        },
+        {
+          "ratio": 1,
+          "visiblePixels": 4536
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "limits": [
+    "PNG and vector source verification; Unity Play and live game bindings not exercised."
+  ]
+}
