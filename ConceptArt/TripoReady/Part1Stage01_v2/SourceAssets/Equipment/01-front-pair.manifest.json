@@ -1,0 +1,32 @@
+{
+  "id": "equipment-front-pair",
+  "view": "front",
+  "image": "01-front-pair.png",
+  "prompts": [
+    "01-front-pair.prompt.txt"
+  ],
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "source": "C:/Users/godki/.codex/generated_images/01a1e20d-a101-74b1-bb96-937bae768ebc/exec-e6ff4585-2d0b-4eaf-8f8e-ee817a891f11.png",
+  "references": [
+    {
+      "path": "../../../Part1Stage01_v1/Normal/02-club.png",
+      "role": "Exact approved club shape/material/front gold star, front-facing view and alpha composition"
+    },
+    {
+      "path": "../../../Part1Stage01_v1/Normal/03-shield.png",
+      "role": "Exact approved shield silhouette/gate/star/material, front-facing view and alpha composition"
+    }
+  ],
+  "layout_role": "Source image only. Exactly two disconnected props, club left and shield right. Final output uses connected foreground components and deterministic fixed anchors.",
+  "visual_qa": {
+    "status": "pass",
+    "subjects": "One complete blunt stone club and one front-facing gate shield. No character, hands, labels or extra objects.",
+    "design": "Original ivory/navy/gold head, band, collars and pommel retained. Original gold-rimmed heater shield, navy field, four-point star and gate motif retained.",
+    "alpha_note": "Source is transparent; RGB values in fully transparent pixels are ignored. Detached alpha specks excluded by the layout foreground component selection."
+  },
+  "width": 1254,
+  "height": 1254,
+  "bytes": 976568,
+  "sha256": "fa3e6fc56d44f504e4977480a8415dda96027379bbea1a28a55895aab75b9bc3"
+}

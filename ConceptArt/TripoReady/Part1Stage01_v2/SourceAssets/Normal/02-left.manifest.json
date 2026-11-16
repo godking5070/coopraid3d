@@ -1,0 +1,41 @@
+{
+  "id": "normal-02-left",
+  "part": 1,
+  "stage": 1,
+  "mode": "normal",
+  "view": "anatomical left side, nose toward image left, yaw90",
+  "image": "02-left.png",
+  "prompts": [
+    "02-left.prompt.txt"
+  ],
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:\\Users\\godki\\.codex\\generated_images\\01a1e262-d937-7032-b683-a281c0d4dd81\\exec-989acb23-7361-435c-8519-85fd5956febd.png",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 492320,
+  "sha256": "96039b5356eb9da286a17d38d8b27fe18ae62937ce71d8b0325ed23e782d7b3f",
+  "transparent_background": true,
+  "references": [
+    {
+      "path": "01-front.png",
+      "role": "First supplied image; approved transparent front identity, scale, proportions, A-pose and materials"
+    },
+    {
+      "path": "../../../../BossOverview/originals/p1-s1-normal.png",
+      "role": "Second supplied image; approved original concept sheet side/rear geometry details only"
+    }
+  ],
+  "visual_qa": {
+    "status": "pass_with_notes",
+    "method": "Saved source PNG view_image inspection and decoded RGBA spot checks",
+    "notes": "Saved PNG inspected. True anatomical left profile with nose and toes pointing image left. Same ivory/navy/brass guardian and A-pose projected in profile; natural far-arm/leg occlusion. Full helmet and feet retained; no weapons, shield, text, floor, or cast shadow. True transparent background confirmed. Minor near-transparent alpha edge noise.",
+    "alpha_background_sample": {
+      "x": 10,
+      "y": 10,
+      "alpha": 0
+    },
+    "alignment_recommendation": "Use alpha>=128 largest connected foreground component. Keep original generated source untouched."
+  },
+  "limits": "AI-inferred source view, not an actual3D render. Raw transparent source; root handles common-layout placement. No weapons or shield. Independent view generation can retain minor detailing differences."
+}
