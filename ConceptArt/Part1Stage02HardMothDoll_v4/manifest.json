@@ -1,0 +1,49 @@
+{
+  "id": "stage02-hard-moth-wings-uncanny-normal-doll",
+  "part": 1,
+  "stage": 2,
+  "version": 4,
+  "title_ko": "플로라 기어 하드 · 나방 날개 결합 수정안",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e20d-a101-74b1-bb96-937bae768ebc/exec-555c583d-8a1c-42a2-a88e-808073c98bd4.png",
+  "references": [
+    {
+      "path": "../Part1Stage02HardRedesign_v3/03-greenhouse-moth/01-boss.png",
+      "role": "Edit target for wings ONLY: M shape, teal segmented panels, hinged brass frame and curled lower tips. Insect central body discarded.",
+      "title": "3번 · 날개 구조",
+      "sha256": "e859c51bbbac0b13dd3bfd6335fbb135772ca718e2b390fa0c97954a8f881a26"
+    },
+    {
+      "path": "../BossOverview/originals/p1-s2-normal.png",
+      "role": "Central normal doll identity and anatomy: cap, short curls, porcelain face, flower chest, apron, two arms/hands and two full legs/shoes.",
+      "title": "노멀 · 가운데 인형",
+      "sha256": "743aaf9cb1c279deca386f691c956a15d582d31c62c7f236b9d9f973ca7df781"
+    },
+    {
+      "path": "../Part1Stage02HardRedesign_v3/05-shear-dancer/01-boss.png",
+      "role": "Scissor-half blade design ONLY for one upper cutting part per wing; no central blade forearms copied.",
+      "title": "5번 · 가위 반쪽",
+      "sha256": "d755c22570462e2c7f870de4d242f000b04ace8026cd2c833bc6612243527d17"
+    }
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 1873558,
+  "sha256": "569c116ae98096c8a7545efebe6b8dae3ac823244e20fc122e67b3434d68930e",
+  "transparent_background": false,
+  "status": "user-directed component combination; final approval pending",
+  "visual_qa": {
+    "status": "pass",
+    "wings": "Two original moth leaf-panel/brass-frame wing assemblies and curled lower ends retained. Each upper cutting part is one dancer-inspired scissor half with a round cutout, brass pivot and handle loop. Exactly two large blades.",
+    "body": "Recognizable normal gardener doll with cap/curls/porcelain face, glass flower chest and apron. Two articulated hands and two full legs with shoes. No central insect anatomy or antennae.",
+    "uncanny_transformation": "Exposed long segmented neck, tilted closed-eye cracked face, offset petal chest plates and asymmetric extended joint/hand posture.",
+    "flower": "Exactly one blue flower and green stem in the chest glass cylinder.",
+    "framing": "All blade tips, cap, wing curls, hands and feet are inside the frame. No extra figures or inset sheets."
+  },
+  "limits": "One AI concept view; not a single-mesh render, Tripo multiview pack, mesh or rig. Attachment fitting has not been tested."
+}
