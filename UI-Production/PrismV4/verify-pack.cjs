@@ -110,7 +110,7 @@ for (const [name, gauge] of Object.entries(manifest.gauges)) {
   }
 }
 
-const report = { passed: failures.length === 0, iconArtworkIncluded: false, spriteCount: results.length, assets: results, gauges: gaugeResults, failures, limits: ["PNG and vector source verification; Unity Play and live game bindings not exercised."] };
+const report = { passed: failures.length === 0, iconArtworkIncluded: false, spriteCount: results.length, assets: results, gauges: gaugeResults, failures, limits: ["Current PNG alpha/dimensions/digests and retained legacy SVG reference checks; this offline verifier does not exercise Unity Play or live game bindings."] };
 const destination = path.join(__dirname, "verification.json");
 fs.writeFileSync(destination, JSON.stringify(report, null, 2) + "\n");
 console.log(JSON.stringify({ passed: report.passed, spriteCount: report.spriteCount, gaugeChecks: report.gauges.length, failures, report: destination }));

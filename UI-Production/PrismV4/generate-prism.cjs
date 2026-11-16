@@ -1,17 +1,21 @@
 "use strict";
 
-// New editable reconstruction of the approved Prism V4 artwork. No old SVG
-// sources or game scenes are restored, patched, imported or overwritten here.
+// Historical structural-vector generator. The current painted PNGs are derived
+// from the separately generated transparent atlas and must not be overwritten.
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { Resvg } = require("@resvg/resvg-js");
 
 const WORKSPACE = path.resolve(__dirname, "../..");
 const ROOT = path.join(WORKSPACE, "Assets/UI/AstellaPrismV4");
 const SOURCE = path.join(ROOT, "Source");
 const SPRITES = path.join(ROOT, "Sprites");
 const PREVIEW = path.join(__dirname, "preview");
+const PAINTED_ATLAS = path.join(__dirname, "raster-recovery", "painted-transparent-atlas.png");
+if (fs.existsSync(PAINTED_ATLAS)) {
+  throw new Error("Painted Prism sprites are active. This legacy SVG generator is blocked to preserve them. Use raster-recovery/Extract-Frames.ps1 and Extract-Gauges.ps1, then update-painted-manifest.cjs instead.");
+}
+const { Resvg } = require("@resvg/resvg-js");
 const assets = [];
 const renderedAssets = new Map();
 
