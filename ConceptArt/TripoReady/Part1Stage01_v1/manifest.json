@@ -1,0 +1,98 @@
+{
+  "project": "ASTELLA",
+  "part": 1,
+  "stage": 1,
+  "version": "Part1Stage01_v1",
+  "title_ko": "1부 1스테이지 Tripo 입력팩",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "user_request": "1부 보스들을 3D Tripo에 넣을 수 있게 구도와 구성을 준비한다. 1부 1스테이지부터 진행한다.",
+  "scope": "기존 노멀·하드 디자인을 유지한 단일 대상 PNG4장. 노멀 몸체/돌봉/방패는 독립 자산, 하드는 몸체와 두 날개가 연결된 단일 캐릭터.",
+  "status": "reference_images_prepared_and_reviewed_no_tripo_submission",
+  "assets": [
+    {
+      "id": "normal-body",
+      "title": "노멀 몸체 · A포즈",
+      "image": "Normal/01-body-a-pose.png",
+      "meta": "Normal/01-body-a-pose.manifest.json",
+      "prompt": "Normal/01-body-a-pose.prompt.txt",
+      "usage": "노멀 캐릭터 몸체를 생성합니다. 돌봉과 방패는 분리되어 있습니다.",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1499068,
+      "sha256": "5d57f1c093e50b8a8760bd6cd20a1297f714618ae7a9eaf060e51564db165e33",
+      "tripo_input": "one_independent_single_image_asset"
+    },
+    {
+      "id": "hard-body",
+      "title": "하드 가고일 · 날개 A포즈",
+      "image": "Hard/01-body-wings-a-pose.png",
+      "meta": "Hard/01-body-wings-a-pose.manifest.json",
+      "prompt": "Hard/01-body-wings-a-pose.prompt.txt",
+      "usage": "몸체와 두 날개가 연결된 하나의 하드 캐릭터를 생성합니다.",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1709589,
+      "sha256": "1642848744a3160358678d6cd4242f2e9ee8d73501b7c8584dbcf1e41d325c21",
+      "tripo_input": "one_independent_single_image_asset"
+    },
+    {
+      "id": "normal-club",
+      "title": "노멀 장비 · 돌봉",
+      "image": "Normal/02-club.png",
+      "meta": "Normal/02-club.manifest.json",
+      "prompt": "Normal/02-club.prompt.txt",
+      "usage": "돌봉을 별도 생성한 뒤 노멀의 오른손에 배치합니다.",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1164027,
+      "sha256": "c53a37469aefe629b85d9a613aa921b0fb452ea5234b59d342d2bc54e1ed7163",
+      "tripo_input": "one_independent_single_image_asset"
+    },
+    {
+      "id": "normal-shield",
+      "title": "노멀 장비 · 성문 방패",
+      "image": "Normal/03-shield.png",
+      "meta": "Normal/03-shield.manifest.json",
+      "prompt": "Normal/03-shield.prompt.txt",
+      "usage": "방패를 별도 생성한 뒤 노멀의 왼손에 배치합니다.",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1386259,
+      "sha256": "1b904460b3228924c74e41e40791bd90adb6c045ba9995bd4e64a1365b277165",
+      "tripo_input": "one_independent_single_image_asset"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Tripo 입력 이미지 준비 안내",
+      "url": "https://www.tripo3d.ai/help/features/how-to-get-better-image-to-3d-results",
+      "checked_date": "2026-11-16"
+    },
+    {
+      "title": "Tripo 멀티뷰 입력 안내",
+      "url": "https://www.tripo3d.ai/help/features/how-to-use-multi-view-input-effectively",
+      "checked_date": "2026-11-16"
+    }
+  ],
+  "reference_originals": [
+    {
+      "path": "../../BossOverview/originals/p1-s1-normal.png",
+      "sha256": "3c2d337fcbacc2c4913b45116013b0cec9a1c6488bef41ddd19d7a4704c569e7"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s1-hard.png",
+      "sha256": "9b01330f78c5eeb0c07733a30db8d1425381942056a3051708801f71142e9add"
+    }
+  ],
+  "upload_rule": "각 PNG를 별도 Image-to-3D 입력으로 사용한다. 이4개는 같은 물체의4방향이 아니다. INDEX.html/미리보기/기존회전도시트는 업로드하지 않는다.",
+  "observed_limits": "실제 출력은1254x1254. 전부위contained, 상하 여백은공식권장보다타이트하다. 손은반개방이어서일부손가락은겹칠수있다. 보이지않는후면/방패손잡이/날개뿌리깊이는Tripo결과검토가필요하다.",
+  "not_performed": [
+    "Tripo 업로드/크레딧 사용",
+    "3D 메시·후면 형상 확인",
+    "자동 리깅·Unity 적용"
+  ],
+  "gallery": "INDEX.html",
+  "guide": "UPLOAD_GUIDE.txt",
+  "prompts": "prompts-all.txt"
+}

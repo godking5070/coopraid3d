@@ -1,0 +1,19 @@
+{
+  "checked_date": "2026-11-16",
+  "result": "pass",
+  "asset_count": 4,
+  "checks": [
+    "4 saved PNGs match generated source SHA256 and actual1254x1254 dimensions; each file under5MiB",
+    "Original concept reference hashes unchanged",
+    "Root and independent visual QA: single subject, identity continuity, complete silhouette, pose and part separation",
+    "Local gallery:4 images decoded and 1440/390/320 layouts without clipping/overflow",
+    "Orca inline4 previews loaded; under512KiB,736/320 layout checked; original PNGs unchanged"
+  ],
+  "inline_visual": "tripo-stage1-input-7a083d.html",
+  "limits": "실제 출력은1254x1254. 전부위contained, 상하 여백은공식권장보다타이트하다. 손은반개방이어서일부손가락은겹칠수있다. 보이지않는후면/방패손잡이/날개뿌리깊이는Tripo결과검토가필요하다.",
+  "not_performed": [
+    "Tripo 업로드/크레딧 사용",
+    "3D 메시·후면 형상 확인",
+    "자동 리깅·Unity 적용"
+  ]
+}

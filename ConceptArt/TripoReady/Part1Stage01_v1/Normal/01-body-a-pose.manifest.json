@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "project": "ASTELLA",
+  "part": 1,
+  "stage": 1,
+  "variant": "normal",
+  "id": "stage01-normal-body-a-pose",
+  "title_ko": "마을 수호 석상 노멀 몸체 A포즈",
+  "version": "Part1Stage01_v1",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-body-a-pose.png",
+  "prompts": [
+    "01-body-a-pose.prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e24f-e8da-7310-8e9e-323b59fff51d/exec-1a20575a-76c6-462c-b6af-8661c6affd10.png",
+  "references": [
+    {
+      "path": "../../../BossOverview/originals/p1-s1-normal.png",
+      "role": "Sole edit target; normal guardian character identity, classical face, crested helmet, original ivory/navy/brass armor and star tabard. Small FRONT body used as body/pose basis; hero-view club and shield removed."
+    }
+  ],
+  "requested_resolution": "Square 2048x2048 preferred, at least1536x1536 requested in prompt",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1499068,
+  "sha256": "5d57f1c093e50b8a8760bd6cd20a1297f714618ae7a9eaf060e51564db165e33",
+  "input_role": "Upload as one body-only Image-to-3D input. Club and shield are separate assets; not additional views of this body.",
+  "visual_qa": {
+    "status": "pass_with_framing_note",
+    "identity": "Original broad ivory guardian statue, stern carved male face, crested helmet, navy chest band with gold star, layered stone waist armor, star tabard and heavy boots preserved.",
+    "pose": "One centered frontal upright humanoid in neutral A-pose. Two arms are separated from torso and hips; empty relaxed half-open chunky hands; both legs and boots clearly separated.",
+    "body_count": "One head, two arms/hands, two legs/feet; no wings, weapon, shield, equipment panel, labels or extra subjects.",
+    "lighting_background": "Plain light neutral-gray background, matte ivory/navy/warm-brass color, evenly lit armor planes with restrained soft surface shading and no dramatic cast shadow.",
+    "framing": "Entire crest, hands and feet inside canvas. Subject occupies approximately94% of image height, tighter than requested70–85% guidance but not cropped; approximately30–45px top/bottom margin. No repeat generation for framing alone.",
+    "file_validation": "System.Drawing successfully decoded saved PNG at1254x1254. SHA256 of saved PNG matches exact generated source."
+  },
+  "limits": "Actual generator output is1254x1254 despite the higher requested size. This is an image prepared for Tripo, not a generated mesh, topology or rig validation."
+}
