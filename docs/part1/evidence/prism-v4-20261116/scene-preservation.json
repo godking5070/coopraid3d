@@ -1,0 +1,480 @@
+{
+  "schemaVersion": 1,
+  "checkedUtc": "2026-11-16T05:41:46.453Z",
+  "readOnly": true,
+  "baselineCommit": "d6d35b4bff7db40ecea0ab220361686eedc74589",
+  "scene": "Assets/Scenes/SampleScene.unity",
+  "baselineNormalizedSha256": "ceb70e123d459021e29764ab4818f8972ce85d74936d04dc9c141f4e8b1c061a",
+  "currentNormalizedSha256": "336f5619972bd7077093ed5fc4e47f9ade15fc894971487c3f1bc25069d905da",
+  "currentFileSha256": "336f5619972bd7077093ed5fc4e47f9ade15fc894971487c3f1bc25069d905da",
+  "passed": true,
+  "conclusion": "No existing scene value was changed. The old HUD was disabled, one new Prism prefab instance/root was added, embedded procedural assets were re-IDed without content changes, and ten previously omitted settings were materialized at existing code defaults.",
+  "scope": "Static YAML document/content/reference comparison. No scene, prefab, meta, cutscene, world object or code was edited by this audit; no Unity execution. Existing serialized values are preserved; default materialization is explicitly recorded rather than described as byte-identical.",
+  "documentCounts": {
+    "baseline": 1179,
+    "current": 1180,
+    "existingNonEmbedded": 1162,
+    "newNonEmbedded": 1,
+    "removedNonEmbedded": 0
+  },
+  "embeddedAssets": {
+    "textureCount": 8,
+    "spriteCount": 9,
+    "textureIdsRegenerated": 8,
+    "spriteIdsRegenerated": 8,
+    "textures": [
+      {
+        "classId": 28,
+        "name": "Proc2D_DpsInner",
+        "baselineLocalId": "22826188",
+        "currentLocalId": "643810907",
+        "exactCanonicalContentSha256": "a564afbd0be103b2177aa71f2857253c62057f57bd2a48ede54e7b5021d5e2f3",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_TankInner",
+        "baselineLocalId": "53706695",
+        "currentLocalId": "1392322304",
+        "exactCanonicalContentSha256": "0cc58557785a5c77721f5391d37d61fad2a0083203066ae06b76b964ab1dc3a9",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_CircleToken",
+        "baselineLocalId": "80104072",
+        "currentLocalId": "1618101985",
+        "exactCanonicalContentSha256": "b145becc9a7ecfa913035ae41c2404d86336eda0aec5313613c20698d6ce374b",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_BossToken",
+        "baselineLocalId": "325401210",
+        "currentLocalId": "2108420674",
+        "exactCanonicalContentSha256": "e7ad575f65686ea84219518d252db4e18287ce2d941f74e607452cfc232f0ef4",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_BossVisor",
+        "baselineLocalId": "468569793",
+        "currentLocalId": "436469276",
+        "exactCanonicalContentSha256": "55d0f32ffa6133507c8344141583cff1f9433868b04035d58ea74c4607639053",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_SquareToken",
+        "baselineLocalId": "1530771288",
+        "currentLocalId": "780474639",
+        "exactCanonicalContentSha256": "943836575c368ee64b979f9f1afa62ab8685dc1ca7e829d4752f8ef106a598b1",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_ForwardArrow",
+        "baselineLocalId": "1760033618",
+        "currentLocalId": "1713713003",
+        "exactCanonicalContentSha256": "3fb627c2483f628925fab10420b2dc8875e28fa951f90ad406b286a9ec1e3ebe",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      },
+      {
+        "classId": 28,
+        "name": "Proc2D_HealerCross",
+        "baselineLocalId": "1889062201",
+        "currentLocalId": "1574119172",
+        "exactCanonicalContentSha256": "7ddde128445b3c125d267f48f27c04455095ec221380c2ef9637d894542de77e",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": null
+      }
+    ],
+    "sprites": [
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "186201357",
+        "currentLocalId": "186201357",
+        "exactCanonicalContentSha256": "1400ab151e2b35cbc8d3161ec5c57ff4169ba092f82c932469ece713d2a2ff27",
+        "uniqueMatch": true,
+        "localIdChanged": false,
+        "texture": "{fileID: 0}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "756962410",
+        "currentLocalId": "1545507300",
+        "exactCanonicalContentSha256": "a0f7841d5ca23fb47d8ffe278e84b43e619d4607694bfea967d208f442305be0",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_ForwardArrow:3fb627c2483f628925fab10420b2dc8875e28fa951f90ad406b286a9ec1e3ebe}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "881489740",
+        "currentLocalId": "267003589",
+        "exactCanonicalContentSha256": "968bd693f36a732c8afb841b215029a314351216e5315081f5645f065e300b94",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_BossVisor:55d0f32ffa6133507c8344141583cff1f9433868b04035d58ea74c4607639053}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "1053430209",
+        "currentLocalId": "1122604316",
+        "exactCanonicalContentSha256": "570919926fa3b3c9e588c63f52c6c8483782fae36b79489866f1bfc52ff6acb5",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_CircleToken:b145becc9a7ecfa913035ae41c2404d86336eda0aec5313613c20698d6ce374b}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "1150248146",
+        "currentLocalId": "851102985",
+        "exactCanonicalContentSha256": "228f7662a69e1111f5e1136f14df495cefb4e4b0e0da5c6b25964f857bea3442",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_BossToken:e7ad575f65686ea84219518d252db4e18287ce2d941f74e607452cfc232f0ef4}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "1625978170",
+        "currentLocalId": "172512524",
+        "exactCanonicalContentSha256": "81c1c6a2bbd49b3070abd39bd18a7abbb694cf22ab7e8adcfdb10fd7c5e400dc",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_TankInner:0cc58557785a5c77721f5391d37d61fad2a0083203066ae06b76b964ab1dc3a9}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "1758284448",
+        "currentLocalId": "1714280934",
+        "exactCanonicalContentSha256": "5702bda311cfe6d91d03887bb224ba41615764b9945b69fcb6f760b5c36d0d53",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_HealerCross:7ddde128445b3c125d267f48f27c04455095ec221380c2ef9637d894542de77e}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "1830363769",
+        "currentLocalId": "1555171638",
+        "exactCanonicalContentSha256": "3d8a4799af3c648209f56c81222e24f562891174e085c92d10db393af4198fad",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_SquareToken:943836575c368ee64b979f9f1afa62ab8685dc1ca7e829d4752f8ef106a598b1}"
+      },
+      {
+        "classId": 213,
+        "name": "",
+        "baselineLocalId": "1949437773",
+        "currentLocalId": "589905724",
+        "exactCanonicalContentSha256": "0c1e99a5c632878ae7fc657c7d47fa9f5b86d261359806534a1da3ff29be8f34",
+        "uniqueMatch": true,
+        "localIdChanged": true,
+        "texture": "{fileID: Texture:Proc2D_DpsInner:a564afbd0be103b2177aa71f2857253c62057f57bd2a48ede54e7b5021d5e2f3}"
+      }
+    ],
+    "referenceOnlyChangedObjects": [
+      {
+        "id": "141114",
+        "classId": 212,
+        "gameObjectLocalId": "141112"
+      },
+      {
+        "id": "4355591",
+        "classId": 212,
+        "gameObjectLocalId": "4355589"
+      },
+      {
+        "id": "360184212",
+        "classId": 212,
+        "gameObjectLocalId": "360184210"
+      },
+      {
+        "id": "551474145",
+        "classId": 212,
+        "gameObjectLocalId": "551474143"
+      },
+      {
+        "id": "560757084",
+        "classId": 212,
+        "gameObjectLocalId": "560757082"
+      },
+      {
+        "id": "713569613",
+        "classId": 212,
+        "gameObjectLocalId": "713569611"
+      },
+      {
+        "id": "754869065",
+        "classId": 212,
+        "gameObjectLocalId": "754869063"
+      },
+      {
+        "id": "833780261",
+        "classId": 212,
+        "gameObjectLocalId": "833780260"
+      },
+      {
+        "id": "1290745716",
+        "classId": 212,
+        "gameObjectLocalId": "1290745714"
+      },
+      {
+        "id": "1390969967",
+        "classId": 212,
+        "gameObjectLocalId": "1390969965"
+      },
+      {
+        "id": "1563222692",
+        "classId": 212,
+        "gameObjectLocalId": "1563222690"
+      },
+      {
+        "id": "1674678091",
+        "classId": 212,
+        "gameObjectLocalId": "1674678089"
+      },
+      {
+        "id": "1916185842",
+        "classId": 212,
+        "gameObjectLocalId": "1916185840"
+      },
+      {
+        "id": "1926085414",
+        "classId": 212,
+        "gameObjectLocalId": "1926085412"
+      },
+      {
+        "id": "1933291150",
+        "classId": 212,
+        "gameObjectLocalId": "1933291148"
+      }
+    ]
+  },
+  "expectedHudDeactivation": {
+    "objectLocalId": "39977652",
+    "baselineName": "Astella_CelestialHUD",
+    "passed": true,
+    "addedModification": "- target: {fileID: 3141891195738843973, guid: d55f54b45df345b4d896d871ed7c2935, type: 3}\n      propertyPath: m_IsActive\n      value: 0\n      objectReference: {fileID: 0}",
+    "removedModifications": 0
+  },
+  "newPrismInstance": {
+    "id": "269528449",
+    "classId": 1001,
+    "sourceGuid": "37f71180a3189874aaa55ff64ed85953",
+    "sourceAsset": "Assets/UI/AstellaPrismV4/AppliedMain/Applied-20261116-143208-179/RaidHUD.prefab",
+    "matchesInstalledPrefab": true,
+    "overrideTargetsStayInsideNewPrefab": true,
+    "overrideCount": 26,
+    "passed": true
+  },
+  "sceneRoots": {
+    "passed": true,
+    "changes": [
+      {
+        "kind": "added",
+        "line": 19,
+        "text": "  - {fileID: 269528449}"
+      }
+    ]
+  },
+  "defaultMaterialization": {
+    "componentLocalId": "2057649243",
+    "component": "BossController",
+    "existingSerializedPropertiesRemovedOrChanged": 0,
+    "additions": [
+      {
+        "path": "MonoBehaviour.guardian.tempoRevision",
+        "serializedValue": "0",
+        "lineInDocument": 447,
+        "expectedCurrentDefault": 0,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardian.stoneWaveInterval",
+        "serializedValue": "0.75",
+        "lineInDocument": 448,
+        "expectedCurrentDefault": 0.75,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardian.stoneWaves",
+        "serializedValue": "6",
+        "lineInDocument": 449,
+        "expectedCurrentDefault": 6,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardian.shieldCrossHalfWidth",
+        "serializedValue": "1.6",
+        "lineInDocument": 481,
+        "expectedCurrentDefault": 1.6,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardianHard.combat.tempoRevision",
+        "serializedValue": "0",
+        "lineInDocument": 497,
+        "expectedCurrentDefault": 0,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardianHard.combat.stoneWaveInterval",
+        "serializedValue": "0.75",
+        "lineInDocument": 498,
+        "expectedCurrentDefault": 0.75,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardianHard.combat.stoneWaves",
+        "serializedValue": "6",
+        "lineInDocument": 499,
+        "expectedCurrentDefault": 6,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardianHard.combat.shieldCrossHalfWidth",
+        "serializedValue": "1.6",
+        "lineInDocument": 531,
+        "expectedCurrentDefault": 1.6,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardianHard.tempoRevision",
+        "serializedValue": "0",
+        "lineInDocument": 589,
+        "expectedCurrentDefault": 0,
+        "matchesCurrentDefault": true
+      },
+      {
+        "path": "MonoBehaviour.guardianHard.lockdownReadyImpactSeconds",
+        "serializedValue": "0.55",
+        "lineInDocument": 590,
+        "expectedCurrentDefault": 0.55,
+        "matchesCurrentDefault": true
+      }
+    ],
+    "settingsSource": "Assets/Scripts/GuardianNormalData.cs",
+    "settingsSourceUnchangedFromBaseline": true,
+    "sourceProof": [
+      {
+        "meaning": "implicit tempoRevision=0",
+        "source": "public int tempoRevision;",
+        "exists": true,
+        "line": 50
+      },
+      {
+        "meaning": "stoneWaveInterval=.75",
+        "source": "public float stoneWaveInterval=.75f;",
+        "exists": true,
+        "line": 51
+      },
+      {
+        "meaning": "stoneWaves=6",
+        "source": "public int stoneWaves=6;",
+        "exists": true,
+        "line": 52
+      },
+      {
+        "meaning": "shieldCrossHalfWidth=1.6",
+        "source": "public float shieldCrossHalfWidth=1.6f;",
+        "exists": true,
+        "line": 87
+      },
+      {
+        "meaning": "lockdownReadyImpactSeconds=.55",
+        "source": "public float lockdownReadyImpactSeconds=.55f;",
+        "exists": true,
+        "line": 145
+      },
+      {
+        "meaning": "old normal zero values repaired",
+        "source": "if(stoneWaveInterval<=0)stoneWaveInterval=.75f;",
+        "exists": true,
+        "line": 45
+      },
+      {
+        "meaning": "old normal wave zero repaired",
+        "source": "if(stoneWaves<1)stoneWaves=6;",
+        "exists": true,
+        "line": 46
+      },
+      {
+        "meaning": "old cross width zero repaired",
+        "source": "if(shieldCrossHalfWidth<=0)shieldCrossHalfWidth=1.6f;",
+        "exists": true,
+        "line": 38
+      },
+      {
+        "meaning": "old hard cross width zero repaired",
+        "source": "if(combat.shieldCrossHalfWidth<=0)combat.shieldCrossHalfWidth=1.6f;",
+        "exists": true,
+        "line": 183
+      },
+      {
+        "meaning": "old hard impact zero repaired",
+        "source": "if(lockdownReadyImpactSeconds<=0)lockdownReadyImpactSeconds=.55f;",
+        "exists": true,
+        "line": 236
+      }
+    ],
+    "normalizationNote": "Added values match current field initializers. Existing normal/hard zero-value repair policies retain effective defaults for old scenes. Hard stone timing/count reads guardianHard.stoneWaveGapSeconds/stoneWaves, not the newly materialized combat copies."
+  },
+  "unexpectedExistingChanges": [],
+  "canonicalComparison": {
+    "existingNonEmbeddedObjectsCompared": 1162,
+    "allExistingSerializedPropertyValuesPreserved": true,
+    "ignoredOnly": "Embedded local-ID substitutions, one exact old-HUD m_IsActive override, one exact SceneRoots append, and the ten explicitly checked default additions."
+  },
+  "additionalPreservationChecks": {
+    "originalHudAsset": "Assets/UI/AstellaOrnate/Applied-20261106-131209-797/RaidHUD.prefab",
+    "existingCutsceneAndAnimationAssetsChanged": [],
+    "otherTrackedWorldAssetChanges": [],
+    "runtimeSettingsSources": [
+      {
+        "path": "Assets/Scripts/GuardianNormalData.cs",
+        "unchangedFromBaseline": true
+      },
+      {
+        "path": "Assets/Scripts/BossGuardianNormal.cs",
+        "unchangedFromBaseline": true
+      },
+      {
+        "path": "Assets/Scripts/BossGuardianHard.cs",
+        "unchangedFromBaseline": true
+      }
+    ],
+    "currentSceneSha256AtAuditEnd": "336f5619972bd7077093ed5fc4e47f9ade15fc894971487c3f1bc25069d905da",
+    "originalHudAndMetaUnchanged": true,
+    "sceneSnapshotStillCurrent": true,
+    "hardStoneRuntimeSelection": [
+      {
+        "line": 294,
+        "source": "_stoneRain.Start(now,GuardianHard?guardianHard.stoneWaveGapSeconds:Tuning.stoneWaveInterval, GuardianHard?guardianHard.stoneWaves:Tuning.stoneWaves);"
+      }
+    ]
+  }
+}

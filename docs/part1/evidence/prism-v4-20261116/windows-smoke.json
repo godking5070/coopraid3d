@@ -1,0 +1,29 @@
+﻿{
+    "sourceCommit":  "6a943258089e3e3815941d58b0214af7589d1f42",
+    "inputSha256":  "ebb4944e29b472756a9d7eee2e08497526edb0c3aa18601e3efa442f0c14ffb4",
+    "executable":  "Builds/AstellaWindows/Astella.exe",
+    "profile":  "prism-v4-editor-20261116",
+    "developmentBuild":  true,
+    "smokePassed":  true,
+    "fullGameplayVerified":  false,
+    "liveSteamVerified":  false,
+    "clientSizes":  [
+                        "1280x1024",
+                        "1366x768"
+                    ],
+    "checks":  [
+                   "Saved campaign continue",
+                   "Saved J binding and moved HP layout restored",
+                   "J produces self-defense effect and 30-second cooldown",
+                   "Dark cooldown overlay and runtime text visible",
+                   "Resolution change and confirmation",
+                   "Quit confirmation accepted and process exited"
+               ],
+    "limits":  [
+                   "Player observer was Editor-only; standalone smoke uses screenshots and input log",
+                   "Audio device initialization failed; sound not heard",
+                   "Not a full campaign completion"
+               ],
+    "playerLog":  "C:/Astella/prism-v4-main-evidence-20261116/built-player.log",
+    "processExited":  true
+}
