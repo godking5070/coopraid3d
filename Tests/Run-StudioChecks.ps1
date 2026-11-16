@@ -40,6 +40,7 @@ if ($Group -in @('Input', 'All')) { Add-StudioCheck 'Run-ClickMoveChecks.ps1' }
 if ($Group -in @('UI', 'All')) {
     Add-StudioCheck 'Run-UIAuthoringSafetyChecks.ps1'
     Add-StudioCheck 'Run-PartyBotPresentationChecks.ps1' $false 'Actual overhead identity, cinematic visibility and late presentation; no Unity rendering.'
+    Add-StudioCheck 'Run-AstellaPrismBridgeChecks.ps1' $false 'Actual Prism display bindings and primary resource snapshot; no Unity rendering or input.'
     Add-StudioCheck 'Run-HUDLayoutChecks.ps1'
     Add-StudioCheck 'Run-LobbyPracticeChecks.ps1'
     Add-StudioCheck 'Run-LobbyBuildStationChecks.ps1' $false 'Includes PartyBuildSummary; no rendering or live host session.'

@@ -5,20 +5,35 @@ using UnityEngine.UI;
 namespace RaidRogue
 {
     // An input acknowledgement only: never implies that the server accepted a skill.
-    // Additive edges preserve authored button graphics, colors and layout.
+    // Additive edges are a fallback for buttons without an authored keyboard skin.
     internal sealed class HotbarInputFeedback
     {
         private Button _button;
         private Image[] _edges;
         private float _until;
         private void Pulse() { _until = Time.unscaledTime + .18f; }
+        private void ReleaseEdges()
+        {
+            if (_button != null) _button.onClick.RemoveListener(Pulse);
+            if (_edges != null)
+                foreach (var edge in _edges)
+                    if (edge != null) { edge.enabled = false; UnityEngine.Object.Destroy(edge.gameObject); }
+            _button = null; _edges = null; _until = 0;
+        }
         public void Tick(Button button, CharacterActor actor, CharacterSlot slot)
         {
-            if (button == null) return;
+            var skin = button != null ? button.GetComponent<AstellaSkillSlotSkin>() : null;
+            if (button == null || skin != null && skin.enabled && skin.animateKeyboard && skin.frame != null && skin.frame.enabled &&
+                (skin.button == null || skin.button == button))
+            {
+                // The authored skin owns pointer and keyboard states together. Keep
+                // it as the single feedback renderer, including during hidden menus.
+                ReleaseEdges();
+                return;
+            }
             if (_button != button)
             {
-                if (_button != null) _button.onClick.RemoveListener(Pulse);
-                if (_edges != null) foreach (var edge in _edges) if (edge != null) UnityEngine.Object.Destroy(edge.gameObject);
+                ReleaseEdges();
                 _button = button; _button.onClick.AddListener(Pulse);
                 _edges = new Image[4];
                 for (int i = 0; i < 4; i++)

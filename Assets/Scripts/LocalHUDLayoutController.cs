@@ -31,6 +31,8 @@ namespace RaidRogue
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatic(){Instance=null;}
         private AstellaOrnateHUD _hud;
+        private AstellaPrismHUDLayout _prismLayout;
+        private string _layoutFileName = "hud-layout.json";
         private readonly List<Item> _items=new List<Item>();
         private readonly Dictionary<string,Pose> _before=new Dictionary<string,Pose>();
         private readonly Vector3[] _corners=new Vector3[4];
@@ -45,7 +47,7 @@ namespace RaidRogue
         private Vector2 _dragStart,_positionStart,_lastCanvasSize;
         private float _nextScan;
         private string _loadNotice="";
-        public string FilePath=>Path.Combine(CampaignStorage.RootFor(Application.persistentDataPath,System.Environment.GetCommandLineArgs(),Debug.isDebugBuild),"hud-layout.json");
+        public string FilePath=>Path.Combine(CampaignStorage.RootFor(Application.persistentDataPath,System.Environment.GetCommandLineArgs(),Debug.isDebugBuild),_layoutFileName);
         public static LocalHUDLayoutController Ensure(AstellaOrnateHUD hud)
         {
             if(hud==null)return null;
@@ -57,6 +59,8 @@ namespace RaidRogue
             Instance=this;
             if(_hud!=null)return;
             _hud=hud;Instance=this;
+            _prismLayout=hud.GetComponent<AstellaPrismHUDLayout>();
+            _layoutFileName=_prismLayout!=null?_prismLayout.FileName:"hud-layout.json";
             string json=LocalSettingsFile.Read(FilePath,ValidJson,out _loadNotice);
             if(json!=null)_saved=JsonUtility.FromJson<LocalHUDLayoutData>(json);
             Discover();
@@ -77,7 +81,12 @@ namespace RaidRogue
         }
         private void Discover()
         {
-            if(_hud==null||_hud.playerRoot==null)return;
+            if(_hud==null)return;
+            // Explicit design roots win by stable ID; Add ignores later discovery duplicates.
+            if(_prismLayout!=null)
+                foreach(var entry in _prismLayout.MappedEntries)
+                    Add(entry.id,string.IsNullOrWhiteSpace(entry.name)?entry.id:entry.name,entry.rect);
+            if(_hud.playerRoot==null)return;
             var player=_hud.playerRoot.transform;
             Add("skills.left","스킬 1 · 2 · 3 · 4",player.Find("Left - 1234") as RectTransform);
             Add("skills.right","스킬 Q · F · R · Space",player.Find("Right - Q F R Space") as RectTransform);

@@ -10,3 +10,8 @@ $exe=Join-Path $outDir 'HUDLayoutTests.exe'
 if($LASTEXITCODE -ne 0){throw 'HUD layout tests failed to compile.'}
 & $exe
 if($LASTEXITCODE -ne 0){throw 'HUD layout tests failed.'}
+$prismExe=Join-Path $outDir 'PrismHUDLayoutTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$prismExe" (Join-Path $projectRoot 'Assets/Scripts/AstellaPrismHUDLayout.cs') (Join-Path $PSScriptRoot 'PrismHUDLayoutTests.cs')
+if($LASTEXITCODE -ne 0){throw 'Prism HUD layout tests failed to compile.'}
+& $prismExe
+if($LASTEXITCODE -ne 0){throw 'Prism HUD layout tests failed.'}

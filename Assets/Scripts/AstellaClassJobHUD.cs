@@ -36,6 +36,14 @@ namespace RaidRogue
 
         public AstellaOrnateHUD hud;
         public View[] views = Array.Empty<View>();
+        // Read-only presentation snapshot for alternate authored HUDs. The resource
+        // selection and display-unit conversion below remain the sole data policy.
+        public bool HasResource { get; private set; }
+        public string ResourceId { get; private set; } = "";
+        public string ResourceLabel { get; private set; } = "";
+        public float CurrentValue { get; private set; }
+        public float Maximum { get; private set; }
+        public bool ResourceIsInteger { get; private set; }
 
         private CharacterActor _actor;
         private NineKeyDamageKit _damage;
@@ -45,6 +53,7 @@ namespace RaidRogue
         private void OnDisable()
         {
             foreach (var view in views ?? Array.Empty<View>()) RestoreGeometry(view);
+            HasResource = false; ResourceId = ResourceLabel = ""; CurrentValue = Maximum = 0; ResourceIsInteger = false;
         }
 
         private void Resolve()
@@ -100,6 +109,12 @@ namespace RaidRogue
                 }
             }
             bool available = resource != null && maximum > 0;
+            HasResource = available;
+            ResourceId = available ? resource.id : "";
+            ResourceLabel = available ? resource.name ?? "" : "";
+            CurrentValue = available ? current : 0;
+            Maximum = available ? maximum : 0;
+            ResourceIsInteger = available && resource.integer;
             foreach (var view in views ?? Array.Empty<View>())
             {
                 if (view?.root == null) continue;

@@ -28,6 +28,13 @@ foreach ($taskFile in $taskFiles) {
     } elseif ($taskFile.Name -eq 'RaidUIGenerationChecks.cs') {
         # Explicit batch smoke tests may resume after a domain reload, but never normal import.
         Assert-AuthoringSafety ($taskSource.Contains('if (!Application.isBatchMode || SessionState.GetString(Key + "phase", "").Length == 0) return;')) 'UI batch check reload hook must require an explicit batch session.'
+    } elseif ($taskFile.Name -eq 'AstellaPrismPlayChecks.cs') {
+        # A user-started passive observer may tick; it cannot author assets or start on import.
+        Assert-AuthoringSafety ($taskSource -notmatch '\[\s*(?:UnityEditor\.)?InitializeOnLoad|DidReloadScripts|static\s+AstellaPrismPlayChecks\s*\(') 'Prism observer must have no startup or reload entry.'
+        Assert-AuthoringSafety ($taskSource.Contains('[MenuItem("Tools/Astella/Prism V4/Watch Live HUD %#F8")]') -and $taskSource.Contains('if (!EditorApplication.isPlaying)')) 'Prism observer must start explicitly in Play Mode.'
+        Assert-AuthoringSafety (([regex]::Matches($taskSource, 'EditorApplication\s*\.\s*\w+\s*\+=').Count -eq 1) -and $taskSource.Contains('EditorApplication.update += WatchTick;')) 'Only the explicit observer tick may be registered.'
+        Assert-AuthoringSafety ($taskSource -notmatch 'SaveAssets\s*\(|SaveAsPrefabAsset\s*\(|SaveScene\s*\(|SetDirty\s*\(|\.SetActive\s*\(|\.SetValue\s*\(') 'Passive Prism observer must not modify assets or gameplay presentation sources.'
+        Assert-AuthoringSafety ($taskSource.Contains('EditorApplication.update -= WatchTick;') -and $taskSource.Contains('EditorApplication.timeSinceStartup >= _deadline')) 'Prism observer must detach on stop and have a time limit.'
     } else {
         Assert-AuthoringSafety (!(Has-AutomaticEntry $taskSource)) ("Automatic editor entry can modify authored UI: " + $taskFile.Name)
     }
