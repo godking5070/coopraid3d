@@ -1,6 +1,8 @@
 # 아스텔라 재개 기준 — 2026-11-16
 
-**최신 서체 변경:** 사용자가 선택한 마루부리 SemiBold를 제목·보스명·시전명 23곳에 남보라 아웃라인과 함께 적용했다. 활성 HUD는 Typography/Applied-20261116-193901-716 복사본이다. [적용·Play 검사](MARUBURI_MAIN_APPLY_2026-11-16.md)와 [오른쪽 게이지 숫자 재비교](MARUBURI_NUMERIC_FONT_REVIEW_2026-11-16.md)를 확인한다. 숫자 후보는 아직 적용하지 않았으며 기존 숫자·본문·쿨타임 폰트를 유지한다. 새 Windows 빌드는 만들지 않았다.
+**최신 숫자 서체:** 사용자가 선택한 Oxanium Medium을 HUD 숫자 18곳에 적용했다. 활성 HUD는 Typography/Oxanium-20261116-201718-685 복사본이다. 마루부리 제목·본문·단축키·기존 아웃라인·배치를 보존했다. [적용·Play 검사](OXANIUM_MAIN_APPLY_2026-11-16.md)와 [크기별 아웃라인 A/B/C](OXANIUM_OUTLINE_VARIANTS_2026-11-16.md)를 확인한다. 아웃라인 묶음은 아직 비교안이며 게임 두께는 바꾸지 않았다. 새 Windows 빌드는 만들지 않았다.
+
+**앞선 서체 변경:** 사용자가 선택한 마루부리 SemiBold를 제목·보스명·시전명 23곳에 남보라 아웃라인과 함께 적용했다. 활성 HUD는 Typography/Applied-20261116-193901-716 복사본이다. [적용·Play 검사](MARUBURI_MAIN_APPLY_2026-11-16.md)와 [오른쪽 게이지 숫자 재비교](MARUBURI_NUMERIC_FONT_REVIEW_2026-11-16.md)를 확인한다. 숫자 후보는 아직 적용하지 않았으며 기존 숫자·본문·쿨타임 폰트를 유지한다. 새 Windows 빌드는 만들지 않았다.
 
 **앞선 변경:** 별도 훈련소 코드와 활성 UI 카드를 제거했다. 현재 HUD는 WithoutTraining/Applied-20261116-192153-353 복사본이다. 대기실 연습과 이전 painted UI는 보존했다. [제거·검사 기록](TRAINING_REMOVAL_2026-11-16.md)과 [폰트 추천·아웃라인 비교](PRISM_FONT_RECOMMENDATION_2026-11-16.md)를 확인한다. 폰트는 조사·비교 단계이며 게임 서체는 교체하지 않았다. 이 변경의 Windows 빌드는 아직 만들지 않았다. 아래 지문은 이전 빌드 이력이다.
 
