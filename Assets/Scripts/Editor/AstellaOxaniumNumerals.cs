@@ -25,6 +25,105 @@ namespace RaidRogue.Editor
         private const string NumericCharacters = "0123456789.,/%+-s:—";
         private static readonly Color NumericInk = new Color(19 / 255f, 16 / 255f, 34 / 255f, 1);
 
+        [Serializable] private sealed class PlayerCaptionReport
+        {
+            public string utc, prefab, backup, error, resourceNamePath, hpCaptionPath;
+            public string prefabHashBefore, prefabHashAfter, metaHashBefore, metaHashAfter;
+            public Vector2 resourcePositionBefore, resourcePositionAfter, resourceSize;
+            public bool passed, alreadyApplied, hpCaptionActiveBefore, hpCaptionActiveAfter;
+            public bool resourceEnabled, resourceActive, allTextUnchanged, geometryUnchanged, effectsUnchanged, bindingsUnchanged, otherActivationUnchanged;
+            public string boundary = "Only the static HP caption GameObject is disabled. The current dynamic resource label, its position, all other authored text and scene/profile files are preserved. Play rendering requires a separate check.";
+        }
+
+        [MenuItem("Tools/Astella/Refine Player Captions")]
+        public static void RefinePlayerCaptions()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || PrefabStageUtility.GetCurrentPrefabStage() != null)
+                throw new InvalidOperationException("Stop Play and close Prefab Mode before refining captions.");
+            if (!string.Equals(Path.GetFullPath(Application.dataPath).TrimEnd('/', '\\'), @"C:\Astella\Astella\Assets", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Run only in the original Astella Unity project.");
+            var profile = AssetDatabase.LoadAssetAtPath<RaidUIPresentation>(ProfilePath);
+            if (profile?.hudPrefab == null) throw new InvalidOperationException("An active authored HUD is required.");
+            var report = new PlayerCaptionReport { utc = DateTime.UtcNow.ToString("O"), prefab = AssetDatabase.GetAssetPath(profile.hudPrefab),
+                backup = "Logs/PlayerCaptionRefinement/Backup-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") };
+            report.prefabHashBefore = Hash(report.prefab); report.metaHashBefore = Hash(report.prefab + ".meta");
+            string sceneHash = Hash(ScenePath), profileHash = Hash(ProfilePath);
+            Directory.CreateDirectory(report.backup);
+            File.Copy(report.prefab, report.backup + "/RaidHUD.prefab");
+            File.Copy(report.prefab + ".meta", report.backup + "/RaidHUD.prefab.meta");
+            GameObject contents = null;
+            try
+            {
+                contents = PrefabUtility.LoadPrefabContents(report.prefab);
+                var (bridge, label, caption) = PlayerCaptions(contents);
+                report.resourceNamePath = AnimationUtility.CalculateTransformPath(label.transform, contents.transform);
+                report.hpCaptionPath = AnimationUtility.CalculateTransformPath(caption.transform, contents.transform);
+                report.resourcePositionBefore = label.rectTransform.anchoredPosition;
+                report.resourceSize = label.rectTransform.sizeDelta;
+                report.hpCaptionActiveBefore = caption.gameObject.activeSelf;
+                string texts = OtherTexts(contents.GetComponentsInChildren<Text>(true), contents.transform);
+                string geometry = Geometry(contents), effects = Effects(contents), bindings = EditorJsonUtility.ToJson(bridge);
+                string activation = CaptionActivation(contents, caption.gameObject);
+                caption.gameObject.SetActive(false);
+                report.resourcePositionAfter = label.rectTransform.anchoredPosition;
+                report.resourceEnabled = label.enabled; report.resourceActive = label.gameObject.activeSelf;
+                report.hpCaptionActiveAfter = caption.gameObject.activeSelf;
+                report.allTextUnchanged = texts == OtherTexts(contents.GetComponentsInChildren<Text>(true), contents.transform);
+                report.geometryUnchanged = geometry == Geometry(contents);
+                report.effectsUnchanged = effects == Effects(contents);
+                report.bindingsUnchanged = bindings == EditorJsonUtility.ToJson(bridge);
+                report.otherActivationUnchanged = activation == CaptionActivation(contents, caption.gameObject);
+                if (!report.allTextUnchanged || !report.geometryUnchanged || !report.effectsUnchanged || !report.bindingsUnchanged || !report.otherActivationUnchanged)
+                    throw new InvalidOperationException("Caption refinement changed authored state outside the static HP caption.");
+                RaidUIAuthoring.ValidateScripts(contents);
+                report.alreadyApplied = !report.hpCaptionActiveBefore;
+                if (!report.alreadyApplied && PrefabUtility.SaveAsPrefabAsset(contents, report.prefab) == null)
+                    throw new IOException("Could not save the reviewed HUD caption change.");
+                report.prefabHashAfter = Hash(report.prefab); report.metaHashAfter = Hash(report.prefab + ".meta");
+                if (report.metaHashBefore != report.metaHashAfter || Hash(ScenePath) != sceneHash || Hash(ProfilePath) != profileHash)
+                    throw new InvalidOperationException("Caption refinement must preserve the GUID and scene/profile files.");
+                report.passed = true;
+                Debug.Log("PLAYER CAPTIONS PASS: dynamic resource name stays in its authored position; only the static HP caption is hidden.");
+            }
+            catch (Exception error) { report.error = error.ToString(); throw; }
+            finally
+            {
+                if (contents != null) PrefabUtility.UnloadPrefabContents(contents);
+                Directory.CreateDirectory("Logs/PlayerCaptionRefinement");
+                File.WriteAllText("Logs/PlayerCaptionRefinement/report.json", JsonUtility.ToJson(report, true));
+            }
+        }
+
+        [MenuItem("Tools/Astella/Validate Player Captions")]
+        public static void ValidatePlayerCaptions()
+        {
+            var profile = AssetDatabase.LoadAssetAtPath<RaidUIPresentation>(ProfilePath);
+            if (profile?.hudPrefab == null) throw new InvalidOperationException("An active authored HUD is required.");
+            foreach (var root in new[] { profile.hudPrefab }.Concat(Object.FindObjectsByType<RaidUIRoot>(FindObjectsSortMode.None)))
+            {
+                var (_, _, caption) = PlayerCaptions(root.gameObject);
+                if (caption.gameObject.activeSelf) throw new InvalidOperationException("Static HP caption is still active.");
+            }
+        }
+
+        private static (AstellaPrismHUDBridge bridge, Text label, Text caption) PlayerCaptions(GameObject root)
+        {
+            var bridge = root.GetComponentsInChildren<AstellaPrismHUDBridge>(true).Single();
+            var view = bridge.playerView;
+            var label = view?.nameText;
+            var health = view?.healthFill != null ? view.healthFill.transform.parent : null;
+            var caption = health != null ? health.Find("Caption")?.GetComponent<Text>() : null;
+            if (bridge.jobSource == null || label == null || !label.enabled || !label.gameObject.activeSelf ||
+                label.rectTransform.sizeDelta.x <= 0 || label.rectTransform.sizeDelta.y <= 0 ||
+                view.jobResourceFill == null || label.transform.parent != view.jobResourceFill.transform.parent ||
+                caption == null || caption.text != "HP" || caption == view.valueText || caption == view.resourceText)
+                throw new InvalidOperationException("Expected the visible dynamic resource label and a separate static HP caption.");
+            return (bridge, label, caption);
+        }
+        private static string CaptionActivation(GameObject root, GameObject caption) => string.Join("\n",
+            root.GetComponentsInChildren<Transform>(true).Where(node => node.gameObject != caption).Select(node =>
+                AnimationUtility.CalculateTransformPath(node, root.transform) + "|" + node.gameObject.activeSelf));
+
         [Serializable] private sealed class Target
         {
             public string role, path, text, previousFont, font, previousStyle, outlineBefore, outlineAfter, widthSample;
