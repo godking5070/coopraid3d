@@ -1,0 +1,16 @@
+{
+  "checked_date": "2026-11-16",
+  "result": "pass",
+  "tool": "Chrome headless / Playwright",
+  "checks": [
+    "3 final PNGs decoded in browser, source SHA256 and dimensions match",
+    "All local gallery links resolve",
+    "Desktop 1440px, mobile 390px and 320px layouts without horizontal overflow",
+    "Image modal, previous/next wraparound, arrow key and Escape tested",
+    "Main overview: 12 stage cards, 22 images and all 9 filter combinations",
+    "All Part2 stages marked redesign pending",
+    "No page JavaScript errors"
+  ],
+  "visual_qa": "All three final images inspected by root and independent reviewer: preferred gargoyle preserved, one clear fulcrum/beam and two large pans, weight difference, three distinct integrations, no duplicated sword or pan.",
+  "limits": "2D concept candidates; no 3D mesh or rig test."
+}

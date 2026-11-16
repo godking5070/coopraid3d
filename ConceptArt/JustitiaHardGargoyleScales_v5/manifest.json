@@ -1,0 +1,66 @@
+{
+  "project": "ASTELLA",
+  "part": 1,
+  "stage": 5,
+  "title_ko": "가고일 저울 결합 3안",
+  "version": "JustitiaHardGargoyleScales_v5",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "user_request": "1번이 좋다. 저울을 잘 녹여볼 수 없나. 꼭 양옆이 아니더라도 저울을 잘 살릴 수 있으면 좋겠다. 1번으로 컨셉 3개만 더 만들어보자.",
+  "preferred_base": {
+    "id": "01-balance-gargoyle",
+    "image": "Reference/base-gargoyle.png",
+    "original": "../JustitiaHardMetamorphosis_v4/01-balance-gargoyle/01-boss.png",
+    "sha256": "e71819e0146f67d8a82a1bf147d3f64d0ec2e917897d6b575af079def56c9890",
+    "status": "user_preferred_base",
+    "user_quote": "1번이 좋다. 근데 저울이 잘 안보이네.",
+    "date": "2026-11-16"
+  },
+  "status": "three_scale_variants_not_selected",
+  "design_policy": "선호한 가고일의 얼굴·몸·웅크린 자세·갈퀴·갑주와 화풍을 유지한다. 하나의 중심축과 저울대, 정확히 두 큰 접시, 사슬 연결과 하중 차이를 주된 형태로 만든다. 검저울 안에서만 검 위치와 검을 쥔 손을 조정한다.",
+  "images": [
+    {
+      "number": 1,
+      "id": "01-spinal-balance",
+      "title_ko": "척추축의 대천칭",
+      "description_ko": "등척추와 날개 뿌리를 하나의 저울대와 중심축으로 연결. 큰 두 접시, 별 추와 계측 바늘로 천칭을 강조한다.",
+      "image": "01-spinal-balance/01-boss.png",
+      "manifest": "01-spinal-balance/manifest.json",
+      "prompt": "01-spinal-balance/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2250509,
+      "sha256": "8c406b96e3a18cd8be472b68213344334d8c98b9177cc843b7236bbbba18bab2"
+    },
+    {
+      "number": 2,
+      "id": "02-sword-balance",
+      "title_ko": "단죄검의 천칭",
+      "description_ko": "대검을 바닥에 짚어 저울 기둥으로 사용. 별 가드의 회전축과 큰 두 접시가 하나의 단죄 무장이 된다.",
+      "image": "02-sword-balance/01-boss.png",
+      "manifest": "02-sword-balance/manifest.json",
+      "prompt": "02-sword-balance/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2134374,
+      "sha256": "997f0f2953c52c891a9492a86e15858edc07c027ad585fa110fbd6d9d0af5160"
+    },
+    {
+      "number": 3,
+      "id": "03-fore-aft-balance",
+      "title_ko": "전후 하중의 천칭",
+      "description_ko": "한쪽 어깨·날개 뿌리에서 저울대가 앞뒤로 뻗는다. 큰 근경 추접시는 낮고, 작은 원경 빈접시는 높다.",
+      "image": "03-fore-aft-balance/01-boss.png",
+      "manifest": "03-fore-aft-balance/manifest.json",
+      "prompt": "03-fore-aft-balance/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2128773,
+      "sha256": "569b6361ea9bf56a8cca4c07d5dbba4f55a582f77f8404c897f1405ab371135f"
+    }
+  ],
+  "gallery": "INDEX.html",
+  "prompts": "prompts-all.txt",
+  "previous_gallery": "../JustitiaHardMetamorphosis_v4/INDEX.html",
+  "limits": "2D comparison concepts; base preferred, no new scale variant selected, no 3D mesh/rig validation."
+}

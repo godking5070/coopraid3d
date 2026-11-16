@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardGargoyleScales_v5",
+  "part": 1,
+  "stage": 5,
+  "id": "02-sword-balance",
+  "number": 2,
+  "title_ko": "단죄검의 천칭",
+  "description_ko": "대검의 검날이 저울 기둥이 되고 별 가드의 회전축에 기울어진 저울팔을 결합했다. 몸 앞의 큰 두 접시와 추로 저울의 기능과 무게 차이를 드러낸다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_visual_qa_and_file_validation_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e230-4b56-7fd0-b471-c0f9697416ff/exec-5d9be00b-7d07-44c7-9df9-75f8a6617e1f.png",
+  "references": [
+    {
+      "path": "../../JustitiaHardMetamorphosis_v4/01-balance-gargoyle/01-boss.png",
+      "role": "Sole exact edit target: user's preferred gargoyle face, blindfold, carved mane, heavy crouched body, armor, wings and art style retained; only original sword/scales integration redesigned"
+    }
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 2134374,
+  "sha256": "997f0f2953c52c891a9492a86e15858edc07c027ad585fa110fbd6d9d0af5160",
+  "visual_qa": {
+    "status": "pass",
+    "identity": "Selected roaring gargoyle face, gold blindfold, carved curl mane, broad ivory/navy/brass star armor, crouched body, two bent legs and two slab wings retained. Sword arm reposed to hold upper handle; other large claw remains planted.",
+    "scale_readability": "One vertical ground-planted sword blade is the central support. Its large star bearing/indicator pivots one clearly tilted beam. Exactly two deep chain-hung pans are prominent in the foreground: nearer low pan holds one large stone weight, higher pan is empty. Pivot, beam, slings and pans form one readable balance at thumbnail size.",
+    "equipment_and_anatomy": "One sword only; original diagonal sword and both old wing-tip pans were removed. Two original arms and two legs, single head, exactly two total weighing pans. The grip and fulcrum are distinct.",
+    "framing": "Entire figure, sword point, wing tips and both large pans contained. Upper wing and lower feet have close margins, with no required framing correction.",
+    "file_validation": "Saved PNG decoded with System.Drawing at1536x1024 and SHA256 recorded. Generated output visually inspected; saved copy hash verified.",
+    "limits": "Single-view concept candidate, not a selected final or validated 3D mesh/rig."
+  }
+}
