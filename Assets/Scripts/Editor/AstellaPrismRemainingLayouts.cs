@@ -83,8 +83,7 @@ namespace RaidRogue.Editor
                     line.color = new Color(.62f, .56f, .76f, .4f);
                     line.raycastTarget = false;
                 }
-            // Home cards, Continue, the legacy runtime-hidden training entry,
-            // references and every Button action remain intact.
+            // Home cards, Continue, references and every Button action remain intact.
         }
 
         private static void PaintedLayer(RectTransform parent, string name, string spriteName)

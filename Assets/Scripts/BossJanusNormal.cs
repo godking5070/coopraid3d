@@ -9,9 +9,9 @@ namespace RaidRogue
         [Header("Stage 6 normal · Janus initial tuning")]
         public JanusNormalSettings janus=new JanusNormalSettings();
         public JanusHardSettings janusHard=new JanusHardSettings();
-        public bool JanusHard => currentStageNumber==6&&!CharacterTrainingSession.Active&&
+        public bool JanusHard => currentStageNumber==6&&
             CampaignRuntime.Instance?.DifficultyId==CampaignCatalog.Hard;
-        public bool JanusEncounter => currentStageNumber==6&&!CharacterTrainingSession.Active&&
+        public bool JanusEncounter => currentStageNumber==6&&
             (CampaignRuntime.Instance==null||CampaignRuntime.Instance.DifficultyId==CampaignCatalog.Normal||JanusHard);
         private JanusNormalSettings JanusTuning => JanusHard ? (JanusNormalSettings)janusHard : janus;
         public JanusNormalSettings JanusSettings => JanusTuning;

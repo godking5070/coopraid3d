@@ -513,7 +513,7 @@ namespace RaidRogue
                 RaidUIStyle.Color(_revivalBudget, new Color(.9f, .85f, 1)); _revivalBudget.raycastTarget = false;
             }
             var stage = StageManager.Instance;
-            _revivalBudget.gameObject.SetActive(stage != null && !CharacterTrainingSession.Active);
+            _revivalBudget.gameObject.SetActive(stage != null);
             if (stage != null) _revivalBudget.text = $"이번 도전 부활 {stage.IrisCoins} / {IrisRescueState.DefaultCoins} · 이리스\n런 누적 사용 {stage.TotalRevives}회";
         }
 

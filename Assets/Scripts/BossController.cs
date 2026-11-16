@@ -182,14 +182,12 @@ namespace RaidRogue
             }
         }
         private string _presentedCastSource,_presentedCastName;
-        private bool _presentedTraining;
         public string CurrentCastSkillName
         {
             get
             {
-                bool training=CharacterTrainingSession.Active;
-                if(_presentedCastSource!=_currentCastSkillName||_presentedTraining!=training||_presentedCastName==null)
-                {_presentedCastSource=_currentCastSkillName;_presentedTraining=training;_presentedCastName=BossCastPresentation.Name(_currentCastSkillName,training);}
+                if(_presentedCastSource!=_currentCastSkillName||_presentedCastName==null)
+                {_presentedCastSource=_currentCastSkillName;_presentedCastName=BossCastPresentation.Name(_currentCastSkillName);}
                 return _presentedCastName;
             }
         }
@@ -582,16 +580,6 @@ namespace RaidRogue
                 aggroTarget = targetPlayer;
             }
 
-            string stageIntroMsg = $"★ 1부 STAGE {currentStageNumber} / 6 · {currentBossTitle}" +
-                (currentStageNumber > 5 && !JanusEncounter ? $" · 기존 Stage {EncounterTemplate} 구성 재사용" : "") + " ★";
-            if (CharacterTrainingSession.Active) { SetMechanicAlert(stageIntroMsg, new Color(1f, 0.9f, 0.3f, 1f), 4.5f);
-            FloatingTextPopup.Spawn(
-                transform.position + Vector3.up * popupHeightOffset,
-                $"{currentBossTitle} 등장!! (HP {Mathf.RoundToInt(maxHp)})",
-                new Color(1f, 0.88f, 0.25f, 1f),
-                true
-            ); }
-
             ResetGuardian();
             ResetFlora();
             ResetCampanella();
@@ -699,11 +687,6 @@ namespace RaidRogue
                 return;
             }
 
-            if (CharacterTrainingSession.Active)
-            {
-                if (IsGroggy) UpdateGroggyState();
-                UpdateAlertBannerTimer(); UpdateTopBossUI(); return;
-            }
             HandleDebugShortcuts();
             UpdateAlertBannerTimer();
 
@@ -753,7 +736,7 @@ namespace RaidRogue
             var stage = StageManager.Instance;
             if (session == null || session.Mode != RaidSessionMode.Single || stage == null ||
                 stage.boss != this || stage.Progress.Phase != RaidBattlePhase.Combat ||
-                StageManager.CombatSuspended || CharacterTrainingSession.Active ||
+                StageManager.CombatSuspended ||
                 LocalGameplayInput.ModalCovered || currentHp <= 0f ||
                 fsmState == BossFSMState.Defeated) return;
 
@@ -2190,7 +2173,7 @@ namespace RaidRogue
         }
         private bool TickBossRaidwide()
         {
-            if (CharacterTrainingSession.Active || currentStageNumber < 1 || currentStageNumber > 6) return false;
+            if (currentStageNumber < 1 || currentStageNumber > 6) return false;
             var next = _raidwide.Advance(Time.deltaTime, RaidwideReady, raidwide);
             if (next == BossRaidwideEvent.Begin)
             {
@@ -2312,10 +2295,8 @@ namespace RaidRogue
 
         private void SetMechanicAlert(string message, Color color, float duration)
         {
-            // Boss solution banners are for explicit character training, not live encounters.
+            // Encounter patterns retain this call site without displaying solution banners.
             // Ground telegraphs, target markers, audio and cast timing retain their own presenters.
-            if(!CharacterTrainingSession.Active)return;
-            SetAlertBanner(message,color,duration);
         }
 
         private void SetAlertBanner(string message, Color color, float duration)
@@ -2343,7 +2324,7 @@ namespace RaidRogue
 
         private void UpdateTopBossUI()
         {
-            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible && !CharacterTrainingSession.Active) return;
+            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible) return;
             if (bossHpFillImage != null)
             {
                 bossHpFillImage.fillAmount = HpRatio;
@@ -2474,7 +2455,7 @@ namespace RaidRogue
             if (bossPhaseText != null && bossPhaseText.isActiveAndEnabled &&
                 (!needsCastPresentation || (bossCastText != null && bossCastText.isActiveAndEnabled)))
             { if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(false); return; }
-            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible && !CharacterTrainingSession.Active)
+            if (RaidApproachField.Instance != null && !RaidApproachField.Instance.BossVisible)
             { if (_castBannerRoot != null) _castBannerRoot.gameObject.SetActive(false); return; }
             if (_castBannerRoot != null && !_castBannerRoot.gameObject.activeSelf) _castBannerRoot.gameObject.SetActive(true);
             if (_castBannerRoot == null || _castBannerText == null)

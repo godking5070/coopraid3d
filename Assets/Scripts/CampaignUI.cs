@@ -44,7 +44,7 @@ namespace RaidRogue
         {
             var c = CampaignRuntime.Instance;
             string text = "개인 계정: " + c.Owner + "\n확정된 스테이지 클리어: " + c.Personal.clears.Length + "건\n1부 완료: " + (c.Personal.PartOneComplete ? "완료" : "미완료") + "\n2부: " + (c.Personal.PartTwoUnlocked ? "후속 해금 조건 충족 · 현재 진입 불가" : "준비 중 · 1부 완료 기록 필요") +
-                "\n\n1부 4인·6스테이지 진행을 지원합니다.\n수호자·플로라·캄파넬라·마리오네트·유스티티아·야누스의 여섯 전장에 도전합니다.\n2부는 준비 중이며 진입할 수 없습니다.\n구버전 프로토타입 기록은 1부 완료로 인정하지 않습니다.\n훈련장·개발 기능은 개인 클리어와 저장에서 제외됩니다.";
+                "\n\n1부 4인·6스테이지 진행을 지원합니다.\n수호자·플로라·캄파넬라·마리오네트·유스티티아·야누스의 여섯 전장에 도전합니다.\n2부는 준비 중이며 진입할 수 없습니다.\n구버전 프로토타입 기록은 1부 완료로 인정하지 않습니다.\n개발 기능은 개인 클리어와 저장에서 제외됩니다.";
             CampaignDialog(text, null);
         }
         private void RequestNewCampaign(Action start)
@@ -69,7 +69,7 @@ namespace RaidRogue
         }
         private bool WantsToQuit()
         {
-            if (_quitApproved || _session == null || _session.Ending || _session.Mode == RaidSessionMode.Menu || _session.Mode == RaidSessionMode.Training) return true;
+            if (_quitApproved || _session == null || _session.Ending || _session.Mode == RaidSessionMode.Menu) return true;
             ConfirmCampaignExit(true); return false;
         }
         private void CampaignDialog(string message, Action action)
@@ -97,7 +97,7 @@ namespace RaidRogue
             _homeContinue.interactable = _campaignContinue.interactable;
             _homeContinue.gameObject.SetActive(RaidSteamRuntime.Instance?.Busy != true);
             _campaignNotice.text = c.Notice;
-            _campaignHudNotice.gameObject.SetActive(c.HasSaveFailure && !_session.MenuOpen && _session.Mode != RaidSessionMode.Training);
+            _campaignHudNotice.gameObject.SetActive(c.HasSaveFailure && !_session.MenuOpen);
             _campaignHudNotice.text = "Save failed: " + c.SaveFailureDetail + "\nOpen the menu to retry saving.";
             if (_campaignHudNotice.gameObject.activeSelf) RaidUIOrder.Raise(_campaignHudNotice.transform);
             _campaignRetry.gameObject.SetActive(c.HasSaveFailure);

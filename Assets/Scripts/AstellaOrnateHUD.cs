@@ -147,7 +147,7 @@ namespace RaidRogue
             SetVisible(playerRoot, visible && (editing || _player != null || _localAvatar?.State != null));
             SetVisible(partyRevivalRoot, visible);
             SetVisible(bossRoot, editing || visible && _boss != null && (!hideBossUntilEncounter || RaidApproachField.Instance == null ||
-                RaidApproachField.Instance.BossVisible || CharacterTrainingSession.Active));
+                RaidApproachField.Instance.BossVisible));
             UpdateHealth();
             UpdateResource(visible);
             UpdateBoss(visible);

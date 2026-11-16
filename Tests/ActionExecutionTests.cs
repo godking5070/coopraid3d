@@ -20,7 +20,6 @@ namespace RaidRogue
     }
     public static class RaidCombatAuthority { public static bool Replica,Active; }
     public sealed class RaidNetworkSession { public static RaidNetworkSession Instance=new RaidNetworkSession();public bool CombatRunning; }
-    public static class CharacterTrainingSession { public static bool enabled;public static bool CanEdit(CharacterActor a)=>enabled; }
     public static class RaidLobbyRoom { public static bool PracticeActive; }
     public sealed class Progress { public RaidBattlePhase Phase=RaidBattlePhase.Combat; }
     public sealed class StageManager { public static StageManager Instance=new StageManager();public Progress Progress=new Progress(); }
@@ -74,9 +73,8 @@ internal static class ActionExecutionTests
             RaidLobbyRoom.PracticeActive=true;
             Check(a.Invoke(attack,enemy,(s,t)=>a.ResolveComboResource(s,policy,true))&&a._state.value==60,"dummy practice permits its normal combo resource loop");
             RaidLobbyRoom.PracticeActive=false;
-            CharacterTrainingSession.enabled=true;
-            Check(a.Invoke(heal,ally,(s,t)=>a.ResolveComboResource(s,policy,true)),"isolated training allows resource testing");
-            CharacterTrainingSession.enabled=false;StageManager.Instance.Progress.Phase=RaidBattlePhase.Combat;
+            Check(a.Invoke(heal,ally,(s,t)=>{Check(!a.ResolveComboResource(s,policy,true),"leaving dummy practice restores the lobby resource gate");return true;})&&a._state.value==60,"inactive dummy cannot farm precombat resources");
+            StageManager.Instance.Progress.Phase=RaidBattlePhase.Combat;
             RaidCombatAuthority.Replica=true;
             Check(!a.Invoke(attack,enemy,(s,t)=>throw new Exception("replica handler executed")),"replica never executes effects");
             RaidCombatAuthority.Replica=false;RaidCombatAuthority.Active=true;

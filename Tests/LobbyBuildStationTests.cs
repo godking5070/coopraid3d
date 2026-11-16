@@ -34,7 +34,6 @@ namespace RaidRogue
         public RaidSessionMode Mode=RaidSessionMode.Single;public bool Ending,MenuOpen,ControlsReady=true,CampaignBuildLocked,CanEditLobbyBuild=true;
         public RaidBattlePhase BattlePhase;
     }
-    public static class CharacterTrainingSession {public static bool Active;}
     public sealed class CampaignRuntime {public static CampaignRuntime Instance;public bool BuildLocked;}
     public sealed class Definition {public int legacyRole;public object[] routes={new object()};public object[] loadouts={new object()};}
     public sealed class CharacterActor {public Definition Definition=new Definition();public bool CanChangeLoadout=true;}
@@ -107,7 +106,6 @@ internal static class LobbyBuildStationTests
         session.MenuOpen=true;Check(!RaidRogue.RaidLobbyRoom.CanUseBuildStation,"menu overlay denies station");session.MenuOpen=false;
         session.Ending=true;Check(!RaidRogue.RaidLobbyRoom.CanUseBuildStation,"ending session denies station");session.Ending=false;
         session.Mode=RaidRogue.RaidSessionMode.Menu;Check(!RaidRogue.RaidLobbyRoom.CanUseBuildStation,"main menu backdrop is not a usable lobby");session.Mode=RaidRogue.RaidSessionMode.Single;
-        RaidRogue.CharacterTrainingSession.Active=true;Check(!RaidRogue.RaidLobbyRoom.CanUseBuildStation,"separate training mode denies station");RaidRogue.CharacterTrainingSession.Active=false;
         foreach(var phase in new[]{RaidRogue.RaidBattlePhase.Loading,RaidRogue.RaidBattlePhase.Combat,RaidRogue.RaidBattlePhase.Reward,RaidRogue.RaidBattlePhase.Wiped})
         {stage.Progress.Phase=phase;Check(!RaidRogue.RaidLobbyRoom.CanUseBuildStation,"single non-lobby denies: "+phase);}
         stage.Progress.Phase=RaidRogue.RaidBattlePhase.Lobby;

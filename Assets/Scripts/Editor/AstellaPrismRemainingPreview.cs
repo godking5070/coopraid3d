@@ -165,8 +165,8 @@ namespace RaidRogue.Editor
             }
             if (view.viewId == "connection")
             {
-                foreach (string hide in new[] { "_room", "_confirmation", "_recoveryPanel", "_campaignDialog", "_campaignMenu", "_createMenu", "_joinMenu", "_lanMenu", "_training" }) Toggle(view, hide, false);
-                entry.previewOnlyVisibility = "Legacy _training button and unrelated menu overlays hidden on the temporary connection clone; runtime Home is verified separately.";
+                foreach (string hide in new[] { "_room", "_confirmation", "_recoveryPanel", "_campaignDialog", "_campaignMenu", "_createMenu", "_joinMenu", "_lanMenu" }) Toggle(view, hide, false);
+                entry.previewOnlyVisibility = "Unrelated menu overlays hidden on the temporary connection clone; runtime Home is verified separately.";
                 var home = Bound(view, "_homeMenu"); if (home == null) throw new InvalidOperationException("No Home panel binding.");
                 for (Transform path = home; path != null && path != view.transform; path = path.parent) path.gameObject.SetActive(true);
             }

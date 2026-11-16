@@ -949,7 +949,6 @@ namespace RaidRogue
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + healAmount);
             float actualHealed = currentHp - before;
-            CharacterTrainingSession.Instance?.RecordOverheal(healAmount - actualHealed);
             CharacterKit.AfterHeal(source,transform,actualHealed,healAmount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 

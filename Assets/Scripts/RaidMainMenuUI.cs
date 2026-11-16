@@ -10,7 +10,7 @@ namespace RaidRogue
         private MainMenuPage _menuPage;
         private RectTransform _menuLayout;
         private GameObject _homeMenu, _createMenu, _joinMenu, _lanMenu;
-        private Text _menuTitle, _menuSubtitle, _trainingAccess, _trainingAction, _homeSave;
+        private Text _menuTitle, _menuSubtitle, _homeSave;
         private Button _menuBack, _hostEntry, _joinEntry, _friends, _homeContinue, _difficultyToggle;
         private static readonly Color MenuGold = new Color(.88f, .73f, .44f);
         private static readonly Color MenuMuted = new Color(.63f, .71f, .79f);
@@ -121,9 +121,6 @@ namespace RaidRogue
                 var label = _difficultyToggle.GetComponentInChildren<Text>();
                 if (label != null) label.text = "Stage 1 난이도: " + (run?.SelectedDifficulty == CampaignCatalog.Hard ? "하드" : "노멀");
             }
-            // Older authored menus can still carry this reference. Retain the
-            // binding fields for prefab compatibility, but retire the entry.
-            if (_training != null) { _training.interactable = false; _training.gameObject.SetActive(false); }
             _steamStatus.gameObject.SetActive(starting && (_menuPage == MainMenuPage.Create || _menuPage == MainMenuPage.Join || busy));
             _status.gameObject.SetActive(!starting || _menuPage == MainMenuPage.LanHost || _menuPage == MainMenuPage.LanJoin);
             if (!RaidUIStyle.Authored(_status)) _status.rectTransform.anchoredPosition = new Vector2(0, starting ? -285 : 166);

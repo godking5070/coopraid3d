@@ -33,16 +33,9 @@ namespace RaidRogue
         public string owner;
         public CampaignClearReceipt[] clears = Array.Empty<CampaignClearReceipt>();
         public string[] unlocks = Array.Empty<string>();
-        // Optional personal-v1 field. Old files remain valid; a real Part 1 clear also
-        // proves participation. Checkpoint existence alone never unlocks training.
+        // Legacy personal-v1 data is retained when existing saves are rewritten.
+        // The removed standalone training mode no longer reads or awards this flag.
         public bool enteredRegularBattle;
-        public bool TrainingUnlocked => enteredRegularBattle || clears.Any(c => c.eligible && c.chapterId == CampaignCatalog.PartOne);
-        public bool RecordBattleParticipation(string authenticatedUser, string chapter, int stage, bool eligible, bool localControl)
-        {
-            if (TrainingUnlocked || owner != authenticatedUser || !CampaignIdentity.Valid(owner) ||
-                chapter != CampaignCatalog.PartOne || stage < 1 || stage > CampaignCatalog.StageCount(chapter) || !eligible || !localControl) return false;
-            enteredRegularBattle = true; return true;
-        }
         // Optional v1 additive field: confirmed remote clear deliveries survive completion and
         // replacement of a run checkpoint. They never grant this host personal progress.
         public CampaignClearReceipt[] deliveries = Array.Empty<CampaignClearReceipt>();

@@ -52,7 +52,7 @@ if ($Group -in @('Diagnostics', 'All')) {
 if ($Group -eq 'Compile') { Add-StudioCheck 'Run-CombatMetricsChecks.ps1' $true }
 if ($Group -eq 'Network') { Add-StudioCheck 'Run-NetworkChecks.ps1' $true }
 if ($Group -in @('Steam', 'All')) {
-    Add-StudioCheck 'Run-SteamChecks.ps1' $true 'Includes Network, SDKs, Compile, Paladin/selection, campaign IO, flow, settings, roster, training, movement, metrics and modal checks; no live connection.'
+    Add-StudioCheck 'Run-SteamChecks.ps1' $true 'Includes Network, SDKs, Compile, Paladin/selection, campaign IO, flow, settings, roster, movement, metrics and modal checks; no live connection.'
 }
 if ($Group -eq 'Progression') { Add-StudioCheck 'Run-CampaignSaveChecks.ps1' }
 if ($Group -in @('Progression', 'All')) {

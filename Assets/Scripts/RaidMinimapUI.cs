@@ -34,7 +34,6 @@ namespace RaidRogue
         private int _shownStage = int.MinValue;
         private int _shownStageMax;
         private bool _shownLobby;
-        private bool _shownTraining;
         private float _mapOriginZ;
 
         private void OnEnable() { _nextRefresh = 0; }
@@ -51,19 +50,18 @@ namespace RaidRogue
             if (panel == null || mapArea == null || playerMarker == null || bossMarker == null) return;
             var session = RaidNetworkSession.Instance;
             var stage = StageManager.Instance;
-            bool training = CharacterTrainingSession.Active;
             bool lobby = RaidLobbyRoom.Active;
             var phase = RaidNetworkSession.Multiplayer ? session.BattlePhase : stage != null ? stage.Progress.Phase : RaidBattlePhase.Lobby;
             bool show = session != null && !session.Ending && !session.MenuOpen &&
-                (training || (session.Mode != RaidSessionMode.Menu && session.Mode != RaidSessionMode.Training &&
-                    (lobby || phase != RaidBattlePhase.Lobby) && phase != RaidBattlePhase.Victory && phase != RaidBattlePhase.Closed));
+                session.Mode != RaidSessionMode.Menu &&
+                (lobby || phase != RaidBattlePhase.Lobby) && phase != RaidBattlePhase.Victory && phase != RaidBattlePhase.Closed;
             show=show||LocalHUDLayoutController.IsEditing;
             if (panel.gameObject.activeSelf != show) panel.gameObject.SetActive(show);
             if (!show) return;
 
             if (_player == null) _player = stage != null ? stage.player : FindFirstObjectByType<PlayerController>();
             float radius = _player != null ? Mathf.Max(1f, _player.arenaBoundaryRadius) : fallbackArenaRadius;
-            var approach = !lobby && !training ? RaidApproachField.Instance : null;
+            var approach = !lobby ? RaidApproachField.Instance : null;
             bool showApproach = approach != null && approach.Showing;
             _mapOriginZ = showApproach ? (approach.StartZ + approach.FieldRadius) * .5f : 0;
             if (showApproach) radius = Mathf.Max(approach.FieldRadius - _mapOriginZ, _mapOriginZ - approach.StartZ) + 1;
@@ -79,7 +77,7 @@ namespace RaidRogue
                 if (playerMarker.rectTransform.localRotation != rotation) playerMarker.rectTransform.localRotation = rotation;
             }
             var boss = stage != null ? stage.boss : null;
-            Place(bossMarker, !lobby && boss != null && (training || approach == null || approach.BossVisible) && CombatRange.LivingEnemy(boss.transform) ? boss.transform : null, radius, true);
+            Place(bossMarker, !lobby && boss != null && (approach == null || approach.BossVisible) && CombatRange.LivingEnemy(boss.transform) ? boss.transform : null, radius, true);
             SetColor(bossMarker, boss != null && selected == boss.transform ? selectedColor : bossColor);
 
             var members = PartyLife.OrderedMembers();
@@ -104,25 +102,15 @@ namespace RaidRogue
                     Place(marker, add.transform, radius, true);
                     SetColor(marker, selected == add.transform ? selectedColor : addColor);
                 }
-            var trainingSession = training ? CharacterTrainingSession.Instance : null;
-            if (addMarkerTemplate != null && trainingSession != null)
-                foreach (var add in trainingSession.ExtraTargets)
-                {
-                    if (add == null || !CombatRange.LivingEnemy(add.transform)) continue;
-                    var marker = Acquire(_addMarkers, addMarkerTemplate, addCount++);
-                    Place(marker, add.transform, radius, true);
-                    SetColor(marker, selected == add.transform ? selectedColor : addColor);
-                }
             HideUnused(_addMarkers, addCount);
-            if (stageLabel != null && (training != _shownTraining || lobby != _shownLobby ||
+            if (stageLabel != null && (lobby != _shownLobby ||
                 (stage != null ? stage.currentStage : 0) != _shownStage ||
                 (stage != null ? stage.maxStage : 0) != _shownStageMax))
             {
-                _shownTraining = training;
                 _shownLobby = lobby;
                 _shownStage = stage != null ? stage.currentStage : 0;
                 _shownStageMax = stage != null ? stage.maxStage : 0;
-                stageLabel.text = training ? "TRAINING" : lobby ? "대기실" : stage != null ? "STAGE " + _shownStage + " / " + _shownStageMax : "";
+                stageLabel.text = lobby ? "대기실" : stage != null ? "STAGE " + _shownStage + " / " + _shownStageMax : "";
             }
         }
 
@@ -220,7 +208,7 @@ namespace RaidRogue
             var panel = Rect("Minimap", hud, new Vector2(216, 244));
             panel.anchorMin = panel.anchorMax = new Vector2(1, 1);
             panel.pivot = new Vector2(1, 1);
-            // Reserve the right column for settings, training controls and combat metrics,
+            // Reserve the right column for settings and combat metrics,
             // and stay below the centered target frame.
             panel.anchoredPosition = new Vector2(-470, -250);
             var background = panel.gameObject.AddComponent<Image>();

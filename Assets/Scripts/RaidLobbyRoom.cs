@@ -7,7 +7,7 @@ namespace RaidRogue
     {
         public static RaidLobbyRoom Instance { get; private set; }
         public static bool Active => Instance != null && Instance._showing && Instance._session != null &&
-            Instance._session.Mode != RaidSessionMode.Menu && !CharacterTrainingSession.Active;
+            Instance._session.Mode != RaidSessionMode.Menu;
         public static bool HostAtDoor => Instance != null && Instance._showing &&
             Instance._player != null && Vector3.Distance(Instance._player.transform.position, Instance._layout.doorPosition) < Instance._layout.doorRange;
         public static Vector3 DoorPosition => Instance != null ? Instance._layout.doorPosition : new Vector3(0,1,14.5f);
@@ -59,7 +59,7 @@ namespace RaidRogue
             bool lobby = _session.Mode == RaidSessionMode.Menu ||
                 (_session.Mode == RaidSessionMode.Single && _stage.Progress.Phase == RaidBattlePhase.Lobby) ||
                 (RaidNetworkSession.Multiplayer && _session.BattlePhase == RaidBattlePhase.Lobby);
-            ShowRoom(lobby && !_session.Ending && !CharacterTrainingSession.Active);
+            ShowRoom(lobby && !_session.Ending);
             if (!_showing || _session.Mode == RaidSessionMode.Menu || _session.MenuOpen || LocalGameplayInput.Blocked)
             { ShowHint(-1); return; }
 

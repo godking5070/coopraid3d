@@ -27,7 +27,7 @@ namespace RaidRogue
         public PotionSettings potionSettings = new PotionSettings();
         public ResurrectionSettings resurrectionSettings = new ResurrectionSettings();
         public static StageManager Instance { get; private set; }
-        public static bool CombatSuspended => !CharacterTrainingSession.Active && (RaidNetworkSession.CombatPreview || Instance != null && (!Instance.EncounterActive || Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared));
+        public static bool CombatSuspended => RaidNetworkSession.CombatPreview || Instance != null && (!Instance.EncounterActive || Instance.IsWiped || Instance.IsPreparing || Instance._isStageTransitioning || Instance._isAllStagesCleared);
         // Practice permits player skills only; boss AI, damage and progression stay suspended.
         public static bool PlayerSkillsSuspended => CombatSuspended && !RaidLobbyRoom.PracticeActive;
         public bool IsWiped { get; private set; }
@@ -99,7 +99,6 @@ namespace RaidRogue
 
         private void Update()
         {
-            if (CharacterTrainingSession.Active) return;
             UpdateSingleRewards();
             if (!RaidCombatAuthority.Active && (RaidApproachField.Instance?.NearPortal(player?.transform) == true ||
                 player != null && player.IsDead && RaidApproachField.Instance?.PortalActive == true) &&
@@ -124,7 +123,6 @@ namespace RaidRogue
         /// </summary>
         public void StartStage(int stageNumber)
         {
-            if (CharacterTrainingSession.Active) return;
             if (stageNumber != Progress.Stage || !Progress.TryStart(Progress.Revision)) return;
             RaidApproachField.Instance?.SetBossCombatReady(true);
             IsWiped = IsPreparing = _pendingBossClear = _isStageTransitioning = _isAllStagesCleared = false;
@@ -238,7 +236,6 @@ namespace RaidRogue
         }
         private bool PrepareEncounter(int stage, bool retry, bool newRun = false, bool resume = false)
         {
-            if (CharacterTrainingSession.Active) return false;
             if (boss == null || player == null || cardManager == null || cardManager.cardSelectionModalRoot == null)
             { RaidNetworkSession.Instance?.FailSession("전투/보상 참조가 누락되었습니다. 원본 프로젝트의 SceneAutoBuilder 구성을 확인하세요."); return false; }
             bool spectatorJump=RaidNetworkSession.Instance?.AiSpectatorActive==true && !retry && !resume &&
@@ -383,7 +380,6 @@ namespace RaidRogue
         // Resolve after all combat Updates. A kill and a wipe in one frame always award the clear once.
         private void LateUpdate()
         {
-            if (CharacterTrainingSession.Active) return;
             if (RaidCombatAuthority.Replica) return;
             if (!_hasStartedEncounter || CombatSuspended || boss == null) return;
             // Spend available spectator coins before resolving a same-frame party wipe.

@@ -18,8 +18,6 @@ namespace RaidRogue
     static class CombatDamageRules { public static bool FinitePositive(float value)=>CharacterDefinitionValidation.Finite(value)&&value>0; }
     sealed class CounterOpportunity
     {public float End;public int Clears;public void Clear(){End=0;Clears++;}public void RestoreEnd(float end){End=end;} }
-    sealed class CharacterTrainingSession
-    {public static bool Active;public static CharacterTrainingSession Instance;public float Recorded;public void RecordStagger(float points){Recorded+=points;} }
     static class FloatingTextPopup { public static int Count;public static void Spawn(Vector3 p,string text,Color color,bool big,bool important=false){Count++;} }
     sealed class BossController
     {

@@ -57,12 +57,6 @@ namespace RaidRogue
             _ui.CloseResults();
         }
 
-        internal void ResetTrainingRecords()
-        {
-            if (!CharacterTrainingSession.Active) return;
-            if (!Ledger.Active) BeginStage(0, true);
-            else { _recentDamage.Clear(); Ledger.ResetCurrentCounters(); RefreshRoster(); }
-        }
         public void RefreshRoster()
         {
             foreach (var member in PartyLife.OrderedMembers()) Register(member);

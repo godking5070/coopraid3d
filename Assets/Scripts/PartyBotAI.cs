@@ -394,7 +394,6 @@ namespace RaidRogue
                 return;
             }
 
-            if (CharacterTrainingSession.Active) return;
             if(targetBoss.MarionetteControlled(transform)) return;
             if(targetBoss.GuardianLured(transform)) return;
             if (targetBoss.GuardianClashHolding(transform) || targetBoss.CampanellaLockHolding(transform))
@@ -1281,7 +1280,6 @@ namespace RaidRogue
             float before = currentHp;
             currentHp = Mathf.Min(maxHp, currentHp + amount);
             float actualHealed = currentHp - before;
-            CharacterTrainingSession.Instance?.RecordOverheal(amount - actualHealed);
             CharacterKit.AfterHeal(source,transform,actualHealed,amount,before,kind);
             CombatMetricsManager.Healing(kind == HealingKind.Potion ? transform : source != null ? source : transform, before, currentHp, kind);
 

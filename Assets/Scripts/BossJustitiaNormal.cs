@@ -10,9 +10,9 @@ namespace RaidRogue
         public JustitiaNormalSettings justitia=new JustitiaNormalSettings();
         [Header("Stage 5 hard: separate initial tuning")]
         public JustitiaHardSettings justitiaHard=new JustitiaHardSettings();
-        public bool JustitiaHard => currentStageNumber==5 && !CharacterTrainingSession.Active &&
+        public bool JustitiaHard => currentStageNumber==5 &&
             CampaignRuntime.Instance?.DifficultyId==CampaignCatalog.Hard;
-        public bool JustitiaEncounter => currentStageNumber==5 && !CharacterTrainingSession.Active &&
+        public bool JustitiaEncounter => currentStageNumber==5 &&
             (CampaignRuntime.Instance==null || CampaignRuntime.Instance.DifficultyId==CampaignCatalog.Normal || JustitiaHard);
         private JustitiaNormalSettings JustTuning => JustitiaHard ? justitiaHard : justitia;
         public float JustitiaHalfWidth => JustTuning.halfWidth;

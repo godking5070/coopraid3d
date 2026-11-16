@@ -15,7 +15,7 @@ namespace RaidRogue
         private readonly Text[] _roleCaptions = new Text[4];
         private Text _readyCaption;
         private Font _font;
-        private Button _beginBattle, _steamCreate, _invite, _ready, _cancelJoin, _single, _lanHost, _lanJoin, _training;
+        private Button _beginBattle, _steamCreate, _invite, _ready, _cancelJoin, _single, _lanHost, _lanJoin;
         private Text _steamStatus, _inviteConfirmText;
         private GameObject _confirmation, _recoveryPanel;
         private Button _recover, _retry, _cancelRecovery, _aegis;
@@ -134,13 +134,6 @@ namespace RaidRogue
             _beginBattle.gameObject.SetActive(_session.IsHostAuthority && _session.CanChooseRole);
             _beginBattle.interactable = _session.CanStartLobby && RaidLobbyRoom.HostAtDoor;
             _barText.text = _session.Mode == RaidSessionMode.Single ? "싱글플레이 · AI 파티" : $"{(_session.UsesSteam ? "Steam" : "LAN")} · 접속 {_session.ConnectedPlayerCount}/4명 · {_session.BattlePhase}\n{LocalInputBindings.Label("Dash")} 대쉬 · {LocalInputBindings.Label("Potion")} 포션";
-            if (_session.Mode == RaidSessionMode.Training)
-            {
-                _bar.SetActive(false); _flowBar.SetActive(false);
-                _roster.text = "로컬 훈련장 · 진행도와 보상 저장 없음\n화면으로 돌아가거나 메인 메뉴로 종료할 수 있습니다.";
-                foreach (var role in _roles) role.gameObject.SetActive(false);
-                return;
-            }
             // The hidden lobby used to rebuild strings and query native Steam members every frame.
             // Admission/control validation remains in the host simulation, independent of UI refresh.
             if (starting || !_session.MenuOpen || Time.unscaledTime < _nextRosterRefresh) return;

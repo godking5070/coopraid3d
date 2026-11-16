@@ -46,7 +46,6 @@ namespace RaidRogue
         internal CampaignPartySlot ReportSlot(Transform member) => member != null && _slots.TryGetValue(member, out var slot) ? slot : null;
 #endif
         public string SaveFailureDetail => _lastBoundaryError ?? Notice;
-        public bool TrainingUnlocked => Owner == CurrentOwner && Personal?.TrainingUnlocked == true;
         // A confirmed Stage 2 receipt is the durable story event. No separate reward flag is written.
         public bool Stage2GardenCleared => Owner == CurrentOwner &&
             ((Personal?.clears != null && Personal.clears.Any(c => c.eligible && c.chapterId == CampaignCatalog.PartOne && c.stage == 2)) ||
@@ -156,24 +155,10 @@ namespace RaidRogue
                 else Notice = "계정이 변경되어 이 세션의 저장을 중단했습니다. 메뉴에서 새 계정으로 다시 시작하세요.";
                 return;
             }
-            RecordFirstBattle();
             if (HasSaveFailure && Time.unscaledTime >= _retryAt) { _retryAt = Time.unscaledTime + 10; RetrySave(); }
-        }
-        private void RecordFirstBattle()
-        {
-            if (TrainingUnlocked || _tainted || CharacterTrainingSession.Active || RaidNetworkSession.Instance?.AiSpectatorActive==true) return;
-            var session = RaidNetworkSession.Instance; var stage = StageManager.Instance;
-            if (session == null || session.Ending || stage == null || !stage.EncounterActive) return;
-            bool participating = session.Mode == RaidSessionMode.Single
-                ? _working != null && _working.runId == stage.RunId
-                : session.RegularCampaignParticipant;
-            if (!Personal.RecordBattleParticipation(CurrentOwner, stage.ChapterId, stage.currentStage, Eligible, participating)) return;
-            _personalDirty = true; SavePersonal();
-            if (!_personalDirty) Notice = "첫 전투 진입 기록 저장 완료 · 대기실 허수아비에서 현재 빌드의 조작을 연습할 수 있습니다.";
         }
         public void MarkDevelopmentUse()
         {
-            if (CharacterTrainingSession.Active) return;
             _tainted = true; if (_working != null) _working.eligible = false;
             _pending = null;
             Settlement = null; _settlementDirty = false;
@@ -184,7 +169,7 @@ namespace RaidRogue
             if (_random == null) _random = new CampaignRandom(unchecked((uint)Guid.NewGuid().GetHashCode()));
             int result = _random.Next(count); if (_working != null) _working.randomState = _random.State; return result;
         }
-        private bool Authority => CurrentOwner == Owner && !CharacterTrainingSession.Active && !RaidCombatAuthority.Replica &&
+        private bool Authority => CurrentOwner == Owner && !RaidCombatAuthority.Replica &&
             (RaidNetworkSession.Instance?.Mode == RaidSessionMode.Single ||
              RaidNetworkSession.Instance?.AiSpectatorActive==true && IsolatedTestProfile ||
              RaidNetworkSession.Instance?.IsHostAuthority == true && RaidNetworkSession.Instance.UsesSteam);
@@ -278,7 +263,7 @@ namespace RaidRogue
         }
         public bool AcceptReceipt(CampaignClearReceipt receipt)
         {
-            if (Owner != CurrentOwner || CharacterTrainingSession.Active || !CampaignValidation.Receipt(receipt, Owner) || !receipt.eligible) return false;
+            if (Owner != CurrentOwner || !CampaignValidation.Receipt(receipt, Owner) || !receipt.eligible) return false;
             if (Personal.Record(receipt)) _personalDirty = true;
             if (_personalDirty) SavePersonal();
             return !_personalDirty;

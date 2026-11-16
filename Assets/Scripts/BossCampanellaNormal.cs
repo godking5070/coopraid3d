@@ -10,7 +10,7 @@ namespace RaidRogue
         public CampanellaNormalSettings campanella=new CampanellaNormalSettings();
         [Header("Stage 3 hard: Campanella (initial tuning)")]
         public CampanellaHardSettings campanellaHard=new CampanellaHardSettings();
-        public bool CampanellaEncounter => currentStageNumber==3 && !CharacterTrainingSession.Active;
+        public bool CampanellaEncounter => currentStageNumber==3;
         public bool CampanellaHard => CampanellaEncounter && CampaignRuntime.Instance?.DifficultyId==CampaignCatalog.Hard;
         public bool CampanellaNormal => CampanellaEncounter && !CampanellaHard;
         private CampanellaNormalSettings CampTuning => CampanellaHard ? campanellaHard.combat : campanella;

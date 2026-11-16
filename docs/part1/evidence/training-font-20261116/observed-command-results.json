@@ -1,0 +1,103 @@
+﻿{
+    "schema":  1,
+    "recordedUtc":  "2026-11-16T10:26:08.5211347Z",
+    "evidenceKind":  "Observed command results transcribed from successful tool output; not a raw log and no tests were repeated for this record.",
+    "rawFullLogsAvailable":  false,
+    "commands":  [
+                     {
+                         "command":  "Tests/Run-CombatMetricsChecks.ps1 -OriginalProject C:/Astella/Astella",
+                         "exitCode":  0,
+                         "managedAssemblies":  [
+                                                   "Assembly-CSharp",
+                                                   "Assembly-CSharp-Editor"
+                                               ],
+                         "assertions":  {
+                                            "combatMetrics":  1048,
+                                            "aiSpectatorDamage":  20,
+                                            "aiSpectatorProgress":  [
+                                                                        50,
+                                                                        50,
+                                                                        1
+                                                                    ],
+                                            "uiIcon":  8,
+                                            "combatResultsModal":  27,
+                                            "popupAdmission":  75,
+                                            "combatActionRules":  4047,
+                                            "actualActionExecution":  28,
+                                            "nineKeyPaladin":  2943,
+                                            "characterSelection":  17,
+                                            "targetSelection":  20
+                                        },
+                         "boundary":  "Managed compiler and actual-source fixtures; Unity Play, rendering and live network not exercised by this invocation."
+                     },
+                     {
+                         "command":  "Tests/Run-BossCastPresentationChecks.ps1",
+                         "exitCode":  0,
+                         "assertions":  11
+                     },
+                     {
+                         "command":  "Tests/Run-CampaignSaveChecks.ps1",
+                         "exitCode":  0,
+                         "assertions":  {
+                                            "campaignSave":  41863,
+                                            "flow":  1003,
+                                            "newRunConfirmation":  16,
+                                            "damageRestore":  234,
+                                            "settlementRestore":  60
+                                        },
+                         "boundary":  "Real isolated file IO and source-linked managed fixtures, no user profile writes or Unity."
+                     }
+                 ],
+    "uiResults":  "C:/Astella/training-removal-checks-20261116/ui-retired/results.json",
+    "staggerResults":  "C:/Astella/training-removal-checks-20261116/stagger-core/results.json",
+    "artifacts":  [
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-Step10-8596e9333a514c42ac588f260bbfd05e\\Assembly-CSharp.dll",
+                          "sha256":  "8244c7f314d5c690b5905d9f948bdf44799d828c0818feac5a0c15a5430b836c",
+                          "bytes":  1863168,
+                          "lastWriteUtc":  "2026-11-16T10:19:46.1196026Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-Step10-8596e9333a514c42ac588f260bbfd05e\\Assembly-CSharp.rsp",
+                          "sha256":  "b3506f1b0c34851e239a5642969bb597dc45edde9f7f9c0de62b50ca268a67a8",
+                          "bytes":  58442,
+                          "lastWriteUtc":  "2026-11-16T10:19:42.1591935Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-Step10-8596e9333a514c42ac588f260bbfd05e\\Assembly-CSharp-Editor.dll",
+                          "sha256":  "ebb2c70bc82bc798b3d28b18071867a108be02139f0586f28eb1d7aefc858f53",
+                          "bytes":  476672,
+                          "lastWriteUtc":  "2026-11-16T10:19:52.5864066Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-Step10-8596e9333a514c42ac588f260bbfd05e\\Assembly-CSharp-Editor.rsp",
+                          "sha256":  "791cb6e39969dfea31fc20e263da47b659d0848ffedc8f5623a774e38128d9a9",
+                          "bytes":  51461,
+                          "lastWriteUtc":  "2026-11-16T10:19:46.2734010Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-CampaignChecks-7b79fd0ca463431392cee92efaa3f520\\CampaignSaveTests.exe",
+                          "sha256":  "cfbd350eb9a69c81c0a16948bc5a42f499b2dffdc69992abd0737711efa84ee4",
+                          "bytes":  350208,
+                          "lastWriteUtc":  "2026-11-16T10:19:26.8010025Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-CampaignChecks-7b79fd0ca463431392cee92efaa3f520\\RaidFlowTests.exe",
+                          "sha256":  "ae2d8dbdf148f0c568edc717a9a493d0926a532131c87959e93b32b718c737fa",
+                          "bytes":  313344,
+                          "lastWriteUtc":  "2026-11-16T10:19:40.0227270Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-CampaignChecks-7b79fd0ca463431392cee92efaa3f520\\DamageCampaignRestoreTests.exe",
+                          "sha256":  "ff57ce49115ce02865df687fdf45193009a1995657228ec19ee2bf830b73392a",
+                          "bytes":  309248,
+                          "lastWriteUtc":  "2026-11-16T10:19:44.4519484Z"
+                      },
+                      {
+                          "path":  "C:\\Users\\godki\\AppData\\Local\\Temp\\RaidRogue-CampaignChecks-7b79fd0ca463431392cee92efaa3f520\\CampaignSettlementRestoreTests.exe",
+                          "sha256":  "c5e07bd075c956655a5f2022819c52668025e6b063b4a577d3e786861c19aebe",
+                          "bytes":  323584,
+                          "lastWriteUtc":  "2026-11-16T10:19:47.5231938Z"
+                      }
+                  ]
+}

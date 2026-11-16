@@ -56,7 +56,7 @@ namespace RaidRogue
             QuarterViewCamera.LocalCamera?.ReleaseOrbit();LocalInputBindings.QuarantineHeld();LocalGameplayInput.SuppressThisFrame();
         }
         public static bool CanEditCurrentRoute(CharacterActor actor, bool network) => actor?.Definition != null &&
-            actor.Definition.legacyRole == 0 && actor.Definition.routes.Length > 0 && !CharacterTrainingSession.Active &&
+            actor.Definition.legacyRole == 0 && actor.Definition.routes.Length > 0 &&
             CampaignRuntime.Instance?.BuildLocked != true && RaidNetworkSession.Instance?.CampaignBuildLocked != true &&
             (network ? RaidNetworkSession.Instance?.CanEditLobbyBuild == true : StageManager.Instance?.CanSelectInitialRole == true);
         public static bool OpenCurrentRoutes(CharacterActor actor, bool network)

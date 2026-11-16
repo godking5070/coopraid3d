@@ -26,7 +26,6 @@ namespace RaidRogue
             // Locked hits are discarded, never queued. Existing progress survives a mandatory pattern.
             float threshold=boss!=null?boss.StaggerThreshold:AegisPaladinData.StaggerThreshold;
             Stagger=Mathf.Min(threshold,Stagger+Mathf.Min(points,threshold));
-            CharacterTrainingSession.Instance?.RecordStagger(points);
             if(boss!=null&&Stagger>=threshold&&boss.TryApplyStaggerGroggy())
             {
                 Stagger=0;_opportunity.Clear();
@@ -49,7 +48,6 @@ namespace RaidRogue
         public bool TryCounter(Transform attacker,float range,float hitStagger=0,int opportunityId=-1,Vector3? attackFacing=null)
         {
             if(RaidCombatAuthority.Replica||attacker==null||!CombatRange.LivingPartyMember(attacker)||!_opportunity.Consume(opportunityId<0?OpportunityId:opportunityId,RaidCombatAuthority.ServerTime,CanCounter(attacker,range,attackFacing)))return false;
-            CharacterTrainingSession.Instance?.RecordCounter();
             // Consume before reactions: one opportunity yields one party-wide charge restoration.
             foreach(var member in PartyLife.OrderedMembers())if(CombatRange.LivingPartyMember(member))CharacterActor.Ensure(member.gameObject).RefreshMovementCharges();
             var boss = GetComponent<BossController>();
@@ -81,22 +79,19 @@ namespace RaidRogue
             CharacterDefinitionValidation.Finite(normalStaggerThreshold)&&normalStaggerThreshold>0?normalStaggerThreshold:1000;
         public bool StaggerLocked=>RaidCombatAuthority.Replica?_replicaStaggerLocked:
             StageManager.CombatSuspended||currentHp<=0||IsBossDefeatedCollapse||IsGroggy||HpDamageBlocked||HardTransformationActive||
-            !CharacterTrainingSession.Active&&(_raidwide.Active||_raidwide.DueWithin(Time.deltaTime,RaidwideReady,raidwide)||
+            (_raidwide.Active||_raidwide.DueWithin(Time.deltaTime,RaidwideReady,raidwide)||
             (GuardianNormal?GuardianStaggerLocked:FloraEncounter?FloraStaggerLocked:CampanellaEncounter?CampanellaStaggerLocked:
              MarionetteEncounter?MarionetteStaggerLocked:JustitiaEncounter?JustitiaStaggerLocked:JanusEncounter?JanusStaggerLocked:false));
         public bool TryApplyStaggerGroggy()
         {
             if(RaidCombatAuthority.Replica||StaggerLocked)return false;
             float seconds=CharacterDefinitionValidation.Finite(normalStaggerGroggySeconds)&&normalStaggerGroggySeconds>0?normalStaggerGroggySeconds:8;
-            if(!CharacterTrainingSession.Active)
-            {
-                if(GuardianNormal)return TryGuardianStaggerGroggy(seconds);
-                if(FloraEncounter)return TryFloraStaggerGroggy(seconds);
-                if(CampanellaEncounter)return TryCampanellaStaggerGroggy(seconds);
-                if(MarionetteEncounter)return TryMarionetteStaggerGroggy(seconds);
-                if(JustitiaEncounter)return TryJustitiaStaggerGroggy(seconds);
-                if(JanusEncounter)return TryJanusStaggerGroggy(seconds);
-            }
+            if(GuardianNormal)return TryGuardianStaggerGroggy(seconds);
+            if(FloraEncounter)return TryFloraStaggerGroggy(seconds);
+            if(CampanellaEncounter)return TryCampanellaStaggerGroggy(seconds);
+            if(MarionetteEncounter)return TryMarionetteStaggerGroggy(seconds);
+            if(JustitiaEncounter)return TryJustitiaStaggerGroggy(seconds);
+            if(JanusEncounter)return TryJanusStaggerGroggy(seconds);
             CleanupActiveTelegraphAndTether();_isChasing=false;_pendingPositionedSkill=null;
             _counterGroggy=true;fsmState=BossFSMState.Groggy;_groggyRemainingTime=seconds;
             return true;

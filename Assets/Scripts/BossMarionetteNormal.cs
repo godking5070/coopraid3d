@@ -10,7 +10,7 @@ namespace RaidRogue
         public MarionetteNormalSettings marionette=new MarionetteNormalSettings();
         [Header("Stage 4 hard: Marionette (initial tuning)")]
         public MarionetteHardSettings marionetteHard=new MarionetteHardSettings();
-        public bool MarionetteEncounter => currentStageNumber==4 && !CharacterTrainingSession.Active &&
+        public bool MarionetteEncounter => currentStageNumber==4 &&
             (CampaignRuntime.Instance==null || CampaignRuntime.Instance.DifficultyId==CampaignCatalog.Normal ||
              CampaignRuntime.Instance.DifficultyId==CampaignCatalog.Hard);
         public bool MarionetteHard => MarionetteEncounter && CampaignRuntime.Instance?.DifficultyId==CampaignCatalog.Hard;

@@ -74,8 +74,6 @@ namespace RaidRogue.Editor
             {
                 var overlay = view.references.FirstOrDefault(r => r.path == "_overlay")?.target as GameObject;
                 if (overlay != null) overlay.SetActive(false); // Editor preview; the session opens it at runtime.
-                var training = view.actions.FirstOrDefault(a => a.id == "훈련소")?.button;
-                if (training != null) training.gameObject.SetActive(false);
             }
             foreach (var role in scene.GetRootGameObjects().SelectMany(o => o.GetComponentsInChildren<RoleSelectionManager>(true)))
                 if (role.roleModalRoot != null) role.roleModalRoot.SetActive(false);

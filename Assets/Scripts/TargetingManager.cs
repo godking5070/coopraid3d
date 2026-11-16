@@ -112,7 +112,7 @@ namespace RaidRogue
                 RefreshSceneReferences();
             }
 
-            if (!CharacterTrainingSession.Active && StageManager.Instance != null &&
+            if (StageManager.Instance != null &&
                 (RaidNetworkSession.Multiplayer ? RaidNetworkSession.Instance.BattlePhase : StageManager.Instance.Progress.Phase) == RaidBattlePhase.Arrival)
             {
                 ClearTarget();

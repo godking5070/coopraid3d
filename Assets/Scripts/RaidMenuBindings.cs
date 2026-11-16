@@ -21,13 +21,6 @@ namespace RaidRogue
             RaidUIView.Bind(this, "<  뒤로", BackMainMenu);
             RaidUIView.Bind(this, "방 만들기", () => ShowMenuPage(MainMenuPage.Create));
             RaidUIView.Bind(this, "들어가기", () => ShowMenuPage(MainMenuPage.Join));
-            var retiredTraining = RaidUIView.For(this)?.actions.Find(x => x.id == "훈련소")?.button;
-            if (retiredTraining != null)
-            {
-                RaidUIView.Bind(this, "훈련소", () => { });
-                retiredTraining.interactable = false;
-                retiredTraining.gameObject.SetActive(false);
-            }
             RaidUIView.Bind(this, "이어하기  >", ContinueFromMenu);
             RaidUIView.Bind(this, "저장 관리", () => ShowMenuPage(MainMenuPage.Saves));
             RaidUIView.Bind(this, "설정", () => FindFirstObjectByType<LocalCameraSettingsUI>()?.Open());

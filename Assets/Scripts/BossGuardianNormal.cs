@@ -9,7 +9,7 @@ namespace RaidRogue
         public GuardianNormalSettings guardian = new GuardianNormalSettings();
         [Header("Stage 1 · 마을 수호 석상 하드 (initial tuning; HP temporary)")]
         public GuardianHardSettings guardianHard = new GuardianHardSettings();
-        public bool GuardianNormal => currentStageNumber == 1 && !CharacterTrainingSession.Active;
+        public bool GuardianNormal => currentStageNumber == 1;
         public bool GuardianHard => GuardianNormal && CampaignRuntime.Instance?.DifficultyId == CampaignCatalog.Hard;
         private GuardianNormalSettings Tuning => GuardianHard ? guardianHard.combat : guardian;
         private readonly GuardianNormalState _guardian = new GuardianNormalState();

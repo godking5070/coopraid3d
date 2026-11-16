@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 
 namespace RaidRogue
 {
-    public enum RaidSessionMode { Menu, Single, Connecting, Host, Client, Closing, Disconnected, Restoring, Training, AiSpectator }
+    // Value 8 belonged to the retired training mode; preserve spectator value 9.
+    public enum RaidSessionMode { Menu, Single, Connecting, Host, Client, Closing, Disconnected, Restoring, AiSpectator = 9 }
 
     [DefaultExecutionOrder(-50)]
     public sealed partial class RaidNetworkSession : MonoBehaviour
@@ -28,7 +29,7 @@ namespace RaidRogue
                 if (_menuOpen == value) return;
                 LocalInputBindings.QuarantineHeld();
                 QuarterViewCamera.LocalCamera?.ReleaseOrbit();
-                if (Mode == RaidSessionMode.Single || Mode == RaidSessionMode.Training)
+                if (Mode == RaidSessionMode.Single)
                 {
                     if (value) { _singleMenuTimeScale = Time.timeScale; Time.timeScale = 0; }
                     else Time.timeScale = _singleMenuTimeScale;
@@ -36,9 +37,9 @@ namespace RaidRogue
                 _menuOpen = value;
             }
         }
-        public static bool CombatPreview => Instance != null && Instance.Mode != RaidSessionMode.Single && Instance.Mode != RaidSessionMode.Training && (Instance.IsRecovering || !Multiplayer || Instance.BattlePhase != RaidBattlePhase.Combat);
+        public static bool CombatPreview => Instance != null && Instance.Mode != RaidSessionMode.Single && (Instance.IsRecovering || !Multiplayer || Instance.BattlePhase != RaidBattlePhase.Combat);
         public static bool Multiplayer => Instance != null && (Instance.Mode == RaidSessionMode.Host || Instance.Mode == RaidSessionMode.AiSpectator || Instance.Mode == RaidSessionMode.Client || Instance.Mode == RaidSessionMode.Restoring || Instance.Mode == RaidSessionMode.Disconnected || (Instance.Mode == RaidSessionMode.Connecting && Instance._resumeRequested));
-        public static bool BlocksInput => Instance != null && (Instance.Ending || Instance.MenuOpen || (Instance.Mode != RaidSessionMode.Single && Instance.Mode != RaidSessionMode.Training && !Instance.ControlsReady) || (Instance.Mode != RaidSessionMode.Single && Instance.Mode != RaidSessionMode.Training && !Instance.HasLocalAvatar));
+        public static bool BlocksInput => Instance != null && (Instance.Ending || Instance.MenuOpen || (Instance.Mode != RaidSessionMode.Single && !Instance.ControlsReady) || (Instance.Mode != RaidSessionMode.Single && !Instance.HasLocalAvatar));
         public bool HasLocalAvatar => Multiplayer && _avatars.ContainsKey(_localId);
         public RaidNetworkMotor LocalMotor => _motors.TryGetValue(_localId, out var motor) ? motor : null;
         public int PlayerCount { get { int count = 0; foreach (var avatar in _avatars.Values) if (!avatar.IsBot) count++; return count; } }
@@ -87,24 +88,6 @@ namespace RaidRogue
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if(Debug.isDebugBuild && GetComponent<AiSpectatorDevelopment>()==null)gameObject.AddComponent<AiSpectatorDevelopment>();
 #endif
-        }
-        public void EnterTraining()
-        {
-            if (CampaignRuntime.Instance?.TrainingUnlocked != true)
-            { Status = "훈련소는 정규 전투에 한 번 참여하면 해금됩니다."; return; }
-            if (Ending || Mode != RaidSessionMode.Menu || _player == null || StageManager.Instance == null ||
-                RaidSteamRuntime.Instance?.Busy == true || GetComponent<CharacterTrainingSession>() != null) return;
-            // Only a fresh main menu can enter. No regular run is started, saved, or rewarded.
-            Mode = RaidSessionMode.Training; MenuOpen = false;
-            RoleSelectionManager.Instance?.CloseRoleSelectionModal();
-            gameObject.AddComponent<CharacterTrainingSession>();
-        }
-        public void EnterTrainingFromLobby()
-        {
-            if (Mode != RaidSessionMode.Single || StageManager.Instance?.Progress.Phase != RaidBattlePhase.Lobby ||
-                CampaignRuntime.Instance?.Resume != null || !RaidLobbyRoom.Active) return;
-            Mode = RaidSessionMode.Menu;
-            EnterTraining(); // Reuse the existing isolated practice session and unlock check.
         }
         public void SinglePlay()
         {
@@ -450,7 +433,7 @@ namespace RaidRogue
         }
         public void Disconnect()
         {
-            if (!Ending && Mode != RaidSessionMode.Menu && Mode != RaidSessionMode.Training && GetComponent<RaidConnectionUI>() is RaidConnectionUI ui)
+            if (!Ending && Mode != RaidSessionMode.Menu && GetComponent<RaidConnectionUI>() is RaidConnectionUI ui)
             { ui.ConfirmCampaignExit(false); return; }
             DisconnectConfirmed();
         }

@@ -17,7 +17,6 @@ namespace RaidRogue
     }
     static class Mathf {public static float Min(float a,float b)=>Math.Min(a,b);public static float Max(float a,float b)=>Math.Max(a,b);}
     static class RaidCombatAuthority {public static bool Replica;}
-    static class CharacterTrainingSession {public static bool Active;}
     sealed class Progress {public RaidBattlePhase Phase=RaidBattlePhase.Lobby;}
     sealed class StageManager
     {public static StageManager Instance;public static bool CombatSuspended=true;public Progress Progress=new Progress();public BossController boss;}
@@ -72,7 +71,6 @@ namespace RaidRogue
             room._showing=false;Check(!RaidLobbyRoom.PracticeActive,"hidden room disables practice");room._showing=true;
             session.Mode=RaidSessionMode.Menu;Check(!RaidLobbyRoom.PracticeActive,"menu backdrop cannot enable skills");session.Mode=RaidSessionMode.Single;
             session.Ending=true;Check(!RaidLobbyRoom.PracticeActive,"ending session disables practice");session.Ending=false;
-            CharacterTrainingSession.Active=true;Check(!RaidLobbyRoom.PracticeActive,"legacy training is not lobby practice");CharacterTrainingSession.Active=false;
             room._dummy=null;Check(!RaidLobbyRoom.PracticeActive,"uninitialized dummy blocks practice");room._dummy=dummy;
             dummy.gameObject.activeInHierarchy=false;Check(!RaidLobbyRoom.PracticeActive,"inactive dummy blocks practice");dummy.gameObject.activeInHierarchy=true;
             foreach(var phase in new[]{RaidBattlePhase.Loading,RaidBattlePhase.Combat,RaidBattlePhase.Reward})

@@ -114,7 +114,7 @@ namespace RaidRogue
         {
             if (CampaignRuntime.Instance?.BuildLocked == true || RaidNetworkSession.Instance?.CampaignBuildLocked == true) return false;
             if(RaidCombatAuthority.Replica||definition==null||CharacterCatalog.Find(definition.id)!=definition||!definition.playable)return false;
-            if(!CharacterTrainingSession.CanEdit(this)&&(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole))return false;
+            if(RaidCombatAuthority.Active?RaidNetworkSession.Instance.BattlePhase!=RaidBattlePhase.Lobby:StageManager.Instance==null||!StageManager.Instance.CanSelectInitialRole)return false;
             if(definition.id==AegisPaladinData.JobId) AegisPaladin.Ensure(gameObject);
             if(CharacterRosterData.Find(definition.id)!=null)CharacterKit.Ensure(gameObject);
             if(NineKeyTankKit.Supports(definition))NineKeyTankKit.Ensure(gameObject);
@@ -162,7 +162,6 @@ namespace RaidRogue
         {
             _state.ResourceChanged += (id, delta) => {
                 GetComponent<CharacterKit>()?.OnResourceChanged(id, delta);
-                if (CharacterTrainingSession.CanEdit(this)) CharacterTrainingSession.Instance.RecordResource(id, delta);
             };
         }
         public void RefreshSkillCooldowns(System.Collections.Generic.IEnumerable<string> ids)
@@ -207,7 +206,7 @@ namespace RaidRogue
             return _state.Gain(AegisPaladinData.UltimateGauge,AegisPaladinData.UltimateGain);
         }
         public void RecordBuildEffect(string id,int stacks,float magnitude=0) { if(!RaidCombatAuthority.Replica)_state?.SetBuildEffect(id,stacks,magnitude); }
-        public void ClearedStage(int stage) { if(!CharacterTrainingSession.Active&&!RaidCombatAuthority.Replica&&StageManager.Instance!=null)_state?.ClearedStage(StageManager.Instance.RunId,StageManager.Instance.ChapterId,stage); }
+        public void ClearedStage(int stage) { if(!RaidCombatAuthority.Replica&&StageManager.Instance!=null)_state?.ClearedStage(StageManager.Instance.RunId,StageManager.Instance.ChapterId,stage); }
         internal bool ChooseAiSpectatorPreset(string rule,string choice)
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -261,7 +260,7 @@ namespace RaidRogue
         }
         public bool CanChangeLoadout=>_state!=null&&(RaidCombatAuthority.Active?
             RaidNetworkSession.Instance.BattlePhase==RaidBattlePhase.Lobby&&RaidNetworkSession.Instance.ControlsReady:
-            StageManager.Instance?.Progress.Phase==RaidBattlePhase.Lobby)&&!CharacterTrainingSession.Active;
+            StageManager.Instance?.Progress.Phase==RaidBattlePhase.Lobby);
         public void RequestSlot(CharacterSlot slot)
         {
             if(RaidCombatAuthority.InputBlocked(this))return;
@@ -394,7 +393,7 @@ namespace RaidRogue
             var purpose=skill.target==SkillTargetRule.LivingEnemy?CombatActionPurpose.Attack:
                 skill.target==SkillTargetRule.LivingAlly?CombatActionPurpose.Heal:CombatActionPurpose.Unknown;
             int step=skill.comboChain==1?_state.Snapshot.combo1:skill.comboChain==2?_state.Snapshot.combo2:0;
-            bool combat=RaidLobbyRoom.PracticeActive||CharacterTrainingSession.CanEdit(this)||(RaidCombatAuthority.Active?
+            bool combat=RaidLobbyRoom.PracticeActive||(RaidCombatAuthority.Active?
                 RaidNetworkSession.Instance.CombatRunning:StageManager.Instance?.Progress.Phase==RaidBattlePhase.Combat);
             bool targetValid=purpose==CombatActionPurpose.Attack?CombatRange.LivingEnemy(target):
                 purpose==CombatActionPurpose.Heal&&CombatRange.LivingPartyMember(target);

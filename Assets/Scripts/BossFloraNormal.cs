@@ -9,7 +9,7 @@ namespace RaidRogue
         public FloraNormalSettings flora = new FloraNormalSettings();
         [Header("Stage 2 hard: Flora Gear (initial tuning)")]
         public FloraHardSettings floraHard = new FloraHardSettings();
-        public bool FloraEncounter => currentStageNumber == 2 && !CharacterTrainingSession.Active;
+        public bool FloraEncounter => currentStageNumber == 2;
         public bool FloraHard => FloraEncounter && CampaignRuntime.Instance?.DifficultyId == CampaignCatalog.Hard;
         public bool FloraNormal => FloraEncounter && !FloraHard;
         public bool FloraHardTransformationActive => FloraHard && (_floraStep==FloraStep.Transformation || _floraReplicaTransforming);

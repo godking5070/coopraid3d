@@ -131,7 +131,7 @@ namespace RaidRogue
         public Row[] rows; public GameObject panelRoot;
     }
     public static class LocalHUDLayoutController { public static bool IsEditing; }
-    public enum RaidSessionMode { Menu, Single, Training }
+    public enum RaidSessionMode { Menu, Single }
     public sealed class RaidNetworkSession { public static RaidNetworkSession Instance = new RaidNetworkSession(); public bool MenuOpen; public RaidSessionMode Mode = RaidSessionMode.Single; }
     public static class CombatMetricsUI { public static bool ResultsOpen; }
 }
@@ -232,8 +232,8 @@ static class AstellaPrismBridgeTests
         Check(!bridge.presentationRoot.activeSelf, "main menu mode hides controls even if MenuOpen was closed");
         LocalHUDLayoutController.IsEditing = true; Tick(bridge);
         Check(bridge.presentationRoot.activeSelf && playerView.gameObject.activeSelf, "explicit layout editing from main menu can preview the authored combat HUD");
-        RaidNetworkSession.Instance.Mode = RaidSessionMode.Training; Tick(bridge);
-        Check(bridge.presentationRoot.activeSelf && playerView.gameObject.activeSelf, "training and in-game HUD editing restore combat presentation");
+        RaidNetworkSession.Instance.Mode = RaidSessionMode.Single; Tick(bridge);
+        Check(bridge.presentationRoot.activeSelf && playerView.gameObject.activeSelf, "single-player HUD editing restores combat presentation");
         LocalHUDLayoutController.IsEditing = false; CombatMetricsUI.ResultsOpen = false; Tick(bridge);
         Check(playerView.gameObject.activeSelf && centerView.readyGlow.activeSelf, "closing overlays restores current presentation state");
 
