@@ -1,20 +1,16 @@
 {
   "checked_date": "2026-11-16",
   "result": "pass",
-  "tool": "Chrome headless / Playwright",
   "checks": [
-    "3 final PNGs decoded in browser, source SHA256 and dimensions match",
-    "All local gallery links resolve",
-    "Desktop 1440px, mobile 390px and 320px layouts without horizontal overflow",
-    "Image modal, previous/next wraparound, arrow key and Escape tested",
-    "Main overview: 12 stage cards, 22 images and all 9 filter combinations",
-    "All Part2 stages marked redesign pending",
-    "No page JavaScript errors"
+    "1536x1024 final PNG decoded; saved/generated source SHA256 matched",
+    "Root and independent visual QA: original wings retained, anatomical left hand grips scale ring, right hand retains sword, exactly two pans and no extra arm",
+    "20 overview image hashes and all local links matched",
+    "Chrome desktop/mobile at 1440/390/320px, 9 filter states, latest-image modal and Escape checked",
+    "Prior v5 gallery marked not preferred; original PNGs preserved"
   ],
-  "visual_qa": "All three final images inspected by root and independent reviewer: preferred gargoyle preserved, one clear fulcrum/beam and two large pans, weight difference, three distinct integrations, no duplicated sword or pan.",
-  "limits": "2D concept candidates; no 3D mesh or rig test.",
+  "image_sha256": "e0763c2c2879dff6cfd7386649e642045026ee72508093e6f4886dc023da1609",
   "stage_count": 12,
-  "image_count": 22,
+  "image_count": 20,
   "checksums": [
     {
       "id": "p1-s1-normal",
@@ -80,25 +76,11 @@
       "bytes": 1958222
     },
     {
-      "id": "p1-s5-v5-1",
-      "sha256": "8c406b96e3a18cd8be472b68213344334d8c98b9177cc843b7236bbbba18bab2",
+      "id": "p1-s5-v6-left-hand-scale",
+      "sha256": "e0763c2c2879dff6cfd7386649e642045026ee72508093e6f4886dc023da1609",
       "width": 1536,
       "height": 1024,
-      "bytes": 2250509
-    },
-    {
-      "id": "p1-s5-v5-2",
-      "sha256": "997f0f2953c52c891a9492a86e15858edc07c027ad585fa110fbd6d9d0af5160",
-      "width": 1536,
-      "height": 1024,
-      "bytes": 2134374
-    },
-    {
-      "id": "p1-s5-v5-3",
-      "sha256": "569b6361ea9bf56a8cca4c07d5dbba4f55a582f77f8404c897f1405ab371135f",
-      "width": 1536,
-      "height": 1024,
-      "bytes": 2128773
+      "bytes": 2050362
     },
     {
       "id": "p1-s6-normal",

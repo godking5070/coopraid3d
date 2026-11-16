@@ -5,11 +5,11 @@
   "source_art_latest_date": "2026-11-16",
   "scope": "1부 1~6스테이지 노멀·하드와 2부 1~6층 최신 대표·확정·검토안",
   "stage_count": 12,
-  "image_count": 22,
+  "image_count": 20,
   "fixed_stages": [],
   "source_root": "../보스-컨셉아트/ConceptArt",
   "source_root_base": "workspace_root",
-  "selection_policy": "1부 유스티티아 하드는 v4 1번 가고일이 선호 베이스이며, v5 저울 결합 3안이 최신 검토안이다. 2부는 전체 재작업 예정 상태를 유지한다.",
+  "selection_policy": "1부 유스티티아 하드는 선호 가고일의 기존 날개를 유지한 v6 왼손 천칭 수정안이 최신이다. v5 저울 결합 3안은 사용자 비선호로 보존한다. 2부는 전체 재작업 예정 상태다.",
   "cards": [
     {
       "id": "p1-s1",
@@ -195,15 +195,15 @@
       "stage": 5,
       "title": "유스티티아",
       "subtitle": "성채 재판소",
-      "notes": "가고일 1번을 선호 베이스로 선택. 몸과 얼굴을 유지하고 등축 대천칭 / 검 천칭 / 전후 하중 천칭의 3안으로 저울을 강조했다.",
+      "notes": "선호한 가고일의 독립된 큰 날개를 유지. 왼손은 천칭 고리를, 오른손은 대각 대검을 쥐고 있다. 날개 끝의 작은 접시는 제거했다.",
       "tags": [
-        "가고일 선호",
-        "저울 결합 3안",
-        "선택 대기"
+        "기존 날개 유지",
+        "왼손 천칭",
+        "오른손 대검"
       ],
       "status": "review",
-      "statusLabel": "가고일 선호 · 저울 3안",
-      "selectionNote": "2026.11.16 사용자 “1번이 좋다”로 v4 가고일을 선호 베이스로 기록. 저울이 잘 안 보이며 꼭 양옆일 필요는 없다는 피드백을 반영한 새 3안. 저울 3안의 최종 선택은 미정.",
+      "statusLabel": "왼손 천칭 · 수정안",
+      "selectionNote": "2026.11.16 저울 결합 3안은 비선호로 보존. 기존 날개가 낫고 왼손에 천칭을 들면 좋겠다는 요청에 따라 v4 선호 원본을 직접 편집한 한 장이다. 새 수정안 최종 선택은 미정.",
       "images": [
         {
           "id": "p1-s5-normal",
@@ -219,55 +219,24 @@
           "bytes": 1958222
         },
         {
-          "id": "p1-s5-v5-1",
+          "id": "p1-s5-v6-left-hand-scale",
           "mode": "hard",
-          "label": "저울 1안 · 척추축의 대천칭",
-          "src": "../JustitiaHardGargoyleScales_v5/01-spinal-balance/01-boss.png",
-          "sourcePath": "ConceptArt/JustitiaHardGargoyleScales_v5/01-spinal-balance/01-boss.png",
+          "label": "하드 · 기존 날개 / 왼손 천칭",
+          "src": "../JustitiaHardGargoyleHandScale_v6/01-boss.png",
+          "sourcePath": "ConceptArt/JustitiaHardGargoyleHandScale_v6/01-boss.png",
           "sourceRootBase": "workspace_root",
-          "sourceManifest": "ConceptArt/JustitiaHardGargoyleScales_v5/01-spinal-balance/manifest.json",
+          "sourceManifest": "ConceptArt/JustitiaHardGargoyleHandScale_v6/manifest.json",
           "width": 1536,
           "height": 1024,
-          "bytes": 2250509,
-          "sha256": "8c406b96e3a18cd8be472b68213344334d8c98b9177cc843b7236bbbba18bab2",
-          "statusLabel": "선택 대기",
-          "description": "등척추와 날개 뿌리를 하나의 저울대와 중심축으로 연결. 큰 두 접시, 별 추와 계측 바늘로 천칭을 강조한다."
-        },
-        {
-          "id": "p1-s5-v5-2",
-          "mode": "hard",
-          "label": "저울 2안 · 단죄검의 천칭",
-          "src": "../JustitiaHardGargoyleScales_v5/02-sword-balance/01-boss.png",
-          "sourcePath": "ConceptArt/JustitiaHardGargoyleScales_v5/02-sword-balance/01-boss.png",
-          "sourceRootBase": "workspace_root",
-          "sourceManifest": "ConceptArt/JustitiaHardGargoyleScales_v5/02-sword-balance/manifest.json",
-          "width": 1536,
-          "height": 1024,
-          "bytes": 2134374,
-          "sha256": "997f0f2953c52c891a9492a86e15858edc07c027ad585fa110fbd6d9d0af5160",
-          "statusLabel": "선택 대기",
-          "description": "대검을 바닥에 짚어 저울 기둥으로 사용. 별 가드의 회전축과 큰 두 접시가 하나의 단죄 무장이 된다."
-        },
-        {
-          "id": "p1-s5-v5-3",
-          "mode": "hard",
-          "label": "저울 3안 · 전후 하중의 천칭",
-          "src": "../JustitiaHardGargoyleScales_v5/03-fore-aft-balance/01-boss.png",
-          "sourcePath": "ConceptArt/JustitiaHardGargoyleScales_v5/03-fore-aft-balance/01-boss.png",
-          "sourceRootBase": "workspace_root",
-          "sourceManifest": "ConceptArt/JustitiaHardGargoyleScales_v5/03-fore-aft-balance/manifest.json",
-          "width": 1536,
-          "height": 1024,
-          "bytes": 2128773,
-          "sha256": "569b6361ea9bf56a8cca4c07d5dbba4f55a582f77f8404c897f1405ab371135f",
-          "statusLabel": "선택 대기",
-          "description": "한쪽 어깨·날개 뿌리에서 저울대가 앞뒤로 뻗는다. 큰 근경 추접시는 낮고, 작은 원경 빈접시는 높다."
+          "bytes": 2050362,
+          "sha256": "e0763c2c2879dff6cfd7386649e642045026ee72508093e6f4886dc023da1609",
+          "statusLabel": "수정안 · 검토"
         }
       ],
-      "previousConceptGallery": "../JustitiaHardMetamorphosis_v4/INDEX.html",
+      "previousConceptGallery": "../JustitiaHardGargoyleScales_v5/INDEX.html",
       "preferred_base": {
         "id": "01-balance-gargoyle",
-        "image": "../JustitiaHardGargoyleScales_v5/Reference/base-gargoyle.png",
+        "image": "../JustitiaHardMetamorphosis_v4/01-balance-gargoyle/01-boss.png",
         "original": "../JustitiaHardMetamorphosis_v4/01-balance-gargoyle/01-boss.png",
         "sha256": "e71819e0146f67d8a82a1bf147d3f64d0ec2e917897d6b575af079def56c9890",
         "status": "user_preferred_base",

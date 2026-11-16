@@ -1,12 +1,8 @@
 보스 컨셉아트 모음
 
-INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 22장을 확인합니다.
-1부는 노멀과 하드를 비교하며 유스티티아 하드는 2026-11-16 새 가고일 저울 결합 3안이 최신입니다.
-유스티티아 저울3안 전용 모음: ../JustitiaHardGargoyleScales_v5/INDEX.html
-2부는 2026-11-16 사용자 의견에 따라 전체 재작업 예정으로 표시했습니다. 이전 선택 이력은 catalog.json에 보존합니다.
-이미지 클릭으로 확대, 좌우 방향키로 이동, Esc로 닫기, 원본 PNG 열기를 지원합니다.
-인터넷 연결이나 설치가 필요하지 않습니다. 현재 모음과 JustitiaHardGargoyleScales_v5 폴더를 함께 보관하세요.
-
-기존 이미지와 이전 유스티티아 하드3안은 원래 파일을 보존했습니다.
-원본 위치: ../보스-컨셉아트/ConceptArt (현재 작업 폴더 루트 기준)
-새 저울3안의 PNG·프롬프트·제작기록은 ../JustitiaHardGargoyleScales_v5에 있습니다.
+INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 20장을 확인합니다.
+유스티티아 하드는 선호 가고일의 기존 날개를 유지한 왼손 천칭 수정안(v6)이 최신입니다.
+원본: ../JustitiaHardGargoyleHandScale_v6/01-boss.png
+제작 기록 및 정확한 프롬프트: ../JustitiaHardGargoyleHandScale_v6/manifest.json 및 prompt.txt
+이전 v5 저울결합3안은 사용자 비선호로 보존했습니다. 2부는 전체 재작업 예정입니다.
+이미지 클릭 확대·원본 열기·좌우 방향키·Esc를 지원합니다. 이전 원본 파일은 보존했습니다.
