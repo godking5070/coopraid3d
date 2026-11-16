@@ -1,0 +1,52 @@
+{
+  "id": "stage02-hard-shearhead-stalker",
+  "part": 1,
+  "stage": 2,
+  "version": "Part1Stage02HardRedesign_v3",
+  "title_ko": "가위머리 추적자",
+  "description_ko": "가위의 두 칼날과 힌지가 머리 자체가 된 키 큰 2족 정원 기계. 가느다란 두 다리, 빈 도구 손, 좁은 꽃 유리함으로 추적자 실루엣을 만든다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt",
+    "refine.prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e2d4-f199-7a23-a3ca-e9d76395c168/exec-888679af-cde1-4749-88f1-12db6e0b9b4d.png",
+  "references": [
+    {
+      "path": "../../BossOverview/originals/p1-s2-normal.png",
+      "role": "Initial generation identity, gardening motifs, palette and clean 2D rendering reference only; no head/body/pose lock"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s2-hard.png",
+      "role": "Initial generation open shell, winding construction and material reference only; no proportions lock"
+    }
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 1643152,
+  "sha256": "f92d71a7297331ea8eb1d3c1f8335dc3039392d4852f3df7377a61441583a1a1",
+  "transparent_background": false,
+  "source_copy_sha256_match": true,
+  "visual_qa": {
+    "status": "pass",
+    "silhouette": "Very tall lean biped, exactly two planted feet and two long arms with empty three-finger tool hands. No four-legged anatomy. One shear-pair mechanism, two upright blades and one brass pivot form the entire head.",
+    "head": "One targeted edit removed the small ordinary doll face and curls below the pivot. Final blade/pivot assembly connects directly to the slim neck. A small teal pivot cover recalls the cap without a separate human head.",
+    "identity": "One blue flower with a green stem in the brass-capped chest glass cylinder; teal split apron-leaf panels, ivory/brass materials, compact attached winding drum and one curved teal ribbon retained.",
+    "framing": "Both blade tips, ribbon, fingers, two feet and all joints are inside the image. Head upper margin is narrow but uncut.",
+    "mechanics": "Two head blades join the same visible hinge. No second handheld scissors, no detached props or disconnected limbs."
+  },
+  "limits": "Single-view 2D concept candidate, not selected; no Tripo reconstruction, multi-view consistency, mesh fitting or rig tested.",
+  "initial_source": "C:/Users/godki/.codex/generated_images/01a1e2d4-f199-7a23-a3ca-e9d76395c168/exec-c27976a3-5ee7-4bf4-a47d-61c03d877f76.png",
+  "refinement": {
+    "prompt": "refine.prompt.txt",
+    "references": [
+      {
+        "path": "C:/Users/godki/.codex/generated_images/01a1e2d4-f199-7a23-a3ca-e9d76395c168/exec-c27976a3-5ee7-4bf4-a47d-61c03d877f76.png",
+        "role": "Exact initial generated image as sole edit target; remove only ordinary small face/hair and connect shear-head hinge directly to neck"
+      }
+    ],
+    "change": "Remove regular girl face under scissor head pivot; preserve every other major shape"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "flora-v3-rolling-conservatory",
+  "part": 1,
+  "stage": 2,
+  "version": "Part1Stage02HardRedesign_v3",
+  "title_ko": "굴러가는 절단온실",
+  "description_ko": "거대한 단일 태엽 바퀴가 몸체를 이루는 비인간형 정원 기계. 바퀴 안의 파란 꽃 유리함과 전방 가위턱이 중심이다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt",
+    "refine.prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e2d5-60e8-7283-8c18-afd41574628c/exec-6a984919-047c-4361-841d-9f94caca5728.png",
+  "initial_source": "C:/Users/godki/.codex/generated_images/01a1e2d5-60e8-7283-8c18-afd41574628c/exec-0844fd88-98fb-4b9d-a6b9-daefb229e8b3.png",
+  "references": [
+    {
+      "path": "../../BossOverview/originals/p1-s2-normal.png",
+      "role": "Original Flora materials and garden identity only: one blue flower in glass, garden-cap canopy, curly axle motif, pruning shears, ivory/brass/teal. No human anatomy lock."
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s2-hard.png",
+      "role": "Clockwork spring drum, ceramic shell and rendering construction reference only. No human body or previous rejected candidate anatomy."
+    }
+  ],
+  "refinement": {
+    "target": "C:/Users/godki/.codex/generated_images/01a1e2d5-60e8-7283-8c18-afd41574628c/exec-0844fd88-98fb-4b9d-a6b9-daefb229e8b3.png",
+    "change": "Remove only the inherited star on lower blade; preserve entire wheel machine."
+  },
+  "transparent_background": false,
+  "width": 1536,
+  "height": 1024,
+  "bytes": 1943388,
+  "sha256": "ef495a9fa857563731dd2bb4995151f63a912c8f90f46a71bccd7180bbf10e07",
+  "source_copy_sha256_match": true,
+  "visual_qa": {
+    "status": "pass",
+    "silhouette": "Exactly one large vertical brass-spoked winding wheel, one contact patch, no arms/hands/legs/feet/human torso or separate human head.",
+    "identity": "Exactly one blue flower with green stem inside clear brass-capped cylinder; original cap becomes canopy and face/curls are small flat axle relief only. Teal leaf-fender panels, ivory ceramic shell, brass winding drum/key.",
+    "mechanism": "One readable connected two-blade pruning jaw with single round brass pivot and rods to the wheel frame. No loose scissors. One targeted refinement removed the lower blade star.",
+    "framing": "Wheel rim, canopy, key and two blade tips fully inside canvas; no cropped major part.",
+    "method": "Generated final preview and browser-decoded full review JPEG inspected. Saved PNG decoded 1536x1024 and SHA verified equal to actual generated source. Local PNG view_image may show a pale-strip rendering artifact; browser decode and JPEG inspection confirm the complete valid image.",
+    "limits": "Single-view concept candidate; not selected or a validated 3D mesh."
+  }
+}

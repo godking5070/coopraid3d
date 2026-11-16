@@ -1,0 +1,39 @@
+{
+  "id": "stage02-hard-grafted-pruner",
+  "part": 1,
+  "stage": 2,
+  "version": "Part1Stage02HardRedesign_v3",
+  "title_ko": "접목된 거대팔",
+  "description_ko": "거대한 한쪽 전지가위 팔과 작은 반대팔을 가진 비대칭 정원 기계. 상부 어깨/등의 큰 꽃 유리함과 낮게 숙인 인형 얼굴을 대비시킨다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e2d4-f199-7a23-a3ca-e9d76395c168/exec-f5c8a8e4-61f1-4b59-a0bd-7ae2d978ab73.png",
+  "references": [
+    {
+      "path": "../../BossOverview/originals/p1-s2-normal.png",
+      "role": "Initial generation identity, gardening motifs, palette and clean 2D rendering reference only; no head/body/pose lock"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s2-hard.png",
+      "role": "Initial generation open shell, winding construction and material reference only; no proportions lock"
+    }
+  ],
+  "width": 1536,
+  "height": 1024,
+  "bytes": 1678600,
+  "sha256": "23ff4e7e6feec72216b17d108764a940925b7959a79968cf9026781d1ccfddbc",
+  "transparent_background": false,
+  "source_copy_sha256_match": true,
+  "visual_qa": {
+    "status": "pass",
+    "silhouette": "One very high massive image-right shoulder and integrated pruning-claw arm, one low slender caretaker arm and empty hand, small offset hunched face, exactly two planted leg/foot contacts. No extra legs or knuckle walking.",
+    "identity": "Closed-eye porcelain caretaker mask, cap and short curls retained as a small detail. One off-center upper shoulder/back glass chamber contains one blue flower with green stem. Teal apron panels, ceramic armor and brass joints retained.",
+    "mechanics": "Two large curved pruning blades are joined at one visible round brass hinge at the end of the dominant arm; arm elbow construction is readable. No loose handheld scissors. A small lower back/hip winding drum and curled spring are attached.",
+    "framing": "Entire two-blade claw, flower pod, cap, small hand and both feet are within frame with background visible around all tips."
+  },
+  "limits": "Single-view 2D concept candidate, not selected; no Tripo reconstruction, multi-view consistency, mesh fitting or rig tested."
+}

@@ -1,6 +1,8 @@
 # 플로라 기어 하드 · 추가 컨셉 3안
 
-기존 4족과 다른 체형으로 제작한 선택 전 후보입니다. [세 안 비교하기](INDEX.html)에서 원본 이미지를 확대할 수 있습니다.
+사용자 비선호로 보존한 이전 세 안입니다. [새 컨셉 5안](../Part1Stage02HardRedesign_v3/INDEX.html)을 이어서 제작했습니다.
+
+기존 4족과 다른 체형으로 제작했던 후보입니다. [세 안 비교하기](INDEX.html)에서 원본 이미지를 확대할 수 있습니다.
 
 | 번호 | 이름 | 하체·실루엣 | 이미지 |
 |---|---|---|---|
@@ -12,4 +14,4 @@
 
 내장 `image_gen`으로 만든 전신 단일 시점 컨셉입니다. [전체 프롬프트](prompts-all.txt)와 [제작 기록](manifest.json)에 실제 생성 출처와 이미지 해시를 기록합니다. Tripo 입력용 다방향 시트나 3D 메시 검증 결과는 아닙니다.
 
-[기존 노멀·하드](../BossOverview/INDEX.html), [이전 4족 변형](../Part1HardMetamorphosis_v1/Stage02/01-boss.png)은 그대로 보존했습니다. 이번 세 안 가운데 확정된 디자인은 없습니다.
+[기존 노멀·하드](../BossOverview/INDEX.html), [이전 4족 변형](../Part1HardMetamorphosis_v1/Stage02/01-boss.png)은 그대로 보존했습니다. 세 안은 모두 사용자 비선호로 기록했습니다.

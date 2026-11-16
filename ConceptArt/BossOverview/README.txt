@@ -11,3 +11,6 @@ INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 20장을
 
 2스테이지 하드 추가 3안(2족 중장갑 / 공중 개화 / 태엽 뱀형): ../Part1Stage02HardAlternatives_v2/INDEX.html
 세 안은 선택 전 후보이며 이전 4족 시안은 보존했습니다.
+
+2스테이지 하드 새 컨셉5안: ../Part1Stage02HardRedesign_v3/INDEX.html
+이전 추가3안은 사용자 비선호로 보존했습니다. 새5안은 선택 전 후보입니다.
