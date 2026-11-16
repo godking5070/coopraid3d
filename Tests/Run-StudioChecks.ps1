@@ -38,6 +38,7 @@ if ($Group -in @('Characters', 'All')) {
 }
 if ($Group -in @('Input', 'All')) { Add-StudioCheck 'Run-ClickMoveChecks.ps1' }
 if ($Group -in @('UI', 'All')) {
+    Add-StudioCheck 'Run-UIAuthoringSafetyChecks.ps1'
     Add-StudioCheck 'Run-HUDLayoutChecks.ps1'
     Add-StudioCheck 'Run-LobbyPracticeChecks.ps1'
     Add-StudioCheck 'Run-LobbyBuildStationChecks.ps1' $false 'Includes PartyBuildSummary; no rendering or live host session.'

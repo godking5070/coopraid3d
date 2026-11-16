@@ -279,6 +279,10 @@ static class CampaignSaveTests
         Check(CampaignStorage.Save(path, first, Inspect, out _), "first atomic write");
         Check(CampaignStorage.Save(path, second, Inspect, out _), "replacement write");
         Check(File.ReadAllText(path + ".bak") == first && File.ReadAllText(path) == second, "normal backup and exact bytes");
+        Check(!CampaignStorage.Save(path, "invalid-data", Inspect, out string invalidDataError) &&
+            invalidDataError.Contains("저장 데이터") && !invalidDataError.Contains("권한") &&
+            File.ReadAllText(path) == second && File.ReadAllText(path + ".bak") == first,
+            "invalid checkpoint reports data validation and preserves both committed files");
         var checkpointReload = Json.Deserialize<CampaignCheckpoint>(CampaignStorage.Read(path, Inspect).text);
         var reloadedActor = new CharacterRuntimeState(CharacterCatalog.Find(checkpointReload.party[0].character.jobId));
         Check(reloadedActor.Restore(checkpointReload.party[0].character), "on-disk boundary restores actor");

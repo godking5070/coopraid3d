@@ -27,31 +27,7 @@ namespace RaidRogue.Editor
         [Serializable] private sealed class MotionSpec
         { public string[] sheetResourcePaths; public int frameCount, framesPerSheet, columns; public float framesPerSecond; }
 
-        [InitializeOnLoadMethod]
-        private static void Schedule()
-        {
-            if (Application.isBatchMode) return;
-            if (File.Exists(Stamp)) return;
-            EditorApplication.update -= WhenIdle; EditorApplication.update += WhenIdle;
-        }
-        private static void WhenIdle()
-        {
-            if (File.Exists(Stamp)) { EditorApplication.update -= WhenIdle; return; }
-            if (!string.Equals(Path.GetFullPath(Application.dataPath).TrimEnd('/', '\\'), @"C:\Astella\Astella\Assets", StringComparison.OrdinalIgnoreCase))
-            { EditorApplication.update -= WhenIdle; return; }
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isUpdating || EditorApplication.isCompiling || PrefabStageUtility.GetCurrentPrefabStage() != null) return;
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/SampleScene.unity") return;
-            // The preceding requested authoring pass supplies the exact existing action/layout roots.
-            if (!File.Exists("Logs/PlayerHUD-v3.applied.txt")) return;
-            EditorApplication.update -= WhenIdle;
-            try { Apply(); }
-            catch (Exception error)
-            {
-                Directory.CreateDirectory("Logs"); File.WriteAllText("Logs/ClassHubs-v6-v8.error.txt", error.ToString());
-                Debug.LogError("Class hubs upgrade stopped; backups retained. " + error);
-            }
-        }
-
+        // Existing class instruments are migrated only by an explicit menu action.
         [MenuItem("Tools/RaidRogue/UI/Apply Class Ultimate and Job Hubs")]
         public static void Apply()
         {

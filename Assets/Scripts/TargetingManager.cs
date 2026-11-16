@@ -990,27 +990,26 @@ namespace RaidRogue
 
             if (_innerSelectionRing != null)
             {
-                _innerSelectionRing.enabled = selectedBoss == null;
-                Color innerCol = new Color(baseColor.r, baseColor.g, baseColor.b, 0.55f);
-                _innerSelectionRing.startColor = innerCol;
-                _innerSelectionRing.endColor = innerCol;
-                DrawCircleOnXZ(_innerSelectionRing, currentTarget.position, animatedRadius * 0.84f, 36, 0.065f);
+                // The outer boundary already identifies the selected ally/add.
+                // A second decorative circle competes with actual mechanic ranges.
+                _innerSelectionRing.enabled = false;
             }
 
             if (_overheadMarkerRoot != null)
             {
-                _overheadMarkerRoot.gameObject.SetActive(true);
                 float bobOffset = Mathf.Sin(Time.unscaledTime * 5.5f) * 0.25f;
                 _overheadMarkerRoot.position = currentTarget.position + new Vector3(0f, headHeight + bobOffset, 0f);
                 _overheadMarkerRoot.rotation = Quaternion.Euler(0f, Time.unscaledTime * 110f, 0f);
 
                 if (_overheadMarkerRenderer3D != null && _overheadMarkerRenderer3D.sharedMaterial != null)
                 {
+                    _overheadMarkerRenderer3D.enabled = !ViewModeManager.Is2DViewActive;
                     _overheadMarkerRenderer3D.sharedMaterial.color = baseColor;
                 }
 
                 if (_overheadMarkerRenderer2D != null)
                 {
+                    _overheadMarkerRenderer2D.enabled = ViewModeManager.Is2DViewActive;
                     _overheadMarkerRenderer2D.color = baseColor;
                     _overheadMarkerRenderer2D.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
                     float zOffset2D = (currentTarget.GetComponent<BossController>() != null) ? 2.65f : 1.45f;
@@ -1050,6 +1049,12 @@ namespace RaidRogue
                     _floatingMarkerRect.gameObject.SetActive(false);
                 }
             }
+            // The screen marker and world arrow identify the same selection. Keep
+            // the world arrow as fallback when the authored screen marker is absent.
+            bool hasScreenMarker = _floatingMarkerRect != null && _floatingMarkerRect.gameObject.activeInHierarchy &&
+                _floatingMarkerArrowText != null && _floatingMarkerArrowText.isActiveAndEnabled;
+            if (_overheadMarkerRoot != null && _overheadMarkerRoot.gameObject.activeSelf == hasScreenMarker)
+                _overheadMarkerRoot.gameObject.SetActive(!hasScreenMarker);
         }
 
         private static void DrawCircleOnXZ(LineRenderer lr, Vector3 center, float radius, int segments, float yHeight)

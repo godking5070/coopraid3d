@@ -44,7 +44,7 @@ namespace RaidRogue
         {
             var c = CampaignRuntime.Instance;
             string text = "개인 계정: " + c.Owner + "\n확정된 스테이지 클리어: " + c.Personal.clears.Length + "건\n1부 완료: " + (c.Personal.PartOneComplete ? "완료" : "미완료") + "\n2부: " + (c.Personal.PartTwoUnlocked ? "후속 해금 조건 충족 · 현재 진입 불가" : "준비 중 · 1부 완료 기록 필요") +
-                "\n\n1부 4인·6스테이지 진행을 지원합니다.\nStage 4~6은 기존 Stage 1~3 보스 구성을 재사용합니다.\n2부는 준비 중이며 진입할 수 없습니다.\n구버전 프로토타입 기록은 1부 완료로 인정하지 않습니다.\n훈련장·개발 기능은 개인 클리어와 저장에서 제외됩니다.";
+                "\n\n1부 4인·6스테이지 진행을 지원합니다.\n수호자·플로라·캄파넬라·마리오네트·유스티티아·야누스의 여섯 전장에 도전합니다.\n2부는 준비 중이며 진입할 수 없습니다.\n구버전 프로토타입 기록은 1부 완료로 인정하지 않습니다.\n훈련장·개발 기능은 개인 클리어와 저장에서 제외됩니다.";
             CampaignDialog(text, null);
         }
         private void RequestNewCampaign(Action start)
@@ -89,7 +89,7 @@ namespace RaidRogue
             _homeSave.text = summary + (c.Saved != null && !c.Saved.completed ? "  ·  마지막 출발 지점부터 재개" : "  ·  방 만들기에서 새롭게 출발하세요");
             if (c.Settlement != null) _homeSave.text = summary + " · 미완료 보상부터 재개";
             string date = c.Saved != null && DateTimeOffset.TryParse(c.Saved.savedUtc, out var savedAt) ? savedAt.ToLocalTime().ToString("yyyy.MM.dd  HH:mm") : "";
-            _campaignSummary.text = summary + "\n\n" + (c.Saved?.completed == true ? "새 원정을 시작할 수 있습니다." : c.Saved == null ? "첫 출발과 스테이지 사이에\n자동으로 저장됩니다." : "노말  ·  " + (c.Saved.transport == "steam" ? "Steam 파티" : "싱글 / AI 파티") + "\n" + date + "\n\n직업과 파티 구성은\n저장 정보에서 확인하세요.");
+            _campaignSummary.text = summary + "\n\n" + (c.Saved?.completed == true ? "새 원정을 시작할 수 있습니다." : c.Saved == null ? "첫 출발과 스테이지 사이에\n자동으로 저장됩니다." : (c.Saved.difficultyId == CampaignCatalog.Hard ? "하드" : "노멀") + "  ·  " + (c.Saved.transport == "steam" ? "Steam 파티" : "싱글 / AI 파티") + "\n" + date + "\n\n직업과 파티 구성은\n저장 정보에서 확인하세요.");
             if (c.Settlement != null) _campaignSummary.text = c.SaveDescription + "\n\n이어하기 후 북쪽 문에서 미완료 보상을 정산합니다.";
             var resumable = c.Settlement?.run ?? c.Saved;
             _campaignContinue.interactable = c.CanContinue && RaidSteamRuntime.Instance?.Busy != true &&

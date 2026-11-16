@@ -26,6 +26,11 @@ namespace RaidRogue
                     if (instance != null) Destroy(instance.gameObject);
                     return false;
                 }
+                if (phase == RaidBattlePhase.Arrival)
+                {
+                    var arrival = field.Arrival(currentStage);
+                    instance.GuardArrivalFraming(boss, arrival.cameraPosition, arrival.cameraLookAt);
+                }
             }
             catch (System.Exception exception)
             {

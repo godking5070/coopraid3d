@@ -43,23 +43,7 @@ namespace RaidRogue.Editor
             finally{PrefabUtility.UnloadPrefabContents(root);}
             SyncLoadedScenes();
         }
-        [InitializeOnLoadMethod]
-        private static void Schedule()
-        {
-            if (Application.isBatchMode) return;
-            EditorApplication.update-=WhenIdle;EditorApplication.update+=WhenIdle;
-            EditorApplication.playModeStateChanged-=OnPlayMode;EditorApplication.playModeStateChanged+=OnPlayMode;
-        }
-        private static void WhenIdle()
-        {
-            if(EditorApplication.isPlayingOrWillChangePlaymode||EditorApplication.isCompiling||EditorApplication.isUpdating||PrefabStageUtility.GetCurrentPrefabStage()!=null)return;
-            EditorApplication.update-=WhenIdle;
-            try{ApplyIfMissing();}catch(Exception error){Debug.LogError("Split HUD application failed: "+error);}
-        }
-        private static void OnPlayMode(PlayModeStateChange state)
-        {
-            if(state==PlayModeStateChange.EnteredEditMode){EditorApplication.update-=WhenIdle;EditorApplication.update+=WhenIdle;}
-        }
+        // Apply/scene synchronization is explicit; local migration stamps are not authority.
         private static bool HasSplitLayout(AstellaOrnateHUD hud)=>hud!=null&&(hud.combatLayoutVersion>=1||AstellaSplitCombatLayout.IsApplied(hud));
         private static void SyncLoadedScenes()
         {

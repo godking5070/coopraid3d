@@ -38,6 +38,21 @@ namespace RaidRogue
             double limit = Math.Max(0, arenaRadius - visibleHalfSpan);
             return Clamp(focus, -limit, limit);
         }
+
+        // Fit a subject in camera-local coordinates without changing the user's zoom preference.
+        // The inset leaves space for the boss HUD and hotbar. Radius also protects the near plane.
+        public static double PerspectiveSubjectDistance(double right, double up, double forward,
+            double radius, double verticalFov, double aspect, double nearPlane)
+        {
+            double extent = Math.Max(0, radius);
+            double tanY = Math.Tan(Clamp(verticalFov, 5, 170) * Math.PI / 360);
+            double horizontal = (Math.Abs(right) + extent) / (tanY * Math.Max(.1, aspect) * .8);
+            double vertical = (Math.Abs(up) + extent) / (tanY * .55);
+            return Math.Max(Math.Max(horizontal, vertical), Math.Max(.01, nearPlane)) + extent - forward;
+        }
+
+        public static bool SubjectInViewport(double x, double y, double depth, double margin = .08) =>
+            depth > 0 && x >= margin && x <= 1 - margin && y >= margin && y <= 1 - margin;
     }
 
     // A new press is required after UI, focus loss, view changes or explicit cancellation.

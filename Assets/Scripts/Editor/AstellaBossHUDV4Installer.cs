@@ -17,29 +17,7 @@ namespace RaidRogue.Editor
         private static Font sans, serif;
         private static readonly Color Gold = new Color32(242, 230, 204, 255);
 
-        [InitializeOnLoadMethod]
-        private static void Schedule()
-        {
-            if (Application.isBatchMode) return;
-            if (File.Exists(Stamp)) return;
-            EditorApplication.update -= WhenIdle; EditorApplication.update += WhenIdle;
-        }
-        private static void WhenIdle()
-        {
-            if (File.Exists(Stamp)) { EditorApplication.update -= WhenIdle; return; }
-            if (!string.Equals(Path.GetFullPath(Application.dataPath).TrimEnd('/', '\\'), @"C:\Astella\Astella\Assets", StringComparison.OrdinalIgnoreCase))
-            { EditorApplication.update -= WhenIdle; return; }
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isUpdating || EditorApplication.isCompiling || PrefabStageUtility.GetCurrentPrefabStage() != null) return;
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/SampleScene.unity") return;
-            EditorApplication.update -= WhenIdle;
-            try { Apply(); }
-            catch (Exception error)
-            {
-                Directory.CreateDirectory("Logs"); File.WriteAllText("Logs/BossHUD-v4.error.txt", error.ToString());
-                Debug.LogError("Boss HUD v4 upgrade stopped; backup retained. " + error);
-            }
-        }
-
+        // Authoring is explicit. A missing local Logs stamp must never reapply a design.
         [MenuItem("Tools/RaidRogue/UI/Apply Boss HUD v4")]
         public static void Apply()
         {

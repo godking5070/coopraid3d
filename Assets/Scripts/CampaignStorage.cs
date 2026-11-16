@@ -77,6 +77,8 @@ namespace RaidRogue
             if (!previous.Writable) { error = previous.notice + " 해당 저장을 명시적으로 삭제하거나 호환 버전에서 열어주세요."; return false; }
             if (ReadOne(path + ".bak", inspect).state == CampaignFileState.Incompatible)
             { error = "호환되지 않는 백업이 있어 덮어쓰지 않았습니다. 저장 정보 확인 후 해당 저장을 명시적으로 삭제하거나 호환 버전에서 열어주세요."; return false; }
+            if (text == null || Encoding.UTF8.GetByteCount(text) > MaximumBytes || inspect(text) != CampaignFileState.Valid)
+            { error = "체크포인트/진행도 저장 데이터가 유효하지 않거나 크기 제한을 초과했습니다. 기존 정상 저장을 유지합니다."; return false; }
             bool ok = LocalSettingsFile.Save(path, text, s => inspect(s) == CampaignFileState.Valid, out error, MaximumBytes);
             if (!ok) error = "체크포인트/진행도 저장 실패 · 기존 정상 저장 유지. " + error;
             return ok;

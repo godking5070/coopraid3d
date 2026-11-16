@@ -425,8 +425,12 @@ namespace RaidRogue
             {
                 Saved = _pending; _pending = null; RunFile = new CampaignFileRead { state = CampaignFileState.Valid };
                 _lastBoundaryError = null;
+                if (Settlement != null && (Saved.completed || Saved.nextStage == Settlement.stage + 1))
+                {
+                    ClearSettlement();
+                    if (Settlement != null) return; // Preserve the actual cleanup failure notice.
+                }
                 Notice = "런 체크포인트 저장 완료 · " + LastSaveLabel + (_personalDirty ? "\n개인 진행도 저장 실패: " + _personalError : "");
-                if (Settlement != null && (Saved.completed || Saved.nextStage == Settlement.stage + 1)) ClearSettlement();
                 return;
             }
             ReportBoundaryError(error + " 플레이는 계속됩니다. 현재 전투가 아니라 보관한 안전 경계 스냅샷만 재시도합니다.");

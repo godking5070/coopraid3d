@@ -9,36 +9,12 @@ using UnityEngine.UI;
 
 namespace RaidRogue.Editor
 {
-    /// <summary>One requested resource swap; defers until the main scene is idle in Edit Mode.</summary>
+    /// <summary>Explicit resource swap for the main scene in Edit Mode.</summary>
     public static class AstellaRequestedUIResourceSwap
     {
         private const string Stamp = "Logs/RequestedUIResources-player2-party4-skillbar1.applied.txt";
 
-        [InitializeOnLoadMethod]
-        private static void Schedule()
-        {
-            if (Application.isBatchMode) return;
-            if (File.Exists(Stamp)) return;
-            EditorApplication.update -= WhenIdle; EditorApplication.update += WhenIdle;
-        }
-        private static void WhenIdle()
-        {
-            if (File.Exists(Stamp)) { EditorApplication.update -= WhenIdle; return; }
-            if (!string.Equals(Path.GetFullPath(Application.dataPath).TrimEnd('/', '\\'), @"C:\Astella\Astella\Assets", StringComparison.OrdinalIgnoreCase))
-            { EditorApplication.update -= WhenIdle; return; }
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating ||
-                PrefabStageUtility.GetCurrentPrefabStage() != null) return;
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/SampleScene.unity") return;
-            EditorApplication.update -= WhenIdle;
-            try { ApplyAll(); }
-            catch (Exception error)
-            {
-                Directory.CreateDirectory("Logs");
-                File.WriteAllText("Logs/RequestedUIResources-error.txt", error.ToString());
-                Debug.LogError("Requested UI resource swap stopped; backups retained. " + error);
-            }
-        }
-
+        // Resource migrations run from the menu, never because local Logs are absent.
         [MenuItem("Tools/RaidRogue/UI/Apply All Requested UI Resources")]
         public static void ApplyAll()
         {

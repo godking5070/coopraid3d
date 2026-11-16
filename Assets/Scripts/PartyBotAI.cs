@@ -1487,7 +1487,7 @@ namespace RaidRogue
             nameObj.transform.localPosition = new Vector3(0f, 0.24f, 0f);
             nameObj.transform.localScale = Vector3.one * 0.075f;
             _nameLabelText = nameObj.AddComponent<TextMesh>();
-            _nameLabelText.text = GetRoleDisplayNameKor();
+            _nameLabelText.text = botDisplayName;
             _nameLabelText.fontSize = 40;
             _nameLabelText.fontStyle = FontStyle.Bold;
             _nameLabelText.anchor = TextAnchor.MiddleCenter;
@@ -1524,72 +1524,41 @@ namespace RaidRogue
                 return;
             }
 
-            if (_isInterceptingTetherForPlayer)
+            // Keep identity and urgent state readable above the actor. HP/shield
+            // totals already have party HUD entries; long AI debug prose hides telegraphs.
+            string label = botDisplayName;
+            Color color = GetRoleBrightColor(role);
+            if (isDead)
             {
-                _nameLabelText.text = "MELEE BOT [탱커 줄 가로채기 & 생존기 방어!]";
-                _nameLabelText.color = new Color(0.25f, 1f, 0.65f, 1f);
-                return;
+                label += " · 전투 불능";
+                color = new Color(1f, 0.3f, 0.3f, 1f);
             }
-
-            if (targetBoss != null && targetBoss.IsStackMechanicActive)
+            else if (_isInterceptingTetherForPlayer)
             {
-                _nameLabelText.text = $"{role} [4인 쉐어 집결 중!]";
-                _nameLabelText.color = new Color(1f, 0.88f, 0.2f, 1f);
-                return;
+                label += " · 줄 인계";
+                color = new Color(0.25f, 1f, 0.65f, 1f);
             }
-
-            if (targetBoss != null && targetBoss.IsSpreadMechanicActive)
+            else if (targetBoss != null && targetBoss.IsStackMechanicActive)
             {
-                _nameLabelText.text = $"{role} [4인 산개 위치 이동!]";
-                _nameLabelText.color = new Color(1f, 0.45f, 0.85f, 1f);
-                return;
+                label += " · 집결";
+                color = new Color(1f, 0.88f, 0.2f, 1f);
             }
-
-            string shieldSuffix = currentShield > 1f ? $" (+보호막 {Mathf.RoundToInt(currentShield)})" : "";
-
-            if (role == PartyBotRole.Tank)
+            else if (targetBoss != null && targetBoss.IsSpreadMechanicActive)
             {
-                if (isDead)
-                {
-                    _nameLabelText.text = "TANK [전투 불능 · 부활 대기]";
-                    _nameLabelText.color = new Color(1f, 0.3f, 0.3f, 1f);
-                }
-                else if (isTankDefensiveActive)
-                {
-                    _nameLabelText.text = $"TANK [방어 뎀감기 ON!]{shieldSuffix}";
-                    _nameLabelText.color = new Color(0.35f, 0.95f, 1f, 1f);
-                }
-                else
-                {
-                    _nameLabelText.text = $"TANK (북쪽 주차){shieldSuffix}";
-                    _nameLabelText.color = new Color(0.25f, 0.65f, 1f, 1f);
-                }
+                label += " · 산개";
+                color = new Color(1f, 0.45f, 0.85f, 1f);
             }
-            else if (role == PartyBotRole.Healer)
+            else if (isTankDefensiveActive)
             {
-                if (_rescueCooldownTimer > 0f)
-                {
-                    _nameLabelText.text = $"HEALER (구출 쿨: {_rescueCooldownTimer:F0}s){shieldSuffix}";
-                    _nameLabelText.color = new Color(0.65f, 0.9f, 0.7f, 1f);
-                }
-                else
-                {
-                    _nameLabelText.text = $"HEALER (구출: 준비됨){shieldSuffix}";
-                    _nameLabelText.color = new Color(0.25f, 0.95f, 0.45f, 1f);
-                }
+                label += " · 방어";
+                color = new Color(0.35f, 0.95f, 1f, 1f);
             }
-            else if (role == PartyBotRole.MeleeDPS)
+            else if (role == PartyBotRole.Healer && _rescueCooldownTimer > 0f)
             {
-                _nameLabelText.text = isTankDefensiveActive
-                    ? $"MELEE BOT [생존기 방어 ON!]{shieldSuffix}"
-                    : $"MELEE (근딜 봇){shieldSuffix}";
-                _nameLabelText.color = new Color(1f, 0.90f, 0.22f, 1f);
+                label += " · 구출 " + Mathf.CeilToInt(_rescueCooldownTimer) + "s";
             }
-            else if (role == PartyBotRole.RangedDPS)
-            {
-                _nameLabelText.text = $"CASTER (캐스터 봇){shieldSuffix}";
-                _nameLabelText.color = new Color(1f, 0.58f, 0.15f, 1f);
-            }
+            _nameLabelText.text = label;
+            _nameLabelText.color = color;
         }
 
         private static void SetUnlitColor(Renderer r, Color color)

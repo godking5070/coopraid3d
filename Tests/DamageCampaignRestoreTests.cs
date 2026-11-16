@@ -15,11 +15,13 @@ static class CharacterCatalog {public static CharacterDefinition current;public 
 enum PlayerRole {Tank}
 sealed class PlayerController
 {
- public float maxHp,currentHp,moveSpeed,combatRadius;public string playerRoleDisplayName;public PlayerController cardManager;
- public void ApplyRoleStatsAndVisuals(PlayerRole role,bool reset){}public void RestoreCampaignCards(CampaignCardStack[] cards){}
+ public float maxHp,currentHp,moveSpeed,combatRadius;public string playerRoleDisplayName,overheadName;public int overheadColor;public PlayerController cardManager;
+ public void ApplyRoleStatsAndVisuals(PlayerRole role,bool reset){playerRoleDisplayName=overheadName="ME (legacy role)";}
+ public void SetNetworkDisplayName(string value,int color){overheadName=value;overheadColor=color;}
+ public void RestoreCampaignCards(CampaignCardStack[] cards){}
 }
 sealed class PartyBotAI {public float currentHp,maxHp;}
-sealed class NetworkRaidAvatar {public int Id;public bool IsLocal;public void Configure(int id,bool local,float radius){}}
+sealed class NetworkRaidAvatar {public int Id;public bool IsLocal;public void Configure(int id,bool local,float radius){}public void RefreshJobLabel(){}public static int RoleColor(int role)=>role;}
 static class Mathf {public static float Clamp01(float f)=>Math.Max(0,Math.Min(1,f));}
 sealed class CharacterPartyStats {public void ResetFactors(){}}
 sealed class CombatStatusEffects {public void Clear(){}}
@@ -55,14 +57,19 @@ static class DamageCampaignRestoreTests
   {
    var d=NineKeyDamageData.Build(job);CharacterCatalog.current=d;
    var saved=new CharacterRuntimeState(d);saved.ChooseRoute(d.routes[r-1].id,true);
-   var slot=new CampaignPartySlot{character=saved.Snapshot};
-   var go=new GameObject();var actor=new CharacterActor{gameObject=go};go.actor=actor;
+   var slot=new CampaignPartySlot{character=saved.Snapshot,role=CharacterRosterData.Role(d),healthFraction=.4f};
+   var go=new GameObject();var player=new PlayerController();var actor=new CharacterActor{gameObject=go,_player=player};go.actor=actor;
    Check(actor.RestoreCampaignBuild(slot),"fresh actor restores DPS saved build");
+   Check(player.playerRoleDisplayName==d.name&&player.overheadName==d.name&&player.overheadColor==slot.role,"restored solo overhead matches actual job and role color");
+   Check(player.currentHp==d.baseHp,"checkpoint actor resumes with full health");
    Check(go.damage!=null,"fresh restoration creates DPS kit");
    Check(actor.handlers.ContainsKey(NineKeyDamageData.Handler),"real Awake registers damage execution handler");
    Check(actor.handlers[NineKeyDamageData.Handler](d.skills.First(),null),"restored handler callable");
    Check(go.damage.core==saved.Snapshot.coreTrait&&go.damage.route==saved.Snapshot.routeId,"kit clear sees restored build");
    var original=go.damage;Check(actor.RestoreCampaignBuild(slot)&&go.damage==original,"repeat restore reuses kit");
+   CampaignRuntime.Instance.ResumingSettlement=true;
+   Check(actor.RestoreCampaignBuild(slot)&&player.overheadName==d.name&&Math.Abs(player.currentHp-d.baseHp*.4f)<.001f,"pending rewards retain saved health and restored job label");
+   CampaignRuntime.Instance.ResumingSettlement=false;
    saved.ChangeLoadout(NineKeyDamageData.Id(job,"loadout.core"+r),NineKeyDamageData.Core(job,r,1),true);
    int before=go.damage.clears;Check(actor.RestoreCampaignState(saved.Snapshot),"stage boundary state restored");
    Check(go.damage.clears==before+1&&go.damage.core==saved.Snapshot.coreTrait,"boundary clears kit after runtime restore");

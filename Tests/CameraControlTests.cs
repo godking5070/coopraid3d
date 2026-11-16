@@ -105,6 +105,29 @@ internal static class CameraControlTests
         Check(!drag.Active, "menus and unfocused windows cannot start orbit");
     }
 
+    private static void CombatPerspectiveFraming()
+    {
+        foreach (double aspect in new[] { .5, 1, 16.0 / 9, 21.0 / 9 })
+        foreach (double fov in new[] { 35.0, 60, 90 })
+        foreach (double right in new[] { -20.0, 0, 20 })
+        foreach (double up in new[] { -12.0, 0, 12 })
+        foreach (double forward in new[] { -30.0, 0, 30 })
+        foreach (double radius in new[] { .9, 3.0 })
+        {
+            double distance = Math.Max(6, CameraControlMath.PerspectiveSubjectDistance(right, up, forward, radius, fov, aspect, .3));
+            double nearestDepth = distance + forward - radius;
+            double tanY = Math.Tan(fov * Math.PI / 360);
+            Check(nearestDepth >= .3 - .000001, "boss or player body never crosses the near plane");
+            Check((Math.Abs(right) + radius) <= nearestDepth * tanY * aspect * .8 + .000001, "both subjects fit horizontal HUD inset");
+            Check((Math.Abs(up) + radius) <= nearestDepth * tanY * .55 + .000001, "both subjects fit between boss HUD and hotbar");
+        }
+        Check(CameraControlMath.SubjectInViewport(.5, .5, 10), "authored boss shot remains active when boss is in frame");
+        Check(!CameraControlMath.SubjectInViewport(.5, .5, -1), "boss behind the presentation camera requests fallback");
+        Check(!CameraControlMath.SubjectInViewport(.5, -.1, 10), "floor-only arrival requests fallback after reveal");
+        Check(!CameraControlMath.SubjectInViewport(1.1, .5, 10), "boss off to the side requests fallback");
+        Check(!CameraControlMath.SubjectInViewport(double.NaN, .5, 10), "invalid viewport coordinates do not retain a broken shot");
+    }
+
     public static int Main()
     {
         Check(CameraControlMath.SpectatorIndex(-1, 0, 1) == -1, "wipe leaves no spectator subject");
@@ -113,7 +136,7 @@ internal static class CameraControlTests
         Check(CameraControlMath.SpectatorIndex(0, 3, -1) == 2, "previous subject wraps");
         Check(CameraControlMath.SpectatorIndex(2, 2, 1) == 0, "departed subject resets selection");
         Check(CameraControlMath.SpectatorIndex(0, 1, 1) == 0, "single survivor remains selected");
-        Movement(); FramingAndZoom(); CursorDragLifecycle();
+        Movement(); FramingAndZoom(); CursorDragLifecycle(); CombatPerspectiveFraming();
         Console.WriteLine("PASS: " + _checks + " camera movement, framing, zoom and drag lifecycle assertions.");
         return 0;
     }

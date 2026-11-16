@@ -13,24 +13,7 @@ namespace RaidRogue.Editor
     public static class AstellaClassHubLayoutRefinement
     {
         private const string Stamp = "Logs/ClassHubs-layout-v2.applied.txt";
-        [InitializeOnLoadMethod] private static void Schedule()
-        {
-            if (Application.isBatchMode) return;
-            if (!File.Exists(Stamp)) EditorApplication.update += WhenIdle;
-        }
-        private static void WhenIdle()
-        {
-            if (File.Exists(Stamp)) { EditorApplication.update -= WhenIdle; return; }
-            if (!string.Equals(Path.GetFullPath(Application.dataPath).TrimEnd('/', '\\'), @"C:\Astella\Astella\Assets", StringComparison.OrdinalIgnoreCase))
-            { EditorApplication.update -= WhenIdle; return; }
-            if (!File.Exists("Logs/ClassHubs-v6-v8.applied.txt") || EditorApplication.isCompiling || EditorApplication.isUpdating ||
-                EditorApplication.isPlayingOrWillChangePlaymode || PrefabStageUtility.GetCurrentPrefabStage() != null ||
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/SampleScene.unity") return;
-            EditorApplication.update -= WhenIdle;
-            try { Apply(); }
-            catch (Exception e) { Directory.CreateDirectory("Logs"); File.WriteAllText("Logs/ClassHubs-layout-v2.error.txt", e.ToString()); Debug.LogException(e); }
-        }
-
+        // Layout refinements are explicit, including when a fresh PC has no Logs stamps.
         [MenuItem("Tools/RaidRogue/UI/Apply Class Hub Key Layout")]
         public static void Apply()
         {

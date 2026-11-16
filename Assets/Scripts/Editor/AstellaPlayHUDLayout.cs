@@ -28,42 +28,17 @@ namespace RaidRogue.Editor
             public Vector3 position,scale;
             public Quaternion rotation;
         }
-        private static bool _captured,_busy;
-        [InitializeOnLoadMethod] private static void Initialize()
-        {
-            if (Application.isBatchMode) return;
-            EditorApplication.update-=Tick;EditorApplication.update+=Tick;
-            EditorApplication.playModeStateChanged-=OnMode;EditorApplication.playModeStateChanged+=OnMode;
-        }
-        private static void Tick()
-        {
-            if(!IsOriginalProject())return;
-            if(_busy||EditorApplication.isCompiling||EditorApplication.isUpdating||File.Exists(AppliedPath))return;
-            if(EditorApplication.isPlaying)
-            {
-                if(!_captured)Capture();
-            }
-            else if(!EditorApplication.isPlayingOrWillChangePlaymode&&File.Exists(CapturePath)&&PrefabStageUtility.GetCurrentPrefabStage()==null)
-            {
-                _busy=true;
-                try{ApplySavedLayout();}
-                catch(Exception error){Debug.LogError("User HUD layout was captured but could not be applied: "+error);EditorApplication.update-=Tick;}
-                finally{_busy=false;}
-            }
-        }
-        private static void OnMode(PlayModeStateChange state)
-        {
-            if(state==PlayModeStateChange.ExitingPlayMode&&!File.Exists(AppliedPath))CaptureCore(true);
-        }
+        // Capture and Apply are separate explicit actions. A stale capture on disk must
+        // never be written into a newer prefab just because Play Mode has ended.
         [MenuItem("Tools/Astella/UI/Capture Current Play HUD Layout")]
         public static void Capture()
         {
-            CaptureCore(false);
+            CaptureCore();
         }
-        private static void CaptureCore(bool leavingPlay)
+        private static void CaptureCore()
         {
             if(!IsOriginalProject())return;
-            if(!leavingPlay&&!EditorApplication.isPlaying)return;
+            if(!EditorApplication.isPlaying)return;
             var hud=UnityEngine.Object.FindObjectsByType<AstellaOrnateHUD>(FindObjectsInactive.Exclude,FindObjectsSortMode.None)
                 .FirstOrDefault(h=>h.gameObject.scene.IsValid()&&h.playerRoot!=null&&AstellaSplitCombatLayout.IsApplied(h));
             if(hud==null)return;
@@ -77,8 +52,7 @@ namespace RaidRogue.Editor
             }
             Directory.CreateDirectory("Logs");
             File.WriteAllText(CapturePath,JsonUtility.ToJson(new Layout{capturedAt=DateTime.Now.ToString("s"),nodes=nodes.ToArray()},true));
-            _captured=true;
-            Debug.Log("USER HUD LAYOUT CAPTURED: "+nodes.Count+" transforms. "+CapturePath+". Updated again when Play stops; applies to the prefab in Edit Mode.");
+            Debug.Log("USER HUD LAYOUT CAPTURED: "+nodes.Count+" transforms. "+CapturePath+". Stop Play, then use Apply Captured Play HUD Layout to update the prefab.");
         }
         [MenuItem("Tools/Astella/UI/Apply Captured Play HUD Layout")]
         public static void ApplySavedLayout()

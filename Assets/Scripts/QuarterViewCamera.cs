@@ -53,6 +53,7 @@ namespace RaidRogue
         private float _zoom2D;
         private float _orthoSize;
         private float _lastAspect;
+        private float _combatFramedDistance;
         private Vector3 _focus;
         private readonly CameraDragState _drag = new CameraDragState();
         private Vector2 _cursorBeforeDrag;
@@ -99,6 +100,15 @@ namespace RaidRogue
             ReleaseOrbit();
             _arrivalCamera = true; _arrivalPosition = position; _arrivalLookAt = lookAt;
             _arrivalCurrentPosition = position + new Vector3(0, 2, -4);
+            // A Timeline LateUpdate can switch after this camera's own LateUpdate.
+            // Apply projection and pose now so a previous 2D/gameplay frame cannot flash.
+            ApplyArrivalCameraPose();
+        }
+        private void ApplyArrivalCameraPose()
+        {
+            UnityCamera.orthographic = false;
+            transform.position = _arrivalCurrentPosition;
+            transform.rotation = Quaternion.LookRotation(_arrivalLookAt - _arrivalCurrentPosition);
         }
         public void ClearArrivalCamera()
         {
@@ -209,10 +219,8 @@ namespace RaidRogue
         {
             if (_arrivalCamera)
             {
-                UnityCamera.orthographic = false;
                 _arrivalCurrentPosition = Vector3.Lerp(_arrivalCurrentPosition, _arrivalPosition, 1f - Mathf.Exp(-1.8f * Time.unscaledDeltaTime));
-                transform.position = _arrivalCurrentPosition;
-                transform.rotation = Quaternion.LookRotation(_arrivalLookAt - _arrivalCurrentPosition);
+                ApplyArrivalCameraPose();
                 return;
             }
             if (_spectatorTarget != null && RaidNetworkSession.Instance?.AiSpectatorActive!=true &&
@@ -255,7 +263,17 @@ namespace RaidRogue
             var focusTarget = _spectatorTarget != null ? _spectatorTarget : target;
             Vector3 playerPosition = focusTarget != null ? focusTarget.position : Vector3.zero;
             if (RaidApproachField.Instance?.Walking == true) return new Vector3(playerPosition.x, 0, playerPosition.z);
-            if (!Is2DMode) return playerPosition + targetOffset;
+            if (!Is2DMode)
+            {
+                var focus = playerPosition + targetOffset;
+                if (TryCombatBoss(out var boss))
+                {
+                    var bossFocus = boss.transform.position + Vector3.up * 1.5f;
+                    float gap = Vector2.Distance(new Vector2(focus.x, focus.z), new Vector2(bossFocus.x, bossFocus.z));
+                    focus = Vector3.Lerp(focus, bossFocus, .5f * Mathf.InverseLerp(5, 12, gap));
+                }
+                return focus;
+            }
             float visibleZoom = Mathf.InverseLerp(DefaultOrthoSize, minimumOrthoSize, _orthoSize);
             float follow = (float)CameraControlMath.FollowBlend(visibleZoom);
             return ClampTopDownFocus(new Vector3(playerPosition.x * follow, 0, playerPosition.z * follow));
@@ -268,7 +286,34 @@ namespace RaidRogue
             UnityCamera.orthographic = Is2DMode;
             if (Is2DMode) UnityCamera.orthographicSize = _orthoSize;
             transform.rotation = DesiredRotation();
-            transform.position = _focus - transform.forward * (Is2DMode ? 45f : distance);
+            float framedDistance = distance;
+            if (!Is2DMode && TryCombatBoss(out var boss))
+            {
+                var subject = _spectatorTarget != null ? _spectatorTarget : target;
+                if (subject != null) framedDistance = FitSubject(framedDistance, subject.position + targetOffset, .9f);
+                framedDistance = FitSubject(framedDistance, boss.transform.position + Vector3.up * 1.5f, boss.CombatRadius);
+                if (boss.JanusEncounter && boss.JanusOmegaTransform != null && boss.JanusOmegaTransform.gameObject.activeInHierarchy)
+                    framedDistance = FitSubject(framedDistance, boss.JanusOmegaTransform.position + Vector3.up * 1.5f, boss.CombatRadius);
+                // Widen immediately to retain moving/teleporting subjects; ease back in.
+                _combatFramedDistance = Mathf.Max(framedDistance, Mathf.Lerp(_combatFramedDistance, framedDistance,
+                    1f - Mathf.Exp(-followSmoothSpeed * Mathf.Min(Time.unscaledDeltaTime, .05f))));
+                framedDistance = _combatFramedDistance;
+            }
+            else _combatFramedDistance = distance;
+            transform.position = _focus - transform.forward * (Is2DMode ? 45f : framedDistance);
+        }
+        private bool TryCombatBoss(out BossController boss)
+        {
+            var stage = StageManager.Instance;
+            boss = stage != null ? stage.boss : null;
+            return RaidNetworkSession.Instance?.AiSpectatorActive != true && stage != null && stage.EncounterActive &&
+                boss != null && boss.currentHp > 0 && boss.gameObject.activeInHierarchy && RaidApproachField.Instance?.BossVisible == true;
+        }
+        private float FitSubject(float current, Vector3 position, float radius)
+        {
+            var point = Quaternion.Inverse(transform.rotation) * (position - _focus);
+            return Mathf.Max(current, (float)CameraControlMath.PerspectiveSubjectDistance(point.x, point.y, point.z,
+                radius, UnityCamera.fieldOfView, UnityCamera.aspect, UnityCamera.nearClipPlane));
         }
         public void SnapToTargetImmediate()
         {

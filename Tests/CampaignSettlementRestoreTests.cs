@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web.Script.Serialization;
 using RaidRogue;
@@ -78,15 +79,24 @@ sealed class StageManager
 sealed class CampaignRuntime
 {
     public static CampaignRuntime Instance;
-    public CampaignSettlement Settlement; public CampaignCheckpoint Resume;
+    public static string CurrentOwner = "offline-local";
+    public CampaignSettlement Settlement; public CampaignCheckpoint Resume, Saved, _pending;
     public string Owner; public bool Authority = true, _tainted, _settlementDirty;
     public string Notice, validation;
+    public string RunPath, SettlementPath, _personalError = "", _lastBoundaryError;
+    public bool _personalDirty; public CampaignFileRead RunFile;
     public CampaignCheckpoint _working;
     public readonly Dictionary<Transform, CampaignPartySlot> _slots = new Dictionary<Transform, CampaignPartySlot>();
     public readonly Dictionary<int, string> _metricSlots = new Dictionary<int, string>();
     public int[] SettlementOffer(Transform member) => Settlement.offers.Single(o => o.slotId == _slots[member].slotId).cardIds.Select(CampaignCardIds.Index).ToArray();
     public void SaveNow() => SaveSettlementSnapshot(true);
-    void RetrySettlementSave() { validation = CampaignValidation.Settlement(Settlement, Owner, CharacterCatalog.Find); _settlementDirty = validation != null; }
+    void RetrySettlementSave() { if (Settlement == null) return; validation = CampaignValidation.Settlement(Settlement, Owner, CharacterCatalog.Find); _settlementDirty = validation != null; }
+    void SavePersonal() { }
+    void ReportBoundaryError(string message) { Notice = _lastBoundaryError = message; }
+    CampaignFileState InspectRun(string text) => CampaignValidation.Checkpoint(JsonUtility.FromJson<CampaignCheckpoint>(text), Owner, CharacterCatalog.Find) == null ? CampaignFileState.Valid : CampaignFileState.Corrupt;
+    /* ACTUAL_BOUNDARY_RETRY */
+    /* ACTUAL_SETTLEMENT_CLEAR */
+    /* ACTUAL_SAVE_LABEL */
     /* ACTUAL_CARD_JOURNAL */
     /* ACTUAL_SETTLEMENT_CAPTURE */
     /* ACTUAL_METRIC_CAPTURE */
@@ -134,6 +144,60 @@ static class CampaignSettlementRestoreTests
         CombatMetricsManager.Instance.Ledger.ReplaceNetworkSnapshot(new CombatEncounterResult(1, 0, Array.Empty<CombatMemberRecord>()), clears, Array.Empty<CombatEncounterResult>(), 0);
         return stage;
     }
+    static void BoundaryNoticeChecks(CampaignCheckpoint next, CampaignSettlement previous)
+    {
+        string folder = Path.Combine(Path.GetTempPath(), "RaidRogue-BoundaryNotice-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(folder);
+        var campaign = new CampaignRuntime { Owner = next.owner, _pending = JsonUtility.Copy(next), Settlement = JsonUtility.Copy(previous),
+            RunPath = Path.Combine(folder, "checkpoint.json"), SettlementPath = Path.Combine(folder, "settlement.json") };
+        try
+        {
+            File.WriteAllText(campaign.SettlementPath, "pending journal");
+            campaign.RetrySave();
+            Check(campaign.Saved?.nextStage == 2 && campaign._pending == null && campaign.Settlement == null, "actual retry commits next boundary and retires pending rewards");
+            Check(campaign.Notice.Contains("Stage 2 시작") && !campaign.Notice.Contains("정산 대기"), "success notice describes committed boundary after settlement cleanup");
+            Check(!File.Exists(campaign.SettlementPath) && JsonUtility.FromJson<CampaignCheckpoint>(File.ReadAllText(campaign.RunPath)).nextStage == 2, "notice agrees with actual checkpoint and retired journal on disk");
+
+            campaign.Settlement = JsonUtility.Copy(previous); campaign._pending = JsonUtility.Copy(next);
+            File.WriteAllText(campaign.SettlementPath, "pending journal");
+            using (var locked = new FileStream(campaign.SettlementPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                campaign.RetrySave();
+                Check(campaign.Saved.nextStage == 2 && campaign.Settlement != null && campaign.Notice.Contains("삭제하지 못했습니다"), "cleanup IO failure is retained instead of overwritten by a success notice");
+            }
+            campaign._pending = JsonUtility.Copy(next); campaign.RetrySave();
+            Check(campaign.Settlement == null && campaign.Notice.Contains("Stage 2 시작"), "retry clears old cleanup failure and displays the actual committed boundary");
+
+            var completed = JsonUtility.Copy(next); completed.nextStage = completed.attemptsStarted = 6; completed.completed = true;
+            foreach (var slot in completed.party)
+            {
+                var state = new CharacterRuntimeState(CharacterCatalog.Find(slot.character.jobId));
+                Check(state.Restore(slot.character), "final-boundary fixture restores the previous job state");
+                for (int stage = 2; stage <= 6; stage++)
+                {
+                    state.ClearedStage(completed.runId, completed.chapterId, stage);
+                    foreach (var rule in state.PendingChoices()) state.ChooseSkill(rule.id, rule.choices[0], state.RewardKey(rule));
+                }
+                state.Reset(CharacterReset.NextStage); slot.character = state.Snapshot;
+                slot.cards = slot.bot ? Array.Empty<CampaignCardStack>() : new[] { new CampaignCardStack { id = "card.swift", stacks = 5 } };
+                slot.character.effects = CampaignCardIds.Effects(slot.cards);
+            }
+            completed.processedStages = Enumerable.Range(1, 6).Select(n => CharacterRewardKey.Stage(completed.runId, completed.chapterId, n)).ToArray();
+            var human = completed.party.Single(p => !p.bot);
+            completed.rewards = Enumerable.Range(1, 5).Select(n => new CampaignRewardRecord { key = CharacterRewardKey.Stage(completed.runId, completed.chapterId, n) + "/card/" + human.slotId,
+                slotId = human.slotId, selectedId = "card.swift", offeredIds = new[] { "card.swift", "card.thorn", "card.vampiric" } }).ToArray();
+            completed.clears = Enumerable.Range(1, 6).Select(n => { var record = JsonUtility.Copy(next.clears[0]); record.stage = n; if (n > 1) foreach (var member in record.members) member.deaths = 0; return record; }).ToArray();
+            completed.runSeconds = (float)completed.clears.Sum(r => r.seconds);
+            Check(CampaignValidation.Checkpoint(completed, completed.owner, CharacterCatalog.Find) == null, "final-boundary fixture satisfies real completed-run validation");
+            var finalJournal = JsonUtility.Copy(previous); finalJournal.stage = 6; finalJournal.offers = Array.Empty<CampaignSettlementOffer>();
+            finalJournal.run = JsonUtility.Copy(completed); finalJournal.run.completed = false;
+            Check(CampaignValidation.Settlement(finalJournal, completed.owner, CharacterCatalog.Find) == null, "final-boundary fixture retains a valid pre-completion settlement");
+            campaign.Settlement = finalJournal; campaign._pending = completed; File.WriteAllText(campaign.SettlementPath, "final clear journal"); campaign.RetrySave();
+            Check(campaign.Saved.completed && campaign.Settlement == null && campaign.Notice.Contains(" · 완료") && !campaign.Notice.Contains("정산 대기"), "final clear commits completion and displays completion after retiring the journal");
+            Check(JsonUtility.FromJson<CampaignCheckpoint>(File.ReadAllText(campaign.RunPath)).completed && !File.Exists(campaign.SettlementPath), "completed-run notice agrees with durable completion and journal cleanup");
+        }
+        finally { foreach (string file in Directory.GetFiles(folder)) File.Delete(file); Directory.Delete(folder); }
+    }
     static void Main()
     {
         CharacterCatalog.Register(AegisPaladinData.BuildNineKey(), out _, true);
@@ -159,6 +223,7 @@ static class CampaignSettlementRestoreTests
             boundary.Reset(CharacterReset.NextStage); slot.character = boundary.Snapshot; slot.healthFraction = 1; slot.potionCooldown = 0;
         }
         Check(CampaignValidation.Checkpoint(next, next.owner, CharacterCatalog.Find) == null, "selected reward and restored history admit valid Stage 2 checkpoint");
+        BoundaryNoticeChecks(next, campaign.Settlement);
         var capped = JsonUtility.Copy(next); capped.attemptsStarted = IrisRescueState.MaximumRecordedAttempts;
         Check(CampaignValidation.Checkpoint(capped, capped.owner, CharacterCatalog.Find) == null, "checkpoint accepts recorded attempt limit");
         capped.attemptsStarted++; Check(CampaignValidation.Checkpoint(capped, capped.owner, CharacterCatalog.Find) != null, "checkpoint rejects history beyond recorded limit");
@@ -183,6 +248,6 @@ static class CampaignSettlementRestoreTests
         Check(!history.TryRestoreCompletedHistory(0, IrisRescueState.MaximumRecordedAttempts + 1) && history.AttemptsStarted == 1, "history rejects attempts beyond recorded limit");
         Check(history.TryRestoreCompletedHistory(4 * IrisRescueState.MaximumRecordedAttempts, IrisRescueState.MaximumRecordedAttempts), "history accepts exact recorded limit and budget");
         history.BeginAttempt(); Check(history.AttemptsStarted == IrisRescueState.MaximumRecordedAttempts + 1 && history.TotalUsed == 4 * IrisRescueState.MaximumRecordedAttempts, "subsequent attempt increment cannot overflow");
-        Console.WriteLine("PASS: " + checks + " actual settlement restore/capture and Iris history checks; no Unity, input, or user profile writes.");
+        Console.WriteLine("PASS: " + checks + " actual settlement restore/capture, boundary save and Iris history checks; no Unity, input, or user profile writes.");
     }
 }

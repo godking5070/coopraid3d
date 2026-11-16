@@ -13,26 +13,43 @@ namespace RaidRogue.Editor
     public static class RaidUIAuthoring
     {
         private const string ProfilePath = "Assets/Resources/UI/RaidUIPresentation.asset";
-        private static bool _minimapUpgradePending;
-
-        [InitializeOnLoadMethod]
-        private static void ScheduleMissingMinimapUpgrade()
+        [MenuItem("Tools/RaidRogue/UI/Reduce Boss Target Text Outline")]
+        public static void ReduceBossTargetTextOutline()
         {
-            if (Application.isBatchMode) return;
-            // Upgrade the existing artist-editable HUD once, after script import. Never
-            // touch a prefab while Play Mode, compilation, or Prefab Mode is active.
-            if (_minimapUpgradePending) return;
-            _minimapUpgradePending = true;
-            EditorApplication.update += UpgradeMissingMinimapWhenSafe;
+            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating ||
+                UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
+                throw new InvalidOperationException("Stop Play and close Prefab Mode before editing the boss target outline.");
+            var profile = AssetDatabase.LoadAssetAtPath<RaidUIPresentation>(ProfilePath);
+            if (profile == null || profile.hudPrefab == null) throw new InvalidOperationException("Active RaidHUD is missing.");
+            string path = AssetDatabase.GetAssetPath(profile.hudPrefab);
+            var contents = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var presenters = contents.GetComponentsInChildren<AstellaBossHUDV4>(true);
+                if (presenters.Length != 1 || presenters[0].targetText == null)
+                    throw new InvalidOperationException("Expected one authored boss target label.");
+                var outline = presenters[0].targetText.GetComponent<Outline>();
+                if (outline == null || outline.effectDistance != new Vector2(3, -3))
+                { Debug.Log("Boss target outline already differs from the old 3px stroke; preserved existing styling."); return; }
+                string backup = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName,
+                    "Logs", "UIRepairBackups", "boss-target-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+                System.IO.Directory.CreateDirectory(backup);
+                System.IO.File.Copy(path, System.IO.Path.Combine(backup, "RaidHUD.prefab"));
+                System.IO.File.Copy(path + ".meta", System.IO.Path.Combine(backup, "RaidHUD.prefab.meta"));
+                outline.effectDistance = new Vector2(1, -1);
+                if (PrefabUtility.SaveAsPrefabAsset(contents, path) == null)
+                    throw new InvalidOperationException("Boss target outline save did not complete.");
+                Debug.Log("Reduced only the boss target label outline to 1px. Layout, font and theme preserved. Backup: " + backup);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(contents); }
         }
 
-        private static void UpgradeMissingMinimapWhenSafe()
+        [MenuItem("Tools/RaidRogue/UI/Upgrade Missing Minimap and Lobby Prompts")]
+        public static void UpgradeMissingMinimapAndLobbyPrompts()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling ||
                 EditorApplication.isUpdating || UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
-                return;
-            EditorApplication.update -= UpgradeMissingMinimapWhenSafe;
-            _minimapUpgradePending = false;
+                throw new InvalidOperationException("Stop Play and close Prefab Mode before upgrading RaidHUD.");
             var profile = AssetDatabase.LoadAssetAtPath<RaidUIPresentation>(ProfilePath);
             if (profile == null || profile.hudPrefab == null) return;
             try
@@ -44,7 +61,7 @@ namespace RaidRogue.Editor
             }
             catch (Exception exception)
             {
-                Debug.LogError("Automatic RaidHUD minimap upgrade failed; the existing HUD was left active. " + exception);
+                Debug.LogError("Requested RaidHUD minimap upgrade failed; the existing HUD was left active. " + exception);
             }
         }
 

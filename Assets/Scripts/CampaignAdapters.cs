@@ -34,7 +34,13 @@ namespace RaidRogue
             if(NineKeyDamageKit.Supports(definition))NineKeyDamageKit.Ensure(gameObject).Clear();
             _previous = transform.position; _singleCastTarget = null; _identityHeld = false;
             GetComponent<AegisPaladin>()?.RecalculateStats(); GetComponent<CharacterKit>()?.Recalculate();
-            if (_player != null) { _player.currentHp = _player.maxHp; _player.playerRoleDisplayName = definition.name; }
+            if (_player != null)
+            {
+                _player.currentHp = _player.maxHp; _player.playerRoleDisplayName = definition.name;
+                var avatar = GetComponent<NetworkRaidAvatar>();
+                if (avatar != null) avatar.RefreshJobLabel();
+                else _player.SetNetworkDisplayName(definition.name, NetworkRaidAvatar.RoleColor(slot.role));
+            }
             if (CampaignRuntime.Instance?.ResumingSettlement == true)
             {
                 if (_player != null) _player.currentHp = _player.maxHp * Mathf.Clamp01(slot.healthFraction);

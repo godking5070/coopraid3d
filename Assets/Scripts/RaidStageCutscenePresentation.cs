@@ -58,6 +58,28 @@ namespace RaidRogue
         private Camera _playerCamera;
         private bool _playerCameraWasEnabled;
         private bool _playing;
+        private BossController _framingBoss;
+        private Vector3 _fallbackPosition, _fallbackLookAt;
+        private bool _usingFallbackCamera;
+
+        // Keep an authored shot until the revealed boss leaves it. Animation and timing still run.
+        public void GuardArrivalFraming(BossController boss, Vector3 fallbackPosition, Vector3 fallbackLookAt)
+        {
+            _framingBoss = boss; _fallbackPosition = fallbackPosition; _fallbackLookAt = fallbackLookAt;
+        }
+        private void LateUpdate()
+        {
+            if (!_playing || _usingFallbackCamera || _framingBoss == null || _playerCamera == null || !_playerCameraWasEnabled ||
+                RaidApproachField.Instance?.BossVisible != true || presentationCamera == null) return;
+            var point = presentationCamera.WorldToViewportPoint(_framingBoss.transform.position + Vector3.up * 1.5f);
+            if (CameraControlMath.SubjectInViewport(point.x, point.y, point.z)) return;
+            var view = QuarterViewCamera.LocalCamera;
+            if (view == null) return;
+            presentationCamera.enabled = false;
+            _playerCamera.enabled = true;
+            view.SetArrivalCamera(_fallbackPosition, _fallbackLookAt);
+            _usingFallbackCamera = true;
+        }
 
         public TimelineAsset DirectorAsset => director != null ? director.playableAsset as TimelineAsset : null;
         public bool HasBossAnimationTrack
@@ -196,6 +218,8 @@ namespace RaidRogue
                 // Revert only this presentation's captured pose, never authored assets or
                 // hard-coded zeroes. The combat root and visual hierarchy stay aligned.
                 RestoreBossPoses();
+                if (_usingFallbackCamera) QuarterViewCamera.LocalCamera?.ClearArrivalCamera();
+                _usingFallbackCamera = false; _framingBoss = null;
                 if (presentationCamera != null) presentationCamera.enabled = false;
                 if (_playerCamera != null) _playerCamera.enabled = _playerCameraWasEnabled;
                 _restoring=false;

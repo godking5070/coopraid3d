@@ -15,29 +15,7 @@ namespace RaidRogue.Editor
         private const string Folder = "Assets/UI/AstellaPlayerHUDV3";
         private const string Stamp = "Logs/PlayerHUD-v3.applied.txt";
 
-        [InitializeOnLoadMethod]
-        private static void Schedule()
-        {
-            if (Application.isBatchMode) return;
-            if (File.Exists(Stamp)) return;
-            EditorApplication.update -= WhenIdle; EditorApplication.update += WhenIdle;
-        }
-        private static void WhenIdle()
-        {
-            if (File.Exists(Stamp)) { EditorApplication.update -= WhenIdle; return; }
-            if (!string.Equals(Path.GetFullPath(Application.dataPath).TrimEnd('/', '\\'), @"C:\Astella\Astella\Assets", StringComparison.OrdinalIgnoreCase))
-            { EditorApplication.update -= WhenIdle; return; }
-            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating || PrefabStageUtility.GetCurrentPrefabStage() != null) return;
-            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != "Assets/Scenes/SampleScene.unity") return;
-            EditorApplication.update -= WhenIdle;
-            try { Apply(); }
-            catch (Exception error)
-            {
-                Directory.CreateDirectory("Logs"); File.WriteAllText("Logs/PlayerHUD-v3.error.txt", error.ToString());
-                Debug.LogError("Player HUD v3 upgrade stopped; backups retained. " + error);
-            }
-        }
-
+        // Authoring is explicit. A missing local Logs stamp must never reapply a design.
         [MenuItem("Tools/RaidRogue/UI/Apply Player HUD v3")]
         public static void Apply()
         {

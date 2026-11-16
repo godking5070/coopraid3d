@@ -59,6 +59,9 @@ $taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_CARD_CALLBACK
 $taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_CARD_JOURNAL */',(Read-CampaignRestoreMethod $taskCampaignSource 'public void CardChosen('))
 $taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_SETTLEMENT_CAPTURE */',(Read-CampaignRestoreMethod $taskCampaignSource 'private void SaveSettlementSnapshot('))
 $taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_METRIC_CAPTURE */',(Read-CampaignRestoreMethod $taskCampaignSource 'private CampaignMetricRecord[] CaptureMetrics(' -Expression))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_BOUNDARY_RETRY */',(Read-CampaignRestoreMethod $taskCampaignSource 'public void RetrySave('))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_SETTLEMENT_CLEAR */',(Read-CampaignRestoreMethod $taskCampaignSource 'private void ClearSettlement('))
+$taskSettlementTemplate=$taskSettlementTemplate.Replace('/* ACTUAL_SAVE_LABEL */',(Read-CampaignRestoreMethod $taskCampaignSource 'public string LastSaveLabel' -Expression))
 $taskSettlementFixture=Join-Path $taskOutput 'CampaignSettlementRestoreFixture.cs'
 [IO.File]::WriteAllText($taskSettlementFixture,$taskSettlementTemplate,[Text.UTF8Encoding]::new($false))
 $taskSettlementExe=Join-Path $taskOutput 'CampaignSettlementRestoreTests.exe'

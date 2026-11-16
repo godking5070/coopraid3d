@@ -24,20 +24,8 @@ namespace RaidRogue.Editor
             public string owner,property,targetAddress;
             public Object target;
         }
-        [InitializeOnLoadMethod]
-        private static void Schedule() { if(Application.isBatchMode)return;EditorApplication.update-=WhenSafe;EditorApplication.update+=WhenSafe; }
-        private static void WhenSafe()
-        {
-            if(EditorApplication.isPlayingOrWillChangePlaymode||EditorApplication.isCompiling||EditorApplication.isUpdating||PrefabStageUtility.GetCurrentPrefabStage()!=null)return;
-            EditorApplication.update-=WhenSafe;
-            try { AstellaSplitCombatHUD.ApplyIfMissing(); }
-            catch(Exception error){Debug.LogError("Split combat HUD authoring stopped: "+error);return;}
-            // Full HUD nesting can change IDs referenced by scene overrides. Keep that
-            // explicit, rather than reattempting a heavy migration after every compilation.
-            // Missing station assets and the compact fallback slots remain safe to initialize.
-            try { RepairSlotWrappers();CreateStation(); }
-            catch(Exception error){Debug.LogError("UI station initialization stopped: "+error);}
-        }
+        // Repairs and missing-asset creation are part of the explicit authoring command.
+        // Compilation and Play Mode transitions must leave existing prefabs unchanged.
         [MenuItem("Tools/Astella/UI/Separate Editable UI Prefabs")]
         public static void Separate()
         {
