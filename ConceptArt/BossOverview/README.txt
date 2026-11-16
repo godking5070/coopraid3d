@@ -8,3 +8,6 @@ INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 20장을
 이미지 클릭 확대·원본 열기·좌우 방향키·Esc를 지원합니다. 이전 원본 파일은 보존했습니다.
 
 2·3·4스테이지 하드 변형 검토 시안: ../Part1HardMetamorphosis_v1/INDEX.html
+
+2스테이지 하드 추가 3안(2족 중장갑 / 공중 개화 / 태엽 뱀형): ../Part1Stage02HardAlternatives_v2/INDEX.html
+세 안은 선택 전 후보이며 이전 4족 시안은 보존했습니다.
