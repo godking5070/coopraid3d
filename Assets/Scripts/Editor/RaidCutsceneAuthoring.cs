@@ -16,6 +16,37 @@ namespace RaidRogue.Editor
         private const string Folder = "Assets/Cutscenes/Examples";
         private const string LayoutPath = "Assets/Resources/UI/RaidLobbyLayout.asset";
 
+        [MenuItem("Tools/RaidRogue/Cutscenes/Use Authored Start Positions in Arrival Example")]
+        public static void UseAuthoredArrivalStartPositions()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || EditorApplication.isUpdating)
+                throw new InvalidOperationException("Stop Play and compilation before repairing the arrival example.");
+            const string path = Folder + "/ArrivalExample.playable";
+            var timeline = AssetDatabase.LoadAssetAtPath<TimelineAsset>(path);
+            if (timeline == null) throw new InvalidOperationException("The existing arrival example is missing.");
+            var clips = new System.Collections.Generic.List<AnimationPlayableAsset>();
+            foreach (var track in timeline.GetOutputTracks())
+                if (track is AnimationTrack)
+                    foreach (var clip in track.GetClips())
+                        if (clip.asset is AnimationPlayableAsset animation && animation.removeStartOffset && animation.clip != null &&
+                            (AssetDatabase.GetAssetPath(animation.clip) == Folder + "/ArrivalExampleCamera.anim" ||
+                             AssetDatabase.GetAssetPath(animation.clip) == Folder + "/ArrivalExampleBoss.anim")) clips.Add(animation);
+            if (clips.Count == 0) { Debug.Log("Arrival example already retains its authored start positions."); return; }
+            string backup = System.IO.Path.Combine(System.IO.Directory.GetParent(Application.dataPath).FullName,
+                "Logs", "CutsceneRepairBackups", "arrival-offset-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+            System.IO.Directory.CreateDirectory(backup);
+            System.IO.File.Copy(path, System.IO.Path.Combine(backup, "ArrivalExample.playable"));
+            System.IO.File.Copy(path + ".meta", System.IO.Path.Combine(backup, "ArrivalExample.playable.meta"));
+            foreach (var clip in clips)
+            {
+                Undo.RecordObject(clip, "Retain arrival clip start position");
+                clip.removeStartOffset = false;
+                EditorUtility.SetDirty(clip);
+                AssetDatabase.SaveAssetIfDirty(clip);
+            }
+            Debug.Log("Arrival example retains its authored camera and boss coordinates. Animation keyframes and GUIDs are unchanged. Backup: " + backup);
+        }
+
         [MenuItem("Tools/RaidRogue/Cutscenes/Set Up Boss Motion for Active Preview")]
         public static void SetUpBossMotionForActivePreview()
         {
@@ -80,6 +111,7 @@ namespace RaidRogue.Editor
                     AssetDatabase.CreateAsset(clip, clipPath);
                 }
                 var shot = track.CreateClip(clip);
+                if (shot.asset is AnimationPlayableAsset bossMotion) bossMotion.removeStartOffset = false;
                 shot.start = timelinePath.EndsWith("ArrivalExample.playable", StringComparison.Ordinal) ? 1f : 0f;
                 shot.duration = 1f;
             }
@@ -505,6 +537,7 @@ namespace RaidRogue.Editor
             AssetDatabase.CreateAsset(timeline, timelinePath);
             var track = timeline.CreateTrack<AnimationTrack>(null, "Presentation Camera Motion");
             var shot = track.CreateClip(clip);
+            if (shot.asset is AnimationPlayableAsset cameraMotion) cameraMotion.removeStartOffset = false;
             shot.start = 0;
             shot.duration = seconds;
             timeline.CreateMarkerTrack();
