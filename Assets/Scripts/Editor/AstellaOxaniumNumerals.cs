@@ -21,20 +21,24 @@ namespace RaidRogue.Editor
         private const string ProfilePath = "Assets/Resources/UI/RaidUIPresentation.asset";
         private const string FontPath = "Assets/UI/AstellaPrismV4/Typography/Fonts/Oxanium-Medium.ttf";
         private const string Evidence = "Logs/OxaniumNumerals";
+        private const string OutlineEvidence = "Logs/OxaniumNumericOutline";
         private const string NumericCharacters = "0123456789.,/%+-s:—";
+        private static readonly Color NumericInk = new Color(19 / 255f, 16 / 255f, 34 / 255f, 1);
 
         [Serializable] private sealed class Target
         {
             public string role, path, text, previousFont, font, previousStyle, outlineBefore, outlineAfter, widthSample;
             public int size;
             public float availableWidth, preferredWidth;
+            public Vector2 outlineDistanceBefore, outlineDistanceAfter;
         }
         [Serializable] private sealed class SourceAsset
         { public string source, copy, sourceHashBefore, sourceHashAfter; }
         [Serializable] private sealed class Report
         {
             public string utc, folder, source, copy, sourceHashBefore, sourceHashAfter, backup, font, error;
-            public bool passed, sceneSaved, outlinesUnchanged, geometryUnchanged;
+            public bool passed, sceneSaved, outlinesUnchanged, geometryUnchanged, otherEffectsUnchanged, numericFontsUnchanged;
+            public bool strongerNumericOutlines;
             public int preservedOtherTexts;
             public Target[] targets;
             public SourceAsset[] assets;
@@ -42,7 +46,12 @@ namespace RaidRogue.Editor
         }
 
         [MenuItem("Tools/Astella/Apply Oxanium Numerals (Preserved Copy)")]
-        public static void Apply()
+        public static void Apply() => Apply(false);
+
+        [MenuItem("Tools/Astella/Apply Strong Numeric Outlines (Preserved Copy)")]
+        public static void ApplyStrongNumericOutlines() => Apply(true);
+
+        private static void Apply(bool strongerOutlines)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling || PrefabStageUtility.GetCurrentPrefabStage() != null)
                 throw new InvalidOperationException("Stop Play and close Prefab Mode before authoring numeric typography.");
@@ -56,13 +65,21 @@ namespace RaidRogue.Editor
             if (profile?.hudPrefab == null) throw new InvalidOperationException("An active authored HUD is required.");
             var sourceTargets = Numerals(profile.hudPrefab.gameObject);
             if (sourceTargets.Count == 0) throw new InvalidOperationException("The active HUD has no explicit Prism numeric bindings.");
-            if (sourceTargets.Keys.All(text => IsApplied(text, font)))
-            { ValidateActive(); Debug.Log("OXANIUM NUMERALS ALREADY APPLIED: authored outlines preserved."); return; }
+            if (strongerOutlines) ValidateRoot(profile.hudPrefab.gameObject, font);
+            if (sourceTargets.Keys.All(text => IsApplied(text, font) && (!strongerOutlines || IsStrongOutline(text))))
+            {
+                if (strongerOutlines) ValidateNumericOutlines(); else ValidateActive();
+                Debug.Log(strongerOutlines ? "NUMERIC OUTLINES ALREADY APPLIED: name/title outlines preserved." : "OXANIUM NUMERALS ALREADY APPLIED: authored outlines preserved.");
+                return;
+            }
 
             string stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss-fff");
+            string evidence = strongerOutlines ? OutlineEvidence : Evidence;
             var report = new Report { utc = DateTime.UtcNow.ToString("O"), font = FontPath,
-                folder = "Assets/UI/AstellaPrismV4/Typography/Oxanium-" + stamp,
-                source = AssetDatabase.GetAssetPath(profile.hudPrefab), backup = Evidence + "/Backup-" + stamp };
+                strongerNumericOutlines = strongerOutlines,
+                folder = "Assets/UI/AstellaPrismV4/Typography/" + (strongerOutlines ? "NumericOutline-" : "Oxanium-") + stamp,
+                source = AssetDatabase.GetAssetPath(profile.hudPrefab), backup = evidence + "/Backup-" + stamp };
+            if (strongerOutlines) report.boundary = "Numeric Outline effects only, at 7.5% of logical font size. Numeric fonts, MaruBuri names/titles and all other text/effects/geometry are preserved. Actual Canvas rendering needs separate verification.";
             report.copy = report.folder + "/RaidHUD.prefab";
             report.sourceHashBefore = Hash(report.source);
             Directory.CreateDirectory(report.backup);
@@ -85,14 +102,20 @@ namespace RaidRogue.Editor
                     string numericBefore = NumericPresentation(targets.Keys, contents.transform);
                     string geometryBefore = Geometry(contents);
                     string outlinesBefore = Effects(contents);
-                    report.targets = targets.Select(pair => ApplyText(pair.Key, pair.Value, font, contents.transform)).ToArray();
+                    string otherEffectsBefore = PreservedEffects(contents, targets.Keys);
+                    string fontsBefore = Fonts(targets.Keys);
+                    report.targets = targets.Select(pair => ApplyText(pair.Key, pair.Value, font, contents.transform, strongerOutlines)).ToArray();
                     report.geometryUnchanged = Geometry(contents) == geometryBefore;
                     report.outlinesUnchanged = Effects(contents) == outlinesBefore;
-                    if (!report.geometryUnchanged || !report.outlinesUnchanged || OtherTexts(otherTexts, contents.transform) != otherBefore ||
+                    report.otherEffectsUnchanged = PreservedEffects(contents, targets.Keys) == otherEffectsBefore;
+                    report.numericFontsUnchanged = Fonts(targets.Keys) == fontsBefore;
+                    if (!report.geometryUnchanged || (!strongerOutlines && !report.outlinesUnchanged) ||
+                        !report.otherEffectsUnchanged || (strongerOutlines && !report.numericFontsUnchanged) || OtherTexts(otherTexts, contents.transform) != otherBefore ||
                         NumericPresentation(targets.Keys, contents.transform) != numericBefore)
-                        throw new InvalidOperationException("Numerical font authoring must preserve other text, numerical presentation, rectangles and existing effects.");
+                        throw new InvalidOperationException("Numeric authoring changed text, fonts, rectangles or effects outside the selected operation.");
                     report.preservedOtherTexts = otherTexts.Length;
                     ValidateRoot(contents, font);
+                    if (strongerOutlines) ValidateOutlines(contents);
                     RaidUIAuthoring.ValidateScripts(contents);
                     if (PrefabUtility.SaveAsPrefabAsset(contents, report.copy) == null) throw new IOException("Could not save numeric typography copy.");
                 }
@@ -112,13 +135,15 @@ namespace RaidRogue.Editor
                 // Scene loading can unload unused prefab handles; resolve after opening it.
                 var prefab = AssetDatabase.LoadAssetAtPath<RaidUIRoot>(report.copy);
                 instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab.gameObject, scene);
-                instance.name = "Astella_PrismV4_MaruBuri_Oxanium"; instance.SetActive(true);
+                instance.name = strongerOutlines ? "Astella_PrismV4_NumericOutline" : "Astella_PrismV4_MaruBuri_Oxanium"; instance.SetActive(true);
                 ValidateActive();
+                if (strongerOutlines) ValidateNumericOutlines();
                 AstellaMaruBuriTypography.ValidateActive();
                 EditorSceneManager.MarkSceneDirty(scene);
                 if (!EditorSceneManager.SaveScene(scene)) throw new IOException("Could not save the main scene.");
                 report.sceneSaved = true; report.passed = true;
-                Debug.Log("OXANIUM NUMERALS PASS: " + report.targets.Length + " numeric fields; MaruBuri headings, other text, layout and existing outlines preserved. " + report.folder);
+                Debug.Log((strongerOutlines ? "NUMERIC OUTLINES PASS: " : "OXANIUM NUMERALS PASS: ") + report.targets.Length +
+                    " numeric fields; MaruBuri names/titles, other text, layout and non-target effects preserved. " + report.folder);
             }
             catch (Exception error)
             {
@@ -136,8 +161,8 @@ namespace RaidRogue.Editor
             {
                 report.assets = new[] { new SourceAsset { source = report.source, copy = report.copy,
                     sourceHashBefore = report.sourceHashBefore, sourceHashAfter = report.sourceHashAfter } };
-                Directory.CreateDirectory(Evidence);
-                File.WriteAllText(Evidence + "/report.json", JsonUtility.ToJson(report, true));
+                Directory.CreateDirectory(evidence);
+                File.WriteAllText(evidence + "/report.json", JsonUtility.ToJson(report, true));
             }
         }
 
@@ -150,6 +175,16 @@ namespace RaidRogue.Editor
             RaidUIAuthoring.Validate(profile);
             ValidateRoot(profile.hudPrefab.gameObject, font);
             foreach (var root in Object.FindObjectsByType<RaidUIRoot>(FindObjectsSortMode.None)) ValidateRoot(root.gameObject, font);
+        }
+
+        [MenuItem("Tools/Astella/Validate Numeric Outlines")]
+        public static void ValidateNumericOutlines()
+        {
+            ValidateActive();
+            var profile = AssetDatabase.LoadAssetAtPath<RaidUIPresentation>(ProfilePath);
+            ValidateOutlines(profile.hudPrefab.gameObject);
+            foreach (var root in Object.FindObjectsByType<RaidUIRoot>(FindObjectsSortMode.None)) ValidateOutlines(root.gameObject);
+            AstellaMaruBuriTypography.ValidateActive();
         }
 
         private static Dictionary<Text, string> Numerals(GameObject root)
@@ -175,17 +210,44 @@ namespace RaidRogue.Editor
             return result.OrderBy(pair => AnimationUtility.CalculateTransformPath(pair.Key.transform, root.transform), StringComparer.Ordinal)
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
         }
-        private static Target ApplyText(Text text, string role, Font font, Transform root)
+        private static Target ApplyText(Text text, string role, Font font, Transform root, bool strongerOutlines)
         {
             var target = new Target { role = role, path = AnimationUtility.CalculateTransformPath(text.transform, root), text = text.text,
                 previousFont = AssetDatabase.GetAssetPath(text.font), font = FontPath, previousStyle = text.fontStyle.ToString(),
-                size = text.fontSize, outlineBefore = Effects(text.gameObject) };
+                size = text.fontSize, outlineBefore = Effects(text.gameObject),
+                outlineDistanceBefore = text.GetComponent<Outline>() != null ? text.GetComponent<Outline>().effectDistance : Vector2.zero };
             ValidateGlyphs(text, font);
             CheckWidth(text, font, role, out target.widthSample, out target.availableWidth, out target.preferredWidth);
-            text.font = font; text.fontStyle = FontStyle.Normal;
-            foreach (var style in text.GetComponents<RaidUIStyle>()) style.useTheme = false;
+            if (strongerOutlines)
+            {
+                if (text.GetComponents<Outline>().Length > 1) throw new InvalidOperationException("Duplicate numeric outlines: " + text.name);
+                var outline = text.GetComponent<Outline>() ?? text.gameObject.AddComponent<Outline>();
+                outline.enabled = true; outline.effectColor = NumericInk; outline.useGraphicAlpha = true;
+                float distance = OutlineDistance(text);
+                outline.effectDistance = new Vector2(distance, -distance);
+            }
+            else
+            {
+                text.font = font; text.fontStyle = FontStyle.Normal;
+                foreach (var style in text.GetComponents<RaidUIStyle>()) style.useTheme = false;
+            }
             target.outlineAfter = Effects(text.gameObject);
+            target.outlineDistanceAfter = text.GetComponent<Outline>() != null ? text.GetComponent<Outline>().effectDistance : Vector2.zero;
             return target;
+        }
+        // Logical font size and effect distance share the same Canvas/parent scale.
+        private static float OutlineDistance(Text text) => Mathf.Round(text.fontSize * .075f * 1000) / 1000;
+        private static bool IsStrongOutline(Text text)
+        {
+            var outline = text.GetComponent<Outline>();
+            float distance = OutlineDistance(text);
+            return text.GetComponents<Outline>().Length == 1 && outline != null && outline.enabled && outline.useGraphicAlpha &&
+                outline.effectColor == NumericInk && (outline.effectDistance - new Vector2(distance, -distance)).sqrMagnitude < .000001f;
+        }
+        private static void ValidateOutlines(GameObject root)
+        {
+            foreach (var text in Numerals(root).Keys)
+                if (!IsStrongOutline(text)) throw new InvalidOperationException("Numeric outline mismatch: " + AnimationUtility.CalculateTransformPath(text.transform, root.transform));
         }
         private static bool IsApplied(Text text, Font font) => text.font == font && text.fontStyle == FontStyle.Normal &&
             !text.GetComponents<RaidUIStyle>().Any(style => style.useTheme);
@@ -230,6 +292,15 @@ namespace RaidRogue.Editor
             AnimationUtility.CalculateTransformPath(text.transform, root) + "|" + EditorJsonUtility.ToJson(text)));
         private static string Effects(GameObject root) => string.Join("\n", root.GetComponentsInChildren<Shadow>(true).Select(effect =>
             AnimationUtility.CalculateTransformPath(effect.transform, root.transform) + "|" + effect.GetType().FullName + "|" + EditorJsonUtility.ToJson(effect)));
+        private static string PreservedEffects(GameObject root, IEnumerable<Text> numerals)
+        {
+            var targets = new HashSet<Text>(numerals);
+            return string.Join("\n", root.GetComponentsInChildren<Shadow>(true)
+                .Where(effect => !(effect is Outline) || !targets.Contains(effect.GetComponent<Text>()))
+                .Select(effect => AnimationUtility.CalculateTransformPath(effect.transform, root.transform) + "|" + effect.GetType().FullName + "|" + EditorJsonUtility.ToJson(effect)));
+        }
+        private static string Fonts(IEnumerable<Text> texts) => string.Join("\n", texts.Select(text =>
+            AssetDatabase.GetAssetPath(text.font) + "|" + text.fontStyle + "|" + string.Join(",", text.GetComponents<RaidUIStyle>().Select(style => style.useTheme))));
         private static string Geometry(GameObject root) => string.Join("\n", root.GetComponentsInChildren<RectTransform>(true).Select(rect =>
             AnimationUtility.CalculateTransformPath(rect, root.transform) + "|" + EditorJsonUtility.ToJson(rect)));
         private static string Hash(string path)

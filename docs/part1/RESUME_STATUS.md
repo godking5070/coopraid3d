@@ -1,6 +1,8 @@
 # 아스텔라 재개 기준 — 2026-11-16
 
-**최신 숫자 서체:** 사용자가 선택한 Oxanium Medium을 HUD 숫자 18곳에 적용했다. 활성 HUD는 Typography/Oxanium-20261116-201718-685 복사본이다. 마루부리 제목·본문·단축키·기존 아웃라인·배치를 보존했다. [적용·Play 검사](OXANIUM_MAIN_APPLY_2026-11-16.md)와 [크기별 아웃라인 A/B/C](OXANIUM_OUTLINE_VARIANTS_2026-11-16.md)를 확인한다. 아웃라인 묶음은 아직 비교안이며 게임 두께는 바꾸지 않았다. 새 Windows 빌드는 만들지 않았다.
+**최신 숫자 표시:** 사용자의 후속 지시에 따라 숫자 18곳만 아웃라인을 강화했다. 이름·제목·시전명의 기존 얇은 효과와 마루부리 서체는 유지했다. 현재 HUD는 Typography/NumericOutline-20261116-203333-618 복사본이다. [숫자 전용 적용·실제 Play·전후 비교](NUMERIC_OUTLINE_ONLY_2026-11-16.md)를 확인한다. 새 Windows 빌드는 만들지 않았다.
+
+**앞선 숫자 서체:** 사용자가 선택한 Oxanium Medium을 HUD 숫자 18곳에 적용했다. 활성 HUD는 Typography/Oxanium-20261116-201718-685 복사본이다. 마루부리 제목·본문·단축키·기존 아웃라인·배치를 보존했다. [적용·Play 검사](OXANIUM_MAIN_APPLY_2026-11-16.md)와 [크기별 아웃라인 A/B/C](OXANIUM_OUTLINE_VARIANTS_2026-11-16.md)를 확인한다. 아웃라인 묶음은 아직 비교안이며 게임 두께는 바꾸지 않았다. 새 Windows 빌드는 만들지 않았다.
 
 **앞선 서체 변경:** 사용자가 선택한 마루부리 SemiBold를 제목·보스명·시전명 23곳에 남보라 아웃라인과 함께 적용했다. 활성 HUD는 Typography/Applied-20261116-193901-716 복사본이다. [적용·Play 검사](MARUBURI_MAIN_APPLY_2026-11-16.md)와 [오른쪽 게이지 숫자 재비교](MARUBURI_NUMERIC_FONT_REVIEW_2026-11-16.md)를 확인한다. 숫자 후보는 아직 적용하지 않았으며 기존 숫자·본문·쿨타임 폰트를 유지한다. 새 Windows 빌드는 만들지 않았다.
 
