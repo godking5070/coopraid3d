@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardAwakening_v3",
+  "part": 1,
+  "stage": 5,
+  "number": 2,
+  "title_ko": "천칭의 집행수",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_visual_qa_and_file_validation_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "user_request": "노멀하고 차이가 없어. 1부 다른 하드 보스들을 참고해서 하드 컨셉 5개만 만들어줘.",
+  "images": [
+    {
+      "id": "02-scale-executioner",
+      "title_ko": "천칭의 집행수",
+      "image": "01-boss.png",
+      "prompts": [
+        "prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1e216-3d3e-7d51-9f33-d71709200a04/exec-e5dc486e-edcf-49f5-87ca-f8b9060d3db4.png",
+      "references": [
+        {
+          "path": "../../BossOverview/originals/p1-s5-normal.png",
+          "role": "character identity reference and redesign target: original slender judicial statue, wavy hair, blindfold, star robe, greatsword and balance"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s1-hard.png",
+          "role": "hard transformation magnitude and credible deployed mechanical hinges only; no gargoyle anatomy or bulk copied"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s4-hard.png",
+          "role": "hinged face-shell opening and exposed clockwork construction only; no extra body arms or puppeteer identity copied"
+        }
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2046969,
+      "sha256": "cac3ce36e7cf5220b17f1acc41da9c33037e44dcf52fcc3580d70e23bb725624",
+      "visual_qa": {
+        "status": "pass",
+        "identity": "Normal swept ivory curls and blindfold/lower face remain recognizable; slender feminine figure, navy high collar, gold stars, long ceremonial coat and original sword family retained.",
+        "hard_difference": "Original rear beam develops into two massive articulated weapon arms. Exactly two scale bowls become giant crescent-rimmed pincers with taut chain actuators. Open flank exposes brass spine and piston linkages; cracked cheek and torn coat reinforce hard form.",
+        "anatomy": "Two actual body arms with two hands hold one sword, two human-shaped legs/feet. Two separate back-mounted mechanical weapon supports terminate in two pan-pincers.",
+        "framing": "Full broad deployed mechanism, both weapon-pans, sword point, curls, coat and both feet are inside canvas; upper and lower margins are narrow but uncut.",
+        "style": "Clean polished ivory/navy/brass game concept, pale lavender background, single full-body hero, no text/insets/gore/photorealism."
+      }
+    }
+  ],
+  "limits": "Single-view generated concept, not 3D mesh or rig validation. Earlier concepts remain unchanged. No framing correction was generated because all extremities are contained."
+}

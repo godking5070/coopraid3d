@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardAwakening_v3",
+  "part": 1,
+  "stage": 5,
+  "number": 1,
+  "title_ko": "개안한 단죄자",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_visual_qa_and_file_validation_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "user_request": "노멀하고 차이가 없어. 1부 다른 하드 보스들을 참고해서 하드 컨셉 5개만 만들어줘.",
+  "images": [
+    {
+      "id": "01-unsealed-verdict",
+      "title_ko": "개안한 단죄자",
+      "image": "01-boss.png",
+      "prompts": [
+        "prompt.txt",
+        "refine.prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1e20d-a101-74b1-bb96-937bae768ebc/exec-e93ac2d5-b2f4-411c-9378-1d53d80e3ddf.png",
+      "references": [
+        {
+          "path": "../../BossOverview/originals/p1-s5-normal.png",
+          "role": "character identity reference and redesign target: original slender judicial statue, wavy hair, blindfold, star robe, greatsword and balance"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s1-hard.png",
+          "role": "hard transformation magnitude and credible deployed mechanical hinges only; no gargoyle anatomy or bulk copied"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s4-hard.png",
+          "role": "hinged face-shell opening and exposed clockwork construction only; no extra body arms or puppeteer identity copied"
+        }
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1917232,
+      "sha256": "fa6895781bba75b4ac82126b9c9d260c384a3a888a5fc4d6e20f5972c90b398c",
+      "visual_qa": {
+        "status": "pass",
+        "identity": "Swept sculpted ivory curls, slim long-limbed feminine body, original navy high collar, ivory/navy/gold star ceremonial coat, balance and one greatsword remain recognizable.",
+        "hard_difference": "Face shell opens into two hinged halves around dark horizontal-lit clock face. Rib shell opens widely around exposed brass spiral heart. Enlarged sword is thrust diagonally forward in a threatening wide stance, torn coat fans outward. Clearly greater transformation than normal.",
+        "anatomy": "Two original arms with two gripping hands, two legs/feet, exactly two chain-hung pans and one clear diagonal greatsword. The unintended vertical extra blade beneath the guard was removed in a targeted final correction.",
+        "framing": "All beam ends, both pans, sword point, hair and both feet inside canvas. Top beam tip and lower feet have narrow but uncut margins; not an 80px-every-side framing.",
+        "style": "Clean polished ivory/navy/brass game concept with pale lavender backdrop, fine linework and cel shadows; single full-body hero with no text or insets."
+      },
+      "initial_source": "C:/Users/godki/.codex/generated_images/01a1e216-3d3e-7d51-9f33-d71709200a04/exec-b37787e0-2deb-4156-a5cc-c3c625af7747.png",
+      "final_correction": "Targeted image_gen edit removed the unintended long vertical extra blade beneath the crossguard. Final has one clear diagonal sword; opened face/chest, body/pose, scale and both pans preserved. Root visually reviewed."
+    }
+  ],
+  "limits": "Single-view generated concept, not 3D mesh or rig validation. Earlier concepts remain unchanged. One targeted correction removed the unintended extra sword blade; framing and character design preserved."
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "project": "ASTELLA",
+  "part": 1,
+  "stage": 5,
+  "mode": "hard",
+  "version": "JustitiaHardAwakening_v3",
+  "created": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "comparison_candidate_not_selected",
+  "user_request": "1부 유스티티아 하드가 노멀과 차이가 없어 다른 1부 하드 보스를 참고한 하드 컨셉 5개 요청",
+  "images": [
+    {
+      "id": "03",
+      "title_ko": "네 팔의 대심판",
+      "image": "01-boss.png",
+      "description_ko": "등 척추의 보조 팔 두 개가 칼날 접시를 들고, 원래 두 팔은 대검을 잡는다. 열린 흉부 태엽과 갈라진 눈가리개, 찢긴 별 예복.",
+      "prompts": [
+        "prompt.txt",
+        "refine.prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1e216-9320-72c0-9982-3589a35c4c6d/exec-88559289-79ad-444e-8c84-62362bb97472.png",
+      "initial_source": "C:/Users/godki/.codex/generated_images/01a1e216-9320-72c0-9982-3589a35c4c6d/exec-26279217-9b40-49c8-957e-3053e7decf43.png",
+      "references": [
+        {
+          "path": "../../BossOverview/originals/p1-s5-normal.png",
+          "role": "Normal Justitia identity, sculpture hair/blindfold, slim feminine body, star formal coat, sword, balance and visual style"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s2-hard.png",
+          "role": "HARD transformation reference only: opened existing ivory shell with visible mechanism"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s4-hard.png",
+          "role": "HARD transformation reference only: articulated four-arm structure, open clockwork and split outer shell"
+        },
+        {
+          "path": "C:/Users/godki/.codex/generated_images/01a1e216-9320-72c0-9982-3589a35c4c6d/exec-26279217-9b40-49c8-957e-3053e7decf43.png",
+          "role": "Exact edit target for framing-only correction"
+        }
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1543411,
+      "sha256": "3bbea99d7b70198d6d1616d9927a39de92953bf8dfa2c1e6b7aba2a9798e7a30",
+      "visual_qa": "Four arms clearly separated: upper pair on brass rear yoke carries exactly two blade-rimmed scale pans, lower original pair grips one greatsword. Two long legs, swept wavy ivory hair, split original blindfold and recognizable star formal coat retained. Broad open chest exposes brass coil/rib clockwork, coat tails are segmented and torn. Final framing edit reduced the full assembly; all arm/pan tips, hair, sword, coat and both feet have ample margins. Clean ivory/navy/brass/lavender 2D rendering retained."
+    }
+  ],
+  "limits": "Single-view concept, not a 3D mesh/rig or final selected design. Prior assets preserved."
+}

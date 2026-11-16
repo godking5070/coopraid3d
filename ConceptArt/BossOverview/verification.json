@@ -1,9 +1,21 @@
 {
   "checked_date": "2026-11-16",
-  "result": "All 22 copied originals match existing manifest SHA256, PNG signature and dimensions.",
-  "stage_count": 12,
-  "image_count": 22,
+  "result": "pass",
+  "tool": "Chrome headless / Playwright",
   "checks": [
+    "5 final PNGs decoded in browser, source SHA256 and dimensions match",
+    "All local gallery links resolve",
+    "Desktop 1440px, mobile 390px and 320px layouts without horizontal overflow",
+    "Image modal, previous/next wraparound, arrow key and Escape tested",
+    "Main overview: 12 stage cards, 24 images and all 9 filter combinations",
+    "All Part2 stages marked redesign pending",
+    "No page JavaScript errors"
+  ],
+  "visual_qa": "All five final images inspected by root and independent reviewer; 01 extra blade corrected.",
+  "limits": "2D concept candidates; no 3D mesh or rig test.",
+  "stage_count": 12,
+  "image_count": 24,
+  "checksums": [
     {
       "id": "p1-s1-normal",
       "sha256": "3c2d337fcbacc2c4913b45116013b0cec9a1c6488bef41ddd19d7a4704c569e7",
@@ -68,25 +80,39 @@
       "bytes": 1958222
     },
     {
-      "id": "p1-s5-hard-a",
-      "sha256": "834b7405141f6ddcda98391a82edadd24d3613523864157fbabdd69e16a448fe",
+      "id": "p1-s5-v3-1",
+      "sha256": "fa6895781bba75b4ac82126b9c9d260c384a3a888a5fc4d6e20f5972c90b398c",
       "width": 1536,
       "height": 1024,
-      "bytes": 1765803
+      "bytes": 1917232
     },
     {
-      "id": "p1-s5-hard-b",
-      "sha256": "219a9f9124e485891eb0d00db016d27e9cbc291889ed2cad89aad734b0891ad3",
+      "id": "p1-s5-v3-2",
+      "sha256": "cac3ce36e7cf5220b17f1acc41da9c33037e44dcf52fcc3580d70e23bb725624",
       "width": 1536,
       "height": 1024,
-      "bytes": 1553085
+      "bytes": 2046969
     },
     {
-      "id": "p1-s5-hard-c",
-      "sha256": "314993b68b1ab2a0ec71ea5db200eb1333b6455ea7094f031f517b8ba87f6091",
+      "id": "p1-s5-v3-3",
+      "sha256": "3bbea99d7b70198d6d1616d9927a39de92953bf8dfa2c1e6b7aba2a9798e7a30",
       "width": 1536,
       "height": 1024,
-      "bytes": 1665845
+      "bytes": 1543411
+    },
+    {
+      "id": "p1-s5-v3-4",
+      "sha256": "89dde6596918f5e00660b22477f709e52748ed2c99592ac4ad65a24dceba4546",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1492856
+    },
+    {
+      "id": "p1-s5-v3-5",
+      "sha256": "9aa6e11fa15f1db1bf0da0934e0be01d82c60446df56555a6ecfd43dfb5161b1",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2041382
     },
     {
       "id": "p1-s6-normal",

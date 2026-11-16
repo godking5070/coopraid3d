@@ -2,17 +2,14 @@
   "project": "ASTELLA",
   "title": "보스 컨셉아트 모음",
   "organized_date": "2026-11-16",
-  "source_art_latest_date": "2026-11-15",
+  "source_art_latest_date": "2026-11-16",
   "scope": "1부 1~6스테이지 노멀·하드와 2부 1~6층 최신 대표·확정·검토안",
   "stage_count": 12,
-  "image_count": 22,
-  "fixed_stages": [
-    "p2-s3",
-    "p2-s4"
-  ],
+  "image_count": 24,
+  "fixed_stages": [],
   "source_root": "../보스-컨셉아트/ConceptArt",
   "source_root_base": "workspace_root",
-  "selection_policy": "기존 제작안·선호 선택·명시 확정·선택 대기를 구분한다. 새 대표가 없는 1부는 기존 화풍 통일본을 사용한다. 1부5 하드는 노멀 계승 v2의 미선택 3안으로 대체한다.",
+  "selection_policy": "1부 유스티티아 하드는 2026-11-16 구조 변형 5안이 최신이며 선택 대기다. 2부는 이전 선택 기록을 보존하고 전체 재작업 예정으로 표시한다.",
   "cards": [
     {
       "id": "p1-s1",
@@ -198,15 +195,15 @@
       "stage": 5,
       "title": "유스티티아",
       "subtitle": "성채 재판소",
-      "notes": "노멀의 눈가리개·곱슬머리·가는 체형·예복·대검·천칭을 계승한 하드 3안. A는 기울어진 저울, B는 개방 흉부, C는 비대칭 외피와 사슬.",
+      "notes": "다른 1부 하드의 외피 개방·태엽 노출·기계 전개를 반영한 최신 5안. 얼굴 개방 / 천칭 집게 / 네 팔 / 외피 감옥 / 사슬 현수형.",
       "tags": [
-        "천칭",
-        "노멀 계승",
-        "하드 3안"
+        "하드 5안",
+        "구조 변형",
+        "선택 대기"
       ],
       "status": "review",
-      "statusLabel": "하드 3안 · 선택 대기",
-      "selectionNote": "2026.11.15 노멀의 느낌을 살려 다시 만든 하드 3안. 확정 기록은 없으며, 이전 하드와 극단 변형 15안은 최신 대표에서 제외했다.",
+      "statusLabel": "하드 5안 · 선택 대기",
+      "selectionNote": "2026.11.16 노멀과 차이가 작다는 피드백을 반영해 새 하드 5안 제작. 이전 3안은 보존하고 최신 모음에서는 교체했다. 최종 선택은 미정.",
       "images": [
         {
           "id": "p1-s5-normal",
@@ -222,46 +219,79 @@
           "bytes": 1958222
         },
         {
-          "id": "p1-s5-hard-a",
+          "id": "p1-s5-v3-1",
           "mode": "hard",
-          "label": "하드 A · 무너진 균형",
-          "sourcePath": "JustitiaHardNormalPreserved_v2/A-imbalanced/01-boss.png",
-          "sourceManifest": "JustitiaHardNormalPreserved_v2/manifest.json",
+          "label": "하드 1안 · 개안한 단죄자",
+          "src": "../JustitiaHardAwakening_v3/01-unsealed-verdict/01-boss.png",
+          "sourcePath": "ConceptArt/JustitiaHardAwakening_v3/01-unsealed-verdict/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/JustitiaHardAwakening_v3/01-unsealed-verdict/manifest.json",
           "width": 1536,
           "height": 1024,
-          "sha256": "834b7405141f6ddcda98391a82edadd24d3613523864157fbabdd69e16a448fe",
+          "bytes": 1917232,
+          "sha256": "fa6895781bba75b4ac82126b9c9d260c384a3a888a5fc4d6e20f5972c90b398c",
           "statusLabel": "선택 대기",
-          "description": "기울어진 대형 저울과 무거운 추. 넓어진 예복과 균열로 판결의 무게를 강조.",
-          "src": "originals/p1-s5-hard-a.png",
-          "bytes": 1765803
+          "description": "얼굴 외피가 열려 기계면이 드러난다. 노출 태엽 심장과 전진하는 대검 자세로 단죄자의 위협을 강조."
         },
         {
-          "id": "p1-s5-hard-b",
+          "id": "p1-s5-v3-2",
           "mode": "hard",
-          "label": "하드 B · 개방된 판결",
-          "sourcePath": "JustitiaHardNormalPreserved_v2/B-unsealed/01-boss.png",
-          "sourceManifest": "JustitiaHardNormalPreserved_v2/manifest.json",
+          "label": "하드 2안 · 천칭의 집행수",
+          "src": "../JustitiaHardAwakening_v3/02-scale-executioner/01-boss.png",
+          "sourcePath": "ConceptArt/JustitiaHardAwakening_v3/02-scale-executioner/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/JustitiaHardAwakening_v3/02-scale-executioner/manifest.json",
           "width": 1536,
           "height": 1024,
-          "sha256": "219a9f9124e485891eb0d00db016d27e9cbc291889ed2cad89aad734b0891ad3",
+          "bytes": 2046969,
+          "sha256": "cac3ce36e7cf5220b17f1acc41da9c33037e44dcf52fcc3580d70e23bb725624",
           "statusLabel": "선택 대기",
-          "description": "노멀에 가까운 자세. 갈라진 흉부 외피 사이로 가는 시계축이 드러나는 변형.",
-          "src": "originals/p1-s5-hard-b.png",
-          "bytes": 1553085
+          "description": "등 천칭과 두 접시가 거대한 집행 집게로 전개된다. 좌우로 넓게 뻗은 기계 무장이 실루엣을 바꾼다."
         },
         {
-          "id": "p1-s5-hard-c",
+          "id": "p1-s5-v3-3",
           "mode": "hard",
-          "label": "하드 C · 봉인 균열",
-          "sourcePath": "JustitiaHardNormalPreserved_v2/C-fractured/01-boss.png",
-          "sourceManifest": "JustitiaHardNormalPreserved_v2/manifest.json",
+          "label": "하드 3안 · 네 팔의 대심판",
+          "src": "../JustitiaHardAwakening_v3/03-fourfold-judgment/01-boss.png",
+          "sourcePath": "ConceptArt/JustitiaHardAwakening_v3/03-fourfold-judgment/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/JustitiaHardAwakening_v3/03-fourfold-judgment/manifest.json",
           "width": 1536,
           "height": 1024,
-          "sha256": "314993b68b1ab2a0ec71ea5db200eb1333b6455ea7094f031f517b8ba87f6091",
+          "bytes": 1543411,
+          "sha256": "3bbea99d7b70198d6d1616d9927a39de92953bf8dfa2c1e6b7aba2a9798e7a30",
           "statusLabel": "선택 대기",
-          "description": "한쪽 외피의 분절과 구속 사슬. 비대칭 예복으로 긴장감을 만든 변형.",
-          "src": "originals/p1-s5-hard-c.png",
-          "bytes": 1665845
+          "description": "원래 두 팔에 등 기계 보조 두 팔이 더해진다. 대검과 두 심판 접시를 동시에 다루는 네 팔 집행형."
+        },
+        {
+          "id": "p1-s5-v3-4",
+          "mode": "hard",
+          "label": "하드 4안 · 벌어진 판결의 감옥",
+          "src": "../JustitiaHardAwakening_v3/04-verdict-cage/01-boss.png",
+          "sourcePath": "ConceptArt/JustitiaHardAwakening_v3/04-verdict-cage/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/JustitiaHardAwakening_v3/04-verdict-cage/manifest.json",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 1492856,
+          "sha256": "89dde6596918f5e00660b22477f709e52748ed2c99592ac4ad65a24dceba4546",
+          "statusLabel": "선택 대기",
+          "description": "법관 예복 외피가 큰 감옥 날판으로 벌어진다. 가는 내부 몸체와 태엽 구동부를 감싸는 열린 판결의 감옥."
+        },
+        {
+          "id": "p1-s5-v3-5",
+          "mode": "hard",
+          "label": "하드 5안 · 저울에 매달린 성상",
+          "src": "../JustitiaHardAwakening_v3/05-suspended-judgment/01-boss.png",
+          "sourcePath": "ConceptArt/JustitiaHardAwakening_v3/05-suspended-judgment/01-boss.png",
+          "sourceRootBase": "workspace_root",
+          "sourceManifest": "ConceptArt/JustitiaHardAwakening_v3/05-suspended-judgment/manifest.json",
+          "width": 1536,
+          "height": 1024,
+          "bytes": 2041382,
+          "sha256": "9aa6e11fa15f1db1bf0da0934e0be01d82c60446df56555a6ecfd43dfb5161b1",
+          "statusLabel": "선택 대기",
+          "description": "불균형한 대형 천칭의 사슬이 손목과 발목을 당긴다. 열린 흉곽과 공중에 매달린 자세로 변형을 강조."
         }
       ]
     },
@@ -321,9 +351,9 @@
         "기억 캡슐",
         "위엄"
       ],
-      "status": "selected",
-      "statusLabel": "선호 선택",
-      "selectionNote": "“1번 맘에 든다.”라고 고른 Stage01Majesty_v8의 1안. 이후 다른 층의 체급 기준으로 사용.",
+      "status": "review",
+      "statusLabel": "재작업 예정",
+      "selectionNote": "2026.11.16 사용자 의견: “2부는 다 별로네, 다시 만들어야 할 듯.” 전체 재작업 예정으로 기록. 이번에는 1부 유스티티아만 제작했다. 이전 기록: “1번 맘에 든다.”라고 고른 Stage01Majesty_v8의 1안. 이후 다른 층의 체급 기준으로 사용.",
       "images": [
         {
           "id": "p2-s1-selected",
@@ -338,7 +368,9 @@
           "statusLabel": "선호 선택",
           "bytes": 1962655
         }
-      ]
+      ],
+      "previousSelectionNote": "“1번 맘에 든다.”라고 고른 Stage01Majesty_v8의 1안. 이후 다른 층의 체급 기준으로 사용.",
+      "previousStatusLabel": "선호 선택"
     },
     {
       "id": "p2-s2",
@@ -353,8 +385,8 @@
         "태엽"
       ],
       "status": "review",
-      "statusLabel": "선호 반영 · 검토",
-      "selectionNote": "기존 1안의 생김새와 파이프 목을 좋아한다는 피드백을 반영한 최신안. 뒤 장치를 바꾼 이 시안의 최종 선택은 아직 남아 있음.",
+      "statusLabel": "재작업 예정",
+      "selectionNote": "2026.11.16 사용자 의견: “2부는 다 별로네, 다시 만들어야 할 듯.” 전체 재작업 예정으로 기록. 이번에는 1부 유스티티아만 제작했다. 이전 기록: 기존 1안의 생김새와 파이프 목을 좋아한다는 피드백을 반영한 최신안. 뒤 장치를 바꾼 이 시안의 최종 선택은 아직 남아 있음.",
       "images": [
         {
           "id": "p2-s2-latest",
@@ -369,7 +401,9 @@
           "statusLabel": "선호 반영 · 검토",
           "bytes": 1931620
         }
-      ]
+      ],
+      "previousSelectionNote": "기존 1안의 생김새와 파이프 목을 좋아한다는 피드백을 반영한 최신안. 뒤 장치를 바꾼 이 시안의 최종 선택은 아직 남아 있음.",
+      "previousStatusLabel": "선호 반영 · 검토"
     },
     {
       "id": "p2-s3",
@@ -383,9 +417,9 @@
         "가는 체형",
         "분기관"
       ],
-      "status": "fixed",
-      "statusLabel": "확정",
-      "selectionNote": "뒤 아티팩트 3안 중 1안을 선택하며 “픽스하자.”고 확정. 가는 체격과 수은 분기관을 함께 유지.",
+      "status": "review",
+      "statusLabel": "재작업 예정",
+      "selectionNote": "2026.11.16 사용자 의견: “2부는 다 별로네, 다시 만들어야 할 듯.” 전체 재작업 예정으로 기록. 이번에는 1부 유스티티아만 제작했다. 이전 기록: 뒤 아티팩트 3안 중 1안을 선택하며 “픽스하자.”고 확정. 가는 체격과 수은 분기관을 함께 유지.",
       "images": [
         {
           "id": "p2-s3-fixed",
@@ -400,7 +434,9 @@
           "statusLabel": "확정",
           "bytes": 1844507
         }
-      ]
+      ],
+      "previousSelectionNote": "뒤 아티팩트 3안 중 1안을 선택하며 “픽스하자.”고 확정. 가는 체격과 수은 분기관을 함께 유지.",
+      "previousStatusLabel": "확정"
     },
     {
       "id": "p2-s4",
@@ -414,9 +450,9 @@
         "중갑",
         "8사슬"
       ],
-      "status": "fixed",
-      "statusLabel": "확정",
-      "selectionNote": "양어깨 방패 3안 중 “2안이 좋다.”고 선택한 성문형 방벽. 원본을 확정 폴더에 보관.",
+      "status": "review",
+      "statusLabel": "재작업 예정",
+      "selectionNote": "2026.11.16 사용자 의견: “2부는 다 별로네, 다시 만들어야 할 듯.” 전체 재작업 예정으로 기록. 이번에는 1부 유스티티아만 제작했다. 이전 기록: 양어깨 방패 3안 중 “2안이 좋다.”고 선택한 성문형 방벽. 원본을 확정 폴더에 보관.",
       "images": [
         {
           "id": "p2-s4-fixed",
@@ -431,7 +467,9 @@
           "statusLabel": "확정",
           "bytes": 2370527
         }
-      ]
+      ],
+      "previousSelectionNote": "양어깨 방패 3안 중 “2안이 좋다.”고 선택한 성문형 방벽. 원본을 확정 폴더에 보관.",
+      "previousStatusLabel": "확정"
     },
     {
       "id": "p2-s5",
@@ -440,14 +478,14 @@
       "title": "무너진 천구를 떠받치는 부단장",
       "subtitle": "V시의 자리 · 천체 등장치 3안",
       "status": "review",
-      "statusLabel": "3안 · 선택 대기",
+      "statusLabel": "재작업 예정",
       "notes": "같은 몸·갑옷·자세·시침창에 서로 다른 천체 등장치. 창은 양손으로만 들고, 등 장치와 창을 연결하는 봉·허리 클램프는 제거.",
       "tags": [
         "시침창",
         "천체",
         "망토"
       ],
-      "selectionNote": "2026.11.14 최신 피드백을 반영한 3안. ① 별자리 성도 망토 ② 천구의 장막 ③ 붕괴한 천체 궤도편. 최종 선택은 미정.",
+      "selectionNote": "2026.11.16 사용자 의견: “2부는 다 별로네, 다시 만들어야 할 듯.” 전체 재작업 예정으로 기록. 이번에는 1부 유스티티아만 제작했다. 이전 기록: 2026.11.14 최신 피드백을 반영한 3안. ① 별자리 성도 망토 ② 천구의 장막 ③ 붕괴한 천체 궤도편. 최종 선택은 미정.",
       "images": [
         {
           "id": "p2-s5-1",
@@ -491,7 +529,9 @@
           "src": "originals/p2-s5-3.png",
           "bytes": 2129508
         }
-      ]
+      ],
+      "previousSelectionNote": "2026.11.14 최신 피드백을 반영한 3안. ① 별자리 성도 망토 ② 천구의 장막 ③ 붕괴한 천체 궤도편. 최종 선택은 미정.",
+      "previousStatusLabel": "3안 · 선택 대기"
     },
     {
       "id": "p2-s6",
@@ -500,14 +540,14 @@
       "title": "구원받은 인형, 이리스",
       "subtitle": "VI시의 자리 · 여섯 초침 날개",
       "status": "review",
-      "statusLabel": "최신안 · 검토",
+      "statusLabel": "재작업 예정",
       "notes": "봉인 물방울 가면과 짧은 베일, 열린 시계 심장. 초침 날개 여섯 장과 왼팔 칼날을 붙잡는 오른손.",
       "tags": [
         "6날개",
         "시계 심장",
         "왼팔 칼날"
       ],
-      "selectionNote": "2026.11.12 위엄을 강화한 v9 최신 제작안. 최종 선택 기록은 없음.",
+      "selectionNote": "2026.11.16 사용자 의견: “2부는 다 별로네, 다시 만들어야 할 듯.” 전체 재작업 예정으로 기록. 이번에는 1부 유스티티아만 제작했다. 이전 기록: 2026.11.12 위엄을 강화한 v9 최신 제작안. 최종 선택 기록은 없음.",
       "images": [
         {
           "id": "p2-s6-latest",
@@ -522,7 +562,10 @@
           "src": "originals/p2-s6-latest.png",
           "bytes": 2093435
         }
-      ]
+      ],
+      "previousSelectionNote": "2026.11.12 위엄을 강화한 v9 최신 제작안. 최종 선택 기록은 없음.",
+      "previousStatusLabel": "최신안 · 검토"
     }
-  ]
+  ],
+  "part2_status": "redesign_pending"
 }

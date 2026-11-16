@@ -1,0 +1,95 @@
+{
+  "project": "ASTELLA",
+  "part": 1,
+  "stage": 5,
+  "title_ko": "유스티티아 하드 변형 5안",
+  "version": "JustitiaHardAwakening_v3",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "user_request": "노멀하고 차이가 없어. 1부 다른 하드 보스들을 참고해서 하드 컨셉 5개만 만들어줘.",
+  "status": "five_comparison_candidates_not_selected",
+  "part2_status": "재작업 예정. 이번 요청에서는 2부 이미지 제작하지 않음.",
+  "normal_reference": {
+    "image": "Reference/01-normal.png",
+    "original": "../BossOverview/originals/p1-s5-normal.png",
+    "sha256": "3b4313ed4aef27fe210e9f4eb9d19fdf67ed8e563ac8e84344bae239e41ef93a"
+  },
+  "transformation_policy": "정상 정체성을 유지하면서 얼굴/흉부 외피 개방, 구동부 노출, 무장 전개, 팔 구성 또는 자세를 명확하게 변형한다.",
+  "references": [
+    "../BossOverview/originals/p1-s1-hard.png",
+    "../BossOverview/originals/p1-s2-hard.png",
+    "../BossOverview/originals/p1-s3-hard.png",
+    "../BossOverview/originals/p1-s4-hard.png",
+    "../BossOverview/originals/p1-s6-hard.png"
+  ],
+  "gallery": "INDEX.html",
+  "prompts": "prompts-all.txt",
+  "images": [
+    {
+      "number": 1,
+      "id": "01-unsealed-verdict",
+      "title_ko": "개안한 단죄자",
+      "description_ko": "얼굴 외피가 열려 기계면이 드러난다. 노출 태엽 심장과 전진하는 대검 자세로 단죄자의 위협을 강조.",
+      "image": "01-unsealed-verdict/01-boss.png",
+      "manifest": "01-unsealed-verdict/manifest.json",
+      "prompt": "01-unsealed-verdict/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1917232,
+      "sha256": "fa6895781bba75b4ac82126b9c9d260c384a3a888a5fc4d6e20f5972c90b398c"
+    },
+    {
+      "number": 2,
+      "id": "02-scale-executioner",
+      "title_ko": "천칭의 집행수",
+      "description_ko": "등 천칭과 두 접시가 거대한 집행 집게로 전개된다. 좌우로 넓게 뻗은 기계 무장이 실루엣을 바꾼다.",
+      "image": "02-scale-executioner/01-boss.png",
+      "manifest": "02-scale-executioner/manifest.json",
+      "prompt": "02-scale-executioner/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2046969,
+      "sha256": "cac3ce36e7cf5220b17f1acc41da9c33037e44dcf52fcc3580d70e23bb725624"
+    },
+    {
+      "number": 3,
+      "id": "03-fourfold-judgment",
+      "title_ko": "네 팔의 대심판",
+      "description_ko": "원래 두 팔에 등 기계 보조 두 팔이 더해진다. 대검과 두 심판 접시를 동시에 다루는 네 팔 집행형.",
+      "image": "03-fourfold-judgment/01-boss.png",
+      "manifest": "03-fourfold-judgment/manifest.json",
+      "prompt": "03-fourfold-judgment/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1543411,
+      "sha256": "3bbea99d7b70198d6d1616d9927a39de92953bf8dfa2c1e6b7aba2a9798e7a30"
+    },
+    {
+      "number": 4,
+      "id": "04-verdict-cage",
+      "title_ko": "벌어진 판결의 감옥",
+      "description_ko": "법관 예복 외피가 큰 감옥 날판으로 벌어진다. 가는 내부 몸체와 태엽 구동부를 감싸는 열린 판결의 감옥.",
+      "image": "04-verdict-cage/01-boss.png",
+      "manifest": "04-verdict-cage/manifest.json",
+      "prompt": "04-verdict-cage/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1492856,
+      "sha256": "89dde6596918f5e00660b22477f709e52748ed2c99592ac4ad65a24dceba4546"
+    },
+    {
+      "number": 5,
+      "id": "05-suspended-judgment",
+      "title_ko": "저울에 매달린 성상",
+      "description_ko": "불균형한 대형 천칭의 사슬이 손목과 발목을 당긴다. 열린 흉곽과 공중에 매달린 자세로 변형을 강조.",
+      "image": "05-suspended-judgment/01-boss.png",
+      "manifest": "05-suspended-judgment/manifest.json",
+      "prompt": "05-suspended-judgment/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2041382,
+      "sha256": "9aa6e11fa15f1db1bf0da0934e0be01d82c60446df56555a6ecfd43dfb5161b1"
+    }
+  ],
+  "limits": "2D single-view concepts; none selected or verified as a 3D mesh or rig."
+}
