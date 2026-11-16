@@ -1,0 +1,133 @@
+﻿{
+    "mode":  "Deterministic mechanical extraction after built-in image_gen transparent atlas generation",
+    "source":  "painted-transparent-atlas.png",
+    "sourceSha256":  "2608d588f7fb06918ce134cf41919dae2bd00ebe3eb6c8eed14762618789d325",
+    "textBakedIntoAssets":  false,
+    "iconsIncluded":  false,
+    "updatedSprites":  [
+                           "Skills/slot-frame-normal.png",
+                           "Skills/slot-frame-hover.png",
+                           "Skills/slot-frame-pressed.png",
+                           "Skills/slot-frame-focused.png",
+                           "Skills/slot-frame-disabled.png",
+                           "Skills/slot-background.png",
+                           "Skills/slot-inner-mask.png",
+                           "Skills/key-badge.png",
+                           "Skills/key-badge-wide.png",
+                           "Hub/hub-frame.png",
+                           "Hub/hub-background.png",
+                           "Hub/hub-crystal.png",
+                           "Hub/hub-inner-mask.png",
+                           "Hub/ultimate-badge.png",
+                           "Party/role-frame.png",
+                           "Party/role-background.png",
+                           "Party/role-inner-mask.png"
+                       ],
+    "slotInnerPolygon":  [
+                             [
+                                 32,
+                                 20
+                             ],
+                             [
+                                 160,
+                                 20
+                             ],
+                             [
+                                 172,
+                                 32
+                             ],
+                             [
+                                 172,
+                                 160
+                             ],
+                             [
+                                 160,
+                                 172
+                             ],
+                             [
+                                 32,
+                                 172
+                             ],
+                             [
+                                 20,
+                                 160
+                             ],
+                             [
+                                 20,
+                                 32
+                             ]
+                         ],
+    "roleInnerPolygon":  [
+                             [
+                                 22,
+                                 14
+                             ],
+                             [
+                                 74,
+                                 14
+                             ],
+                             [
+                                 82,
+                                 22
+                             ],
+                             [
+                                 82,
+                                 74
+                             ],
+                             [
+                                 74,
+                                 82
+                             ],
+                             [
+                                 22,
+                                 82
+                             ],
+                             [
+                                 14,
+                                 74
+                             ],
+                             [
+                                 14,
+                                 22
+                             ]
+                         ],
+    "hubInnerPolygon":  [
+                            [
+                                120,
+                                37
+                            ],
+                            [
+                                268,
+                                37
+                            ],
+                            [
+                                347,
+                                117
+                            ],
+                            [
+                                347,
+                                274
+                            ],
+                            [
+                                268,
+                                350
+                            ],
+                            [
+                                118,
+                                350
+                            ],
+                            [
+                                35,
+                                274
+                            ],
+                            [
+                                35,
+                                117
+                            ]
+                        ],
+    "notes":  [
+                  "Badge-occluded upper frame segments continue neighboring painted rim pixels.",
+                  "Occluded center backplate extends clean painted side-panel pixels.",
+                  "Existing Unity metadata and native canvas sizes are preserved."
+              ]
+}

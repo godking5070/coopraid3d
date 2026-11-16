@@ -55,7 +55,7 @@ $prismEvidence = [ordered]@{
     uguiAssemblyReference = $UGuiAssemblyDirectory
     sourceFiles = @($prismSourceFiles | ForEach-Object { $_.Substring($prismWorkspace.Length + 1).Replace('\', '/') })
     sourceSha256 = @($prismSourceFiles | ForEach-Object { [ordered]@{ path = $_.Substring($prismWorkspace.Length + 1).Replace('\', '/'); sha256 = (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash.ToLowerInvariant() } })
-    geometryCases = 32
+    geometryCases = 64
     geometryOutput = (($prismGeometryLog -join [Environment]::NewLine).Trim())
     binariesTracked = $false
     unityEditorLaunched = $false

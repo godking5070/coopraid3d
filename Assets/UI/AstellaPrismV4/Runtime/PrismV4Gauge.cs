@@ -26,6 +26,7 @@ namespace Astella.PrismV4
 
         private float _lastRatio = -1;
         private readonly List<Vector2> _polygon = new List<Vector2>(8);
+        private readonly List<Vector2> _clipScratch = new List<Vector2>(8);
 
         public float Ratio => Sanitize(sourceFill != null && sourceFill != this ? sourceFill.fillAmount : previewValue);
 
@@ -59,13 +60,20 @@ namespace Astella.PrismV4
 
             var rect = GetPixelAdjustedRect();
             Sprite artwork = overrideSprite != null ? overrideSprite : sprite;
+            Vector2 sourceSize = artwork != null ? artwork.rect.size : Vector2.one;
+            Vector4 padding = artwork != null ? DataUtility.GetPadding(artwork) : Vector4.zero;
+            Rect visible = GetVisibleSpriteRect(padding, sourceSize);
+            ClipToVisibleRect(_polygon, visible, _clipScratch);
+            if (_polygon.Count < 3) return;
+            rect = GetAspectDrawingRect(rect, sourceSize, rectTransform.pivot, preserveAspect);
             Vector4 uv = artwork != null ? DataUtility.GetOuterUV(artwork) : new Vector4(0, 0, 1, 1);
             for (int i = 0; i < _polygon.Count; i++)
             {
                 Vector2 point = _polygon[i];
                 var vertex = UIVertex.simpleVert;
                 vertex.position = new Vector3(rect.xMin + rect.width * point.x, rect.yMin + rect.height * point.y, 0);
-                vertex.uv0 = new Vector4(Mathf.Lerp(uv.x, uv.z, point.x), Mathf.Lerp(uv.y, uv.w, point.y), 0, 0);
+                Vector2 mappedUV = MapSourcePointToUV(point, visible, uv);
+                vertex.uv0 = new Vector4(mappedUV.x, mappedUV.y, 0, 0);
                 vertex.color = color;
                 helper.AddVert(vertex);
             }
@@ -74,6 +82,83 @@ namespace Astella.PrismV4
             {
                 if (transpose) helper.AddTriangle(0, i, i + 1);
                 else helper.AddTriangle(0, i + 1, i);
+            }
+        }
+
+        /// <summary>
+        /// OuterUV covers only a sprite's trimmed texture rectangle. Keep its padding in
+        /// original sprite coordinates, as uGUI Image.GetDrawingDimensions does.
+        /// </summary>
+        public static Rect GetVisibleSpriteRect(Vector4 padding, Vector2 sourceSize)
+        {
+            float width = Mathf.Max(1, Mathf.RoundToInt(sourceSize.x));
+            float height = Mathf.Max(1, Mathf.RoundToInt(sourceSize.y));
+            float left = Mathf.Clamp01(padding.x / width), bottom = Mathf.Clamp01(padding.y / height);
+            float right = Mathf.Max(left, Mathf.Clamp01(1 - padding.z / width));
+            float top = Mathf.Max(bottom, Mathf.Clamp01(1 - padding.w / height));
+            return Rect.MinMaxRect(left, bottom, right, top);
+        }
+
+        public static Vector2 MapSourcePointToUV(Vector2 point, Rect visible, Vector4 outerUV)
+        {
+            float x = visible.width > 0 ? (point.x - visible.xMin) / visible.width : 0;
+            float y = visible.height > 0 ? (point.y - visible.yMin) / visible.height : 0;
+            return new Vector2(outerUV.x + (outerUV.z - outerUV.x) * x,
+                outerUV.y + (outerUV.w - outerUV.y) * y);
+        }
+
+        /// <summary>Matches the original sprite aspect/pivot before its transparent padding is applied.</summary>
+        public static Rect GetAspectDrawingRect(Rect rect, Vector2 sourceSize, Vector2 pivot, bool keepAspect)
+        {
+            if (!keepAspect || sourceSize.x <= 0 || sourceSize.y <= 0 || rect.width <= 0 || rect.height <= 0) return rect;
+            float spriteRatio = sourceSize.x / sourceSize.y;
+            if (spriteRatio > rect.width / rect.height)
+            {
+                float originalHeight = rect.height;
+                rect.height = rect.width / spriteRatio;
+                rect.y += (originalHeight - rect.height) * pivot.y;
+            }
+            else
+            {
+                float originalWidth = rect.width;
+                rect.width = rect.height * spriteRatio;
+                rect.x += (originalWidth - rect.width) * pivot.x;
+            }
+            return rect;
+        }
+
+        /// <summary>
+        /// Intersects the full-source ratio polygon with the trimmed texture rectangle.
+        /// This prevents sampling beyond OuterUV into adjacent atlas sprites or expanding
+        /// the visible fill to the full Image rect. Texture UVs and source geometry stay fixed.
+        /// </summary>
+        public static void ClipToVisibleRect(List<Vector2> polygon, Rect visible, List<Vector2> scratch)
+        {
+            if (visible.width <= 0 || visible.height <= 0) { polygon.Clear(); return; }
+            ClipAxis(polygon, scratch, true, visible.xMin, true);
+            ClipAxis(scratch, polygon, true, visible.xMax, false);
+            ClipAxis(polygon, scratch, false, visible.yMin, true);
+            ClipAxis(scratch, polygon, false, visible.yMax, false);
+        }
+
+        private static void ClipAxis(List<Vector2> source, List<Vector2> output, bool horizontal, float boundary, bool keepGreater)
+        {
+            output.Clear();
+            if (source.Count == 0) return;
+            Vector2 previous = source[source.Count - 1];
+            float previousAxis = horizontal ? previous.x : previous.y;
+            bool previousInside = keepGreater ? previousAxis >= boundary : previousAxis <= boundary;
+            foreach (var current in source)
+            {
+                float currentAxis = horizontal ? current.x : current.y;
+                bool currentInside = keepGreater ? currentAxis >= boundary : currentAxis <= boundary;
+                if (currentInside != previousInside)
+                {
+                    float t = (boundary - previousAxis) / (currentAxis - previousAxis);
+                    output.Add(Vector2.LerpUnclamped(previous, current, t));
+                }
+                if (currentInside) output.Add(current);
+                previous = current; previousAxis = currentAxis; previousInside = currentInside;
             }
         }
 
