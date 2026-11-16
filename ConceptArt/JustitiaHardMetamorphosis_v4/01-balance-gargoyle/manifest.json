@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardMetamorphosis_v4",
+  "part": 1,
+  "stage": 5,
+  "id": "01-balance-gargoyle",
+  "number": 1,
+  "title_ko": "천칭의 가고일",
+  "description_ko": "법관 성상이 갈퀴와 굽힌 다리를 가진 거대한 가고일로 변형됐다. 천칭은 비대칭 석판 날개가 되고 두 접시가 남아 재판의 상징을 잇는다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_and_visual_qa_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e222-f54e-7e10-b4e9-2fda950ae2ec/exec-1ca40424-2fba-41e4-95b8-cae9fde115fe.png",
+  "references": [
+    {
+      "path": "../../BossOverview/originals/p1-s5-normal.png",
+      "role": "Normal Justitia judicial identity motifs and materials; not a body, face or stance lock"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s1-normal.png",
+      "role": "Stage1 normal benchmark used with hard to calibrate transformation magnitude"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s1-hard.png",
+      "role": "Large silhouette, anatomy and stone armor transformation magnitude / cel rendering only; not exact guardian anatomy"
+    }
+  ],
+  "visual_qa": {
+    "status": "pass",
+    "transformation": "Massive crouched predatory stone gargoyle with a broad cracked armored thorax, long heavy arms, clawed hands and feet, aggressive angular fanged jaw. Much larger silhouette change than v3 slender human frame.",
+    "identity": "Ivory sculpted curl mane, gold blindfold motif, navy high judge collar and torn gold-star judicial coat, one star-hilt greatsword, two pans suspended from transformed balance wings retain Justitia family.",
+    "anatomy_and_equipment": "One head, two actual arms with claw hands, two bent legs, two asymmetric mechanically hinged slab wings, exactly two scale pans and one diagonal sword. Wing roots and scale chains physically attached.",
+    "framing": "All wing ends, pans, curls, hands, sword point and feet inside1536x1024 canvas. Close top/lower margins but no cropping.",
+    "style": "Clean polished ivory/navy/gold stone fantasy game concept, lavender cel shadows, quiet pale backdrop."
+  },
+  "limits": "Single-view generated concept; not selected and not validated as a3D mesh or rig. Earlier assets preserved.",
+  "width": 1536,
+  "height": 1024,
+  "bytes": 2179545,
+  "sha256": "e71819e0146f67d8a82a1bf147d3f64d0ec2e917897d6b575af079def56c9890"
+}

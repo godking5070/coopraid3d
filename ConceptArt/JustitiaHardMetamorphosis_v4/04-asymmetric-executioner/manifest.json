@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardMetamorphosis_v4",
+  "part": 1,
+  "stage": 5,
+  "number": 4,
+  "title_ko": "편완의 단죄자",
+  "description_ko": "천칭 접시와 석재 주먹이 융합된 거대한 한팔. 비대칭 중갑과 웅크린 몸으로 집행 괴수의 위협을 만든다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_visual_qa_and_file_validation_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "user_request": "스테이지1 노멀, 하드 보스답게, 느낌은 있되 다르게 가도 되겠다. 그런식으로 5개만 만들어줘.",
+  "images": [
+    {
+      "id": "04-asymmetric-executioner",
+      "number": 4,
+      "title_ko": "편완의 단죄자",
+      "image": "01-boss.png",
+      "prompts": [
+        "prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1e223-6518-7db1-8412-a0e539500e50/exec-d877f180-81dd-469f-b981-c1b96a0737be.png",
+      "references": [
+        {
+          "path": "../../BossOverview/originals/p1-s5-normal.png",
+          "role": "Normal Justitia legal identity, blindfold, carved curl hair, robe/star palette, sword and scales motifs only; body and human face are not locked"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s1-normal.png",
+          "role": "Stage 1 normal-to-hard transformation comparison: origin knight shape; not copied"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s1-hard.png",
+          "role": "Magnitude of monster body transformation and stone/brass rendering; guardian face/helmet/shield/mace not copied"
+        }
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1988847,
+      "sha256": "966beebac537511af13e3ef32a4c3389b6f67cb3b50bce4deb6f91552a834c00",
+      "visual_qa": {
+        "status": "pass",
+        "notes": "Extremely asymmetric crouched stone execution beast. One gigantic stone hand/forearm and navy/gold pan shell dominate the foreground, with an ivory hooked blade; opposite slender arm holds one original-family star-hilt sword. Wide hunched plated body and heavy crouched legs, foreground leg partly occluded by colossal gauntlet. Broken blindfold, curled ivory mane, high collar and star robe armor retain judicial identity. One huge pan integrated with gauntlet and one small counterpart pan on rear balance beam, so two pan motifs total. Single hero, full giant hand/beam/sword tip in frame; narrow outer margins but no crop. Major body-volume and silhouette transformation, not ordinary slim woman plus accessory."
+      }
+    }
+  ],
+  "limits": "Single-view generated concept, not a 3D mesh/rig or selected final. One generation; no correction needed because subject is fully in frame."
+}

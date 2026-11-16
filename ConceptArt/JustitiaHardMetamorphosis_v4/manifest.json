@@ -1,0 +1,104 @@
+{
+  "project": "ASTELLA",
+  "part": 1,
+  "stage": 5,
+  "title_ko": "유스티티아 하드 괴수 변형 5안",
+  "version": "JustitiaHardMetamorphosis_v4",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "user_request": "스테이지1 노멀, 하드 보스 답게, 느낌은 있되 다르게 가도 되겠다. 그런식으로 5개만 만들어줘.",
+  "interpretation": "유스티티아 하드 5안을 다시 만든다. 스테이지 1 노멀과 하드는 변화 폭과 계열성의 참고이며, 스테이지 1 자체를 재설계하는 요청으로 해석하지 않는다.",
+  "transformation_policy": "원래 몸과 얼굴의 엄격한 고정을 해제한다. 눈가리개·돌 곱슬머리·법관 별 예복·천칭·대검과 재질 색은 연결점으로 남기고, 체형·질량·사지·이동 방식을 크게 바꾼다.",
+  "status": "five_comparison_candidates_not_selected",
+  "previous_gallery": "../JustitiaHardAwakening_v3/INDEX.html",
+  "references": [
+    {
+      "image": "Reference/justitia-normal.png",
+      "original": "../BossOverview/originals/p1-s5-normal.png",
+      "label": "유스티티아 노멀 · 연결할 상징",
+      "sha256": "3b4313ed4aef27fe210e9f4eb9d19fdf67ed8e563ac8e84344bae239e41ef93a"
+    },
+    {
+      "image": "Reference/guardian-normal.png",
+      "original": "../BossOverview/originals/p1-s1-normal.png",
+      "label": "스테이지 1 노멀",
+      "sha256": "3c2d337fcbacc2c4913b45116013b0cec9a1c6488bef41ddd19d7a4704c569e7"
+    },
+    {
+      "image": "Reference/guardian-hard.png",
+      "original": "../BossOverview/originals/p1-s1-hard.png",
+      "label": "스테이지 1 하드 · 변형 폭 참고",
+      "sha256": "9b01330f78c5eeb0c07733a30db8d1425381942056a3051708801f71142e9add"
+    }
+  ],
+  "images": [
+    {
+      "number": 1,
+      "id": "01-balance-gargoyle",
+      "title_ko": "천칭의 가고일",
+      "description_ko": "법관 석상이 날개와 갈퀴를 가진 재판 악귀로 변형된다. 천칭은 석판 날개가 되고, 웅크린 거체가 전면으로 돌진한다.",
+      "image": "01-balance-gargoyle/01-boss.png",
+      "manifest": "01-balance-gargoyle/manifest.json",
+      "prompt": "01-balance-gargoyle/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2179545,
+      "sha256": "e71819e0146f67d8a82a1bf147d3f64d0ec2e917897d6b575af079def56c9890"
+    },
+    {
+      "number": 2,
+      "id": "02-execution-colossus",
+      "title_ko": "형틀의 집행거인",
+      "description_ko": "사각 중갑 상체와 거대한 장완, 굵은 두 다리의 집행거인. 등 형틀과 단두검으로 판결의 무게를 강조한다.",
+      "image": "02-execution-colossus/01-boss.png",
+      "manifest": "02-execution-colossus/manifest.json",
+      "prompt": "02-execution-colossus/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2010507,
+      "sha256": "7e6d082ce24abb20425a649e4ecf2efab61c1624d45e9d968e01600cc6d02612"
+    },
+    {
+      "number": 3,
+      "id": "03-quadruped-judge",
+      "title_ko": "사족의 재판관",
+      "description_ko": "낮고 넓은 네 발의 심판 괴수. 법관의 머리·칼라와 천칭이 사족 갑주 몸체에 결합된다.",
+      "image": "03-quadruped-judge/01-boss.png",
+      "manifest": "03-quadruped-judge/manifest.json",
+      "prompt": "03-quadruped-judge/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2190108,
+      "sha256": "67bdc9b382660c06b3a767bdbace82250b6ab43f4d24bbfedad76a03e236caf2"
+    },
+    {
+      "number": 4,
+      "id": "04-asymmetric-executioner",
+      "title_ko": "편완의 단죄자",
+      "description_ko": "한쪽 팔이 거대한 판결 무장으로 변한 비대칭 집행 석상. 불균형한 몸체와 대검이 공격 방향을 만든다.",
+      "image": "04-asymmetric-executioner/01-boss.png",
+      "manifest": "04-asymmetric-executioner/manifest.json",
+      "prompt": "04-asymmetric-executioner/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 1988847,
+      "sha256": "966beebac537511af13e3ef32a4c3389b6f67cb3b50bce4deb6f91552a834c00"
+    },
+    {
+      "number": 5,
+      "id": "05-floating-tribunal",
+      "title_ko": "부유하는 대재판소",
+      "description_ko": "사람 다리가 사라진 육중한 부유 재판소. 석재 예복 기단과 하부 첨두, 대검과 불균형 천칭이 하나의 몸체로 결합된다.",
+      "image": "05-floating-tribunal/01-boss.png",
+      "manifest": "05-floating-tribunal/manifest.json",
+      "prompt": "05-floating-tribunal/prompt.txt",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2041058,
+      "sha256": "8d0f367ef607e7246ef38c400c56d387ff6d672d4d9a05f3b68d7ecc4e7c7f2f"
+    }
+  ],
+  "gallery": "INDEX.html",
+  "prompts": "prompts-all.txt",
+  "limits": "2D concept candidates, not final selections or verified 3D meshes/rigs."
+}

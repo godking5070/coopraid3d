@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardMetamorphosis_v4",
+  "part": 1,
+  "stage": 5,
+  "number": 3,
+  "title_ko": "사족의 재판관",
+  "description_ko": "네 개의 굵은 석재 다리로 버티는 대형 사족 재판관. 천칭을 등 기갑에 결합하고 굵은 상체로 대검을 든다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_visual_qa_and_file_validation_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "user_request": "스테이지1 노멀, 하드 보스답게, 느낌은 있되 다르게 가도 되겠다. 그런식으로 5개만 만들어줘.",
+  "images": [
+    {
+      "id": "03-quadruped-judge",
+      "number": 3,
+      "title_ko": "사족의 재판관",
+      "image": "01-boss.png",
+      "prompts": [
+        "prompt.txt"
+      ],
+      "source": "C:/Users/godki/.codex/generated_images/01a1e223-6518-7db1-8412-a0e539500e50/exec-d1306c51-e04e-49e7-9f6a-d905be792b64.png",
+      "references": [
+        {
+          "path": "../../BossOverview/originals/p1-s5-normal.png",
+          "role": "Normal Justitia legal identity, blindfold, carved curl hair, robe/star palette, sword and scales motifs only; body and human face are not locked"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s1-normal.png",
+          "role": "Stage 1 normal-to-hard transformation comparison: origin knight shape; not copied"
+        },
+        {
+          "path": "../../BossOverview/originals/p1-s1-hard.png",
+          "role": "Magnitude of monster body transformation and stone/brass rendering; guardian face/helmet/shield/mace not copied"
+        }
+      ],
+      "width": 1536,
+      "height": 1024,
+      "bytes": 2190108,
+      "sha256": "67bdc9b382660c06b3a767bdbace82250b6ab43f4d24bbfedad76a03e236caf2",
+      "visual_qa": {
+        "status": "pass",
+        "notes": "Large integrated quadruped stone judicial beast, four distinct massive planted stone feet, continuous armored navy/gold star body and broad upper torso. One visible foreground hand grips a single star-hilt sword; other upper arm is partly occluded. Swept ivory curl mane, cracked blindfold with lavender gaze, navy high collar and chest star preserve normal Justitia motifs. Exactly two balance pans on the rear crossbeam. Full assembly and all four feet in frame; sword tip is close to right edge but uncut. Material and large heavy body change markedly from normal slender statue, no separate rider or thin insect legs."
+      }
+    }
+  ],
+  "limits": "Single-view generated concept, not a 3D mesh/rig or selected final. One generation; no correction needed because subject is fully in frame."
+}

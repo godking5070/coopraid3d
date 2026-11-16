@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "version": "JustitiaHardMetamorphosis_v4",
+  "part": 1,
+  "stage": 5,
+  "id": "02-execution-colossus",
+  "number": 2,
+  "title_ko": "형틀의 집행거인",
+  "description_ko": "법관 예복이 거대한 사각 석재 중갑으로 변했다. 굵은 다리와 장완, 등에서 솟은 형틀 천칭과 슬랩 대검으로 집행거인의 체급을 만든다.",
+  "created_date": "2026-11-16",
+  "tool": "built-in image_gen",
+  "status": "generation_and_visual_qa_complete",
+  "selection_status": "comparison_candidate_not_selected_or_fixed",
+  "image": "01-boss.png",
+  "prompts": [
+    "prompt.txt"
+  ],
+  "source": "C:/Users/godki/.codex/generated_images/01a1e222-f54e-7e10-b4e9-2fda950ae2ec/exec-11077de8-f040-4fd6-aee8-6bd395d9c7ab.png",
+  "references": [
+    {
+      "path": "../../BossOverview/originals/p1-s5-normal.png",
+      "role": "Normal Justitia judicial identity motifs and materials; not a body, face or stance lock"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s1-normal.png",
+      "role": "Stage1 normal benchmark used with hard to calibrate transformation magnitude"
+    },
+    {
+      "path": "../../BossOverview/originals/p1-s1-hard.png",
+      "role": "Large silhouette, anatomy and stone armor transformation magnitude / cel rendering only; not exact guardian anatomy"
+    }
+  ],
+  "visual_qa": {
+    "status": "pass",
+    "transformation": "Monumental square armored upper body, enormous long gauntlet arms and planted thick legs. Full-body volume and armor rhythm changed radically from normal and from v3, with tall integrated judicial execution frame dominating vertical silhouette.",
+    "identity": "Original ivory curled judicial head and blindfold sit small within massive body; navy high collar, ivory/gold star robe plates, one star-crossguard slab sword and two chain-hung balance pans preserve judicial statue identity.",
+    "anatomy_and_equipment": "One head, two arms and hands, two thick legs and feet, exactly one slab sword and two pans. Tall scale frame has visible shoulder braces and brass pivots. No wings, extra limbs or duplicate sword blade.",
+    "framing": "All frame tips, pans, head, fingers, sword tip and feet inside1536x1024 canvas. Frame top has narrow approximately7px margin but not cropped; no correction generated solely for margin.",
+    "style": "Clean polished ivory/navy/gold stone armor, controlled lavender cel shadows and pale background, no text or sheet."
+  },
+  "limits": "Single-view generated concept; not selected and not validated as a3D mesh or rig. Earlier assets preserved.",
+  "width": 1536,
+  "height": 1024,
+  "bytes": 2010507,
+  "sha256": "7e6d082ce24abb20425a649e4ecf2efab61c1624d45e9d968e01600cc6d02612"
+}
