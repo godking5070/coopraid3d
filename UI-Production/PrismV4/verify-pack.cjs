@@ -12,6 +12,17 @@ const results = [];
 const cache = new Map();
 function check(condition, message) { if (!condition) failures.push(message); }
 function hash(data) { return crypto.createHash("sha256").update(data).digest("hex"); }
+const deliveryManifestPath = path.join(pack, "prism-v4-manifest.json");
+if (fs.existsSync(deliveryManifestPath)) {
+  const delivery = JSON.parse(fs.readFileSync(deliveryManifestPath, "utf8"));
+  check(delivery.assets.length === manifest.assets.length, "Delivery/source manifest asset counts differ.");
+  for (const asset of manifest.assets) {
+    const published = delivery.assets.find(item => item.id === asset.id);
+    check(published && published.pngSha256 === asset.pngSha256 && published.svgSha256 === asset.svgSha256,
+      "Delivery manifest is stale: " + asset.id + "; run finalize-manifest.cjs after the last artwork build.");
+  }
+  check(JSON.stringify(delivery.gauges) === JSON.stringify(manifest.gauges), "Delivery gauge geometry is stale.");
+}
 function paeth(a, b, c) {
   const p = a + b - c, x = Math.abs(p - a), y = Math.abs(p - b), z = Math.abs(p - c);
   return x <= y && x <= z ? a : y <= z ? b : c;
