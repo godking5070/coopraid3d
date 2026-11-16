@@ -17,3 +17,6 @@ INDEX.html에서 1부·2부 12개 스테이지, 최신 대표 이미지 20장을
 
 2스테이지 하드 나방 날개 결합 수정안: ../Part1Stage02HardMothDoll_v4/INDEX.html
 3번의 날개+5번 가위 반쪽+기괴하게 변형한 노멀 인형. 사용자 지정 수정안이며 최종확정은 미정입니다.
+
+2스테이지 노멀 꽃 유리함 매립 수정: ../Part1Stage02NormalInsetFlower_v1/INDEX.html
+전체 모음의 노멀 표시를 수정본으로 연결했습니다. 이전 원본 PNG는 originals/p1-s2-normal.png에 보존했습니다.
