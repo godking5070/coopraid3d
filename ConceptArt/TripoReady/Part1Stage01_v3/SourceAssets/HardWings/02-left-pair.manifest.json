@@ -1,0 +1,70 @@
+{
+  "id": "hard-wings-02-left",
+  "view": "left",
+  "image": "02-left-pair.png",
+  "prompts": [
+    "02-left-pair.prompt.txt",
+    "02-left-pair.refine.prompt.txt"
+  ],
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:/Users/godki/.codex/generated_images/01a1e270-b91c-7b43-ac82-367c453868ae/exec-4a6c09a4-d996-4a8d-a29d-d61197252050.png",
+  "initial_source": "C:/Users/godki/.codex/generated_images/01a1e270-b91c-7b43-ac82-367c453868ae/exec-6c237dca-34e9-40c3-a396-b245cf6d911c.png",
+  "initial_references": [
+    "01-front-pair.png",
+    "../../../Part1Stage01_v2/SourceAssets/Hard/02-left.png"
+  ],
+  "references": [
+    {
+      "path": "01-front-pair.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    },
+    {
+      "path": "03-right-pair.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    }
+  ],
+  "transparent_background": true,
+  "width": 1774,
+  "height": 887,
+  "bytes": 270096,
+  "sha256": "e8dc7fbe9ae85e0464378d47049defdc01b1abc63d1ddc1b88f0dcb9afc82a90",
+  "layout_role": "Raw transparent source. Two disconnected wing parts; root composites each slot at fixed anchors and scale.",
+  "visual_qa": {
+    "status": "pass_with_notes",
+    "notes": "One camera-only refinement reduced original broad 3/4 projection to narrow orthographic edge profile comparable to right view. Both complete separated wing objects and root mounts retained. The paired mirror geometry and decorated two-sided faces make opposite profiles visually similar; AI-inferred views are not mesh renders.",
+    "source_background_alpha_noise": "Low-alpha edge specks may be removed in final matte normalization; transparent RGB is ignored."
+  },
+  "alpha_qa": {
+    "max_alpha": 255,
+    "transparent_fraction": 0.924497533583555,
+    "components": 2,
+    "selected_components": [
+      {
+        "bbox": {
+          "x": 473,
+          "y": 23,
+          "w": 124,
+          "h": 841
+        },
+        "area": 58475,
+        "component_ids": [
+          1
+        ]
+      },
+      {
+        "bbox": {
+          "x": 1177,
+          "y": 23,
+          "w": 124,
+          "h": 840
+        },
+        "area": 58551,
+        "component_ids": [
+          2
+        ]
+      }
+    ]
+  },
+  "limits": "AI-inferred views, not renders of a single 3D mesh. No Tripo submission performed."
+}

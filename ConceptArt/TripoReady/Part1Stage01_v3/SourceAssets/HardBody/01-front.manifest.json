@@ -1,0 +1,72 @@
+{
+  "id": "hard-body-01-front",
+  "view": "01-front",
+  "image": "01-front.png",
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:\\Users\\godki\\.codex\\generated_images\\01a1e270-8938-7681-950d-05aeec39e15f\\exec-9ba4daa0-0dad-4d54-98d9-b51e6a4ada1d.png",
+  "prompts": [
+    "01-front.prompt.txt"
+  ],
+  "transparent_background": true,
+  "references": [
+    {
+      "path": "../../../Part1Stage01_v2/SourceAssets/Hard/01-front.png",
+      "role": "Edit target; preserve exact camera, pose and body identity while removing wing accessories"
+    }
+  ],
+  "qa": {
+    "status": "pass",
+    "notes": "Complete wingless body; both shoulder plates preserved; all back blade wings, connector struts, gold collars and round gold attachment hinges removed. Full head/hands/feet within image. Exact original view retained. No detached props.",
+    "alpha_samples": [
+      {
+        "x": 0,
+        "y": 0,
+        "alpha": 0
+      },
+      {
+        "x": 1253,
+        "y": 0,
+        "alpha": 0
+      },
+      {
+        "x": 0,
+        "y": 1253,
+        "alpha": 0
+      },
+      {
+        "x": 1253,
+        "y": 1253,
+        "alpha": 0
+      },
+      {
+        "x": 627,
+        "y": 627,
+        "alpha": 253
+      }
+    ],
+    "foreground_bbox": {
+      "x": 110,
+      "y": 193,
+      "w": 1033,
+      "h": 1006
+    },
+    "raw_alpha_note": "Near-transparent detached RGB noise outside the character; normalize with alpha>=48 connected foreground component for final layout."
+  },
+  "limits": "AI-edited reference image, not a single mesh render. Raw source is transparent; root handles alpha-noise exclusion and fixed layout.",
+  "generation_history": {
+    "initial_failed_attempt": {
+      "prompt": "01-front.failed.prompt.txt",
+      "status": "output safety system 400 moderation_blocked categories other",
+      "request_id": "9e19ff46-2d98-4bfd-9e81-2b796e1679a4"
+    },
+    "successful_attempt": {
+      "prompt": "01-front.prompt.txt",
+      "result": "C:\\Users\\godki\\.codex\\generated_images\\01a1e270-8938-7681-950d-05aeec39e15f\\exec-9ba4daa0-0dad-4d54-98d9-b51e6a4ada1d.png"
+    }
+  },
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1236503,
+  "sha256": "cb5e4a9439bf203cef030a52c900d472b85a32cbcefef57997e028c47a09ea48"
+}

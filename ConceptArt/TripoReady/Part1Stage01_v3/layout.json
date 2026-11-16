@@ -1,0 +1,993 @@
+{
+  "version": 3,
+  "background": "#eeeeee",
+  "coordinate_system": "top-left origin; pixels; x/y/w/h are visible source-crop placement",
+  "views": [
+    {
+      "id": "01-front",
+      "label": "정면"
+    },
+    {
+      "id": "02-left",
+      "label": "왼쪽면"
+    },
+    {
+      "id": "03-right",
+      "label": "오른쪽면"
+    },
+    {
+      "id": "04-back",
+      "label": "후면"
+    }
+  ],
+  "groups": {
+    "Normal": {
+      "width": 2048,
+      "height": 2048,
+      "baseline": 1888,
+      "centers_x": [
+        1024
+      ],
+      "object_heights": [
+        1728
+      ],
+      "objects": [
+        "character"
+      ],
+      "directory": "Characters/Normal",
+      "title": "노멀 몸체",
+      "description": "장비 없는 캐릭터",
+      "inherited_from": "../Part1Stage01_v2/layout.json"
+    },
+    "HardBody": {
+      "title": "하드 몸체",
+      "description": "날개와 연결부를 분리한 맨손 캐릭터",
+      "directory": "Characters/Hard",
+      "width": 2048,
+      "height": 2048,
+      "baseline": 1888,
+      "centers_x": [
+        1024
+      ],
+      "object_heights": [
+        1728
+      ],
+      "objects": [
+        "wingless hard body"
+      ],
+      "rotation": "Anatomical left profile faces image left, right profile faces image right."
+    },
+    "Equipment": {
+      "width": 3072,
+      "height": 2048,
+      "baseline": 1856,
+      "centers_x": [
+        768,
+        2304
+      ],
+      "object_heights": [
+        1600,
+        1464
+      ],
+      "objects": [
+        "club",
+        "shield"
+      ],
+      "directory": "Equipment",
+      "title": "돌봉 + 방패",
+      "description": "두 장비를 한 이미지에 고정 배치",
+      "inherited_from": "../Part1Stage01_v2/layout.json"
+    },
+    "HardWings": {
+      "title": "하드 날개",
+      "description": "좌우 날개와 각 연결부를 몸체와 분리",
+      "directory": "Attachments/HardWings",
+      "width": 3072,
+      "height": 2048,
+      "baseline": 1856,
+      "centers_x": [
+        768,
+        2304
+      ],
+      "object_heights": [
+        1420,
+        1420
+      ],
+      "objects": [
+        "image-left wing",
+        "image-right wing"
+      ],
+      "rotation": "Each object rotates around its own vertical axis while its image-left/right slot identity is fixed."
+    }
+  },
+  "images": [
+    {
+      "group": "Normal",
+      "view": "01-front",
+      "label": "정면",
+      "file": "Characters/Normal/01-front.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "8705c8c1dac39ab5abcea131918561fdf4c900cea72aa5012f256c3756167caf",
+      "bytes": 1887750,
+      "source": "../Part1Stage01_v2/SourceAssets/Normal/01-front.png",
+      "source_sha256": "16b590fc8a347e5d3034b4796b5d3ced230b0733b0f06094f1bc2b6385e674b9",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 485109,
+          "x": 198,
+          "y": 32,
+          "w": 858,
+          "h": 1179
+        }
+      ],
+      "parts": [
+        {
+          "object": "character",
+          "source_bbox": {
+            "x": 198,
+            "y": 32,
+            "w": 858,
+            "h": 1179
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 395,
+          "y": 160,
+          "w": 1258,
+          "h": 1728
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Characters/Normal/01-front.png"
+    },
+    {
+      "group": "Normal",
+      "view": "02-left",
+      "label": "왼쪽면",
+      "file": "Characters/Normal/02-left.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "eae44d669935e23be29347b00e2458b6a8722c7be765cd8d1a671cee48342439",
+      "bytes": 1001259,
+      "source": "../Part1Stage01_v2/SourceAssets/Normal/02-left.png",
+      "source_sha256": "96039b5356eb9da286a17d38d8b27fe18ae62937ce71d8b0325ed23e782d7b3f",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 249765,
+          "x": 450,
+          "y": 22,
+          "w": 345,
+          "h": 1191
+        }
+      ],
+      "parts": [
+        {
+          "object": "character",
+          "source_bbox": {
+            "x": 450,
+            "y": 22,
+            "w": 345,
+            "h": 1191
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 774,
+          "y": 160,
+          "w": 500,
+          "h": 1728
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Characters/Normal/02-left.png"
+    },
+    {
+      "group": "Normal",
+      "view": "03-right",
+      "label": "오른쪽면",
+      "file": "Characters/Normal/03-right.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "d31b39817ac0531f5600e2aae095c0a3669cb056c03bd965a465b71531e3498f",
+      "bytes": 1064481,
+      "source": "../Part1Stage01_v2/SourceAssets/Normal/03-right.png",
+      "source_sha256": "588d36bb5e839cb5dd2a52cbae8522a3b661dbcf4c78a1fe60fe23e15f30e69d",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 258001,
+          "x": 435,
+          "y": 28,
+          "w": 348,
+          "h": 1171
+        }
+      ],
+      "parts": [
+        {
+          "object": "character",
+          "source_bbox": {
+            "x": 435,
+            "y": 28,
+            "w": 348,
+            "h": 1171
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 767,
+          "y": 160,
+          "w": 514,
+          "h": 1728
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Characters/Normal/03-right.png"
+    },
+    {
+      "group": "Normal",
+      "view": "04-back",
+      "label": "후면",
+      "file": "Characters/Normal/04-back.png",
+      "width": 2048,
+      "height": 2048,
+      "sha256": "26745c19d8955801a492c3b2164f9ca0dba888b21363ad9aa8e78f25b0164267",
+      "bytes": 1834148,
+      "source": "../Part1Stage01_v2/SourceAssets/Normal/04-back.png",
+      "source_sha256": "6073153a915fb37ad321b215ecf6c770f9d7194d785d53b09c5991bc60e0a48e",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 493311,
+          "x": 193,
+          "y": 27,
+          "w": 867,
+          "h": 1179
+        }
+      ],
+      "parts": [
+        {
+          "object": "character",
+          "source_bbox": {
+            "x": 193,
+            "y": 27,
+            "w": 867,
+            "h": 1179
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 389,
+          "y": 160,
+          "w": 1270,
+          "h": 1728
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Characters/Normal/04-back.png"
+    },
+    {
+      "group": "HardBody",
+      "view": "01-front",
+      "label": "정면",
+      "file": "Characters/Hard/01-front.png",
+      "width": 2048,
+      "height": 2048,
+      "bytes": 3036587,
+      "sha256": "81c2125fdfeeade578b22db1a6475b4bd70f583a695e4eba99a217f391764c9c",
+      "source": "SourceAssets/HardBody/01-front.png",
+      "source_sha256": "cb5e4a9439bf203cef030a52c900d472b85a32cbcefef57997e028c47a09ea48",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 550239,
+          "x": 110,
+          "y": 193,
+          "w": 1033,
+          "h": 1006
+        }
+      ],
+      "parts": [
+        {
+          "object": "wingless hard body",
+          "source_bbox": {
+            "x": 110,
+            "y": 193,
+            "w": 1033,
+            "h": 1006
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 137,
+          "y": 160,
+          "w": 1774,
+          "h": 1728
+        }
+      ]
+    },
+    {
+      "group": "HardBody",
+      "view": "02-left",
+      "label": "왼쪽면",
+      "file": "Characters/Hard/02-left.png",
+      "width": 2048,
+      "height": 2048,
+      "bytes": 1488963,
+      "sha256": "042196ca6b80f16ffcb420c2c4775ab99471f53b534ab479cfaca1fa0d96ac95",
+      "source": "SourceAssets/HardBody/02-left.png",
+      "source_sha256": "4ed346d2cefee114bc8a57d4e8f11d1b51b1062ab5526a4055f3cc8aae12b991",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 204108,
+          "x": 373,
+          "y": 230,
+          "w": 318,
+          "h": 894
+        }
+      ],
+      "parts": [
+        {
+          "object": "wingless hard body",
+          "source_bbox": {
+            "x": 373,
+            "y": 230,
+            "w": 318,
+            "h": 894
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 717,
+          "y": 160,
+          "w": 614,
+          "h": 1728
+        }
+      ]
+    },
+    {
+      "group": "HardBody",
+      "view": "03-right",
+      "label": "오른쪽면",
+      "file": "Characters/Hard/03-right.png",
+      "width": 2048,
+      "height": 2048,
+      "bytes": 1519803,
+      "sha256": "2710806227db9dc5f877aff514bfaebd2c8e4cbcce52395918b6535e8d4868d2",
+      "source": "SourceAssets/HardBody/03-right.png",
+      "source_sha256": "672a99de77f42077e2cbca5b19151e364a77763361143de6f888123e966ca805",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 257461,
+          "x": 528,
+          "y": 178,
+          "w": 356,
+          "h": 996
+        }
+      ],
+      "parts": [
+        {
+          "object": "wingless hard body",
+          "source_bbox": {
+            "x": 528,
+            "y": 178,
+            "w": 356,
+            "h": 996
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 715,
+          "y": 160,
+          "w": 618,
+          "h": 1728
+        }
+      ]
+    },
+    {
+      "group": "HardBody",
+      "view": "04-back",
+      "label": "후면",
+      "file": "Characters/Hard/04-back.png",
+      "width": 2048,
+      "height": 2048,
+      "bytes": 2674199,
+      "sha256": "340dc83ea287286993eb52a02fbb091cc099cf799a34b5eeffa21f33f334adaa",
+      "source": "SourceAssets/HardBody/04-back.png",
+      "source_sha256": "ac8f04621d1e38c63f4368fd12627ddd278f4fd8c1cabe4aaf31a25ab0f64705",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 523240,
+          "x": 133,
+          "y": 182,
+          "w": 989,
+          "h": 1010
+        }
+      ],
+      "parts": [
+        {
+          "object": "wingless hard body",
+          "source_bbox": {
+            "x": 133,
+            "y": 182,
+            "w": 989,
+            "h": 1010
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 178,
+          "y": 160,
+          "w": 1692,
+          "h": 1728
+        }
+      ]
+    },
+    {
+      "group": "Equipment",
+      "view": "01-front",
+      "label": "정면",
+      "file": "Equipment/01-front.png",
+      "width": 3072,
+      "height": 2048,
+      "sha256": "d7d5d4e74a5e5186a26e01aff9c86cfd0f4d95049522e02b398ab0e60b1078d0",
+      "bytes": 2120203,
+      "source": "../Part1Stage01_v2/SourceAssets/Equipment/01-front-pair.png",
+      "source_sha256": "fa3e6fc56d44f504e4977480a8415dda96027379bbea1a28a55895aab75b9bc3",
+      "source_width": 1254,
+      "source_height": 1254,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 2,
+          "area": 405336,
+          "x": 614,
+          "y": 122,
+          "w": 597,
+          "h": 971
+        },
+        {
+          "id": 1,
+          "area": 179205,
+          "x": 105,
+          "y": 102,
+          "w": 291,
+          "h": 1061
+        }
+      ],
+      "parts": [
+        {
+          "object": "club",
+          "source_bbox": {
+            "x": 105,
+            "y": 102,
+            "w": 291,
+            "h": 1061
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 549,
+          "y": 256,
+          "w": 438,
+          "h": 1600
+        },
+        {
+          "object": "shield",
+          "source_bbox": {
+            "x": 614,
+            "y": 122,
+            "w": 597,
+            "h": 971
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 1854,
+          "y": 392,
+          "w": 900,
+          "h": 1464
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Equipment/01-front.png"
+    },
+    {
+      "group": "Equipment",
+      "view": "02-left",
+      "label": "왼쪽면",
+      "file": "Equipment/02-left.png",
+      "width": 3072,
+      "height": 2048,
+      "sha256": "f2f73cd072edba5da7536543fe33250fc2c7665d7427f543a9ac29142c7a253e",
+      "bytes": 1153834,
+      "source": "../Part1Stage01_v2/SourceAssets/Equipment/02-left-pair.png",
+      "source_sha256": "41df28087607cdb64fd2c14db575c1f3d79be2d61ef8fd5b5bae5806fd65e23d",
+      "source_width": 1536,
+      "source_height": 1024,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 143210,
+          "x": 1024,
+          "y": 29,
+          "w": 256,
+          "h": 967
+        },
+        {
+          "id": 2,
+          "area": 132045,
+          "x": 255,
+          "y": 32,
+          "w": 216,
+          "h": 965
+        }
+      ],
+      "parts": [
+        {
+          "object": "club",
+          "source_bbox": {
+            "x": 255,
+            "y": 32,
+            "w": 216,
+            "h": 965
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 589,
+          "y": 256,
+          "w": 358,
+          "h": 1600
+        },
+        {
+          "object": "shield",
+          "source_bbox": {
+            "x": 1024,
+            "y": 29,
+            "w": 256,
+            "h": 967
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 2110,
+          "y": 392,
+          "w": 388,
+          "h": 1464
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Equipment/02-left.png"
+    },
+    {
+      "group": "Equipment",
+      "view": "03-right",
+      "label": "오른쪽면",
+      "file": "Equipment/03-right.png",
+      "width": 3072,
+      "height": 2048,
+      "sha256": "39a2a88656ec798b3ae8328d8a30701febb32ee22a2056f8f4f3923e3e3e3d53",
+      "bytes": 1111746,
+      "source": "../Part1Stage01_v2/SourceAssets/Equipment/03-right-pair.png",
+      "source_sha256": "a265cb0cd37dc89919d2e5d42741b30817e6dd4d960198e55595c9596777b58b",
+      "source_width": 1536,
+      "source_height": 1024,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 2,
+          "area": 132774,
+          "x": 992,
+          "y": 36,
+          "w": 227,
+          "h": 958
+        },
+        {
+          "id": 1,
+          "area": 125351,
+          "x": 269,
+          "y": 36,
+          "w": 216,
+          "h": 957
+        }
+      ],
+      "parts": [
+        {
+          "object": "club",
+          "source_bbox": {
+            "x": 269,
+            "y": 36,
+            "w": 216,
+            "h": 957
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 587,
+          "y": 256,
+          "w": 362,
+          "h": 1600
+        },
+        {
+          "object": "shield",
+          "source_bbox": {
+            "x": 992,
+            "y": 36,
+            "w": 227,
+            "h": 958
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 2131,
+          "y": 392,
+          "w": 346,
+          "h": 1464
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Equipment/03-right.png"
+    },
+    {
+      "group": "Equipment",
+      "view": "04-back",
+      "label": "후면",
+      "file": "Equipment/04-back.png",
+      "width": 3072,
+      "height": 2048,
+      "sha256": "52b8f284162852a35230bf0c2f4b08682e1fb6075b92eacee980924603d3c886",
+      "bytes": 2021981,
+      "source": "../Part1Stage01_v2/SourceAssets/Equipment/04-back-pair.png",
+      "source_sha256": "c7dafb9a7c45cdef0cec91a40c06c4302ecd500d3a8e82df143d4b80e7be8a1b",
+      "source_width": 1536,
+      "source_height": 1024,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 2,
+          "area": 336576,
+          "x": 888,
+          "y": 52,
+          "w": 544,
+          "h": 901
+        },
+        {
+          "id": 1,
+          "area": 138550,
+          "x": 190,
+          "y": 48,
+          "w": 256,
+          "h": 921
+        }
+      ],
+      "parts": [
+        {
+          "object": "club",
+          "source_bbox": {
+            "x": 190,
+            "y": 48,
+            "w": 256,
+            "h": 921
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 546,
+          "y": 256,
+          "w": 444,
+          "h": 1600
+        },
+        {
+          "object": "shield",
+          "source_bbox": {
+            "x": 888,
+            "y": 52,
+            "w": 544,
+            "h": 901
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 1862,
+          "y": 392,
+          "w": 884,
+          "h": 1464
+        }
+      ],
+      "inherited_from": "../Part1Stage01_v2/Equipment/04-back.png"
+    },
+    {
+      "group": "HardWings",
+      "view": "01-front",
+      "label": "정면",
+      "file": "Attachments/HardWings/01-front.png",
+      "width": 3072,
+      "height": 2048,
+      "bytes": 1950160,
+      "sha256": "624b6d1b9b85340ebb57c9942b8b24194ffe4081eeeb17b4a3f88d4eb59c404e",
+      "source": "SourceAssets/HardWings/01-front-pair.png",
+      "source_sha256": "506304965b9eded6e7fb2211185d7cb0e5eaf63d552ec26fdeb38c16f468d70d",
+      "source_width": 1774,
+      "source_height": 887,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 178503,
+          "x": 71,
+          "y": 51,
+          "w": 695,
+          "h": 818
+        },
+        {
+          "id": 2,
+          "area": 178332,
+          "x": 1008,
+          "y": 51,
+          "w": 696,
+          "h": 818
+        }
+      ],
+      "parts": [
+        {
+          "object": "image-left wing",
+          "source_bbox": {
+            "x": 71,
+            "y": 51,
+            "w": 695,
+            "h": 818
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 165,
+          "y": 436,
+          "w": 1206,
+          "h": 1420
+        },
+        {
+          "object": "image-right wing",
+          "source_bbox": {
+            "x": 1008,
+            "y": 51,
+            "w": 696,
+            "h": 818
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 1700,
+          "y": 436,
+          "w": 1208,
+          "h": 1420
+        }
+      ]
+    },
+    {
+      "group": "HardWings",
+      "view": "02-left",
+      "label": "왼쪽면",
+      "file": "Attachments/HardWings/02-left.png",
+      "width": 3072,
+      "height": 2048,
+      "bytes": 685482,
+      "sha256": "0aa1a86bca394df98c27adba6fecc31d00b5e81e1d9f2800029da46694c71f91",
+      "source": "SourceAssets/HardWings/02-left-pair.png",
+      "source_sha256": "e8dc7fbe9ae85e0464378d47049defdc01b1abc63d1ddc1b88f0dcb9afc82a90",
+      "source_width": 1774,
+      "source_height": 887,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 2,
+          "area": 58551,
+          "x": 1177,
+          "y": 23,
+          "w": 124,
+          "h": 840
+        },
+        {
+          "id": 1,
+          "area": 58475,
+          "x": 473,
+          "y": 23,
+          "w": 124,
+          "h": 841
+        }
+      ],
+      "parts": [
+        {
+          "object": "image-left wing",
+          "source_bbox": {
+            "x": 473,
+            "y": 23,
+            "w": 124,
+            "h": 841
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 663,
+          "y": 436,
+          "w": 210,
+          "h": 1420
+        },
+        {
+          "object": "image-right wing",
+          "source_bbox": {
+            "x": 1177,
+            "y": 23,
+            "w": 124,
+            "h": 840
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 2199,
+          "y": 436,
+          "w": 210,
+          "h": 1420
+        }
+      ]
+    },
+    {
+      "group": "HardWings",
+      "view": "03-right",
+      "label": "오른쪽면",
+      "file": "Attachments/HardWings/03-right.png",
+      "width": 3072,
+      "height": 2048,
+      "bytes": 689894,
+      "sha256": "45cd1aa39a3fea199e6c083b843ced78f3133b70a45fa0f96fc24926c22bbe53",
+      "source": "SourceAssets/HardWings/03-right-pair.png",
+      "source_sha256": "bb84d4c1c5299ae5f3ab3259cde4d7db73f4d6290e37b9ce9d7e33cefde05097",
+      "source_width": 1774,
+      "source_height": 887,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 1,
+          "area": 57098,
+          "x": 466,
+          "y": 30,
+          "w": 130,
+          "h": 827
+        },
+        {
+          "id": 2,
+          "area": 56840,
+          "x": 1178,
+          "y": 33,
+          "w": 130,
+          "h": 824
+        }
+      ],
+      "parts": [
+        {
+          "object": "image-left wing",
+          "source_bbox": {
+            "x": 466,
+            "y": 30,
+            "w": 130,
+            "h": 827
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 656,
+          "y": 436,
+          "w": 224,
+          "h": 1420
+        },
+        {
+          "object": "image-right wing",
+          "source_bbox": {
+            "x": 1178,
+            "y": 33,
+            "w": 130,
+            "h": 824
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 2192,
+          "y": 436,
+          "w": 224,
+          "h": 1420
+        }
+      ]
+    },
+    {
+      "group": "HardWings",
+      "view": "04-back",
+      "label": "후면",
+      "file": "Attachments/HardWings/04-back.png",
+      "width": 3072,
+      "height": 2048,
+      "bytes": 2002461,
+      "sha256": "77b2486faffb3ee0cd4d97ee976b721d1bde11bd8435b16a439769ccda5ef7e1",
+      "source": "SourceAssets/HardWings/04-back-pair.png",
+      "source_sha256": "55c04aa7366ecf89eccd2c797dd5ce22efb928d98db84dbf136c652491acf7f2",
+      "source_width": 1774,
+      "source_height": 887,
+      "source_alpha_cutoff": 48,
+      "source_components": [
+        {
+          "id": 2,
+          "area": 184785,
+          "x": 988,
+          "y": 47,
+          "w": 738,
+          "h": 819
+        },
+        {
+          "id": 1,
+          "area": 184499,
+          "x": 48,
+          "y": 47,
+          "w": 738,
+          "h": 819
+        }
+      ],
+      "parts": [
+        {
+          "object": "image-left wing",
+          "source_bbox": {
+            "x": 48,
+            "y": 47,
+            "w": 738,
+            "h": 819
+          },
+          "component_ids": [
+            1
+          ],
+          "x": 128,
+          "y": 436,
+          "w": 1280,
+          "h": 1420
+        },
+        {
+          "object": "image-right wing",
+          "source_bbox": {
+            "x": 988,
+            "y": 47,
+            "w": 738,
+            "h": 819
+          },
+          "component_ids": [
+            2
+          ],
+          "x": 1664,
+          "y": 436,
+          "w": 1280,
+          "h": 1420
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "id": "hard-wings-01-front",
+  "view": "front",
+  "image": "01-front-pair.png",
+  "prompts": [
+    "01-front-pair.prompt.txt"
+  ],
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:/Users/godki/.codex/generated_images/01a1e270-b91c-7b43-ac82-367c453868ae/exec-65fa591a-a889-4409-bcda-646328ce3390.png",
+  "references": [
+    {
+      "path": "../../../Part1Stage01_v2/SourceAssets/Hard/01-front.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    },
+    {
+      "path": "../../../Part1Stage01_v2/SourceAssets/Hard/04-back.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    }
+  ],
+  "transparent_background": true,
+  "width": 1774,
+  "height": 887,
+  "bytes": 729216,
+  "sha256": "506304965b9eded6e7fb2211185d7cb0e5eaf63d552ec26fdeb38c16f468d70d",
+  "layout_role": "Raw transparent source. Two disconnected wing parts; root composites each slot at fixed anchors and scale.",
+  "visual_qa": {
+    "status": "pass_with_notes",
+    "notes": "Two detached wings, full curved ivory blades, two blade hinges, navy short root strut, gold collar and root round mounting disk. No shoulder plates or character.",
+    "source_background_alpha_noise": "Low-alpha edge specks may be removed in final matte normalization; transparent RGB is ignored."
+  },
+  "alpha_qa": {
+    "max_alpha": 255,
+    "transparent_fraction": 0.7716731340456983,
+    "components": 2,
+    "selected_components": [
+      {
+        "bbox": {
+          "x": 71,
+          "y": 51,
+          "w": 695,
+          "h": 818
+        },
+        "area": 178503,
+        "component_ids": [
+          1
+        ]
+      },
+      {
+        "bbox": {
+          "x": 1008,
+          "y": 51,
+          "w": 696,
+          "h": 818
+        },
+        "area": 178332,
+        "component_ids": [
+          2
+        ]
+      }
+    ]
+  },
+  "limits": "AI-inferred views, not renders of a single 3D mesh. No Tripo submission performed."
+}

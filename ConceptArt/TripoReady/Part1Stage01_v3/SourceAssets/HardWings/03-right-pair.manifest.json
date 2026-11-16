@@ -1,0 +1,64 @@
+{
+  "id": "hard-wings-03-right",
+  "view": "right",
+  "image": "03-right-pair.png",
+  "prompts": [
+    "03-right-pair.prompt.txt"
+  ],
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:/Users/godki/.codex/generated_images/01a1e270-b91c-7b43-ac82-367c453868ae/exec-71fee4f0-555b-4fe7-86e1-67b9fff0f2fe.png",
+  "references": [
+    {
+      "path": "01-front-pair.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    },
+    {
+      "path": "../../../Part1Stage01_v2/SourceAssets/Hard/03-right.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    }
+  ],
+  "transparent_background": true,
+  "width": 1774,
+  "height": 887,
+  "bytes": 267796,
+  "sha256": "bb84d4c1c5299ae5f3ab3259cde4d7db73f4d6290e37b9ce9d7e33cefde05097",
+  "layout_role": "Raw transparent source. Two disconnected wing parts; root composites each slot at fixed anchors and scale.",
+  "visual_qa": {
+    "status": "pass_with_notes",
+    "notes": "Narrow stone blade edge profiles, hinge cylinder thickness, navy struts/collars/root joints. Both disconnected complete objects; no body.",
+    "source_background_alpha_noise": "Low-alpha edge specks may be removed in final matte normalization; transparent RGB is ignored."
+  },
+  "alpha_qa": {
+    "max_alpha": 255,
+    "transparent_fraction": 0.9265642138925149,
+    "components": 2,
+    "selected_components": [
+      {
+        "bbox": {
+          "x": 466,
+          "y": 30,
+          "w": 130,
+          "h": 827
+        },
+        "area": 57098,
+        "component_ids": [
+          1
+        ]
+      },
+      {
+        "bbox": {
+          "x": 1178,
+          "y": 33,
+          "w": 130,
+          "h": 824
+        },
+        "area": 56840,
+        "component_ids": [
+          2
+        ]
+      }
+    ]
+  },
+  "limits": "AI-inferred views, not renders of a single 3D mesh. No Tripo submission performed."
+}

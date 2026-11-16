@@ -1,0 +1,65 @@
+{
+  "id": "hard-body-02-left",
+  "view": "02-left",
+  "image": "02-left.png",
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:\\Users\\godki\\.codex\\generated_images\\01a1e270-8938-7681-950d-05aeec39e15f\\exec-bb910a89-d581-4f4a-84df-83f1a56b5951.png",
+  "prompts": [
+    "02-left.prompt.txt"
+  ],
+  "transparent_background": true,
+  "references": [
+    {
+      "path": "../../../Part1Stage01_v2/SourceAssets/Hard/02-left.png",
+      "role": "Edit target; preserve exact camera, pose and body identity while removing wing accessories"
+    },
+    {
+      "path": "01-front.png",
+      "role": "Supporting reference for approved wingless body identity"
+    }
+  ],
+  "qa": {
+    "status": "pass",
+    "notes": "Complete wingless body; both shoulder plates preserved; all back blade wings, connector struts, gold collars and round gold attachment hinges removed. Full head/hands/feet within image. Exact original view retained. No detached props.",
+    "alpha_samples": [
+      {
+        "x": 0,
+        "y": 0,
+        "alpha": 0
+      },
+      {
+        "x": 1253,
+        "y": 0,
+        "alpha": 0
+      },
+      {
+        "x": 0,
+        "y": 1253,
+        "alpha": 1
+      },
+      {
+        "x": 1253,
+        "y": 1253,
+        "alpha": 0
+      },
+      {
+        "x": 627,
+        "y": 627,
+        "alpha": 248
+      }
+    ],
+    "foreground_bbox": {
+      "x": 373,
+      "y": 230,
+      "w": 318,
+      "h": 894
+    },
+    "raw_alpha_note": "Near-transparent detached RGB noise outside the character; normalize with alpha>=48 connected foreground component for final layout."
+  },
+  "limits": "AI-edited reference image, not a single mesh render. Raw source is transparent; root handles alpha-noise exclusion and fixed layout.",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 490168,
+  "sha256": "4ed346d2cefee114bc8a57d4e8f11d1b51b1062ab5526a4055f3cc8aae12b991"
+}

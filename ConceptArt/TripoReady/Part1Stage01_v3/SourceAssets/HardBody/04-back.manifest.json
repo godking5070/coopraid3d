@@ -1,0 +1,72 @@
+{
+  "id": "hard-body-04-back",
+  "view": "04-back",
+  "image": "04-back.png",
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:/Users/godki/.codex/generated_images/01a1e270-8938-7681-950d-05aeec39e15f/exec-44a64dd1-fad0-441d-8ff0-daeb9c2d31de.png",
+  "prompts": [
+    "04-back.prompt.txt",
+    "04-back.refine.prompt.txt"
+  ],
+  "transparent_background": true,
+  "references": [
+    {
+      "path": "../../../Part1Stage01_v2/SourceAssets/Hard/04-back.png",
+      "role": "Edit target; preserve exact camera, pose and body identity while removing wing accessories"
+    },
+    {
+      "path": "01-front.png",
+      "role": "Supporting reference for approved wingless body identity"
+    }
+  ],
+  "qa": {
+    "status": "pass",
+    "notes": "Complete wingless body; both shoulder plates preserved; all back blade wings, connector struts, gold collars and round gold attachment hinges removed. Full head/hands/feet within image. Exact original view retained. No detached props.",
+    "alpha_samples": [
+      {
+        "x": 0,
+        "y": 0,
+        "alpha": 0
+      },
+      {
+        "x": 1253,
+        "y": 0,
+        "alpha": 0
+      },
+      {
+        "x": 0,
+        "y": 1253,
+        "alpha": 0
+      },
+      {
+        "x": 1253,
+        "y": 1253,
+        "alpha": 0
+      },
+      {
+        "x": 627,
+        "y": 627,
+        "alpha": 253
+      }
+    ],
+    "foreground_bbox": {
+      "x": 133,
+      "y": 182,
+      "w": 989,
+      "h": 1010
+    },
+    "raw_alpha_note": "Near-transparent detached RGB noise outside the character; normalize with alpha>=48 connected foreground component for final layout."
+  },
+  "limits": "AI-edited reference image, not a single mesh render. Raw source is transparent; root handles alpha-noise exclusion and fixed layout.",
+  "initial_source": "C:\\Users\\godki\\.codex\\generated_images\\01a1e270-8938-7681-950d-05aeec39e15f\\exec-40d82a31-191a-4540-8112-2a70f4ac7d8f.png",
+  "refinement": {
+    "edit_target_generated_source": "C:\\Users\\godki\\.codex\\generated_images\\01a1e270-8938-7681-950d-05aeec39e15f\\exec-40d82a31-191a-4540-8112-2a70f4ac7d8f.png",
+    "change": "Remove two mistakenly introduced gold shoulder stars from back navy panels; original rear navy panels are plain",
+    "status": "pass"
+  },
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1083922,
+  "sha256": "ac8f04621d1e38c63f4368fd12627ddd278f4fd8c1cabe4aaf31a25ab0f64705"
+}

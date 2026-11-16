@@ -1,0 +1,66 @@
+{
+  "id": "hard-wings-04-back",
+  "view": "back",
+  "image": "04-back-pair.png",
+  "prompts": [
+    "04-back-pair.prompt.txt",
+    "04-back-pair.refine.prompt.txt"
+  ],
+  "tool": "built-in image_gen",
+  "created_date": "2026-11-16",
+  "source": "C:/Users/godki/.codex/generated_images/01a1e270-b91c-7b43-ac82-367c453868ae/exec-9ea85d91-6b67-4719-a5e4-9fb563b3fd8f.png",
+  "initial_source": "C:/Users/godki/.codex/generated_images/01a1e270-b91c-7b43-ac82-367c453868ae/exec-49155673-f0ea-418c-92cf-24db4c38c800.png",
+  "initial_references": [
+    "01-front-pair.png",
+    "../../../Part1Stage01_v2/SourceAssets/Hard/04-back.png"
+  ],
+  "references": [
+    {
+      "path": "01-front-pair.png",
+      "role": "Exact wing identity, view/camera and construction reference"
+    }
+  ],
+  "transparent_background": true,
+  "width": 1774,
+  "height": 887,
+  "bytes": 798938,
+  "sha256": "55c04aa7366ecf89eccd2c797dd5ce22efb928d98db84dbf136c652491acf7f2",
+  "layout_role": "Raw transparent source. Two disconnected wing parts; root composites each slot at fixed anchors and scale.",
+  "visual_qa": {
+    "status": "pass_with_notes",
+    "notes": "One rear outline correction reversed each individual wing silhouette in its fixed slot. Long blade tips point toward the center gap; root arms point outward. Rear navy/star panels kept as present in original boss rear.",
+    "source_background_alpha_noise": "Low-alpha edge specks may be removed in final matte normalization; transparent RGB is ignored."
+  },
+  "alpha_qa": {
+    "max_alpha": 255,
+    "transparent_fraction": 0.7637667472917717,
+    "components": 2,
+    "selected_components": [
+      {
+        "bbox": {
+          "x": 48,
+          "y": 47,
+          "w": 738,
+          "h": 819
+        },
+        "area": 184499,
+        "component_ids": [
+          1
+        ]
+      },
+      {
+        "bbox": {
+          "x": 988,
+          "y": 47,
+          "w": 738,
+          "h": 819
+        },
+        "area": 184785,
+        "component_ids": [
+          2
+        ]
+      }
+    ]
+  },
+  "limits": "AI-inferred views, not renders of a single 3D mesh. No Tripo submission performed."
+}
