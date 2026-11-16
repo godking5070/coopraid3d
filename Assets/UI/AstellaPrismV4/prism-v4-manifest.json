@@ -1,0 +1,2885 @@
+{
+  "schemaVersion": 1,
+  "packageId": "astella-prism-v4",
+  "packageVersion": "1.0.0",
+  "assetRoot": "Assets/UI/AstellaPrismV4",
+  "purpose": "Separate text-free Prism HUD resources for transfer to the main project.",
+  "approvedReference": {
+    "path": "UI-Concepts/2026-11-16-prism-v4/02-continuous-fill.png",
+    "sha256": "c7c16e4974710e61534b8c02cbce327ab7d191b1f92e43be20f17df0876d86f1",
+    "canvas": [
+      1672,
+      941
+    ]
+  },
+  "provenance": {
+    "method": "New deterministic vector reconstruction; not recovered original SVG art.",
+    "generator": "UI-Production/PrismV4/generate-prism.cjs",
+    "renderer": "@resvg/resvg-js@2.6.2",
+    "recoveredLayers": false
+  },
+  "iconArtwork": {
+    "included": false,
+    "policy": "Reuse existing skill, class and role icons; this package only supplies empty artwork Images, frames and masks."
+  },
+  "text": {
+    "bakedIntoSprites": false,
+    "runtime": [
+      "player health",
+      "boss name and percent",
+      "cast time",
+      "party names",
+      "job resource values",
+      "key bindings",
+      "cooldown values"
+    ]
+  },
+  "import": {
+    "type": "Sprite",
+    "spriteMode": "Single",
+    "mesh": "FullRect",
+    "alphaIsTransparency": true,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "pixelsPerUnit": 100,
+    "filter": "Bilinear",
+    "wrap": "Clamp",
+    "mipmaps": false,
+    "compression": "Uncompressed",
+    "slice": "Do not resize pointed or octagonal art with arbitrary nine-slicing."
+  },
+  "coordinateSystem": {
+    "origin": "top-left",
+    "units": "native pixels",
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "borderOrder": [
+      "left",
+      "bottom",
+      "right",
+      "top"
+    ]
+  },
+  "gauges": {
+    "boss": {
+      "canvas": [
+        1280,
+        96
+      ],
+      "outer": [
+        [
+          14,
+          48
+        ],
+        [
+          44,
+          22
+        ],
+        [
+          1236,
+          22
+        ],
+        [
+          1266,
+          48
+        ],
+        [
+          1236,
+          74
+        ],
+        [
+          44,
+          74
+        ]
+      ],
+      "inner": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "movingTipWidth": 22,
+      "frame": "Boss/boss-frame",
+      "track": "Boss/boss-track",
+      "fill": "Boss/boss-fill",
+      "endcaps": [
+        {
+          "asset": "Boss/boss-gem-left",
+          "rect": [
+            -16,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "asset": "Boss/boss-gem-right",
+          "rect": [
+            1200,
+            0,
+            96,
+            96
+          ]
+        }
+      ],
+      "innerMask": "Boss/boss-inner-mask",
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    },
+    "cast": {
+      "canvas": [
+        512,
+        48
+      ],
+      "outer": [
+        [
+          4,
+          24
+        ],
+        [
+          17,
+          17
+        ],
+        [
+          495,
+          17
+        ],
+        [
+          508,
+          24
+        ],
+        [
+          495,
+          31
+        ],
+        [
+          17,
+          31
+        ]
+      ],
+      "inner": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "movingTipWidth": 7,
+      "frame": "Boss/cast-frame",
+      "track": "Boss/cast-track",
+      "fill": "Boss/cast-fill",
+      "innerMask": "Boss/cast-inner-mask",
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    },
+    "player": {
+      "canvas": [
+        1024,
+        96
+      ],
+      "outer": [
+        [
+          12,
+          48
+        ],
+        [
+          60,
+          10
+        ],
+        [
+          964,
+          10
+        ],
+        [
+          1012,
+          48
+        ],
+        [
+          964,
+          86
+        ],
+        [
+          60,
+          86
+        ]
+      ],
+      "inner": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "movingTipWidth": 36,
+      "frame": "Player/gauge-frame",
+      "track": "Player/gauge-track",
+      "fills": {
+        "hp": "Player/hp-fill",
+        "resource": "Player/resource-fill"
+      },
+      "endcaps": [],
+      "innerMask": "Player/gauge-inner-mask",
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    },
+    "party": {
+      "canvas": [
+        320,
+        40
+      ],
+      "outer": [
+        [
+          4,
+          20
+        ],
+        [
+          20,
+          6
+        ],
+        [
+          300,
+          6
+        ],
+        [
+          316,
+          20
+        ],
+        [
+          300,
+          34
+        ],
+        [
+          20,
+          34
+        ]
+      ],
+      "inner": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "movingTipWidth": 10,
+      "frame": "Party/bar-frame",
+      "track": "Party/bar-track",
+      "fill": "Party/bar-fill",
+      "innerMask": "Party/bar-inner-mask",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    }
+  },
+  "layerOrder": {
+    "gauge": [
+      "full track",
+      "full-width fill clipped by live ratio",
+      "frame",
+      "boss gems if applicable",
+      "runtime text"
+    ],
+    "slot": [
+      "background",
+      "existing game icon clipped by inner mask",
+      "cooldown overlay",
+      "state frame",
+      "blank key badge",
+      "runtime labels"
+    ],
+    "center": [
+      "background",
+      "central crystal",
+      "state overlay",
+      "frame",
+      "blank ultimate badge",
+      "runtime key"
+    ]
+  },
+  "bindings": {
+    "playerHealth": [
+      "AstellaOrnateHUD.playerHpFill",
+      "AstellaOrnateHUD.playerHpText"
+    ],
+    "boss": [
+      "AstellaOrnateHUD.bossHpFill",
+      "bossTitleText",
+      "bossPercentText",
+      "castFill",
+      "castNameText",
+      "castTimeText"
+    ],
+    "rightJobResource": {
+      "owner": "AstellaClassJobHUD",
+      "exclude": ".ultimate",
+      "source": "View.fillMask / fillArtwork / valueText / labelText"
+    },
+    "centralUltimate": {
+      "owner": "AstellaClassUltimateHUD",
+      "source": "ChargeRatio / CurrentState / views[]",
+      "readiness": "AstellaPlayerHUDV3.IsReady"
+    },
+    "party": "AstellaPartyHUDV4.source and rows[]; retain existing callbacks and icon registry.",
+    "skills": {
+      "owner": "AstellaOrnateHUD.slots[]",
+      "semanticOrder": [
+        "Gcd1",
+        "Gcd2",
+        "OffGcd1",
+        "Counter",
+        "Job1",
+        "Movement",
+        "Identity",
+        "OffGcd2"
+      ],
+      "labels": "LocalInputBindings.Label",
+      "artwork": "Reuse RaidUIPresentation.Settings.Icon(skill.id)"
+    }
+  },
+  "tools": {
+    "import": "Tools > Astella > Prism V4 > Import Sprites",
+    "examples": "Tools > Astella > Prism V4 > Build Example Prefabs",
+    "automaticMainApplication": false
+  },
+  "assets": [
+    {
+      "id": "Boss/boss-frame",
+      "png": "Sprites/Boss/boss-frame.png",
+      "svg": "Source/Boss/boss-frame.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 100096,
+      "translucentPixels": 5172,
+      "pngSha256": "b70671823aa2f78eb23250f10c2ddd9340ae503d7211d3f1f9ea44e3f7d20bf8",
+      "svgSha256": "67e3c26b619393afa4e497bc11dce5602af52308f30a395562ca988f7e7aafd2",
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "movingTipWidth": 22,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true
+    },
+    {
+      "id": "Boss/boss-track",
+      "png": "Sprites/Boss/boss-track.png",
+      "svg": "Source/Boss/boss-track.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77068,
+      "translucentPixels": 120,
+      "pngSha256": "ce361ccca9c350e721099b354979c8524bf9a70f0a745ece0a47e18474e90b39",
+      "svgSha256": "6f3cba7e019c8a4bd1420d2cd96270776eefd55d19176c3af9c75df8c80384f7",
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "movingTipWidth": 22,
+      "layer": "full pointed track"
+    },
+    {
+      "id": "Boss/boss-fill",
+      "png": "Sprites/Boss/boss-fill.png",
+      "svg": "Source/Boss/boss-fill.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77068,
+      "translucentPixels": 120,
+      "pngSha256": "4090b1618afb9e18852ef828ca071c33f331753669f0154dff684a7f27705e6d",
+      "svgSha256": "038e2955a11998ae540a487bb0d38ae4d78324353f4622f0dba32869a9092f49",
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "movingTipWidth": 22,
+      "layer": "full 100% fill; runtime mask changes ratio"
+    },
+    {
+      "id": "Boss/cast-frame",
+      "png": "Sprites/Boss/cast-frame.png",
+      "svg": "Source/Boss/cast-frame.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 19528,
+      "translucentPixels": 2044,
+      "pngSha256": "7b64cb157a02abc08ceaa888777cffce94d9a4f0078de9dda20dc402c5f700bc",
+      "svgSha256": "3bc37b372032ee83bb01f239143e9bdc9188311780085f3b355b4dddd4f7e9e4",
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "movingTipWidth": 7,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true
+    },
+    {
+      "id": "Boss/cast-track",
+      "png": "Sprites/Boss/cast-track.png",
+      "svg": "Source/Boss/cast-track.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 20760,
+      "translucentPixels": 32,
+      "pngSha256": "2149f3c5dd2a80c3a91f8adcf0d4088d730e88a526a962af780205b829f1c239",
+      "svgSha256": "ff245dbe7640ce081478482008bbe7e5232a9e022b6b2e607e8ef4dcd82bb6e0",
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "movingTipWidth": 7,
+      "layer": "full pointed track"
+    },
+    {
+      "id": "Boss/cast-fill",
+      "png": "Sprites/Boss/cast-fill.png",
+      "svg": "Source/Boss/cast-fill.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 20760,
+      "translucentPixels": 32,
+      "pngSha256": "820a2f3b1bf0eb279433874acf7c74f8333c41a556c8d33086de7cfe9c636ee2",
+      "svgSha256": "5e5312ace03c6240ab77cd139dd070124bf91d4f0d9f560565c98de56e4142e9",
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "movingTipWidth": 7,
+      "layer": "full 100% fill; runtime mask changes ratio"
+    },
+    {
+      "id": "Player/gauge-frame",
+      "png": "Sprites/Player/gauge-frame.png",
+      "svg": "Source/Player/gauge-frame.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77752,
+      "translucentPixels": 4264,
+      "pngSha256": "8d0aad1b802c7e09ffa3899aa27ecf56e498212fa526f887ef2e2145b77e8288",
+      "svgSha256": "467c0f772a5504adbd68e117824b6488d1c8314f1a68aeb32bd72029574dec3d",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true
+    },
+    {
+      "id": "Player/gauge-track",
+      "png": "Sprites/Player/gauge-track.png",
+      "svg": "Source/Player/gauge-track.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "83818b8f6e0526f5dabfe1dd61ac2ee99f6d15b6dea739faaebe6526d2953d5d",
+      "svgSha256": "abbac955fc1488130b19e929df7766c7188089836896018d17e5f6cb38c0e6ed",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "full pointed track"
+    },
+    {
+      "id": "Player/hp-fill",
+      "png": "Sprites/Player/hp-fill.png",
+      "svg": "Source/Player/hp-fill.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "e1e39dfaef9ea659448ab84397c478b62cafe718f28bd5f9d7f9c55183aadad7",
+      "svgSha256": "68d0d04f75c54a56790905ad78a1bdcb1aa5748b16fac769c3f05679ea07d673",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "full 100% health fill; runtime mask changes ratio"
+    },
+    {
+      "id": "Player/resource-fill",
+      "png": "Sprites/Player/resource-fill.png",
+      "svg": "Source/Player/resource-fill.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "173591b944b9422cc83818ecb41bea90b1dae5e7e793c0ae8565e7d605618664",
+      "svgSha256": "7775498d0bc41729f37d56867f9fd75f0efa165c577d5f58bb6f33f5652e8361",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "full 100% job-resource fill; runtime mask changes ratio"
+    },
+    {
+      "id": "Party/bar-frame",
+      "png": "Sprites/Party/bar-frame.png",
+      "svg": "Source/Party/bar-frame.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 7804,
+      "translucentPixels": 1324,
+      "pngSha256": "75bad696213a5e6c6915db3c65c13f4f48d1ebb5609a44e90b3fafe0a5232980",
+      "svgSha256": "a66ce417c6a90cf1d7e8a82a88bb7206ad25a8dfdcf5f71a4c4c7fd8f615ecd9",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true
+    },
+    {
+      "id": "Party/bar-track",
+      "png": "Sprites/Party/bar-track.png",
+      "svg": "Source/Party/bar-track.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "ad4f6e6e811916c2133fb7ce770c3668366dde7952b92add9df383c64e725a74",
+      "svgSha256": "d1e8e2c544881faba2d6daabbf13b7531318d4621584f6f9d537ca98a9debb00",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "full pointed track"
+    },
+    {
+      "id": "Party/bar-fill",
+      "png": "Sprites/Party/bar-fill.png",
+      "svg": "Source/Party/bar-fill.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "69a431bc09a994b232c99763637ac7aa18a367e82d00e1d4c7c7e287268d3ad5",
+      "svgSha256": "68d07c35e1d89fb563f030d7a8f368a76798b46a8671c3fc9ae204f33641996b",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "full 100% fill; runtime mask changes ratio"
+    },
+    {
+      "id": "Boss/boss-gem-left",
+      "png": "Sprites/Boss/boss-gem-left.png",
+      "svg": "Source/Boss/boss-gem-left.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 5604,
+      "translucentPixels": 488,
+      "pngSha256": "a861dd41a7bae0178e37cc2828eb3a21803a4474bc8c77d10353a25e66d2246f",
+      "svgSha256": "522c85bddd860c2d9ca7e618062be19a234696850cd6407b3ab66d5f27c748fa",
+      "layer": "boss-only detached endcap"
+    },
+    {
+      "id": "Boss/boss-gem-right",
+      "png": "Sprites/Boss/boss-gem-right.png",
+      "svg": "Source/Boss/boss-gem-right.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 5604,
+      "translucentPixels": 488,
+      "pngSha256": "51b1e71036127961565be18247823da16fd75509c504989939fcc3259d9335b5",
+      "svgSha256": "79161fb75f4a8de9694d343e729d83de6a55e9d80955d2f9ab1aa3446e790b8c",
+      "layer": "boss-only detached endcap"
+    },
+    {
+      "id": "Party/role-frame",
+      "png": "Sprites/Party/role-frame.png",
+      "svg": "Source/Party/role-frame.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 6696,
+      "translucentPixels": 620,
+      "pngSha256": "461774d053eede5928b5bfd530786167633d490129da700b2f05984b2d8c9064",
+      "svgSha256": "c195db1dfd982e61d329ac9846aa01cfb88c5f48c415bf4735bdae1df9e59e22",
+      "innerPolygon": [
+        [
+          21,
+          13
+        ],
+        [
+          75,
+          13
+        ],
+        [
+          83,
+          21
+        ],
+        [
+          83,
+          75
+        ],
+        [
+          75,
+          83
+        ],
+        [
+          21,
+          83
+        ],
+        [
+          13,
+          75
+        ],
+        [
+          13,
+          21
+        ]
+      ],
+      "layer": "fixed role-slot frame"
+    },
+    {
+      "id": "Party/role-background",
+      "png": "Sprites/Party/role-background.png",
+      "svg": "Source/Party/role-background.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 4428,
+      "translucentPixels": 32,
+      "pngSha256": "f33f27214fd47cc4a449ad49742c3665a24c2fd3b49de9bd4639f30530e4d8ac",
+      "svgSha256": "5db23326a0c83f7714ca4cce39aea7b20a35a6f7c691460cdc8c43265f2cd1e6",
+      "innerPolygon": [
+        [
+          21,
+          13
+        ],
+        [
+          75,
+          13
+        ],
+        [
+          83,
+          21
+        ],
+        [
+          83,
+          75
+        ],
+        [
+          75,
+          83
+        ],
+        [
+          21,
+          83
+        ],
+        [
+          13,
+          75
+        ],
+        [
+          13,
+          21
+        ]
+      ],
+      "layer": "empty role-slot backplate; artwork excluded"
+    },
+    {
+      "id": "Party/role-inner-mask",
+      "png": "Sprites/Party/role-inner-mask.png",
+      "svg": "Source/Party/role-inner-mask.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 4428,
+      "translucentPixels": 32,
+      "pngSha256": "d0624bbbc7b366dcdbb79091541c72f9b0111fd6dc9775212f0f6431e03bcb5c",
+      "svgSha256": "fba3162650a565299ea6ef6ef55c0f39bceffbe115d2b8277698751d0a794ae9",
+      "innerPolygon": [
+        [
+          21,
+          13
+        ],
+        [
+          75,
+          13
+        ],
+        [
+          83,
+          21
+        ],
+        [
+          83,
+          75
+        ],
+        [
+          75,
+          83
+        ],
+        [
+          21,
+          83
+        ],
+        [
+          13,
+          75
+        ],
+        [
+          13,
+          21
+        ]
+      ],
+      "layer": "white alpha role-slot mask; artwork excluded"
+    },
+    {
+      "id": "Hub/hub-frame",
+      "png": "Sprites/Hub/hub-frame.png",
+      "svg": "Source/Hub/hub-frame.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 124652,
+      "translucentPixels": 2580,
+      "pngSha256": "f02e403d16710cb79fe7549ae5d42a5c368d787122480255e94f18dda1e09ad7",
+      "svgSha256": "06877882fcfcacbf2da4fc5c44795dca6246052112f9c41a484bd396fbe8a112",
+      "innerPolygon": [
+        [
+          108,
+          25
+        ],
+        [
+          276,
+          25
+        ],
+        [
+          359,
+          108
+        ],
+        [
+          359,
+          276
+        ],
+        [
+          276,
+          359
+        ],
+        [
+          108,
+          359
+        ],
+        [
+          25,
+          276
+        ],
+        [
+          25,
+          108
+        ]
+      ],
+      "layer": "fixed octagon frame",
+      "transparentInterior": true
+    },
+    {
+      "id": "Hub/hub-background",
+      "png": "Sprites/Hub/hub-background.png",
+      "svg": "Source/Hub/hub-background.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 49512,
+      "translucentPixels": 332,
+      "pngSha256": "5c10384f509a42e09011d92211e8d168105ff18764b15cba4c5fd4c438c24738",
+      "svgSha256": "931e2517691e2e60f46104666fcfa29f23bf0c2481226ced43b436987d360d5b",
+      "innerPolygon": [
+        [
+          108,
+          25
+        ],
+        [
+          276,
+          25
+        ],
+        [
+          359,
+          108
+        ],
+        [
+          359,
+          276
+        ],
+        [
+          276,
+          359
+        ],
+        [
+          108,
+          359
+        ],
+        [
+          25,
+          276
+        ],
+        [
+          25,
+          108
+        ]
+      ],
+      "layer": "full octagon glass backplate"
+    },
+    {
+      "id": "Hub/hub-crystal",
+      "png": "Sprites/Hub/hub-crystal.png",
+      "svg": "Source/Hub/hub-crystal.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 119488,
+      "translucentPixels": 1132,
+      "pngSha256": "04c4dcaa140731a3bbcaa695ec1177c4bef3c2d28bbe80425368a20faaf49c45",
+      "svgSha256": "d407eb15c3ca52c9935e102e63db0a482f393ea0cdf680bb49880b0774187d84",
+      "crystalBounds": [
+        102,
+        42,
+        180,
+        302
+      ],
+      "majorFacetCount": 6,
+      "layer": "separate faceted amethyst"
+    },
+    {
+      "id": "Hub/ultimate-badge",
+      "png": "Sprites/Hub/ultimate-badge.png",
+      "svg": "Source/Hub/ultimate-badge.svg",
+      "canvas": [
+        128,
+        80
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 3328,
+      "translucentPixels": 392,
+      "pngSha256": "d80316feb33f9515e07ea4662baf7fc4d8bcd4c11ef2ad43d24b1c8dd64c13be",
+      "svgSha256": "7311b09f6351b2fd08f58e216cfc1e997fa1fdb9a72af82d097145b4fd2ad192",
+      "layer": "blank V badge; text supplied by runtime",
+      "textRect": [
+        23,
+        16,
+        82,
+        48
+      ]
+    },
+    {
+      "id": "Skills/slot-background",
+      "png": "Sprites/Skills/slot-background.png",
+      "svg": "Source/Skills/slot-background.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11474,
+      "translucentPixels": 270,
+      "pngSha256": "fdaeeb73f87b616d017f44b2cb2ed921c794a5dbc3959a1bffd53a8b3458d32b",
+      "svgSha256": "2ac4bcda7b3a7e49eaeef7b6d27943bd2e7621d3649d306bd68b02964c907cec",
+      "layer": "slot backplate"
+    },
+    {
+      "id": "Skills/slot-frame-normal",
+      "png": "Sprites/Skills/slot-frame-normal.png",
+      "svg": "Source/Skills/slot-frame-normal.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 30648,
+      "translucentPixels": 1324,
+      "pngSha256": "18f6f501b4801bd68b24ab5ca43a5b5b2e729ebc79ea41ab47f756c4a293b4eb",
+      "svgSha256": "fc7b4bbc366fb8a687963cfc2fec6975ab7264918a7a59aac09a0251dae9f006",
+      "layer": "one active state frame",
+      "state": "normal",
+      "innerPolygon": [
+        [
+          31,
+          16
+        ],
+        [
+          161,
+          16
+        ],
+        [
+          176,
+          31
+        ],
+        [
+          176,
+          161
+        ],
+        [
+          161,
+          176
+        ],
+        [
+          31,
+          176
+        ],
+        [
+          16,
+          161
+        ],
+        [
+          16,
+          31
+        ]
+      ],
+      "transparentInterior": true
+    },
+    {
+      "id": "Skills/slot-frame-hover",
+      "png": "Sprites/Skills/slot-frame-hover.png",
+      "svg": "Source/Skills/slot-frame-hover.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 30648,
+      "translucentPixels": 1324,
+      "pngSha256": "fb9f26df094e85705d2b9dd33305b4b191aad757dad61c40a4a622f2b7d3e28d",
+      "svgSha256": "2d8b0d126fc3251df520d653e412faa0c5df0e3270ce2b2a091f86210b68ee8c",
+      "layer": "one active state frame",
+      "state": "hover",
+      "innerPolygon": [
+        [
+          31,
+          16
+        ],
+        [
+          161,
+          16
+        ],
+        [
+          176,
+          31
+        ],
+        [
+          176,
+          161
+        ],
+        [
+          161,
+          176
+        ],
+        [
+          31,
+          176
+        ],
+        [
+          16,
+          161
+        ],
+        [
+          16,
+          31
+        ]
+      ],
+      "transparentInterior": true
+    },
+    {
+      "id": "Skills/slot-frame-pressed",
+      "png": "Sprites/Skills/slot-frame-pressed.png",
+      "svg": "Source/Skills/slot-frame-pressed.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 30648,
+      "translucentPixels": 1324,
+      "pngSha256": "fdd921537ccf428a8323714c1fd66ba56e9a2c1f4836aa8a54f86d1956a2bd2f",
+      "svgSha256": "387a47a8555b6a509535040788c4cc65e93b83f6a075a75862e18e9019e88d87",
+      "layer": "one active state frame",
+      "state": "pressed",
+      "innerPolygon": [
+        [
+          31,
+          16
+        ],
+        [
+          161,
+          16
+        ],
+        [
+          176,
+          31
+        ],
+        [
+          176,
+          161
+        ],
+        [
+          161,
+          176
+        ],
+        [
+          31,
+          176
+        ],
+        [
+          16,
+          161
+        ],
+        [
+          16,
+          31
+        ]
+      ],
+      "transparentInterior": true
+    },
+    {
+      "id": "Skills/slot-frame-focused",
+      "png": "Sprites/Skills/slot-frame-focused.png",
+      "svg": "Source/Skills/slot-frame-focused.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 30648,
+      "translucentPixels": 1324,
+      "pngSha256": "18688f148c0ac549da5584608bf9abab81d68c256865306a029033f6abb44cab",
+      "svgSha256": "b6f088a28c455903618ecff800ef8869caecec2073e74f78da5efa1dee666342",
+      "layer": "one active state frame",
+      "state": "focused",
+      "innerPolygon": [
+        [
+          31,
+          16
+        ],
+        [
+          161,
+          16
+        ],
+        [
+          176,
+          31
+        ],
+        [
+          176,
+          161
+        ],
+        [
+          161,
+          176
+        ],
+        [
+          31,
+          176
+        ],
+        [
+          16,
+          161
+        ],
+        [
+          16,
+          31
+        ]
+      ],
+      "transparentInterior": true
+    },
+    {
+      "id": "Skills/slot-frame-disabled",
+      "png": "Sprites/Skills/slot-frame-disabled.png",
+      "svg": "Source/Skills/slot-frame-disabled.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 30648,
+      "translucentPixels": 1324,
+      "pngSha256": "09decf1685cce83e7543ab009d46e1073c2361f6584a2a1adfa9698d2014c5fc",
+      "svgSha256": "a6f092f6d91510d475b1b99cd491df41f49f9c09421a17971724bb464459dc4d",
+      "layer": "one active state frame",
+      "state": "disabled",
+      "innerPolygon": [
+        [
+          31,
+          16
+        ],
+        [
+          161,
+          16
+        ],
+        [
+          176,
+          31
+        ],
+        [
+          176,
+          161
+        ],
+        [
+          161,
+          176
+        ],
+        [
+          31,
+          176
+        ],
+        [
+          16,
+          161
+        ],
+        [
+          16,
+          31
+        ]
+      ],
+      "transparentInterior": true
+    },
+    {
+      "id": "Skills/slot-inner-mask",
+      "png": "Sprites/Skills/slot-inner-mask.png",
+      "svg": "Source/Skills/slot-inner-mask.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 60,
+      "pngSha256": "73f2c88eaef0e4217a51a1903f08406bad3d01d00e6e4cb033835b6ff6c9bbfb",
+      "svgSha256": "4bbaa540c98d0b22d5fa7583f74b4cfb0c065326a223bcc364f85ddc510b7a59",
+      "layer": "white alpha icon mask",
+      "innerPolygon": [
+        [
+          31,
+          16
+        ],
+        [
+          161,
+          16
+        ],
+        [
+          176,
+          31
+        ],
+        [
+          176,
+          161
+        ],
+        [
+          161,
+          176
+        ],
+        [
+          31,
+          176
+        ],
+        [
+          16,
+          161
+        ],
+        [
+          16,
+          31
+        ]
+      ]
+    },
+    {
+      "id": "Skills/key-badge",
+      "png": "Sprites/Skills/key-badge.png",
+      "svg": "Source/Skills/key-badge.svg",
+      "canvas": [
+        72,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 508,
+      "translucentPixels": 256,
+      "pngSha256": "b161d6a88ea98dac7b020e576e7544be6a5d0a69120a0cbae37601a1ccb0ee86",
+      "svgSha256": "4a8297eb59359c6db33f2019d07de7d48098c01dc5175400c03b275fd014c94d",
+      "layer": "blank runtime key badge",
+      "textRect": [
+        12,
+        8,
+        48,
+        32
+      ]
+    },
+    {
+      "id": "Skills/key-badge-wide",
+      "png": "Sprites/Skills/key-badge-wide.png",
+      "svg": "Source/Skills/key-badge-wide.svg",
+      "canvas": [
+        112,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 588,
+      "translucentPixels": 336,
+      "pngSha256": "75dee7fb9c3d8840c2488eea72ee41cdba60fc6a894925616d0e45d69d950690",
+      "svgSha256": "ebd664ad22fe089ac2d788de3ff3dffaacbe81fdb8a117e7956f4e4f0ac942f0",
+      "layer": "blank runtime key badge",
+      "textRect": [
+        12,
+        8,
+        88,
+        32
+      ]
+    },
+    {
+      "id": "States/cooldown-mask",
+      "png": "Sprites/States/cooldown-mask.png",
+      "svg": "Source/States/cooldown-mask.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 60,
+      "pngSha256": "73f2c88eaef0e4217a51a1903f08406bad3d01d00e6e4cb033835b6ff6c9bbfb",
+      "svgSha256": "4bbaa540c98d0b22d5fa7583f74b4cfb0c065326a223bcc364f85ddc510b7a59",
+      "layer": "alpha mask for radial cooldown; runtime supplies ratio"
+    },
+    {
+      "id": "States/cooldown-overlay",
+      "png": "Sprites/States/cooldown-overlay.png",
+      "svg": "Source/States/cooldown-overlay.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 25180,
+      "pngSha256": "27c8da77130629437ed048c90df10064f82df36304b68058b64e947e968f504a",
+      "svgSha256": "980e1ac95a9ae76dd861989e43524b438819c77c319f1aa8e68c0118563ca7b0",
+      "layer": "radial-fill cooldown shade; no baked timer"
+    },
+    {
+      "id": "States/disabled-overlay",
+      "png": "Sprites/States/disabled-overlay.png",
+      "svg": "Source/States/disabled-overlay.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 25180,
+      "pngSha256": "8b4c76cdbd4711e9bff85bd99321d1dde1c4786804c065130ff6fb0a535792a6",
+      "svgSha256": "4d55a02147b59d824cd3ceeb0825398cf819efa98f86a12a24f45ecf2e454161",
+      "layer": "disabled desaturation/tint overlay"
+    },
+    {
+      "id": "States/hover-overlay",
+      "png": "Sprites/States/hover-overlay.png",
+      "svg": "Source/States/hover-overlay.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 25180,
+      "pngSha256": "6f49e38bc796246891523352990e7f8826a716f9ba96442b8e5bdfffa10e0eeb",
+      "svgSha256": "d7c4405ec05b89bb284dc51f478b39a01f580c832a93494e2076b4bf5ebba157",
+      "layer": "subtle hover glass light"
+    },
+    {
+      "id": "Boss/boss-inner-mask",
+      "png": "Sprites/Boss/boss-inner-mask.png",
+      "svg": "Source/Boss/boss-inner-mask.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77068,
+      "translucentPixels": 120,
+      "pngSha256": "8488cdaa35dab975fde30f2401dc8098db4bcdb9406f850440fb21a9165af5b0",
+      "svgSha256": "29075eb8afc25b6a825b60e6f2e4533120294316807182fcb722c08cc7f931de",
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "layer": "white alpha inner mask"
+    },
+    {
+      "id": "Boss/cast-inner-mask",
+      "png": "Sprites/Boss/cast-inner-mask.png",
+      "svg": "Source/Boss/cast-inner-mask.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 20760,
+      "translucentPixels": 32,
+      "pngSha256": "a4ef968529f79dc87b943a54bbe6e450b70da73b707e7f0603cf475b7a8434c8",
+      "svgSha256": "de0c1cf20c925263ec14a5c9443d9ad6dadcddfc8c40884040b2d24e51b2ab6a",
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "layer": "white alpha inner mask"
+    },
+    {
+      "id": "Player/gauge-inner-mask",
+      "png": "Sprites/Player/gauge-inner-mask.png",
+      "svg": "Source/Player/gauge-inner-mask.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "d201717f7d142df43ebeb2ab79047e9ed15f4ab7e2e1be660a43039acc3c0469",
+      "svgSha256": "0516274414a77f75123a84df3cd6f570ce556baad70de6064990f508d734804f",
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "layer": "white alpha inner mask"
+    },
+    {
+      "id": "Party/bar-inner-mask",
+      "png": "Sprites/Party/bar-inner-mask.png",
+      "svg": "Source/Party/bar-inner-mask.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "f5a1ca3f612f7dbf510d238f3787e0d934bbfd7166e2b416968bdb1dd0312d2b",
+      "svgSha256": "ef797242567fe68f3b66d6b29841f96a79f82ad956049e41b135262af3d64f0a",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "layer": "white alpha inner mask"
+    },
+    {
+      "id": "Hub/hub-inner-mask",
+      "png": "Sprites/Hub/hub-inner-mask.png",
+      "svg": "Source/Hub/hub-inner-mask.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 49512,
+      "translucentPixels": 332,
+      "pngSha256": "5838e758937fa1462682aafa804d106df776bad617cd393f0825db40b9b9c4e6",
+      "svgSha256": "42a25230e5d8b21c86b8a7263d577ad669e9ccd04aee138abc74dc8d66fbcb3f",
+      "innerPolygon": [
+        [
+          108,
+          25
+        ],
+        [
+          276,
+          25
+        ],
+        [
+          359,
+          108
+        ],
+        [
+          359,
+          276
+        ],
+        [
+          276,
+          359
+        ],
+        [
+          108,
+          359
+        ],
+        [
+          25,
+          276
+        ],
+        [
+          25,
+          108
+        ]
+      ],
+      "layer": "white alpha inner mask"
+    },
+    {
+      "id": "Hub/ready-glow",
+      "png": "Sprites/Hub/ready-glow.png",
+      "svg": "Source/Hub/ready-glow.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 58718,
+      "translucentPixels": 88738,
+      "pngSha256": "f7e76647d8d2cef419da3c523eb0a843d83cee5d4a9ff04df75cf5c3c932c907",
+      "svgSha256": "a7b5a48676139a2c4022c0799258a67c15e50855ba5f7eae0e72f56676939c00",
+      "layer": "optional readiness light inside hub only"
+    },
+    {
+      "id": "Hub/disabled-overlay",
+      "png": "Sprites/Hub/disabled-overlay.png",
+      "svg": "Source/Hub/disabled-overlay.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 49512,
+      "translucentPixels": 97944,
+      "pngSha256": "c656f4898695a6164dbc05e9b47ddb83adf6318e505c79adfb95a3ca4611d9cc",
+      "svgSha256": "80c4d5efb9aa94a916df1f607fa3f3336227fc842113be79c98066e1ad8956c5",
+      "innerPolygon": [
+        [
+          108,
+          25
+        ],
+        [
+          276,
+          25
+        ],
+        [
+          359,
+          108
+        ],
+        [
+          359,
+          276
+        ],
+        [
+          276,
+          359
+        ],
+        [
+          108,
+          359
+        ],
+        [
+          25,
+          276
+        ],
+        [
+          25,
+          108
+        ]
+      ],
+      "layer": "optional unavailable hub tint"
+    },
+    {
+      "id": "Party/bar-fill-critical",
+      "png": "Sprites/Party/bar-fill-critical.png",
+      "svg": "Source/Party/bar-fill-critical.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "1dcb56cfb8d8db3296afaf112502ab321c630da7df90025535dff5834d130ad6",
+      "svgSha256": "c1ddf4d28be53e06656a6e9e8cc054d411c2168943a480c6e403a0bc2bbef67d",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "critical-health alternative full fill"
+    },
+    {
+      "id": "Party/selected-overlay",
+      "png": "Sprites/Party/selected-overlay.png",
+      "svg": "Source/Party/selected-overlay.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 7684,
+      "translucentPixels": 5116,
+      "pngSha256": "b12fd39004605d4ffb88440318969d2a5b538d847498f67aaf97a702529c189f",
+      "svgSha256": "f38e52b727c5aef09ba7950eea437c6373a4a054ed05cb4f8bc70346994e8424",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "layer": "optional selected party-bar light"
+    },
+    {
+      "id": "Party/dead-overlay",
+      "png": "Sprites/Party/dead-overlay.png",
+      "svg": "Source/Party/dead-overlay.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 4536,
+      "pngSha256": "c76a5f8b2476a577ec6a452e254040cce886cc384fb92f093e706f92f7df03dd",
+      "svgSha256": "db874b78d6ccdfe5476047c365e7823544ccb2603f83b46267c4e3f0c6a6f2d3",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "layer": "optional defeated party-bar tint"
+    }
+  ],
+  "validation": {
+    "report": "UI-Production/PrismV4/verification.json",
+    "unityPlayVerified": false,
+    "liveBindingsApplied": false
+  }
+}

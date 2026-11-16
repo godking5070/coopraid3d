@@ -1,0 +1,12 @@
+{
+  "name": "astella-prism-v4-art-production",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Deterministic editable SVG and transparent PNG production for the approved Prism V4 UI reconstruction.",
+  "scripts": {
+    "build": "node generate-prism.cjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}
