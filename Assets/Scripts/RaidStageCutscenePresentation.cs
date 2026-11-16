@@ -59,6 +59,7 @@ namespace RaidRogue
         private bool _playerCameraWasEnabled;
         private bool _playing;
         private BossController _framingBoss;
+        private Renderer[] _framingRenderers;
         private Vector3 _fallbackPosition, _fallbackLookAt;
         private bool _usingFallbackCamera;
 
@@ -66,18 +67,49 @@ namespace RaidRogue
         public void GuardArrivalFraming(BossController boss, Vector3 fallbackPosition, Vector3 fallbackLookAt)
         {
             _framingBoss = boss; _fallbackPosition = fallbackPosition; _fallbackLookAt = fallbackLookAt;
+            var visual = boss != null ? boss.dualVisual : null;
+            var root = visual != null ? (ViewModeManager.Is2DViewActive ? visual.visual2DRoot : visual.visual3DRoot) : null;
+            if (ViewModeManager.Is2DViewActive)
+                _framingRenderers = root != null ? root.GetComponentsInChildren<Renderer>(true) : Array.Empty<Renderer>();
+            else
+                // Dedicated encounter meshes may be siblings of the placeholder visual root.
+                // Mesh-only collection excludes particle/line telegraphs and 2D tokens.
+                _framingRenderers = boss != null ? boss.GetComponentsInChildren<MeshRenderer>(true) : Array.Empty<MeshRenderer>();
         }
         private void LateUpdate()
         {
-            if (!_playing || _usingFallbackCamera || _framingBoss == null || _playerCamera == null || !_playerCameraWasEnabled ||
+            if (!_playing || _framingBoss == null || _playerCamera == null || !_playerCameraWasEnabled ||
                 RaidApproachField.Instance?.BossVisible != true || presentationCamera == null) return;
-            var point = presentationCamera.WorldToViewportPoint(_framingBoss.transform.position + Vector3.up * 1.5f);
-            if (CameraControlMath.SubjectInViewport(point.x, point.y, point.z)) return;
+            // Boss animation can move the visible mesh away from the combat root.
+            // Only model renderers contribute; telegraphs and world labels are excluded.
+            var bounds = new Bounds(_framingBoss.transform.position + Vector3.up * 1.5f, Vector3.one);
+            bool found = false;
+            foreach (var renderer in _framingRenderers)
+            {
+                if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy ||
+                    renderer.GetComponent<TextMesh>() != null || renderer.GetComponentInParent<AoETelegraph>() != null) continue;
+                if (!found) { bounds = renderer.bounds; found = true; }
+                else bounds.Encapsulate(renderer.bounds);
+            }
+            bool inFrame = true;
+            for (int corner = 0; corner < 8 && inFrame; corner++)
+            {
+                var offset = Vector3.Scale(bounds.extents, new Vector3((corner & 1) == 0 ? -1 : 1,
+                    (corner & 2) == 0 ? -1 : 1, (corner & 4) == 0 ? -1 : 1));
+                var point = presentationCamera.WorldToViewportPoint(bounds.center + offset);
+                inFrame = CameraControlMath.SubjectInViewport(point.x, point.y, point.z);
+            }
+            if (!_usingFallbackCamera && inFrame) return;
             var view = QuarterViewCamera.LocalCamera;
             if (view == null) return;
+            var cameraOffset = _fallbackPosition - _fallbackLookAt;
+            if (cameraOffset.sqrMagnitude < .01f) cameraOffset = new Vector3(0, 8, -15);
+            float halfFov = Mathf.Atan(Mathf.Tan(view.UnityCamera.fieldOfView * Mathf.Deg2Rad * .5f) *
+                Mathf.Min(1, Mathf.Max(.1f, view.UnityCamera.aspect)));
+            float cameraDistance = Mathf.Max(cameraOffset.magnitude, bounds.extents.magnitude / Mathf.Sin(halfFov) * 1.15f);
             presentationCamera.enabled = false;
+            view.SetArrivalCamera(bounds.center + cameraOffset.normalized * cameraDistance, bounds.center, true);
             _playerCamera.enabled = true;
-            view.SetArrivalCamera(_fallbackPosition, _fallbackLookAt);
             _usingFallbackCamera = true;
         }
 
@@ -219,7 +251,7 @@ namespace RaidRogue
                 // hard-coded zeroes. The combat root and visual hierarchy stay aligned.
                 RestoreBossPoses();
                 if (_usingFallbackCamera) QuarterViewCamera.LocalCamera?.ClearArrivalCamera();
-                _usingFallbackCamera = false; _framingBoss = null;
+                _usingFallbackCamera = false; _framingBoss = null; _framingRenderers = null;
                 if (presentationCamera != null) presentationCamera.enabled = false;
                 if (_playerCamera != null) _playerCamera.enabled = _playerCameraWasEnabled;
                 _restoring=false;

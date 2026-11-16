@@ -318,6 +318,19 @@ namespace RaidRogue
             }
         }
 
+        // Presentation must keep following the camera in lobbies, approaches,
+        // paused combat and on replicas; none of these updates simulate AI.
+        private void LateUpdate()
+        {
+            if (_hpBarRoot == null) return;
+            // Replicas follow the received phase; solo uses the local stage flow.
+            var phase = RaidNetworkSession.Multiplayer && RaidNetworkSession.Instance != null
+                ? RaidNetworkSession.Instance.BattlePhase : StageManager.Instance?.Progress.Phase ?? RaidBattlePhase.Lobby;
+            bool visible = phase != RaidBattlePhase.Arrival && phase != RaidBattlePhase.BossClear;
+            if (_hpBarRoot.gameObject.activeSelf != visible) _hpBarRoot.gameObject.SetActive(visible);
+            if (visible) UpdateOverheadHpBar();
+        }
+
         private void Update()
         {
             if (RaidCombatAuthority.Replica || Time.timeScale <= 0.001f || targetBoss == null || StageManager.CombatSuspended ||
@@ -348,7 +361,6 @@ namespace RaidRogue
 
             if (isDead)
             {
-                UpdateOverheadHpBar();
                 return;
             }
 
@@ -365,7 +377,6 @@ namespace RaidRogue
 
             if (targetBoss.IsBossDefeatedCollapse)
             {
-                UpdateOverheadHpBar();
                 return;
             }
 
@@ -373,7 +384,6 @@ namespace RaidRogue
             if (_isBeingRescuedByPlayer)
             {
                 UpdateRescuedByPlayerMovementXZ();
-                UpdateOverheadHpBar();
                 return;
             }
 
@@ -381,19 +391,18 @@ namespace RaidRogue
             if (_isBeingKnockedBack)
             {
                 UpdateKnockbackMovementXZ();
-                UpdateOverheadHpBar();
                 return;
             }
 
-            if (CharacterTrainingSession.Active) { UpdateOverheadHpBar(); return; }
-            if(targetBoss.MarionetteControlled(transform)) { UpdateOverheadHpBar(); return; }
-            if(targetBoss.GuardianLured(transform)) { UpdateOverheadHpBar(); return; }
+            if (CharacterTrainingSession.Active) return;
+            if(targetBoss.MarionetteControlled(transform)) return;
+            if(targetBoss.GuardianLured(transform)) return;
             if (targetBoss.GuardianClashHolding(transform) || targetBoss.CampanellaLockHolding(transform))
             {
                 if (role == PartyBotRole.Tank && RaidCombatAuthority.ServerTime >= _guardianDefenseReady &&
                     (targetBoss.GuardianClashPulseImminent(transform) || targetBoss.CampanellaLockPulseImminent(transform)))
                 { ActivateTankDefensive(4.5f, "힘겨루기 맥동 대비 · 방어기"); _guardianDefenseReady = RaidCombatAuthority.ServerTime + 15; }
-                UpdateOverheadHpBar(); return;
+                return;
             }
             UpdateGuardianActions();
             switch (role)
@@ -414,8 +423,6 @@ namespace RaidRogue
                     UpdateRangedDPSAI();
                     break;
             }
-
-            UpdateOverheadHpBar();
         }
 
         /// <summary>
@@ -1487,12 +1494,38 @@ namespace RaidRogue
             nameObj.transform.localPosition = new Vector3(0f, 0.24f, 0f);
             nameObj.transform.localScale = Vector3.one * 0.075f;
             _nameLabelText = nameObj.AddComponent<TextMesh>();
-            _nameLabelText.text = botDisplayName;
+            _nameLabelText.text = OverheadDisplayName();
             _nameLabelText.fontSize = 40;
             _nameLabelText.fontStyle = FontStyle.Bold;
             _nameLabelText.anchor = TextAnchor.MiddleCenter;
             _nameLabelText.alignment = TextAlignment.Center;
             _nameLabelText.color = roleColor;
+        }
+
+        private string OverheadDisplayName()
+        {
+            string shortName = role switch
+            {
+                PartyBotRole.Tank => "가디언",
+                PartyBotRole.Healer => "오라클",
+                PartyBotRole.MeleeDPS => "블레이드",
+                PartyBotRole.RangedDPS => "아크메이지",
+                _ => "AI"
+            };
+            if (string.IsNullOrEmpty(_customDisplayName)) return shortName;
+            string label = _customDisplayName;
+            if (!label.StartsWith("BOT", System.StringComparison.Ordinal)) return label;
+            int cursor = 3;
+            while (cursor < label.Length && label[cursor] == ' ') cursor++;
+            int numberStart = cursor;
+            while (cursor < label.Length && label[cursor] >= '0' && label[cursor] <= '9') cursor++;
+            if (cursor == numberStart || cursor >= label.Length || label[cursor] != ':') return label;
+            string detail = label.Substring(cursor + 1).Trim();
+            // Only the generated legacy RoleSelectionManager labels are shortened.
+            // Custom names and the full identity used by party HUD/metrics are intact.
+            return detail == "가디언 (탱커)" || detail == "오라클 (힐러)" ||
+                detail == "블레이드 (근딜)" || detail == "블레이드 (근딜·줄수호)" ||
+                detail == "아크메이지 (캐스터)" ? shortName : label;
         }
 
         private void UpdateOverheadHpBar()
@@ -1526,7 +1559,7 @@ namespace RaidRogue
 
             // Keep identity and urgent state readable above the actor. HP/shield
             // totals already have party HUD entries; long AI debug prose hides telegraphs.
-            string label = botDisplayName;
+            string label = OverheadDisplayName();
             Color color = GetRoleBrightColor(role);
             if (isDead)
             {

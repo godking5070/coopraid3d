@@ -93,13 +93,13 @@ namespace RaidRogue
         public Camera UnityCamera => _cam != null ? _cam : (_cam = GetComponent<Camera>());
         private bool _arrivalCamera;
         private Vector3 _arrivalPosition, _arrivalLookAt, _arrivalCurrentPosition;
-        public void SetArrivalCamera(Vector3 position, Vector3 lookAt)
+        public void SetArrivalCamera(Vector3 position, Vector3 lookAt, bool immediate = false)
         {
             if ((lookAt - position).sqrMagnitude < .01f) lookAt = position + Vector3.forward;
-            if (_arrivalCamera && _arrivalPosition == position && _arrivalLookAt == lookAt) return;
+            if (_arrivalCamera && _arrivalPosition == position && _arrivalLookAt == lookAt && !immediate) return;
             ReleaseOrbit();
             _arrivalCamera = true; _arrivalPosition = position; _arrivalLookAt = lookAt;
-            _arrivalCurrentPosition = position + new Vector3(0, 2, -4);
+            _arrivalCurrentPosition = immediate ? position : position + new Vector3(0, 2, -4);
             // A Timeline LateUpdate can switch after this camera's own LateUpdate.
             // Apply projection and pose now so a previous 2D/gameplay frame cannot flash.
             ApplyArrivalCameraPose();

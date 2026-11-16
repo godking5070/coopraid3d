@@ -169,7 +169,7 @@ namespace RaidRogue
                 : session.RegularCampaignParticipant;
             if (!Personal.RecordBattleParticipation(CurrentOwner, stage.ChapterId, stage.currentStage, Eligible, participating)) return;
             _personalDirty = true; SavePersonal();
-            if (!_personalDirty) Notice = "훈련소 해금 · 메인 메뉴에서 모든 직업을 연습할 수 있습니다.";
+            if (!_personalDirty) Notice = "첫 전투 진입 기록 저장 완료 · 대기실 허수아비에서 현재 빌드의 조작을 연습할 수 있습니다.";
         }
         public void MarkDevelopmentUse()
         {
