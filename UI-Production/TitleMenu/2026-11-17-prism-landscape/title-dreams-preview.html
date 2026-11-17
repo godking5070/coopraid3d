@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>아스텔라 · 영화적 풍경과 세로 메뉴 시안</title>
+  <style>
+    @font-face { font-family: MaruBuri; src: url('../../../Assets/UI/AstellaPrismV4/Typography/Fonts/MaruBuri-SemiBold.ttf') format('truetype'); font-display: swap; }
+    @font-face { font-family: Pretendard; src: url('../../../Assets/UI/AstellaPrismV4/Typography/Fonts/Pretendard-Medium.ttf') format('truetype'); font-display: swap; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #111625; color: #edf0f5; font: 14px/1.6 Pretendard, sans-serif; }
+    .preview-bar, .preview-note { max-width: 1536px; margin: 0 auto; padding: 18px 24px; }
+    .preview-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 30px; }
+    .preview-bar h1 { margin: 0 0 3px; font-size: 17px; font-weight: 500; }
+    .preview-bar p, .preview-note p { margin: 0; color: #b9c2d1; }
+    .preview-bar label { display: flex; align-items: center; gap: 9px; cursor: pointer; white-space: nowrap; }
+    .preview-bar input { accent-color: #cbb2f7; width: 16px; height: 16px; }
+    .stage-wrap { max-width: 1920px; margin: 0 auto; }
+    .scene { position: relative; isolation: isolate; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #14203a; container-type: inline-size; }
+    .landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -3; }
+    .scene::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -2;
+      background: linear-gradient(90deg, rgba(4, 10, 26, .20), rgba(4, 10, 26, .07) 31%, transparent 54%);
+    }
+    .scene::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1;
+      background: linear-gradient(0deg, rgba(3, 8, 21, .18), transparent 24%, transparent 82%, rgba(3, 8, 21, .08));
+    }
+    .brand { position: absolute; left: 10.6%; top: 8.8%; color: #faf7ff; }
+    .brand-word {
+      margin: 0; font: normal 5.416667cqw/1.12 MaruBuri, serif; letter-spacing: .085em;
+      text-shadow: 0 2px 6px rgba(6, 9, 26, .86), 0 0 26px rgba(165, 191, 255, .35), 0 0 58px rgba(195, 161, 255, .13);
+      -webkit-text-stroke: .4px rgba(25, 26, 57, .68); paint-order: stroke fill;
+    }
+    .brand-ko {
+      margin: .75cqw 0 0 .24cqw; font: normal 1.20cqw/1.6 MaruBuri, serif;
+      letter-spacing: .36em; color: #ded9f0; text-shadow: 0 2px 5px #10152b, 0 0 15px rgba(177, 192, 255, .24);
+    }
+    .main-menu { position: absolute; left: 11.3%; top: 35.8%; width: 25%; display: flex; flex-direction: column; align-items: flex-start; gap: .729167cqw; }
+    .entry { width: 100%; }
+    .menu-action {
+      position: relative; display: block; width: 100%; min-height: 3.125cqw; padding: .39cqw 0;
+      border: 0; border-radius: 0; background: transparent; color: #f1f0fc; text-align: left;
+      font: normal 1.510417cqw/1.55 MaruBuri, serif; cursor: pointer;
+      text-shadow: 0 1px 3px rgba(4, 8, 21, .96), 0 0 10px rgba(115, 158, 245, .24);
+      -webkit-text-stroke: .45px rgba(10, 14, 35, .80); paint-order: stroke fill;
+    }
+    .menu-action .label { display: inline-block; transition: transform .16s ease, color .16s ease, text-shadow .16s ease; }
+    .menu-action::before {
+      content: '◆'; position: absolute; left: -1.43cqw; top: 1.13cqw;
+      font: normal .40cqw/1 Pretendard, sans-serif; color: #d7c1ff; opacity: 0;
+      text-shadow: 0 0 9px rgba(186, 153, 255, .80); transition: opacity .16s ease;
+    }
+    .menu-action:hover:not(:disabled) .label, .menu-action:focus-visible .label { color: #eee3ff; transform: translateX(.26cqw); text-shadow: 0 1px 3px #070b1c, 0 0 14px rgba(170, 181, 255, .55); }
+    .menu-action.is-selected .label, .menu-action:focus-visible .label { text-decoration: underline; text-decoration-color: rgba(204, 181, 255, .65); text-decoration-thickness: 1px; text-underline-offset: .50cqw; }
+    .menu-action.is-selected::before, .menu-action:hover:not(:disabled)::before, .menu-action:focus-visible::before { opacity: 1; }
+    .menu-action:focus { outline: none; }
+    .menu-action:disabled { color: #a3acc4; opacity: .57; cursor: default; }
+    .save-hint { margin: -.08cqw 0 .32cqw; color: #bbc5da; font: normal .729167cqw/1.5 Pretendard, sans-serif; text-shadow: 0 1px 4px #070e24; }
+    .preview-note { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 30px; }
+    #preview-status { color: #ded4f5; }
+    .capture .preview-bar, .capture .preview-note { display: none; }
+    .capture .stage-wrap { max-width: none; margin: 0; }
+    .capture .scene { width: 100vw; height: 100vh; aspect-ratio: auto; }
+    @media (max-width: 700px) {
+      .preview-bar, .preview-note { padding: 13px 16px; font-size: 12px; }
+      .preview-bar h1 { font-size: 15px; }
+      .preview-note { display: block; }
+    }
+    @media (prefers-reduced-motion: reduce) { .menu-action .label, .menu-action::before { transition: none; } }
+  </style>
+</head>
+<body>
+  <header class="preview-bar">
+    <div>
+      <h1>아스텔라 · 영화적 풍경과 왼쪽 메뉴 시안</h1>
+      <p>실제 게임과 연결되지 않음 · 메뉴는 선택 표시만 확인할 수 있습니다.</p>
+    </div>
+    <label><input id="saved-example" type="checkbox"> 예시 저장 있음</label>
+  </header>
+  <main class="stage-wrap">
+    <section class="scene" aria-label="은빛 공명 나무와 자수정 풍경 위에 왼쪽 로고와 세로 메뉴를 배치한 아스텔라 메인 화면">
+      <img class="landscape" src="title-dreams-environment.png" alt="달빛 아래 은빛 나무와 자수정 핵이 빛나고 꽃과 유적이 이어지는 공명 숲">
+      <div class="brand" aria-label="ASTELLA 아스텔라">
+        <p class="brand-word">ASTELLA</p>
+        <p class="brand-ko">아스텔라</p>
+      </div>
+      <nav class="main-menu" aria-label="메인 메뉴">
+        <div class="entry">
+          <button class="menu-action" id="continue" data-action="이어하기" disabled aria-pressed="false"><span class="label">이어하기</span></button>
+          <p class="save-hint" id="save-hint">저장된 원정이 없습니다</p>
+        </div>
+        <button class="menu-action is-selected" data-action="새 원정 시작" aria-pressed="true"><span class="label">새 원정 시작</span></button>
+        <button class="menu-action" data-action="파티 참가" aria-pressed="false"><span class="label">파티 참가</span></button>
+        <button class="menu-action" data-action="저장 관리" aria-pressed="false"><span class="label">저장 관리</span></button>
+        <button class="menu-action" data-action="설정" aria-pressed="false"><span class="label">설정</span></button>
+        <button class="menu-action" data-action="종료" aria-pressed="false"><span class="label">종료</span></button>
+      </nav>
+    </section>
+  </main>
+  <footer class="preview-note">
+    <p>넓은 풍경 · 큰 로고와 여백 · 테두리 없는 세로 메뉴 6개</p>
+    <p id="preview-status" role="status" aria-live="polite">선택한 메뉴: 새 원정 시작 (표시 확인용)</p>
+  </footer>
+  <script>
+    'use strict';
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('capture') === '1') document.body.classList.add('capture');
+    const actions = [...document.querySelectorAll('.menu-action')];
+    const savedToggle = document.getElementById('saved-example');
+    const continueButton = document.getElementById('continue');
+    const status = document.getElementById('preview-status');
+    function selectAction(button) {
+      if (button.disabled) return;
+      for (const action of actions) {
+        const selected = action === button;
+        action.classList.toggle('is-selected', selected);
+        action.setAttribute('aria-pressed', String(selected));
+      }
+      status.textContent = `선택한 메뉴: ${button.dataset.action} (표시 확인용)`;
+    }
+    for (const action of actions) {
+      action.addEventListener('click', () => selectAction(action));
+      action.addEventListener('keydown', event => {
+        if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const enabled = actions.filter(button => !button.disabled);
+        const current = enabled.indexOf(action);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? enabled.length - 1 :
+          (current + (event.key === 'ArrowDown' ? 1 : -1) + enabled.length) % enabled.length;
+        enabled[next].focus();
+      });
+    }
+    function updateExample() {
+      continueButton.disabled = !savedToggle.checked;
+      document.getElementById('save-hint').textContent = savedToggle.checked ? '예시 저장: 1부 · Stage 2 / 6' : '저장된 원정이 없습니다';
+      if (continueButton.disabled && continueButton.classList.contains('is-selected')) selectAction(actions[1]);
+    }
+    savedToggle.addEventListener('change', updateExample);
+    savedToggle.checked = query.get('saved') === '1';
+    updateExample();
+    document.fonts.ready.then(() => {
+      document.body.dataset.fontsReady = 'true';
+      document.body.dataset.maruReady = String(document.fonts.check('29px MaruBuri'));
+      document.body.dataset.pretendardReady = String(document.fonts.check('14px Pretendard'));
+      document.body.dataset.ready = 'true';
+    });
+  </script>
+</body>
+</html>
