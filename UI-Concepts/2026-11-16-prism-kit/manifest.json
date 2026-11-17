@@ -1,0 +1,3503 @@
+{
+  "schemaVersion": 1,
+  "packageId": "astella-prism-v4",
+  "packageVersion": "1.0.1",
+  "assetRoot": "Assets/UI/AstellaPrismV4",
+  "purpose": "Separate text-free Prism HUD resources for transfer to the main project.",
+  "approvedReference": {
+    "path": "UI-Production/PrismV4/approved-reference.png",
+    "sha256": "c7c16e4974710e61534b8c02cbce327ab7d191b1f92e43be20f17df0876d86f1",
+    "canvas": [
+      1672,
+      941
+    ]
+  },
+  "provenance": {
+    "method": "Painted PNG components mechanically separated from a newly generated transparent image_gen atlas based on the approved raster reference; not recovered original PSD/SVG layers.",
+    "recoveredLayers": false,
+    "originalPsdRecovered": false,
+    "paintedAtlas": {
+      "path": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+      "sha256": "2608d588f7fb06918ce134cf41919dae2bd00ebe3eb6c8eed14762618789d325",
+      "generationMode": "built-in image_gen edit",
+      "transparentBackground": true
+    },
+    "prompt": {
+      "path": "UI-Production/PrismV4/raster-recovery/prompt.txt",
+      "sha256": "1c4313ca119c255c17562b4c742242ef8aff55c68c351edfedf6dbae5cb9c34f"
+    },
+    "extractors": [
+      "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1",
+      "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+    ],
+    "legacySvg": {
+      "path": "Assets/UI/AstellaPrismV4/Source/**/*.svg",
+      "status": "Historical structural/coordinate references, not the editable source of current painted RGB artwork.",
+      "generator": "UI-Production/PrismV4/generate-prism.cjs",
+      "overwriteProtection": "Legacy generator refuses to run while the painted transparent atlas exists."
+    },
+    "notes": [
+      "No new skill or role icon artwork; no baked text.",
+      "Badge-occluded rim segments continue adjacent painted rim pixels; occluded backplate extends clean side-panel pixels.",
+      "Gauge masks and full fills retain their canonical geometry and continuous pointed endpoints."
+    ],
+    "paintedExtractionAssetCount": 37,
+    "retainedStateAssetCount": 8
+  },
+  "iconArtwork": {
+    "included": false,
+    "policy": "Reuse existing skill, class and role icons; this package only supplies empty artwork Images, frames and masks."
+  },
+  "text": {
+    "bakedIntoSprites": false,
+    "runtime": [
+      "player health",
+      "boss name and percent",
+      "cast time",
+      "party names",
+      "job resource values",
+      "key bindings",
+      "cooldown values"
+    ]
+  },
+  "import": {
+    "type": "Sprite",
+    "spriteMode": "Single",
+    "mesh": "FullRect",
+    "alphaIsTransparency": true,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "pixelsPerUnit": 100,
+    "filter": "Bilinear",
+    "wrap": "Clamp",
+    "mipmaps": false,
+    "compression": "Uncompressed",
+    "slice": "Do not resize pointed or octagonal art with arbitrary nine-slicing."
+  },
+  "coordinateSystem": {
+    "origin": "top-left",
+    "units": "native pixels",
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "borderOrder": [
+      "left",
+      "bottom",
+      "right",
+      "top"
+    ]
+  },
+  "gauges": {
+    "boss": {
+      "canvas": [
+        1280,
+        96
+      ],
+      "outer": [
+        [
+          14,
+          48
+        ],
+        [
+          44,
+          22
+        ],
+        [
+          1236,
+          22
+        ],
+        [
+          1266,
+          48
+        ],
+        [
+          1236,
+          74
+        ],
+        [
+          44,
+          74
+        ]
+      ],
+      "inner": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "movingTipWidth": 22,
+      "frame": "Boss/boss-frame",
+      "track": "Boss/boss-track",
+      "fill": "Boss/boss-fill",
+      "endcaps": [
+        {
+          "asset": "Boss/boss-gem-left",
+          "rect": [
+            -16,
+            0,
+            96,
+            96
+          ]
+        },
+        {
+          "asset": "Boss/boss-gem-right",
+          "rect": [
+            1200,
+            0,
+            96,
+            96
+          ]
+        }
+      ],
+      "innerMask": "Boss/boss-inner-mask",
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    },
+    "cast": {
+      "canvas": [
+        512,
+        48
+      ],
+      "outer": [
+        [
+          4,
+          24
+        ],
+        [
+          17,
+          17
+        ],
+        [
+          495,
+          17
+        ],
+        [
+          508,
+          24
+        ],
+        [
+          495,
+          31
+        ],
+        [
+          17,
+          31
+        ]
+      ],
+      "inner": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "movingTipWidth": 7,
+      "frame": "Boss/cast-frame",
+      "track": "Boss/cast-track",
+      "fill": "Boss/cast-fill",
+      "innerMask": "Boss/cast-inner-mask",
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    },
+    "player": {
+      "canvas": [
+        1024,
+        96
+      ],
+      "outer": [
+        [
+          12,
+          48
+        ],
+        [
+          60,
+          10
+        ],
+        [
+          964,
+          10
+        ],
+        [
+          1012,
+          48
+        ],
+        [
+          964,
+          86
+        ],
+        [
+          60,
+          86
+        ]
+      ],
+      "inner": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "movingTipWidth": 36,
+      "frame": "Player/gauge-frame",
+      "track": "Player/gauge-track",
+      "fills": {
+        "hp": "Player/hp-fill",
+        "resource": "Player/resource-fill"
+      },
+      "endcaps": [],
+      "innerMask": "Player/gauge-inner-mask",
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    },
+    "party": {
+      "canvas": [
+        320,
+        40
+      ],
+      "outer": [
+        [
+          4,
+          20
+        ],
+        [
+          20,
+          6
+        ],
+        [
+          300,
+          6
+        ],
+        [
+          316,
+          20
+        ],
+        [
+          300,
+          34
+        ],
+        [
+          20,
+          34
+        ]
+      ],
+      "inner": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "movingTipWidth": 10,
+      "frame": "Party/bar-frame",
+      "track": "Party/bar-track",
+      "fill": "Party/bar-fill",
+      "innerMask": "Party/bar-inner-mask",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "fillRatio": "current / maximum",
+      "fillMode": "clip the fixed full-width fill to the full inner polygon and the moving pointed end",
+      "atZero": "hide fill; keep full track",
+      "atFull": "use complete inner polygon including both pointed tips",
+      "frameAndText": "fixed layers, outside fill clipping"
+    }
+  },
+  "hub": {
+    "canvas": [
+      384,
+      384
+    ],
+    "outer": [
+      [
+        100,
+        8
+      ],
+      [
+        284,
+        8
+      ],
+      [
+        376,
+        100
+      ],
+      [
+        376,
+        284
+      ],
+      [
+        284,
+        376
+      ],
+      [
+        100,
+        376
+      ],
+      [
+        8,
+        284
+      ],
+      [
+        8,
+        100
+      ]
+    ],
+    "inner": [
+      [
+        120,
+        37
+      ],
+      [
+        268,
+        37
+      ],
+      [
+        347,
+        117
+      ],
+      [
+        347,
+        274
+      ],
+      [
+        268,
+        350
+      ],
+      [
+        118,
+        350
+      ],
+      [
+        35,
+        274
+      ],
+      [
+        35,
+        117
+      ]
+    ],
+    "crystalBounds": [
+      102,
+      42,
+      180,
+      302
+    ],
+    "badgeRect": [
+      128,
+      -24,
+      128,
+      80
+    ],
+    "innerMask": "Hub/hub-inner-mask",
+    "background": "Hub/hub-background",
+    "crystal": "Hub/hub-crystal",
+    "frame": "Hub/hub-frame",
+    "blankBadge": "Hub/ultimate-badge",
+    "innerPolygon": [
+      [
+        120,
+        37
+      ],
+      [
+        268,
+        37
+      ],
+      [
+        347,
+        117
+      ],
+      [
+        347,
+        274
+      ],
+      [
+        268,
+        350
+      ],
+      [
+        118,
+        350
+      ],
+      [
+        35,
+        274
+      ],
+      [
+        35,
+        117
+      ]
+    ],
+    "innerBounds": [
+      35,
+      37,
+      312,
+      313
+    ]
+  },
+  "skills": {
+    "canvas": [
+      192,
+      192
+    ],
+    "outer": [
+      [
+        28,
+        8
+      ],
+      [
+        164,
+        8
+      ],
+      [
+        184,
+        28
+      ],
+      [
+        184,
+        164
+      ],
+      [
+        164,
+        184
+      ],
+      [
+        28,
+        184
+      ],
+      [
+        8,
+        164
+      ],
+      [
+        8,
+        28
+      ]
+    ],
+    "inner": [
+      [
+        32,
+        20
+      ],
+      [
+        160,
+        20
+      ],
+      [
+        172,
+        32
+      ],
+      [
+        172,
+        160
+      ],
+      [
+        160,
+        172
+      ],
+      [
+        32,
+        172
+      ],
+      [
+        20,
+        160
+      ],
+      [
+        20,
+        32
+      ]
+    ],
+    "innerBounds": [
+      20,
+      20,
+      152,
+      152
+    ],
+    "layerOrder": [
+      "Skills/slot-background",
+      "optional existing artwork supplied by main project; new icons excluded",
+      "States/cooldown-overlay (runtime radial fill)",
+      "one Skills/slot-frame-*",
+      "blank Skills/key-badge or key-badge-wide",
+      "runtime key / cooldown text"
+    ]
+  },
+  "legacyVectorSources": {
+    "path": "Assets/UI/AstellaPrismV4/Source/**/*.svg",
+    "status": "Historical structural/coordinate references, not the editable source of current painted RGB artwork.",
+    "generator": "UI-Production/PrismV4/generate-prism.cjs",
+    "overwriteProtection": "Legacy generator refuses to run while the painted transparent atlas exists."
+  },
+  "layerOrder": {
+    "gauge": [
+      "full track",
+      "full-width fill clipped by live ratio",
+      "frame",
+      "boss gems if applicable",
+      "runtime text"
+    ],
+    "slot": [
+      "background",
+      "existing game icon clipped by inner mask",
+      "cooldown overlay",
+      "state frame",
+      "blank key badge",
+      "runtime labels"
+    ],
+    "center": [
+      "background",
+      "central crystal",
+      "state overlay",
+      "frame",
+      "blank ultimate badge",
+      "runtime key"
+    ]
+  },
+  "bindings": {
+    "playerHealth": [
+      "AstellaOrnateHUD.playerHpFill",
+      "AstellaOrnateHUD.playerHpText"
+    ],
+    "boss": [
+      "AstellaOrnateHUD.bossHpFill",
+      "bossTitleText",
+      "bossPercentText",
+      "castFill",
+      "castNameText",
+      "castTimeText"
+    ],
+    "rightJobResource": {
+      "owner": "AstellaClassJobHUD",
+      "exclude": ".ultimate",
+      "source": "View.fillMask / fillArtwork / valueText / labelText"
+    },
+    "centralUltimate": {
+      "owner": "AstellaClassUltimateHUD",
+      "source": "ChargeRatio / CurrentState / views[]",
+      "readiness": "AstellaPlayerHUDV3.IsReady"
+    },
+    "party": "AstellaPartyHUDV4.source and rows[]; retain existing callbacks and icon registry.",
+    "skills": {
+      "owner": "AstellaOrnateHUD.slots[]",
+      "semanticOrder": [
+        "Gcd1",
+        "Gcd2",
+        "OffGcd1",
+        "Counter",
+        "Job1",
+        "Movement",
+        "Identity",
+        "OffGcd2"
+      ],
+      "labels": "LocalInputBindings.Label",
+      "artwork": "Reuse RaidUIPresentation.Settings.Icon(skill.id)"
+    }
+  },
+  "tools": {
+    "import": "Tools > Astella > Prism V4 > Import Sprites",
+    "examples": "Tools > Astella > Prism V4 > Build Example Prefabs",
+    "automaticMainApplication": false
+  },
+  "assets": [
+    {
+      "id": "Boss/boss-frame",
+      "png": "Sprites/Boss/boss-frame.png",
+      "svg": "Source/Boss/boss-frame.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 104944,
+      "translucentPixels": 17936,
+      "pngSha256": "1889b72736fa81097246beaf48807ac6e7fd0ee0465081e6f70d195014a3502d",
+      "svgSha256": "0af4ce6886b421fe888b38d313e9af1c8865b82907a689b9fc587fa7c42148f3",
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "movingTipWidth": 22,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/boss-track",
+      "png": "Sprites/Boss/boss-track.png",
+      "svg": "Source/Boss/boss-track.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77068,
+      "translucentPixels": 120,
+      "pngSha256": "2926b63ce2bb1bf7030e0aaef0f47182945a2806d518ae2fbedea5e73de075c9",
+      "svgSha256": "6f3cba7e019c8a4bd1420d2cd96270776eefd55d19176c3af9c75df8c80384f7",
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "movingTipWidth": 22,
+      "layer": "full pointed track",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/boss-fill",
+      "png": "Sprites/Boss/boss-fill.png",
+      "svg": "Source/Boss/boss-fill.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77068,
+      "translucentPixels": 120,
+      "pngSha256": "6cea15f70e9a1b9bebfbb54bc658968399a8b68637a1fc11072ec2f69f611c51",
+      "svgSha256": "038e2955a11998ae540a487bb0d38ae4d78324353f4622f0dba32869a9092f49",
+      "innerBounds": [
+        27,
+        29,
+        1226,
+        38
+      ],
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "movingTipWidth": 22,
+      "layer": "full 100% fill; runtime mask changes ratio",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/cast-frame",
+      "png": "Sprites/Boss/cast-frame.png",
+      "svg": "Source/Boss/cast-frame.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 21456,
+      "translucentPixels": 3120,
+      "pngSha256": "ea51d20423b86eebf4c1728405870635e6fe7e5b03f7f07e92ac27532587f9df",
+      "svgSha256": "257288e571ab2d6f5aa231e03214e28333c74e95795e8cf968acb1fbbab6dd9c",
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "movingTipWidth": 7,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/cast-track",
+      "png": "Sprites/Boss/cast-track.png",
+      "svg": "Source/Boss/cast-track.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 20760,
+      "translucentPixels": 32,
+      "pngSha256": "9b33134c66f4855f6c8689763de78324b8e8d164a78375fb6774129002ac76b0",
+      "svgSha256": "ff245dbe7640ce081478482008bbe7e5232a9e022b6b2e607e8ef4dcd82bb6e0",
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "movingTipWidth": 7,
+      "layer": "full pointed track",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/cast-fill",
+      "png": "Sprites/Boss/cast-fill.png",
+      "svg": "Source/Boss/cast-fill.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 20760,
+      "translucentPixels": 32,
+      "pngSha256": "41caa05b6debca192c01ed0df4037c82c3e8efd7cf1a55a1d241bcda931f4af8",
+      "svgSha256": "5e5312ace03c6240ab77cd139dd070124bf91d4f0d9f560565c98de56e4142e9",
+      "innerBounds": [
+        15,
+        20,
+        482,
+        8
+      ],
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "movingTipWidth": 7,
+      "layer": "full 100% fill; runtime mask changes ratio",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Player/gauge-frame",
+      "png": "Sprites/Player/gauge-frame.png",
+      "svg": "Source/Player/gauge-frame.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 81528,
+      "translucentPixels": 16776,
+      "pngSha256": "93fa540ff7127f1231bbf4714debb3d0d730c762f5862fa8c4b5d04456292e63",
+      "svgSha256": "62aa222d95761bfdcce5970bcf713f6e05bcbc9b1f9b37dfe1f12d6a91c2c0b1",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Player/gauge-track",
+      "png": "Sprites/Player/gauge-track.png",
+      "svg": "Source/Player/gauge-track.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "4e0950322214aaaa56dc09427e9937e1f67e20af0fa4374774c6a3b79430de96",
+      "svgSha256": "abbac955fc1488130b19e929df7766c7188089836896018d17e5f6cb38c0e6ed",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "full pointed track",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Player/hp-fill",
+      "png": "Sprites/Player/hp-fill.png",
+      "svg": "Source/Player/hp-fill.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "60f413e019974d54ad117eada1d169883a10f8dbdc78ac76ae617b206e3df0aa",
+      "svgSha256": "68d0d04f75c54a56790905ad78a1bdcb1aa5748b16fac769c3f05679ea07d673",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "full 100% health fill; runtime mask changes ratio",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Player/resource-fill",
+      "png": "Sprites/Player/resource-fill.png",
+      "svg": "Source/Player/resource-fill.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "d4afcccd44a24d9f97cf1959052fb35c0215fa97d7caf1d68ee35b660419059b",
+      "svgSha256": "7775498d0bc41729f37d56867f9fd75f0efa165c577d5f58bb6f33f5652e8361",
+      "innerBounds": [
+        29,
+        18,
+        966,
+        60
+      ],
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "movingTipWidth": 36,
+      "layer": "full 100% job-resource fill; runtime mask changes ratio",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Party/bar-frame",
+      "png": "Sprites/Party/bar-frame.png",
+      "svg": "Source/Party/bar-frame.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8952,
+      "translucentPixels": 3848,
+      "pngSha256": "050ca8f4576cbfcd2dff715ad5491c8181d2041ea6b5809c234aef9f31bdccc7",
+      "svgSha256": "307a2c3340c36b5f851d8638e79117f071c84cf2e553f605ac475e2526ac002b",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "fixed transparent frame",
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Party/bar-track",
+      "png": "Sprites/Party/bar-track.png",
+      "svg": "Source/Party/bar-track.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "192fba24069bfc12e9ca7886b70ece15499c13868f5bb0162ee04d0bad3bb489",
+      "svgSha256": "d1e8e2c544881faba2d6daabbf13b7531318d4621584f6f9d537ca98a9debb00",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "full pointed track",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Party/bar-fill",
+      "png": "Sprites/Party/bar-fill.png",
+      "svg": "Source/Party/bar-fill.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "bcdd33aa5e145e482f23a299ce48c730f9fad13cb978e5bdc3ace08508a12dfe",
+      "svgSha256": "68d07c35e1d89fb563f030d7a8f368a76798b46a8671c3fc9ae204f33641996b",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "full 100% fill; runtime mask changes ratio",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/boss-gem-left",
+      "png": "Sprites/Boss/boss-gem-left.png",
+      "svg": "Source/Boss/boss-gem-left.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 6116,
+      "translucentPixels": 3100,
+      "pngSha256": "622b864731d6a11bc88303ef097b20be2d662509e0509d951cfae214682e727c",
+      "svgSha256": "fd4d28e4b36e88b6c33456f1a14ee58e9de9ed752824b11dd22c85c43f4388a8",
+      "layer": "boss-only detached endcap",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/boss-gem-right",
+      "png": "Sprites/Boss/boss-gem-right.png",
+      "svg": "Source/Boss/boss-gem-right.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 6081,
+      "translucentPixels": 3135,
+      "pngSha256": "e767337665a2b41abb99af24f9998ae5f3678c72f7783270bf87ecb46099beb7",
+      "svgSha256": "eda09210322579e31291617dbf79e2cc61dcdb9084aa16573b47fda92ce22106",
+      "layer": "boss-only detached endcap",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Party/role-frame",
+      "png": "Sprites/Party/role-frame.png",
+      "svg": "Source/Party/role-frame.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 7162,
+      "translucentPixels": 1923,
+      "pngSha256": "b1cf9370e153b23af15913f688445a5d3997c5c1c3ed9f8f4f109d78609b9932",
+      "svgSha256": "46c9fa0f2980e5282d030ae4b6dae52de90ffc4428b638a35b07d7039b79e6c0",
+      "innerPolygon": [
+        [
+          22,
+          14
+        ],
+        [
+          74,
+          14
+        ],
+        [
+          82,
+          22
+        ],
+        [
+          82,
+          74
+        ],
+        [
+          74,
+          82
+        ],
+        [
+          22,
+          82
+        ],
+        [
+          14,
+          74
+        ],
+        [
+          14,
+          22
+        ]
+      ],
+      "layer": "fixed role-slot frame",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        14,
+        14,
+        68,
+        68
+      ]
+    },
+    {
+      "id": "Party/role-background",
+      "png": "Sprites/Party/role-background.png",
+      "svg": "Source/Party/role-background.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 4704,
+      "translucentPixels": 4512,
+      "pngSha256": "17878179536eb06c1232759a6e7281a95a93984551398382e8c542099121882b",
+      "svgSha256": "5db23326a0c83f7714ca4cce39aea7b20a35a6f7c691460cdc8c43265f2cd1e6",
+      "innerPolygon": [
+        [
+          22,
+          14
+        ],
+        [
+          74,
+          14
+        ],
+        [
+          82,
+          22
+        ],
+        [
+          82,
+          74
+        ],
+        [
+          74,
+          82
+        ],
+        [
+          22,
+          82
+        ],
+        [
+          14,
+          74
+        ],
+        [
+          14,
+          22
+        ]
+      ],
+      "layer": "empty role-slot backplate; artwork excluded",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        14,
+        14,
+        68,
+        68
+      ]
+    },
+    {
+      "id": "Party/role-inner-mask",
+      "png": "Sprites/Party/role-inner-mask.png",
+      "svg": "Source/Party/role-inner-mask.svg",
+      "canvas": [
+        96,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 4704,
+      "translucentPixels": 32,
+      "pngSha256": "d798e5d2b310bc0ccbb59fd5b7c499eae1fc1b0d1eefab64e5f714bb364233af",
+      "svgSha256": "fba3162650a565299ea6ef6ef55c0f39bceffbe115d2b8277698751d0a794ae9",
+      "innerPolygon": [
+        [
+          22,
+          14
+        ],
+        [
+          74,
+          14
+        ],
+        [
+          82,
+          22
+        ],
+        [
+          82,
+          74
+        ],
+        [
+          74,
+          82
+        ],
+        [
+          22,
+          82
+        ],
+        [
+          14,
+          74
+        ],
+        [
+          14,
+          22
+        ]
+      ],
+      "layer": "white alpha role-slot mask; artwork excluded",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        14,
+        14,
+        68,
+        68
+      ]
+    },
+    {
+      "id": "Hub/hub-frame",
+      "png": "Sprites/Hub/hub-frame.png",
+      "svg": "Source/Hub/hub-frame.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 116239,
+      "translucentPixels": 30629,
+      "pngSha256": "d01a59e47f7eefa272f202e7dedabc3bde78f885ca6cf39ce96893e2003bb034",
+      "svgSha256": "0742f1153778e14adcb08d3caf2558c65f00bd635f7cd5f13a68310614d02f27",
+      "innerPolygon": [
+        [
+          120,
+          37
+        ],
+        [
+          268,
+          37
+        ],
+        [
+          347,
+          117
+        ],
+        [
+          347,
+          274
+        ],
+        [
+          268,
+          350
+        ],
+        [
+          118,
+          350
+        ],
+        [
+          35,
+          274
+        ],
+        [
+          35,
+          117
+        ]
+      ],
+      "layer": "fixed octagon frame",
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        35,
+        37,
+        312,
+        313
+      ]
+    },
+    {
+      "id": "Hub/hub-background",
+      "png": "Sprites/Hub/hub-background.png",
+      "svg": "Source/Hub/hub-background.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 62259,
+      "translucentPixels": 85197,
+      "pngSha256": "b833d666e9add1d1e5492036b2cb037ec35fcaa404d5bec8fdf360816248b84e",
+      "svgSha256": "931e2517691e2e60f46104666fcfa29f23bf0c2481226ced43b436987d360d5b",
+      "innerPolygon": [
+        [
+          120,
+          37
+        ],
+        [
+          268,
+          37
+        ],
+        [
+          347,
+          117
+        ],
+        [
+          347,
+          274
+        ],
+        [
+          268,
+          350
+        ],
+        [
+          118,
+          350
+        ],
+        [
+          35,
+          274
+        ],
+        [
+          35,
+          117
+        ]
+      ],
+      "layer": "full octagon glass backplate",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        35,
+        37,
+        312,
+        313
+      ]
+    },
+    {
+      "id": "Hub/hub-crystal",
+      "png": "Sprites/Hub/hub-crystal.png",
+      "svg": "Source/Hub/hub-crystal.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 119874,
+      "translucentPixels": 27582,
+      "pngSha256": "ecb8a889df8339bcc1ff3f35dc0cb9b24105d8c38af4689c7dce2c61faeb03d2",
+      "svgSha256": "d407eb15c3ca52c9935e102e63db0a482f393ea0cdf680bb49880b0774187d84",
+      "crystalBounds": [
+        102,
+        42,
+        180,
+        302
+      ],
+      "majorFacetCount": 6,
+      "layer": "separate faceted amethyst",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      }
+    },
+    {
+      "id": "Hub/ultimate-badge",
+      "png": "Sprites/Hub/ultimate-badge.png",
+      "svg": "Source/Hub/ultimate-badge.svg",
+      "canvas": [
+        128,
+        80
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 3646,
+      "translucentPixels": 6547,
+      "pngSha256": "9c29fd644ca1846e765f099997e00ca2054ac21926e6fe3e0096dc63dec6ae01",
+      "svgSha256": "1d6e473b8458295d05f7cfa09fbf1f398b87304ecd14d71e9565b7b294c34c40",
+      "layer": "blank V badge; text supplied by runtime",
+      "textRect": [
+        23,
+        16,
+        82,
+        48
+      ],
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      }
+    },
+    {
+      "id": "Skills/slot-background",
+      "png": "Sprites/Skills/slot-background.png",
+      "svg": "Source/Skills/slot-background.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 14024,
+      "translucentPixels": 22840,
+      "pngSha256": "e9c31c7e4dc5c8e7bb440b7dea68f4b2aa853d0b81f519b8cf1986197d844386",
+      "svgSha256": "2ac4bcda7b3a7e49eaeef7b6d27943bd2e7621d3649d306bd68b02964c907cec",
+      "layer": "slot backplate",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/slot-frame-normal",
+      "png": "Sprites/Skills/slot-frame-normal.png",
+      "svg": "Source/Skills/slot-frame-normal.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 29838,
+      "translucentPixels": 6694,
+      "pngSha256": "01484c45b9f04725dde9f12ab68933cfc734777e6345128b73c5a715d6081a8c",
+      "svgSha256": "ea23fb9e0f46d5226175c508fb160b7ab58c9f0bb41e42c02aa9fcebdef7299d",
+      "layer": "one active state frame",
+      "state": "normal",
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/slot-frame-hover",
+      "png": "Sprites/Skills/slot-frame-hover.png",
+      "svg": "Source/Skills/slot-frame-hover.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 29838,
+      "translucentPixels": 6694,
+      "pngSha256": "2bdecce082b513a107ab6b42477713e073b47ff69ec30721d0488404e46221a8",
+      "svgSha256": "e4bd2d512aed2d93a8775a151c19076e9d25cb20780e92113d9e818a20cd5ed3",
+      "layer": "one active state frame",
+      "state": "hover",
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/slot-frame-pressed",
+      "png": "Sprites/Skills/slot-frame-pressed.png",
+      "svg": "Source/Skills/slot-frame-pressed.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 29838,
+      "translucentPixels": 6694,
+      "pngSha256": "52476ba441de329f8e4ee1fdd595a31295116b8fe30adb9587a322a7e1e040ab",
+      "svgSha256": "5e483e740e2904d5a7550403d2d8024a56548f170c2cb5c7098bc0711e764a91",
+      "layer": "one active state frame",
+      "state": "pressed",
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/slot-frame-focused",
+      "png": "Sprites/Skills/slot-frame-focused.png",
+      "svg": "Source/Skills/slot-frame-focused.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 29838,
+      "translucentPixels": 6694,
+      "pngSha256": "9b771e750e1f5a5cdc941be7372948df677d45645c16efca75dda11c77bd6bc1",
+      "svgSha256": "a059d2dc948a1a80eea342ef760abf5454688bae2fe9e25208d591d1c70d7918",
+      "layer": "one active state frame",
+      "state": "focused",
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/slot-frame-disabled",
+      "png": "Sprites/Skills/slot-frame-disabled.png",
+      "svg": "Source/Skills/slot-frame-disabled.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 29838,
+      "translucentPixels": 6694,
+      "pngSha256": "f7ede4338b4d7a5a0e0557932ccf88dba724e655ba43f522c0628c3bb5ab633e",
+      "svgSha256": "faf10be3add8658426e2e52544d0f1915572418dff2a3f7d4e340b09925e7a57",
+      "layer": "one active state frame",
+      "state": "disabled",
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "transparentInterior": true,
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/slot-inner-mask",
+      "png": "Sprites/Skills/slot-inner-mask.png",
+      "svg": "Source/Skills/slot-inner-mask.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 14024,
+      "translucentPixels": 48,
+      "pngSha256": "fc8fbaf951506be34912e338b43e285d6bb4a24422202882155c3e7cf4cd3592",
+      "svgSha256": "4bbaa540c98d0b22d5fa7583f74b4cfb0c065326a223bcc364f85ddc510b7a59",
+      "layer": "white alpha icon mask",
+      "innerPolygon": [
+        [
+          32,
+          20
+        ],
+        [
+          160,
+          20
+        ],
+        [
+          172,
+          32
+        ],
+        [
+          172,
+          160
+        ],
+        [
+          160,
+          172
+        ],
+        [
+          32,
+          172
+        ],
+        [
+          20,
+          160
+        ],
+        [
+          20,
+          32
+        ]
+      ],
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        20,
+        20,
+        152,
+        152
+      ]
+    },
+    {
+      "id": "Skills/key-badge",
+      "png": "Sprites/Skills/key-badge.png",
+      "svg": "Source/Skills/key-badge.svg",
+      "canvas": [
+        72,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 697,
+      "translucentPixels": 2731,
+      "pngSha256": "5f3ff9c3593550f7484f55d2c1e9e9aa27c9cf6205f96ff1783cb129f04494db",
+      "svgSha256": "40da2430ce632e24531b2e9525e68da4410a48ec760c8e40ba344036ad8ffda9",
+      "layer": "blank runtime key badge",
+      "textRect": [
+        12,
+        8,
+        48,
+        32
+      ],
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      }
+    },
+    {
+      "id": "Skills/key-badge-wide",
+      "png": "Sprites/Skills/key-badge-wide.png",
+      "svg": "Source/Skills/key-badge-wide.svg",
+      "canvas": [
+        112,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 903,
+      "translucentPixels": 4426,
+      "pngSha256": "f8afc871f8b907fb6e0cdb2c3ea2255dece99f1e03f9964c790e734c216293b4",
+      "svgSha256": "d31a38a1fd5bb58e7e95727c9168f529ad24c9ea585231dc9a6dd7447265f854",
+      "layer": "blank runtime key badge",
+      "textRect": [
+        12,
+        8,
+        88,
+        32
+      ],
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      }
+    },
+    {
+      "id": "States/cooldown-mask",
+      "png": "Sprites/States/cooldown-mask.png",
+      "svg": "Source/States/cooldown-mask.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 60,
+      "pngSha256": "73f2c88eaef0e4217a51a1903f08406bad3d01d00e6e4cb033835b6ff6c9bbfb",
+      "svgSha256": "4bbaa540c98d0b22d5fa7583f74b4cfb0c065326a223bcc364f85ddc510b7a59",
+      "layer": "alpha mask for radial cooldown; runtime supplies ratio",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "States/cooldown-overlay",
+      "png": "Sprites/States/cooldown-overlay.png",
+      "svg": "Source/States/cooldown-overlay.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 25180,
+      "pngSha256": "27c8da77130629437ed048c90df10064f82df36304b68058b64e947e968f504a",
+      "svgSha256": "980e1ac95a9ae76dd861989e43524b438819c77c319f1aa8e68c0118563ca7b0",
+      "layer": "radial-fill cooldown shade; no baked timer",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "States/disabled-overlay",
+      "png": "Sprites/States/disabled-overlay.png",
+      "svg": "Source/States/disabled-overlay.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 25180,
+      "pngSha256": "8b4c76cdbd4711e9bff85bd99321d1dde1c4786804c065130ff6fb0a535792a6",
+      "svgSha256": "4d55a02147b59d824cd3ceeb0825398cf819efa98f86a12a24f45ecf2e454161",
+      "layer": "disabled desaturation/tint overlay",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "States/hover-overlay",
+      "png": "Sprites/States/hover-overlay.png",
+      "svg": "Source/States/hover-overlay.svg",
+      "canvas": [
+        192,
+        192
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 11684,
+      "translucentPixels": 25180,
+      "pngSha256": "6f49e38bc796246891523352990e7f8826a716f9ba96442b8e5bdfffa10e0eeb",
+      "svgSha256": "d7c4405ec05b89bb284dc51f478b39a01f580c832a93494e2076b4bf5ebba157",
+      "layer": "subtle hover glass light",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "Boss/boss-inner-mask",
+      "png": "Sprites/Boss/boss-inner-mask.png",
+      "svg": "Source/Boss/boss-inner-mask.svg",
+      "canvas": [
+        1280,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 77068,
+      "translucentPixels": 120,
+      "pngSha256": "e1f7038313009f1d8ea1974f4d70fd87d9aeb50edee29b013fcae5468789a3d2",
+      "svgSha256": "29075eb8afc25b6a825b60e6f2e4533120294316807182fcb722c08cc7f931de",
+      "innerPolygon": [
+        [
+          27,
+          48
+        ],
+        [
+          49,
+          29
+        ],
+        [
+          1231,
+          29
+        ],
+        [
+          1253,
+          48
+        ],
+        [
+          1231,
+          67
+        ],
+        [
+          49,
+          67
+        ]
+      ],
+      "layer": "white alpha inner mask",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Boss/cast-inner-mask",
+      "png": "Sprites/Boss/cast-inner-mask.png",
+      "svg": "Source/Boss/cast-inner-mask.svg",
+      "canvas": [
+        512,
+        48
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 20760,
+      "translucentPixels": 32,
+      "pngSha256": "fc31352d86380266fc21cad0af58be51cc7f6c37d4b16baa58b9a51f923f8bcc",
+      "svgSha256": "de0c1cf20c925263ec14a5c9443d9ad6dadcddfc8c40884040b2d24e51b2ab6a",
+      "innerPolygon": [
+        [
+          15,
+          24
+        ],
+        [
+          22,
+          20
+        ],
+        [
+          490,
+          20
+        ],
+        [
+          497,
+          24
+        ],
+        [
+          490,
+          28
+        ],
+        [
+          22,
+          28
+        ]
+      ],
+      "layer": "white alpha inner mask",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Player/gauge-inner-mask",
+      "png": "Sprites/Player/gauge-inner-mask.png",
+      "svg": "Source/Player/gauge-inner-mask.svg",
+      "canvas": [
+        1024,
+        96
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 42408,
+      "translucentPixels": 192,
+      "pngSha256": "7101a9026c81720b4deceb115bcaf1d17a4fdc0ccf0a098f206df8950850eb74",
+      "svgSha256": "0516274414a77f75123a84df3cd6f570ce556baad70de6064990f508d734804f",
+      "innerPolygon": [
+        [
+          29,
+          48
+        ],
+        [
+          65,
+          18
+        ],
+        [
+          959,
+          18
+        ],
+        [
+          995,
+          48
+        ],
+        [
+          959,
+          78
+        ],
+        [
+          65,
+          78
+        ]
+      ],
+      "layer": "white alpha inner mask",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Party/bar-inner-mask",
+      "png": "Sprites/Party/bar-inner-mask.png",
+      "svg": "Source/Party/bar-inner-mask.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "34e879b0537726fade5b79ab5a046d35fcd7b054aa031314ee74ef4dc8b184b6",
+      "svgSha256": "ef797242567fe68f3b66d6b29841f96a79f82ad956049e41b135262af3d64f0a",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "layer": "white alpha inner mask",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Hub/hub-inner-mask",
+      "png": "Sprites/Hub/hub-inner-mask.png",
+      "svg": "Source/Hub/hub-inner-mask.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 62259,
+      "translucentPixels": 514,
+      "pngSha256": "f1871017879e31d32af8e7d861f8d271a9fc0dc9fab7b4da65a01cc633b009d0",
+      "svgSha256": "42a25230e5d8b21c86b8a7263d577ad669e9ccd04aee138abc74dc8d66fbcb3f",
+      "innerPolygon": [
+        [
+          120,
+          37
+        ],
+        [
+          268,
+          37
+        ],
+        [
+          347,
+          117
+        ],
+        [
+          347,
+          274
+        ],
+        [
+          268,
+          350
+        ],
+        [
+          118,
+          350
+        ],
+        [
+          35,
+          274
+        ],
+        [
+          35,
+          117
+        ]
+      ],
+      "layer": "white alpha inner mask",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "geometric alpha mask for current painted extraction",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Frames.ps1"
+      },
+      "innerBounds": [
+        35,
+        37,
+        312,
+        313
+      ]
+    },
+    {
+      "id": "Hub/ready-glow",
+      "png": "Sprites/Hub/ready-glow.png",
+      "svg": "Source/Hub/ready-glow.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 58718,
+      "translucentPixels": 88738,
+      "pngSha256": "f7e76647d8d2cef419da3c523eb0a843d83cee5d4a9ff04df75cf5c3c932c907",
+      "svgSha256": "a7b5a48676139a2c4022c0799258a67c15e50855ba5f7eae0e72f56676939c00",
+      "layer": "optional readiness light inside hub only",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "Hub/disabled-overlay",
+      "png": "Sprites/Hub/disabled-overlay.png",
+      "svg": "Source/Hub/disabled-overlay.svg",
+      "canvas": [
+        384,
+        384
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 49512,
+      "translucentPixels": 97944,
+      "pngSha256": "c656f4898695a6164dbc05e9b47ddb83adf6318e505c79adfb95a3ca4611d9cc",
+      "svgSha256": "80c4d5efb9aa94a916df1f607fa3f3336227fc842113be79c98066e1ad8956c5",
+      "innerPolygon": [
+        [
+          108,
+          25
+        ],
+        [
+          276,
+          25
+        ],
+        [
+          359,
+          108
+        ],
+        [
+          359,
+          276
+        ],
+        [
+          276,
+          359
+        ],
+        [
+          108,
+          359
+        ],
+        [
+          25,
+          276
+        ],
+        [
+          25,
+          108
+        ]
+      ],
+      "layer": "optional unavailable hub tint",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "Party/bar-fill-critical",
+      "png": "Sprites/Party/bar-fill-critical.png",
+      "svg": "Source/Party/bar-fill-critical.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 48,
+      "pngSha256": "381a6a4597f49bcb9c64c48d8a36bb5625214957d070885ac8546a8cfaa11c65",
+      "svgSha256": "c1ddf4d28be53e06656a6e9e8cc054d411c2168943a480c6e403a0bc2bbef67d",
+      "innerBounds": [
+        14,
+        12,
+        292,
+        16
+      ],
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "movingTipWidth": 10,
+      "layer": "critical-health alternative full fill",
+      "svgRole": "legacy structural reference; does not reproduce the current PNG",
+      "pngProvenance": {
+        "method": "mechanical extraction or deterministic appearance state derived from painted atlas",
+        "atlas": "UI-Production/PrismV4/raster-recovery/painted-transparent-atlas.png",
+        "extractor": "UI-Production/PrismV4/raster-recovery/Extract-Gauges.ps1"
+      }
+    },
+    {
+      "id": "Party/selected-overlay",
+      "png": "Sprites/Party/selected-overlay.png",
+      "svg": "Source/Party/selected-overlay.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 7684,
+      "translucentPixels": 5116,
+      "pngSha256": "b12fd39004605d4ffb88440318969d2a5b538d847498f67aaf97a702529c189f",
+      "svgSha256": "f38e52b727c5aef09ba7950eea437c6373a4a054ed05cb4f8bc70346994e8424",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "layer": "optional selected party-bar light",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    },
+    {
+      "id": "Party/dead-overlay",
+      "png": "Sprites/Party/dead-overlay.png",
+      "svg": "Source/Party/dead-overlay.svg",
+      "canvas": [
+        320,
+        40
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ],
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "preserveAspect": true,
+      "rgba": true,
+      "textBakedIntoAsset": false,
+      "transparentPixels": 8264,
+      "translucentPixels": 4536,
+      "pngSha256": "c76a5f8b2476a577ec6a452e254040cce886cc384fb92f093e706f92f7df03dd",
+      "svgSha256": "db874b78d6ccdfe5476047c365e7823544ccb2603f83b46267c4e3f0c6a6f2d3",
+      "innerPolygon": [
+        [
+          14,
+          20
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          296,
+          12
+        ],
+        [
+          306,
+          20
+        ],
+        [
+          296,
+          28
+        ],
+        [
+          24,
+          28
+        ]
+      ],
+      "layer": "optional defeated party-bar tint",
+      "svgRole": "retained deterministic structural state/mask source",
+      "pngProvenance": {
+        "method": "retained deterministic structural state overlay/mask"
+      }
+    }
+  ],
+  "validation": {
+    "report": "UI-Production/PrismV4/verification.json",
+    "scope": "Independent resource-kit verification, not the current main scene's integration/Play status; consult the separate main-project evidence.",
+    "unityPlayVerified": false,
+    "liveBindingsApplied": false
+  }
+}
