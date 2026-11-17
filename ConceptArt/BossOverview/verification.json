@@ -160,5 +160,20 @@
     "path": "../Part1Stage02NormalGripFix_v2/01-character-sheet.png",
     "status": "pass",
     "checks": "Grip/arm correction and inset flower retained. Source hash, catalog, thumbnail/modal and comparison verified."
+  },
+  "latest_display_repair": {
+    "date": "2026-11-17",
+    "status": "pass",
+    "report": "display-verification.json",
+    "original_pngs_unchanged": 20,
+    "jpeg_thumbnails": 20,
+    "jpeg_full_previews": 20,
+    "checks": [
+      "20 local thumbnails and20 full modals on a restricted-folder HTTP server",
+      "20 original PNG links return200 and match source hashes",
+      "JPEG fallback and all-failure/retry recovery",
+      "Part/mode filters, keyboard,390px/320px layout",
+      "Static JPEG thumbnails remain visible without JavaScript"
+    ]
   }
 }
