@@ -1,6 +1,6 @@
 """Render six textured CPU previews without saving or replacing the input scene.
 
-blender --background Eris_Animated.blend --python render_previews.py -- Preview
+blender --background Eris_Animated.blend --python render_previews.py -- Preview [motion-verification.json]
 """
 import bpy,sys,json,math,hashlib
 from pathlib import Path
@@ -26,7 +26,13 @@ for name,loc,energy,size in [('Key',(-1,-2,2),45,2),('Fill',(1,0,1.5),25,2)]:
 camera=bpy.data.cameras.new('AuditCamera');cameraobj=bpy.data.objects.new('AuditCamera',camera);scene.collection.objects.link(cameraobj);scene.camera=cameraobj
 camera.type='ORTHO';camera.ortho_scale=1.18
 arm=bpy.data.objects['Armature'];results=[]
-for clip,frame in [('Idle',1),('Idle',108),('Walk',10),('Walk',26),('Run',20),('Run',59)]:
+arguments=sys.argv[sys.argv.index('--')+1:]
+poses=[('Idle',1),('Idle',108),('Walk',10),('Walk',26),('Run',20),('Run',59)]
+if len(arguments)>1:
+    motions=json.loads(Path(arguments[1]).read_text(encoding='utf8'))
+    poses=[(item['action'].removeprefix('Eris_'),1+round((item['frames']-1)*fraction))
+           for item in motions['clips'] for fraction in (.25,.75)]
+for clip,frame in poses:
     action=bpy.data.actions['Eris_'+clip];arm.animation_data.action=action;arm.animation_data.action_slot=action_get_first_suitable_slot(action,'OBJECT')
     scene.frame_set(frame);bpy.context.view_layer.update()
     cameraobj.location=(1.2,-3,.95);cameraobj.rotation_euler=(Vector((0,-.02,.51))-cameraobj.location).to_track_quat('-Z','Y').to_euler()

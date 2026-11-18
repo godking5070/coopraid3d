@@ -1,0 +1,588 @@
+{
+  "manifest": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\Character-Production\\Eris\\Animation\\Bright\\Exports\\export-verification.json",
+  "staging": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\bright-animation-work\\final-export-roundtrip",
+  "clips": [
+    {
+      "name": "Idle",
+      "path": "Eris_Idle.fbx",
+      "fbx_version": 7400,
+      "checks": [
+        {
+          "name": "Export FBX hash matches the exporter record",
+          "passed": true
+        },
+        {
+          "name": "Exactly one FBX animation take",
+          "passed": true,
+          "take_count": 1
+        },
+        {
+          "name": "Embedded texture bytes match the source image",
+          "passed": true,
+          "payload_bytes": [
+            2968961
+          ],
+          "sha256": [
+            "189b4813c7263fceaf33838130af46c86d3793b221bc5d94ebb7a76c6884567c"
+          ]
+        },
+        {
+          "name": "Only the intended rig and two meshes imported",
+          "passed": true,
+          "armatures": 1,
+          "mesh_names": [
+            "Hair",
+            "Head"
+          ]
+        },
+        {
+          "name": "All 74 bones retained without added leaf bones",
+          "passed": true,
+          "total": 74,
+          "missing": [],
+          "extra": []
+        },
+        {
+          "name": "Armature has one active Action with a valid Slot and matching frame range",
+          "passed": true,
+          "action": "Armature|Scene",
+          "frame_range": [
+            1.0,
+            56.0
+          ]
+        },
+        {
+          "name": "Assigned image materials resolve from embedded content in isolation",
+          "passed": true,
+          "images": [
+            {
+              "name": "anime_girl_3d_model_basecolor.jpg",
+              "sha256": "189b4813c7263fceaf33838130af46c86d3793b221bc5d94ebb7a76c6884567c",
+              "staged_embedded_resolution": true
+            }
+          ]
+        },
+        {
+          "name": "Five sampled poses retain world bones and deformed vertex positions",
+          "passed": true,
+          "frames": [
+            {
+              "frame": 1,
+              "max_bone_world_error": 5.364418029785156e-07,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.943547661171664e-07,
+                  "max_vertex_sample_error": 5.578409094098014e-07,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 3.576747505951161e-07,
+                  "max_vertex_sample_error": 5.241344661621739e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 14,
+              "max_bone_world_error": 6.258487701416016e-07,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 3.7450504394853645e-07,
+                  "max_vertex_sample_error": 8.280003112037804e-07,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 3.58995399518669e-07,
+                  "max_vertex_sample_error": 4.2452503723477975e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 28,
+              "max_bone_world_error": 7.227063179016113e-07,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.3425391693088216e-07,
+                  "max_vertex_sample_error": 7.616432881885071e-07,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.097587680216506e-07,
+                  "max_vertex_sample_error": 3.099267406048156e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 42,
+              "max_bone_world_error": 5.289912223815918e-07,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.702389723663323e-07,
+                  "max_vertex_sample_error": 5.338158776402313e-07,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.0956899510204963e-07,
+                  "max_vertex_sample_error": 3.679702626768755e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 56,
+              "max_bone_world_error": 5.364418029785156e-07,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.943547661171664e-07,
+                  "max_vertex_sample_error": 5.578409094098014e-07,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 3.576747505951161e-07,
+                  "max_vertex_sample_error": 5.241344661621739e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            }
+          ]
+        },
+        {
+          "name": "Production FBX remains byte-identical after validation",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "Walk",
+      "path": "Eris_Walk.fbx",
+      "fbx_version": 7400,
+      "checks": [
+        {
+          "name": "Export FBX hash matches the exporter record",
+          "passed": true
+        },
+        {
+          "name": "Exactly one FBX animation take",
+          "passed": true,
+          "take_count": 1
+        },
+        {
+          "name": "Embedded texture bytes match the source image",
+          "passed": true,
+          "payload_bytes": [
+            2968961
+          ],
+          "sha256": [
+            "189b4813c7263fceaf33838130af46c86d3793b221bc5d94ebb7a76c6884567c"
+          ]
+        },
+        {
+          "name": "Only the intended rig and two meshes imported",
+          "passed": true,
+          "armatures": 1,
+          "mesh_names": [
+            "Head",
+            "Hair"
+          ]
+        },
+        {
+          "name": "All 74 bones retained without added leaf bones",
+          "passed": true,
+          "total": 74,
+          "missing": [],
+          "extra": []
+        },
+        {
+          "name": "Armature has one active Action with a valid Slot and matching frame range",
+          "passed": true,
+          "action": "Armature|Scene",
+          "frame_range": [
+            1.0,
+            34.0
+          ]
+        },
+        {
+          "name": "Assigned image materials resolve from embedded content in isolation",
+          "passed": true,
+          "images": [
+            {
+              "name": "anime_girl_3d_model_basecolor.jpg",
+              "sha256": "189b4813c7263fceaf33838130af46c86d3793b221bc5d94ebb7a76c6884567c",
+              "staged_embedded_resolution": true
+            }
+          ]
+        },
+        {
+          "name": "Five sampled poses retain world bones and deformed vertex positions",
+          "passed": true,
+          "frames": [
+            {
+              "frame": 1,
+              "max_bone_world_error": 1.8998980522155762e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 1.8651288686416523e-07,
+                  "max_vertex_sample_error": 1.948767879622615e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.9443978233345547e-07,
+                  "max_vertex_sample_error": 4.961949615633898e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 9,
+              "max_bone_world_error": 1.3969838619232178e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.543011852762511e-07,
+                  "max_vertex_sample_error": 1.4321932595012798e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.436278944695225e-07,
+                  "max_vertex_sample_error": 4.386122446353724e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 17,
+              "max_bone_world_error": 2.2854655981063843e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 3.881880035749852e-07,
+                  "max_vertex_sample_error": 2.346455056694008e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 3.437686092178094e-07,
+                  "max_vertex_sample_error": 3.2849877090734836e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 25,
+              "max_bone_world_error": 1.3783574104309082e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 3.1388206297999766e-07,
+                  "max_vertex_sample_error": 1.3808291216277357e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.4276345475526817e-07,
+                  "max_vertex_sample_error": 3.4551970606866433e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 34,
+              "max_bone_world_error": 1.8998980522155762e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 1.8651288686416523e-07,
+                  "max_vertex_sample_error": 1.948767879622615e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.9443978233345547e-07,
+                  "max_vertex_sample_error": 4.961949615633898e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            }
+          ]
+        },
+        {
+          "name": "Production FBX remains byte-identical after validation",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "name": "Run",
+      "path": "Eris_Run.fbx",
+      "fbx_version": 7400,
+      "checks": [
+        {
+          "name": "Export FBX hash matches the exporter record",
+          "passed": true
+        },
+        {
+          "name": "Exactly one FBX animation take",
+          "passed": true,
+          "take_count": 1
+        },
+        {
+          "name": "Embedded texture bytes match the source image",
+          "passed": true,
+          "payload_bytes": [
+            2968961
+          ],
+          "sha256": [
+            "189b4813c7263fceaf33838130af46c86d3793b221bc5d94ebb7a76c6884567c"
+          ]
+        },
+        {
+          "name": "Only the intended rig and two meshes imported",
+          "passed": true,
+          "armatures": 1,
+          "mesh_names": [
+            "Head",
+            "Hair"
+          ]
+        },
+        {
+          "name": "All 74 bones retained without added leaf bones",
+          "passed": true,
+          "total": 74,
+          "missing": [],
+          "extra": []
+        },
+        {
+          "name": "Armature has one active Action with a valid Slot and matching frame range",
+          "passed": true,
+          "action": "Armature|Scene",
+          "frame_range": [
+            1.0,
+            39.0
+          ]
+        },
+        {
+          "name": "Assigned image materials resolve from embedded content in isolation",
+          "passed": true,
+          "images": [
+            {
+              "name": "anime_girl_3d_model_basecolor.jpg",
+              "sha256": "189b4813c7263fceaf33838130af46c86d3793b221bc5d94ebb7a76c6884567c",
+              "staged_embedded_resolution": true
+            }
+          ]
+        },
+        {
+          "name": "Five sampled poses retain world bones and deformed vertex positions",
+          "passed": true,
+          "frames": [
+            {
+              "frame": 1,
+              "max_bone_world_error": 2.7939677238464355e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.9278739967621235e-07,
+                  "max_vertex_sample_error": 3.004193680343492e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.3815824995443435e-07,
+                  "max_vertex_sample_error": 3.167449049712445e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 10,
+              "max_bone_world_error": 2.9243528842926025e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 3.003580711646858e-07,
+                  "max_vertex_sample_error": 3.130035885673399e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.7829855864247577e-07,
+                  "max_vertex_sample_error": 4.2580648995649284e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 20,
+              "max_bone_world_error": 2.7585774660110474e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 3.6676935305859915e-07,
+                  "max_vertex_sample_error": 2.9706660698916587e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 1.8938991430683672e-07,
+                  "max_vertex_sample_error": 2.523935804799038e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 29,
+              "max_bone_world_error": 2.9355287551879883e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 3.755491971013658e-07,
+                  "max_vertex_sample_error": 3.1449292804547335e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 3.2668405569591386e-07,
+                  "max_vertex_sample_error": 4.383733758217545e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            },
+            {
+              "frame": 39,
+              "max_bone_world_error": 2.7939677238464355e-06,
+              "finite": true,
+              "meshes": {
+                "Head": {
+                  "count_matches": true,
+                  "vertices": 15802,
+                  "finite": true,
+                  "max_bounds_error": 2.9278739967621235e-07,
+                  "max_vertex_sample_error": 3.004193680343492e-06,
+                  "passed": true
+                },
+                "Hair": {
+                  "count_matches": true,
+                  "vertices": 10447,
+                  "finite": true,
+                  "max_bounds_error": 2.3815824995443435e-07,
+                  "max_vertex_sample_error": 3.167449049712445e-07,
+                  "passed": true
+                }
+              },
+              "passed": true
+            }
+          ]
+        },
+        {
+          "name": "Production FBX remains byte-identical after validation",
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "unity_import_or_play_verified": false,
+  "original_blend_saved": false,
+  "passed": true
+}

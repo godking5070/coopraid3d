@@ -1,0 +1,187 @@
+{
+  "source": "live-bright-source-20261119-002255.blend",
+  "source_sha256": "be0e0cd65bd8418999f9f0f9da123db5958b6b8aec38ba736e667bc164a6f871",
+  "final": "Eris_Animated_Bright.blend",
+  "final_sha256": "2b80685793e3ff54944e44eecc8cd88955b3d41db64fada76c5e1b63e9092a2e",
+  "checks": [
+    {
+      "name": "All74 rest bones and hierarchy are exact",
+      "passed": true
+    },
+    {
+      "name": "Armature and all mesh object transforms are exact",
+      "passed": true
+    },
+    {
+      "name": "All meshes retain exact geometry UV materials modifiers and every weight",
+      "passed": true
+    },
+    {
+      "name": "Existing hair pose bases are exact",
+      "passed": true
+    },
+    {
+      "name": "All source material graphs survive unchanged",
+      "passed": true
+    },
+    {
+      "name": "Active image bytes remain exact and packed",
+      "passed": true
+    },
+    {
+      "name": "Every original Action retains exact curves slots and range",
+      "passed": true,
+      "actions": {
+        "Eris_Idle": {
+          "retained_name": "Eris_Idle_Calm",
+          "passed": true
+        },
+        "Eris_Run": {
+          "retained_name": "Eris_Run_Calm",
+          "passed": true
+        },
+        "Eris_Walk": {
+          "retained_name": "Eris_Walk_Calm",
+          "passed": true
+        },
+        "mixamo.com": {
+          "retained_name": "mixamo.com",
+          "passed": true
+        },
+        "mixamo.com.001": {
+          "retained_name": "mixamo.com.001",
+          "passed": true
+        }
+      }
+    },
+    {
+      "name": "Actual import report contains exactly three requested motions",
+      "passed": true
+    },
+    {
+      "name": "Eris_Idle retains its actual downloaded FBX hash",
+      "passed": true,
+      "source": "Mixamo_Idle_Bright.fbx"
+    },
+    {
+      "name": "Eris_Idle has complete finite52bone looping channels without joint stretch or Hair keys",
+      "passed": true,
+      "frames": [
+        1,
+        56
+      ],
+      "curves": 520,
+      "keyed_bones": 52,
+      "loop_channel_error": 0.0,
+      "no_joint_stretch": true,
+      "paths_and_cycles_valid": true
+    },
+    {
+      "name": "Eris_Idle all actual frames retain finite deformation and hair/head follow",
+      "passed": true,
+      "frames_checked": 56,
+      "all_bones_and_meshes_finite": true,
+      "maximum_mesh_extent_world": 0.946485530881225,
+      "hair_head_rigid_max_error_world": 4.071431598529074e-07,
+      "hips_xy_endpoint_error_world": 0.0
+    },
+    {
+      "name": "Eris_Run retains its actual downloaded FBX hash",
+      "passed": true,
+      "source": "Mixamo_Run_Bright.fbx"
+    },
+    {
+      "name": "Eris_Run has complete finite52bone looping channels without joint stretch or Hair keys",
+      "passed": true,
+      "frames": [
+        1,
+        39
+      ],
+      "curves": 520,
+      "keyed_bones": 52,
+      "loop_channel_error": 0.0,
+      "no_joint_stretch": true,
+      "paths_and_cycles_valid": true
+    },
+    {
+      "name": "Eris_Run all actual frames retain finite deformation and hair/head follow",
+      "passed": true,
+      "frames_checked": 39,
+      "all_bones_and_meshes_finite": true,
+      "maximum_mesh_extent_world": 0.8969685098932517,
+      "hair_head_rigid_max_error_world": 3.8544208114110745e-07,
+      "hips_xy_endpoint_error_world": 0.0
+    },
+    {
+      "name": "Eris_Walk retains its actual downloaded FBX hash",
+      "passed": true,
+      "source": "Mixamo_Walk_Bright.fbx"
+    },
+    {
+      "name": "Eris_Walk has complete finite52bone looping channels without joint stretch or Hair keys",
+      "passed": true,
+      "frames": [
+        1,
+        34
+      ],
+      "curves": 520,
+      "keyed_bones": 52,
+      "loop_channel_error": 0.0,
+      "no_joint_stretch": true,
+      "paths_and_cycles_valid": true
+    },
+    {
+      "name": "Eris_Walk all actual frames retain finite deformation and hair/head follow",
+      "passed": true,
+      "frames_checked": 34,
+      "all_bones_and_meshes_finite": true,
+      "maximum_mesh_extent_world": 0.9559742636866636,
+      "hair_head_rigid_max_error_world": 4.038678901308046e-07,
+      "hips_xy_endpoint_error_world": 0.0
+    },
+    {
+      "name": "File opens with Idle at30FPS",
+      "passed": true
+    },
+    {
+      "name": "No retained NLA track overrides the chosen motion",
+      "passed": true
+    },
+    {
+      "name": "Source and final files remain byte-identical during read-only validation",
+      "passed": true
+    }
+  ],
+  "motions": [
+    {
+      "action": "Eris_Idle",
+      "frames_checked": 56,
+      "all_bones_and_meshes_finite": true,
+      "maximum_mesh_extent_world": 0.946485530881225,
+      "hair_head_rigid_max_error_world": 4.071431598529074e-07,
+      "hips_xy_endpoint_error_world": 0.0,
+      "passed": true
+    },
+    {
+      "action": "Eris_Run",
+      "frames_checked": 39,
+      "all_bones_and_meshes_finite": true,
+      "maximum_mesh_extent_world": 0.8969685098932517,
+      "hair_head_rigid_max_error_world": 3.8544208114110745e-07,
+      "hips_xy_endpoint_error_world": 0.0,
+      "passed": true
+    },
+    {
+      "action": "Eris_Walk",
+      "frames_checked": 34,
+      "all_bones_and_meshes_finite": true,
+      "maximum_mesh_extent_world": 0.9559742636866636,
+      "hair_head_rigid_max_error_world": 4.038678901308046e-07,
+      "hips_xy_endpoint_error_world": 0.0,
+      "passed": true
+    }
+  ],
+  "frames_checked": 129,
+  "passed": true,
+  "unity_play_verified": false
+}
