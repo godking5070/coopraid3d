@@ -1,0 +1,5 @@
+*.json text eol=lf
+*.py text eol=lf
+*.txt text eol=lf
+# Validation reports refer to the exact patch bytes.
+collar_weight_patch.json -text -eol whitespace=cr-at-eol

@@ -1,0 +1,107 @@
+{
+  "source": "live-animation-source-20261118-233936.blend",
+  "source_sha256": "d30d990a2a38c9d08dedc84da8f264ffe5ab729ffc4e3fc9d48517b6af79d2af",
+  "final": "Eris_Animated.blend",
+  "final_sha256": "0cd4da55655c2e50e5c4276bcfcc571496ae05f3b9e8b5832ac231f2c5438717",
+  "checks": [
+    {
+      "name": "All74bone rest transforms and hierarchy are exact",
+      "passed": true
+    },
+    {
+      "name": "Armature object transform is exact",
+      "passed": true
+    },
+    {
+      "name": "All original mesh positions topology UVs materials and modifiers are exact",
+      "passed": true
+    },
+    {
+      "name": "Hair weights are exact",
+      "passed": true
+    },
+    {
+      "name": "Hair local pose basis is preserved",
+      "passed": true
+    },
+    {
+      "name": "Body weight edits are only declared clothing vertices",
+      "passed": true,
+      "changed_vertices": 2957,
+      "declared_vertices": 3078,
+      "undeclared_changes": [],
+      "non_clothing_declarations": []
+    },
+    {
+      "name": "Hidden original duplicate skin data is exact",
+      "passed": true
+    },
+    {
+      "name": "All original material graphs are exact",
+      "passed": true
+    },
+    {
+      "name": "Original Actions survive reopen with exact curves and ranges",
+      "passed": true,
+      "original_actions": {
+        "mixamo.com": {
+          "present": true,
+          "fake_user": true
+        },
+        "mixamo.com.001": {
+          "present": true,
+          "fake_user": true
+        }
+      }
+    },
+    {
+      "name": "Eris_Idle: valid looping52bone motion noHairkeys nojointstretch",
+      "passed": true,
+      "range": [
+        1.0,
+        432.0
+      ],
+      "curves": 520,
+      "hair_keys": 0,
+      "finite": true,
+      "nonroot_translations_and_scales_valid": true,
+      "loop_channel_endpoint_error": 0.0
+    },
+    {
+      "name": "Eris_Walk: valid looping52bone motion noHairkeys nojointstretch",
+      "passed": true,
+      "range": [
+        1.0,
+        38.0
+      ],
+      "curves": 520,
+      "hair_keys": 0,
+      "finite": true,
+      "nonroot_translations_and_scales_valid": true,
+      "loop_channel_endpoint_error": 0.0
+    },
+    {
+      "name": "Eris_Run: valid looping52bone motion noHairkeys nojointstretch",
+      "passed": true,
+      "range": [
+        1.0,
+        78.0
+      ],
+      "curves": 520,
+      "hair_keys": 0,
+      "finite": true,
+      "nonroot_translations_and_scales_valid": true,
+      "loop_channel_endpoint_error": 0.0
+    },
+    {
+      "name": "Playback is30FPS with Idle active",
+      "passed": true
+    },
+    {
+      "name": "Source and final files remained byte-identical during read-only validation",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "unity_play_verified": false
+}
