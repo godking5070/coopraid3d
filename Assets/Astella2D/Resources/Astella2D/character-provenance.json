@@ -1,0 +1,226 @@
+{
+    "schemaVersion":  1,
+    "purpose":  "Byte-preserved character atlases for the Astella 2D playable prototype.",
+    "sourceBranch":  "godking5070/캐릭터-컨셉아트",
+    "sourceCommit":  "9929b6d61218864098b9bf05c4f25114e024039e",
+    "sourceRoster":  "Character-Production/Quarter-View/roster.json",
+    "sourceRosterSha256":  "1ceccd3fee05ab8168b88d3b278cf9a8ef1adb873a45904475663d3b3836c4ef",
+    "generation":  "Existing project concept art and Iris pixel art were used as references for built-in ImageGen; the source PNGs are copied without image editing.",
+    "animationState":  "idle",
+    "animationLimitation":  "Each atlas contains one static idle pose for each of eight directions. It does not contain walk, attack, cast, hit, or death animation frames.",
+    "bakedViewPitchDegrees":  50,
+    "atlasSizePx":  [
+                        512,
+                        288
+                    ],
+    "columns":  4,
+    "rows":  2,
+    "frameSizePx":  [
+                        128,
+                        144
+                    ],
+    "frameOrderTopLeft":  [
+                              "s",
+                              "se",
+                              "e",
+                              "ne",
+                              "n",
+                              "nw",
+                              "w",
+                              "sw"
+                          ],
+    "pivotTopLeftPx":  [
+                           64,
+                           128
+                       ],
+    "pivotUnityNormalized":  [
+                                 0.5,
+                                 0.1111111111111111
+                             ],
+    "pixelsPerUnit":  96,
+    "unityRectConvention":  "Atlas coordinates are flipped vertically: indices 0-3 have y=144; indices 4-7 have y=0. Each column advances x by 128.",
+    "sampling":  "Point filtering with texture compression disabled is set by the Unity importer.",
+    "promptSources":  [
+                          {
+                              "sourcePath":  "Character-Production/Quarter-View/imagegen-prompts.txt",
+                              "sha256":  "691cbce4f43fa15a188a55f288699adfaa428806c40fe4a86f0b73e463baa125",
+                              "tool":  "Built-in ImageGen",
+                              "recordKind":  "Exact source requests and reference-image roles"
+                          },
+                          {
+                              "sourcePath":  "Character-Production/Eris/2D-Styles/Quarter-View/README.txt",
+                              "sha256":  "4b049d48ba46ca5299c5089c95595b8906e3d0897d8216a3d966dab3c3f66f52",
+                              "tool":  "Built-in ImageGen",
+                              "recordKind":  "Exact source requests and reference-image roles"
+                          }
+                      ],
+    "characters":  [
+                       {
+                           "id":  "guardian",
+                           "name":  "수호기사",
+                           "role":  "Tank",
+                           "asset":  "Characters/guardian.png",
+                           "resourcePath":  "Astella2D/Characters/guardian",
+                           "sourceAtlas":  "Character-Production/Quarter-View/guardian/guardian_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/guardian/directions.json",
+                           "sourceManifestSha256":  "e44175bf82c53e26c22795450a78090040d9745d0a8bdf16947404e2a87b3337",
+                           "sha256":  "dba0a4c80ad576feb8c7342b1b616edd38240e232212d48fae96923b07679edd",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/01_수호기사.png",
+                           "conceptSha256":  "e7ed5e53f57f49c92f1eee85471a61f7c2321563563ee78ce54452bdbb23f023"
+                       },
+                       {
+                           "id":  "lance-knight",
+                           "name":  "랜스 창기사",
+                           "role":  "Tank",
+                           "asset":  "Characters/lance-knight.png",
+                           "resourcePath":  "Astella2D/Characters/lance-knight",
+                           "sourceAtlas":  "Character-Production/Quarter-View/lance-knight/lance-knight_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/lance-knight/directions.json",
+                           "sourceManifestSha256":  "75059c57982b71d64a4fb7b0369347407f7383f7c248c7bd33a205c250fb6085",
+                           "sha256":  "76e00672a48ac66680311b18cdc2375c0bc9b197381e48db5f85244722dc90d5",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/02_랜스 창기사.png",
+                           "conceptSha256":  "9a25f39d7305596a79b0da675ed31f2a4f37adeb3c7ad9d562e1b4be90f9aaf0"
+                       },
+                       {
+                           "id":  "hammer-knight",
+                           "name":  "성전 망치 기사",
+                           "role":  "Tank",
+                           "asset":  "Characters/hammer-knight.png",
+                           "resourcePath":  "Astella2D/Characters/hammer-knight",
+                           "sourceAtlas":  "Character-Production/Quarter-View/hammer-knight/hammer-knight_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/hammer-knight/directions.json",
+                           "sourceManifestSha256":  "6e8dcea5768820fd1cc4854f62dcd14383a1c64b8f5a7288bbb1340cb3a3dd53",
+                           "sha256":  "e6cb3c8528d9aa6de967c8dfea79180cd673b33b18acd71678a0723393db8471",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/03_성전 망치 기사.png",
+                           "conceptSha256":  "c30ecec1d8b8a96733d6e0fbe1971ed6a86819edb085d8d783bfd0831370ac60"
+                       },
+                       {
+                           "id":  "chronomancer",
+                           "name":  "시간술사",
+                           "role":  "Healer",
+                           "asset":  "Characters/chronomancer.png",
+                           "resourcePath":  "Astella2D/Characters/chronomancer",
+                           "sourceAtlas":  "Character-Production/Quarter-View/chronomancer/chronomancer_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/chronomancer/directions.json",
+                           "sourceManifestSha256":  "07f87cf97ca9e76cb9a22a56cd93d1af48fb2672db6f69fd6794200a459ccac5",
+                           "sha256":  "ab7170d64e7bde85b636f211ca9e0d504232c1a1598f9a953f7a02b0bc8ccc12",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/04_시간술사.png",
+                           "conceptSha256":  "9e0ad6d94fb46bb2111722c8af4d6bf76075171ff2b9bf527da5bc4c1058af4e"
+                       },
+                       {
+                           "id":  "bard",
+                           "name":  "음유시인",
+                           "role":  "Healer",
+                           "asset":  "Characters/bard.png",
+                           "resourcePath":  "Astella2D/Characters/bard",
+                           "sourceAtlas":  "Character-Production/Quarter-View/bard/bard_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/bard/directions.json",
+                           "sourceManifestSha256":  "535a9bb36eded09c3036c1194261d1553c1ab12a6cbbdc618d86703a7b79b466",
+                           "sha256":  "16809155de921340a1c8c1218be12020d33ded1a5a414c1d46c912ef62968703",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/05_음유시인.png",
+                           "conceptSha256":  "a54a3e09bfdd38e7f29ee93f451676f61a9a4da0e7aa1824f6fbf7ad1f510833"
+                       },
+                       {
+                           "id":  "alchemist",
+                           "name":  "연금술사",
+                           "role":  "Healer",
+                           "asset":  "Characters/alchemist.png",
+                           "resourcePath":  "Astella2D/Characters/alchemist",
+                           "sourceAtlas":  "Character-Production/Quarter-View/alchemist/alchemist_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/alchemist/directions.json",
+                           "sourceManifestSha256":  "19d8e85091399d7aab2de2b56b5b1681dac4ac8cb8f449d375485ac35e7e874a",
+                           "sha256":  "18e93998bff83fc514d66453b440d97e8bb7e797f29688e850c8e5d0ee12f247",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/06_연금술사.png",
+                           "conceptSha256":  "3471ff5e8470ee4921bd98df4bc9881fffbad7ece84463f6b4b117089b658eff"
+                       },
+                       {
+                           "id":  "dual-blade",
+                           "name":  "쌍검 암살자",
+                           "role":  "Melee",
+                           "asset":  "Characters/dual-blade.png",
+                           "resourcePath":  "Astella2D/Characters/dual-blade",
+                           "sourceAtlas":  "Character-Production/Quarter-View/dual-blade/dual-blade_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/dual-blade/directions.json",
+                           "sourceManifestSha256":  "f581b74eae15f357abac51dfd84e387a2d46766eefefd609faeffe2dcd29190b",
+                           "sha256":  "292a1f124c718422fb74a5550bca78aa2fdf7afdaa73795545751fb2309ef4dd",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/07_쌍검 암살자.png",
+                           "conceptSha256":  "6b49c4df495b36aa444fb3e9212d7c5d991481e9aad2d159337bc321d88a7d77"
+                       },
+                       {
+                           "id":  "dragon-lancer",
+                           "name":  "용창사",
+                           "role":  "Melee",
+                           "asset":  "Characters/dragon-lancer.png",
+                           "resourcePath":  "Astella2D/Characters/dragon-lancer",
+                           "sourceAtlas":  "Character-Production/Quarter-View/dragon-lancer/dragon-lancer_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/dragon-lancer/directions.json",
+                           "sourceManifestSha256":  "260df67b65544d782a03d7fcbffdfef903b969bb665cc0c80742d46e1f7b9bc3",
+                           "sha256":  "c3c7d4feb6637a47752f37e56ed109a25cf042f84ff473b0fa50cffcfe50a2e9",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/08_용창사.png",
+                           "conceptSha256":  "2f301d43fd6b61b453f8d635f89085d7c52271e31f88f3b519501855617092ff"
+                       },
+                       {
+                           "id":  "forest-archer",
+                           "name":  "숲의 궁수",
+                           "role":  "Ranged",
+                           "asset":  "Characters/forest-archer.png",
+                           "resourcePath":  "Astella2D/Characters/forest-archer",
+                           "sourceAtlas":  "Character-Production/Quarter-View/forest-archer/forest-archer_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/forest-archer/directions.json",
+                           "sourceManifestSha256":  "ac58bc7fdd7d0b78b1edbfbc4f9d9d95ad56520e286586c2d80b0fd7706d2dd5",
+                           "sha256":  "b862a64a61b8549a193968b2f89d1b0ab2e4b7a982a066954bf4134721367ac8",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/09_숲의 궁수.png",
+                           "conceptSha256":  "f19978f6d63c5182e918dc71088aa022e8d0948011015cfc28f0bbfce2935473"
+                       },
+                       {
+                           "id":  "machinist",
+                           "name":  "기공사",
+                           "role":  "Ranged",
+                           "asset":  "Characters/machinist.png",
+                           "resourcePath":  "Astella2D/Characters/machinist",
+                           "sourceAtlas":  "Character-Production/Quarter-View/machinist/machinist_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/machinist/directions.json",
+                           "sourceManifestSha256":  "8800c5517faa9f6841dca0fcb7f4715629af9532dee7c4577043c941ff87f47e",
+                           "sha256":  "3cddda17e519777a8ecd39bc79968bc3cecd2a9c324a2af566987d75a0ef574a",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/10_기공사.png",
+                           "conceptSha256":  "94c6e32747a0aee1c98ac31960231857fa528ad07fff6c1f992e44093d0a3005"
+                       },
+                       {
+                           "id":  "nebula-mage",
+                           "name":  "성운술사",
+                           "role":  "Caster",
+                           "asset":  "Characters/nebula-mage.png",
+                           "resourcePath":  "Astella2D/Characters/nebula-mage",
+                           "sourceAtlas":  "Character-Production/Quarter-View/nebula-mage/nebula-mage_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/nebula-mage/directions.json",
+                           "sourceManifestSha256":  "bbec71b02d794becae2e340a195ee4990473f37aebe39f303f58406b8489bbd3",
+                           "sha256":  "37bdd861810544dbb177a2bd807a0f0f41239d955eb7fab99eb720ec95424b46",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/11_성운술사.png",
+                           "conceptSha256":  "0aab168938778e7913897834f671c929b69f29c24c8014d5e037c065a54dd652"
+                       },
+                       {
+                           "id":  "causality-mage",
+                           "name":  "인과술사",
+                           "role":  "Caster",
+                           "asset":  "Characters/causality-mage.png",
+                           "resourcePath":  "Astella2D/Characters/causality-mage",
+                           "sourceAtlas":  "Character-Production/Quarter-View/causality-mage/causality-mage_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Quarter-View/causality-mage/directions.json",
+                           "sourceManifestSha256":  "a135b0e6003d65584e9a83319296f2a3d56d9bd200e265bfbd043097de346808",
+                           "sha256":  "9ec6928e8df9a429fab4817caeb05293f3d9841b86cdb29f557eafd007a1f4d1",
+                           "conceptSource":  "ConceptArt/CharacterOverview/originals/일러스트/12_인과술사.png",
+                           "conceptSha256":  "ec09e60699739125a9026c61db56e08dcf718c07a67506fc1d58f40de4b2d26d"
+                       },
+                       {
+                           "id":  "iris",
+                           "name":  "이리스",
+                           "role":  "Caster",
+                           "asset":  "Characters/iris.png",
+                           "resourcePath":  "Astella2D/Characters/iris",
+                           "sourceAtlas":  "Character-Production/Eris/2D-Styles/Quarter-View/Iris_Idle_Pixel_Quarter_8Dir.png",
+                           "sourceManifest":  "Character-Production/Eris/2D-Styles/Quarter-View/directions.json",
+                           "sourceManifestSha256":  "b8a993b722be457e20368fc44fed07117ff61a184308a55720d5f8fd9db84fe5",
+                           "sha256":  "a91584e55dce06a5a9cb173c390e270ad4e5aef357354d5302f24dd8fd00e923"
+                       }
+                   ]
+}
