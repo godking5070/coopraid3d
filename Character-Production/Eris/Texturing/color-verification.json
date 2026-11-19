@@ -1,0 +1,275 @@
+{
+  "source": "Eris_Animated_Bright.blend",
+  "source_sha256": "2b80685793e3ff54944e44eecc8cd88955b3d41db64fada76c5e1b63e9092a2e",
+  "final": "Iris_Concept_Textured.blend",
+  "final_sha256": "e62cd95fb5293fd15dabc83e77a4d462fd7651f092fbd7d96246aa2e3806f2b0",
+  "sampling": "Bilinear samples at original mesh polygon UV centroids; atlas padding is excluded.",
+  "checks": [
+    {
+      "name": "Body navy recolor reaches real UV surface interiors",
+      "passed": true,
+      "region": "BodyNavy"
+    },
+    {
+      "name": "Hair tips approach the reference warm blush pink on weighted strand interiors",
+      "passed": true,
+      "region": "HairPinkTips"
+    },
+    {
+      "name": "Hair roots retain warm cream rather than silver",
+      "passed": true,
+      "region": "HairWarmRoots"
+    },
+    {
+      "name": "SkinFace preserves painted detail and stays nonmetallic",
+      "passed": true,
+      "region": "SkinFace"
+    },
+    {
+      "name": "SkinLeftHand preserves painted detail and stays nonmetallic",
+      "passed": true,
+      "region": "SkinLeftHand"
+    },
+    {
+      "name": "SkinRightHand preserves painted detail and stays nonmetallic",
+      "passed": true,
+      "region": "SkinRightHand"
+    },
+    {
+      "name": "HairStrands stays nonmetallic without gold foil",
+      "passed": true,
+      "region": "HairStrands"
+    },
+    {
+      "name": "HairFixedWarmBangs stays nonmetallic without gold foil",
+      "passed": true,
+      "region": "HairFixedWarmBangs"
+    },
+    {
+      "name": "BodyGold retains a metallic gold response",
+      "passed": true,
+      "region": "BodyGold"
+    },
+    {
+      "name": "HairGoldOrnaments retains a metallic gold response",
+      "passed": true,
+      "region": "HairGoldOrnaments"
+    },
+    {
+      "name": "Semantic sampling preserves source and final file bytes",
+      "passed": true
+    }
+  ],
+  "regions": {
+    "BodyNavy": {
+      "surface_samples": 1117,
+      "before_mean_rgb": [
+        0.2966624320168037,
+        0.3342051180499631,
+        0.43451834588392374
+      ],
+      "after_mean_rgb": [
+        0.29335342893702954,
+        0.3316047458972878,
+        0.43675777260820736
+      ],
+      "mean_abs_rgb_change": 0.0031374833096845076,
+      "p95_abs_rgb_change": 0.011764705181121826,
+      "changed_fraction_over_002": 0.0026857654431512983,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": 0.0020655839749301147,
+      "reference_target_srgb": [
+        0.2549019607843137,
+        0.28627450980392155,
+        0.42745098039215684
+      ],
+      "reference_chromaticity_distance_before": 0.027500902658543214,
+      "reference_chromaticity_distance_after": 0.024832228975380233,
+      "reference_chromaticity_distance_improvement": 0.002668673683162981,
+      "red_minus_green_gain": -0.0007086309270989792
+    },
+    "BodyGold": {
+      "surface_samples": 586,
+      "before_mean_rgb": [
+        0.8606514742769564,
+        0.7185192158846874,
+        0.5319018779324198
+      ],
+      "after_mean_rgb": [
+        0.8706759684384201,
+        0.7233428151935789,
+        0.5110070394131132
+      ],
+      "mean_abs_rgb_change": 0.011921250989654374,
+      "p95_abs_rgb_change": 0.0313725471496582,
+      "changed_fraction_over_002": 0.6655290102389079,
+      "metallic_mean": 0.5958516409899839,
+      "metallic_p95": 0.7490196228027344,
+      "pink_chroma_shift": -0.010258771487812889
+    },
+    "SkinFace": {
+      "surface_samples": 2855,
+      "before_mean_rgb": [
+        0.7667123166007455,
+        0.6807140596001588,
+        0.6859157929633383
+      ],
+      "after_mean_rgb": [
+        0.7666968295272717,
+        0.6807087243640652,
+        0.6859018499626777
+      ],
+      "mean_abs_rgb_change": 0.00013940181863617327,
+      "p95_abs_rgb_change": 0.00038963027459599684,
+      "changed_fraction_over_002": 0.0014010507880910684,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": -9.379800973788005e-06
+    },
+    "SkinLeftHand": {
+      "surface_samples": 802,
+      "before_mean_rgb": [
+        0.9393855187737777,
+        0.8284238046846256,
+        0.8037638306063101
+      ],
+      "after_mean_rgb": [
+        0.9393914892592368,
+        0.82840993240087,
+        0.8037638298862051
+      ],
+      "mean_abs_rgb_change": 4.4785182334054606e-05,
+      "p95_abs_rgb_change": 0.00011928619385889738,
+      "changed_fraction_over_002": 0.0,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": 1.6857166432594575e-05
+    },
+    "SkinRightHand": {
+      "surface_samples": 807,
+      "before_mean_rgb": [
+        0.939258659966827,
+        0.8261052291950333,
+        0.8017562684034368
+      ],
+      "after_mean_rgb": [
+        0.9377614412434052,
+        0.8247780120738101,
+        0.8004438526487317
+      ],
+      "mean_abs_rgb_change": 0.0014153952228743072,
+      "p95_abs_rgb_change": 0.0002732303764027,
+      "changed_fraction_over_002": 0.004956629491945477,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": -7.760011784037712e-05
+    },
+    "HairPinkTips": {
+      "surface_samples": 2071,
+      "before_mean_rgb": [
+        0.9312998447606479,
+        0.7763315645711625,
+        0.7694254474440395
+      ],
+      "after_mean_rgb": [
+        0.9464033745399218,
+        0.7812995767805732,
+        0.7619608557832223
+      ],
+      "mean_abs_rgb_change": 0.009196385848726082,
+      "p95_abs_rgb_change": 0.023529410362243652,
+      "changed_fraction_over_002": 0.19845485272815064,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": -0.0011485431501816782,
+      "reference_target_srgb": [
+        0.9647058823529412,
+        0.7411764705882353,
+        0.7294117647058823
+      ],
+      "reference_chromaticity_distance_before": 0.01340985398586213,
+      "reference_chromaticity_distance_after": 0.010646349480931206,
+      "reference_chromaticity_distance_improvement": 0.0027635045049309234,
+      "red_minus_green_gain": 0.010135517569864123
+    },
+    "HairWarmRoots": {
+      "surface_samples": 1858,
+      "before_mean_rgb": [
+        0.9163608316567186,
+        0.8371455160830261,
+        0.7984667522916903
+      ],
+      "after_mean_rgb": [
+        0.9193470224993385,
+        0.8465829636509569,
+        0.7863338692883657
+      ],
+      "mean_abs_rgb_change": 0.009613576944346692,
+      "p95_abs_rgb_change": 0.023529410362243652,
+      "changed_fraction_over_002": 0.12002152852529602,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": -0.014010793648283112
+    },
+    "HairStrands": {
+      "surface_samples": 6888,
+      "before_mean_rgb": [
+        0.9215325509477378,
+        0.8163965361979837,
+        0.789162965910426
+      ],
+      "after_mean_rgb": [
+        0.9333579455632238,
+        0.8228023375252553,
+        0.7791992045878763
+      ],
+      "mean_abs_rgb_change": 0.009835894799560123,
+      "p95_abs_rgb_change": 0.023529410362243652,
+      "changed_fraction_over_002": 0.18800813008130082,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": -0.005474984680803465
+    },
+    "HairFixedWarmBangs": {
+      "surface_samples": 1864,
+      "before_mean_rgb": [
+        0.9174110840288632,
+        0.8325830092302178,
+        0.7867071717817444
+      ],
+      "after_mean_rgb": [
+        0.9164137278023885,
+        0.8341683465335065,
+        0.7883962155323343
+      ],
+      "mean_abs_rgb_change": 0.0014988999464783418,
+      "p95_abs_rgb_change": 0.003921568393707275,
+      "changed_fraction_over_002": 0.0,
+      "metallic_mean": 0.0,
+      "metallic_p95": 0.0,
+      "pink_chroma_shift": -0.0012394935412320643
+    },
+    "HairGoldOrnaments": {
+      "surface_samples": 108,
+      "before_mean_rgb": [
+        0.9050284276508166,
+        0.7359161394408914,
+        0.5114325157134715
+      ],
+      "after_mean_rgb": [
+        0.9124718738603863,
+        0.7429174080556179,
+        0.49598915818072103
+      ],
+      "mean_abs_rgb_change": 0.01034693360584004,
+      "p95_abs_rgb_change": 0.02975541080813857,
+      "changed_fraction_over_002": 0.3888888888888889,
+      "metallic_mean": 0.7451673971597115,
+      "metallic_p95": 0.7490196228027344,
+      "pink_chroma_shift": -0.011001224276316822
+    }
+  },
+  "passed": true,
+  "unity_import_or_play_verified": false
+}

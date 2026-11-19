@@ -1,0 +1,34 @@
+{
+  "character_name": "이리스 / Iris",
+  "source_blend": "../Animation/Bright/Eris_Animated_Bright.blend",
+  "reference": "Reference/Iris_Concept_UserReference.png",
+  "reference_sha256": "5341f946db6abf0c41f7f068044adb7b123db5cbe4615a01f9d34ab1f8d064ef",
+  "reference_role": "Exact character concept art supplied by the user on 2026-11-19; preserve the ivory hood, navy outfit and gold ornaments.",
+  "detail_texture": "Textures/Fabric_MicroWeave.png",
+  "detail_texture_sha256": "052b8d23545209be0cdf2eceef15c2a35e259de79420698f752a73ed6e0dd77a",
+  "detail_generation": "Built-in image_gen; full prompt in imagegen-prompt.txt. Independent grayscale fine cloth microdetail, not a replacement character atlas.",
+  "resolution": 4096,
+  "bake_margin": 2,
+  "palette": {
+    "ivory": "#FFF4E7",
+    "navy": "#41496D",
+    "gold": "#DEB56C",
+    "pale_blue": "#B9D3EC",
+    "hair_top": "#FFF0D5",
+    "hair_tip": "#F6BDBA"
+  },
+  "strengths": {"ivory": 0.18, "navy": 0.28, "gold": 0.3, "hair": 0.42},
+  "roughness": {"cloth": 0.72, "gold": 0.29, "skin": 0.48, "eye": 0.18, "hair": 0.45},
+  "metallic_gold": 0.75,
+  "detail_scale": 8.0,
+  "detail_strength": 0.025,
+  "hair_gradient_world_z": [0.42, 0.83],
+  "head_albedo_protect_z": 0.66,
+  "invariants": [
+    "Preserve exact geometry, existing UV coordinates, 74 rest bones, all weights and every existing animation action.",
+    "Preserve eye/star/eyelash/face texture placement and original floral motifs.",
+    "Hair object also contains the hood and flower ornaments: use semantic hair masks; do not recolor the entire object as hair.",
+    "Warm cream blonde to blush pink hair, matching the supplied concept; no silver/lilac recolor.",
+    "Write new materials, maps and a separate Iris_Concept_Textured.blend; preserve source assets."
+  ]
+}

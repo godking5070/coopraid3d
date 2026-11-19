@@ -1,6 +1,11 @@
 에리스 — 애니메이션 및 손·손목·등 의상 리깅 기록
 
-최신 작업본: Bright/Eris_Animated_Bright.blend
+최신 컨셉 텍스처 작업본: ../Texturing/Iris_Concept_Textured.blend
+이리스(Iris)의 따뜻한 크림색 머리·분홍빛 끝부분과 아이보리·네이비·금색 의상을
+4K PBR 맵으로 표현하며 기존 리깅·밝은 모션을 유지합니다.
+최신 파일·검증 범위는 ../Texturing/README.txt를 참고합니다.
+
+텍스처 작업 전 밝은 모션 보존본: Bright/Eris_Animated_Bright.blend
 2026-11-19 사용자가 확정한 “밝고 활발하게” 성격을 적용했습니다.
 Happy Idle / Happy Walk / Running과 최신 프레임·사용법은 Bright/README.txt를 참고합니다.
 게임 엔진용 최신 파일은 Bright/Exports/에 있습니다.
