@@ -1,6 +1,6 @@
 {
-  "manifest": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\Character-Production\\Eris\\Texturing\\Exports\\export-verification.json",
-  "staging": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\eris-texturing-pipeline\\final-export-roundtrip",
+  "manifest": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\iris-shoulder\\release\\Exports\\export-verification.json",
+  "staging": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\iris-shoulder\\roundtrip-stage",
   "clips": [
     {
       "name": "Idle",
@@ -297,8 +297,8 @@
           "passed": true,
           "armatures": 1,
           "mesh_names": [
-            "Head",
-            "Hair"
+            "Hair",
+            "Head"
           ]
         },
         {
@@ -322,33 +322,18 @@
           "passed": true,
           "images": [
             {
-              "name": "Iris_HairHood_Normal.png",
-              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
+              "name": "Iris_HairHood_BaseColor.png",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_Metallic.png",
-              "sha256": "a4a4f3e930d1f5e51e7a71420e1537c7698d4ee7dec594446ba203d73cd25fbc",
+              "name": "Iris_HairHood_Roughness.png",
+              "sha256": "377b00b19ed8d96c5f471bbe82c923e3d032382c29ec283c389727381fb6a5d2",
               "staged_embedded_resolution": true
             },
             {
               "name": "Iris_HairHood_BaseColor.png.001",
               "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_BaseColor.png",
-              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_BaseColor.png.001",
-              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_Metallic.png",
-              "sha256": "bb25f779e64565abc620b73ef8f923157941d20ab72ca3dbff1a0e370f6ffb54",
               "staged_embedded_resolution": true
             },
             {
@@ -362,13 +347,28 @@
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_BaseColor.png",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "name": "Iris_HairHood_Normal.png",
+              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_Roughness.png",
-              "sha256": "377b00b19ed8d96c5f471bbe82c923e3d032382c29ec283c389727381fb6a5d2",
+              "name": "Iris_HairHood_Metallic.png",
+              "sha256": "a4a4f3e930d1f5e51e7a71420e1537c7698d4ee7dec594446ba203d73cd25fbc",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_Body_BaseColor.png",
+              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_Body_Metallic.png",
+              "sha256": "bb25f779e64565abc620b73ef8f923157941d20ab72ca3dbff1a0e370f6ffb54",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_Body_BaseColor.png.001",
+              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
               "staged_embedded_resolution": true
             }
           ]
@@ -574,8 +574,28 @@
           "passed": true,
           "images": [
             {
+              "name": "Iris_Body_BaseColor.png",
+              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+              "staged_embedded_resolution": true
+            },
+            {
               "name": "Iris_Body_Metallic.png",
               "sha256": "bb25f779e64565abc620b73ef8f923157941d20ab72ca3dbff1a0e370f6ffb54",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_BaseColor.png",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_BaseColor.png.001",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_Body_Normal.png",
+              "sha256": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
               "staged_embedded_resolution": true
             },
             {
@@ -589,8 +609,8 @@
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_BaseColor.png",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "name": "Iris_HairHood_Normal.png",
+              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
               "staged_embedded_resolution": true
             },
             {
@@ -601,26 +621,6 @@
             {
               "name": "Iris_HairHood_Metallic.png",
               "sha256": "a4a4f3e930d1f5e51e7a71420e1537c7698d4ee7dec594446ba203d73cd25fbc",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_HairHood_BaseColor.png.001",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_BaseColor.png",
-              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_Normal.png",
-              "sha256": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_HairHood_Normal.png",
-              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
               "staged_embedded_resolution": true
             }
           ]
