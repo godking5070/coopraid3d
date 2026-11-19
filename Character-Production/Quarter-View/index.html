@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>아스텔라 쿼터뷰 도트</title>
+  <style>
+    html {
+      color-scheme:light dark;
+      background:var(--background,#f9fbfe);
+      color:var(--foreground,#182746);
+    }
+    body {
+      margin:0;
+      font-family:var(--font-sans,system-ui,sans-serif);
+    }
+    main {
+      max-width:900px;
+      margin:0 auto;
+      padding:16px clamp(10px,3vw,28px) 24px;
+    }
+    h1 {
+      font-size:clamp(23px,4vw,32px);
+      letter-spacing:-.035em;
+      margin:5px 0 2px;
+    }
+    .summary {
+      color:var(--muted-foreground,#51617e);
+      font-size:14px;
+      margin:4px 0 18px;
+    }
+    .controls {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:0 0 12px;
+    }
+    .controls label {
+      font-size:13px;
+      font-weight:700;
+    }
+    select,button,#sheet {
+      font:inherit;
+      font-size:14px;
+      box-sizing:border-box;
+      min-height:38px;
+      padding:8px 11px;
+      border:1px solid var(--border,#ccd8e9);
+      border-radius:var(--radius,8px);
+      background:var(--card,#fff);
+      color:var(--card-foreground,#243a5d);
+    }
+    button,#sheet {
+      cursor:pointer;
+    }
+    #sheet {
+      text-decoration:none;
+    }
+    button[aria-pressed=true] {
+      background:var(--accent,#30476e);
+      color:var(--accent-foreground,#fff);
+    }
+    :focus-visible {
+      outline:2px solid var(--ring,#46649e);
+      outline-offset:2px;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:9px;
+    }
+    .grid.pairs {
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      max-width:560px;
+      margin:0 auto;
+    }
+    .tile {
+      margin:0;
+      display:block;
+      min-width:0;
+      background:var(--muted,#eef3fa);
+      color:var(--foreground,#182746);
+      border:1px solid var(--border,#ccd8e9);
+      border-radius:var(--radius,10px);
+      overflow:hidden;
+      text-decoration:none;
+    }
+    .tile:hover {
+      border-color:var(--ring,#889fc7);
+    }
+    .image-window {
+      display:block;
+      position:relative;
+      overflow:hidden;
+      aspect-ratio:128/144;
+    }
+    .image-window.reflection {
+      transform:scaleX(-1);
+    }
+    img {
+      display:block;
+      width:100%;
+      height:auto;
+      image-rendering:pixelated;
+    }
+    .atlas {
+      position:absolute;
+      width:400%;
+      max-width:none;
+    }
+    .label {
+      display:block;
+      text-align:center;
+      font-size:13px;
+      font-weight:650;
+      padding:2px 3px 11px;
+    }
+    @media(max-width:570px) {
+      .grid {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+      main {
+        padding-top:10px;
+      }
+      .label {
+        font-size:12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>아스텔라 쿼터뷰 도트</h1>
+    <p class="summary">하향 50° · 대기 자세</p>
+    <div class="controls">
+      <label for="character">캐릭터</label>
+      <select id="character"></select>
+      <button id="flow" type="button" aria-pressed="false">좌우 비교</button>
+      <a id="sheet" download>시트 PNG</a>
+    </div>
+    <div class="grid" id="directions"></div>
+  </main>
+  <script type="application/json" id="catalog">
+    {
+      "characters": [
+        {
+          "id": "iris",
+          "name": "이리스",
+          "atlas": "../Eris/2D-Styles/Quarter-View/Iris_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "../Eris/2D-Styles/Quarter-View/directions.json",
+          "tiles": [
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_s.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_se.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_e.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_ne.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_n.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_nw.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_w.png",
+            "../Eris/2D-Styles/Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "guardian",
+          "name": "수호기사",
+          "atlas": "guardian/guardian_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "guardian/directions.json",
+          "tiles": [
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_s.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_se.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_e.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_ne.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_n.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_nw.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_w.png",
+            "guardian/Sprites/guardian_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "lance-knight",
+          "name": "랜스 창기사",
+          "atlas": "lance-knight/lance-knight_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "lance-knight/directions.json",
+          "tiles": [
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_s.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_se.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_e.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_ne.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_n.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_nw.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_w.png",
+            "lance-knight/Sprites/lance-knight_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "hammer-knight",
+          "name": "성전 망치 기사",
+          "atlas": "hammer-knight/hammer-knight_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "hammer-knight/directions.json",
+          "tiles": [
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_s.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_se.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_e.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_ne.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_n.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_nw.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_w.png",
+            "hammer-knight/Sprites/hammer-knight_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "chronomancer",
+          "name": "시간술사",
+          "atlas": "chronomancer/chronomancer_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "chronomancer/directions.json",
+          "tiles": [
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_s.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_se.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_e.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_ne.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_n.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_nw.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_w.png",
+            "chronomancer/Sprites/chronomancer_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "bard",
+          "name": "음유시인",
+          "atlas": "bard/bard_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "bard/directions.json",
+          "tiles": [
+            "bard/Sprites/bard_Idle_Pixel_Quarter_s.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_se.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_e.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_ne.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_n.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_nw.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_w.png",
+            "bard/Sprites/bard_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "alchemist",
+          "name": "연금술사",
+          "atlas": "alchemist/alchemist_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "alchemist/directions.json",
+          "tiles": [
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_s.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_se.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_e.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_ne.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_n.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_nw.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_w.png",
+            "alchemist/Sprites/alchemist_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "dual-blade",
+          "name": "쌍검 암살자",
+          "atlas": "dual-blade/dual-blade_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "dual-blade/directions.json",
+          "tiles": [
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_s.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_se.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_e.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_ne.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_n.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_nw.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_w.png",
+            "dual-blade/Sprites/dual-blade_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "dragon-lancer",
+          "name": "용창사",
+          "atlas": "dragon-lancer/dragon-lancer_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "dragon-lancer/directions.json",
+          "tiles": [
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_s.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_se.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_e.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_ne.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_n.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_nw.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_w.png",
+            "dragon-lancer/Sprites/dragon-lancer_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "forest-archer",
+          "name": "숲의 궁수",
+          "atlas": "forest-archer/forest-archer_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "forest-archer/directions.json",
+          "tiles": [
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_s.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_se.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_e.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_ne.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_n.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_nw.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_w.png",
+            "forest-archer/Sprites/forest-archer_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "machinist",
+          "name": "기공사",
+          "atlas": "machinist/machinist_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "machinist/directions.json",
+          "tiles": [
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_s.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_se.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_e.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_ne.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_n.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_nw.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_w.png",
+            "machinist/Sprites/machinist_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "nebula-mage",
+          "name": "성운술사",
+          "atlas": "nebula-mage/nebula-mage_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "nebula-mage/directions.json",
+          "tiles": [
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_s.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_se.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_e.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_ne.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_n.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_nw.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_w.png",
+            "nebula-mage/Sprites/nebula-mage_Idle_Pixel_Quarter_sw.png"
+          ]
+        },
+        {
+          "id": "causality-mage",
+          "name": "인과술사",
+          "atlas": "causality-mage/causality-mage_Idle_Pixel_Quarter_8Dir.png",
+          "manifest": "causality-mage/directions.json",
+          "tiles": [
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_s.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_se.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_e.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_ne.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_n.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_nw.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_w.png",
+            "causality-mage/Sprites/causality-mage_Idle_Pixel_Quarter_sw.png"
+          ]
+        }
+      ],
+      "directions": [
+        {
+          "id": "s",
+          "label": "정면",
+          "arrow": "↓"
+        },
+        {
+          "id": "se",
+          "label": "오른쪽 앞",
+          "arrow": "↘"
+        },
+        {
+          "id": "e",
+          "label": "오른쪽 옆",
+          "arrow": "→"
+        },
+        {
+          "id": "ne",
+          "label": "오른쪽 뒤",
+          "arrow": "↗"
+        },
+        {
+          "id": "n",
+          "label": "뒷모습",
+          "arrow": "↑"
+        },
+        {
+          "id": "nw",
+          "label": "왼쪽 뒤",
+          "arrow": "↖"
+        },
+        {
+          "id": "w",
+          "label": "왼쪽 옆",
+          "arrow": "←"
+        },
+        {
+          "id": "sw",
+          "label": "왼쪽 앞",
+          "arrow": "↙"
+        }
+      ],
+      "inline": false
+    }
+  </script>
+  <script>
+    const app = JSON.parse(document.getElementById('catalog').textContent);
+    const character = document.getElementById('character');
+    const grid = document.getElementById('directions');
+    const toggle = document.getElementById('flow');
+    const sheet = document.getElementById('sheet');
+    let comparison = false;
+    for (const entry of app.characters) character.add(new Option(entry.name, entry.id));
+    const initial = new URLSearchParams(location.search).get('character');
+    if (initial && app.characters.some(entry => entry.id === initial)) character.value = initial;
+
+    function render() {
+        const record = app.characters.find(entry => entry.id === character.value);
+        const positions = comparison ? [1,7,2,6,3,5] : [0,1,2,3,4,5,6,7];
+        grid.replaceChildren();
+        grid.classList.toggle('pairs', comparison);
+        if (sheet) sheet.href = record.atlas;
+        for (const [i,point] of positions.entries()) {
+            const reverse = comparison && i % 2 === 1;
+            const direction = app.directions[point];
+            const label = direction.arrow + ' ' + direction.label + (reverse ? ' \u00b7 \ubc18\uc804' : '');
+            const tile = document.createElement(app.inline ? 'figure' : 'a');
+            tile.className = 'tile';
+            tile.dataset.direction = direction.id;
+            if (!app.inline) { tile.href = record.tiles[point]; tile.download = ''; }
+            const crop = document.createElement('span');
+            crop.className = 'image-window' + (reverse ? ' reflection' : '');
+            const image = document.createElement('img');
+            image.alt = record.name + ' ' + label;
+            if (app.inline) {
+                image.width = 512;
+                image.height = 288;
+                image.className = 'atlas';
+                image.style.left = (- (point % 4) * 100) + '%';
+                image.style.top = (- Math.floor(point / 4) * 100) + '%';
+                image.src = record.data;
+            } else {
+                image.width = 128;
+                image.height = 144;
+                image.src = record.tiles[point];
+            }
+            const caption = document.createElement('span');
+            caption.className = 'label';
+            caption.textContent = label;
+            crop.append(image);
+            tile.append(crop, caption);
+            grid.append(tile);
+        }
+    }
+    character.addEventListener('change', render);
+    if (toggle) toggle.addEventListener('click', () => {
+        comparison = !comparison;
+        toggle.setAttribute('aria-pressed', String(comparison));
+        render();
+    });
+    render();
+  </script>
+</body>
+</html>
