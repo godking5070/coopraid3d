@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>이리스 · 정면 도트 5종</title>
+<style>
+:root{font:15px/1.55 "Malgun Gothic",system-ui,sans-serif;color:#1d2840;background:#f7f4ee;--navy:#222f4d;--muted:#56627a;--surface:#fffdf9;--line:#d9dce4;--height:242px;--backdrop:#dfe8f2}
+*{box-sizing:border-box}
+body{margin:0}
+.wrap{width:min(1340px,100%);margin:auto;padding-inline:25px}
+header{padding-block:29px 33px;background:var(--navy);color:#f6efdf;border-bottom:4px solid #c8a873}
+header a{color:#ffe2ab}
+h1{margin:8px 0 6px;font-size:clamp(29px,4.6vw,49px);letter-spacing:-.055em;line-height:1.13}
+header p{margin:0;color:#e6e9f1}
+a{text-underline-offset:3px;color:#234a76}
+main{padding-block:22px 30px}
+.controls{display:flex;gap:12px 24px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+label{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+select,button,.download{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+button,select{cursor:pointer}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #6285bb;outline-offset:3px}
+input{width:125px;accent-color:#234a76}
+output{min-width:44px;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.card{margin:0;overflow:hidden;border:1px solid var(--line);background:var(--surface);border-radius:12px}
+.art,.dialog-art{background:var(--backdrop)}
+body[data-background="dark"]{--backdrop:#273653}
+body[data-background="grid"] :is(.art,.dialog-art){background-color:#f1f1f0;background-image:repeating-conic-gradient(#d6dae2 0% 25%,transparent 0% 50%);background-size:16px 16px}
+.art{display:grid;place-items:center;width:100%;min-height:275px;padding:12px 8px;border:0;border-radius:0}
+.art img{display:block;width:auto;max-width:100%;height:var(--height);object-fit:contain;image-rendering:pixelated}
+.copy{padding:10px 12px 13px}
+h2{margin:0;font-size:16px}
+.copy p{margin:3px 0 9px;color:var(--muted);font-size:12px}
+.download{display:inline-flex;font-size:13px;color:#234a76;text-decoration:none;font-weight:650}
+.links{display:flex;gap:18px;flex-wrap:wrap;margin-top:19px;color:var(--muted);font-size:13px}
+dialog{width:min(620px,calc(100% - 22px));max-height:calc(100% - 22px);padding:0;border:1px solid var(--line);border-radius:13px;background:var(--surface);color:inherit}
+dialog::backdrop{background:#0f1931dd}
+.dialog-heading{display:flex;align-items:center;justify-content:space-between;padding:11px 13px}
+.dialog-art{display:grid;place-items:center;padding:12px}
+.dialog-art img{display:block;width:auto;max-width:100%;max-height:min(70vh,700px);object-fit:contain;image-rendering:pixelated}
+@media(max-width:980px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:570px){.wrap{padding-inline:13px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.art{min-height:235px}.controls{gap:7px 13px}}
+</style>
+</head>
+<body data-background="light">
+<header>
+  <div class="wrap">
+    <a href="../index.html">이리스 2D 시안 모음</a>
+    <h1>이리스 정면 도트 5종</h1>
+    <p>선택한 도트풍으로 그린 정면 전신 대기 자세입니다. 그림을 클릭하면 확대됩니다.</p>
+  </div>
+</header>
+<main class="wrap">
+  <div class="controls">
+    <label for="background">배경
+      <select id="background">
+        <option value="light">밝은 배경</option><option value="dark">어두운 배경</option><option value="grid">투명 격자</option>
+      </select>
+    </label>
+    <label for="height">미리보기 높이
+      <input id="height" type="range" min="48" max="272" step="2" value="242"><output id="height-display" for="height">242 px</output>
+    </label>
+  </div>
+  <div class="grid">
+    <figure class="card">
+      <button class="art" type="button" aria-label="기본형 도트 확대"><img src="Sprites/01-classic-front.png" alt="정면을 보는 기본형 도트 이리스"></button>
+      <figcaption class="copy"><h2>기본형 도트</h2><p>원본에 가까운 비율과 선 굵기</p><a class="download" href="Sprites/01-classic-front.png" download>PNG</a></figcaption>
+    </figure>
+    <figure class="card">
+      <button class="art" type="button" aria-label="둥근 SD 도트 확대"><img src="Sprites/02-round-sd-front.png" alt="정면을 보는 둥근 SD 도트 이리스"></button>
+      <figcaption class="copy"><h2>둥근 SD 도트</h2><p>큰 얼굴, 짧은 팔다리, 둥근 실루엣</p><a class="download" href="Sprites/02-round-sd-front.png" download>PNG</a></figcaption>
+    </figure>
+    <figure class="card">
+      <button class="art" type="button" aria-label="굵은 저해상도 도트 확대"><img src="Sprites/03-compact-front.png" alt="정면을 보는 굵은 저해상도 도트 이리스"></button>
+      <figcaption class="copy"><h2>굵은 저해상도 도트</h2><p>큰 픽셀과 간단한 장식</p><a class="download" href="Sprites/03-compact-front.png" download>PNG</a></figcaption>
+    </figure>
+    <figure class="card">
+      <button class="art" type="button" aria-label="파스텔 도트 확대"><img src="Sprites/04-pastel-front.png" alt="정면을 보는 파스텔 도트 이리스"></button>
+      <figcaption class="copy"><h2>파스텔 도트</h2><p>라벤더 외곽선과 옅은 분홍 명암</p><a class="download" href="Sprites/04-pastel-front.png" download>PNG</a></figcaption>
+    </figure>
+    <figure class="card">
+      <button class="art" type="button" aria-label="선명한 아케이드 도트 확대"><img src="Sprites/05-arcade-front.png" alt="정면을 보는 선명한 아케이드 도트 이리스"></button>
+      <figcaption class="copy"><h2>선명한 아케이드 도트</h2><p>짙은 외곽선과 뚜렷한 금장</p><a class="download" href="Sprites/05-arcade-front.png" download>PNG</a></figcaption>
+    </figure>
+  </div>
+  <nav class="links" aria-label="관련 파일">
+    <a href="../Motion/01-pixel-compact/cast.png">참조한 도트 모션 시트</a>
+    <a href="imagegen-prompts.txt">생성 프롬프트</a>
+  </nav>
+</main>
+<dialog id="preview" aria-labelledby="preview-title">
+  <div class="dialog-heading"><h2 id="preview-title"></h2><form method="dialog"><button type="submit">닫기</button></form></div>
+  <div class="dialog-art"><img id="preview-image" alt=""></div>
+</dialog>
+<script>
+const dialog = document.getElementById('preview');
+const preview = document.getElementById('preview-image');
+for (const art of document.querySelectorAll('.art')) {
+  art.addEventListener('click', () => {
+    const image = art.querySelector('img');
+    preview.src = image.src;
+    preview.alt = image.alt;
+    document.getElementById('preview-title').textContent = art.closest('figure').querySelector('h2').textContent;
+    dialog.showModal();
+  });
+}
+document.getElementById('background').addEventListener('change', event => {
+  document.body.dataset.background = event.target.value;
+});
+document.getElementById('height').addEventListener('input', event => {
+  const height = event.target.value + 'px';
+  document.documentElement.style.setProperty('--height', height);
+  document.getElementById('height-display').value = event.target.value + ' px';
+});
+</script>
+</body>
+</html>
