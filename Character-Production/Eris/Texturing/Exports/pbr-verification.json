@@ -1,23 +1,23 @@
 {
-  "expected_images": 8,
+  "expected_images": 9,
   "clips": [
     {
       "name": "Idle",
       "checks": [
         {
-          "name": "Exactly eight expected PNG payload hashes are embedded",
+          "name": "All expected PNG payload hashes are embedded",
           "passed": true,
-          "images": 8
+          "images": 9
         },
         {
-          "name": "Each material connects all four intended FBX texture roles",
+          "name": "Each material connects its intended FBX texture roles",
           "passed": true,
           "materials": {
             "Eris_ConceptBody": {
               "BaseColor": {
-                "expected": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+                "expected": "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1",
                 "actual": [
-                  "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2"
+                  "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1"
                 ],
                 "passed": true
               },
@@ -39,6 +39,13 @@
                 "expected": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
                 "actual": [
                   "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20"
+                ],
+                "passed": true
+              },
+              "Emission": {
+                "expected": "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b",
+                "actual": [
+                  "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b"
                 ],
                 "passed": true
               }
@@ -76,7 +83,7 @@
           }
         },
         {
-          "name": "Fresh isolated import retains four correct map roles spaces and finite UV mappings",
+          "name": "Fresh isolated import retains map roles, color spaces and finite UV mappings",
           "passed": true,
           "materials": {
             "Eris_ConceptBody": {
@@ -85,7 +92,7 @@
                   "images": [
                     {
                       "image": "Iris_Body_BaseColor.png",
-                      "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+                      "sha256": "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1",
                       "colorspace": "sRGB",
                       "size": [
                         4096,
@@ -136,6 +143,21 @@
                     }
                   ],
                   "passed": true
+                },
+                "Emission": {
+                  "images": [
+                    {
+                      "image": "Iris_Body_Emission.png",
+                      "sha256": "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b",
+                      "colorspace": "sRGB",
+                      "size": [
+                        4096,
+                        4096
+                      ]
+                    }
+                  ],
+                  "passed": true,
+                  "strength": 0.6200000047683716
                 }
               },
               "invalid_mapping_inputs": [],
@@ -216,19 +238,19 @@
       "name": "Walk",
       "checks": [
         {
-          "name": "Exactly eight expected PNG payload hashes are embedded",
+          "name": "All expected PNG payload hashes are embedded",
           "passed": true,
-          "images": 8
+          "images": 9
         },
         {
-          "name": "Each material connects all four intended FBX texture roles",
+          "name": "Each material connects its intended FBX texture roles",
           "passed": true,
           "materials": {
             "Eris_ConceptBody": {
               "BaseColor": {
-                "expected": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+                "expected": "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1",
                 "actual": [
-                  "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2"
+                  "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1"
                 ],
                 "passed": true
               },
@@ -250,6 +272,13 @@
                 "expected": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
                 "actual": [
                   "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20"
+                ],
+                "passed": true
+              },
+              "Emission": {
+                "expected": "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b",
+                "actual": [
+                  "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b"
                 ],
                 "passed": true
               }
@@ -287,7 +316,7 @@
           }
         },
         {
-          "name": "Fresh isolated import retains four correct map roles spaces and finite UV mappings",
+          "name": "Fresh isolated import retains map roles, color spaces and finite UV mappings",
           "passed": true,
           "materials": {
             "Eris_ConceptBody": {
@@ -296,7 +325,7 @@
                   "images": [
                     {
                       "image": "Iris_Body_BaseColor.png",
-                      "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+                      "sha256": "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1",
                       "colorspace": "sRGB",
                       "size": [
                         4096,
@@ -347,6 +376,21 @@
                     }
                   ],
                   "passed": true
+                },
+                "Emission": {
+                  "images": [
+                    {
+                      "image": "Iris_Body_Emission.png",
+                      "sha256": "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b",
+                      "colorspace": "sRGB",
+                      "size": [
+                        4096,
+                        4096
+                      ]
+                    }
+                  ],
+                  "passed": true,
+                  "strength": 0.6200000047683716
                 }
               },
               "invalid_mapping_inputs": [],
@@ -427,19 +471,19 @@
       "name": "Run",
       "checks": [
         {
-          "name": "Exactly eight expected PNG payload hashes are embedded",
+          "name": "All expected PNG payload hashes are embedded",
           "passed": true,
-          "images": 8
+          "images": 9
         },
         {
-          "name": "Each material connects all four intended FBX texture roles",
+          "name": "Each material connects its intended FBX texture roles",
           "passed": true,
           "materials": {
             "Eris_ConceptBody": {
               "BaseColor": {
-                "expected": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+                "expected": "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1",
                 "actual": [
-                  "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2"
+                  "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1"
                 ],
                 "passed": true
               },
@@ -461,6 +505,13 @@
                 "expected": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
                 "actual": [
                   "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20"
+                ],
+                "passed": true
+              },
+              "Emission": {
+                "expected": "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b",
+                "actual": [
+                  "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b"
                 ],
                 "passed": true
               }
@@ -498,7 +549,7 @@
           }
         },
         {
-          "name": "Fresh isolated import retains four correct map roles spaces and finite UV mappings",
+          "name": "Fresh isolated import retains map roles, color spaces and finite UV mappings",
           "passed": true,
           "materials": {
             "Eris_ConceptBody": {
@@ -507,7 +558,7 @@
                   "images": [
                     {
                       "image": "Iris_Body_BaseColor.png",
-                      "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+                      "sha256": "c5557abbc06f380d1727d0c390d36087efc14586fa47c1e98e5cab229837aab1",
                       "colorspace": "sRGB",
                       "size": [
                         4096,
@@ -558,6 +609,21 @@
                     }
                   ],
                   "passed": true
+                },
+                "Emission": {
+                  "images": [
+                    {
+                      "image": "Iris_Body_Emission.png",
+                      "sha256": "1d3d9e86252a09d988f6525f21c1101ae69d2a9b5b6e595968cb4f20b3f7f84b",
+                      "colorspace": "sRGB",
+                      "size": [
+                        4096,
+                        4096
+                      ]
+                    }
+                  ],
+                  "passed": true,
+                  "strength": 0.6200000047683716
                 }
               },
               "invalid_mapping_inputs": [],

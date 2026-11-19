@@ -5,6 +5,7 @@ Texturing/Iris_Concept_Textured.blend
   따뜻한 크림색 머리와 분홍빛 끝부분, 아이보리 의상·네이비·금색 포인트를 표현한다.
   기존 UV의 4K PBR 맵과 Happy Idle / Happy Walk / Running을 사용한다.
   최신 작업본에는 양쪽 어깨 회전점과 상완·소매 가중치 보정이 적용됐다.
+  양쪽 눈의 흰자위를 보정했다. 전후 모습은 Texturing/Review/texture-comparison.html에서 볼 수 있다.
   텍스처·게임 엔진용 파일·검증 범위는 Texturing/README.txt를 참고한다.
 
 Animation/Bright/Eris_Animated_Bright.blend
