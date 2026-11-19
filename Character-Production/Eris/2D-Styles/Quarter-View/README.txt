@@ -32,3 +32,18 @@ Image 1은 ../Eight-Directions/Sprites/Iris_Idle_sw.png 를 최근접 보간으�
 Use case: style-transfer with identity and viewpoint guidance. Create one full-body transparent 2D RPG idle sprite of Iris for a real quarter-view game. Image 1 is the approved southwest Iris sprite and is the master for identity, costume, body proportions and drawing style. Image 2 is a Blender render of the same character seen from the game's elevated camera. Match the precise viewpoint of Image 2: perspective camera pitched DOWN 50 degrees over the floor, with the character turned 45 degrees toward screen lower left (southwest). Match its occlusion and depth cues. The broad upper surface of the cream hood is visibly exposed, the face and torso are foreshortened, the coat hem curves in perspective, one boot is higher on the screen than the other, and the tops of both boots are clearly visible. The head is substantially seen from above, as in Image 2, and is gazing naturally forward toward lower left. Keep both soles planted on the same imaginary floor, body balanced and upright in her relaxed standing idle. Empty hands down, fingers grouped naturally below cuffs. Preserve Image 1's scale of head relative to body, hairstyle and flower placement. The hood has the dark navy band and blue petal marks; the sky-blue flower with a gold star center rests on her anatomical left temple (image-right from this angle), with navy ribbons; ivory-to-pink curled hair, deep navy and ivory dress, gold trim and paired buttons, puffy sleeves and cream fur boots. The nearer visible eye is blue with a gold star and a small white sclera. The far eye should be partly occluded as appropriate from this height. Same cheerful gentle expression. The finished sprite is one complete centrally framed character with all hood and boots visible, occupying about 76 percent of the frame height, generous empty margins. True alpha transparency in the background and around limbs and curl gaps. No scenery, floor graphic, drop shadow, text, UI, particles, extra figures, props, or equipment.
 
 Render as true old-school RPG sprite pixel art in Image 1's classic style. Image 1 is magnified by nearest-neighbor to show authentic square pixels and the stepped darkest navy outline. Build the new drawing on one clean orthogonal square pixel grid, as a compact roughly 54–62 pixel wide by 96 pixel tall character, each logical pixel drawn at the same integer enlargement so the bitmap can be scaled back to a 128-by-144 game frame. Clear one-pixel outlines and carefully grouped 2–3-tone clusters, no gradients, no antialiasing or fine high-resolution linework. Match exact proportions and pixel density of Image 1 when viewed at gameplay size. Use the second image only to establish the view angle and occlusion. Keep good shape separation between cuff, small relaxed hand, skirt and hair.
+
+쿼터뷰 도트 8방향
+
+Sprites 폴더의 Iris_Idle_Pixel_Quarter_*.png에 8방향 대기 프레임이 있습니다.
+Iris_Idle_Pixel_Quarter_8Dir.png는 512 × 288 px 크기, 4열 2행 시트입니다.
+윗줄은 ↓ 정면, ↘ 오른쪽 앞, → 오른쪽 옆, ↗ 오른쪽 뒤 순서입니다.
+아랫줄은 ↑ 뒷모습, ↖ 왼쪽 뒤, ← 왼쪽 옆, ↙ 왼쪽 앞 순서입니다.
+프레임은 128 × 144 px이며 발 기준점은 왼쪽 위에서 (64, 128) px입니다.
+기존 ↙ 프레임을 기준으로 하향 50°에서 45°씩 돌아가며 나머지 일곱 방향을 그렸습니다.
+
+directions.json에 각 프레임의 위치와 피벗이 있습니다.
+Unity 원본 프로젝트에서는 Sprite Editor에서 128 × 144 px 그리드로 시트를 나누고
+왼쪽 아래를 원점으로 하는 정규화 좌표 (0.5, 0.111111)로 피벗을 설정합니다.
+도트가 흐려지지 않게 Point 필터와 압축 없음으로 가져옵니다.
+제작에 사용한 방향별 지시는 imagegen-prompts.txt에 있습니다.

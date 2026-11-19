@@ -1,0 +1,31 @@
+이리스 쿼터뷰 도트 8방향 제작 기록
+
+기본 내장 ImageGen을 사용했습니다. 왼쪽 앞(↙)은 현재 승인된 쿼터뷰 PNG를 그대로 사용했습니다.
+
+Image 1은 Sprites/Iris_Idle_Pixel_Quarter_sw.png를 최근접 방식으로 8배 확대한 이미지입니다.
+Image 2는 ../../Texturing/Iris_Concept_Textured.blend의 대기 1프레임을 하향 50° 원근 카메라에서 45°씩 돌아가며 렌더한 방향별 가이드입니다.
+
+아래 공통 프롬프트에 해당 방향의 Facing request를 붙였습니다.
+
+Use case: precise-object-edit for a directional 2D RPG game sprite. Draw exactly ONE new full-body pixel art frame of the SAME Iris from Image 1, turning in place to the direction specified below, seen from a fixed high quarter-view game camera pitched down 50 degrees. Image 1 is the approved 128x144 sprite, magnified by nearest neighbor, and is the exact style and character-proportions master. Image 2 is the Blender TURN GUIDE at the target angle. Follow Image 2 for the facing, where the top of the hood and boots are seen, head/torso foreshortening, how limbs overlap, face or back of head visibility, and where the toes point. Preserve Image 1 for the warm palette, chunky even pixel grid, dark navy contour and cute character shapes. Maintain the approved chibi body identical to Image 1 in a neutral relaxed upright idle with both soles planted. No action, walking or flying. Preserve the cream hood and dark navy band, little sky blue petal symbols, cream-blonde to dusty pink corkscrew hair, navy coat with original gold paired buttons and trim, rounded ivory open-shoulder sleeves and matching fuzzy cream boots. The single sky-blue flower and tiny gold star lie only on her anatomical left temple, with navy ribbons; do not mirror or duplicate it. Where the face is visible use blue star irises, a little white sclera and the same gentle smile. Keep the original palette and grouped pixel clusters with darkest navy outlines, crisp like Image 1. Use clean hard square pixels of uniform size, a roughly 52 to 66 pixel wide and 96 pixel tall silhouette before nearest-neighbor enlargement. No smooth shading, vector outlines, textures or antialiasing. Show full hood and both boots wherever they are naturally visible. Center the single high-angle figure so it occupies about 76 percent of the canvas height with clear padding. True clean RGBA transparency around the figure and in gaps. No background, ground, prop, shadow, text, mark, particles or grid.
+
+정면
+Facing request: STRAIGHT FRONT SOUTH. Iris faces directly toward the bottom edge of the screen. Front view is bilaterally balanced except for the distinct single blue flower at image-right. Eyes and the center of the bow, buttons and boots align symmetrically. Both boot toes point DOWN the screen and the boots lie at the same projected depth. The cap of the hood is clearly seen from above and both eyes are tucked beneath the brim, still lively with tiny sclera. Match how much of the top of her head and shoulder surfaces Image 2 reveals.
+
+오른쪽 앞
+Facing request: FRONT RIGHT DIAGONAL SOUTHEAST, facing toward screen BOTTOM-RIGHT. Follow Image 2’s rightward-facing nose and the two toes pointing diagonally down-right, far foot higher, head and chest in three-quarter view. The near shoulder, roomy sleeve and visible relaxed hand are on screen-left; the near eye reads well and far eye is narrower. Keep only the foreshortened blue-and-gold ornament on her far anatomical left temple, at the far screen-right rim of the hood. Preserve the tilt viewed down over the tops of her hood and boots.
+
+오른쪽 옆
+Facing request: STRICT RIGHT PROFILE EAST, her body, gaze, boot toes and nose directed horizontally toward the right edge. Match Image 2 including the crown of the hood from above and her far boot partially hidden by the near boot. Draw side view, shoulders overlap and front button panel only a sliver at front right. Her blue temple flower, on the FAR side in this orientation, can only be a tiny sliver at the hood top or hidden. The visible near hand is small and relaxed below its cuff. Show at most a thin profile of the single near eye.
+
+오른쪽 뒤
+Facing request: BACK RIGHT DIAGONAL NORTHEAST, looking away and toward the top-right of the screen. Most of the drawing is the broad top and rear of the ivory hood with blue petal emblems along the lower edge, over long pink-blond curls. The sleeve and boot edges match Image 2. Only the top edge of blue ornament can peek behind the hood if visible. Her face is completely hidden, no eye, mouth, nose or front gold button row. Keep just one natural relaxed visible hand tucked below its own sleeve if it is visible in the guide.
+
+뒷모습
+Facing request: STRAIGHT BACK NORTH. Face away directly to the top edge. Center the back of the cream hood with the little light blue petal motifs along its rear hem. Long cream to strawberry-pink curls and upper back hide her coat center. Two boots show their backs and point directly toward screen top, with broad upper rims visible. A small edge of her single blue flower may peek at image-left near the top of the hood. Full rear view: NO face, any eyes, mouth, gold chest buttons, or front collar bow. Keep the actual above-and-behind 50 degree angle, not a front view or a side look.
+
+왼쪽 뒤
+Facing request: BACK LEFT DIAGONAL NORTHWEST, looking away and toward the top-left of the screen. Rebuild the large top and back of the hood and pink curls according to Image 2; blue petal emblems along the rear hem. Her near sleeve and the near foot read on the left. There may be a narrow blue-gold edge of the flower visible on the upper left outer temple edge, not a second ornament. Her entire face, eyes, lips and front gold button row are occluded. Match boots pointing up-left, with soles planted and their depth offset.
+
+왼쪽 옆
+Facing request: STRICT LEFT PROFILE WEST, nose, gaze and boot toes toward screen-left. Look from the same above-ground 50 degree pitch, so the crown of the hood and near boot top are unmistakable. One tiny foreshortened profile eye, head side and shoulder in profile. The blue star flower is on the NEAR anatomical left temple and clearly visible, the hood and long pink-tipped curls flow to screen-right. The near sleeve overlaps the far arm, one relaxed intact hand resting clearly below its white cuff. Only a slim edge of front gold buttons may show. The far boot is partially obscured as in Image 2.
