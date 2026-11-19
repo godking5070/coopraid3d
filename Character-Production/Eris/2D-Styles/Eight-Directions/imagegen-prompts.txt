@@ -1,0 +1,32 @@
+이리스 기본형 도트 8방향 제작 기록
+
+생성 방식은 기본 내장 ImageGen입니다.
+
+Image 1은 ../Front-Variations/Sprites/01-classic-front.png 입니다.
+
+Image 2는 ../../Texturing/Iris_Concept_Textured.blend 대기 1프레임에서 방향마다 45도씩 돌아가며 렌더한 가이드입니다.
+
+정면은 Image 1에서 픽셀을 가져왔습니다. 나머지 일곱 방향의 프롬프트는 공통 지시 뒤에 해당 Facing 문장을 붙였습니다.
+
+Use case: stylized-concept. Create just one new full-body directional RPG idle sprite of the exact Iris character seen in Image 1. Image 1 is the approved 2D pixel sprite and the master for the clothing, proportions, pixel scale, ink and all colors. Image 2 is an orthographic 3D TURN GUIDE only: match its facing direction, what sides of the hood, face, coat, and boots are visible, and the left-side placement of the flower. Do not copy the guide's rendered look or elongated proportions. Redraw Image 1 in the requested angle as if the same pixel character turns in place on a fixed floor. Match the large cheerful head, exact head-to-boot proportions, distinct navy single stepped pixel outlines, ivory hood with a navy front band and light blue four-petal marks, long cream-blond hair with pink curled ends, deep navy and cream dress with paired gold buttons and a navy bow, soft round ivory cuffs, cream fur boots and dark straps with gold buckles. In the angle where eyes can be seen, match Image 1's blue irises, clear small white sclera, tiny four-point gold stars and smile. Her sky-blue flower with gold center and navy ribbons is attached only to her anatomical left temple, on the viewer's right in Image 1. Follow its visibility in the turn guide. Rebuild occluded sections; don't horizontally mirror the asymmetric ornament. Maintain hard square stepped pixel clusters of consistent size, flat palettes with two or three shade bands, no smooth antialiasing, no 3D gradients or extra textures. Neutral idle, hands lowered and empty, legs supporting weight, unobstructed soles and head, centered full figure. Give substantial transparent padding. True RGBA cutout, nothing outside the figure. No text, arrows, backdrops, glow, ground, shadows, props, motion lines, other figures, or sprite grid.
+
+오른쪽 앞 · 45°
+Facing: FRONT-RIGHT DIAGONAL, her forward direction toward the right edge and toward the viewer. True 45° turn from Image 1. Front and her anatomical right side both visible. The nearer cheek and near sleeve are on the viewer's left. Both eyes visible but far eye visibly narrower. Nose and forward boot toes point diagonally toward image right. The flower is on the far temple; if seen it is a partial blue shape at the right head edge like Image 2.
+
+오른쪽 옆 · 90°
+Facing: EXACT RIGHT-FACING PROFILE at 90°, with her nose, chin, shoe toe and gaze aimed at screen-right. Show one eye in profile only, only the near sleeve and near boot clearly visible, and the far shapes narrowly occluded. Sleeve occupies the center side silhouette and navy front panel is only a thin edge on the right. Her anatomical left-side flower lies on the hidden far side. The broad hood and curl mass behind the face extend to screen-left. Match Image 2 as a strict side view.
+
+오른쪽 뒤 · 135°
+Facing: BACK-RIGHT DIAGONAL at 135°, turned AWAY past profile. Predominantly see the back of her hood and long curly cream-to-pink hair, with the right-side sleeve and legs like Image 2. Toes and face orientation point away and toward screen-right. Absolutely no eye, iris, smile, or front-facing facial feature is visible; even the face profile is hidden behind hood and hair. The flower is on the far side and occluded. Hood's pale blue petal marks on the back hem, subtle edge of coat side only. Make this clearly oblique from behind, not the side profile or a straight back view.
+
+뒷모습 · 180°
+Facing: EXACT STRAIGHT BACK view at 180° facing directly away. Symmetric back of the ivory hood with the small pale-blue four-petal marks spaced along its lower hem, and cream-to-pink hanging curls over the back of the navy coat. Both shoulders, both boots, and hem centered and directly back-facing; both heels visible. No eyes, cheek, chin, bow or front buttons. The left temple flower is on the upper-left edge from behind and only a tiny edge can peek from under the hood as in Image 2.
+
+왼쪽 뒤 · 225°
+Facing: BACK-LEFT DIAGONAL at 225°, viewed clearly from behind while she faces away toward screen-left. Rear hood panel and curls dominate; near left sleeve and its cuff emerge on the image-left side. Both legs read as seen from behind and boot toes angle away to screen-left. Do not show her iris, smile, face, neck bow, or front buttons. Back hem of hood with blue petal trim. A small partial blue flower and navy ribbons can be seen only at the upper-left near temple edge like Image 2. Clearly the back-left oblique view, not a front view.
+
+왼쪽 옆 · 270°
+Facing: EXACT LEFT-FACING PROFILE at 270°, nose, gaze and clearly visible boot toe to screen-left, hood and pink curl mass extend to screen-right. At most ONE small visible eye in true side profile. Both shoulders overlap, the near sleeve dominates, and the near boot occludes most of the far boot. The flower with its gold center and navy ribbon is on the visible anatomical left temple. Prioritize the strict 90° profile silhouette of Image 2, never a frontal three-quarter face.
+
+왼쪽 앞 · 315°
+Facing: FRONT-LEFT DIAGONAL, a clear 45° turn from the front toward screen-left and the viewer, exact facing of Image 2. Both eyes visible but the far eye noticeably narrower. Nose, front of dress, both boot toes point diagonally toward screen-left. The near left sleeve and flower at the visible left temple are on the viewer's right, with pink hair trailing behind to the right. Front gold button rows still visible in perspective. Keep a neutral standing idle, with no action or spell.
