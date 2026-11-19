@@ -1,6 +1,6 @@
 {
-  "manifest": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\iris-shoulder\\release\\Exports\\export-verification.json",
-  "staging": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\iris-shoulder\\roundtrip-stage",
+  "manifest": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\iris-shoulder\\pivot-final\\Exports\\export-verification.json",
+  "staging": "C:\\Users\\godki\\orca\\workspaces\\Astella\\\uce90\ub9ad\ud130-\ucee8\uc149\uc544\ud2b8\\.utmp\\iris-shoulder\\pivot-roundtrip",
   "clips": [
     {
       "name": "Idle",
@@ -70,7 +70,17 @@
           "passed": true,
           "images": [
             {
+              "name": "Iris_HairHood_BaseColor.png.001",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "staged_embedded_resolution": true
+            },
+            {
               "name": "Iris_Body_BaseColor.png",
+              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_Body_BaseColor.png.001",
               "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
               "staged_embedded_resolution": true
             },
@@ -80,18 +90,13 @@
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_Metallic.png",
-              "sha256": "a4a4f3e930d1f5e51e7a71420e1537c7698d4ee7dec594446ba203d73cd25fbc",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_HairHood_BaseColor.png.001",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
-              "staged_embedded_resolution": true
-            },
-            {
               "name": "Iris_HairHood_Roughness.png",
               "sha256": "377b00b19ed8d96c5f471bbe82c923e3d032382c29ec283c389727381fb6a5d2",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_Metallic.png",
+              "sha256": "a4a4f3e930d1f5e51e7a71420e1537c7698d4ee7dec594446ba203d73cd25fbc",
               "staged_embedded_resolution": true
             },
             {
@@ -113,11 +118,6 @@
               "name": "Iris_Body_Metallic.png",
               "sha256": "bb25f779e64565abc620b73ef8f923157941d20ab72ca3dbff1a0e370f6ffb54",
               "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_BaseColor.png.001",
-              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
-              "staged_embedded_resolution": true
             }
           ]
         },
@@ -134,8 +134,8 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 2.943547661171664e-07,
-                  "max_vertex_sample_error": 5.578409094098014e-07,
+                  "max_bounds_error": 3.5563265024518564e-07,
+                  "max_vertex_sample_error": 5.390952402262172e-07,
                   "passed": true
                 },
                 "Hair": {
@@ -151,15 +151,15 @@
             },
             {
               "frame": 14,
-              "max_bone_world_error": 6.258487701416016e-07,
+              "max_bone_world_error": 3.2782554626464844e-07,
               "finite": true,
               "meshes": {
                 "Head": {
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 3.7450504394853645e-07,
-                  "max_vertex_sample_error": 8.280003112037804e-07,
+                  "max_bounds_error": 2.1010955299910483e-07,
+                  "max_vertex_sample_error": 4.7037244682579527e-07,
                   "passed": true
                 },
                 "Hair": {
@@ -182,7 +182,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 2.3425391693088216e-07,
+                  "max_bounds_error": 4.789745596811557e-07,
                   "max_vertex_sample_error": 7.616432881885071e-07,
                   "passed": true
                 },
@@ -206,8 +206,8 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 2.702389723663323e-07,
-                  "max_vertex_sample_error": 5.338158776402313e-07,
+                  "max_bounds_error": 3.407018322187927e-07,
+                  "max_vertex_sample_error": 4.973789091006209e-07,
                   "passed": true
                 },
                 "Hair": {
@@ -230,8 +230,8 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 2.943547661171664e-07,
-                  "max_vertex_sample_error": 5.578409094098014e-07,
+                  "max_bounds_error": 3.5563265024518564e-07,
+                  "max_vertex_sample_error": 5.390952402262172e-07,
                   "passed": true
                 },
                 "Hair": {
@@ -297,8 +297,8 @@
           "passed": true,
           "armatures": 1,
           "mesh_names": [
-            "Hair",
-            "Head"
+            "Head",
+            "Hair"
           ]
         },
         {
@@ -322,8 +322,8 @@
           "passed": true,
           "images": [
             {
-              "name": "Iris_HairHood_BaseColor.png",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "name": "Iris_Body_Roughness.png",
+              "sha256": "f97e46d9bc9f256146cc5e0d7842f628975f6fc1684edf1931c42f4df1995df2",
               "staged_embedded_resolution": true
             },
             {
@@ -332,28 +332,13 @@
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_BaseColor.png.001",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_Normal.png",
-              "sha256": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_Roughness.png",
-              "sha256": "f97e46d9bc9f256146cc5e0d7842f628975f6fc1684edf1931c42f4df1995df2",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_HairHood_Normal.png",
-              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
-              "staged_embedded_resolution": true
-            },
-            {
               "name": "Iris_HairHood_Metallic.png",
               "sha256": "a4a4f3e930d1f5e51e7a71420e1537c7698d4ee7dec594446ba203d73cd25fbc",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_BaseColor.png.001",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
               "staged_embedded_resolution": true
             },
             {
@@ -367,8 +352,23 @@
               "staged_embedded_resolution": true
             },
             {
+              "name": "Iris_Body_Normal.png",
+              "sha256": "f30bbc1a8c4449593815c5f5b63f5546655d131890f1a7ae4cc57c2d60135f20",
+              "staged_embedded_resolution": true
+            },
+            {
               "name": "Iris_Body_BaseColor.png.001",
               "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_BaseColor.png",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_Normal.png",
+              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
               "staged_embedded_resolution": true
             }
           ]
@@ -386,7 +386,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 1.8651288686416523e-07,
+                  "max_bounds_error": 1.5277525878350153e-07,
                   "max_vertex_sample_error": 1.948767879622615e-06,
                   "passed": true
                 },
@@ -410,7 +410,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 2.543011852762511e-07,
+                  "max_bounds_error": 4.452660675169362e-07,
                   "max_vertex_sample_error": 1.4321932595012798e-06,
                   "passed": true
                 },
@@ -434,7 +434,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 3.881880035749852e-07,
+                  "max_bounds_error": 1.1211400197108645e-07,
                   "max_vertex_sample_error": 2.346455056694008e-06,
                   "passed": true
                 },
@@ -458,7 +458,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 3.1388206297999766e-07,
+                  "max_bounds_error": 2.416107063429179e-07,
                   "max_vertex_sample_error": 1.3808291216277357e-06,
                   "passed": true
                 },
@@ -482,7 +482,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 1.8651288686416523e-07,
+                  "max_bounds_error": 1.5277525878350153e-07,
                   "max_vertex_sample_error": 1.948767879622615e-06,
                   "passed": true
                 },
@@ -574,6 +574,21 @@
           "passed": true,
           "images": [
             {
+              "name": "Iris_HairHood_BaseColor.png",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_Normal.png",
+              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
+              "staged_embedded_resolution": true
+            },
+            {
+              "name": "Iris_HairHood_BaseColor.png.001",
+              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "staged_embedded_resolution": true
+            },
+            {
               "name": "Iris_Body_BaseColor.png",
               "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
               "staged_embedded_resolution": true
@@ -584,13 +599,8 @@
               "staged_embedded_resolution": true
             },
             {
-              "name": "Iris_HairHood_BaseColor.png",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_HairHood_BaseColor.png.001",
-              "sha256": "73616083f8e4105366ba0a0e303bc3ab892e0cb99b11a961a1bcf2916eaba73f",
+              "name": "Iris_Body_BaseColor.png.001",
+              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
               "staged_embedded_resolution": true
             },
             {
@@ -601,16 +611,6 @@
             {
               "name": "Iris_Body_Roughness.png",
               "sha256": "f97e46d9bc9f256146cc5e0d7842f628975f6fc1684edf1931c42f4df1995df2",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_Body_BaseColor.png.001",
-              "sha256": "9cf4eed3bfbd440e82c831240b313d368442c6d3729a441333671cd6484acfc2",
-              "staged_embedded_resolution": true
-            },
-            {
-              "name": "Iris_HairHood_Normal.png",
-              "sha256": "d885391e8f7b4162a74e98537395809d7072479a0329ab9a2c2aa09d180426f8",
               "staged_embedded_resolution": true
             },
             {
@@ -662,7 +662,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 3.003580711646858e-07,
+                  "max_bounds_error": 3.905032191497959e-07,
                   "max_vertex_sample_error": 3.130035885673399e-06,
                   "passed": true
                 },
@@ -710,7 +710,7 @@
                   "count_matches": true,
                   "vertices": 15802,
                   "finite": true,
-                  "max_bounds_error": 3.755491971013658e-07,
+                  "max_bounds_error": 4.201505567624775e-07,
                   "max_vertex_sample_error": 3.1449292804547335e-06,
                   "passed": true
                 },

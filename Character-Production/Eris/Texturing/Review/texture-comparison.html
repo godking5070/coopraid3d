@@ -5,12 +5,32 @@
 <title>이리스 · 컨셉 텍스처 비교</title>
 <style>
 :root{color-scheme:dark;font:15px/1.6 system-ui,sans-serif;background:#111827;color:#e5e7eb}*{box-sizing:border-box}body{max-width:1320px;margin:auto;padding:32px 24px}h1{font-size:28px;margin:0 0 8px}p{color:#b7c3d7;margin:0 0 20px}a{color:#c8dbff}header{margin-bottom:24px}.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:20px 0}select,input{accent-color:#dfbe7d}select{padding:9px 12px;background:#1f2937;color:inherit;border:1px solid #40506b;border-radius:8px}.grid{display:grid;grid-template-columns:1fr 2fr;gap:20px}.card{margin:0;border:1px solid #35445f;border-radius:16px;overflow:hidden;background:#1b2535}.card figcaption{padding:13px 16px;background:#202d42;color:#d3dfef}.reference{display:block;width:100%;height:640px;object-fit:contain;background:#142035}.comparison{position:relative;aspect-ratio:4/5;max-height:800px;overflow:hidden;background:#70777c}.comparison img{display:block;width:100%;height:100%;object-fit:contain}.layer{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}.handle{position:absolute;top:0;bottom:0;left:50%;width:2px;background:#f4d28b;pointer-events:none}.badge{position:absolute;top:14px;padding:5px 10px;border-radius:8px;background:#111827c9;font-size:12px}.left{left:14px}.right{right:14px}.range{display:flex;gap:12px;align-items:center;padding:14px 18px}.range input{flex:1;width:100%}.links{display:flex;flex-wrap:wrap;gap:18px;margin:24px 0}.swatches{display:flex;flex-wrap:wrap;gap:15px;margin:20px 0}.swatches span{display:flex;align-items:center;gap:8px;color:#b7c3d7}.swatches i{width:18px;height:18px;border-radius:50%;border:1px solid #ffffff33}.note{font-size:13px;color:#9baec8}button{cursor:pointer} @media(max-width:800px){body{padding:22px 12px}.grid{grid-template-columns:1fr}.reference{height:440px}h1{font-size:24px}}
+.comparison.joint-view {aspect-ratio:1;max-height:none}
+.joint-guide {display:none;position:absolute;pointer-events:none;z-index:2}
+.joint-view .joint-guide {display:block}
+.joint-outline {left:52.07%;top:46.37%;width:22.11%;height:22.58%;border:2px solid #fc4730;border-radius:50%;transform:translate(-50%,-50%)}
+.joint-point {width:12px;height:12px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 1px #111827,0 2px 5px #111827aa}
+.joint-point span {position:absolute;left:12px;top:-12px;padding:2px 5px;border-radius:4px;background:#111827e6;white-space:nowrap;font-size:12px}
+.joint-point.old {left:69.62%;top:54.82%;background:#f49d4c}
+.joint-point.new {left:57.63%;top:49.38%;background:#67e8f9}
 </style>
 <header><h1>이리스 · 컨셉 텍스처 비교</h1><p>제공한 원화의 아이보리·남색·금색, 크림 금발과 연분홍 머리끝을 기준으로 다듬었습니다.</p></header>
-<div class="bar"><label for="view">확인할 부분</label><select id="view"><option value="front">정면</option><option value="back">뒷모습</option><option value="face">얼굴·후드</option><option value="costume">의상·장식</option><option value="shoulder">어깨 리깅</option></select><span class="note">같은 자세·카메라·조명으로 비교합니다.</span></div>
+<div class="bar"><label for="view">확인할 부분</label><select id="view"><option value="front">정면</option><option value="back">뒷모습</option><option value="face">얼굴·후드</option><option value="costume">의상·장식</option><option value="shoulder">어깨 가중치</option><option value="pivot">어깨 회전점</option></select><span class="note">같은 자세·카메라·조명으로 비교합니다.</span></div>
 <main class="grid">
 <figure class="card"><figcaption>사용자 제공 컨셉아트</figcaption><img class="reference" src="../Reference/Iris_Concept_UserReference.png" alt="아이보리 후드, 남색 의상, 금장과 분홍빛 머리끝의 이리스 원화"></figure>
-<figure class="card"><figcaption id="caption">텍스처 적용 전후 · 슬라이더로 비교</figcaption><div class="comparison"><img id="after" src="after-front.png" alt="수정 후"><div class="layer" id="layer"><img id="before" src="before-front.png" alt="수정 전"></div><div class="handle" id="handle"></div><span class="badge left">적용 전</span><span class="badge right">적용 후</span></div><label class="range"><span>후</span><input id="range" type="range" min="0" max="100" value="50" aria-label="적용 전 이미지 비율"><span>전</span></label></figure>
+<figure class="card">
+  <figcaption id="caption">텍스처 적용 전후 · 슬라이더로 비교</figcaption>
+  <div class="comparison" id="comparison">
+    <img id="after" src="after-front.png" alt="수정 후">
+    <div class="layer" id="layer"><img id="before" src="before-front.png" alt="수정 전"></div>
+    <div class="handle" id="handle"></div>
+    <span class="badge left">적용 전</span><span class="badge right">적용 후</span>
+    <span class="joint-guide joint-outline" aria-hidden="true"></span>
+    <span class="joint-guide joint-point old"><span>이전 회전점</span></span>
+    <span class="joint-guide joint-point new"><span>수정 회전점</span></span>
+  </div>
+  <label class="range"><span>후</span><input id="range" type="range" min="0" max="100" value="50" aria-label="적용 전 이미지 비율"><span>전</span></label>
+</figure>
 </main>
 <div class="swatches"><span><i style="background:#fff4e7"></i>아이보리</span><span><i style="background:#41496d"></i>남색</span><span><i style="background:#deb56c"></i>금색</span><span><i style="background:#b9d3ec"></i>연한 하늘색</span><span><i style="background:#fff0d5"></i>크림 금발</span><span><i style="background:#f6bdba"></i>연분홍 머리끝</span></div>
 <nav class="links"><a href="../Iris_Concept_Textured.blend">Blender 작업본</a><a href="../README.txt">파일·재생 안내</a><a href="../Textures/Iris_Body_BaseColor.png">몸·의상 색상 맵</a><a href="../Textures/Iris_HairHood_BaseColor.png">머리·후드 색상 맵</a></nav>
@@ -20,9 +40,12 @@ const view=document.getElementById('view'),range=document.getElementById('range'
 view.addEventListener('change', () => {
   document.getElementById('before').src = `before-${view.value}.png`;
   document.getElementById('after').src = `after-${view.value}.png`;
-  document.getElementById('caption').textContent = view.value === 'shoulder'
-    ? '어깨 가중치 보정 전후 · 대기 1프레임'
-    : '텍스처 적용 전후 · 슬라이더로 비교';
+  const captions = {
+    shoulder: '어깨 가중치 보정 전후 · 대기 1프레임',
+    pivot: '어깨 회전점 이동 · 대기 36프레임',
+  };
+  document.getElementById('comparison').classList.toggle('joint-view', view.value === 'pivot');
+  document.getElementById('caption').textContent = captions[view.value] || '텍스처 적용 전후 · 슬라이더로 비교';
 });
 range.addEventListener('input',()=>{layer.style.clipPath=`inset(0 ${100-range.value}% 0 0)`;handle.style.left=`${range.value}%`});
 </script>

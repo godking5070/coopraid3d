@@ -5,11 +5,12 @@
 원화: Reference/Iris_Concept_UserReference.png (2026-11-19 사용자 제공)
 
 어깨 리깅 보정 (2026-11-19)
-팔을 내렸을 때 상완과 소매가 접히는 부분의 가중치를 정리했습니다.
-양쪽 어깨와 상완 사이의 영향이 가까운 정점에서 완만하게 이어집니다.
-대기·걷기·달리기 129프레임과 어깨·팔 회전 12가지 자세에서 검사했습니다.
-왼쪽 어깨 주변 변의 최대 길이 비율은 4.09배에서 1.52배로 줄었습니다.
-비교 페이지에서 ‘어깨 리깅’을 선택하면 대기 자세의 전후를 볼 수 있습니다.
+사용자가 표시한 어깨 관절에 쇄골 끝과 상완 시작점을 맞췄습니다.
+양쪽에서 상완 시작점을 몸통 쪽으로 약 3.8cm, 위로 약 1.3cm 옮겼습니다.
+상완과 전완의 회전을 다시 맞춰 손목과 손가락의 기존 궤적을 이어갑니다.
+밝은 버전과 차분한 버전의 대기·걷기·달리기 6개 동작, 총 677프레임을 확인했습니다.
+비교 페이지의 ‘어깨 회전점’에서 대기 36프레임의 빨간 표시와 회전점 위치를 볼 수 있습니다.
+‘어깨 가중치’는 먼저 진행한 소매 가중치 수정의 전후입니다.
 
 아이보리 후드·남색 의상·금색 장식은 유지합니다.
 원화의 따뜻한 크림 금발에서 연분홍 머리끝으로 이어지는 색감,
@@ -41,8 +42,8 @@ Eris_Idle: 1–56 / Eris_Walk: 1–34 / Eris_Run: 1–39, 30 FPS.
 기존 파일명의 Eris와 리그·Action 이름은 이전 작업과의 연결을 위해 유지합니다.
 
 리깅
-74개 본과 기존 모션을 사용합니다. 현재 작업본에는 손목 소매·등 옷깃 보정에 더해
-양쪽 어깨와 상완 사이의 가중치 보정이 들어 있습니다.
+74개 본으로 몸과 머리카락이 움직입니다. 손목 소매와 등 옷깃에 이어 양쪽 어깨의
+회전점과 윗소매 가중치를 보정했습니다.
 수천 개로 조각난 기존 UV를 AI로 재배치하지 않고, 새 재질을 같은 UV에 굽습니다.
 머리카락과 후드가 같은 메시이므로 머리카락 영역만 분홍 그라데이션을 적용합니다.
 
@@ -57,7 +58,8 @@ Unity 가중치 설정은 ../Animation/README.txt의 해당 안내를 따릅니�
 검증 자료
 texture-build-verification.json과 independent-verification.json은 컨셉 텍스처를 적용한 단계의 기록입니다.
 color-verification.json에 표면 UV의 색과 금속성 검사 결과가 있습니다.
-shoulder-repair-verification.json에 현재 작업본의 어깨 보정 전후와 전체 프레임 검사 결과가 있습니다.
+shoulder-repair-verification.json은 첫 윗소매 가중치 보정의 기록입니다.
+shoulder-joint-verification.json에 현재 작업본의 관절 위치와 모션 재검사 결과가 있습니다.
 Exports/export-verification.json / roundtrip-verification.json: FBX 내보내기·재수입 비교.
 Exports/pbr-verification.json: 각 FBX의 정확한 4K 맵 8개와 역할·색 공간 연결 검사.
 Review/before-* / after-*: 같은 자세·조명·카메라로 렌더링한 비교 이미지.
@@ -70,4 +72,5 @@ build_textured_character.py --manifest texture-spec.json --output 새경로.blen
 열기 좋게 정리할 수 있습니다. 이 단계는 새 출력의 해시를 확인한 뒤 뷰 설정만 저장합니다.
 텍스처를 다시 만든 파일에 repair_shoulder_weights.py --output 보정본.blend를 실행하면
 어깨 가중치 보정을 적용한 새 작업본이 생성됩니다.
+그 작업본에 align_shoulder_joints.py --output 관절보정본.blend를 실행하면 관절 위치와 팔 동작을 맞춥니다.
 기존 출력 파일·맵을 덮어쓰지 않으므로 새 출력 폴더를 사용합니다.
