@@ -21,6 +21,7 @@ Sprites 폴더에 기본형 도트 투명 PNG 8장, Iris_Idle_8Dir.png에 4열 2
 다면 컬러 블록은 30종 시안의 12번 그림체를 기준으로 면의 색과 각진 윤곽을 잡았습니다.
 Faceted 폴더에 방향별 PNG 8장과 Iris_Idle_8Dir_Faceted.png 시트가 있습니다.
 한 칸은 512 × 576 px, 발 기준점은 (256, 512) px입니다. 도트와 화면상 기준을 맞췄습니다.
+왼쪽 앞 자세는 얼굴과 발의 방향을 유지하면서 가슴과 어깨를 조금 앞으로 옮겼습니다.
 Faceted/directions.json에 프레임 좌표가 있고 Faceted/imagegen-prompts.txt에 제작 기준이 있습니다.
 
 Unity 원본 프로젝트에서는 선택한 시트를 2D Sprite로 가져와 해당 칸 크기로
