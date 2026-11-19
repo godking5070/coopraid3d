@@ -1,7 +1,8 @@
-이리스 8방향 도트 대기 자세
+이리스 8방향 대기 자세
 
-index.html에서 방향 버튼을 눌러 확인할 수 있습니다.
-Sprites 폴더에 방향별 투명 PNG 8장, Iris_Idle_8Dir.png에 4열 2행 시트가 있습니다.
+index.html에서 그림체와 방향을 선택해 확인할 수 있습니다.
+Sprites 폴더에 기본형 도트 투명 PNG 8장, Iris_Idle_8Dir.png에 4열 2행 시트가 있습니다.
+4번째 오른쪽 뒤와 7번째 왼쪽 옆의 손은 손끝의 외곽선과 소매 아래 경계를 다듬었습니다.
 
 한 칸은 128 × 144 px입니다. 발 기준점은 각 칸의 왼쪽 위에서 (64, 128) px이고
 캐릭터 높이는 약 112 px입니다. 방향 조합과 프레임 좌표는 directions.json에 있습니다.
@@ -17,5 +18,10 @@ Sprites 폴더에 방향별 투명 PNG 8장, Iris_Idle_8Dir.png에 4열 2행 시
 회전 각도와 가려지는 부분은 Blender 모델로 잡았습니다.
 이어 그릴 때는 동일한 기본형 도트 원본과 imagegen-prompts.txt를 참조할 수 있습니다.
 
-Unity 원본 프로젝트에서는 시트를 2D Sprite로 가져와 128 × 144 px 칸으로
-나눈 뒤 파일의 발 기준점에 맞춰 테스트할 수 있습니다.
+다면 컬러 블록은 30종 시안의 12번 그림체를 기준으로 면의 색과 각진 윤곽을 잡았습니다.
+Faceted 폴더에 방향별 PNG 8장과 Iris_Idle_8Dir_Faceted.png 시트가 있습니다.
+한 칸은 512 × 576 px, 발 기준점은 (256, 512) px입니다. 도트와 화면상 기준을 맞췄습니다.
+Faceted/directions.json에 프레임 좌표가 있고 Faceted/imagegen-prompts.txt에 제작 기준이 있습니다.
+
+Unity 원본 프로젝트에서는 선택한 시트를 2D Sprite로 가져와 해당 칸 크기로
+나눈 뒤 directions.json의 발 기준점에 맞춰 테스트할 수 있습니다.
