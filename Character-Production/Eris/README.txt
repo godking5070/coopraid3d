@@ -1,5 +1,9 @@
 이리스(Iris) 캐릭터 제작 파일 — 기존 Eris 경로 유지
 
+2D-Styles/index.html
+  투명 전신 2D 스프라이트 30종과 도트·셀 채색의 걷기, 별꽃 마법 시트.
+  폴더 안의 README.txt와 sprite-manifest.json에 파일 구성과 프레임 정보가 있다.
+
 Texturing/Iris_Concept_Textured.blend
   사용자가 제공한 컨셉을 반영한 최신 텍스처·리깅·모션 작업본.
   따뜻한 크림색 머리와 분홍빛 끝부분, 아이보리 의상·네이비·금색 포인트를 표현한다.
