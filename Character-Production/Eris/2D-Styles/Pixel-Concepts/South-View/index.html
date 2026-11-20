@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이리스 도트 컨셉 | 하향 50°</title>
+  <style>
+:root {
+  color-scheme: light dark;
+  --ink: var(--foreground, #202942);
+  --muted: var(--muted-foreground, #526283);
+  --paper: var(--background, #f5f7fb);
+  --sheet: var(--card, #fff);
+  --line: var(--border, #dbe2ef);
+  --focus: #2e61bd;
+  --art: #edf1f8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: var(--foreground, #eff2fa);
+    --muted: var(--muted-foreground, #b0bdd7);
+    --paper: var(--background, #151b29);
+    --sheet: var(--card, #222b40);
+    --line: var(--border, #3f4b65);
+    --focus: #9fbcff;
+    --art: #dbe3f2;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: var(--paper); font: 15px/1.5 system-ui, "Malgun Gothic", sans-serif; }
+main { width: min(100%, 1220px); margin-inline: auto; padding: 20px clamp(10px, 3vw, 28px) 28px; }
+header { margin: 0 0 16px; }
+h1 { font-size: clamp(23px, 2.8vw, 32px); line-height: 1.24; margin: 0 0 4px; }
+p { margin: 0; }
+.note { color: var(--muted); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 1.2vw, 15px);
+}
+@media (min-width: 620px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 955px) { .grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+figure {
+  min-width: 0;
+  margin: 0;
+  padding: clamp(6px, 1vw, 10px);
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.art {
+  width: 100%;
+  display: block;
+  overflow: hidden;
+  border: 0;
+  border-radius: 7px;
+  padding: 0;
+  background: var(--art);
+  cursor: zoom-in;
+}
+.art > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: scale(1.18);
+  transform-origin: 50% 67%;
+}
+img { image-rendering: pixelated; }
+figcaption { padding: 9px 4px 3px; }
+figcaption h2, dialog h2 { margin: 0; font-size: 15px; line-height: 1.35; }
+figcaption p { margin-top: 4px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+dialog {
+  color: var(--ink);
+  background: var(--sheet);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  width: min(500px, calc(100% - 22px));
+  max-width: none;
+  max-height: calc(100% - 22px);
+  padding: 12px;
+}
+dialog::backdrop { background: #101729bf; }
+.detail-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.detail-art { border-radius: 8px; background: var(--art); display: grid; place-items: center; overflow: hidden; }
+.detail-art img { display: block; width: min(100%, 68vh); height: auto; max-height: 65vh; object-fit: contain; }
+.detail-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 8px; }
+.detail-footer p { color: var(--muted); font-size: 13px; }
+.control { color: var(--ink); background: var(--paper); font: inherit; border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; cursor: pointer; }
+a.control { text-decoration: none; white-space: nowrap; }
+.view-reference { margin-top: 6px; }
+.view-reference summary { width: fit-content; cursor: pointer; color: var(--muted); }
+.view-reference img { display: block; width: 145px; max-width: 100%; margin-top: 7px; height: auto; border-radius: 7px; background: var(--art); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>이리스 도트 컨셉</h1>
+      <p class="note">하향 50° · 화면 아래쪽을 바라보는 뷰</p>
+      <details class="view-reference">
+        <summary>첨부 기준 이미지</summary>
+        <img src="../../Quarter-View/Sprites/Iris_Idle_Pixel_Quarter_s.png" alt="각도 기준이 된 이리스 게임 스프라이트" width="128" height="144">
+      </details>
+    </header>
+    <section class="grid" aria-label="이리스 도트 시안 10개">
+      <figure>
+        <button class="art" type="button" data-file="01-mini.png" aria-label="01 미니 도트 확대">
+          <img src="Sprites/01-mini.png" alt="이리스 미니 도트" width="40" height="45">
+        </button>
+        <figcaption>
+          <h2>01 미니 도트</h2>
+          <p>작은 화면에서도 읽히는 큰 픽셀</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="02-eight-color.png" aria-label="02 8색 팔레트 확대">
+          <img src="Sprites/02-eight-color.png" alt="이리스 8색 팔레트" width="64" height="72">
+        </button>
+        <figcaption>
+          <h2>02 8색 팔레트</h2>
+          <p>크림·분홍·남색을 포함한 8색</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="03-rpg16.png" aria-label="03 16비트 RPG 확대">
+          <img src="Sprites/03-rpg16.png" alt="이리스 16비트 RPG" width="80" height="90">
+        </button>
+        <figcaption>
+          <h2>03 16비트 RPG</h2>
+          <p>짙은 외곽선과 단정한 음영</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="04-high-density.png" aria-label="04 고밀도 도트 확대">
+          <img src="Sprites/04-high-density.png" alt="이리스 고밀도 도트" width="144" height="162">
+        </button>
+        <figcaption>
+          <h2>04 고밀도 도트</h2>
+          <p>눈과 금장까지 읽히는 섬세한 도트</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="05-pastel.png" aria-label="05 파스텔 도트 확대">
+          <img src="Sprites/05-pastel.png" alt="이리스 파스텔 도트" width="112" height="126">
+        </button>
+        <figcaption>
+          <h2>05 파스텔 도트</h2>
+          <p>밝은 라일락 음영과 부드러운 색 경계</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="06-arcade.png" aria-label="06 아케이드 도트 확대">
+          <img src="Sprites/06-arcade.png" alt="이리스 아케이드 도트" width="112" height="126">
+        </button>
+        <figcaption>
+          <h2>06 아케이드 도트</h2>
+          <p>굵은 테두리와 선명한 색 대비</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="07-cel.png" aria-label="07 셀 셰이딩 도트 확대">
+          <img src="Sprites/07-cel.png" alt="이리스 셀 셰이딩 도트" width="112" height="126">
+        </button>
+        <figcaption>
+          <h2>07 셀 셰이딩 도트</h2>
+          <p>큰 두 단계 명암과 적은 테두리</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="08-dither.png" aria-label="08 디더링 도트 확대">
+          <img src="Sprites/08-dither.png" alt="이리스 디더링 도트" width="128" height="144">
+        </button>
+        <figcaption>
+          <h2>08 디더링 도트</h2>
+          <p>그늘에 교차 픽셀을 넣은 복고 질감</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="09-facets.png" aria-label="09 다면 도트 확대">
+          <img src="Sprites/09-facets.png" alt="이리스 다면 도트" width="128" height="144">
+        </button>
+        <figcaption>
+          <h2>09 다면 도트</h2>
+          <p>계단진 삼각 면으로 만든 명암</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <button class="art" type="button" data-file="10-round-chibi.png" aria-label="10 둥근 치비 도트 확대">
+          <img src="Sprites/10-round-chibi.png" alt="이리스 둥근 치비 도트" width="96" height="108">
+        </button>
+        <figcaption>
+          <h2>10 둥근 치비 도트</h2>
+          <p>큰 머리와 짧고 둥근 팔다리</p>
+        </figcaption>
+      </figure>
+    </section>
+  </main>
+  <dialog aria-labelledby="detail-title">
+    <div class="detail-head">
+      <h2 id="detail-title"></h2>
+      <form method="dialog"><button class="control" type="submit">닫기</button></form>
+    </div>
+    <div class="detail-art"><img alt=""></div>
+    <div class="detail-footer">
+      <p id="detail-size"></p>
+      <a class="control" id="detail-png" download>PNG 저장</a>
+    </div>
+  </dialog>
+  <script>
+const preview = document.querySelector('dialog');
+const detailImage = preview.querySelector('img');
+const title = document.querySelector('#detail-title');
+const dimensions = document.querySelector('#detail-size');
+const download = document.querySelector('#detail-png');
+document.querySelector('.grid').addEventListener('click', (event) => {
+  const art = event.target.closest('.art');
+  if (!art) return;
+  const image = art.querySelector('img');
+  title.textContent = art.closest('figure').querySelector('h2').textContent;
+  detailImage.src = image.getAttribute('src');
+  detailImage.alt = image.alt;
+  dimensions.textContent = image.getAttribute('width') + ' × ' + image.getAttribute('height') + ' px';
+  download.href = detailImage.getAttribute('src');
+  download.download = art.dataset.file;
+  preview.showModal();
+});
+  </script>
+</body>
+</html>
