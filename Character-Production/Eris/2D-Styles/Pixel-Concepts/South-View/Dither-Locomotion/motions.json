@@ -86,16 +86,30 @@
       "durationMs": 720,
       "frameDurationMs": 90,
       "sourcePose": {
-        "stanceFraction": 0.38,
-        "soleClearanceM": 0.089,
+        "stanceFraction": 0.375,
+        "soleClearanceM": 0.096,
         "samples": [
           {
             "index": 0,
+            "stage": "contact",
             "cyclePhase": 0.03,
-            "torsoLeanDegrees": 9.4,
+            "feetPhase": {
+              "left": 0.022,
+              "right": 0.522
+            },
+            "torsoLeanDegrees": 11.5,
+            "pelvisHeightM": 0.56547,
             "grounded": {
               "left": true,
               "right": false
+            },
+            "footClearanceM": {
+              "left": 0,
+              "right": 0.08094
+            },
+            "bootPitchDegrees": {
+              "left": -10.026,
+              "right": 25.123
             },
             "wristBelowShoulderM": {
               "left": 0.2199,
@@ -108,11 +122,25 @@
           },
           {
             "index": 1,
+            "stage": "load",
             "cyclePhase": 0.155,
-            "torsoLeanDegrees": 8.5,
+            "feetPhase": {
+              "left": 0.157,
+              "right": 0.657
+            },
+            "torsoLeanDegrees": 12.5,
+            "pelvisHeightM": 0.54247,
             "grounded": {
               "left": true,
               "right": false
+            },
+            "footClearanceM": {
+              "left": 0,
+              "right": 0.0953
+            },
+            "bootPitchDegrees": {
+              "left": 0,
+              "right": 13.065
             },
             "wristBelowShoulderM": {
               "left": 0.21202,
@@ -125,11 +153,25 @@
           },
           {
             "index": 2,
+            "stage": "toe-off",
             "cyclePhase": 0.28,
-            "torsoLeanDegrees": 9.4,
+            "feetPhase": {
+              "left": 0.341,
+              "right": 0.841
+            },
+            "torsoLeanDegrees": 11.8,
+            "pelvisHeightM": 0.55947,
             "grounded": {
               "left": true,
               "right": false
+            },
+            "footClearanceM": {
+              "left": 0,
+              "right": 0.0561
+            },
+            "bootPitchDegrees": {
+              "left": 30.528,
+              "right": -4.228
             },
             "wristBelowShoulderM": {
               "left": 0.19593,
@@ -142,11 +184,25 @@
           },
           {
             "index": 3,
+            "stage": "flight",
             "cyclePhase": 0.405,
-            "torsoLeanDegrees": 10.3,
+            "feetPhase": {
+              "left": 0.431,
+              "right": 0.931
+            },
+            "torsoLeanDegrees": 11.2,
+            "pelvisHeightM": 0.57647,
             "grounded": {
               "left": false,
               "right": false
+            },
+            "footClearanceM": {
+              "left": 0.04253,
+              "right": 0.02433
+            },
+            "bootPitchDegrees": {
+              "left": 30.049,
+              "right": -9.577
             },
             "wristBelowShoulderM": {
               "left": 0.18105,
@@ -159,11 +215,25 @@
           },
           {
             "index": 4,
+            "stage": "contact",
             "cyclePhase": 0.53,
-            "torsoLeanDegrees": 9.4,
+            "feetPhase": {
+              "left": 0.522,
+              "right": 0.02200000000000002
+            },
+            "torsoLeanDegrees": 11.5,
+            "pelvisHeightM": 0.56547,
             "grounded": {
               "left": false,
               "right": true
+            },
+            "footClearanceM": {
+              "left": 0.08094,
+              "right": 0
+            },
+            "bootPitchDegrees": {
+              "left": 25.123,
+              "right": -10.026
             },
             "wristBelowShoulderM": {
               "left": 0.1761,
@@ -176,11 +246,25 @@
           },
           {
             "index": 5,
+            "stage": "load",
             "cyclePhase": 0.655,
-            "torsoLeanDegrees": 8.5,
+            "feetPhase": {
+              "left": 0.657,
+              "right": 0.15700000000000003
+            },
+            "torsoLeanDegrees": 12.5,
+            "pelvisHeightM": 0.54247,
             "grounded": {
               "left": false,
               "right": true
+            },
+            "footClearanceM": {
+              "left": 0.0953,
+              "right": 0
+            },
+            "bootPitchDegrees": {
+              "left": 13.065,
+              "right": 0
             },
             "wristBelowShoulderM": {
               "left": 0.18398,
@@ -193,11 +277,25 @@
           },
           {
             "index": 6,
+            "stage": "toe-off",
             "cyclePhase": 0.78,
-            "torsoLeanDegrees": 9.4,
+            "feetPhase": {
+              "left": 0.841,
+              "right": 0.34099999999999997
+            },
+            "torsoLeanDegrees": 11.8,
+            "pelvisHeightM": 0.55947,
             "grounded": {
               "left": false,
               "right": true
+            },
+            "footClearanceM": {
+              "left": 0.0561,
+              "right": 0
+            },
+            "bootPitchDegrees": {
+              "left": -4.228,
+              "right": 30.528
             },
             "wristBelowShoulderM": {
               "left": 0.20007,
@@ -210,11 +308,25 @@
           },
           {
             "index": 7,
+            "stage": "flight",
             "cyclePhase": 0.905,
-            "torsoLeanDegrees": 10.3,
+            "feetPhase": {
+              "left": 0.931,
+              "right": 0.43100000000000005
+            },
+            "torsoLeanDegrees": 11.2,
+            "pelvisHeightM": 0.57647,
             "grounded": {
               "left": false,
               "right": false
+            },
+            "footClearanceM": {
+              "left": 0.02433,
+              "right": 0.04253
+            },
+            "bootPitchDegrees": {
+              "left": -9.577,
+              "right": 30.049
             },
             "wristBelowShoulderM": {
               "left": 0.21495,
@@ -235,7 +347,7 @@
         ],
         "columns": 8,
         "rows": 8,
-        "sha256": "552871049eb2854c99ee21c2ba947116da4f7111661135a155e4c61bd595636b"
+        "sha256": "5fd7e5a9999b1e44443b933ec0c60813d7148340f69c76caabdefecac162caef"
       },
       "directions": [
         {
@@ -257,22 +369,24 @@
               ],
               "visibleRectPx": [
                 31,
-                47,
+                48,
                 65,
-                101
+                94
               ],
               "guideRectPx": [
                 28,
-                47,
+                48,
                 72,
-                101
+                97
               ],
-              "silhouetteDelta": 0.1371,
+              "silhouetteDelta": 0.198,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 759
+              "armEditPixels": 759,
+              "strideEditPixels": 767,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -284,22 +398,24 @@
               ],
               "visibleRectPx": [
                 33,
-                48,
+                50,
                 61,
-                92
+                84
               ],
               "guideRectPx": [
                 28,
-                48,
+                50,
                 72,
-                92
+                88
               ],
-              "silhouetteDelta": 0.1275,
+              "silhouetteDelta": 0.0852,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 645
+              "armEditPixels": 645,
+              "strideEditPixels": 765,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 2,
@@ -311,22 +427,24 @@
               ],
               "visibleRectPx": [
                 32,
-                47,
+                49,
                 63,
-                90
+                86
               ],
               "guideRectPx": [
-                27,
-                47,
+                28,
+                48,
                 72,
                 90
               ],
-              "silhouetteDelta": 0.1335,
+              "silhouetteDelta": 0.1268,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 702
+              "armEditPixels": 702,
+              "strideEditPixels": 739,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -338,22 +456,24 @@
               ],
               "visibleRectPx": [
                 32,
-                46,
+                47,
                 64,
-                99
+                94
               ],
               "guideRectPx": [
                 28,
                 46,
                 72,
-                98
+                97
               ],
-              "silhouetteDelta": 0.0789,
+              "silhouetteDelta": 0.0704,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 652
+              "armEditPixels": 652,
+              "strideEditPixels": 725,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 4,
@@ -365,22 +485,24 @@
               ],
               "visibleRectPx": [
                 32,
-                47,
+                48,
                 65,
-                101
+                95
               ],
               "guideRectPx": [
                 28,
-                47,
+                48,
                 72,
-                101
+                97
               ],
-              "silhouetteDelta": 0.1343,
+              "silhouetteDelta": 0.1463,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 706
+              "armEditPixels": 706,
+              "strideEditPixels": 774,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -392,22 +514,24 @@
               ],
               "visibleRectPx": [
                 33,
-                48,
+                50,
                 60,
-                92
+                84
               ],
               "guideRectPx": [
                 28,
-                48,
+                50,
                 72,
-                92
+                88
               ],
-              "silhouetteDelta": 0.1455,
+              "silhouetteDelta": 0.1522,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 657
+              "armEditPixels": 657,
+              "strideEditPixels": 616,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 6,
@@ -419,22 +543,24 @@
               ],
               "visibleRectPx": [
                 33,
-                47,
+                49,
                 61,
-                90
+                85
               ],
               "guideRectPx": [
                 28,
-                47,
+                48,
                 72,
-                90
+                91
               ],
-              "silhouetteDelta": 0.1515,
+              "silhouetteDelta": 0.1328,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 613
+              "armEditPixels": 613,
+              "strideEditPixels": 668,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -446,25 +572,28 @@
               ],
               "visibleRectPx": [
                 32,
-                46,
+                47,
                 64,
-                99
+                94
               ],
               "guideRectPx": [
                 28,
                 46,
                 72,
-                98
+                97
               ],
-              "silhouetteDelta": 0.0817,
+              "silhouetteDelta": 0.0724,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 664
+              "armEditPixels": 664,
+              "strideEditPixels": 688,
+              "postureCrownShiftPxY": 0
             }
           ],
-          "armEditSourceSha256": "85fda608d2101dc674f2ff03c73a65de6f8ef6afedf7640314478c102a97e9ec"
+          "armEditSourceSha256": "85fda608d2101dc674f2ff03c73a65de6f8ef6afedf7640314478c102a97e9ec",
+          "strideEditSourceSha256": "73b53ee34bc992ef47fb14201b2e79639db8093d2f4888600dedffda757a205d"
         },
         {
           "id": "se",
@@ -484,23 +613,25 @@
                 160
               ],
               "visibleRectPx": [
-                31,
-                46,
-                57,
-                94
+                29,
+                47,
+                60,
+                90
               ],
               "guideRectPx": [
                 26,
                 46,
-                62,
-                94
+                60,
+                92
               ],
-              "silhouetteDelta": 0.2214,
+              "silhouetteDelta": 0.2545,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 598
+              "armEditPixels": 598,
+              "strideEditPixels": 784,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -512,22 +643,24 @@
               ],
               "visibleRectPx": [
                 29,
-                46,
-                59,
-                88
+                49,
+                60,
+                86
               ],
               "guideRectPx": [
-                26,
-                46,
-                60,
-                88
+                27,
+                48,
+                58,
+                85
               ],
-              "silhouetteDelta": 0.1799,
+              "silhouetteDelta": 0.1634,
               "centerOffsetPx": [
                 1,
                 -1
               ],
-              "armEditPixels": 572
+              "armEditPixels": 572,
+              "strideEditPixels": 816,
+              "postureCrownShiftPxY": 2
             },
             {
               "index": 2,
@@ -538,23 +671,25 @@
                 160
               ],
               "visibleRectPx": [
-                30,
-                46,
-                58,
-                91
+                28,
+                48,
+                61,
+                87
               ],
               "guideRectPx": [
                 26,
                 46,
                 58,
-                91
+                92
               ],
-              "silhouetteDelta": 0.2426,
+              "silhouetteDelta": 0.2814,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 481
+              "armEditPixels": 481,
+              "strideEditPixels": 566,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -565,23 +700,25 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                45,
+                27,
+                46,
                 63,
-                98
+                94
               ],
               "guideRectPx": [
                 26,
                 45,
-                68,
-                98
+                64,
+                97
               ],
-              "silhouetteDelta": 0.1922,
+              "silhouetteDelta": 0.2209,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 661
+              "armEditPixels": 661,
+              "strideEditPixels": 804,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 4,
@@ -592,23 +729,25 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                46,
-                61,
-                100
+                27,
+                47,
+                63,
+                95
               ],
               "guideRectPx": [
                 26,
                 46,
-                70,
-                100
+                66,
+                98
               ],
-              "silhouetteDelta": 0.1719,
+              "silhouetteDelta": 0.2432,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 719
+              "armEditPixels": 719,
+              "strideEditPixels": 949,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -619,23 +758,25 @@
                 160
               ],
               "visibleRectPx": [
-                30,
-                46,
-                59,
-                95
+                28,
+                49,
+                62,
+                87
               ],
               "guideRectPx": [
                 26,
-                46,
-                66,
-                95
+                48,
+                63,
+                91
               ],
-              "silhouetteDelta": 0.1994,
+              "silhouetteDelta": 0.2203,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 598
+              "armEditPixels": 598,
+              "strideEditPixels": 807,
+              "postureCrownShiftPxY": 2
             },
             {
               "index": 6,
@@ -646,23 +787,25 @@
                 160
               ],
               "visibleRectPx": [
-                30,
-                46,
-                58,
-                89
+                29,
+                48,
+                60,
+                83
               ],
               "guideRectPx": [
-                25,
+                26,
                 46,
-                61,
-                89
+                60,
+                86
               ],
-              "silhouetteDelta": 0.2623,
+              "silhouetteDelta": 0.2987,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 537
+              "armEditPixels": 537,
+              "strideEditPixels": 785,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -673,26 +816,29 @@
                 160
               ],
               "visibleRectPx": [
-                29,
-                45,
-                60,
-                92
+                28,
+                46,
+                61,
+                89
               ],
               "guideRectPx": [
                 26,
                 45,
-                63,
-                92
+                60,
+                91
               ],
-              "silhouetteDelta": 0.174,
+              "silhouetteDelta": 0.1973,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 652
+              "armEditPixels": 652,
+              "strideEditPixels": 742,
+              "postureCrownShiftPxY": 0
             }
           ],
-          "armEditSourceSha256": "c2a4628412d4a04e867deaa537cbf74901bb5157ba89cdcc0c4268c23ea8a72c"
+          "armEditSourceSha256": "c2a4628412d4a04e867deaa537cbf74901bb5157ba89cdcc0c4268c23ea8a72c",
+          "strideEditSourceSha256": "1eaf41fe97c4387e66202513a4eba5cd007a80ee74650ea2a5328e316ffa9c2d"
         },
         {
           "id": "e",
@@ -712,23 +858,25 @@
                 160
               ],
               "visibleRectPx": [
-                34,
+                33,
                 46,
-                57,
+                53,
                 85
               ],
               "guideRectPx": [
-                30,
+                31,
                 46,
-                65,
-                85
+                60,
+                84
               ],
-              "silhouetteDelta": 0.2732,
+              "silhouetteDelta": 0.2272,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 893
+              "armEditPixels": 893,
+              "strideEditPixels": 864,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -739,23 +887,25 @@
                 160
               ],
               "visibleRectPx": [
-                35,
-                47,
-                49,
-                83
+                34,
+                48,
+                51,
+                82
               ],
               "guideRectPx": [
-                31,
-                47,
-                58,
-                83
+                32,
+                48,
+                56,
+                81
               ],
-              "silhouetteDelta": 0.1105,
+              "silhouetteDelta": 0.1434,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 754
+              "armEditPixels": 754,
+              "strideEditPixels": 634,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 2,
@@ -766,23 +916,25 @@
                 160
               ],
               "visibleRectPx": [
-                36,
-                46,
-                49,
-                85
+                34,
+                47,
+                50,
+                84
               ],
               "guideRectPx": [
                 31,
                 46,
                 54,
-                84
+                86
               ],
-              "silhouetteDelta": 0.2834,
+              "silhouetteDelta": 0.2969,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 786
+              "armEditPixels": 786,
+              "strideEditPixels": 641,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -793,23 +945,25 @@
                 160
               ],
               "visibleRectPx": [
-                34,
-                44,
-                56,
+                33,
+                45,
+                53,
                 88
               ],
               "guideRectPx": [
                 31,
                 45,
-                61,
+                58,
                 88
               ],
-              "silhouetteDelta": 0.2199,
+              "silhouetteDelta": 0.1567,
               "centerOffsetPx": [
                 2,
                 -1
               ],
-              "armEditPixels": 903
+              "armEditPixels": 903,
+              "strideEditPixels": 745,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 4,
@@ -820,23 +974,25 @@
                 160
               ],
               "visibleRectPx": [
-                34,
+                33,
                 46,
-                57,
-                90
+                53,
+                89
               ],
               "guideRectPx": [
-                30,
+                32,
                 46,
-                64,
+                58,
                 90
               ],
-              "silhouetteDelta": 0.205,
+              "silhouetteDelta": 0.2121,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 994
+              "armEditPixels": 994,
+              "strideEditPixels": 805,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -847,23 +1003,25 @@
                 160
               ],
               "visibleRectPx": [
-                35,
-                47,
-                50,
-                90
+                32,
+                48,
+                54,
+                88
               ],
               "guideRectPx": [
-                30,
-                46,
-                59,
-                90
+                32,
+                47,
+                54,
+                89
               ],
-              "silhouetteDelta": 0.2051,
+              "silhouetteDelta": 0.1887,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 935
+              "armEditPixels": 935,
+              "strideEditPixels": 839,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 6,
@@ -874,23 +1032,25 @@
                 160
               ],
               "visibleRectPx": [
-                33,
-                46,
-                51,
-                91
+                31,
+                47,
+                54,
+                88
               ],
               "guideRectPx": [
-                30,
+                31,
                 46,
                 54,
                 90
               ],
-              "silhouetteDelta": 0.2996,
+              "silhouetteDelta": 0.295,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 790
+              "armEditPixels": 790,
+              "strideEditPixels": 793,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -901,27 +1061,30 @@
                 160
               ],
               "visibleRectPx": [
-                31,
+                30,
                 45,
-                62,
-                89
+                58,
+                86
               ],
               "guideRectPx": [
                 31,
                 45,
-                60,
-                90
+                58,
+                87
               ],
-              "silhouetteDelta": 0.2096,
+              "silhouetteDelta": 0.2132,
               "centerOffsetPx": [
                 0,
                 -1
               ],
-              "armEditPixels": 861
+              "armEditPixels": 861,
+              "strideEditPixels": 970,
+              "postureCrownShiftPxY": 0
             }
           ],
           "armEditSourceSha256": "a84fc121570b17b776b68b193f79aa0a75e7d08a876c56c47ae9339c05e6330b",
-          "pairedArmEditSourceSha256": "e552464246f0d86b912b8c84b12be9d454ca31da11eb87393940dd57beb591b2"
+          "pairedArmEditSourceSha256": "e552464246f0d86b912b8c84b12be9d454ca31da11eb87393940dd57beb591b2",
+          "strideEditSourceSha256": "c444d974a521aad08b32ba05c38c77230eb2d4de819d1d96d68c9e4333a29a95"
         },
         {
           "id": "ne",
@@ -942,22 +1105,24 @@
               ],
               "visibleRectPx": [
                 28,
-                45,
-                60,
-                93
+                44,
+                61,
+                94
               ],
               "guideRectPx": [
-                26,
+                27,
                 44,
-                69,
-                93
+                65,
+                91
               ],
-              "silhouetteDelta": 0.1473,
+              "silhouetteDelta": 0.1796,
               "centerOffsetPx": [
                 -2,
                 0
               ],
-              "armEditPixels": 240
+              "armEditPixels": 240,
+              "strideEditPixels": 649,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -970,21 +1135,23 @@
               "visibleRectPx": [
                 28,
                 46,
-                59,
-                86
+                60,
+                88
               ],
               "guideRectPx": [
-                26,
-                46,
-                66,
+                27,
+                45,
+                62,
                 86
               ],
-              "silhouetteDelta": 0.1525,
+              "silhouetteDelta": 0.1527,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 233
+              "armEditPixels": 233,
+              "strideEditPixels": 630,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 2,
@@ -997,21 +1164,23 @@
               "visibleRectPx": [
                 26,
                 45,
-                62,
-                91
+                63,
+                93
               ],
               "guideRectPx": [
-                26,
+                27,
                 44,
                 60,
                 90
               ],
-              "silhouetteDelta": 0.2074,
+              "silhouetteDelta": 0.2149,
               "centerOffsetPx": [
                 1,
                 1
               ],
-              "armEditPixels": 288
+              "armEditPixels": 288,
+              "strideEditPixels": 734,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -1023,22 +1192,24 @@
               ],
               "visibleRectPx": [
                 27,
-                44,
-                61,
-                93
+                43,
+                62,
+                91
               ],
               "guideRectPx": [
-                26,
-                44,
-                62,
-                92
+                27,
+                43,
+                60,
+                89
               ],
-              "silhouetteDelta": 0.179,
+              "silhouetteDelta": 0.1634,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 373
+              "armEditPixels": 373,
+              "strideEditPixels": 782,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 4,
@@ -1050,22 +1221,24 @@
               ],
               "visibleRectPx": [
                 27,
-                45,
-                61,
-                87
-              ],
-              "guideRectPx": [
-                26,
                 44,
                 62,
-                86
+                91
               ],
-              "silhouetteDelta": 0.2032,
+              "guideRectPx": [
+                27,
+                44,
+                59,
+                87
+              ],
+              "silhouetteDelta": 0.2221,
               "centerOffsetPx": [
                 1,
                 1
               ],
-              "armEditPixels": 357
+              "armEditPixels": 357,
+              "strideEditPixels": 768,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -1076,23 +1249,25 @@
                 160
               ],
               "visibleRectPx": [
-                26,
+                25,
                 46,
-                62,
-                91
+                64,
+                95
               ],
               "guideRectPx": [
-                26,
+                27,
                 45,
-                60,
-                91
+                58,
+                92
               ],
-              "silhouetteDelta": 0.1766,
+              "silhouetteDelta": 0.1621,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 303
+              "armEditPixels": 303,
+              "strideEditPixels": 870,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 6,
@@ -1103,23 +1278,25 @@
                 160
               ],
               "visibleRectPx": [
-                24,
+                23,
                 45,
-                65,
-                97
+                67,
+                99
               ],
               "guideRectPx": [
-                26,
+                27,
                 44,
                 58,
-                98
+                97
               ],
-              "silhouetteDelta": 0.1314,
+              "silhouetteDelta": 0.1374,
               "centerOffsetPx": [
                 -1,
                 -1
               ],
-              "armEditPixels": 255
+              "armEditPixels": 255,
+              "strideEditPixels": 819,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -1130,26 +1307,29 @@
                 160
               ],
               "visibleRectPx": [
-                25,
-                44,
-                64,
-                97
-              ],
-              "guideRectPx": [
-                26,
+                24,
                 43,
                 66,
-                100
+                95
               ],
-              "silhouetteDelta": 0.1216,
+              "guideRectPx": [
+                27,
+                42,
+                63,
+                96
+              ],
+              "silhouetteDelta": 0.132,
               "centerOffsetPx": [
                 -1,
                 -3
               ],
-              "armEditPixels": 360
+              "armEditPixels": 360,
+              "strideEditPixels": 744,
+              "postureCrownShiftPxY": 0
             }
           ],
-          "armEditSourceSha256": "18beecbb546f08816dc52b8754ffd12a022ad6e1432822a42762a4d0441e5b55"
+          "armEditSourceSha256": "18beecbb546f08816dc52b8754ffd12a022ad6e1432822a42762a4d0441e5b55",
+          "strideEditSourceSha256": "bb3a9320ee74587df58e49e81acde1eb42592fa5598a0d6ce3a786f85ce5c73d"
         },
         {
           "id": "n",
@@ -1170,22 +1350,24 @@
               ],
               "visibleRectPx": [
                 33,
-                46,
+                45,
                 63,
-                93
+                95
               ],
               "guideRectPx": [
                 27,
-                46,
+                45,
                 73,
-                92
+                90
               ],
-              "silhouetteDelta": 0.1218,
+              "silhouetteDelta": 0.1492,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 582
+              "armEditPixels": 582,
+              "strideEditPixels": 630,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -1199,20 +1381,22 @@
                 34,
                 47,
                 61,
-                86
+                90
               ],
               "guideRectPx": [
                 28,
-                47,
+                46,
                 72,
-                86
+                88
               ],
-              "silhouetteDelta": 0.1209,
+              "silhouetteDelta": 0.1043,
               "centerOffsetPx": [
                 0,
                 -1
               ],
-              "armEditPixels": 609
+              "armEditPixels": 609,
+              "strideEditPixels": 684,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 2,
@@ -1226,20 +1410,22 @@
                 33,
                 46,
                 62,
-                96
+                98
               ],
               "guideRectPx": [
                 28,
-                46,
+                45,
                 72,
                 96
               ],
-              "silhouetteDelta": 0.0583,
+              "silhouetteDelta": 0.1004,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 634
+              "armEditPixels": 634,
+              "strideEditPixels": 727,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -1251,22 +1437,24 @@
               ],
               "visibleRectPx": [
                 34,
-                45,
+                44,
                 62,
                 101
               ],
               "guideRectPx": [
                 27,
-                45,
+                44,
                 73,
-                100
+                96
               ],
-              "silhouetteDelta": 0.0893,
+              "silhouetteDelta": 0.0756,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 579
+              "armEditPixels": 579,
+              "strideEditPixels": 726,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 4,
@@ -1278,22 +1466,24 @@
               ],
               "visibleRectPx": [
                 34,
-                46,
+                45,
                 61,
                 93
               ],
               "guideRectPx": [
                 27,
-                46,
-                72,
-                93
+                45,
+                73,
+                90
               ],
-              "silhouetteDelta": 0.1361,
+              "silhouetteDelta": 0.1595,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 515
+              "armEditPixels": 515,
+              "strideEditPixels": 614,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -1307,20 +1497,22 @@
                 35,
                 47,
                 60,
-                86
+                89
               ],
               "guideRectPx": [
                 27,
-                47,
+                46,
                 72,
-                86
+                88
               ],
-              "silhouetteDelta": 0.1108,
+              "silhouetteDelta": 0.0885,
               "centerOffsetPx": [
                 1,
                 -1
               ],
-              "armEditPixels": 554
+              "armEditPixels": 554,
+              "strideEditPixels": 639,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 6,
@@ -1334,20 +1526,22 @@
                 34,
                 46,
                 61,
-                96
+                97
               ],
               "guideRectPx": [
                 27,
-                46,
+                45,
                 72,
                 96
               ],
-              "silhouetteDelta": 0.1124,
+              "silhouetteDelta": 0.1096,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 578
+              "armEditPixels": 578,
+              "strideEditPixels": 720,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -1359,25 +1553,28 @@
               ],
               "visibleRectPx": [
                 33,
-                45,
+                44,
                 64,
                 101
               ],
               "guideRectPx": [
                 27,
-                45,
+                44,
                 73,
-                101
+                96
               ],
-              "silhouetteDelta": 0.1267,
+              "silhouetteDelta": 0.102,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 640
+              "armEditPixels": 640,
+              "strideEditPixels": 797,
+              "postureCrownShiftPxY": 0
             }
           ],
-          "armEditSourceSha256": "1002024340e34a14c61c68706a60eba0935bda4a6b392dfbfc9c507bb84339f0"
+          "armEditSourceSha256": "1002024340e34a14c61c68706a60eba0935bda4a6b392dfbfc9c507bb84339f0",
+          "strideEditSourceSha256": "e326ea8e7cc7d7cb3407319b2c270bcd3600595471456dcf7a8747561122269d"
         },
         {
           "id": "nw",
@@ -1397,23 +1594,25 @@
                 160
               ],
               "visibleRectPx": [
-                42,
-                46,
-                57,
-                85
+                45,
+                45,
+                53,
+                88
               ],
               "guideRectPx": [
-                39,
+                41,
                 46,
-                62,
-                84
+                60,
+                85
               ],
-              "silhouetteDelta": 0.2095,
+              "silhouetteDelta": 0.2071,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 475
+              "armEditPixels": 475,
+              "strideEditPixels": 784,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -1424,23 +1623,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
+                43,
                 47,
                 55,
-                89
+                91
               ],
               "guideRectPx": [
                 42,
                 47,
-                60,
-                88
+                58,
+                90
               ],
-              "silhouetteDelta": 0.1495,
+              "silhouetteDelta": 0.1408,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 458
+              "armEditPixels": 458,
+              "strideEditPixels": 771,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 2,
@@ -1451,7 +1652,7 @@
                 160
               ],
               "visibleRectPx": [
-                45,
+                44,
                 46,
                 54,
                 96
@@ -1460,14 +1661,16 @@
                 43,
                 46,
                 58,
-                96
+                94
               ],
-              "silhouetteDelta": 0.2165,
+              "silhouetteDelta": 0.2373,
               "centerOffsetPx": [
                 -1,
                 0
               ],
-              "armEditPixels": 298
+              "armEditPixels": 298,
+              "strideEditPixels": 720,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -1478,23 +1681,25 @@
                 160
               ],
               "visibleRectPx": [
+                43,
                 44,
-                46,
                 58,
                 97
               ],
               "guideRectPx": [
-                35,
+                38,
                 45,
-                66,
-                98
+                62,
+                94
               ],
-              "silhouetteDelta": 0.1654,
+              "silhouetteDelta": 0.1848,
               "centerOffsetPx": [
                 1,
                 -1
               ],
-              "armEditPixels": 363
+              "armEditPixels": 363,
+              "strideEditPixels": 942,
+              "postureCrownShiftPxY": -1
             },
             {
               "index": 4,
@@ -1505,23 +1710,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
-                46,
+                43,
+                45,
                 55,
-                91
+                92
               ],
               "guideRectPx": [
-                33,
+                36,
                 46,
-                68,
-                91
+                64,
+                88
               ],
-              "silhouetteDelta": 0.1886,
+              "silhouetteDelta": 0.2023,
               "centerOffsetPx": [
                 0,
                 -1
               ],
-              "armEditPixels": 362
+              "armEditPixels": 362,
+              "strideEditPixels": 574,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -1532,23 +1739,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
+                43,
                 47,
                 56,
-                85
+                87
               ],
               "guideRectPx": [
-                36,
+                39,
                 47,
-                66,
+                62,
                 84
               ],
-              "silhouetteDelta": 0.1829,
+              "silhouetteDelta": 0.178,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 377
+              "armEditPixels": 377,
+              "strideEditPixels": 727,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 6,
@@ -1559,23 +1768,25 @@
                 160
               ],
               "visibleRectPx": [
-                43,
+                42,
                 46,
                 56,
-                89
+                90
               ],
               "guideRectPx": [
                 41,
                 46,
                 60,
-                89
+                88
               ],
-              "silhouetteDelta": 0.2179,
+              "silhouetteDelta": 0.215,
               "centerOffsetPx": [
                 -1,
                 -1
               ],
-              "armEditPixels": 330
+              "armEditPixels": 330,
+              "strideEditPixels": 741,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -1586,26 +1797,29 @@
                 160
               ],
               "visibleRectPx": [
-                45,
-                46,
+                44,
+                44,
                 54,
-                91
+                92
               ],
               "guideRectPx": [
-                39,
-                46,
-                62,
-                90
+                41,
+                45,
+                60,
+                87
               ],
-              "silhouetteDelta": 0.1735,
+              "silhouetteDelta": 0.1777,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 404
+              "armEditPixels": 404,
+              "strideEditPixels": 723,
+              "postureCrownShiftPxY": -1
             }
           ],
-          "armEditSourceSha256": "91aa89f9f6ab4213a67b9d98635ec1f87c2af47acfd8e18fc8d5d9f4f3595e1d"
+          "armEditSourceSha256": "91aa89f9f6ab4213a67b9d98635ec1f87c2af47acfd8e18fc8d5d9f4f3595e1d",
+          "strideEditSourceSha256": "dae64af7b069e8fc136d22b22cb833238fb7268448b4749ba00f7a3be7ccd8d1"
         },
         {
           "id": "w",
@@ -1625,23 +1839,25 @@
                 160
               ],
               "visibleRectPx": [
-                40,
+                43,
                 46,
-                58,
+                56,
                 90
               ],
               "guideRectPx": [
-                33,
+                37,
                 46,
-                64,
+                59,
                 90
               ],
-              "silhouetteDelta": 0.2641,
+              "silhouetteDelta": 0.2856,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 684
+              "armEditPixels": 684,
+              "strideEditPixels": 767,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -1652,23 +1868,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
-                46,
-                54,
-                91
+                43,
+                48,
+                58,
+                89
               ],
               "guideRectPx": [
-                39,
-                46,
-                58,
-                90
+                41,
+                47,
+                56,
+                89
               ],
-              "silhouetteDelta": 0.135,
+              "silhouetteDelta": 0.138,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 605
+              "armEditPixels": 605,
+              "strideEditPixels": 698,
+              "postureCrownShiftPxY": 2
             },
             {
               "index": 2,
@@ -1679,23 +1897,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
-                46,
-                53,
-                91
+                43,
+                47,
+                57,
+                90
               ],
               "guideRectPx": [
-                42,
+                43,
                 46,
                 54,
                 90
               ],
-              "silhouetteDelta": 0.2886,
+              "silhouetteDelta": 0.2828,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 497
+              "armEditPixels": 497,
+              "strideEditPixels": 806,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -1706,23 +1926,25 @@
                 160
               ],
               "visibleRectPx": [
-                39,
+                41,
                 45,
                 60,
-                88
+                87
               ],
               "guideRectPx": [
-                36,
+                39,
                 45,
-                61,
-                90
+                58,
+                87
               ],
-              "silhouetteDelta": 0.2261,
+              "silhouetteDelta": 0.2032,
               "centerOffsetPx": [
                 1,
                 -2
               ],
-              "armEditPixels": 479
+              "armEditPixels": 479,
+              "strideEditPixels": 975,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 4,
@@ -1733,23 +1955,25 @@
                 160
               ],
               "visibleRectPx": [
-                39,
+                44,
                 46,
-                58,
-                85
+                56,
+                84
               ],
               "guideRectPx": [
-                33,
+                37,
                 46,
-                64,
-                85
+                59,
+                84
               ],
-              "silhouetteDelta": 0.2294,
+              "silhouetteDelta": 0.2567,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 480
+              "armEditPixels": 480,
+              "strideEditPixels": 768,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -1760,23 +1984,25 @@
                 160
               ],
               "visibleRectPx": [
-                45,
-                46,
-                51,
-                84
+                44,
+                48,
+                54,
+                80
               ],
               "guideRectPx": [
-                39,
-                46,
-                58,
-                84
+                41,
+                48,
+                55,
+                81
               ],
-              "silhouetteDelta": 0.1653,
+              "silhouetteDelta": 0.1582,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 458
+              "armEditPixels": 458,
+              "strideEditPixels": 525,
+              "postureCrownShiftPxY": 2
             },
             {
               "index": 6,
@@ -1787,23 +2013,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
-                46,
-                52,
+                43,
+                47,
+                55,
                 85
               ],
               "guideRectPx": [
-                42,
+                43,
                 46,
                 54,
-                85
+                86
               ],
-              "silhouetteDelta": 0.2604,
+              "silhouetteDelta": 0.2579,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 473
+              "armEditPixels": 473,
+              "strideEditPixels": 742,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -1814,26 +2042,29 @@
                 160
               ],
               "visibleRectPx": [
-                40,
+                43,
                 45,
-                58,
-                87
+                57,
+                88
               ],
               "guideRectPx": [
-                36,
+                39,
                 45,
-                61,
-                87
+                58,
+                88
               ],
-              "silhouetteDelta": 0.2058,
+              "silhouetteDelta": 0.182,
               "centerOffsetPx": [
                 0,
                 -1
               ],
-              "armEditPixels": 676
+              "armEditPixels": 676,
+              "strideEditPixels": 765,
+              "postureCrownShiftPxY": 0
             }
           ],
-          "armEditSourceSha256": "e552464246f0d86b912b8c84b12be9d454ca31da11eb87393940dd57beb591b2"
+          "armEditSourceSha256": "e552464246f0d86b912b8c84b12be9d454ca31da11eb87393940dd57beb591b2",
+          "strideEditSourceSha256": "c73a5c7a88cafc0e99cd629dc8d76ce597f7010ef7ca9792786d6e9a77e38169"
         },
         {
           "id": "sw",
@@ -1853,23 +2084,25 @@
                 160
               ],
               "visibleRectPx": [
-                43,
-                46,
-                60,
-                100
+                42,
+                47,
+                61,
+                94
               ],
               "guideRectPx": [
-                32,
+                36,
                 46,
-                70,
-                100
+                66,
+                98
               ],
-              "silhouetteDelta": 0.1962,
+              "silhouetteDelta": 0.1976,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 694
+              "armEditPixels": 694,
+              "strideEditPixels": 795,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 1,
@@ -1880,23 +2113,25 @@
                 160
               ],
               "visibleRectPx": [
-                45,
-                46,
-                56,
-                95
+                44,
+                49,
+                57,
+                87
               ],
               "guideRectPx": [
-                36,
-                46,
-                66,
-                94
+                38,
+                48,
+                63,
+                91
               ],
-              "silhouetteDelta": 0.1882,
+              "silhouetteDelta": 0.1778,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 618
+              "armEditPixels": 618,
+              "strideEditPixels": 758,
+              "postureCrownShiftPxY": 2
             },
             {
               "index": 2,
@@ -1908,22 +2143,24 @@
               ],
               "visibleRectPx": [
                 44,
-                46,
-                58,
-                89
+                48,
+                57,
+                82
               ],
               "guideRectPx": [
                 41,
                 46,
                 60,
-                89
+                86
               ],
-              "silhouetteDelta": 0.2252,
+              "silhouetteDelta": 0.2619,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 538
+              "armEditPixels": 538,
+              "strideEditPixels": 768,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 3,
@@ -1934,23 +2171,25 @@
                 160
               ],
               "visibleRectPx": [
-                41,
-                45,
-                61,
-                92
+                43,
+                46,
+                59,
+                88
               ],
               "guideRectPx": [
-                38,
+                41,
                 45,
-                64,
+                60,
                 92
               ],
-              "silhouetteDelta": 0.1585,
+              "silhouetteDelta": 0.1512,
               "centerOffsetPx": [
                 2,
                 0
               ],
-              "armEditPixels": 514
+              "armEditPixels": 514,
+              "strideEditPixels": 678,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 4,
@@ -1961,23 +2200,25 @@
                 160
               ],
               "visibleRectPx": [
-                40,
-                46,
-                61,
-                94
+                42,
+                47,
+                59,
+                88
               ],
               "guideRectPx": [
-                39,
+                41,
                 46,
-                63,
-                94
+                60,
+                92
               ],
-              "silhouetteDelta": 0.2103,
+              "silhouetteDelta": 0.279,
               "centerOffsetPx": [
                 0,
                 0
               ],
-              "armEditPixels": 696
+              "armEditPixels": 696,
+              "strideEditPixels": 730,
+              "postureCrownShiftPxY": 0
             },
             {
               "index": 5,
@@ -1988,23 +2229,25 @@
                 160
               ],
               "visibleRectPx": [
-                44,
-                46,
-                58,
-                89
+                43,
+                49,
+                59,
+                82
               ],
               "guideRectPx": [
                 42,
-                46,
-                60,
-                88
+                48,
+                59,
+                85
               ],
-              "silhouetteDelta": 0.1215,
+              "silhouetteDelta": 0.1333,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 598
+              "armEditPixels": 598,
+              "strideEditPixels": 668,
+              "postureCrownShiftPxY": 2
             },
             {
               "index": 6,
@@ -2015,23 +2258,25 @@
                 160
               ],
               "visibleRectPx": [
-                45,
-                46,
-                57,
-                91
+                44,
+                48,
+                58,
+                86
               ],
               "guideRectPx": [
                 43,
                 46,
-                58,
-                91
+                59,
+                92
               ],
-              "silhouetteDelta": 0.1533,
+              "silhouetteDelta": 0.1976,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 572
+              "armEditPixels": 572,
+              "strideEditPixels": 540,
+              "postureCrownShiftPxY": 1
             },
             {
               "index": 7,
@@ -2042,32 +2287,45 @@
                 160
               ],
               "visibleRectPx": [
-                43,
-                45,
-                59,
-                98
+                42,
+                46,
+                60,
+                93
               ],
               "guideRectPx": [
-                34,
+                38,
                 45,
-                68,
-                98
+                64,
+                97
               ],
-              "silhouetteDelta": 0.1149,
+              "silhouetteDelta": 0.1228,
               "centerOffsetPx": [
                 1,
                 0
               ],
-              "armEditPixels": 648
+              "armEditPixels": 648,
+              "strideEditPixels": 677,
+              "postureCrownShiftPxY": 0
             }
           ],
-          "armEditSourceSha256": "0f0c596ba577ee5fb664c406680479a2dac220ffee29945dd179b6d288777051"
+          "armEditSourceSha256": "0f0c596ba577ee5fb664c406680479a2dac220ffee29945dd179b6d288777051",
+          "strideEditSourceSha256": "71df7cdefc1ce75d26d5df0458dbde83cd22ad5b27cc3116d26bf8ece4d93423"
         }
       ],
       "centerAlignment": {
         "landmark": "Upper hood",
         "maximumHorizontalRangePxBefore": 3.379,
         "maximumHorizontalRangePxAfter": 0.982
+      },
+      "spritePosture": {
+        "profileUpperBodyForwardPx": 1.2,
+        "profileHemAndLegsBackPx": 4.4,
+        "crownYByStepPx": [
+          0,
+          2,
+          1,
+          -1
+        ]
       }
     },
     {
