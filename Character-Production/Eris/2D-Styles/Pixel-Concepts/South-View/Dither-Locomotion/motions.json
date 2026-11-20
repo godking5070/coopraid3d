@@ -83,114 +83,146 @@
     {
       "id": "run",
       "label": "달리기",
-      "durationMs": 640,
-      "frameDurationMs": 80,
+      "durationMs": 720,
+      "frameDurationMs": 90,
       "sourcePose": {
-        "stanceFraction": 0.42,
-        "soleClearanceM": 0.123,
+        "stanceFraction": 0.38,
+        "soleClearanceM": 0.089,
         "samples": [
           {
             "index": 0,
-            "cyclePhase": 0.085,
-            "torsoLeanDegrees": 11,
+            "cyclePhase": 0.03,
+            "torsoLeanDegrees": 9.4,
             "grounded": {
               "left": true,
               "right": false
             },
             "wristBelowShoulderM": {
-              "left": 0.22317,
-              "right": 0.12475
+              "left": 0.21485,
+              "right": 0.14615
+            },
+            "wristBehindShoulderM": {
+              "left": 0.08248,
+              "right": -0.15148
             }
           },
           {
             "index": 1,
-            "cyclePhase": 0.21000000000000002,
-            "torsoLeanDegrees": 9.8,
+            "cyclePhase": 0.155,
+            "torsoLeanDegrees": 8.5,
             "grounded": {
               "left": true,
               "right": false
             },
             "wristBelowShoulderM": {
-              "left": 0.20963,
-              "right": 0.15921
+              "left": 0.20249,
+              "right": 0.15851
+            },
+            "wristBehindShoulderM": {
+              "left": 0.0404,
+              "right": -0.1094
             }
           },
           {
             "index": 2,
-            "cyclePhase": 0.335,
-            "torsoLeanDegrees": 11,
+            "cyclePhase": 0.28,
+            "torsoLeanDegrees": 9.4,
             "grounded": {
               "left": true,
               "right": false
             },
             "wristBelowShoulderM": {
-              "left": 0.17192,
-              "right": 0.20185
+              "left": 0.17725,
+              "right": 0.18375
+            },
+            "wristBehindShoulderM": {
+              "left": -0.04556,
+              "right": -0.02344
             }
           },
           {
             "index": 3,
-            "cyclePhase": 0.46,
-            "torsoLeanDegrees": 12.2,
+            "cyclePhase": 0.405,
+            "torsoLeanDegrees": 10.3,
             "grounded": {
               "left": false,
               "right": false
             },
             "wristBelowShoulderM": {
-              "left": 0.13106,
-              "right": 0.222
+              "left": 0.15392,
+              "right": 0.20708
+            },
+            "wristBehindShoulderM": {
+              "left": -0.12504,
+              "right": 0.05604
             }
           },
           {
             "index": 4,
-            "cyclePhase": 0.585,
-            "torsoLeanDegrees": 11,
+            "cyclePhase": 0.53,
+            "torsoLeanDegrees": 9.4,
             "grounded": {
               "left": false,
               "right": true
             },
             "wristBelowShoulderM": {
-              "left": 0.1247,
-              "right": 0.22377
+              "left": 0.14615,
+              "right": 0.21485
+            },
+            "wristBehindShoulderM": {
+              "left": -0.15148,
+              "right": 0.08248
             }
           },
           {
             "index": 5,
-            "cyclePhase": 0.71,
-            "torsoLeanDegrees": 9.8,
+            "cyclePhase": 0.655,
+            "torsoLeanDegrees": 8.5,
             "grounded": {
               "left": false,
               "right": true
             },
             "wristBelowShoulderM": {
-              "left": 0.159,
-              "right": 0.21013
+              "left": 0.15851,
+              "right": 0.20249
+            },
+            "wristBehindShoulderM": {
+              "left": -0.1094,
+              "right": 0.0404
             }
           },
           {
             "index": 6,
-            "cyclePhase": 0.835,
-            "torsoLeanDegrees": 11,
+            "cyclePhase": 0.78,
+            "torsoLeanDegrees": 9.4,
             "grounded": {
               "left": false,
               "right": true
             },
             "wristBelowShoulderM": {
-              "left": 0.20141,
-              "right": 0.1722
+              "left": 0.18375,
+              "right": 0.17725
+            },
+            "wristBehindShoulderM": {
+              "left": -0.02344,
+              "right": -0.04556
             }
           },
           {
             "index": 7,
-            "cyclePhase": 0.96,
-            "torsoLeanDegrees": 12.2,
+            "cyclePhase": 0.905,
+            "torsoLeanDegrees": 10.3,
             "grounded": {
               "left": false,
               "right": false
             },
             "wristBelowShoulderM": {
-              "left": 0.22141,
-              "right": 0.13114
+              "left": 0.20708,
+              "right": 0.15392
+            },
+            "wristBehindShoulderM": {
+              "left": 0.05604,
+              "right": -0.12504
             }
           }
         ]
@@ -203,13 +235,13 @@
         ],
         "columns": 8,
         "rows": 8,
-        "sha256": "24929f3065c6de431bc683dda0f69f1da119e0e93c24aaca8a8c6548225bc749"
+        "sha256": "4619147ba9802a546d591e52e69ca4bdf2d37a59af072f5ff4530e32f4cd92da"
       },
       "directions": [
         {
           "id": "s",
           "row": 0,
-          "sourceSheetSha256": "6f4d0739f79a53daa15602aad24ff53e93d84f52f93b6e36d50276b0dda8d147",
+          "sourceSheetSha256": "e19a3a753175a546465033bd80e7daf38c21cf5b9ef132998d4a3df1aa97d15e",
           "sourceSheetSizePx": [
             1586,
             992
@@ -224,18 +256,18 @@
                 160
               ],
               "visibleRectPx": [
-                27,
-                50,
-                73,
-                96
+                31,
+                47,
+                65,
+                101
               ],
               "guideRectPx": [
                 28,
-                49,
+                47,
                 72,
-                96
+                101
               ],
-              "silhouetteDelta": 0.1046,
+              "silhouetteDelta": 0.1447,
               "centerOffsetPx": [
                 0,
                 0
@@ -250,20 +282,20 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                51,
-                72,
-                87
+                33,
+                48,
+                61,
+                92
               ],
               "guideRectPx": [
-                27,
-                50,
+                28,
+                48,
                 72,
-                88
+                92
               ],
-              "silhouetteDelta": 0.1477,
+              "silhouetteDelta": 0.1349,
               "centerOffsetPx": [
-                1,
+                0,
                 0
               ]
             },
@@ -276,20 +308,20 @@
                 160
               ],
               "visibleRectPx": [
-                29,
-                50,
-                71,
-                89
+                32,
+                47,
+                63,
+                90
               ],
               "guideRectPx": [
                 27,
-                49,
+                47,
                 72,
                 90
               ],
-              "silhouetteDelta": 0.1616,
+              "silhouetteDelta": 0.1302,
               "centerOffsetPx": [
-                1,
+                -1,
                 0
               ]
             },
@@ -302,21 +334,21 @@
                 160
               ],
               "visibleRectPx": [
-                26,
-                49,
-                76,
-                97
+                32,
+                46,
+                64,
+                99
               ],
               "guideRectPx": [
                 28,
-                48,
+                46,
                 72,
-                101
+                98
               ],
-              "silhouetteDelta": 0.1202,
+              "silhouetteDelta": 0.0814,
               "centerOffsetPx": [
                 0,
-                -4
+                0
               ]
             },
             {
@@ -328,21 +360,21 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                50,
-                73,
-                97
+                32,
+                47,
+                65,
+                101
               ],
               "guideRectPx": [
                 28,
-                49,
+                47,
                 72,
-                96
+                101
               ],
-              "silhouetteDelta": 0.1691,
+              "silhouetteDelta": 0.139,
               "centerOffsetPx": [
-                0,
-                1
+                -1,
+                0
               ]
             },
             {
@@ -354,21 +386,21 @@
                 160
               ],
               "visibleRectPx": [
-                26,
-                51,
-                75,
-                88
+                33,
+                48,
+                60,
+                92
               ],
               "guideRectPx": [
-                29,
-                50,
+                28,
+                48,
                 72,
-                88
+                92
               ],
-              "silhouetteDelta": 0.174,
+              "silhouetteDelta": 0.1386,
               "centerOffsetPx": [
-                0,
-                1
+                -1,
+                0
               ]
             },
             {
@@ -380,20 +412,20 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                50,
-                72,
+                33,
+                47,
+                61,
                 90
               ],
               "guideRectPx": [
-                29,
-                49,
+                28,
+                47,
                 72,
                 90
               ],
-              "silhouetteDelta": 0.1597,
+              "silhouetteDelta": 0.1442,
               "centerOffsetPx": [
-                0,
+                -1,
                 0
               ]
             },
@@ -406,21 +438,21 @@
                 160
               ],
               "visibleRectPx": [
-                27,
-                49,
-                76,
+                32,
+                46,
+                64,
                 99
               ],
               "guideRectPx": [
                 28,
-                48,
+                46,
                 72,
-                101
+                98
               ],
-              "silhouetteDelta": 0.1442,
+              "silhouetteDelta": 0.0885,
               "centerOffsetPx": [
-                1,
-                -2
+                0,
+                0
               ]
             }
           ]
@@ -428,7 +460,7 @@
         {
           "id": "se",
           "row": 1,
-          "sourceSheetSha256": "ee5208bf2a7f09be2ec030d1ff9ad1b9f0772d345020ae71051b229353456b88",
+          "sourceSheetSha256": "4ab90c96b08b19447b3260e2d19283c6a6592737b3579b151a8fb51542a18c5e",
           "sourceSheetSizePx": [
             1586,
             992
@@ -443,18 +475,18 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                48,
-                64,
-                91
+                31,
+                46,
+                57,
+                94
               ],
               "guideRectPx": [
                 26,
-                47,
-                59,
-                92
+                46,
+                62,
+                94
               ],
-              "silhouetteDelta": 0.2461,
+              "silhouetteDelta": 0.2261,
               "centerOffsetPx": [
                 1,
                 0
@@ -469,20 +501,20 @@
                 160
               ],
               "visibleRectPx": [
-                30,
-                47,
-                57,
-                85
+                29,
+                46,
+                59,
+                88
               ],
               "guideRectPx": [
                 26,
-                48,
-                61,
-                84
+                46,
+                60,
+                88
               ],
-              "silhouetteDelta": 0.1811,
+              "silhouetteDelta": 0.1802,
               "centerOffsetPx": [
-                2,
+                1,
                 -1
               ]
             },
@@ -495,18 +527,18 @@
                 160
               ],
               "visibleRectPx": [
-                29,
-                48,
-                67,
+                30,
+                46,
+                58,
                 91
               ],
               "guideRectPx": [
                 26,
-                48,
-                68,
-                90
+                46,
+                58,
+                91
               ],
-              "silhouetteDelta": 0.2406,
+              "silhouetteDelta": 0.2493,
               "centerOffsetPx": [
                 2,
                 0
@@ -521,18 +553,18 @@
                 160
               ],
               "visibleRectPx": [
-                25,
-                47,
-                77,
-                100
+                28,
+                45,
+                63,
+                98
               ],
               "guideRectPx": [
                 26,
-                46,
-                72,
-                100
+                45,
+                68,
+                98
               ],
-              "silhouetteDelta": 0.2317,
+              "silhouetteDelta": 0.1927,
               "centerOffsetPx": [
                 1,
                 0
@@ -547,18 +579,18 @@
                 160
               ],
               "visibleRectPx": [
-                26,
-                48,
-                73,
-                97
+                28,
+                46,
+                63,
+                100
               ],
               "guideRectPx": [
                 26,
-                47,
-                74,
-                97
+                46,
+                70,
+                100
               ],
-              "silhouetteDelta": 0.1764,
+              "silhouetteDelta": 0.1731,
               "centerOffsetPx": [
                 0,
                 0
@@ -573,21 +605,21 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                49,
-                71,
-                91
+                30,
+                46,
+                59,
+                95
               ],
               "guideRectPx": [
                 26,
-                48,
-                70,
-                91
+                46,
+                66,
+                95
               ],
-              "silhouetteDelta": 0.2675,
+              "silhouetteDelta": 0.1918,
               "centerOffsetPx": [
                 1,
-                1
+                0
               ]
             },
             {
@@ -599,21 +631,21 @@
                 160
               ],
               "visibleRectPx": [
-                27,
-                48,
-                64,
-                86
+                30,
+                46,
+                58,
+                89
               ],
               "guideRectPx": [
-                26,
-                47,
-                64,
-                86
+                25,
+                46,
+                61,
+                89
               ],
-              "silhouetteDelta": 0.2478,
+              "silhouetteDelta": 0.2583,
               "centerOffsetPx": [
-                0,
-                1
+                2,
+                0
               ]
             },
             {
@@ -625,18 +657,18 @@
                 160
               ],
               "visibleRectPx": [
-                26,
-                46,
-                73,
-                94
+                29,
+                45,
+                60,
+                92
               ],
               "guideRectPx": [
                 26,
-                46,
-                65,
-                94
+                45,
+                63,
+                92
               ],
-              "silhouetteDelta": 0.2235,
+              "silhouetteDelta": 0.175,
               "centerOffsetPx": [
                 2,
                 0
@@ -647,7 +679,445 @@
         {
           "id": "e",
           "row": 2,
-          "sourceSheetSha256": "f82087b8b306950a3ff7107c142bdefea36098ab47e2342c6b59fdd72b0c4304",
+          "sourceSheetSha256": "c640a5765833a77a0af08aa8be8178615b0d6e450fc5a8529c93b3050e4feb11",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                46,
+                57,
+                85
+              ],
+              "guideRectPx": [
+                30,
+                46,
+                65,
+                85
+              ],
+              "silhouetteDelta": 0.2717,
+              "centerOffsetPx": [
+                1,
+                0
+              ]
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                47,
+                49,
+                83
+              ],
+              "guideRectPx": [
+                31,
+                47,
+                58,
+                83
+              ],
+              "silhouetteDelta": 0.1063,
+              "centerOffsetPx": [
+                1,
+                0
+              ]
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                46,
+                49,
+                85
+              ],
+              "guideRectPx": [
+                31,
+                46,
+                54,
+                84
+              ],
+              "silhouetteDelta": 0.2976,
+              "centerOffsetPx": [
+                2,
+                0
+              ]
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                44,
+                56,
+                88
+              ],
+              "guideRectPx": [
+                31,
+                45,
+                61,
+                88
+              ],
+              "silhouetteDelta": 0.2222,
+              "centerOffsetPx": [
+                2,
+                -1
+              ]
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                46,
+                57,
+                90
+              ],
+              "guideRectPx": [
+                30,
+                46,
+                64,
+                90
+              ],
+              "silhouetteDelta": 0.2101,
+              "centerOffsetPx": [
+                2,
+                0
+              ]
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                47,
+                50,
+                90
+              ],
+              "guideRectPx": [
+                30,
+                46,
+                59,
+                90
+              ],
+              "silhouetteDelta": 0.1981,
+              "centerOffsetPx": [
+                2,
+                0
+              ]
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                46,
+                51,
+                91
+              ],
+              "guideRectPx": [
+                30,
+                46,
+                54,
+                90
+              ],
+              "silhouetteDelta": 0.3006,
+              "centerOffsetPx": [
+                0,
+                0
+              ]
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                45,
+                62,
+                89
+              ],
+              "guideRectPx": [
+                31,
+                45,
+                60,
+                90
+              ],
+              "silhouetteDelta": 0.2075,
+              "centerOffsetPx": [
+                0,
+                -1
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ne",
+          "row": 3,
+          "sourceSheetSha256": "93374ff93ffe09868c3f2aa1b86f4139a661b70d9b63a31d71dd1386e5af6615",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                45,
+                60,
+                93
+              ],
+              "guideRectPx": [
+                26,
+                44,
+                69,
+                93
+              ],
+              "silhouetteDelta": 0.143,
+              "centerOffsetPx": [
+                -2,
+                0
+              ]
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                46,
+                59,
+                86
+              ],
+              "guideRectPx": [
+                26,
+                46,
+                66,
+                86
+              ],
+              "silhouetteDelta": 0.1667,
+              "centerOffsetPx": [
+                -1,
+                0
+              ]
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                45,
+                62,
+                91
+              ],
+              "guideRectPx": [
+                26,
+                44,
+                60,
+                90
+              ],
+              "silhouetteDelta": 0.193,
+              "centerOffsetPx": [
+                1,
+                1
+              ]
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                44,
+                61,
+                93
+              ],
+              "guideRectPx": [
+                26,
+                44,
+                62,
+                92
+              ],
+              "silhouetteDelta": 0.1666,
+              "centerOffsetPx": [
+                1,
+                0
+              ]
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                45,
+                61,
+                87
+              ],
+              "guideRectPx": [
+                26,
+                44,
+                62,
+                86
+              ],
+              "silhouetteDelta": 0.2055,
+              "centerOffsetPx": [
+                1,
+                1
+              ]
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                46,
+                62,
+                91
+              ],
+              "guideRectPx": [
+                26,
+                45,
+                60,
+                91
+              ],
+              "silhouetteDelta": 0.1841,
+              "centerOffsetPx": [
+                0,
+                0
+              ]
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                45,
+                65,
+                97
+              ],
+              "guideRectPx": [
+                26,
+                44,
+                58,
+                98
+              ],
+              "silhouetteDelta": 0.1406,
+              "centerOffsetPx": [
+                -1,
+                -1
+              ]
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                44,
+                66,
+                97
+              ],
+              "guideRectPx": [
+                26,
+                43,
+                66,
+                100
+              ],
+              "silhouetteDelta": 0.1406,
+              "centerOffsetPx": [
+                -1,
+                -3
+              ]
+            }
+          ]
+        },
+        {
+          "id": "n",
+          "row": 4,
+          "sourceSheetSha256": "2d90c9e8a03633e468fd0bc3bf1990951ae50eb5c667dc0a2db7bc63dc05a5f8",
           "sourceSheetSizePx": [
             1585,
             992
@@ -657,463 +1127,25 @@
               "index": 0,
               "atlasRectPx": [
                 0,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                31,
-                48,
-                57,
-                82
-              ],
-              "guideRectPx": [
-                31,
-                47,
-                68,
-                82
-              ],
-              "silhouetteDelta": 0.1587,
-              "centerOffsetPx": [
-                -1,
-                0
-              ]
-            },
-            {
-              "index": 1,
-              "atlasRectPx": [
-                128,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                31,
-                48,
-                56,
-                81
-              ],
-              "guideRectPx": [
-                31,
-                49,
-                64,
-                78
-              ],
-              "silhouetteDelta": 0.1172,
-              "centerOffsetPx": [
-                1,
-                1
-              ]
-            },
-            {
-              "index": 2,
-              "atlasRectPx": [
-                256,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                30,
-                48,
-                58,
-                82
-              ],
-              "guideRectPx": [
-                31,
-                48,
-                60,
-                82
-              ],
-              "silhouetteDelta": 0.2566,
-              "centerOffsetPx": [
-                0,
-                0
-              ]
-            },
-            {
-              "index": 3,
-              "atlasRectPx": [
-                384,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                29,
-                47,
-                70,
-                89
-              ],
-              "guideRectPx": [
-                31,
-                46,
-                66,
-                88
-              ],
-              "silhouetteDelta": 0.2928,
-              "centerOffsetPx": [
-                -1,
-                1
-              ]
-            },
-            {
-              "index": 4,
-              "atlasRectPx": [
-                512,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                29,
-                48,
-                59,
-                90
-              ],
-              "guideRectPx": [
-                31,
-                47,
-                68,
-                90
-              ],
-              "silhouetteDelta": 0.1498,
-              "centerOffsetPx": [
-                -2,
-                1
-              ]
-            },
-            {
-              "index": 5,
-              "atlasRectPx": [
                 640,
-                320,
                 128,
                 160
               ],
               "visibleRectPx": [
-                29,
-                48,
-                59,
-                89
-              ],
-              "guideRectPx": [
-                31,
-                48,
-                64,
-                88
-              ],
-              "silhouetteDelta": 0.1782,
-              "centerOffsetPx": [
-                -2,
-                0
-              ]
-            },
-            {
-              "index": 6,
-              "atlasRectPx": [
-                768,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                29,
-                47,
-                59,
-                90
-              ],
-              "guideRectPx": [
-                32,
-                47,
-                60,
-                90
-              ],
-              "silhouetteDelta": 0.1736,
-              "centerOffsetPx": [
-                -2,
-                0
-              ]
-            },
-            {
-              "index": 7,
-              "atlasRectPx": [
-                896,
-                320,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
+                33,
                 46,
-                69,
-                89
-              ],
-              "guideRectPx": [
-                31,
-                46,
-                68,
-                88
-              ],
-              "silhouetteDelta": 0.169,
-              "centerOffsetPx": [
-                -2,
-                0
-              ]
-            }
-          ]
-        },
-        {
-          "id": "ne",
-          "row": 3,
-          "sourceSheetSha256": "f4996a9ddcef459733078395b6568a5be2212209bb7150b0e457fc1fe74fe14e",
-          "sourceSheetSizePx": [
-            1586,
-            992
-          ],
-          "frames": [
-            {
-              "index": 0,
-              "atlasRectPx": [
-                0,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
-                46,
-                70,
-                90
-              ],
-              "guideRectPx": [
-                27,
-                46,
-                72,
-                90
-              ],
-              "silhouetteDelta": 0.1358,
-              "centerOffsetPx": [
-                0,
-                0
-              ]
-            },
-            {
-              "index": 1,
-              "atlasRectPx": [
-                128,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
-                47,
-                67,
-                84
-              ],
-              "guideRectPx": [
-                26,
-                47,
-                70,
-                84
-              ],
-              "silhouetteDelta": 0.1898,
-              "centerOffsetPx": [
-                -1,
-                0
-              ]
-            },
-            {
-              "index": 2,
-              "atlasRectPx": [
-                256,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
-                46,
-                64,
-                91
-              ],
-              "guideRectPx": [
-                27,
-                46,
-                64,
-                91
-              ],
-              "silhouetteDelta": 0.1473,
-              "centerOffsetPx": [
-                0,
-                0
-              ]
-            },
-            {
-              "index": 3,
-              "atlasRectPx": [
-                384,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
-                44,
                 63,
                 93
               ],
               "guideRectPx": [
                 27,
-                44,
-                64,
-                93
-              ],
-              "silhouetteDelta": 0.1978,
-              "centerOffsetPx": [
-                0,
-                0
-              ]
-            },
-            {
-              "index": 4,
-              "atlasRectPx": [
-                512,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
                 46,
-                58,
-                87
-              ],
-              "guideRectPx": [
-                27,
-                45,
-                59,
-                86
-              ],
-              "silhouetteDelta": 0.1842,
-              "centerOffsetPx": [
-                0,
-                1
-              ]
-            },
-            {
-              "index": 5,
-              "atlasRectPx": [
-                640,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                28,
-                47,
-                60,
-                91
-              ],
-              "guideRectPx": [
-                26,
-                47,
-                60,
-                91
-              ],
-              "silhouetteDelta": 0.1669,
-              "centerOffsetPx": [
-                1,
-                0
-              ]
-            },
-            {
-              "index": 6,
-              "atlasRectPx": [
-                768,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                27,
-                46,
-                67,
-                98
-              ],
-              "guideRectPx": [
-                27,
-                45,
-                66,
-                98
-              ],
-              "silhouetteDelta": 0.1531,
-              "centerOffsetPx": [
-                0,
-                0
-              ]
-            },
-            {
-              "index": 7,
-              "atlasRectPx": [
-                896,
-                480,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                26,
-                44,
                 73,
-                100
+                92
               ],
-              "guideRectPx": [
-                27,
-                44,
-                72,
-                100
-              ],
-              "silhouetteDelta": 0.1205,
+              "silhouetteDelta": 0.1146,
               "centerOffsetPx": [
                 0,
-                0
-              ]
-            }
-          ]
-        },
-        {
-          "id": "n",
-          "row": 4,
-          "sourceSheetSha256": "6eddb1cba9c7e9e5bc372441309a4a821d41fb43efb0e3a982dd07e52989e709",
-          "sourceSheetSizePx": [
-            1586,
-            992
-          ],
-          "frames": [
-            {
-              "index": 0,
-              "atlasRectPx": [
-                0,
-                640,
-                128,
-                160
-              ],
-              "visibleRectPx": [
-                29,
-                46,
-                68,
-                91
-              ],
-              "guideRectPx": [
-                28,
-                46,
-                72,
-                90
-              ],
-              "silhouetteDelta": 0.1992,
-              "centerOffsetPx": [
-                -1,
                 0
               ]
             },
@@ -1126,21 +1158,21 @@
                 160
               ],
               "visibleRectPx": [
-                29,
-                48,
-                69,
-                88
+                34,
+                47,
+                61,
+                86
               ],
               "guideRectPx": [
                 28,
-                48,
+                47,
                 72,
-                88
+                86
               ],
-              "silhouetteDelta": 0.141,
+              "silhouetteDelta": 0.1094,
               "centerOffsetPx": [
-                -1,
-                0
+                0,
+                -1
               ]
             },
             {
@@ -1152,20 +1184,20 @@
                 160
               ],
               "visibleRectPx": [
-                28,
+                33,
                 46,
-                70,
-                98
+                62,
+                96
               ],
               "guideRectPx": [
                 28,
                 46,
-                73,
-                98
+                72,
+                96
               ],
-              "silhouetteDelta": 0.0934,
+              "silhouetteDelta": 0.0644,
               "centerOffsetPx": [
-                -1,
+                0,
                 0
               ]
             },
@@ -1178,21 +1210,21 @@
                 160
               ],
               "visibleRectPx": [
-                26,
-                46,
-                74,
-                96
+                34,
+                45,
+                62,
+                101
               ],
               "guideRectPx": [
                 27,
                 45,
                 73,
-                101
+                100
               ],
-              "silhouetteDelta": 0.1056,
+              "silhouetteDelta": 0.0927,
               "centerOffsetPx": [
-                -1,
-                -4
+                0,
+                0
               ]
             },
             {
@@ -1204,21 +1236,21 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                45,
-                71,
-                90
+                34,
+                46,
+                61,
+                93
               ],
               "guideRectPx": [
                 27,
                 46,
                 72,
-                90
+                93
               ],
-              "silhouetteDelta": 0.1514,
+              "silhouetteDelta": 0.131,
               "centerOffsetPx": [
-                0,
-                -1
+                1,
+                0
               ]
             },
             {
@@ -1230,21 +1262,21 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                48,
-                70,
-                88
+                35,
+                47,
+                60,
+                86
               ],
               "guideRectPx": [
                 27,
-                48,
+                47,
                 72,
-                88
+                86
               ],
-              "silhouetteDelta": 0.1191,
+              "silhouetteDelta": 0.1082,
               "centerOffsetPx": [
-                0,
-                0
+                1,
+                -1
               ]
             },
             {
@@ -1256,20 +1288,20 @@
                 160
               ],
               "visibleRectPx": [
-                27,
+                34,
                 46,
-                72,
-                98
+                61,
+                96
               ],
               "guideRectPx": [
                 27,
                 46,
                 72,
-                98
+                96
               ],
-              "silhouetteDelta": 0.0784,
+              "silhouetteDelta": 0.1131,
               "centerOffsetPx": [
-                0,
+                1,
                 0
               ]
             },
@@ -1282,21 +1314,21 @@
                 160
               ],
               "visibleRectPx": [
-                26,
+                33,
                 45,
-                74,
+                64,
                 101
               ],
               "guideRectPx": [
                 27,
                 45,
-                72,
-                102
+                73,
+                101
               ],
-              "silhouetteDelta": 0.1595,
+              "silhouetteDelta": 0.1229,
               "centerOffsetPx": [
-                0,
-                -1
+                1,
+                0
               ]
             }
           ]
@@ -1304,7 +1336,7 @@
         {
           "id": "nw",
           "row": 5,
-          "sourceSheetSha256": "e75aaa94da3989d36cede28dda9fdbe4a23f9d2b5152c703d02db269e1185b03",
+          "sourceSheetSha256": "356afaf63ea1dd627243f432960853e822d4b67da333e7ada25534fd3aec02a9",
           "sourceSheetSizePx": [
             1586,
             992
@@ -1320,17 +1352,17 @@
               ],
               "visibleRectPx": [
                 42,
-                47,
-                58,
+                46,
+                57,
                 85
               ],
               "guideRectPx": [
-                42,
-                47,
-                59,
-                85
+                39,
+                46,
+                62,
+                84
               ],
-              "silhouetteDelta": 0.2397,
+              "silhouetteDelta": 0.2131,
               "centerOffsetPx": [
                 -1,
                 0
@@ -1345,20 +1377,20 @@
                 160
               ],
               "visibleRectPx": [
-                42,
-                49,
-                60,
+                44,
+                47,
+                55,
                 89
               ],
               "guideRectPx": [
-                41,
-                49,
+                42,
+                47,
                 60,
-                89
+                88
               ],
-              "silhouetteDelta": 0.1847,
+              "silhouetteDelta": 0.1515,
               "centerOffsetPx": [
-                0,
+                -1,
                 0
               ]
             },
@@ -1371,20 +1403,20 @@
                 160
               ],
               "visibleRectPx": [
-                34,
-                47,
-                68,
-                97
-              ],
-              "guideRectPx": [
-                34,
-                47,
-                66,
+                45,
+                46,
+                54,
                 96
               ],
-              "silhouetteDelta": 0.2158,
+              "guideRectPx": [
+                43,
+                46,
+                58,
+                96
+              ],
+              "silhouetteDelta": 0.2373,
               "centerOffsetPx": [
-                0,
+                -1,
                 0
               ]
             },
@@ -1397,21 +1429,21 @@
                 160
               ],
               "visibleRectPx": [
-                30,
+                38,
                 46,
-                73,
-                98
+                64,
+                97
               ],
               "guideRectPx": [
-                29,
-                46,
-                72,
+                35,
+                45,
+                66,
                 98
               ],
-              "silhouetteDelta": 0.1542,
+              "silhouetteDelta": 0.1794,
               "centerOffsetPx": [
                 1,
-                0
+                -1
               ]
             },
             {
@@ -1423,21 +1455,21 @@
                 160
               ],
               "visibleRectPx": [
-                30,
-                47,
-                70,
-                88
+                38,
+                46,
+                61,
+                91
               ],
               "guideRectPx": [
-                29,
-                47,
-                72,
-                88
+                33,
+                46,
+                68,
+                91
               ],
-              "silhouetteDelta": 0.2148,
+              "silhouetteDelta": 0.1881,
               "centerOffsetPx": [
                 0,
-                0
+                -1
               ]
             },
             {
@@ -1449,20 +1481,20 @@
                 160
               ],
               "visibleRectPx": [
-                31,
-                49,
-                70,
-                82
+                41,
+                47,
+                59,
+                85
               ],
               "guideRectPx": [
-                32,
-                49,
-                69,
-                82
+                36,
+                47,
+                66,
+                84
               ],
-              "silhouetteDelta": 0.2156,
+              "silhouetteDelta": 0.1876,
               "centerOffsetPx": [
-                -1,
+                0,
                 0
               ]
             },
@@ -1475,21 +1507,21 @@
                 160
               ],
               "visibleRectPx": [
-                38,
-                47,
-                62,
-                90
+                43,
+                46,
+                56,
+                89
               ],
               "guideRectPx": [
-                37,
-                47,
-                64,
-                90
+                41,
+                46,
+                60,
+                89
               ],
-              "silhouetteDelta": 0.2005,
+              "silhouetteDelta": 0.2232,
               "centerOffsetPx": [
                 -1,
-                0
+                -1
               ]
             },
             {
@@ -1501,18 +1533,18 @@
                 160
               ],
               "visibleRectPx": [
-                38,
+                45,
                 46,
-                63,
+                54,
                 91
               ],
               "guideRectPx": [
-                37,
+                39,
                 46,
-                64,
-                91
+                62,
+                90
               ],
-              "silhouetteDelta": 0.205,
+              "silhouetteDelta": 0.1727,
               "centerOffsetPx": [
                 0,
                 0
@@ -1523,10 +1555,10 @@
         {
           "id": "w",
           "row": 6,
-          "sourceSheetSha256": "f01d1961e97b6ef8f827b82f9168cde879fb9d4fec9964b0b18307374675ed58",
+          "sourceSheetSha256": "952fd93e5bfbf74a30c0d4ab92a5444c1657d1e321952bcea249d84f573fb56f",
           "sourceSheetSizePx": [
-            1774,
-            887
+            1586,
+            992
           ],
           "frames": [
             {
@@ -1538,20 +1570,20 @@
                 160
               ],
               "visibleRectPx": [
-                29,
-                47,
-                69,
+                40,
+                46,
+                58,
                 90
               ],
               "guideRectPx": [
-                29,
-                47,
-                68,
+                33,
+                46,
+                64,
                 90
               ],
-              "silhouetteDelta": 0.1718,
+              "silhouetteDelta": 0.2655,
               "centerOffsetPx": [
-                -3,
+                2,
                 0
               ]
             },
@@ -1564,21 +1596,21 @@
                 160
               ],
               "visibleRectPx": [
-                37,
-                49,
-                61,
-                89
+                44,
+                46,
+                54,
+                91
               ],
               "guideRectPx": [
-                33,
-                48,
-                64,
-                88
+                39,
+                46,
+                58,
+                90
               ],
-              "silhouetteDelta": 0.2226,
+              "silhouetteDelta": 0.1398,
               "centerOffsetPx": [
-                -1,
-                1
+                2,
+                0
               ]
             },
             {
@@ -1590,20 +1622,20 @@
                 160
               ],
               "visibleRectPx": [
-                35,
-                47,
-                64,
-                90
+                44,
+                46,
+                53,
+                91
               ],
               "guideRectPx": [
-                36,
-                47,
-                61,
+                42,
+                46,
+                54,
                 90
               ],
-              "silhouetteDelta": 0.2233,
+              "silhouetteDelta": 0.2972,
               "centerOffsetPx": [
-                -1,
+                2,
                 0
               ]
             },
@@ -1616,21 +1648,21 @@
                 160
               ],
               "visibleRectPx": [
-                31,
-                46,
-                69,
+                39,
+                45,
+                60,
                 88
               ],
               "guideRectPx": [
-                29,
-                46,
-                67,
-                88
+                36,
+                45,
+                61,
+                90
               ],
-              "silhouetteDelta": 0.209,
+              "silhouetteDelta": 0.2166,
               "centerOffsetPx": [
-                0,
-                -1
+                1,
+                -2
               ]
             },
             {
@@ -1642,20 +1674,20 @@
                 160
               ],
               "visibleRectPx": [
-                34,
-                47,
-                62,
-                82
+                39,
+                46,
+                58,
+                85
               ],
               "guideRectPx": [
-                29,
-                47,
-                68,
-                82
+                33,
+                46,
+                64,
+                85
               ],
-              "silhouetteDelta": 0.1656,
+              "silhouetteDelta": 0.218,
               "centerOffsetPx": [
-                -1,
+                2,
                 0
               ]
             },
@@ -1668,21 +1700,21 @@
                 160
               ],
               "visibleRectPx": [
-                35,
-                48,
-                60,
-                81
+                45,
+                46,
+                51,
+                84
               ],
               "guideRectPx": [
-                33,
-                49,
-                64,
-                78
+                39,
+                46,
+                58,
+                84
               ],
-              "silhouetteDelta": 0.1677,
+              "silhouetteDelta": 0.165,
               "centerOffsetPx": [
-                -2,
-                1
+                1,
+                0
               ]
             },
             {
@@ -1694,20 +1726,20 @@
                 160
               ],
               "visibleRectPx": [
-                35,
-                47,
-                62,
-                83
+                44,
+                46,
+                52,
+                85
               ],
               "guideRectPx": [
-                36,
-                47,
-                60,
-                82
+                42,
+                46,
+                54,
+                85
               ],
-              "silhouetteDelta": 0.2229,
+              "silhouetteDelta": 0.2791,
               "centerOffsetPx": [
-                -2,
+                0,
                 0
               ]
             },
@@ -1720,21 +1752,21 @@
                 160
               ],
               "visibleRectPx": [
-                28,
-                46,
-                71,
-                89
+                40,
+                45,
+                58,
+                87
               ],
               "guideRectPx": [
-                29,
-                46,
-                67,
-                88
+                36,
+                45,
+                61,
+                87
               ],
-              "silhouetteDelta": 0.2202,
+              "silhouetteDelta": 0.2077,
               "centerOffsetPx": [
-                -3,
-                0
+                0,
+                -1
               ]
             }
           ]
@@ -1742,7 +1774,7 @@
         {
           "id": "sw",
           "row": 7,
-          "sourceSheetSha256": "61ca31b37473e2c5aef92e5b1b5e75876c50e0cbbde2b955f7159b02bde539a9",
+          "sourceSheetSha256": "35d2df79c1fc2ff03ad1a51b8527d9bd036f08dbea9b9ca59cc6e65639f97fed",
           "sourceSheetSizePx": [
             1586,
             992
@@ -1757,20 +1789,20 @@
                 160
               ],
               "visibleRectPx": [
-                32,
-                47,
-                68,
-                98
+                38,
+                46,
+                65,
+                100
               ],
               "guideRectPx": [
-                28,
-                47,
-                74,
-                98
+                32,
+                46,
+                70,
+                100
               ],
-              "silhouetteDelta": 0.1976,
+              "silhouetteDelta": 0.1969,
               "centerOffsetPx": [
-                1,
+                2,
                 0
               ]
             },
@@ -1783,18 +1815,18 @@
                 160
               ],
               "visibleRectPx": [
-                36,
-                48,
-                65,
-                91
+                42,
+                46,
+                59,
+                95
               ],
               "guideRectPx": [
-                31,
-                48,
-                71,
-                91
+                36,
+                46,
+                66,
+                94
               ],
-              "silhouetteDelta": 0.218,
+              "silhouetteDelta": 0.1846,
               "centerOffsetPx": [
                 2,
                 0
@@ -1809,20 +1841,20 @@
                 160
               ],
               "visibleRectPx": [
-                36,
-                47,
-                65,
-                86
+                42,
+                46,
+                60,
+                89
               ],
               "guideRectPx": [
-                37,
-                47,
-                65,
-                86
+                41,
+                46,
+                60,
+                89
               ],
-              "silhouetteDelta": 0.2454,
+              "silhouetteDelta": 0.2262,
               "centerOffsetPx": [
-                0,
+                1,
                 0
               ]
             },
@@ -1835,21 +1867,21 @@
                 160
               ],
               "visibleRectPx": [
-                38,
-                46,
-                67,
-                94
+                41,
+                45,
+                61,
+                92
               ],
               "guideRectPx": [
-                36,
-                46,
-                65,
-                94
+                38,
+                45,
+                64,
+                92
               ],
-              "silhouetteDelta": 0.1429,
+              "silhouetteDelta": 0.1584,
               "centerOffsetPx": [
-                1,
-                -1
+                2,
+                0
               ]
             },
             {
@@ -1861,20 +1893,20 @@
                 160
               ],
               "visibleRectPx": [
-                37,
-                47,
-                63,
-                92
+                40,
+                46,
+                61,
+                94
               ],
               "guideRectPx": [
-                42,
-                47,
-                60,
-                92
+                39,
+                46,
+                63,
+                94
               ],
-              "silhouetteDelta": 0.238,
+              "silhouetteDelta": 0.1994,
               "centerOffsetPx": [
-                -1,
+                0,
                 0
               ]
             },
@@ -1887,20 +1919,20 @@
                 160
               ],
               "visibleRectPx": [
-                40,
-                48,
-                63,
-                85
+                42,
+                46,
+                60,
+                89
               ],
               "guideRectPx": [
-                41,
-                48,
-                61,
-                84
+                42,
+                46,
+                60,
+                88
               ],
-              "silhouetteDelta": 0.1677,
+              "silhouetteDelta": 0.1122,
               "centerOffsetPx": [
-                0,
+                1,
                 0
               ]
             },
@@ -1913,18 +1945,18 @@
                 160
               ],
               "visibleRectPx": [
-                33,
-                47,
-                69,
+                42,
+                46,
+                60,
                 91
               ],
               "guideRectPx": [
-                33,
-                47,
-                68,
-                90
+                43,
+                46,
+                58,
+                91
               ],
-              "silhouetteDelta": 0.2112,
+              "silhouetteDelta": 0.1613,
               "centerOffsetPx": [
                 1,
                 0
@@ -1939,21 +1971,21 @@
                 160
               ],
               "visibleRectPx": [
-                31,
-                46,
-                75,
-                100
+                38,
+                45,
+                64,
+                98
               ],
               "guideRectPx": [
-                28,
-                46,
-                74,
-                100
+                34,
+                45,
+                68,
+                98
               ],
-              "silhouetteDelta": 0.1925,
+              "silhouetteDelta": 0.1185,
               "centerOffsetPx": [
-                3,
-                -1
+                1,
+                0
               ]
             }
           ]
@@ -1961,8 +1993,8 @@
       ],
       "centerAlignment": {
         "landmark": "Upper hood",
-        "maximumHorizontalRangePxBefore": 3.626,
-        "maximumHorizontalRangePxAfter": 0.939
+        "maximumHorizontalRangePxBefore": 3.379,
+        "maximumHorizontalRangePxAfter": 0.982
       }
     },
     {
