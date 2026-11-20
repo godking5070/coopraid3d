@@ -19,6 +19,12 @@
 
 로그와 managed 검사 출력은 이 PC의 `C:/Astella/2d-evidence-20261120/`에 있다. 이 디렉터리는 저장소 자산이나 다른 PC의 실행 의존성이 아니다.
 
+### 2026-11-20 11:04 재검증
+
+이 PC의 원본 프로젝트에서 배치와 일반 에디터 실행을 각각 시도했다. 배치는 `com.unity.editor.headless`, 일반 실행은 `com.unity.editor.ui` 라이선스를 받지 못했고, 둘 다 `No valid Unity Editor license found`를 기록했다. 두 시도 모두 Play에 진입하기 전이어서 Game View 캡처를 생성할 수 없었다. 로그는 `C:/Astella/2d-play-verification/`의 `unity-play.log`와 `unity-gui.log`에 있다.
+
+검사 코드에서 기본 공격의 성공과 직후 보스 체력 변화를 같은 프레임에 확인하도록 수정했다. 피격 무적이 끝날 때까지 패배 검사를 제한된 시간 안에서 재시도한다. 캡처는 재시작 후 첫 장판이 생길 때 요청하고, 저장 후 정지한 플레이어가 그 장판에 맞았는지 확인한다. 수정한 코드로 기하 검사 84개와 런타임·에디터 managed 컴파일을 다시 통과했다. Unity에서 이 검사 흐름을 구동하려면 활성 라이선스가 필요하다.
+
 ## 아직 검증되지 않은 항목
 
 - Unity import 및 새 씬 생성, 실제 Play의 입력·이동·대시·공격·피해·승패·재시작.

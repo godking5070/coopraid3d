@@ -158,7 +158,7 @@ namespace Astella.TwoD.Editor
                 {
                     if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
                     StopChecks();
-                    Debug.Log("ASTELLA 2D PLAY CHECKS PASS: actual movement, dash, damage, death, menu return, restart and rendered screenshot.");
+                    Debug.Log("ASTELLA 2D PLAY CHECKS PASS: movement, dash, basic attack, defeat, restart, telegraph screenshot and hit.");
                     EditorApplication.Exit(0);
                     return;
                 }
@@ -214,31 +214,36 @@ namespace Astella.TwoD.Editor
                     {
                         game.RequestMove(Vector2.zero);
                         game.AimAt(game.BossPosition);
-                        SessionState.SetFloat(Key + "bossBefore", game.BossHealth);
-                        SessionState.SetInt(Key + "attacksBefore", game.Attacks);
-                        SessionState.SetInt(Key + "damageBefore", game.DamageEvents);
                         Phase("attack");
                     }
                 }
                 else if (phase == "attack")
                 {
                     game.AimAt(game.BossPosition);
-                    game.TryUseSkill(0);
-                    if (game.BossHealth < SessionState.GetFloat(Key + "bossBefore", 0))
+                    float bossBefore = game.BossHealth;
+                    int attacksBefore = game.Attacks;
+                    int damageBefore = game.DamageEvents;
+                    if (game.TryUseSkill(0))
                     {
-                        Require(game.Attacks > SessionState.GetInt(Key + "attacksBefore", 0) &&
-                            game.DamageEvents > SessionState.GetInt(Key + "damageBefore", 0),
+                        Require(game.BossHealth < bossBefore && game.Attacks == attacksBefore + 1 &&
+                            game.DamageEvents == damageBefore + 1,
                             "A basic attack must produce an actual boss damage event.");
                         Record("basic-attack-and-boss-damage");
                         SessionState.SetInt(Key + "observedAttacks", game.Attacks);
                         SessionState.SetInt(Key + "observedDamageEvents", game.DamageEvents);
-                        game.ApplyPlayerDamage(game.PlayerHealth + 10000f);
                         Phase("death");
                     }
                     else Require(elapsed < 5f, "Basic attacks did not damage the boss within five seconds in combat range.");
                 }
-                else if (phase == "death" && elapsed > .2f)
+                else if (phase == "death")
                 {
+                    // A recent hit can temporarily block this damage. Wait for that window to end.
+                    if (!game.Finished) game.ApplyPlayerDamage(game.PlayerHealth + 10000f);
+                    if (!game.Finished)
+                    {
+                        Require(elapsed < 4f, "Lethal damage never reached the defeat state.");
+                        return;
+                    }
                     Require(game.Finished && !game.Won && game.PlayerHealth <= 0, "Lethal damage must reach the actual defeat state.");
                     Record("defeat");
                     game.ReturnToMenu();
@@ -252,11 +257,18 @@ namespace Astella.TwoD.Editor
                     Record("restart");
                     Phase("restarted");
                 }
-                else if (phase == "restarted" && elapsed > 2f)
+                else if (phase == "restarted")
                 {
                     Require(game.Running && !game.Finished && game.PlayerHealth > 0, "Restarted expedition must remain alive before capture.");
+                    if (game.ActiveTelegraphs == 0)
+                    {
+                        Require(elapsed < 15f, "The restarted boss did not start a telegraph.");
+                        return;
+                    }
+                    Record("boss-telegraph");
                     Require(Screen.width >= 320 && Screen.height >= 180, "The Game View must have a rendered size.");
                     string path = Path.Combine(SessionState.GetString(Key + "evidence", DefaultEvidence), "unity-play.png");
+                    SessionState.SetFloat(Key + "healthBeforeTelegraphHit", game.PlayerHealth);
                     SessionState.SetString(Key + "captureStarted", DateTime.UtcNow.Ticks.ToString(System.Globalization.CultureInfo.InvariantCulture));
                     ScreenCapture.CaptureScreenshot(path);
                     Phase("screenshot");
@@ -268,11 +280,23 @@ namespace Astella.TwoD.Editor
                     if (File.Exists(path) && new FileInfo(path).Length > 1024 && File.GetLastWriteTimeUtc(path).Ticks >= started)
                     {
                         Record("rendered-screenshot");
-                        WriteReport(true, "", game, path);
-                        Phase("exit");
-                        EditorApplication.isPlaying = false;
+                        Phase("telegraph-hit");
                     }
                     else Require(elapsed < 15f, "Unity did not write a new rendered screenshot. Check that graphics and the Game View are available.");
+                }
+                else if (phase == "telegraph-hit")
+                {
+                    // With no movement after restart, the first targeted circle should hit the player.
+                    if (game.PlayerHealth >= SessionState.GetFloat(Key + "healthBeforeTelegraphHit", 0))
+                    {
+                        Require(elapsed < 8f, "The first targeted telegraph did not damage the stationary player.");
+                        return;
+                    }
+                    Record("boss-telegraph-hit");
+                    string path = Path.Combine(SessionState.GetString(Key + "evidence", DefaultEvidence), "unity-play.png");
+                    WriteReport(true, "", game, path);
+                    Phase("exit");
+                    EditorApplication.isPlaying = false;
                 }
             }
             catch (Exception error)
