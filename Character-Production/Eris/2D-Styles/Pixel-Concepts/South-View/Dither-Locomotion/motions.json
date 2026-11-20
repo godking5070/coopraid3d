@@ -1,0 +1,3332 @@
+{
+  "formatVersion": 1,
+  "character": "이리스",
+  "artStyle": "08-dither",
+  "styleReference": "../Sprites/08-dither.png",
+  "sourceArmature": "../../../../Texturing/Iris_Concept_Textured.blend",
+  "sourceArmatureSha256": "bbf489796eb63aaf3c978f10ed36728c07f812c36265f90e0a897589561c4d64",
+  "cameraPitchDegrees": 50,
+  "cameraProjection": "perspective",
+  "frameSizePx": [
+    128,
+    160
+  ],
+  "pivotPx": [
+    64,
+    128
+  ],
+  "unityPivot": [
+    0.5,
+    0.2
+  ],
+  "inPlace": true,
+  "coordinates": "Top-left origin.",
+  "directions": [
+    {
+      "id": "s",
+      "label": "정면",
+      "arrow": "↓",
+      "yawDegrees": 0,
+      "row": 0
+    },
+    {
+      "id": "se",
+      "label": "오른쪽 앞",
+      "arrow": "↘",
+      "yawDegrees": 45,
+      "row": 1
+    },
+    {
+      "id": "e",
+      "label": "오른쪽 옆",
+      "arrow": "→",
+      "yawDegrees": 90,
+      "row": 2
+    },
+    {
+      "id": "ne",
+      "label": "오른쪽 뒤",
+      "arrow": "↗",
+      "yawDegrees": 135,
+      "row": 3
+    },
+    {
+      "id": "n",
+      "label": "뒷모습",
+      "arrow": "↑",
+      "yawDegrees": 180,
+      "row": 4
+    },
+    {
+      "id": "nw",
+      "label": "왼쪽 뒤",
+      "arrow": "↖",
+      "yawDegrees": 225,
+      "row": 5
+    },
+    {
+      "id": "w",
+      "label": "왼쪽 옆",
+      "arrow": "←",
+      "yawDegrees": 270,
+      "row": 6
+    },
+    {
+      "id": "sw",
+      "label": "왼쪽 앞",
+      "arrow": "↙",
+      "yawDegrees": 315,
+      "row": 7
+    }
+  ],
+  "clips": [
+    {
+      "id": "run",
+      "label": "달리기",
+      "durationMs": 640,
+      "frameDurationMs": 80,
+      "sourcePose": {
+        "stanceFraction": 0.42,
+        "soleClearanceM": 0.123,
+        "samples": [
+          {
+            "index": 0,
+            "cyclePhase": 0.085,
+            "torsoLeanDegrees": 11,
+            "grounded": {
+              "left": true,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.22317,
+              "right": 0.12475
+            }
+          },
+          {
+            "index": 1,
+            "cyclePhase": 0.21000000000000002,
+            "torsoLeanDegrees": 9.8,
+            "grounded": {
+              "left": true,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.20963,
+              "right": 0.15921
+            }
+          },
+          {
+            "index": 2,
+            "cyclePhase": 0.335,
+            "torsoLeanDegrees": 11,
+            "grounded": {
+              "left": true,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.17192,
+              "right": 0.20185
+            }
+          },
+          {
+            "index": 3,
+            "cyclePhase": 0.46,
+            "torsoLeanDegrees": 12.2,
+            "grounded": {
+              "left": false,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.13106,
+              "right": 0.222
+            }
+          },
+          {
+            "index": 4,
+            "cyclePhase": 0.585,
+            "torsoLeanDegrees": 11,
+            "grounded": {
+              "left": false,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.1247,
+              "right": 0.22377
+            }
+          },
+          {
+            "index": 5,
+            "cyclePhase": 0.71,
+            "torsoLeanDegrees": 9.8,
+            "grounded": {
+              "left": false,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.159,
+              "right": 0.21013
+            }
+          },
+          {
+            "index": 6,
+            "cyclePhase": 0.835,
+            "torsoLeanDegrees": 11,
+            "grounded": {
+              "left": false,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.20141,
+              "right": 0.1722
+            }
+          },
+          {
+            "index": 7,
+            "cyclePhase": 0.96,
+            "torsoLeanDegrees": 12.2,
+            "grounded": {
+              "left": false,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.22141,
+              "right": 0.13114
+            }
+          }
+        ]
+      },
+      "atlas": {
+        "file": "Iris_08_Run_8Dir.png",
+        "imageSizePx": [
+          1024,
+          1280
+        ],
+        "columns": 8,
+        "rows": 8,
+        "sha256": "d8edf364317d665460b510907f749a637a88b1629fa0d121d381018e61aa2a41"
+      },
+      "directions": [
+        {
+          "id": "s",
+          "row": 0,
+          "sourceSheetSha256": "6f4d0739f79a53daa15602aad24ff53e93d84f52f93b6e36d50276b0dda8d147",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                50,
+                73,
+                96
+              ],
+              "guideRectPx": [
+                28,
+                49,
+                72,
+                96
+              ],
+              "silhouetteDelta": 0.1029
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                51,
+                72,
+                87
+              ],
+              "guideRectPx": [
+                27,
+                50,
+                72,
+                88
+              ],
+              "silhouetteDelta": 0.1477
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                50,
+                71,
+                89
+              ],
+              "guideRectPx": [
+                27,
+                49,
+                72,
+                90
+              ],
+              "silhouetteDelta": 0.2345
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                53,
+                76,
+                97
+              ],
+              "guideRectPx": [
+                28,
+                48,
+                72,
+                101
+              ],
+              "silhouetteDelta": 0.2049
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                49,
+                73,
+                97
+              ],
+              "guideRectPx": [
+                28,
+                49,
+                72,
+                96
+              ],
+              "silhouetteDelta": 0.1691
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                50,
+                75,
+                88
+              ],
+              "guideRectPx": [
+                29,
+                50,
+                72,
+                88
+              ],
+              "silhouetteDelta": 0.1409
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                50,
+                72,
+                90
+              ],
+              "guideRectPx": [
+                29,
+                49,
+                72,
+                90
+              ],
+              "silhouetteDelta": 0.1616
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                51,
+                76,
+                99
+              ],
+              "guideRectPx": [
+                28,
+                48,
+                72,
+                101
+              ],
+              "silhouetteDelta": 0.1391
+            }
+          ]
+        },
+        {
+          "id": "se",
+          "row": 1,
+          "sourceSheetSha256": "ee5208bf2a7f09be2ec030d1ff9ad1b9f0772d345020ae71051b229353456b88",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                48,
+                64,
+                91
+              ],
+              "guideRectPx": [
+                26,
+                47,
+                59,
+                92
+              ],
+              "silhouetteDelta": 0.2436
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                48,
+                57,
+                85
+              ],
+              "guideRectPx": [
+                26,
+                48,
+                61,
+                84
+              ],
+              "silhouetteDelta": 0.1816
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                48,
+                67,
+                91
+              ],
+              "guideRectPx": [
+                26,
+                48,
+                68,
+                90
+              ],
+              "silhouetteDelta": 0.248
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                47,
+                77,
+                100
+              ],
+              "guideRectPx": [
+                26,
+                46,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.2196
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                48,
+                73,
+                97
+              ],
+              "guideRectPx": [
+                26,
+                47,
+                74,
+                97
+              ],
+              "silhouetteDelta": 0.1804
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                48,
+                71,
+                91
+              ],
+              "guideRectPx": [
+                26,
+                48,
+                70,
+                91
+              ],
+              "silhouetteDelta": 0.2535
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                47,
+                64,
+                86
+              ],
+              "guideRectPx": [
+                26,
+                47,
+                64,
+                86
+              ],
+              "silhouetteDelta": 0.2186
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                46,
+                73,
+                94
+              ],
+              "guideRectPx": [
+                26,
+                46,
+                65,
+                94
+              ],
+              "silhouetteDelta": 0.2207
+            }
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "sourceSheetSha256": "f82087b8b306950a3ff7107c142bdefea36098ab47e2342c6b59fdd72b0c4304",
+          "sourceSheetSizePx": [
+            1585,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                48,
+                57,
+                82
+              ],
+              "guideRectPx": [
+                31,
+                47,
+                68,
+                82
+              ],
+              "silhouetteDelta": 0.2072
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                47,
+                56,
+                81
+              ],
+              "guideRectPx": [
+                31,
+                49,
+                64,
+                78
+              ],
+              "silhouetteDelta": 0.1494
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                48,
+                58,
+                82
+              ],
+              "guideRectPx": [
+                31,
+                48,
+                60,
+                82
+              ],
+              "silhouetteDelta": 0.275
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                46,
+                70,
+                89
+              ],
+              "guideRectPx": [
+                31,
+                46,
+                66,
+                88
+              ],
+              "silhouetteDelta": 0.2824
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                47,
+                59,
+                90
+              ],
+              "guideRectPx": [
+                31,
+                47,
+                68,
+                90
+              ],
+              "silhouetteDelta": 0.1768
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                48,
+                59,
+                89
+              ],
+              "guideRectPx": [
+                31,
+                48,
+                64,
+                88
+              ],
+              "silhouetteDelta": 0.1782
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                47,
+                59,
+                90
+              ],
+              "guideRectPx": [
+                32,
+                47,
+                60,
+                90
+              ],
+              "silhouetteDelta": 0.1736
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                46,
+                69,
+                89
+              ],
+              "guideRectPx": [
+                31,
+                46,
+                68,
+                88
+              ],
+              "silhouetteDelta": 0.1755
+            }
+          ]
+        },
+        {
+          "id": "ne",
+          "row": 3,
+          "sourceSheetSha256": "f4996a9ddcef459733078395b6568a5be2212209bb7150b0e457fc1fe74fe14e",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                46,
+                70,
+                90
+              ],
+              "guideRectPx": [
+                27,
+                46,
+                72,
+                90
+              ],
+              "silhouetteDelta": 0.1406
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                47,
+                67,
+                84
+              ],
+              "guideRectPx": [
+                26,
+                47,
+                70,
+                84
+              ],
+              "silhouetteDelta": 0.2064
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                46,
+                64,
+                91
+              ],
+              "guideRectPx": [
+                27,
+                46,
+                64,
+                91
+              ],
+              "silhouetteDelta": 0.1473
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                44,
+                63,
+                93
+              ],
+              "guideRectPx": [
+                27,
+                44,
+                64,
+                93
+              ],
+              "silhouetteDelta": 0.175
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                45,
+                58,
+                87
+              ],
+              "guideRectPx": [
+                27,
+                45,
+                59,
+                86
+              ],
+              "silhouetteDelta": 0.1926
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                47,
+                60,
+                91
+              ],
+              "guideRectPx": [
+                26,
+                47,
+                60,
+                91
+              ],
+              "silhouetteDelta": 0.1654
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                46,
+                67,
+                98
+              ],
+              "guideRectPx": [
+                27,
+                45,
+                66,
+                98
+              ],
+              "silhouetteDelta": 0.1531
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                44,
+                73,
+                100
+              ],
+              "guideRectPx": [
+                27,
+                44,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.1205
+            }
+          ]
+        },
+        {
+          "id": "n",
+          "row": 4,
+          "sourceSheetSha256": "6eddb1cba9c7e9e5bc372441309a4a821d41fb43efb0e3a982dd07e52989e709",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                46,
+                68,
+                91
+              ],
+              "guideRectPx": [
+                28,
+                46,
+                72,
+                90
+              ],
+              "silhouetteDelta": 0.1992
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                48,
+                69,
+                88
+              ],
+              "guideRectPx": [
+                28,
+                48,
+                72,
+                88
+              ],
+              "silhouetteDelta": 0.141
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                46,
+                70,
+                98
+              ],
+              "guideRectPx": [
+                28,
+                46,
+                73,
+                98
+              ],
+              "silhouetteDelta": 0.186
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                50,
+                74,
+                96
+              ],
+              "guideRectPx": [
+                27,
+                45,
+                73,
+                101
+              ],
+              "silhouetteDelta": 0.1979
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                46,
+                71,
+                90
+              ],
+              "guideRectPx": [
+                27,
+                46,
+                72,
+                90
+              ],
+              "silhouetteDelta": 0.123
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                48,
+                70,
+                88
+              ],
+              "guideRectPx": [
+                27,
+                48,
+                72,
+                88
+              ],
+              "silhouetteDelta": 0.1191
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                46,
+                72,
+                98
+              ],
+              "guideRectPx": [
+                27,
+                46,
+                72,
+                98
+              ],
+              "silhouetteDelta": 0.0845
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                46,
+                74,
+                101
+              ],
+              "guideRectPx": [
+                27,
+                45,
+                72,
+                102
+              ],
+              "silhouetteDelta": 0.1634
+            }
+          ]
+        },
+        {
+          "id": "nw",
+          "row": 5,
+          "sourceSheetSha256": "e75aaa94da3989d36cede28dda9fdbe4a23f9d2b5152c703d02db269e1185b03",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                47,
+                58,
+                85
+              ],
+              "guideRectPx": [
+                42,
+                47,
+                59,
+                85
+              ],
+              "silhouetteDelta": 0.2387
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                42,
+                49,
+                60,
+                89
+              ],
+              "guideRectPx": [
+                41,
+                49,
+                60,
+                89
+              ],
+              "silhouetteDelta": 0.1847
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                47,
+                68,
+                97
+              ],
+              "guideRectPx": [
+                34,
+                47,
+                66,
+                96
+              ],
+              "silhouetteDelta": 0.203
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                46,
+                73,
+                98
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                72,
+                98
+              ],
+              "silhouetteDelta": 0.1467
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                47,
+                70,
+                88
+              ],
+              "guideRectPx": [
+                29,
+                47,
+                72,
+                88
+              ],
+              "silhouetteDelta": 0.2073
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                49,
+                70,
+                82
+              ],
+              "guideRectPx": [
+                32,
+                49,
+                69,
+                82
+              ],
+              "silhouetteDelta": 0.2156
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                39,
+                47,
+                62,
+                90
+              ],
+              "guideRectPx": [
+                37,
+                47,
+                64,
+                90
+              ],
+              "silhouetteDelta": 0.1898
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                38,
+                46,
+                63,
+                91
+              ],
+              "guideRectPx": [
+                37,
+                46,
+                64,
+                91
+              ],
+              "silhouetteDelta": 0.1996
+            }
+          ]
+        },
+        {
+          "id": "w",
+          "row": 6,
+          "sourceSheetSha256": "f01d1961e97b6ef8f827b82f9168cde879fb9d4fec9964b0b18307374675ed58",
+          "sourceSheetSizePx": [
+            1774,
+            887
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                47,
+                69,
+                90
+              ],
+              "guideRectPx": [
+                29,
+                47,
+                68,
+                90
+              ],
+              "silhouetteDelta": 0.1845
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                38,
+                48,
+                61,
+                89
+              ],
+              "guideRectPx": [
+                33,
+                48,
+                64,
+                88
+              ],
+              "silhouetteDelta": 0.215
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                47,
+                64,
+                90
+              ],
+              "guideRectPx": [
+                36,
+                47,
+                61,
+                90
+              ],
+              "silhouetteDelta": 0.2022
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                47,
+                69,
+                88
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                67,
+                88
+              ],
+              "silhouetteDelta": 0.2085
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                47,
+                62,
+                82
+              ],
+              "guideRectPx": [
+                29,
+                47,
+                68,
+                82
+              ],
+              "silhouetteDelta": 0.1998
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                37,
+                47,
+                60,
+                81
+              ],
+              "guideRectPx": [
+                33,
+                49,
+                64,
+                78
+              ],
+              "silhouetteDelta": 0.1597
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                37,
+                47,
+                62,
+                83
+              ],
+              "guideRectPx": [
+                36,
+                47,
+                60,
+                82
+              ],
+              "silhouetteDelta": 0.2252
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                46,
+                71,
+                89
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                67,
+                88
+              ],
+              "silhouetteDelta": 0.2202
+            }
+          ]
+        },
+        {
+          "id": "sw",
+          "row": 7,
+          "sourceSheetSha256": "61ca31b37473e2c5aef92e5b1b5e75876c50e0cbbde2b955f7159b02bde539a9",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                47,
+                68,
+                98
+              ],
+              "guideRectPx": [
+                28,
+                47,
+                74,
+                98
+              ],
+              "silhouetteDelta": 0.1873
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                48,
+                65,
+                91
+              ],
+              "guideRectPx": [
+                31,
+                48,
+                71,
+                91
+              ],
+              "silhouetteDelta": 0.2233
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                47,
+                65,
+                86
+              ],
+              "guideRectPx": [
+                37,
+                47,
+                65,
+                86
+              ],
+              "silhouetteDelta": 0.2261
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                37,
+                47,
+                67,
+                94
+              ],
+              "guideRectPx": [
+                36,
+                46,
+                65,
+                94
+              ],
+              "silhouetteDelta": 0.1283
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                38,
+                47,
+                63,
+                92
+              ],
+              "guideRectPx": [
+                42,
+                47,
+                60,
+                92
+              ],
+              "silhouetteDelta": 0.2336
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                40,
+                48,
+                63,
+                85
+              ],
+              "guideRectPx": [
+                41,
+                48,
+                61,
+                84
+              ],
+              "silhouetteDelta": 0.1825
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                47,
+                69,
+                91
+              ],
+              "guideRectPx": [
+                33,
+                47,
+                68,
+                90
+              ],
+              "silhouetteDelta": 0.2035
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                47,
+                75,
+                100
+              ],
+              "guideRectPx": [
+                28,
+                46,
+                74,
+                100
+              ],
+              "silhouetteDelta": 0.1925
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "label": "걷기",
+      "durationMs": 1080,
+      "frameDurationMs": 135,
+      "sourcePose": {
+        "stanceFraction": 0.62,
+        "soleClearanceM": 0.052,
+        "samples": [
+          {
+            "index": 0,
+            "cyclePhase": 0,
+            "torsoLeanDegrees": 3.39,
+            "grounded": {
+              "left": true,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.25345,
+              "right": 0.21756
+            }
+          },
+          {
+            "index": 1,
+            "cyclePhase": 0.125,
+            "torsoLeanDegrees": 3.7,
+            "grounded": {
+              "left": true,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.25559,
+              "right": 0.22357
+            }
+          },
+          {
+            "index": 2,
+            "cyclePhase": 0.25,
+            "torsoLeanDegrees": 2.61,
+            "grounded": {
+              "left": true,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.25826,
+              "right": 0.24931
+            }
+          },
+          {
+            "index": 3,
+            "cyclePhase": 0.375,
+            "torsoLeanDegrees": 2.3,
+            "grounded": {
+              "left": true,
+              "right": false
+            },
+            "wristBelowShoulderM": {
+              "left": 0.23952,
+              "right": 0.25983
+            }
+          },
+          {
+            "index": 4,
+            "cyclePhase": 0.5,
+            "torsoLeanDegrees": 3.39,
+            "grounded": {
+              "left": true,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.21701,
+              "right": 0.25419
+            }
+          },
+          {
+            "index": 5,
+            "cyclePhase": 0.625,
+            "torsoLeanDegrees": 3.7,
+            "grounded": {
+              "left": false,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.223,
+              "right": 0.25632
+            }
+          },
+          {
+            "index": 6,
+            "cyclePhase": 0.75,
+            "torsoLeanDegrees": 2.61,
+            "grounded": {
+              "left": false,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.24864,
+              "right": 0.25898
+            }
+          },
+          {
+            "index": 7,
+            "cyclePhase": 0.875,
+            "torsoLeanDegrees": 2.3,
+            "grounded": {
+              "left": false,
+              "right": true
+            },
+            "wristBelowShoulderM": {
+              "left": 0.2591,
+              "right": 0.24015
+            }
+          }
+        ]
+      },
+      "atlas": {
+        "file": "Iris_08_Walk_8Dir.png",
+        "imageSizePx": [
+          1024,
+          1280
+        ],
+        "columns": 8,
+        "rows": 8,
+        "sha256": "36f9b90044a2f7f945bf71d35440d498bf008f62357f8aa1996f393cb96f27a0"
+      },
+      "directions": [
+        {
+          "id": "s",
+          "row": 0,
+          "sourceSheetSha256": "b2b37303289335d79e07a1da516a917303893f5a1215c64f998125dea1d4b891",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                46,
+                65,
+                103
+              ],
+              "guideRectPx": [
+                28,
+                45,
+                72,
+                104
+              ],
+              "silhouetteDelta": 0.0737
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                45,
+                66,
+                100
+              ],
+              "guideRectPx": [
+                27,
+                45,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.1408
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                44,
+                66,
+                96
+              ],
+              "guideRectPx": [
+                27,
+                44,
+                72,
+                96
+              ],
+              "silhouetteDelta": 0.1402
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                43,
+                67,
+                97
+              ],
+              "guideRectPx": [
+                27,
+                43,
+                72,
+                96
+              ],
+              "silhouetteDelta": 0.1505
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                45,
+                68,
+                103
+              ],
+              "guideRectPx": [
+                28,
+                45,
+                72,
+                103
+              ],
+              "silhouetteDelta": 0.0733
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                45,
+                68,
+                100
+              ],
+              "guideRectPx": [
+                29,
+                45,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.114
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                44,
+                67,
+                96
+              ],
+              "guideRectPx": [
+                29,
+                44,
+                72,
+                96
+              ],
+              "silhouetteDelta": 0.1446
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                43,
+                66,
+                97
+              ],
+              "guideRectPx": [
+                28,
+                43,
+                72,
+                96
+              ],
+              "silhouetteDelta": 0.1564
+            }
+          ]
+        },
+        {
+          "id": "se",
+          "row": 1,
+          "sourceSheetSha256": "b482a05a94f896aa98d053c87856cdfa53f8eac1290783a097f0d01abbee4369",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                44,
+                65,
+                96
+              ],
+              "guideRectPx": [
+                24,
+                44,
+                66,
+                96
+              ],
+              "silhouetteDelta": 0.1276
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                45,
+                61,
+                93
+              ],
+              "guideRectPx": [
+                25,
+                44,
+                60,
+                93
+              ],
+              "silhouetteDelta": 0.1168
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                44,
+                60,
+                91
+              ],
+              "guideRectPx": [
+                24,
+                43,
+                60,
+                91
+              ],
+              "silhouetteDelta": 0.1713
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                43,
+                64,
+                97
+              ],
+              "guideRectPx": [
+                24,
+                43,
+                64,
+                96
+              ],
+              "silhouetteDelta": 0.1625
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                44,
+                68,
+                102
+              ],
+              "guideRectPx": [
+                24,
+                44,
+                68,
+                102
+              ],
+              "silhouetteDelta": 0.0653
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                45,
+                67,
+                99
+              ],
+              "guideRectPx": [
+                25,
+                44,
+                67,
+                99
+              ],
+              "silhouetteDelta": 0.1458
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                43,
+                65,
+                98
+              ],
+              "guideRectPx": [
+                25,
+                43,
+                62,
+                98
+              ],
+              "silhouetteDelta": 0.1812
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                43,
+                62,
+                95
+              ],
+              "guideRectPx": [
+                24,
+                42,
+                62,
+                95
+              ],
+              "silhouetteDelta": 0.1499
+            }
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "sourceSheetSha256": "678d91c25df9c2300084581535f47036bb1287b020e9c59933ade0d90a0b1a9c",
+          "sourceSheetSizePx": [
+            1585,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                46,
+                60,
+                91
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                63,
+                91
+              ],
+              "silhouetteDelta": 0.0955
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                47,
+                58,
+                89
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                58,
+                89
+              ],
+              "silhouetteDelta": 0.2386
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                46,
+                51,
+                87
+              ],
+              "guideRectPx": [
+                29,
+                45,
+                52,
+                88
+              ],
+              "silhouetteDelta": 0.1603
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                46,
+                55,
+                88
+              ],
+              "guideRectPx": [
+                29,
+                45,
+                55,
+                88
+              ],
+              "silhouetteDelta": 0.1074
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                46,
+                60,
+                90
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                63,
+                90
+              ],
+              "silhouetteDelta": 0.1258
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                46,
+                52,
+                91
+              ],
+              "guideRectPx": [
+                29,
+                46,
+                58,
+                91
+              ],
+              "silhouetteDelta": 0.1085
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                45,
+                53,
+                92
+              ],
+              "guideRectPx": [
+                28,
+                45,
+                52,
+                92
+              ],
+              "silhouetteDelta": 0.1303
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                46,
+                60,
+                91
+              ],
+              "guideRectPx": [
+                28,
+                45,
+                56,
+                92
+              ],
+              "silhouetteDelta": 0.136
+            }
+          ]
+        },
+        {
+          "id": "ne",
+          "row": 3,
+          "sourceSheetSha256": "6206bba0240088e7584134d2ec89ddc32bc77ffa097fd6202067e1e6b7dff27b",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                46,
+                67,
+                97
+              ],
+              "guideRectPx": [
+                25,
+                46,
+                67,
+                96
+              ],
+              "silhouetteDelta": 0.0608
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                46,
+                65,
+                98
+              ],
+              "guideRectPx": [
+                25,
+                46,
+                66,
+                98
+              ],
+              "silhouetteDelta": 0.1351
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                46,
+                61,
+                91
+              ],
+              "guideRectPx": [
+                25,
+                46,
+                63,
+                91
+              ],
+              "silhouetteDelta": 0.138
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                46,
+                62,
+                87
+              ],
+              "guideRectPx": [
+                25,
+                45,
+                62,
+                87
+              ],
+              "silhouetteDelta": 0.1582
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                46,
+                62,
+                90
+              ],
+              "guideRectPx": [
+                25,
+                46,
+                64,
+                90
+              ],
+              "silhouetteDelta": 0.1206
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                47,
+                64,
+                91
+              ],
+              "guideRectPx": [
+                25,
+                46,
+                61,
+                92
+              ],
+              "silhouetteDelta": 0.1576
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                46,
+                64,
+                91
+              ],
+              "guideRectPx": [
+                25,
+                45,
+                60,
+                91
+              ],
+              "silhouetteDelta": 0.207
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                46,
+                66,
+                94
+              ],
+              "guideRectPx": [
+                25,
+                45,
+                63,
+                94
+              ],
+              "silhouetteDelta": 0.1293
+            }
+          ]
+        },
+        {
+          "id": "n",
+          "row": 4,
+          "sourceSheetSha256": "b806f9d2b11940a934ab2fcc374d0f0246adf0aa37f3e50b2f2027cdf8d27a85",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                48,
+                75,
+                95
+              ],
+              "guideRectPx": [
+                27,
+                48,
+                73,
+                95
+              ],
+              "silhouetteDelta": 0.1073
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                48,
+                74,
+                98
+              ],
+              "guideRectPx": [
+                28,
+                48,
+                72,
+                98
+              ],
+              "silhouetteDelta": 0.0968
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                48,
+                73,
+                90
+              ],
+              "guideRectPx": [
+                28,
+                47,
+                72,
+                90
+              ],
+              "silhouetteDelta": 0.1516
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                48,
+                71,
+                91
+              ],
+              "guideRectPx": [
+                28,
+                47,
+                73,
+                91
+              ],
+              "silhouetteDelta": 0.096
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                48,
+                72,
+                95
+              ],
+              "guideRectPx": [
+                27,
+                48,
+                73,
+                94
+              ],
+              "silhouetteDelta": 0.1091
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                48,
+                74,
+                98
+              ],
+              "guideRectPx": [
+                27,
+                48,
+                73,
+                98
+              ],
+              "silhouetteDelta": 0.1278
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                48,
+                72,
+                89
+              ],
+              "guideRectPx": [
+                27,
+                48,
+                72,
+                89
+              ],
+              "silhouetteDelta": 0.1158
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                47,
+                72,
+                91
+              ],
+              "guideRectPx": [
+                27,
+                47,
+                73,
+                90
+              ],
+              "silhouetteDelta": 0.1208
+            }
+          ]
+        },
+        {
+          "id": "nw",
+          "row": 5,
+          "sourceSheetSha256": "da835ddba85ef661a447716e1f6c2cea52eaef6d7d324c094f31bc35d25bcc2b",
+          "sourceSheetSizePx": [
+            1774,
+            887
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                48,
+                57,
+                88
+              ],
+              "guideRectPx": [
+                39,
+                48,
+                64,
+                88
+              ],
+              "silhouetteDelta": 0.0802
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                44,
+                48,
+                56,
+                89
+              ],
+              "guideRectPx": [
+                42,
+                48,
+                60,
+                89
+              ],
+              "silhouetteDelta": 0.1694
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                45,
+                47,
+                57,
+                89
+              ],
+              "guideRectPx": [
+                43,
+                47,
+                60,
+                88
+              ],
+              "silhouetteDelta": 0.1888
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                42,
+                47,
+                59,
+                93
+              ],
+              "guideRectPx": [
+                40,
+                47,
+                63,
+                92
+              ],
+              "silhouetteDelta": 0.1243
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                37,
+                49,
+                64,
+                94
+              ],
+              "guideRectPx": [
+                36,
+                48,
+                66,
+                94
+              ],
+              "silhouetteDelta": 0.101
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                48,
+                66,
+                96
+              ],
+              "guideRectPx": [
+                36,
+                48,
+                66,
+                96
+              ],
+              "silhouetteDelta": 0.1446
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                41,
+                48,
+                61,
+                90
+              ],
+              "guideRectPx": [
+                40,
+                48,
+                62,
+                90
+              ],
+              "silhouetteDelta": 0.1518
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                46,
+                48,
+                54,
+                85
+              ],
+              "guideRectPx": [
+                41,
+                47,
+                62,
+                85
+              ],
+              "silhouetteDelta": 0.139
+            }
+          ]
+        },
+        {
+          "id": "w",
+          "row": 6,
+          "sourceSheetSha256": "a7767fa851c6d7d9ca29777ba6667e305143472b60bac216ada489c6916c86d0",
+          "sourceSheetSizePx": [
+            1774,
+            887
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                41,
+                46,
+                57,
+                90
+              ],
+              "guideRectPx": [
+                35,
+                46,
+                64,
+                90
+              ],
+              "silhouetteDelta": 0.0851
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                46,
+                56,
+                91
+              ],
+              "guideRectPx": [
+                40,
+                46,
+                58,
+                91
+              ],
+              "silhouetteDelta": 0.146
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                44,
+                45,
+                55,
+                92
+              ],
+              "guideRectPx": [
+                47,
+                45,
+                52,
+                92
+              ],
+              "silhouetteDelta": 0.1389
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                45,
+                55,
+                92
+              ],
+              "guideRectPx": [
+                44,
+                45,
+                56,
+                92
+              ],
+              "silhouetteDelta": 0.147
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                40,
+                46,
+                59,
+                91
+              ],
+              "guideRectPx": [
+                36,
+                46,
+                63,
+                90
+              ],
+              "silhouetteDelta": 0.1184
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                47,
+                55,
+                89
+              ],
+              "guideRectPx": [
+                39,
+                46,
+                60,
+                89
+              ],
+              "silhouetteDelta": 0.1808
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                46,
+                46,
+                52,
+                87
+              ],
+              "guideRectPx": [
+                47,
+                46,
+                52,
+                87
+              ],
+              "silhouetteDelta": 0.1431
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                44,
+                46,
+                54,
+                88
+              ],
+              "guideRectPx": [
+                44,
+                45,
+                55,
+                88
+              ],
+              "silhouetteDelta": 0.0954
+            }
+          ]
+        },
+        {
+          "id": "sw",
+          "row": 7,
+          "sourceSheetSha256": "f616442eefa989debf4d711529e84b5c3a25e43c0460864adeaefb35858c46d0",
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                44,
+                68,
+                102
+              ],
+              "guideRectPx": [
+                35,
+                44,
+                68,
+                102
+              ],
+              "silhouetteDelta": 0.1099
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                45,
+                66,
+                99
+              ],
+              "guideRectPx": [
+                36,
+                44,
+                67,
+                99
+              ],
+              "silhouetteDelta": 0.1512
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                40,
+                43,
+                60,
+                98
+              ],
+              "guideRectPx": [
+                40,
+                43,
+                64,
+                98
+              ],
+              "silhouetteDelta": 0.1652
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                41,
+                43,
+                62,
+                95
+              ],
+              "guideRectPx": [
+                41,
+                42,
+                62,
+                95
+              ],
+              "silhouetteDelta": 0.1691
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                40,
+                44,
+                62,
+                96
+              ],
+              "guideRectPx": [
+                38,
+                44,
+                65,
+                96
+              ],
+              "silhouetteDelta": 0.1109
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                41,
+                45,
+                61,
+                93
+              ],
+              "guideRectPx": [
+                42,
+                44,
+                60,
+                93
+              ],
+              "silhouetteDelta": 0.1577
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                41,
+                44,
+                61,
+                91
+              ],
+              "guideRectPx": [
+                43,
+                43,
+                60,
+                91
+              ],
+              "silhouetteDelta": 0.1431
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                39,
+                43,
+                63,
+                97
+              ],
+              "guideRectPx": [
+                40,
+                43,
+                64,
+                96
+              ],
+              "silhouetteDelta": 0.1276
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
