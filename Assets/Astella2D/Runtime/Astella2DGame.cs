@@ -64,7 +64,7 @@ namespace Astella.TwoD
         readonly List<Mesh> _battleMeshes = new List<Mesh>();
         Fighter _player;
         Camera _camera;
-        Material _material;
+        Material _shapeMaterial;
         Transform _world;
         SpriteRenderer _bossArt;
         Sprite _bossSprite;
@@ -97,7 +97,10 @@ namespace Astella.TwoD
             _font = Resources.Load<Font>("Astella2D/Fonts/Pretendard-Medium");
             _titleFont = Resources.Load<Font>("Astella2D/Fonts/MaruBuri-SemiBold");
             if (_font == null || _titleFont == null) throw new InvalidOperationException("Build the Astella 2D scene with Tools/Astella/2D first: required fonts are missing.");
-            _material = new Material(Shader.Find("Sprites/Default")); _owned.Add(_material);
+            var shapeShader = Resources.Load<Shader>("Astella2D/ArenaShape");
+            if (shapeShader == null) throw new InvalidOperationException("Astella 2D arena shape shader is missing.");
+            _shapeMaterial = new Material(shapeShader);
+            _owned.Add(_shapeMaterial);
             _world = new GameObject("2D World").transform; _world.SetParent(transform, false);
             CreateWorld(); CreateHud(); SelectCharacter(0); ReturnToMenu();
         }
@@ -460,8 +463,12 @@ namespace Astella.TwoD
         static Sprite NewSprite(Texture2D texture, Vector2 pivot, float ppu) => Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot, ppu, 0, SpriteMeshType.FullRect);
         SpriteRenderer SpriteObject(string name, Transform parent, Sprite sprite, int order)
         {
-            var go = new GameObject(name, typeof(SpriteRenderer)); go.transform.SetParent(parent, false);
-            var art = go.GetComponent<SpriteRenderer>(); art.sprite = sprite; art.sortingOrder = order; art.sharedMaterial = _material; return art;
+            var go = new GameObject(name, typeof(SpriteRenderer));
+            go.transform.SetParent(parent, false);
+            var art = go.GetComponent<SpriteRenderer>();
+            art.sprite = sprite;
+            art.sortingOrder = order;
+            return art;
         }
 
         GameObject ShapeView(Hazard h, Color color, int order, out Mesh mesh)
@@ -489,7 +496,10 @@ namespace Astella.TwoD
             }
             mesh = new Mesh { name = "2D " + h.Shape }; mesh.SetVertices(vertices); mesh.SetTriangles(triangles, 0); SetMeshColor(mesh, color); mesh.RecalculateBounds();
             var go = new GameObject("Telegraph " + h.Name, typeof(MeshFilter), typeof(MeshRenderer)); go.transform.SetParent(_world, false); go.transform.position = h.Center;
-            go.GetComponent<MeshFilter>().sharedMesh = mesh; var renderer = go.GetComponent<MeshRenderer>(); renderer.sharedMaterial = _material; renderer.sortingOrder = order;
+            go.GetComponent<MeshFilter>().sharedMesh = mesh;
+            var renderer = go.GetComponent<MeshRenderer>();
+            renderer.sharedMaterial = _shapeMaterial;
+            renderer.sortingOrder = order;
             return go;
         }
         static void SetMeshColor(Mesh mesh, Color color) { var colors = new Color[mesh.vertexCount]; for (int i = 0; i < colors.Length; i++) colors[i] = color; mesh.colors = colors; }
