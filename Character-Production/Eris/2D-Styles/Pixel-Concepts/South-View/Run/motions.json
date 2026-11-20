@@ -1,0 +1,3949 @@
+{
+  "formatVersion": 1,
+  "character": "이리스",
+  "animation": "run",
+  "cameraPitchDegrees": 50,
+  "cameraProjection": "perspective",
+  "inPlace": true,
+  "coordinates": "Top-left of each frame and atlas.",
+  "source": {
+    "motionSheet": "../../../Quarter-View/Locomotion/Iris_Run_Pixel_Quarter_8Dir.png",
+    "sha256": "b6c8316b380897ad3e99116f75d15bd041dd5368fe972e457ccd3c225bb36625",
+    "action": "Eris_Run",
+    "fps": 30,
+    "cycleFrames": 19
+  },
+  "frameCountPerDirection": 8,
+  "durationMs": 633.3333333333334,
+  "frameDurationMs": 79.16666666666667,
+  "directions": [
+    {
+      "id": "s",
+      "label": "정면",
+      "arrow": "↓",
+      "yawDegrees": 0,
+      "row": 0
+    },
+    {
+      "id": "se",
+      "label": "오른쪽 앞",
+      "arrow": "↘",
+      "yawDegrees": 45,
+      "row": 1
+    },
+    {
+      "id": "e",
+      "label": "오른쪽 옆",
+      "arrow": "→",
+      "yawDegrees": 90,
+      "row": 2
+    },
+    {
+      "id": "ne",
+      "label": "오른쪽 뒤",
+      "arrow": "↗",
+      "yawDegrees": 135,
+      "row": 3
+    },
+    {
+      "id": "n",
+      "label": "뒷모습",
+      "arrow": "↑",
+      "yawDegrees": 180,
+      "row": 4
+    },
+    {
+      "id": "nw",
+      "label": "왼쪽 뒤",
+      "arrow": "↖",
+      "yawDegrees": 225,
+      "row": 5
+    },
+    {
+      "id": "w",
+      "label": "왼쪽 옆",
+      "arrow": "←",
+      "yawDegrees": 270,
+      "row": 6
+    },
+    {
+      "id": "sw",
+      "label": "왼쪽 앞",
+      "arrow": "↙",
+      "yawDegrees": 315,
+      "row": 7
+    }
+  ],
+  "styles": [
+    {
+      "id": "dither",
+      "number": 8,
+      "label": "8번 디더링 도트",
+      "styleReference": "../Sprites/8-dither.png",
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        128
+      ],
+      "unityPivot": [
+        0.5,
+        0.2
+      ],
+      "atlas": {
+        "file": "Iris_Run_08_Dither_8Dir.png",
+        "imageSizePx": [
+          1024,
+          1280
+        ],
+        "columns": 8,
+        "rows": 8,
+        "sha256": "95aa88623b29eaad721c24f1c629c3fd0226cd24d51074f1823022e057e9e982"
+      },
+      "symmetricPairs": [
+        {
+          "right": "se",
+          "left": "sw",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7353
+        },
+        {
+          "right": "e",
+          "left": "w",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7024
+        },
+        {
+          "right": "ne",
+          "left": "nw",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7713
+        }
+      ],
+      "directions": [
+        {
+          "id": "s",
+          "row": 0,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "0dd2a9d8daf50be09b39b3f299db9238cc93b5d8445e5ef6b18d394d74bff60a",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                49,
+                66,
+                102
+              ],
+              "silhouetteDelta": 0.1401,
+              "guideOverlap": 0.929,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                51,
+                65,
+                88
+              ],
+              "silhouetteDelta": 0.1134,
+              "guideOverlap": 0.9392,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                50,
+                66,
+                82
+              ],
+              "silhouetteDelta": 0.1707,
+              "guideOverlap": 0.9185,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                48,
+                66,
+                99
+              ],
+              "silhouetteDelta": 0.1678,
+              "guideOverlap": 0.9301,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                50,
+                67,
+                101
+              ],
+              "silhouetteDelta": 0.1765,
+              "guideOverlap": 0.9363,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                53,
+                63,
+                87
+              ],
+              "silhouetteDelta": 0.1503,
+              "guideOverlap": 0.921,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                52,
+                67,
+                85
+              ],
+              "silhouetteDelta": 0.2376,
+              "guideOverlap": 0.9351,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                48,
+                68,
+                101
+              ],
+              "silhouetteDelta": 0.1287,
+              "guideOverlap": 0.9436,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "se",
+          "row": 1,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "fd725d3720f03f0d4402682c7c33fef41f86fa4bbbaf50cdc7e598b6d67d1211",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                46,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.2959,
+              "guideOverlap": 0.915,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                48,
+                69,
+                89
+              ],
+              "silhouetteDelta": 0.1615,
+              "guideOverlap": 0.942,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                49,
+                74,
+                85
+              ],
+              "silhouetteDelta": 0.3874,
+              "guideOverlap": 0.9334,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                45,
+                73,
+                100
+              ],
+              "silhouetteDelta": 0.2043,
+              "guideOverlap": 0.9115,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                48,
+                74,
+                99
+              ],
+              "silhouetteDelta": 0.2759,
+              "guideOverlap": 0.9442,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                50,
+                75,
+                89
+              ],
+              "silhouetteDelta": 0.1663,
+              "guideOverlap": 0.9137,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                49,
+                77,
+                85
+              ],
+              "silhouetteDelta": 0.3311,
+              "guideOverlap": 0.9459,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                46,
+                76,
+                97
+              ],
+              "silhouetteDelta": 0.2061,
+              "guideOverlap": 0.9326,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "da5c50ef1a3defa4ec9cdc7277a4d24ba89541ff716c7deb2613b8d9121a4f40",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                48,
+                72,
+                87
+              ],
+              "silhouetteDelta": 0.3224,
+              "guideOverlap": 0.9027,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                50,
+                64,
+                83
+              ],
+              "silhouetteDelta": 0.2179,
+              "guideOverlap": 0.8939,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                48,
+                69,
+                87
+              ],
+              "silhouetteDelta": 0.3806,
+              "guideOverlap": 0.9083,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                46,
+                69,
+                89
+              ],
+              "silhouetteDelta": 0.1329,
+              "guideOverlap": 0.9136,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                48,
+                72,
+                86
+              ],
+              "silhouetteDelta": 0.3315,
+              "guideOverlap": 0.9174,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                51,
+                65,
+                84
+              ],
+              "silhouetteDelta": 0.1795,
+              "guideOverlap": 0.9093,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                50,
+                68,
+                85
+              ],
+              "silhouetteDelta": 0.402,
+              "guideOverlap": 0.9039,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                22,
+                47,
+                72,
+                88
+              ],
+              "silhouetteDelta": 0.1297,
+              "guideOverlap": 0.8933,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "ne",
+          "row": 3,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "b6f2f1f399a1406fd177beb7d11d121449f78c3c5b23a513f0cb4db883df7d69",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                49,
+                72,
+                104
+              ],
+              "silhouetteDelta": 0.2073,
+              "guideOverlap": 0.8979,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                52,
+                68,
+                92
+              ],
+              "silhouetteDelta": 0.1386,
+              "guideOverlap": 0.9053,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                20,
+                50,
+                71,
+                90
+              ],
+              "silhouetteDelta": 0.2793,
+              "guideOverlap": 0.927,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                22,
+                47,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.1578,
+              "guideOverlap": 0.9224,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                20,
+                50,
+                73,
+                97
+              ],
+              "silhouetteDelta": 0.2175,
+              "guideOverlap": 0.9193,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                19,
+                52,
+                72,
+                84
+              ],
+              "silhouetteDelta": 0.2176,
+              "guideOverlap": 0.924,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                50,
+                72,
+                92
+              ],
+              "silhouetteDelta": 0.2073,
+              "guideOverlap": 0.8939,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                20,
+                48,
+                73,
+                100
+              ],
+              "silhouetteDelta": 0.1672,
+              "guideOverlap": 0.9105,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "n",
+          "row": 4,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "3141c48051592e880c60d610946887439e5549e4b4a12922e75525fd746d93c8",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                53,
+                70,
+                104
+              ],
+              "silhouetteDelta": 0.1809,
+              "guideOverlap": 0.9037,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                56,
+                67,
+                89
+              ],
+              "silhouetteDelta": 0.1406,
+              "guideOverlap": 0.9053,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                56,
+                71,
+                90
+              ],
+              "silhouetteDelta": 0.2483,
+              "guideOverlap": 0.9174,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                51,
+                72,
+                104
+              ],
+              "silhouetteDelta": 0.1079,
+              "guideOverlap": 0.916,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                53,
+                70,
+                99
+              ],
+              "silhouetteDelta": 0.1158,
+              "guideOverlap": 0.9335,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                54,
+                67,
+                86
+              ],
+              "silhouetteDelta": 0.1529,
+              "guideOverlap": 0.8908,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                54,
+                71,
+                90
+              ],
+              "silhouetteDelta": 0.2175,
+              "guideOverlap": 0.9421,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                51,
+                68,
+                102
+              ],
+              "silhouetteDelta": 0.1529,
+              "guideOverlap": 0.9099,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "nw",
+          "row": 5,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "76363257ea2ed9d0c4cb91b972286c13afcc119615e4a20b5c596873dadc72fe",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                54,
+                67,
+                93
+              ],
+              "silhouetteDelta": 0.2855,
+              "guideOverlap": 0.9544,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                57,
+                68,
+                81
+              ],
+              "silhouetteDelta": 0.2028,
+              "guideOverlap": 0.919,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                37,
+                57,
+                64,
+                85
+              ],
+              "silhouetteDelta": 0.2028,
+              "guideOverlap": 0.9407,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                54,
+                70,
+                94
+              ],
+              "silhouetteDelta": 0.1416,
+              "guideOverlap": 0.9348,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                53,
+                72,
+                95
+              ],
+              "silhouetteDelta": 0.2296,
+              "guideOverlap": 0.93,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                56,
+                72,
+                84
+              ],
+              "silhouetteDelta": 0.1823,
+              "guideOverlap": 0.9438,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                54,
+                70,
+                83
+              ],
+              "silhouetteDelta": 0.2056,
+              "guideOverlap": 0.9467,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                53,
+                68,
+                91
+              ],
+              "silhouetteDelta": 0.2254,
+              "guideOverlap": 0.9393,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "w",
+          "row": 6,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "1b788d10c761ad26842d7bc85d5d34cb1e88d239d0875b8e54eb2c45acf3b0d6",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                53,
+                66,
+                80
+              ],
+              "silhouetteDelta": 0.3288,
+              "guideOverlap": 0.9077,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                46,
+                56,
+                58,
+                77
+              ],
+              "silhouetteDelta": 0.1746,
+              "guideOverlap": 0.9202,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                44,
+                55,
+                61,
+                78
+              ],
+              "silhouetteDelta": 0.2841,
+              "guideOverlap": 0.9049,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                53,
+                57,
+                79
+              ],
+              "silhouetteDelta": 0.1948,
+              "guideOverlap": 0.9155,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                38,
+                53,
+                65,
+                78
+              ],
+              "silhouetteDelta": 0.2591,
+              "guideOverlap": 0.9277,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                54,
+                60,
+                77
+              ],
+              "silhouetteDelta": 0.1256,
+              "guideOverlap": 0.9221,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                42,
+                53,
+                60,
+                80
+              ],
+              "silhouetteDelta": 0.3263,
+              "guideOverlap": 0.9314,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                51,
+                68,
+                81
+              ],
+              "silhouetteDelta": 0.1543,
+              "guideOverlap": 0.9346,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "sw",
+          "row": 7,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "1dc34e1024ac9fd00d459c697e8bbad52a716deda5e64a87dd02caa9a111ac62",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                51,
+                74,
+                95
+              ],
+              "silhouetteDelta": 0.2513,
+              "guideOverlap": 0.9378,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                52,
+                68,
+                85
+              ],
+              "silhouetteDelta": 0.1414,
+              "guideOverlap": 0.9276,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                52,
+                69,
+                78
+              ],
+              "silhouetteDelta": 0.3048,
+              "guideOverlap": 0.936,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                50,
+                68,
+                90
+              ],
+              "silhouetteDelta": 0.1539,
+              "guideOverlap": 0.9369,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                50,
+                75,
+                94
+              ],
+              "silhouetteDelta": 0.2747,
+              "guideOverlap": 0.9268,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                52,
+                75,
+                84
+              ],
+              "silhouetteDelta": 0.1427,
+              "guideOverlap": 0.9246,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                51,
+                77,
+                86
+              ],
+              "silhouetteDelta": 0.3069,
+              "guideOverlap": 0.9352,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                48,
+                79,
+                96
+              ],
+              "silhouetteDelta": 0.2539,
+              "guideOverlap": 0.9223,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "facets",
+      "number": 9,
+      "label": "9번 다면 도트",
+      "styleReference": "../Sprites/9-facets.png",
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        128
+      ],
+      "unityPivot": [
+        0.5,
+        0.2
+      ],
+      "atlas": {
+        "file": "Iris_Run_09_Faceted_8Dir.png",
+        "imageSizePx": [
+          1024,
+          1280
+        ],
+        "columns": 8,
+        "rows": 8,
+        "sha256": "f421a3001e8bb3a544c44a796e4c45238ef38d437452de424d4a430b7a2648b3"
+      },
+      "symmetricPairs": [
+        {
+          "right": "se",
+          "left": "sw",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7342
+        },
+        {
+          "right": "e",
+          "left": "w",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7179
+        },
+        {
+          "right": "ne",
+          "left": "nw",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7763
+        }
+      ],
+      "directions": [
+        {
+          "id": "s",
+          "row": 0,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "4ed31fe277da5bad5192758fed8e1fcbaa280b33734592e8ae8dc0d673095884",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                49,
+                64,
+                102
+              ],
+              "silhouetteDelta": 0.1393,
+              "guideOverlap": 0.8927,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                51,
+                62,
+                88
+              ],
+              "silhouetteDelta": 0.1147,
+              "guideOverlap": 0.9074,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                50,
+                63,
+                82
+              ],
+              "silhouetteDelta": 0.1792,
+              "guideOverlap": 0.9188,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                48,
+                65,
+                99
+              ],
+              "silhouetteDelta": 0.1969,
+              "guideOverlap": 0.9205,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                50,
+                67,
+                101
+              ],
+              "silhouetteDelta": 0.1738,
+              "guideOverlap": 0.9059,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                53,
+                63,
+                87
+              ],
+              "silhouetteDelta": 0.1549,
+              "guideOverlap": 0.9124,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                52,
+                66,
+                85
+              ],
+              "silhouetteDelta": 0.2294,
+              "guideOverlap": 0.9122,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                0,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                48,
+                68,
+                101
+              ],
+              "silhouetteDelta": 0.1167,
+              "guideOverlap": 0.9102,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "se",
+          "row": 1,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "ad30b9ab5a9806bad94a63aa974fa171d96e2ce327f844ab48870d303968e29a",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                22,
+                46,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.3093,
+              "guideOverlap": 0.8972,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                48,
+                68,
+                89
+              ],
+              "silhouetteDelta": 0.1822,
+              "guideOverlap": 0.9068,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                49,
+                73,
+                85
+              ],
+              "silhouetteDelta": 0.3834,
+              "guideOverlap": 0.9138,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                45,
+                72,
+                100
+              ],
+              "silhouetteDelta": 0.1949,
+              "guideOverlap": 0.9117,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                48,
+                71,
+                99
+              ],
+              "silhouetteDelta": 0.2886,
+              "guideOverlap": 0.91,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                50,
+                71,
+                89
+              ],
+              "silhouetteDelta": 0.1811,
+              "guideOverlap": 0.8619,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                23,
+                49,
+                73,
+                85
+              ],
+              "silhouetteDelta": 0.3374,
+              "guideOverlap": 0.919,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                160,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                22,
+                46,
+                74,
+                97
+              ],
+              "silhouetteDelta": 0.1673,
+              "guideOverlap": 0.9198,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "2b2823d78d380ca82de51fb2ff3ed0fdf52cf5cd0d3113365c84c8710746f952",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                22,
+                48,
+                72,
+                87
+              ],
+              "silhouetteDelta": 0.3325,
+              "guideOverlap": 0.8289,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                50,
+                62,
+                83
+              ],
+              "silhouetteDelta": 0.1972,
+              "guideOverlap": 0.8491,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                48,
+                65,
+                87
+              ],
+              "silhouetteDelta": 0.3694,
+              "guideOverlap": 0.8591,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                46,
+                66,
+                89
+              ],
+              "silhouetteDelta": 0.1671,
+              "guideOverlap": 0.899,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                24,
+                48,
+                68,
+                86
+              ],
+              "silhouetteDelta": 0.3215,
+              "guideOverlap": 0.9108,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                51,
+                65,
+                84
+              ],
+              "silhouetteDelta": 0.1842,
+              "guideOverlap": 0.8792,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                27,
+                50,
+                64,
+                85
+              ],
+              "silhouetteDelta": 0.3855,
+              "guideOverlap": 0.8685,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                320,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                47,
+                69,
+                88
+              ],
+              "silhouetteDelta": 0.1593,
+              "guideOverlap": 0.8464,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "ne",
+          "row": 3,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "3e396101ef6721d65bf7cc1d54d27bcb45510061f63669d7025023d909898106",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                49,
+                72,
+                104
+              ],
+              "silhouetteDelta": 0.2308,
+              "guideOverlap": 0.9031,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                52,
+                70,
+                92
+              ],
+              "silhouetteDelta": 0.1264,
+              "guideOverlap": 0.9349,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                19,
+                50,
+                73,
+                90
+              ],
+              "silhouetteDelta": 0.2937,
+              "guideOverlap": 0.9261,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                47,
+                73,
+                100
+              ],
+              "silhouetteDelta": 0.1576,
+              "guideOverlap": 0.9145,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                50,
+                72,
+                97
+              ],
+              "silhouetteDelta": 0.2424,
+              "guideOverlap": 0.9057,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                19,
+                52,
+                73,
+                84
+              ],
+              "silhouetteDelta": 0.2487,
+              "guideOverlap": 0.9226,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                21,
+                50,
+                72,
+                92
+              ],
+              "silhouetteDelta": 0.1985,
+              "guideOverlap": 0.9029,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                480,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                20,
+                48,
+                74,
+                100
+              ],
+              "silhouetteDelta": 0.1489,
+              "guideOverlap": 0.9196,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "n",
+          "row": 4,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "6652ce2e862f04018b25de73241215ce5ea67e300286ce090e174461c23336af",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                53,
+                68,
+                104
+              ],
+              "silhouetteDelta": 0.1691,
+              "guideOverlap": 0.923,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                56,
+                65,
+                89
+              ],
+              "silhouetteDelta": 0.165,
+              "guideOverlap": 0.9177,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                25,
+                56,
+                71,
+                90
+              ],
+              "silhouetteDelta": 0.2264,
+              "guideOverlap": 0.931,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                26,
+                51,
+                70,
+                104
+              ],
+              "silhouetteDelta": 0.1051,
+              "guideOverlap": 0.9234,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                53,
+                67,
+                99
+              ],
+              "silhouetteDelta": 0.1281,
+              "guideOverlap": 0.9226,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                54,
+                65,
+                86
+              ],
+              "silhouetteDelta": 0.1199,
+              "guideOverlap": 0.9293,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                28,
+                54,
+                70,
+                90
+              ],
+              "silhouetteDelta": 0.1839,
+              "guideOverlap": 0.9431,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                640,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                51,
+                68,
+                102
+              ],
+              "silhouetteDelta": 0.1486,
+              "guideOverlap": 0.9202,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "nw",
+          "row": 5,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "4b6de12d694b8819dff28ecdc6f171fece3764161d4a3616eb849bebde8e3140",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                54,
+                65,
+                93
+              ],
+              "silhouetteDelta": 0.2786,
+              "guideOverlap": 0.9192,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                57,
+                67,
+                81
+              ],
+              "silhouetteDelta": 0.1906,
+              "guideOverlap": 0.9277,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                36,
+                57,
+                66,
+                85
+              ],
+              "silhouetteDelta": 0.1958,
+              "guideOverlap": 0.9384,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                54,
+                68,
+                94
+              ],
+              "silhouetteDelta": 0.135,
+              "guideOverlap": 0.9332,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                53,
+                69,
+                95
+              ],
+              "silhouetteDelta": 0.2158,
+              "guideOverlap": 0.9369,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                56,
+                70,
+                84
+              ],
+              "silhouetteDelta": 0.1477,
+              "guideOverlap": 0.9249,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                54,
+                69,
+                83
+              ],
+              "silhouetteDelta": 0.2116,
+              "guideOverlap": 0.9163,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                800,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                53,
+                66,
+                91
+              ],
+              "silhouetteDelta": 0.2215,
+              "guideOverlap": 0.9326,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "w",
+          "row": 6,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "b317201beac14933710cea6e2b878e3515062010807ff9ddc147775b63c48dc4",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                38,
+                53,
+                63,
+                80
+              ],
+              "silhouetteDelta": 0.3451,
+              "guideOverlap": 0.852,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                46,
+                56,
+                58,
+                77
+              ],
+              "silhouetteDelta": 0.1699,
+              "guideOverlap": 0.8947,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                44,
+                55,
+                61,
+                78
+              ],
+              "silhouetteDelta": 0.289,
+              "guideOverlap": 0.9114,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                42,
+                53,
+                59,
+                79
+              ],
+              "silhouetteDelta": 0.2036,
+              "guideOverlap": 0.9096,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                38,
+                53,
+                66,
+                78
+              ],
+              "silhouetteDelta": 0.2624,
+              "guideOverlap": 0.9114,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                43,
+                54,
+                60,
+                77
+              ],
+              "silhouetteDelta": 0.1328,
+              "guideOverlap": 0.9054,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                42,
+                53,
+                62,
+                80
+              ],
+              "silhouetteDelta": 0.3026,
+              "guideOverlap": 0.92,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                960,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                37,
+                51,
+                66,
+                81
+              ],
+              "silhouetteDelta": 0.168,
+              "guideOverlap": 0.8951,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "sw",
+          "row": 7,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "a2cf8320e9984cd5b78987b68f24675af4df831df4003d0c6c0eb7722e369e1e",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                33,
+                51,
+                72,
+                95
+              ],
+              "silhouetteDelta": 0.2194,
+              "guideOverlap": 0.9018,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                128,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                34,
+                52,
+                71,
+                85
+              ],
+              "silhouetteDelta": 0.1234,
+              "guideOverlap": 0.9121,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                256,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                52,
+                69,
+                78
+              ],
+              "silhouetteDelta": 0.296,
+              "guideOverlap": 0.9042,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                384,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                35,
+                50,
+                70,
+                90
+              ],
+              "silhouetteDelta": 0.16,
+              "guideOverlap": 0.8924,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                512,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                32,
+                50,
+                75,
+                94
+              ],
+              "silhouetteDelta": 0.2847,
+              "guideOverlap": 0.9033,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                640,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                31,
+                52,
+                75,
+                84
+              ],
+              "silhouetteDelta": 0.1678,
+              "guideOverlap": 0.9021,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                768,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                29,
+                51,
+                75,
+                86
+              ],
+              "silhouetteDelta": 0.2926,
+              "guideOverlap": 0.8969,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                896,
+                1120,
+                128,
+                160
+              ],
+              "visibleRectPx": [
+                30,
+                48,
+                79,
+                96
+              ],
+              "silhouetteDelta": 0.2293,
+              "guideOverlap": 0.8994,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "round-chibi",
+      "number": 10,
+      "label": "10번 둥근 치비 도트",
+      "styleReference": "../Sprites/10-round-chibi.png",
+      "frameSizePx": [
+        96,
+        120
+      ],
+      "pivotPx": [
+        48,
+        96
+      ],
+      "unityPivot": [
+        0.5,
+        0.2
+      ],
+      "atlas": {
+        "file": "Iris_Run_10_RoundChibi_8Dir.png",
+        "imageSizePx": [
+          768,
+          960
+        ],
+        "columns": 8,
+        "rows": 8,
+        "sha256": "db2ba72478b362780c1005aefe872849773345dc9a4a443fb7aa82a42705892c"
+      },
+      "symmetricPairs": [
+        {
+          "right": "se",
+          "left": "sw",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7247
+        },
+        {
+          "right": "e",
+          "left": "w",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7276
+        },
+        {
+          "right": "ne",
+          "left": "nw",
+          "phaseOffsetFrames": 4,
+          "silhouetteOverlap": 0.7706
+        }
+      ],
+      "directions": [
+        {
+          "id": "s",
+          "row": 0,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "50646021b2b0314a08af389c2a04f322c2fdd24155cc354cbd0253b9eb325752",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                37,
+                52,
+                76
+              ],
+              "silhouetteDelta": 0.1633,
+              "guideOverlap": 0.8651,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                24,
+                38,
+                49,
+                66
+              ],
+              "silhouetteDelta": 0.1063,
+              "guideOverlap": 0.8852,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                37,
+                48,
+                62
+              ],
+              "silhouetteDelta": 0.1978,
+              "guideOverlap": 0.8817,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                36,
+                49,
+                74
+              ],
+              "silhouetteDelta": 0.1912,
+              "guideOverlap": 0.8845,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                37,
+                51,
+                76
+              ],
+              "silhouetteDelta": 0.1997,
+              "guideOverlap": 0.8889,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                24,
+                40,
+                47,
+                65
+              ],
+              "silhouetteDelta": 0.1291,
+              "guideOverlap": 0.8701,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                23,
+                39,
+                48,
+                64
+              ],
+              "silhouetteDelta": 0.2308,
+              "guideOverlap": 0.8827,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                0,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                36,
+                50,
+                76
+              ],
+              "silhouetteDelta": 0.1513,
+              "guideOverlap": 0.8857,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "se",
+          "row": 1,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "768374da90725d8d430664d5c5731f4d69c0da409c992266a8eeb5fa6de82971",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                34,
+                53,
+                75
+              ],
+              "silhouetteDelta": 0.3074,
+              "guideOverlap": 0.9236,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                18,
+                36,
+                53,
+                67
+              ],
+              "silhouetteDelta": 0.1799,
+              "guideOverlap": 0.9466,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                18,
+                37,
+                55,
+                63
+              ],
+              "silhouetteDelta": 0.3981,
+              "guideOverlap": 0.9374,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                34,
+                55,
+                75
+              ],
+              "silhouetteDelta": 0.2112,
+              "guideOverlap": 0.9505,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                18,
+                36,
+                55,
+                74
+              ],
+              "silhouetteDelta": 0.2818,
+              "guideOverlap": 0.9247,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                19,
+                37,
+                54,
+                67
+              ],
+              "silhouetteDelta": 0.1728,
+              "guideOverlap": 0.9146,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                37,
+                56,
+                63
+              ],
+              "silhouetteDelta": 0.3475,
+              "guideOverlap": 0.9437,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                120,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                34,
+                55,
+                73
+              ],
+              "silhouetteDelta": 0.1992,
+              "guideOverlap": 0.9306,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "e",
+          "row": 2,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "cdb39412147582c2df48fa06a867bb33aed69e895c7854ce7902b6d95c342faa",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                36,
+                53,
+                65
+              ],
+              "silhouetteDelta": 0.3156,
+              "guideOverlap": 0.8785,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                37,
+                50,
+                63
+              ],
+              "silhouetteDelta": 0.1958,
+              "guideOverlap": 0.9066,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                36,
+                51,
+                65
+              ],
+              "silhouetteDelta": 0.3605,
+              "guideOverlap": 0.8897,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                20,
+                34,
+                50,
+                67
+              ],
+              "silhouetteDelta": 0.1297,
+              "guideOverlap": 0.9035,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                36,
+                53,
+                64
+              ],
+              "silhouetteDelta": 0.3174,
+              "guideOverlap": 0.9333,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                18,
+                38,
+                50,
+                63
+              ],
+              "silhouetteDelta": 0.1646,
+              "guideOverlap": 0.8845,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                18,
+                37,
+                51,
+                64
+              ],
+              "silhouetteDelta": 0.3704,
+              "guideOverlap": 0.897,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                240,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                17,
+                35,
+                54,
+                66
+              ],
+              "silhouetteDelta": 0.1424,
+              "guideOverlap": 0.8726,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "ne",
+          "row": 3,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "7aec6ede6f6d157273e8b00cf2998f16750540a4a73db7677e19d0bffd273f47",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                37,
+                54,
+                78
+              ],
+              "silhouetteDelta": 0.1962,
+              "guideOverlap": 0.898,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                39,
+                52,
+                69
+              ],
+              "silhouetteDelta": 0.1157,
+              "guideOverlap": 0.9145,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                15,
+                37,
+                53,
+                68
+              ],
+              "silhouetteDelta": 0.2829,
+              "guideOverlap": 0.9149,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                35,
+                54,
+                75
+              ],
+              "silhouetteDelta": 0.1265,
+              "guideOverlap": 0.9236,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                37,
+                53,
+                73
+              ],
+              "silhouetteDelta": 0.239,
+              "guideOverlap": 0.8959,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                15,
+                39,
+                53,
+                63
+              ],
+              "silhouetteDelta": 0.1903,
+              "guideOverlap": 0.916,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                37,
+                54,
+                69
+              ],
+              "silhouetteDelta": 0.198,
+              "guideOverlap": 0.8965,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                360,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                16,
+                36,
+                54,
+                75
+              ],
+              "silhouetteDelta": 0.1542,
+              "guideOverlap": 0.9219,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "n",
+          "row": 4,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "13c7b0252360e60ba347ac2ec8ad9950dda1f5a512d8017b3fe71b56fdcea3a0",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                40,
+                51,
+                78
+              ],
+              "silhouetteDelta": 0.1729,
+              "guideOverlap": 0.8928,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                42,
+                50,
+                67
+              ],
+              "silhouetteDelta": 0.1628,
+              "guideOverlap": 0.9066,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                20,
+                42,
+                51,
+                67
+              ],
+              "silhouetteDelta": 0.2595,
+              "guideOverlap": 0.8822,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                20,
+                38,
+                50,
+                78
+              ],
+              "silhouetteDelta": 0.1202,
+              "guideOverlap": 0.8774,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                21,
+                40,
+                50,
+                74
+              ],
+              "silhouetteDelta": 0.1193,
+              "guideOverlap": 0.9056,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                40,
+                50,
+                65
+              ],
+              "silhouetteDelta": 0.1413,
+              "guideOverlap": 0.8909,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                40,
+                51,
+                68
+              ],
+              "silhouetteDelta": 0.1802,
+              "guideOverlap": 0.9168,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                480,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                38,
+                51,
+                77
+              ],
+              "silhouetteDelta": 0.1396,
+              "guideOverlap": 0.8712,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "nw",
+          "row": 5,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "8fd79707dd86568622204fcebcadd2720c11ff11a4320ba51e07dfb5eacac650",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                26,
+                40,
+                50,
+                70
+              ],
+              "silhouetteDelta": 0.2661,
+              "guideOverlap": 0.9025,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                26,
+                43,
+                51,
+                60
+              ],
+              "silhouetteDelta": 0.1797,
+              "guideOverlap": 0.9366,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                27,
+                43,
+                49,
+                63
+              ],
+              "silhouetteDelta": 0.1854,
+              "guideOverlap": 0.9326,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                40,
+                51,
+                71
+              ],
+              "silhouetteDelta": 0.1274,
+              "guideOverlap": 0.9208,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                40,
+                52,
+                71
+              ],
+              "silhouetteDelta": 0.2054,
+              "guideOverlap": 0.9276,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                42,
+                53,
+                63
+              ],
+              "silhouetteDelta": 0.1498,
+              "guideOverlap": 0.9349,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                40,
+                54,
+                63
+              ],
+              "silhouetteDelta": 0.2098,
+              "guideOverlap": 0.9325,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                600,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                40,
+                51,
+                68
+              ],
+              "silhouetteDelta": 0.1685,
+              "guideOverlap": 0.9278,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "w",
+          "row": 6,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "7ae81395afef81c64ed6b5aa619a09a8f2feef05f7398228b54f5ee72646ccd7",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                26,
+                40,
+                50,
+                60
+              ],
+              "silhouetteDelta": 0.3379,
+              "guideOverlap": 0.8872,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                34,
+                42,
+                44,
+                58
+              ],
+              "silhouetteDelta": 0.1527,
+              "guideOverlap": 0.898,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                32,
+                41,
+                47,
+                59
+              ],
+              "silhouetteDelta": 0.2689,
+              "guideOverlap": 0.9105,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                31,
+                40,
+                45,
+                59
+              ],
+              "silhouetteDelta": 0.1675,
+              "guideOverlap": 0.9012,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                28,
+                40,
+                49,
+                58
+              ],
+              "silhouetteDelta": 0.2747,
+              "guideOverlap": 0.8888,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                31,
+                40,
+                46,
+                58
+              ],
+              "silhouetteDelta": 0.1053,
+              "guideOverlap": 0.8999,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                31,
+                40,
+                47,
+                60
+              ],
+              "silhouetteDelta": 0.2993,
+              "guideOverlap": 0.9264,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                720,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                26,
+                38,
+                50,
+                61
+              ],
+              "silhouetteDelta": 0.1571,
+              "guideOverlap": 0.8934,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        },
+        {
+          "id": "sw",
+          "row": 7,
+          "sourceSheetSizePx": [
+            1586,
+            992
+          ],
+          "sourceSheetSha256": "89e6347838630847a88ad5f76317490ab823785eff3002ebcdda31e594df4546",
+          "frames": [
+            {
+              "index": 0,
+              "atlasRectPx": [
+                0,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                38,
+                55,
+                71
+              ],
+              "silhouetteDelta": 0.2543,
+              "guideOverlap": 0.9083,
+              "sourceFrame": 6.7
+            },
+            {
+              "index": 1,
+              "atlasRectPx": [
+                96,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                26,
+                39,
+                52,
+                64
+              ],
+              "silhouetteDelta": 0.1376,
+              "guideOverlap": 0.9091,
+              "sourceFrame": 9.075
+            },
+            {
+              "index": 2,
+              "atlasRectPx": [
+                192,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                26,
+                39,
+                52,
+                58
+              ],
+              "silhouetteDelta": 0.2841,
+              "guideOverlap": 0.9176,
+              "sourceFrame": 11.45
+            },
+            {
+              "index": 3,
+              "atlasRectPx": [
+                288,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                27,
+                37,
+                51,
+                68
+              ],
+              "silhouetteDelta": 0.1511,
+              "guideOverlap": 0.9024,
+              "sourceFrame": 13.825
+            },
+            {
+              "index": 4,
+              "atlasRectPx": [
+                384,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                25,
+                37,
+                56,
+                71
+              ],
+              "silhouetteDelta": 0.2573,
+              "guideOverlap": 0.9046,
+              "sourceFrame": 16.2
+            },
+            {
+              "index": 5,
+              "atlasRectPx": [
+                480,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                23,
+                39,
+                56,
+                63
+              ],
+              "silhouetteDelta": 0.1427,
+              "guideOverlap": 0.9295,
+              "sourceFrame": 18.575
+            },
+            {
+              "index": 6,
+              "atlasRectPx": [
+                576,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                38,
+                56,
+                65
+              ],
+              "silhouetteDelta": 0.2861,
+              "guideOverlap": 0.9159,
+              "sourceFrame": 1.9499999999999993
+            },
+            {
+              "index": 7,
+              "atlasRectPx": [
+                672,
+                840,
+                96,
+                120
+              ],
+              "visibleRectPx": [
+                22,
+                36,
+                59,
+                72
+              ],
+              "silhouetteDelta": 0.2349,
+              "guideOverlap": 0.9186,
+              "sourceFrame": 4.324999999999999
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
