@@ -25,6 +25,7 @@ namespace Astella.TwoD
         public Vector2 PlayerPosition => _player != null ? _player.Body.position : Vector2.zero;
         public Vector2 BossPosition => new Vector2(0, 1.1f);
         public float CombatRange => IsRanged ? 10f : 2.8f;
+        public Astella2DPrismView prismHudPrefab;
 
         sealed class Fighter
         {
@@ -69,14 +70,12 @@ namespace Astella.TwoD
         SpriteRenderer _bossArt;
         Sprite _bossSprite;
         Font _font, _titleFont;
-        GameObject _menu, _battleHud, _result, _pause, _help;
-        Text _selectionText, _bossTitle, _bossCast, _playerText, _noticeText, _resultText, _roundText;
-        Image _bossFill, _playerFill, _ultimateFill;
-        readonly Text[] _skillText = new Text[5];
-        readonly Text[] _partyText = new Text[4];
-        readonly Image[] _partyFill = new Image[4];
+        GameObject _menu, _battleHud, _pause, _help;
+        Text _selectionText, _noticeText;
+        Astella2DPrismView _prism;
+        Astella2DPrismOutcome _outcome;
+        int _selectedParty;
         readonly List<Button> _characterButtons = new List<Button>();
-        readonly List<GameObject> _rewardButtons = new List<GameObject>();
         Image _selectedPortrait;
         Vector2 _move, _aim = Vector2.right, _dashDirection;
         float _bossHp, _bossMax, _patternTimer, _dashTime, _hurtTime, _ultimate, _elapsed, _noticeTime;
@@ -154,7 +153,8 @@ namespace Astella.TwoD
                 if (candidate == SelectedCharacter) continue;
                 Spawn(candidate, new Vector2((_party.Count - 2) * 2.3f, -1.8f));
             }
-            _menu.SetActive(false); _battleHud.SetActive(true); _result.SetActive(false); _pause.SetActive(false);
+            _selectedParty = 0;
+            _menu.SetActive(false); _battleHud.SetActive(true); _outcome.Hide(); _pause.SetActive(false);
             Notice("공명 원정 " + (_encounter + 1) + " / 3 · 장판을 피하며 수호자의 핵을 파괴하세요", 4);
             RefreshHud();
         }
@@ -179,7 +179,7 @@ namespace Astella.TwoD
         {
             Running = Finished = Won = _paused = false; _move = Vector2.zero;
             ClearBattle();
-            _menu.SetActive(true); _battleHud.SetActive(false); _result.SetActive(false); _pause.SetActive(false);
+            _menu.SetActive(true); _battleHud.SetActive(false); _outcome.Hide(); _pause.SetActive(false);
             SelectCharacter(SelectedCharacter);
         }
 
@@ -444,10 +444,8 @@ namespace Astella.TwoD
             Running = false; Finished = true; Won = won; _move = Vector2.zero; _dashTime = 0;
             foreach (var fighter in _party) { fighter.Body.linearVelocity = Vector2.zero; fighter.Body.simulated = false; }
             foreach (var hazard in _hazards) ReleaseHazard(hazard); _hazards.Clear();
-            _result.SetActive(true);
-            bool rewards = won && _encounter < 2;
-            foreach (var button in _rewardButtons) button.SetActive(rewards);
-            _resultText.text = rewards ? "공명 수호자 격파\n다음 원정을 위한 축복을 고르세요" : won ? "원정 완료\n세 번의 공명을 모두 잠재웠습니다" : "원정 실패\n움직임을 읽고 다시 도전하세요";
+            _battleHud.SetActive(false);
+            _outcome.Show(won, won && _encounter < 2);
         }
 
         void ChooseReward(int reward)
@@ -559,13 +557,6 @@ namespace Astella.TwoD
             var label = Label(rect, text, size - new Vector2(24, 0), new Vector2(.5f, .5f), Vector2.zero, fontSize, true); label.alignment = TextAnchor.MiddleCenter;
             return button;
         }
-        Image Fill(Transform parent, string name, Vector2 size, Vector2 anchor, Vector2 position, Color color)
-        {
-            var track = Panel(parent, name, size, anchor, position, new Color(.035f, .04f, .08f, .9f));
-            var fill = Panel(track, "Fill", size - new Vector2(4, 4), Vector2.zero, new Vector2(2, 2), color).GetComponent<Image>(); return fill;
-        }
-        static void SetFill(Image image, float fraction) { image.rectTransform.localScale = new Vector3(Mathf.Clamp01(fraction), 1, 1); }
-
         void CreateHud()
         {
             if (EventSystem.current == null) { var events = new GameObject("2D EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule)); events.transform.SetParent(transform, false); }
@@ -594,37 +585,17 @@ namespace Astella.TwoD
             Button(_menu.transform, "원정 시작", new Vector2(400, 70), topLeft, new Vector2(133, -865), () => BeginRun(SelectedCharacter), 30);
             Label(_menu.transform, "캐릭터 컨셉 브랜치 · 13종 / 8방향", new Vector2(800, 45), topLeft, new Vector2(135, -975), 17).color = new Color(.61f, .60f, .75f);
 
-            _battleHud = new GameObject("Combat HUD", typeof(RectTransform)); _battleHud.transform.SetParent(ui, false);
+            _battleHud = new GameObject("Combat HUD", typeof(RectTransform)); _battleHud.transform.SetParent(canvasGo.transform, false);
+            _battleHud.transform.SetAsFirstSibling();
             var hudRect = (RectTransform)_battleHud.transform; hudRect.anchorMin = Vector2.zero; hudRect.anchorMax = Vector2.one; hudRect.offsetMin = hudRect.offsetMax = Vector2.zero;
-            Label(_battleHud.transform, "ASTELLA  /  2D", new Vector2(320, 40), topLeft, new Vector2(35, -25), 24, true);
-            _roundText = Label(_battleHud.transform, "", new Vector2(330, 40), topLeft, new Vector2(36, -67), 18);
-            _bossTitle = Label(_battleHud.transform, "", new Vector2(650, 45), new Vector2(.5f, 1), new Vector2(0, -28), 27, true); _bossTitle.alignment = TextAnchor.MiddleCenter;
-            _bossFill = Fill(_battleHud.transform, "Boss Health", new Vector2(650, 19), new Vector2(.5f, 1), new Vector2(0, -78), new Color(.73f, .31f, .65f));
-            _bossCast = Label(_battleHud.transform, "", new Vector2(700, 42), new Vector2(.5f, 1), new Vector2(0, -100), 22); _bossCast.alignment = TextAnchor.MiddleCenter;
-            for (int i = 0; i < 4; i++)
-            {
-                _partyText[i] = Label(_battleHud.transform, "", new Vector2(255, 38), topLeft, new Vector2(36, -161 - i * 69), 19, true);
-                _partyFill[i] = Fill(_battleHud.transform, "Party " + i, new Vector2(230, 9), topLeft, new Vector2(36, -203 - i * 69), new Color(.38f, .72f, .67f));
-            }
-            _noticeText = Label(_battleHud.transform, "", new Vector2(1150, 48), new Vector2(.5f, 0), new Vector2(0, 188), 24); _noticeText.alignment = TextAnchor.MiddleCenter;
-            _playerText = Label(_battleHud.transform, "", new Vector2(470, 36), new Vector2(.5f, 0), new Vector2(-330, 127), 21, true);
-            _playerFill = Fill(_battleHud.transform, "Player Health", new Vector2(400, 14), new Vector2(.5f, 0), new Vector2(-300, 108), new Color(.65f, .19f, .35f));
-            _ultimateFill = Fill(_battleHud.transform, "Resonance", new Vector2(250, 12), new Vector2(.5f, 0), new Vector2(320, 111), Violet);
-            string[] names = { "기본 타격", "공명 기술", "은빛 가호", "별의 공명", "회피 대시" }; string[] keys = { "LMB / J", "Q", "E", "R", "SPACE" };
-            for (int i = 0; i < 5; i++)
-            {
-                int slot = i;
-                var button = Button(_battleHud.transform, "", new Vector2(174, 72), new Vector2(.5f, 0), new Vector2((i - 2) * 187, 25), () => TryUseSkill(slot));
-                _skillText[i] = Label(button.transform, names[i], new Vector2(164, 41), new Vector2(.5f, .5f), new Vector2(0, 6), 20, true); _skillText[i].alignment = TextAnchor.MiddleCenter;
-                var key = Label(button.transform, keys[i], new Vector2(164, 24), new Vector2(.5f, 0), new Vector2(0, 5), 13); key.alignment = TextAnchor.MiddleCenter; key.color = new Color(.68f, .70f, .84f);
-            }
+            if (prismHudPrefab == null) throw new InvalidOperationException("Assign the 2D Prism HUD with Astella > 2D > Create Scene.");
+            _prism = Instantiate(prismHudPrefab, hudRect, false);
+            _prism.Initialize(slot => TryUseSkill(slot), member => _selectedParty = member);
+            _prism.Show(true);
+            _noticeText = Label(_battleHud.transform, "", new Vector2(1150, 48), new Vector2(.5f, 0), new Vector2(0, 240), 24);
+            _noticeText.alignment = TextAnchor.MiddleCenter;
             Button(_battleHud.transform, "ESC  메뉴", new Vector2(150, 43), Vector2.one, new Vector2(-30, -25), () => { _paused = true; _pause.SetActive(true); }, 19);
-            _result = Panel(ui, "Encounter Result", new Vector2(1120, 500), new Vector2(.5f, .5f), Vector2.zero, Ink).gameObject;
-            _resultText = Label(_result.transform, "", new Vector2(1020, 150), new Vector2(.5f, 1), new Vector2(0, -35), 35, true); _resultText.alignment = TextAnchor.MiddleCenter;
-            string[] rewards = { "별빛의 칼날\n공격력 +25%", "은빛 생명\n최대 체력 +30%", "공명의 발걸음\n대시 대기시간 -25%" };
-            for (int i = 0; i < 3; i++) { int choice = i; _rewardButtons.Add(Button(_result.transform, rewards[i], new Vector2(305, 115), new Vector2(.5f, .5f), new Vector2((i - 1) * 330, -15), () => ChooseReward(choice), 23).gameObject); }
-            Button(_result.transform, "다시 도전", new Vector2(300, 55), new Vector2(.5f, 0), new Vector2(-165, 45), () => BeginRun(SelectedCharacter));
-            Button(_result.transform, "캐릭터 선택", new Vector2(300, 55), new Vector2(.5f, 0), new Vector2(165, 45), ReturnToMenu);
+            _outcome = Astella2DPrismMenu.CreateOutcome(ui, ChooseReward, () => BeginRun(SelectedCharacter), ReturnToMenu);
             _pause = Panel(ui, "Paused", new Vector2(600, 440), new Vector2(.5f, .5f), Vector2.zero, Ink).gameObject;
             Label(_pause.transform, "잠시 쉬어가기", new Vector2(500, 90), new Vector2(.5f, 1), new Vector2(0, -30), 36, true).alignment = TextAnchor.MiddleCenter;
             Button(_pause.transform, "계속", new Vector2(400, 65), new Vector2(.5f, .5f), new Vector2(0, 35), () => { _paused = false; _pause.SetActive(false); });
@@ -632,6 +603,7 @@ namespace Astella.TwoD
             Button(_pause.transform, "캐릭터 선택", new Vector2(400, 65), new Vector2(.5f, .5f), new Vector2(0, -125), ReturnToMenu);
             _help = Panel(ui, "Controls Help", new Vector2(560, 210), Vector2.one, new Vector2(-30, -145), Ink).gameObject;
             Label(_help.transform, "WASD 이동 · 마우스 조준 · LMB/J 공격\nQ 공명 기술 · E 회복/소생 · R 궁극기\nSPACE 무적 대시 · ESC 메뉴 · F1 닫기\n붉은 예고가 사라지는 순간 피해가 적용됩니다", new Vector2(530, 190), new Vector2(.5f, .5f), Vector2.zero, 20); _help.SetActive(false);
+            Astella2DPrismMenu.Apply(_menu, _pause);
         }
 
         void SelectCharacter(int index)
@@ -640,24 +612,24 @@ namespace Astella.TwoD
             var value = Astella2DRoster.All[SelectedCharacter];
             _selectionText.text = value.Name + "\n" + RoleName(value.Role) + "\n8방향 쿼터뷰";
             _selectedPortrait.sprite = Astella2DRoster.Frame(SelectedCharacter, Vector2.down);
-            for (int i = 0; i < _characterButtons.Count; i++) _characterButtons[i].GetComponent<Image>().color = i == SelectedCharacter ? new Color(.39f, .28f, .57f) : new Color(.14f, .13f, .24f, .94f);
+            for (int i = 0; i < _characterButtons.Count; i++) Astella2DPrismMenu.SetSelected(_characterButtons[i], i == SelectedCharacter);
         }
         static string RoleName(PixelRole role) => role == PixelRole.Tank ? "수호" : role == PixelRole.Healer ? "치유" : role == PixelRole.Melee ? "근접" : role == PixelRole.Ranged ? "원거리" : "마법";
         void RefreshHud()
         {
-            if (_player == null) return;
-            _bossTitle.text = "공명 수호자" + (_bossHp < _bossMax * .5f ? "  ·  격앙" : ""); SetFill(_bossFill, _bossMax > 0 ? _bossHp / _bossMax : 0);
-            _bossCast.text = _hazards.Count > 0 ? _hazards[0].Name + "  " + Mathf.Max(0, _hazards[0].Time).ToString("0.0") : "";
-            _roundText.text = "원정 " + (_encounter + 1) + " / 3  ·  " + TimeSpan.FromSeconds(_elapsed).ToString(@"mm\:ss");
-            _playerText.text = Astella2DRoster.All[SelectedCharacter].Name + "   " + Mathf.CeilToInt(_player.Hp) + " / " + Mathf.CeilToInt(_player.MaxHp);
-            SetFill(_playerFill, _player.Hp / _player.MaxHp); SetFill(_ultimateFill, _ultimate / 100);
-            _noticeText.text = _notice;
-            string[] names = { "기본 타격", "공명 기술", "은빛 가호", "별의 공명", "회피 대시" };
-            for (int i = 0; i < 5; i++) _skillText[i].text = _cooldowns[i] > .05f ? _cooldowns[i].ToString("0.0") : i == 3 && _ultimate < 100 ? "공명 " + Mathf.FloorToInt(_ultimate) + "%" : names[i];
+            if (_player == null || !_battleHud.activeSelf) return;
+            var cast = _hazards.Count > 0 ? _hazards[0] : null;
+            string bossName = _bossHp < _bossMax * .5f ? "공명 수호자 · 격앙" : "공명 수호자";
+            _prism.UpdateBoss(_bossHp, _bossMax, _encounter + 1, bossName, cast?.Name, cast?.Time ?? 0, cast?.Duration ?? 0);
+            _prism.UpdatePlayer(_player.Hp, _player.MaxHp, _ultimate, _cooldowns[4], _durations[4] * _dashBonus);
+            _prism.UpdateSkills(_cooldowns, _durations, _ultimate, Running && !_paused);
+            if (_noticeText.text != _notice) _noticeText.text = _notice;
             for (int i = 0; i < 4; i++)
             {
-                if (i >= _party.Count) { _partyText[i].text = ""; SetFill(_partyFill[i], 0); continue; }
-                var fighter = _party[i]; _partyText[i].text = (i == 0 ? "◆ " : "  ") + Astella2DRoster.All[fighter.Character].Name + (fighter.Hp <= 0 ? "  쓰러짐" : ""); SetFill(_partyFill[i], fighter.Hp / fighter.MaxHp);
+                var fighter = i < _party.Count ? _party[i] : null;
+                if (fighter == null) { _prism.UpdateParty(i, "", 0, 0, null, false); continue; }
+                var character = Astella2DRoster.All[fighter.Character];
+                _prism.UpdateParty(i, character.Name, fighter.Hp, fighter.MaxHp, Astella2DRoster.Frame(fighter.Character, Vector2.down), i == _selectedParty);
             }
         }
 

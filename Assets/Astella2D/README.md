@@ -41,7 +41,8 @@
 - 기존 MaruBuri와 Pretendard를 새 Resources 폰트 경로로 Unity API를 통해 복사한다. 원본 폰트와 metadata GUID는 유지한다.
 - 새 2D 텍스처는 Point 필터·mipmap 없음·무압축으로 가져온다.
 - 새 파일의 metadata는 기존 Prism 패키지와 같은 새 자산 전용 방식의 `Tools/Write-Astella2DMetas.cjs`로 작성할 수 있다. 새 Astella2D 경로만 대상으로 하며 이미 있는 `.meta`는 교체하지 않고 기존 GUID 충돌도 검사한다.
-- 런타임은 새 씬의 UI와 표시 객체를 코드로 만든다. 기존 사용자가 편집한 Prism HUD나 프리팹의 디자인을 덮어쓰지 않는다.
+- 전투 UI는 현재 `RaidUIPresentation`이 참조하는 Prism HUD의 복제본 `Presentation/PrismCombatHUD.prefab`이다. 플레이어 체력과 중앙 궁극기, 보스 체력·시전, 파티 4행, 8칸 스킬 배치·아이콘·툴팁을 2D 데이터에 연결한다. 구현된 2D 기술만 버튼을 활성화하고 오른쪽 게이지에는 대시 준비와 남은 시간을 표시한다. 2D 프리팹은 Unity에서 별도로 편집할 수 있다.
+- 보상·패배 화면은 `RaidUIPresentation`의 `skill-reward`·`wipe` 프리팹을 사용한다. 13종 캐릭터 선택과 일시정지는 2D 전용 배치를 유지하며 활성 Prism 폼의 외형을 적용한다.
 
 ## 검사
 
@@ -62,6 +63,6 @@
   --astella2d-evidence=C:/Astella/2d-evidence-20261120
 ```
 
-검사는 메뉴 → 전투 시작 → Rigidbody2D 이동 → 대시 이동·무적 → 플레이어 기본 공격의 보스 피해 → 패배 → 메뉴 복귀 → 재시작 순으로 진행한다. 재시작 후 첫 원형 장판과 HUD를 Game View PNG로 저장한 뒤, 움직이지 않은 플레이어가 장판에 맞아 체력이 줄어드는지 확인하고 결과를 JSON에 기록한다. 수동 입력·승리·축복 선택·전체 13종·화면 크기 변경은 별도 Play 검증 범위다.
+검사는 메뉴 → 전투 시작 → 파티 선택과 Rigidbody2D 이동 → Prism 버튼의 대시·기본 공격 → 패배 화면의 메뉴 버튼 → 재시작 순으로 진행한다. 재시작 후 첫 원형 장판과 보스 시전바를 Game View PNG로 저장한다. 장판 피해 후 플레이어 체력 게이지가 갱신되는지 확인하고 결과를 JSON에 기록한다. 수동 입력·승리·축복 선택·전체 13종·다른 해상도는 별도 Play 검증 범위다.
 
 2026-11-20 실제 수행 결과와 미검증 범위는 `VALIDATION.md`에 구분했다.

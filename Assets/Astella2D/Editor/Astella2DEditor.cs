@@ -48,12 +48,16 @@ namespace Astella.TwoD.Editor
             {
                 var existing = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
                 ValidateScene(existing);
+                var game = ObjectInScene(existing);
+                if (Astella2DPrismAuthoring.AssignIfMissing(game) && !EditorSceneManager.SaveScene(existing))
+                    throw new IOException("Could not save the 2D Prism HUD binding: " + ScenePath);
                 Debug.Log("ASTELLA 2D: existing scene preserved and opened: " + ScenePath);
                 return;
             }
 
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            new GameObject("Astella 2D Game").AddComponent<Astella2DGame>();
+            var newGame = new GameObject("Astella 2D Game").AddComponent<Astella2DGame>();
+            Astella2DPrismAuthoring.AssignIfMissing(newGame);
             ValidateScene(scene);
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
                 throw new IOException("Could not save the new 2D scene: " + ScenePath);
@@ -175,6 +179,12 @@ namespace Astella.TwoD.Editor
                     Require(game.Running && !game.Finished && game.PlayerHealth > 0 && game.BossHealth > 0,
                         "Starting an expedition must create a live player and boss.");
                     Record("begin-run");
+                    var hud = RequirePrismHud();
+                    Require(hud.party.Length == 4 && hud.slots.Length == 8 && hud.center.ultimateChargeFill.Ratio > 0 &&
+                        hud.party.All(row => row.artwork.enabled && row.artwork.sprite != null),
+                        "The Prism composition must show all four members and the eight-slot dock with its ultimate gauge.");
+                    hud.party[1].button.onClick.Invoke();
+                    Record("prism-hud-binding");
                     SavePosition("moveStart", game.PlayerPosition);
                     game.RequestMove(Vector2.right);
                     Phase("move");
@@ -184,12 +194,17 @@ namespace Astella.TwoD.Editor
                     Require(Vector2.Distance(game.PlayerPosition, LoadPosition("moveStart")) > .35f,
                         "The actual 2D player did not move under its normal movement simulation.");
                     Record("movement");
+                    var hud = RequirePrismHud();
+                    Require(hud.party[1].selectedOverlay.enabled && !hud.party[0].selectedOverlay.enabled,
+                        "The Prism party button did not update the selected row.");
+                    Record("prism-party-selection");
                     game.RequestMove(Vector2.zero);
                     game.AimAt(game.BossPosition);
                     SavePosition("dashStart", game.PlayerPosition);
                     SessionState.SetInt(Key + "dashBefore", game.DodgeCount);
                     float healthBeforeDash = game.PlayerHealth;
-                    Require(game.TryUseSkill(4), "A ready dash must be accepted.");
+                    Require(hud.slots[7].button.IsInteractable(), "The authored dash button must be ready.");
+                    hud.slots[7].button.onClick.Invoke();
                     game.ApplyPlayerDamage(1f);
                     Require(Mathf.Approximately(game.PlayerHealth, healthBeforeDash) &&
                         game.DodgeCount > SessionState.GetInt(Key + "dashBefore", 0),
@@ -202,6 +217,9 @@ namespace Astella.TwoD.Editor
                     Require(game.DodgeCount > SessionState.GetInt(Key + "dashBefore", 0) &&
                         Vector2.Distance(game.PlayerPosition, LoadPosition("dashStart")) > .2f,
                         "The dash did not advance actual position after its invulnerability dodge was observed.");
+                    var hud = RequirePrismHud();
+                    Require(hud.slots[7].cooldownShade.enabled && hud.player.jobResourceFill.Ratio < 1,
+                        "Dash cooldown must appear in the Prism slot and right gauge.");
                     Record("dash");
                     SessionState.SetInt(Key + "observedDodges", game.DodgeCount);
                     Phase("approach");
@@ -223,7 +241,9 @@ namespace Astella.TwoD.Editor
                     float bossBefore = game.BossHealth;
                     int attacksBefore = game.Attacks;
                     int damageBefore = game.DamageEvents;
-                    if (game.TryUseSkill(0))
+                    var button = RequirePrismHud().slots[0].button;
+                    if (button.IsInteractable()) button.onClick.Invoke();
+                    if (game.Attacks > attacksBefore)
                     {
                         Require(game.BossHealth < bossBefore && game.Attacks == attacksBefore + 1 &&
                             game.DamageEvents == damageBefore + 1,
@@ -246,7 +266,11 @@ namespace Astella.TwoD.Editor
                     }
                     Require(game.Finished && !game.Won && game.PlayerHealth <= 0, "Lethal damage must reach the actual defeat state.");
                     Record("defeat");
-                    game.ReturnToMenu();
+                    var wipe = UnityEngine.Object.FindObjectsByType<RaidRogue.RaidUIView>(FindObjectsSortMode.None)
+                        .Single(view => view.viewId == "wipe");
+                    var returnButton = wipe.actions.Single(action => action.id == "메인 메뉴로").button;
+                    Require(returnButton.isActiveAndEnabled, "The authored wipe view must display its menu button.");
+                    returnButton.onClick.Invoke();
                     Require(!game.Running && !game.Finished, "Returning from defeat must restore the menu state.");
                     Record("return-to-menu");
                     game.BeginRun(0);
@@ -266,6 +290,10 @@ namespace Astella.TwoD.Editor
                         return;
                     }
                     Record("boss-telegraph");
+                    var boss = RequirePrismHud().boss;
+                    Require(boss.castFill.isActiveAndEnabled && boss.castFill.Ratio > 0 && !string.IsNullOrEmpty(boss.castNameText.text),
+                        "The authored Prism cast bar must reflect the first boss warning.");
+                    Record("prism-cast-bar");
                     Require(Screen.width >= 320 && Screen.height >= 180, "The Game View must have a rendered size.");
                     string path = Path.Combine(SessionState.GetString(Key + "evidence", DefaultEvidence), "unity-play.png");
                     SessionState.SetFloat(Key + "healthBeforeTelegraphHit", game.PlayerHealth);
@@ -293,6 +321,8 @@ namespace Astella.TwoD.Editor
                         return;
                     }
                     Record("boss-telegraph-hit");
+                    Require(RequirePrismHud().player.healthFill.Ratio < 1, "The Prism health bar must show the hit.");
+                    Record("prism-health-after-hit");
                     string path = Path.Combine(SessionState.GetString(Key + "evidence", DefaultEvidence), "unity-play.png");
                     WriteReport(true, "", game, path);
                     Phase("exit");
@@ -307,6 +337,13 @@ namespace Astella.TwoD.Editor
                 Debug.LogException(error);
                 EditorApplication.Exit(1);
             }
+        }
+
+        private static Astella2DPrismView RequirePrismHud()
+        {
+            var hud = UnityEngine.Object.FindFirstObjectByType<Astella2DPrismView>();
+            Require(hud != null, "The authored 2D Prism HUD must be active in combat.");
+            return hud;
         }
 
         private static void WriteReport(bool success, string error, Astella2DGame game, string screenshot)
@@ -371,6 +408,9 @@ namespace Astella.TwoD.Editor
             int roots = scene.GetRootGameObjects().Sum(root => root.GetComponentsInChildren<Astella2DGame>(true).Length);
             if (roots != 1) throw new InvalidOperationException("The 2D scene must have exactly one Astella2DGame; existing authored content was preserved.");
         }
+
+        private static Astella2DGame ObjectInScene(Scene scene) => scene.GetRootGameObjects()
+            .SelectMany(root => root.GetComponentsInChildren<Astella2DGame>(true)).Single();
 
         private static void PrepareGameView()
         {
