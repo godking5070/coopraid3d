@@ -151,6 +151,7 @@ canvas { image-rendering:pixelated }
     <a id="sheet-link">게임용 시트</a>
     <a id="frames-link">프레임별 PNG</a>
     <a id="gif-link">전체 방향 반복 GIF</a>
+    <a id="classic-side-link" href="../Run-Side-30/index.html">원본 도트풍 30° 좌우</a>
   </p>
   <p id="error" role="alert" hidden>캐릭터 시트를 불러오지 못했습니다.</p>
 </main>
@@ -323,6 +324,7 @@ canvas { image-rendering:pixelated }
       get('sheet-link').href = entry.files.atlas;
       get('frames-link').href = entry.files.frames;
       get('gif-link').href = entry.files.preview;
+      get('classic-side-link').href = '../Run-Side-30/index.html#' + entry.id;
     }
     try {
       if (!sprites.has(entry.id)) {
