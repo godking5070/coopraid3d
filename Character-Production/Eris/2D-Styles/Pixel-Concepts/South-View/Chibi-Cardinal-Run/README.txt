@@ -9,11 +9,20 @@ index.html의 방향 메뉴로 왼쪽 둥근 치비와 오른쪽 08 기준 모�
 ## 제작과 검수
 
 - 위와 아래는 기존 08 자세 가이드에 10번 둥근 치비의 채색과 윤곽을 적용했습니다. 첫 네 포즈의 손 스윙을 정리했고, 두 번째 반 주기는 팔과 다리의 역할을 바꿨습니다. 아래를 보는 두 눈과 입은 한 표정으로 맞췄고, 위를 보는 후드와 파란 장식도 프레임마다 같은 위치에 있습니다.
+- 위 방향은 몸 앞쪽에 접힌 손이 몸통과 머리카락 뒤에 가려지도록 소매 끝만 다듬었습니다. 8장 모두 손이 있던 곳에 살색 픽셀이 남지 않고, 팔꿈치 윤곽과 소매 스윙이 이어지는 것을 확인했습니다.
 - 왼쪽은 오른쪽 보폭을 좌우 반전하고 반 주기를 옮겼습니다. 왼쪽에서 보이는 파란 꽃·리본을 붙였습니다. 오른쪽 행은 ../Run-Concept-Comparison/Iris_10_Run_E.png와 픽셀이 일치합니다.
 - 네 방향의 32장이 각각 끊긴 픽셀 없이 연결되어 있는지 검사했습니다. 확대해서 손목·소매, 치마·허벅지, 발목·부츠를 대조했습니다. 위·아래의 2번과 6번에서 화면에 더 가까운 부츠 쪽이 반대로 교대하는 것도 확인했습니다.
 - Chrome의 데스크톱 및 390px 모바일 에뮬레이션에서 전체·얼굴·손·발 확대의 픽셀을 시트와 대조했습니다. 1× 및 0.5×에서 각 방향이 1→8→1로 빠짐없이 재생되는지 확인했습니다. Unity와 실제 휴대폰에서의 재생은 미검증입니다.
 
 ## 내장 이미지 생성 프롬프트
+
+### 위쪽 소매 수정
+
+편집 입력은 1b85d56의 위 방향 8장을 배열한 가이드입니다. 생성 결과의 소매 끝 명암을 기존 셀에 맞춰 쓰고, 나머지 그림은 원본 시트에서 가져왔습니다.
+
+Use case: precise-object-edit. Change just the wrist and hand occlusion in this exact sprite strip of Iris running away from the camera. Image 1 is the edit target. Return exactly eight full transparent cels on the same 4 by 2 grid with generous gutters (frames 1–4 then 5–8). Keep the precise view, individual poses, spacing, scale, head, hair, costume, boot angles, thickness, positions and timing of the source. The bent arms swing beside her ribs, with forearms and fists held forward, on the far side of the torso relative to the viewer. In all eight frames the peach-colored fists now visible below the ivory sleeves should be entirely hidden behind the body. Paint a continuous rounded ivory sleeve elbow where its silhouette protrudes beyond the hair. Have each sleeve turn inward into the side of the torso or behind a pink lock, so it reads as a bent sleeve seen from behind and not a pale hand. Keep the small raised and lowered sleeve differences of this same alternating run. Clear tasteful one-color muted plum outline with the source's pale cream sleeve highlights. Do not expand the silhouette where the hands were. Leave the adjacent hair and skirt edges and arm lengths in place. Keep the back of the hood, flower, three blue embroidered clovers, flowing pink-blonde curls, navy dress and gold hem, knees and contrasting boots exactly recognizable as in the input. No visible face, fist or fingers, no new props, floor, letters, numerals, shadows or checkerboard. True transparent background outside each cell.
+
+### 초기 스타일 변환
 
 첫 번째 입력은 ../Dither-Locomotion/Iris_08_Run_8Dir.png의 해당 방향을 4×2로 배열한 자세 가이드입니다. 두 번째 입력은 ../Run-Concept-Comparison/Iris_10_Run_E.png의 10번 스타일 가이드입니다.
 
