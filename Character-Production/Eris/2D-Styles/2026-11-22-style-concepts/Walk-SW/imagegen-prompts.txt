@@ -1,0 +1,26 @@
+이리스 왼쪽 앞 걷기 애니메이션 5종
+
+내장 ImageGen으로 그림체마다 8포즈를 한 시트로 생성했습니다.
+Image 1은 상위 폴더의 같은 이름을 가진 이리스 대기 PNG입니다.
+Image 2는 가까운 발과 먼 발을 색으로 구분한 4열 2행 보행 자세 가이드입니다. 원래 쿼터뷰에서 두 발이 각각 뻗고, 디디고, 몸 아래를 지나가는 순서를 표현했습니다.
+출력은 프레임마다 투명 가장자리를 정리하고 꽃 장식의 위치를 기준으로 흔들림을 보정한 뒤 같은 피벗의 투명 PNG로 배열했습니다.
+
+공통 프롬프트
+Generate a single practical 2D game sprite sheet for Iris walking. Image 1 is the exact approved Astella Iris art. Preserve its art rendering, anatomy, face and exact identity (hair and flower must never flip), translucent or matte material as shown, saturated blue star eyes, ivory hood with navy band and petal marks, gold-centered large blue flower on the visible near temple, cream-to-pastel-pink curled hair, ivory/navy coat dress and fur boots. Image 2 is an exact 8-pose biomechanics/layout diagram ONLY. Overlay Iris over this motion diagram as though tracing the positions and order of EACH knee, ankle, sole and hand. Both boots must be drawn in the same ivory and gold as Image 1. Blue and rust on the diagram are tracking labels for the legs, not colors to use in the output. The blue (anatomical left) boot always originates from the near hip on image-right; the rust (anatomical right) boot always originates from the far hip on image-left. Camera fixed at original elevated quarter front view and she walks toward bottom-left (↙); do not change camera or flip character between frames.
+
+Make one landscape grid, exactly 4 evenly spaced columns × 2 rows of 8 complete detailed full-body Iris sprites. Chronology is top row 1,2,3,4, then bottom row 5,6,7,8. Copy the specific positions exactly: 1 far boot low and very far screen-left, near boot up and far screen-right (widest lateral split); 2 far boot pushing under the left side of the hips, near boot lifted to its right; 3 far boot on lower-left, near boot passing clearly beside it on the right slightly above; 4 near boot crosses to front and is lower and big, far boot behind slightly left; 5 near boot reaches toward bottom-left and is larger/lower, far boot partially behind to the right; 6 near boot on ground nearer the cell center, far boot lifting behind; 7 near boot supports her from the SCREEN-RIGHT, far boot now swinging in midair and fully visible to its SCREEN-LEFT; 8 far boot about to touch down visibly LEFT again, near boot stays low-right; loop into 1. Use the broad foot separation and alternating contact, recovery, pass and heel reach shown in diagram. Not eight versions of the same pose. Lean and arms counter-swing subtly as illustrated. Keep the same face, scale, head position, camera and body proportions, with only minor vertical bob. One full figure per cell, ample transparent margin (at least 7% height, 12% width) around every silhouette including between rows. True transparent alpha with clean zero-alpha background and clean isolated edges; no backdrop, colored diagram limbs, numbers, frames, labels, kerning, panel grid, effects or floor.
+
+01-pixel-art-walk-sw.png
+The drawing language is exactly Image 1: authentic medium-density console RPG pixel art. Each pose is a crisp game sprite on a square pixel grid with selective dark-indigo stepped outlines and the same warm color clusters. No smooth outlining or gradient rendering. Preserve the recognizable star centers and burgundy/pink curl clusters even in small pixels. Aim for about 105 logical pixels tall per pose.
+
+02-cel-shading-walk-sw.png
+Copy Image 1's anime animation cel aesthetic precisely: smoothly tapered deep blue outer lines, lighter interior lines, strong hard-edged solid shadow shapes, flat warm cream, muted coral-pink and rich navy. Keep the hair reflections and bright star pupils consistent. No brush texture or pixel treatment.
+
+03-paper-cutout-walk-sw.png
+Copy Image 1's layered dyed cut-paper look precisely: tactile fine matte fibers, almost no ink outlines, shaped layers of ribbons and ivory panels and small contact shadows only inside the silhouette. Same head, curl paths and gold paper fastening across the walk. Cut out the character on true alpha, with no paper background.
+
+04-gouache-walk-sw.png
+Copy Image 1's opaque storybook gouache precisely: fine visible directional dry-brush texture inside the silhouette, matte warm ivory, lavender in the shadows, ultramarine/navy coat and rose-peach hair. Preserve face and material appearances from pose to pose. No paper background or flecks outside the silhouette.
+
+05-stained-glass-walk-sw.png
+Copy Image 1's original stained-glass rendering precisely: dark navy lead contours, delicate interior lines in the opalescent ivory panels and rose hair, rich cobalt coat glass and honey gold fastenings. Repeat the same panel boundaries in the fabric and hair throughout. No window surround, background, glow or light rays.
