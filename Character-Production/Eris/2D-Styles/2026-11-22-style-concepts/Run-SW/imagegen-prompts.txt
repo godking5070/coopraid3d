@@ -1,0 +1,28 @@
+이리스 왼쪽 앞 달리기 애니메이션 5종
+
+내장 ImageGen으로 그림체마다 8포즈를 한 시트로 생성했습니다.
+Image 1은 상위 폴더의 해당 그림체 이리스 대기 PNG입니다.
+Image 2는 가까운 발과 먼 발을 색으로 추적하는 4열 2행 달리기 가이드입니다. 양발의 착지, 체중 지지, 밀어내기, 공중 전환을 두 번 반복합니다.
+출력은 프레임마다 외곽의 알파를 정리하고 꽃 장식으로 위치를 보정했습니다. 기존 걷기 시트의 머리 크기를 참고해 크기를 맞췄고 같은 프레임 규격과 피벗으로 배열했습니다.
+
+공통 프롬프트
+Draw one production 2D game sprite atlas of Astella's Iris RUNNING toward screen bottom-left (↙), same elevated front-left quarter camera as Image 1 and exact appearance of Image 1. Image 1 is the approved finished idle art for this style. Keep exactly her recognizable face and blue star eyes, ivory hood with navy band and sky-blue petal marks, gold-star centered blue hair flower on her near temple (viewer-right), short navy ribbons, cream-to-peach pink long curls, deep navy and ivory flared coat with gold fastenings, oversized cuff sleeves, and cream fur-lined buckled boots. Preserve the same face and detail level throughout. Slight athletic forward tilt at waist, soft determined smile, hood and curls lifted back to screen-right, bent elbows counter-pumping (one beside chest, the other back beside waist), compact hands. Full body always at same angle and same size, keep her chibi proportions. No mirrored face or changes of viewpoint.
+
+Image 2 is an exact technical diagram of the eight running poses to draw in order, ONLY for body motion, placement and relative spacing. In it BLUE boot tracks the closer anatomical left leg starting at the image-right hip, RUST boot tracks the farther right leg starting at the image-left hip; use the SAME fur-trimmed cream boots as Image 1 for both, never render these diagram colors. Transfer each specific hip, knees, boots and sleeve gestures as drawn in guide, mapping Iris's actual clothes, hair and shape over it. Fast bouncy RUN, not a brisk walk or eight variations of one standing pose. The four-panel halves have opposite leading legs, with real single-leg support and clearly both feet off the imaginary floor in 4 and 8. Frame 1 far boot stretched well toward bottom left for landing with near heel kicked up high on right; 2 far leg bent beneath hips and near heel still raised back; 3 far foot pushes with toe down and near knee drives ahead, clear ankled crossover; 4 both feet airborne, near boot now forward at lower left and far boot behind, hood noticeably rises; 5 NEAR boot stretched ahead and lands, far heel visibly tucked behind to the right; 6 near boot supports under hips, far knee tightly tucked and arm crossing opposite; 7 near boot toe pushes at screen-right and far boot rises tucked at screen-left; 8 airborne with far boot reaching left and near heel behind at screen-right, then return to 1. Keep the greater knee flex, forward body lean, switch in lead foot and visible opposing bent-arm swings in Image 2.
+
+Single LANDSCAPE RGBA sheet. Exactly 4 even columns by 2 even rows. One isolated entire sprite per cell. Time sequence is top row frames 1 2 3 4, bottom row 5 6 7 8, then back to 1. Keep center/running scale consistent and keep all hood, hands, hair and toe outlines completely inside each cell, at least 4% vertical breathing space in each cell and at least 10% horizontal breathing space, generous gaps between figures, no clipping even of widest steps. Use true transparency past the outline and within any gaps, never draw backdrop, white edge matte, diagram numbers, panel borders, floor line, shadow, label, text, ghost copy, sharp effects or props.
+
+01-pixel-art-run-sw.png
+The drawing language is exactly Image 1: authentic medium-density console RPG pixel art. Each pose is a crisp game sprite on a square pixel grid with selective dark-indigo stepped outlines and the same warm color clusters. No smooth outlining or gradient rendering. Preserve the recognizable star centers and burgundy/pink curl clusters even in small pixels. Aim for about 105 logical pixels tall per pose.
+
+02-cel-shading-run-sw.png
+Copy Image 1's anime animation cel aesthetic precisely: smoothly tapered deep blue outer lines, lighter interior lines, strong hard-edged solid shadow shapes, flat warm cream, muted coral-pink and rich navy. Keep the hair reflections and bright star pupils consistent. No brush texture or pixel treatment.
+
+03-paper-cutout-run-sw.png
+Copy Image 1's layered dyed cut-paper look precisely: tactile fine matte fibers, almost no ink outlines, shaped layers of ribbons and ivory panels and small contact shadows only inside the silhouette. Same head, curl paths and gold paper fastening across the walk. Cut out the character on true alpha, with no paper background.
+
+04-gouache-run-sw.png
+Copy Image 1's opaque storybook gouache precisely: fine visible directional dry-brush texture inside the silhouette, matte warm ivory, lavender in the shadows, ultramarine/navy coat and rose-peach hair. Preserve face and material appearances from pose to pose. No paper background or flecks outside the silhouette.
+
+05-stained-glass-run-sw.png
+Copy Image 1's original stained-glass rendering precisely: dark navy lead contours, delicate interior lines in the opalescent ivory panels and rose hair, rich cobalt coat glass and honey gold fastenings. Repeat the same panel boundaries in the fabric and hair throughout. No window surround, background, glow or light rays.
