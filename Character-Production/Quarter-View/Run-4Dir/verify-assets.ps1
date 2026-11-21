@@ -123,6 +123,12 @@ foreach ($item in $manifest.characters) {
         @($result[0].directions | Where-Object comparedTransitions -eq 8).Count -ne 4) {
         throw "Frame transition audit missing for $id."
     }
+    $feet = @($result[0].directions | Where-Object {
+        $_.minimumShinBootOverlapPx -ge 13 -and $_.minimumForefootPx -ge 25 -and
+        $_.maxContactErrorPx -le 1 -and $_.contactSamples -eq 6 -and $_.maxPitchChangeDegrees -le 16 -and
+        $_.minimumVisibleNearBootPx -gt 0
+    })
+    if ($feet.Count -ne 4) { throw "Incomplete ankle, forefoot or ground contact audit for $id." }
     $files = @{
         atlas = "$id/$($id)_Run_4Dir.png"
         frames = "$id/$($id)_Run_4Dir_Frames.png"
@@ -138,4 +144,4 @@ foreach ($item in $manifest.characters) {
         (Join-Path $PSScriptRoot $files.preview),[int[]]$item.durationsMs)
     Write-Output "$id passed 32 cels and 8 GIF frames"
 }
-Write-Output 'Verified 384 atlas cels, their published hashes, and 12 GIF timelines.'
+Write-Output 'Verified 384 cels, their 768 boot joint measurements, file hashes, and 12 GIF timelines.'

@@ -122,6 +122,7 @@ canvas { image-rendering:pixelated }
         <select id="compare" aria-label="비교할 프레임">
           <option value="-1">직전 프레임</option>
           <option value="1">다음 프레임</option>
+          <option value="before" hidden>수정 전</option>
         </select>
         <small id="ref-position"></small>
       </header>
@@ -147,7 +148,7 @@ canvas { image-rendering:pixelated }
   <p id="error" role="alert" hidden>캐릭터 시트를 불러오지 못했습니다.</p>
 </main>
 
-<script type="application/json" id="roster">[{"id":"guardian","name":"수호기사","motion":"경계하듯 시선과 몸통을 안정시키고, 방패를 앞세워 땅을 단단히 디디는 달리기.","durationsMs":[110,90,100,90,110,90,100,90],"files":{"atlas":"guardian/guardian_Run_4Dir.png","frames":"guardian/guardian_Run_4Dir_Frames.png","preview":"guardian/guardian_Run_4Dir_Preview.gif"},"sha256":{"atlas":"fc07adf19616930fa97c05392ce155fc076c9eb794c1ea7d60a1b78e1995467c","frames":"196874f97a0a1373c1e95e31ff31feb821ee571be5790efd2b15fd734af1b966","preview":"365813a466d6a5f8601bbe8298ac739b225e7c0d16214b94c4224953e36db2a7"}},{"id":"lance-knight","name":"랜스 창기사","motion":"자세를 곧게 세우고 일정한 리듬으로 전진한다. 창끝 흔들림이 적고 무릎을 앞으로 낸다.","durationsMs":[90,90,90,90,90,90,90,90],"files":{"atlas":"lance-knight/lance-knight_Run_4Dir.png","frames":"lance-knight/lance-knight_Run_4Dir_Frames.png","preview":"lance-knight/lance-knight_Run_4Dir_Preview.gif"},"sha256":{"atlas":"396a05e0e7ae897a3b12a1800af05d676d7147d73c3256ec612967135bcd6a3f","frames":"53130114f56c2bffbcbaabec5d6c5d605d7d63032594e827a3e7c94bf82cfff1","preview":"723952335368da9a4b47b55cb76996ff027fcc84f399951484f525852b376740"}},{"id":"hammer-knight","name":"성전 망치 기사","motion":"겁먹은 표정과 모은 팔을 유지한다. 망치를 가깝게 붙들고 짧게 내디딘 뒤 착지 때 무게가 실린다.","durationsMs":[120,110,100,90,120,110,100,90],"files":{"atlas":"hammer-knight/hammer-knight_Run_4Dir.png","frames":"hammer-knight/hammer-knight_Run_4Dir_Frames.png","preview":"hammer-knight/hammer-knight_Run_4Dir_Preview.gif"},"sha256":{"atlas":"a65566a0620189607262f8516d6e7a8b336d2f21a9fb17193424bd4585c19ef2","frames":"c9bce9d5abfe6bc684b0b9227cf364912bb9fefa467319d8033c522dd6944f07","preview":"6a5d121b986cc5343ae910f75ae8f1487948f69693033d29bdb23267d6d8cd40"}},{"id":"chronomancer","name":"시간술사","motion":"보폭과 착지 간격을 고르게 맞추고 손목은 회중시계를 들어 정확하게 고정한다.","durationsMs":[100,100,100,100,100,100,100,100],"files":{"atlas":"chronomancer/chronomancer_Run_4Dir.png","frames":"chronomancer/chronomancer_Run_4Dir_Frames.png","preview":"chronomancer/chronomancer_Run_4Dir_Preview.gif"},"sha256":{"atlas":"64df6b64818b27074701fd4c4d1950d42f94d28732a5833dd806d5e644f0eee9","frames":"18cd4fe80010c1776522cc04ef43f83bb2902988e7290140d7f880ed35953026","preview":"5fa12d791bbeb0c75d1ad459241026e2e13b2b53acd21e29abd4036f29ac1199"}},{"id":"bard","name":"음유시인","motion":"채비할 때 살짝 내려앉고 밀어 올릴 때 경쾌하게 튄다. 꽃 하프를 품에 들고 자유로운 팔에 박자를 준다.","durationsMs":[80,80,80,100,80,80,80,100],"files":{"atlas":"bard/bard_Run_4Dir.png","frames":"bard/bard_Run_4Dir_Frames.png","preview":"bard/bard_Run_4Dir_Preview.gif"},"sha256":{"atlas":"efe97948e0f269673cfec64ea63e92a4b129cc4097b64aa1e665284a6125cd27","frames":"c7d71e55097aab020fddaf859203e785b56ebdc60b1ac663be75e281ea6d20eb","preview":"6ec99730278f0cf8318d829af304946621ba93a55ace6ea6f4903cc73ca53684"}},{"id":"alchemist","name":"연금술사","motion":"양팔로 플라스크를 감싸 수평을 잡고 잰걸음으로 달린다. 고개와 손은 안정되고 가방과 옆머리가 늦게 움직인다.","durationsMs":[80,80,90,80,80,80,90,80],"files":{"atlas":"alchemist/alchemist_Run_4Dir.png","frames":"alchemist/alchemist_Run_4Dir_Frames.png","preview":"alchemist/alchemist_Run_4Dir_Preview.gif"},"sha256":{"atlas":"b2d73e8449d077bb345e793b3064c86b0d87c6a39e4088a811c161dd09499cb7","frames":"5158a0832f98191d786d32245ff94bde6ef1231d01d2d2227c5bf449fe697f31","preview":"886cdd2ba3f5c12e4591a6947ecbea1e74937601659fb6862fb19ccbba9a3912"}},{"id":"dual-blade","name":"쌍검 암살자","motion":"상체를 낮고 길게 뻗고, 칼 쥔 손은 허리 가까이 유지한다. 빠른 발 교대와 늦게 따라오는 은발이 특징이다.","durationsMs":[70,80,80,70,70,80,80,70],"files":{"atlas":"dual-blade/dual-blade_Run_4Dir.png","frames":"dual-blade/dual-blade_Run_4Dir_Frames.png","preview":"dual-blade/dual-blade_Run_4Dir_Preview.gif"},"sha256":{"atlas":"1e00de6029d9ac775d5b553acb8e172e03d04d4e8c4230e7bb596703af390169","frames":"7fd75d0599afb5ba5902038ab3b8e5c4e7aa677cc0326ac1678ff2d954ddba60","preview":"0c349d07e67f8343f3e8fb9f703962a923a817f7dc966196517b1a0d38a27c6c"}},{"id":"dragon-lancer","name":"용창사","motion":"상체를 앞으로 기울이고 뒷발로 길게 밀어낸다. 창 든 팔은 단단히 고정하고 반대 팔은 힘차게 흔든다.","durationsMs":[80,90,90,90,80,90,90,90],"files":{"atlas":"dragon-lancer/dragon-lancer_Run_4Dir.png","frames":"dragon-lancer/dragon-lancer_Run_4Dir_Frames.png","preview":"dragon-lancer/dragon-lancer_Run_4Dir_Preview.gif"},"sha256":{"atlas":"152b35f238c2df4230cf4a8798e53a2465b9670c1754c293ecd4b5add36a0a91","frames":"0346a6a8c06ba5fadc9216916a77df7913f0bee90b8404ab211562c41f85ad75","preview":"760b05dd589380f8246e821d03e0b41abbad2fd2f3f5d8d34cc3c5f6aba047da"}},{"id":"forest-archer","name":"숲의 궁수","motion":"발끝으로 가볍게 디디며 무릎을 빨리 회수한다. 시선은 진행 방향을 보고 모자 깃털과 망토가 뒤따른다.","durationsMs":[90,80,90,80,90,80,90,80],"files":{"atlas":"forest-archer/forest-archer_Run_4Dir.png","frames":"forest-archer/forest-archer_Run_4Dir_Frames.png","preview":"forest-archer/forest-archer_Run_4Dir_Preview.gif"},"sha256":{"atlas":"926988a0314ba53cf97d12d29143849173f6a98d1596b69a612c9be7f6f33aea","frames":"e2a33bf9fd29d8c59fe8573e7bc41bdfb8426c8a383bc59add3e4cf7c47184fc","preview":"38f2d27d81b11f6a5d81fd89537250d59beb49db06824ceeecbb3cf21fd45e60"}},{"id":"machinist","name":"기공사","motion":"상체를 단단하게 유지하며 규칙적으로 발을 구른다. 오른손의 장비는 어깨 쪽에 가까이 두고 왼팔을 작게 흔든다.","durationsMs":[80,90,90,80,80,90,90,80],"files":{"atlas":"machinist/machinist_Run_4Dir.png","frames":"machinist/machinist_Run_4Dir_Frames.png","preview":"machinist/machinist_Run_4Dir_Preview.gif"},"sha256":{"atlas":"27ae5b66a1f27baed2cd86a532ebe7a7a31a6c265885c9524c61d6973ce1b45e","frames":"9532d2de8ebfce294ac262349d1dae08969141d1bb600b907f3a853915930bed","preview":"341d3ccb25287c9b4419efb19d9b27414855e6fa34f93d749d690d29be4d85e6"}},{"id":"nebula-mage","name":"성운술사","motion":"가볍게 미끄러지듯 발을 앞으로 뻗으며 상체를 조용히 유지한다. 천구는 가슴 높이에서 수평을 유지한다.","durationsMs":[100,100,100,90,100,100,100,90],"files":{"atlas":"nebula-mage/nebula-mage_Run_4Dir.png","frames":"nebula-mage/nebula-mage_Run_4Dir_Frames.png","preview":"nebula-mage/nebula-mage_Run_4Dir_Preview.gif"},"sha256":{"atlas":"40dda7f2263a7426babf046c672505f2405c51c20b80a8f666b71eecbb103289","frames":"61ab3b48316a78882580be7c852df69a0a09e7effcff2c8a99deb50bbd425225","preview":"64f7b124dd30c2fb4849bafb480c591c86e49878ed1962dee5aedd10eb316cec"}},{"id":"causality-mage","name":"인과술사","motion":"상체를 안정시킨 채 보폭을 또렷하게 끊어 간다. 등 뒤 금빛 고리는 중심에 붙여 움직이고 팔은 몸 가까이 모은다.","durationsMs":[110,100,100,100,110,100,100,100],"files":{"atlas":"causality-mage/causality-mage_Run_4Dir.png","frames":"causality-mage/causality-mage_Run_4Dir_Frames.png","preview":"causality-mage/causality-mage_Run_4Dir_Preview.gif"},"sha256":{"atlas":"bd32d4117c276fee305f4e80db6f66960059e46c2ad7cfa1a0825066908efad1","frames":"32091f9f42edb17bd6a6485c5f50dbc7aa62131060558be4e7b6382534d317bd","preview":"a1b0702f7e46bf13d971d7f1897f701655ccc8a7df35fd268b2b92f9a93fc076"}}]</script>
+<script type="application/json" id="roster">[{"id":"guardian","name":"수호기사","motion":"경계하듯 시선과 몸통을 안정시키고, 방패를 앞세워 땅을 단단히 디디는 달리기.","durationsMs":[110,90,100,90,110,90,100,90],"files":{"atlas":"guardian/guardian_Run_4Dir.png","frames":"guardian/guardian_Run_4Dir_Frames.png","preview":"guardian/guardian_Run_4Dir_Preview.gif"},"sha256":{"atlas":"36bb384ba6e08fe68f2c0caf343e2ccd96b28fa413f5938e2cdbdfd242ffe995","frames":"8024cad7548f08b5d914159d9ab287daada4b2b87901b3d0261dc4b479b8e58f","preview":"903f88ba4dfa7b0ac190a8ce5b123b460a2273aef83ca05095de28516e372c23"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/guardian/guardian_Run_4Dir.png"},{"id":"lance-knight","name":"랜스 창기사","motion":"자세를 곧게 세우고 일정한 리듬으로 전진한다. 창끝 흔들림이 적고 무릎을 앞으로 낸다.","durationsMs":[90,90,90,90,90,90,90,90],"files":{"atlas":"lance-knight/lance-knight_Run_4Dir.png","frames":"lance-knight/lance-knight_Run_4Dir_Frames.png","preview":"lance-knight/lance-knight_Run_4Dir_Preview.gif"},"sha256":{"atlas":"b035820f0c5ed8c14370375566f8d17569656d74bd0329b326f3a72d62913cb3","frames":"7617aca7f010bbb8db39c6ebfdd597af455b006510a575e6bb8f5f811ced0728","preview":"c7b44718382827aa2390fae0629ff48c6b8f168720247cee0baa1edcb87b6c51"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/lance-knight/lance-knight_Run_4Dir.png"},{"id":"hammer-knight","name":"성전 망치 기사","motion":"겁먹은 표정과 모은 팔을 유지한다. 망치를 가깝게 붙들고 짧게 내디딘 뒤 착지 때 무게가 실린다.","durationsMs":[120,110,100,90,120,110,100,90],"files":{"atlas":"hammer-knight/hammer-knight_Run_4Dir.png","frames":"hammer-knight/hammer-knight_Run_4Dir_Frames.png","preview":"hammer-knight/hammer-knight_Run_4Dir_Preview.gif"},"sha256":{"atlas":"ed5929742c4ffafd3a4fa040a4154515a722808aebb2702d329bff3924695c40","frames":"c4dddaabd73bd58c336907435d6f7dcadfd0bb834b43d88fb6d2166af406322c","preview":"206d4af5e40df44c58c52cf9506d832027b49953f36d0ef61428541f3e3d5b15"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/hammer-knight/hammer-knight_Run_4Dir.png"},{"id":"chronomancer","name":"시간술사","motion":"보폭과 착지 간격을 고르게 맞추고 손목은 회중시계를 들어 정확하게 고정한다.","durationsMs":[100,100,100,100,100,100,100,100],"files":{"atlas":"chronomancer/chronomancer_Run_4Dir.png","frames":"chronomancer/chronomancer_Run_4Dir_Frames.png","preview":"chronomancer/chronomancer_Run_4Dir_Preview.gif"},"sha256":{"atlas":"816bab80d47377d2a83731d27fe4f864592efebf4bf74f76230f4b756b6d6204","frames":"40c6504a1acc72f78b9a1148d26556ebe7432093f27bda4e77782d9e816c1f68","preview":"52b0db5f4f9e29591b3755297659ae6a794a6ceb27f999ba575a59a04f3b70c8"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/chronomancer/chronomancer_Run_4Dir.png"},{"id":"bard","name":"음유시인","motion":"채비할 때 살짝 내려앉고 밀어 올릴 때 경쾌하게 튄다. 꽃 하프를 품에 들고 자유로운 팔에 박자를 준다.","durationsMs":[80,80,80,100,80,80,80,100],"files":{"atlas":"bard/bard_Run_4Dir.png","frames":"bard/bard_Run_4Dir_Frames.png","preview":"bard/bard_Run_4Dir_Preview.gif"},"sha256":{"atlas":"25caf8e23f420486d7c0ecfe63e12d0cc3cfb5adedbbe64fa4e7410177a442a0","frames":"63728ca5df5b9eed9f4453045d683b1dc0b3ba003d633497b8dbb6dbdfaaebc8","preview":"13bd5337535303da6452139f525f4b164c8f04a931f29b1274d0f6b9a09a03bd"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/bard/bard_Run_4Dir.png"},{"id":"alchemist","name":"연금술사","motion":"양팔로 플라스크를 감싸 수평을 잡고 잰걸음으로 달린다. 고개와 손은 안정되고 가방과 옆머리가 늦게 움직인다.","durationsMs":[80,80,90,80,80,80,90,80],"files":{"atlas":"alchemist/alchemist_Run_4Dir.png","frames":"alchemist/alchemist_Run_4Dir_Frames.png","preview":"alchemist/alchemist_Run_4Dir_Preview.gif"},"sha256":{"atlas":"390d6e0b612912ebcefdfe4235a4fc8a6427ee32998b01e9b1536bd1257c30be","frames":"b2bd8fc6a14ebdc1da6e92ac8ed969b13407a3aabd59c6a13f0573b4edcd13a6","preview":"f15c431b9387c130008540fa430f60974c3293634b3e4d15b1c42ce30ed68a61"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/alchemist/alchemist_Run_4Dir.png"},{"id":"dual-blade","name":"쌍검 암살자","motion":"상체를 낮고 길게 뻗고, 칼 쥔 손은 허리 가까이 유지한다. 빠른 발 교대와 늦게 따라오는 은발이 특징이다.","durationsMs":[70,80,80,70,70,80,80,70],"files":{"atlas":"dual-blade/dual-blade_Run_4Dir.png","frames":"dual-blade/dual-blade_Run_4Dir_Frames.png","preview":"dual-blade/dual-blade_Run_4Dir_Preview.gif"},"sha256":{"atlas":"bd387e26daf6269f2445fa86fa3d99b862c2e903f8bf24c9e0ffcb176f30a923","frames":"2de242e039aa9ce2cb2425fbee2f7d31e1fe9e359684fd9de19a98294012f8ff","preview":"2bb8004d937a34d6ac18238559bf38ac227e4400332d82f74d73aafc68ebacb8"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/dual-blade/dual-blade_Run_4Dir.png"},{"id":"dragon-lancer","name":"용창사","motion":"상체를 앞으로 기울이고 뒷발로 길게 밀어낸다. 창 든 팔은 단단히 고정하고 반대 팔은 힘차게 흔든다.","durationsMs":[80,90,90,90,80,90,90,90],"files":{"atlas":"dragon-lancer/dragon-lancer_Run_4Dir.png","frames":"dragon-lancer/dragon-lancer_Run_4Dir_Frames.png","preview":"dragon-lancer/dragon-lancer_Run_4Dir_Preview.gif"},"sha256":{"atlas":"0325eaee3a8955613226516723be8569161e9f333ecca651e28200ee0de45971","frames":"bafa03940ddaa7895797651eda9b0c1b20647270ac1bc5a37cebdc5c108c592e","preview":"9da81eeb42272a4eb5df701355da190098ee250b79598f33bdfe6c2291b62628"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/dragon-lancer/dragon-lancer_Run_4Dir.png"},{"id":"forest-archer","name":"숲의 궁수","motion":"발끝으로 가볍게 디디며 무릎을 빨리 회수한다. 시선은 진행 방향을 보고 모자 깃털과 망토가 뒤따른다.","durationsMs":[90,80,90,80,90,80,90,80],"files":{"atlas":"forest-archer/forest-archer_Run_4Dir.png","frames":"forest-archer/forest-archer_Run_4Dir_Frames.png","preview":"forest-archer/forest-archer_Run_4Dir_Preview.gif"},"sha256":{"atlas":"307a9c7d11e5c0bf4e019c418ed32f031784915c97e2059a33906c75de6708a9","frames":"6d24488a3cebce893ad2a0437f3eb66a8830deccf2ea895309895d9fccba5854","preview":"384d914229c9e3a0fee01590fd7f3888c66b43589cfbef171aa12b607b7669b6"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/forest-archer/forest-archer_Run_4Dir.png"},{"id":"machinist","name":"기공사","motion":"상체를 단단하게 유지하며 규칙적으로 발을 구른다. 오른손의 장비는 어깨 쪽에 가까이 두고 왼팔을 작게 흔든다.","durationsMs":[80,90,90,80,80,90,90,80],"files":{"atlas":"machinist/machinist_Run_4Dir.png","frames":"machinist/machinist_Run_4Dir_Frames.png","preview":"machinist/machinist_Run_4Dir_Preview.gif"},"sha256":{"atlas":"d1a936239e53213cc59a200b379681b13b1d0d005b57fff3600c0fcfad1bb466","frames":"2684ac94f8ad5529e0ee32097d6b67c71babe90c2cb7e1dffbecf9405b306e48","preview":"44e63b11d0925f58954cadf8195f1555315962c22e7a51fb292f60151b059c7f"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/machinist/machinist_Run_4Dir.png"},{"id":"nebula-mage","name":"성운술사","motion":"가볍게 미끄러지듯 발을 앞으로 뻗으며 상체를 조용히 유지한다. 천구는 가슴 높이에서 수평을 유지한다.","durationsMs":[100,100,100,90,100,100,100,90],"files":{"atlas":"nebula-mage/nebula-mage_Run_4Dir.png","frames":"nebula-mage/nebula-mage_Run_4Dir_Frames.png","preview":"nebula-mage/nebula-mage_Run_4Dir_Preview.gif"},"sha256":{"atlas":"d998664110decc8b921cda3199097106d7e55fff5d625ea5e148b7a29d913b8c","frames":"512e74c16b6408a3777dbfd427c49a51d5f16bd1a7fa969c2a7dad5caef7eac4","preview":"eeaf44c71795df0550418d71bd5f0e3848b8f788adcec34f52dd567050ed4bc8"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/nebula-mage/nebula-mage_Run_4Dir.png"},{"id":"causality-mage","name":"인과술사","motion":"상체를 안정시킨 채 보폭을 또렷하게 끊어 간다. 등 뒤 금빛 고리는 중심에 붙여 움직이고 팔은 몸 가까이 모은다.","durationsMs":[110,100,100,100,110,100,100,100],"files":{"atlas":"causality-mage/causality-mage_Run_4Dir.png","frames":"causality-mage/causality-mage_Run_4Dir_Frames.png","preview":"causality-mage/causality-mage_Run_4Dir_Preview.gif"},"sha256":{"atlas":"53a4a1457d9d309f0737f4450e7629bb2678973ae3a261955ed1332c344ce40a","frames":"0e5a6e5d06956af8eb36075fa08c15b6cc202018c11c74b6d8329e5a9819bacd","preview":"2521a9e7ea01a51d3278e26e181a145c2cfe74641991dc097d37742963b637c1"},"before":"https://raw.githubusercontent.com/godking5070/coopraid3d/c9204cc06f1f0647996b6715abe0a775b9ef4f5b/Character-Production/Quarter-View/Run-4Dir/causality-mage/causality-mage_Run_4Dir.png"}]</script>
 <script>(() => {
   const get = id => document.getElementById(id);
   const roster = JSON.parse(get('roster').textContent);
@@ -162,8 +163,9 @@ canvas { image-rendering:pixelated }
   };
   const contact = ['왼발 착지','왼발 지지','왼발 밀기','공중','오른발 착지','오른발 지지','오른발 밀기','공중'];
   const sprites = new Map();
+  const previousSheets = new Map();
   let frame = 0, playing = false, previous = null, elapsed = 0, request = 0;
-  let sheet, character, revision = 0;
+  let sheet, previousSheet, character, revision = 0, baselineFailed = false;
 
   for (const item of roster) choice.add(new Option(item.name, item.id));
   if (roster.some(item => item.id === location.hash.slice(1))) choice.value = location.hash.slice(1);
@@ -182,27 +184,61 @@ canvas { image-rendering:pixelated }
     thumbs.push({button, canvas});
   }
 
-  function update(canvas, index, crop) {
+  function fitPixels(canvas) {
+    const stage = canvas.parentElement;
+    if (!stage.classList.contains('stage')) return;
+    const ratio = window.devicePixelRatio || 1;
+    const zoom = Math.floor(Math.min(stage.clientWidth * ratio / canvas.width,
+      (stage.clientHeight - 6) * ratio / canvas.height));
+    if (zoom < 1) {
+      canvas.style.width = '';
+      canvas.style.height = '';
+      canvas.style.transform = '';
+      delete canvas.dataset.pixelScale;
+      return;
+    }
+    canvas.style.width = (canvas.width * zoom / ratio) + 'px';
+    canvas.style.height = (canvas.height * zoom / ratio) + 'px';
+    canvas.style.transform = '';
+    const {left,top} = canvas.getBoundingClientRect();
+    canvas.style.transform = 'translate(' + ((Math.round(left * ratio) - left * ratio) / ratio) +
+      'px,' + ((Math.round(top * ratio) - top * ratio) / ratio) + 'px)';
+    canvas.dataset.pixelScale = zoom;
+  }
+
+  const rasterViews = [get('candidate'),get('reference')];
+  const fitViews = () => rasterViews.forEach(fitPixels);
+  if (typeof ResizeObserver === 'function') {
+    const resized = new ResizeObserver(fitViews);
+    for (const canvas of rasterViews) resized.observe(canvas.parentElement);
+  }
+  window.addEventListener('resize',fitViews);
+  window.addEventListener('scroll',fitViews,{passive:true});
+
+  function update(canvas, index, crop, image = sheet) {
     const [x,y,width,height] = crop;
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
+      fitPixels(canvas);
     }
     const row = Number(directions.value);
     const paint = canvas.getContext('2d');
     paint.imageSmoothingEnabled = false;
     paint.clearRect(0,0,width,height);
-    paint.drawImage(sheet, 128 * index + x, 160 * row + y, width,height, 0,0,width,height);
+    if (image) paint.drawImage(image, 128 * index + x, 160 * row + y, width,height, 0,0,width,height);
   }
 
   function draw() {
     if (!sheet) return;
-    const other = (frame + Number(get('compare').value) + 8) % 8;
+    const before = get('compare').value === 'before';
+    const other = before ? frame : (frame + Number(get('compare').value) + 8) % 8;
     const crop = regions[get('zoom').value];
     update(get('candidate'),frame,crop);
-    update(get('reference'),other,crop);
+    update(get('reference'),other,crop,before ? (previousSheet || null) : sheet);
     get('position').textContent = (frame + 1) + ' / 8';
-    get('ref-position').textContent = (other + 1) + ' / 8';
+    get('ref-position').textContent = before && !previousSheet ?
+      (baselineFailed ? '불러오기 실패' : '불러오는 중') : (other + 1) + ' / 8';
     get('support').textContent = contact[frame];
     document.body.dataset.frame = frame + 1;
     for (const [i,thumb] of thumbs.entries()) thumb.button.ariaCurrent = String(i === frame);
@@ -249,6 +285,8 @@ canvas { image-rendering:pixelated }
     document.body.dataset.ready = 'false';
     playButton.disabled = true;
     const entry = roster.find(item => item.id === choice.value);
+    get('compare').querySelector('[value="before"]').hidden = !entry.before;
+    if (!entry.before && get('compare').value === 'before') get('compare').value = '-1';
     get('motion').textContent = entry.motion;
     get('error').hidden = true;
     get('assets').hidden = !entry.files;
@@ -270,12 +308,20 @@ canvas { image-rendering:pixelated }
       if (selecting !== revision) return;
       sheet = next;
       character = entry;
-      frame = 0;
+      previousSheet = null;
+      baselineFailed = false;
+      frame = entry.focus?.frame ?? 0;
+      if (entry.focus) {
+        directions.value = entry.focus.direction;
+        get('zoom').value = 'feet';
+        get('compare').value = 'before';
+      }
       timeline();
       draw();
       document.body.dataset.ready = 'true';
       document.body.dataset.character = entry.id;
       playButton.disabled = false;
+      if (get('compare').value === 'before') loadBefore();
     } catch {
       sprites.delete(entry.id);
       if (selecting !== revision) return;
@@ -291,10 +337,46 @@ canvas { image-rendering:pixelated }
     }
   }
 
+  async function loadBefore() {
+    const entry = character;
+    if (!entry?.before || get('compare').value !== 'before') {
+      draw();
+      return;
+    }
+    if (previousSheet) {
+      draw();
+      return;
+    }
+    const selecting = revision;
+    baselineFailed = false;
+    if (!previousSheets.has(entry.id)) {
+      const image = new Image();
+      if (!entry.before.startsWith('data:')) image.crossOrigin = 'anonymous';
+      image.src = entry.before;
+      previousSheets.set(entry.id,image.decode().then(() => {
+        if (image.naturalWidth !== 1024 || image.naturalHeight !== 640) throw new Error('Wrong comparison dimensions.');
+        return image;
+      }));
+    }
+    draw();
+    try {
+      const image = await previousSheets.get(entry.id);
+      if (selecting !== revision) return;
+      previousSheet = image;
+      draw();
+    } catch {
+      previousSheets.delete(entry.id);
+      if (selecting === revision) {
+        baselineFailed = true;
+        draw();
+      }
+    }
+  }
+
   choice.addEventListener('change',loadCharacter);
   directions.addEventListener('change',() => { timeline(); draw(); });
   get('zoom').addEventListener('change',draw);
-  get('compare').addEventListener('change',draw);
+  get('compare').addEventListener('change',loadBefore);
   get('speed').addEventListener('change',() => { previous = null; elapsed = 0; });
   get('prev').addEventListener('click',() => stepTo(frame - 1));
   get('next').addEventListener('click',() => stepTo(frame + 1));
