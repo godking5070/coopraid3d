@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>이리스 횡스크롤 이동</title>
+  <style>
+    html {
+      color-scheme: light dark;
+      background: var(--background,#181622);
+      color: var(--foreground,#f0ebf4);
+      font-family: var(--font-sans,system-ui,sans-serif);
+    }
+    body { margin:0; }
+    main { box-sizing:border-box; width:min(930px,100%); margin:auto; padding:clamp(12px,3vw,24px); }
+    h1 { margin:0 0 11px; font-size:clamp(21px,4vw,30px); line-height:1.25; }
+    button,select {
+      box-sizing:border-box;
+      font:inherit;
+      color:var(--card-foreground,#f0ebf4);
+      background:var(--card,#252232);
+      border:1px solid var(--border,#51485f);
+      border-radius:var(--radius,8px);
+      cursor:pointer;
+    }
+    button:disabled { opacity:.55; cursor:default; }
+    button[aria-pressed="true"],button[aria-current="true"] {
+      color:var(--accent-foreground,#1e1a2c);
+      background:var(--accent,#d9c7eb);
+      border-color:var(--accent,#d9c7eb);
+    }
+    :focus-visible { outline:2px solid var(--ring,#a28bc6); outline-offset:3px; }
+    .stage {
+      height:clamp(234px,45vw,420px);
+      overflow:hidden;
+      border:1px solid var(--border,#51485f);
+      border-radius:var(--radius,10px);
+      background:#241f37;
+    }
+    #scene { display:block; width:100%; height:100%; image-rendering:pixelated; }
+    .controls { display:flex; flex-wrap:wrap; gap:10px 18px; margin-top:12px; align-items:center; justify-content:space-between; }
+    .group { display:flex; gap:6px; align-items:center; }
+    .controls button { min-height:44px; padding:8px 13px; font-size:14px; }
+    .direction button { touch-action:none; user-select:none; min-width:68px; }
+    .hint { margin:8px 0 12px; color:var(--muted-foreground,#bfb4cb); font-size:12px; }
+    kbd { font:inherit; }
+    details { border-top:1px solid var(--border,#51485f); padding:10px 0 0; }
+    summary { font-size:14px; cursor:pointer; }
+    .inspect { margin:10px 0 8px; display:flex; flex-wrap:wrap; align-items:center; gap:7px; font-size:13px; }
+    .inspect button,.inspect select { min-height:34px; padding:4px 9px; }
+    .inspect label { margin-inline-start:4px; }
+    .frames { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px; }
+    .frames button { min-width:0; padding:3px 3px 5px; font-size:12px; }
+    .frames canvas { display:block; width:100%; margin:0 auto 4px; background:#352e43; image-rendering:pixelated; border-radius:3px; }
+    #load-error { padding:8px 0; font-size:14px; }
+    [hidden] { display:none !important; }
+    @media (max-width:480px) {
+      .controls { gap:8px; }
+      .controls button { min-height:44px; padding:6px 10px; }
+      .frames { grid-template-columns:repeat(4,minmax(0,1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>이리스 횡스크롤 이동</h1>
+    <div class="stage" id="stage">
+      <canvas id="scene" aria-label="이리스가 좌우로 이동하는 픽셀 풍경" tabindex="0"></canvas>
+    </div>
+    <p id="load-error" role="alert" hidden>스프라이트를 불러오지 못했습니다. HTML과 스프라이트 PNG를 같은 폴더에 두고 다시 열어 주세요.</p>
+    <div class="controls">
+      <div class="group direction" aria-label="이동 방향" role="group">
+        <button type="button" id="left" aria-pressed="false" disabled>← 왼쪽</button>
+        <button type="button" id="right" aria-pressed="false" disabled>오른쪽 →</button>
+      </div>
+      <div class="group" aria-label="이동 방식" role="group">
+        <button type="button" id="walk" aria-pressed="false" disabled>걷기</button>
+        <button type="button" id="run" aria-pressed="true" disabled>달리기</button>
+      </div>
+    </div>
+    <p class="hint"><kbd>←</kbd> <kbd>→</kbd> 또는 <kbd>A</kbd> <kbd>D</kbd>를 누르거나 화면의 방향 버튼을 길게 누르세요.</p>
+    <details id="frame-review">
+      <summary>프레임별 보기</summary>
+      <div class="inspect">
+        <button type="button" id="previous" disabled>이전</button>
+        <button type="button" id="preview-play" aria-pressed="false" disabled>재생</button>
+        <button type="button" id="next" disabled>다음</button>
+        <label>속도 <select id="rate" disabled><option value="1">1×</option><option value="0.5">0.5×</option></select></label>
+        <output id="frame-count" aria-label="현재 프레임"></output>
+      </div>
+      <div class="frames" id="frames"></div>
+    </details>
+  </main>
+  <script>
+    (async () => {
+      const get = id => document.getElementById(id);
+      const stage = get('stage');
+      const scene = get('scene');
+      const ctx = scene.getContext('2d', { alpha:false });
+      const left = get('left');
+      const right = get('right');
+      const play = get('preview-play');
+      const rate = get('rate');
+      const cell = { width:128, height:160, anchorX:55, anchorY:128, count:8 };
+      const clips = { walk:{ row:0, ms:135, speed:57 }, run:{ row:1, ms:90, speed:119 } };
+      const worldWidth = 2030;
+      const clamp = (value,lo,hi) => Math.max(lo,Math.min(hi,value));
+      const sprite = new Image();
+      sprite.src = 'Iris_08_Side_Locomotion.png';
+      try {
+        await sprite.decode();
+        if (sprite.naturalWidth !== cell.width*cell.count || sprite.naturalHeight !== cell.height*2) {
+          throw new Error('Invalid side locomotion atlas');
+        }
+      } catch {
+        get('load-error').hidden = false;
+        return;
+      }
+
+      const held = new Map();
+      let position = 264, camera = 0, facing = 1;
+      let mode = 'run', phase = 0;
+      let inspecting = false, previewPlaying = false;
+      let clock = null, request = 0;
+      let moving = false, thumbFacing = 0, thumbMode = '';
+      const thumbs = [];
+
+      for (let i=0;i<cell.count;i++) {
+        const button = document.createElement('button');
+        const canvas = document.createElement('canvas');
+        button.type = 'button';
+        button.setAttribute('aria-label', (i+1)+'번 프레임');
+        canvas.width = 90;
+        canvas.height = 109;
+        canvas.setAttribute('aria-hidden','true');
+        button.append(canvas,String(i+1));
+        button.addEventListener('click',() => inspect(i));
+        get('frames').append(button);
+        thumbs.push({ button, canvas });
+      }
+
+      function paintSprite(painter, clip, frame, direction, x, y) {
+        painter.save();
+        painter.translate(Math.round(x),Math.round(y));
+        painter.scale(direction,1);
+        painter.imageSmoothingEnabled = false;
+        painter.drawImage(sprite,frame*cell.width,clip.row*cell.height,cell.width,cell.height,
+          -cell.anchorX,-cell.anchorY,cell.width,cell.height);
+        painter.restore();
+      }
+
+      function scenery(w,h,floor) {
+        const sky = ctx.createLinearGradient(0,0,0,floor);
+        sky.addColorStop(0,'#201c35');
+        sky.addColorStop(.68,'#534161');
+        sky.addColorStop(1,'#78516c');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0,0,w,h);
+
+        const moonX = Math.round(w*.72-camera*.043);
+        const moonY = Math.round(floor*.30);
+        ctx.fillStyle = '#a592b0';
+        for (let dy=-24;dy<=24;dy+=2) {
+          const inset = Math.floor(Math.sqrt(26*26-dy*dy));
+          ctx.fillRect(moonX-inset,moonY+dy,inset*2,2);
+        }
+        ctx.fillStyle = '#d8c6d4';
+        for (let dy=-22;dy<=22;dy+=2) {
+          const inset = Math.floor(Math.sqrt(23*23-dy*dy));
+          ctx.fillRect(moonX-inset,moonY+dy,inset*2,2);
+        }
+        for (let i=0;i<37;i++) {
+          const x = ((97*i+27-Math.round(camera*.10))%703+703)%703;
+          const y = 9 + (53*i)%Math.max(15,Math.floor(floor*.65));
+          ctx.fillStyle = i%5===0 ? '#e9cccf' : '#9d88ad';
+          ctx.fillRect(x,y,i%5===0 ? 2 : 1,1);
+        }
+
+        ridge(w,floor-41,camera*.23,'#534363',17,29);
+        ridge(w,floor-22,camera*.43,'#393047',20,23);
+        ctx.fillStyle = '#c4aaa9';
+        ctx.fillRect(0,floor-10,w,2);
+        ctx.fillStyle = '#816276';
+        ctx.fillRect(0,floor-8,w,22);
+        ctx.fillStyle = '#6a4d64';
+        ctx.fillRect(0,floor+14,w,3);
+        ctx.fillStyle = '#3c2e45';
+        ctx.fillRect(0,floor+17,w,h-floor);
+
+        const start = Math.floor(camera/19);
+        for (let i=start;i*19<camera+w+19;i++) {
+          const x = Math.round(i*19-camera);
+          const y = floor+((i*19)%17)-5;
+          ctx.fillStyle = i%4===0 ? '#b48b99' : '#9d7588';
+          ctx.fillRect(x,y,3+(i*5)%9,1);
+          if (i%6===1) {
+            ctx.fillStyle = '#b0a7c0';
+            ctx.fillRect(x+4,floor-14,1,7);
+            ctx.fillRect(x+2,floor-13,5,1);
+            ctx.fillRect(x+3,floor-15,3,1);
+          }
+        }
+      }
+
+      function ridge(w, base, shift, color, height, span) {
+        ctx.fillStyle = color;
+        for (let x=0;x<w;x+=3) {
+          const p = x + shift;
+          const rise = Math.round((Math.sin(p/span)+Math.sin(p/(span*2.8))*.55+.95)*height);
+          ctx.fillRect(x,base-rise,3,rise+65);
+        }
+      }
+
+      function render() {
+        const w=scene.width,h=scene.height;
+        const ground = Math.round(h*.76), x = Math.round(position-camera);
+        scenery(w,h,ground);
+        ctx.fillStyle = 'rgba(34,22,44,.25)';
+        ctx.fillRect(x-10,ground-2,23,4);
+        ctx.fillRect(x-7,ground+2,17,2);
+        const active = moving || inspecting;
+        const clip = active ? mode : 'walk';
+        const frame = active ? Math.floor(phase) : 2;
+        paintSprite(ctx,clips[clip],frame,facing,x,ground);
+        if (get('frame-review').open) {
+          if (facing!==thumbFacing || mode!==thumbMode) {
+            for (const [index, thumb] of thumbs.entries()) {
+              const brush = thumb.canvas.getContext('2d');
+              brush.clearRect(0,0,90,109);
+              paintSprite(brush,clips[mode],index,facing,44,94);
+            }
+            thumbFacing=facing;
+            thumbMode=mode;
+          }
+          thumbs.forEach(({ button },index) => {
+            if (active && frame===index) button.setAttribute('aria-current','true');
+            else button.removeAttribute('aria-current');
+          });
+          get('frame-count').value = active ? (frame+1)+' / 8' : '';
+        }
+        scene.dataset.state = moving ? 'moving' : inspecting ? 'inspection' : 'standing';
+        scene.dataset.facing = facing < 0 ? 'left' : 'right';
+        scene.dataset.position = position.toFixed(2);
+        scene.dataset.camera = camera.toFixed(2);
+        scene.dataset.clip = clip;
+        scene.dataset.frame = String(frame+1);
+      }
+
+      function resize() {
+        const scale = stage.clientWidth >= 570 ? 2 : 1;
+        scene.width = Math.max(1,Math.floor(stage.clientWidth/scale));
+        scene.height = Math.max(1,Math.floor(stage.clientHeight/scale));
+        camera = clamp(position-scene.width/2,0,Math.max(0,worldWidth-scene.width));
+        render();
+      }
+
+      function tick(now) {
+        request = 0;
+        const dt = clock===null ? 0 : clamp((now-clock)/1000,0,.05);
+        clock = now;
+        const direction = Array.from(held.values()).at(-1) || 0;
+        const clip = clips[mode];
+        const min = 48, max = worldWidth-48;
+        const canMove = direction>0 ? position<max : direction<0 && position>min;
+        if (direction) facing = direction;
+        moving = Boolean(canMove);
+        if (moving) {
+          const next = clamp(position+direction*clip.speed*dt,min,max);
+          const advancedMs = Math.abs(next-position)/clip.speed*1000;
+          position = next;
+          phase = (phase+advancedMs/clip.ms)%cell.count;
+        } else if (previewPlaying) {
+          phase = (phase+(dt*1000/clip.ms)*Number(rate.value))%cell.count;
+        }
+
+        const w=scene.width;
+        const leftEdge = position-w*.36, rightEdge = position-w*.64;
+        const target = clamp(clamp(camera,rightEdge,leftEdge),0,Math.max(0,worldWidth-w));
+        const gap = target-camera;
+        camera += Math.abs(gap)<.06 ? gap : gap*Math.min(1,dt*12);
+        render();
+        if (moving || previewPlaying || Math.abs(gap)>.06) wake();
+        else clock = null;
+      }
+
+      function wake() {
+        if (!request) request = requestAnimationFrame(tick);
+      }
+
+      function playback(active) {
+        previewPlaying=active;
+        play.textContent = active ? '일시정지' : '재생';
+        play.setAttribute('aria-pressed',String(active));
+      }
+
+      function inspect(frame, active=false) {
+        held.clear();
+        updateDirections();
+        moving = false;
+        inspecting = true;
+        phase = (frame+cell.count)%cell.count;
+        playback(active);
+        render();
+        wake();
+      }
+
+      function updateDirections() {
+        const dir = Array.from(held.values()).at(-1) || 0;
+        left.setAttribute('aria-pressed',String(dir===-1));
+        right.setAttribute('aria-pressed',String(dir===1));
+      }
+
+      function press(key,direction) {
+        if (held.has(key)) return;
+        if (!held.size) phase=0;
+        held.set(key,direction);
+        inspecting = false;
+        playback(false);
+        updateDirections();
+        wake();
+      }
+
+      function release(key) {
+        held.delete(key);
+        updateDirections();
+        wake();
+      }
+
+      function stop() {
+        held.clear();
+        playback(false);
+        updateDirections();
+        clock = null;
+        wake();
+      }
+
+      const arrows = { ArrowLeft:-1, KeyA:-1, ArrowRight:1, KeyD:1 };
+      document.addEventListener('keydown',event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.target===rate) return;
+        let direction = arrows[event.code];
+        if (event.code==='Enter' || event.code==='Space') {
+          direction = event.target===left ? -1 : event.target===right ? 1 : 0;
+        }
+        if (!direction) return;
+        event.preventDefault();
+        press(event.code,direction);
+      });
+      document.addEventListener('keyup',event => {
+        if (held.has(event.code)) {
+          event.preventDefault();
+          release(event.code);
+        }
+      });
+      for (const [button,direction] of [[left,-1],[right,1]]) {
+        const token = event => 'pointer-'+event.pointerId;
+        button.addEventListener('pointerdown',event => {
+          if (event.button!==0) return;
+          event.preventDefault();
+          button.setPointerCapture(event.pointerId);
+          press(token(event),direction);
+        });
+        for (const eventName of ['pointerup','pointercancel','lostpointercapture']) {
+          button.addEventListener(eventName,event => release(token(event)));
+        }
+      }
+
+      for (const value of Object.keys(clips)) {
+        get(value).addEventListener('click',() => {
+          mode = value;
+          for (const name of Object.keys(clips)) get(name).setAttribute('aria-pressed',String(name===mode));
+          render();
+        });
+      }
+      get('previous').addEventListener('click',() => inspect(Math.floor(phase)-1));
+      get('next').addEventListener('click',() => inspect(Math.floor(phase)+1));
+      play.addEventListener('click',() => inspect(Math.floor(phase),!previewPlaying));
+      get('frame-review').addEventListener('toggle',() => {
+        if (!get('frame-review').open) {
+          inspecting=false;
+          playback(false);
+        }
+        render();
+      });
+      addEventListener('blur',stop);
+      document.addEventListener('visibilitychange',() => { if (document.hidden) stop(); });
+      new ResizeObserver(resize).observe(stage);
+      for (const control of document.querySelectorAll('button,select')) control.disabled=false;
+      resize();
+      document.body.dataset.ready = 'true';
+    })();
+  </script>
+</body>
+</html>
