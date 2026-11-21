@@ -1,7 +1,7 @@
 [
     {
         "id":  "guardian",
-        "sha256":  "1da648abb0974c29566a0dd5097002dcfbe1cf265bfd6906e3e52a6943e0616f",
+        "sha256":  "88af5a7cbb96eb0c9dd5296af40b379f8d5cc741ab4d12624360e76e3afe3fc3",
         "checkedCels":  16,
         "directions":  [
                            {
@@ -10,17 +10,17 @@
                                "elevationDegrees":  30,
                                "maxProjectionErrorDegrees":  2E-05,
                                "silhouetteHeightRangePx":  [
-                                                               93,
-                                                               93
+                                                               91,
+                                                               95
                                                            ],
                                "bottomRangePx":  [
-                                                     131,
-                                                     134
+                                                     129,
+                                                     136
                                                  ],
                                "maxAnkleStepPx":  11.75,
                                "changedSilhouetteFraction":  [
-                                                                 0.0761,
-                                                                 0.174
+                                                                 0.1043,
+                                                                 0.1835
                                                              ],
                                "alignedHeadChangeFraction":  0,
                                "removedLoosePixels":  0,
@@ -33,10 +33,29 @@
                                "maxContactErrorPx":  0.4,
                                "contactSamples":  6,
                                "maxPitchChangeDegrees":  15,
-                               "minimumVisibleNearBootPx":  102,
+                               "minimumVisibleNearBootPx":  85,
                                "farBootOccludedFrames":  0,
                                "repairedWarpHoles":  [
-
+                                                         {
+                                                             "frame":  2,
+                                                             "pixels":  3
+                                                         },
+                                                         {
+                                                             "frame":  3,
+                                                             "pixels":  2
+                                                         },
+                                                         {
+                                                             "frame":  4,
+                                                             "pixels":  2
+                                                         },
+                                                         {
+                                                             "frame":  5,
+                                                             "pixels":  2
+                                                         },
+                                                         {
+                                                             "frame":  8,
+                                                             "pixels":  2
+                                                         }
                                                      ]
                            },
                            {
@@ -45,17 +64,17 @@
                                "elevationDegrees":  30,
                                "maxProjectionErrorDegrees":  2E-05,
                                "silhouetteHeightRangePx":  [
-                                                               88,
+                                                               87,
                                                                93
                                                            ],
                                "bottomRangePx":  [
-                                                     127,
+                                                     126,
                                                      132
                                                  ],
                                "maxAnkleStepPx":  11.75,
                                "changedSilhouetteFraction":  [
-                                                                 0.0875,
-                                                                 0.1656
+                                                                 0.0961,
+                                                                 0.1696
                                                              ],
                                "alignedHeadChangeFraction":  0,
                                "removedLoosePixels":  0,
@@ -69,9 +88,16 @@
                                "contactSamples":  6,
                                "maxPitchChangeDegrees":  15,
                                "minimumVisibleNearBootPx":  96,
-                               "farBootOccludedFrames":  3,
+                               "farBootOccludedFrames":  2,
                                "repairedWarpHoles":  [
-
+                                                         {
+                                                             "frame":  2,
+                                                             "pixels":  1
+                                                         },
+                                                         {
+                                                             "frame":  3,
+                                                             "pixels":  1
+                                                         }
                                                      ]
                            }
                        ]
