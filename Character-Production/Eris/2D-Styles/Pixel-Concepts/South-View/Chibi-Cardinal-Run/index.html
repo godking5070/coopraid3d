@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이리스 둥근 치비 · 4방향 달리기</title>
+<style>
+* { box-sizing: border-box }
+body {
+  margin: 0;
+  padding: 12px;
+  color: var(--foreground,#f2edf4);
+  background: var(--background,#181719);
+  font: 14px var(--font-sans,system-ui,sans-serif);
+}
+main { max-width: 860px; margin: 0 auto }
+h1 { margin: 0 0 12px; font-size: 19px; letter-spacing: -.025em }
+[hidden] { display: none !important }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.panel {
+  min-width: 0;
+  border: 1px solid var(--border,#3d3742);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card,#201e23);
+  color: var(--card-foreground,#f2edf4);
+}
+.panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  min-height: 45px;
+  padding: 6px 9px;
+}
+.panel strong { font-size: 13px }
+small { color: var(--muted-foreground,#bfb3c3) }
+#position { font-variant-numeric: tabular-nums; white-space: nowrap }
+.stage { display: grid; place-items: center; height: 210px; overflow: hidden; background: #342e3b }
+canvas { display: block; image-rendering: pixelated }
+.stage canvas { width: auto; height: 200px; max-width: 100%; object-fit: contain }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 }
+button, select {
+  min-height: 33px;
+  padding: 4px 8px;
+  border: 1px solid var(--border,#3d3742);
+  border-radius: 7px;
+  color: var(--foreground,#f2edf4);
+  background: var(--card,#201e23);
+  font: inherit;
+  cursor: pointer;
+}
+button:hover, select:hover, button[aria-current="true"] {
+  background: var(--accent,#393242);
+  color: var(--accent-foreground,#fff4ff);
+}
+button:focus-visible, select:focus-visible {
+  outline: 2px solid var(--ring,#bda1e1);
+  outline-offset: 1px;
+}
+button[aria-current="true"] { border-color: var(--ring,#bda1e1); font-weight: 700 }
+#play { min-width: 76px }
+.timeline { display: grid; grid-template-columns: repeat(var(--columns,8), minmax(0,1fr)); gap: 5px }
+.timeline button { padding: 4px; min-width: 0; font-size: 12px }
+.timeline canvas {
+  width: 100%;
+  height: auto;
+  max-height: 94px;
+  object-fit: contain;
+  background: #342e3b;
+  border-radius: 4px;
+}
+.timeline span { display: block; margin: 3px 0 1px }
+#overlay-note { margin: 8px 0 0; font-size: 12px; color: var(--muted-foreground,#bfb3c3) }
+@media(max-width: 500px) {
+  body { padding: 9px }
+  .panels { gap: 7px }
+  .stage { height: 172px }
+  .stage canvas { height: 164px }
+  .timeline { grid-template-columns: repeat(4,minmax(0,1fr)) }
+  .timeline canvas { height: 57px }
+}
+
+  .settings { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin:0 0 9px }
+  .settings label { display:inline-flex; align-items:center; gap:5px }
+  .panel strong { white-space:nowrap }
+  button,select { min-height:36px }
+</style>
+</head>
+<body>
+<main>
+  <h1>이리스 둥근 치비 · 4방향 달리기</h1>
+  <div class="settings">
+    <label>방향 <select id="direction">
+      <option value="0">↓ 아래</option>
+      <option value="1">→ 오른쪽</option>
+      <option value="2">↑ 위</option>
+      <option value="3">← 왼쪽</option>
+    </select></label>
+    <label>확대 <select id="zoom">
+      <option value="all">전체</option>
+      <option value="head">후드·표정</option>
+      <option value="hands">손·소매</option>
+      <option value="feet">발·부츠</option>
+    </select></label>
+  </div>
+  <div class="panels">
+    <section class="panel">
+      <header><strong>10 둥근 치비</strong><small id="position"></small></header>
+      <div class="stage"><canvas id="candidate" role="img" aria-label="둥근 치비 프레임"></canvas></div>
+    </section>
+    <section class="panel">
+      <header><strong>08 기준 모션</strong></header>
+      <div class="stage"><canvas id="reference" role="img" aria-label="기준 프레임"></canvas></div>
+    </section>
+  </div>
+  <div class="controls">
+    <button id="prev" type="button" aria-label="이전 프레임">이전</button>
+    <button id="play" type="button" aria-pressed="false">재생</button>
+    <button id="next" type="button" aria-label="다음 프레임">다음</button>
+    <select id="speed" aria-label="재생 속도">
+      <option value="0.5">0.5×</option>
+      <option value="1" selected>1×</option>
+    </select>
+    <small id="support"></small>
+  </div>
+  <div class="timeline" id="frames" aria-label="프레임 선택"></div>
+  <p id="error" role="alert" hidden>비교 이미지를 불러오지 못했습니다.</p>
+</main>
+<script>
+(async () => {
+  const get = id => document.getElementById(id);
+  const full = {x:20,y:39,w:88,h:112};
+  const regions = {
+    all:full,
+    head:{x:35,y:42,w:65,h:50},
+    hands:{x:39,y:75,w:55,h:45},
+    feet:{x:23,y:98,w:77,h:51}
+  };
+  const contact = ['왼발 착지','왼발 지지','왼발 밀기','공중','오른발 착지','오른발 지지','오른발 밀기','공중'];
+  const referenceRows = [0,2,4,6];
+  const playButton = get('play');
+  const direction = get('direction');
+  async function load(src) {
+    const image = new Image();
+    image.src=src;
+    await image.decode();
+    return image;
+  }
+  let candidate,reference;
+  try {
+    [candidate,reference]=await Promise.all([
+      load('Iris_10_Run_4Dir.png'),
+      load('../Dither-Locomotion/Iris_08_Run_8Dir.png')
+    ]);
+    if (candidate.naturalWidth!==1024 || candidate.naturalHeight!==640 ||
+        reference.naturalWidth!==1024 || reference.naturalHeight<160*(Math.max(...referenceRows)+1)) {
+      throw new Error('Unexpected sprite grid.');
+    }
+  } catch {
+    get('error').hidden=false;
+    return;
+  }
+
+  let frame=0, playing=false, clock=null, elapsed=0, request=0;
+  const thumbs=[];
+  for (let i=0;i<8;i++) {
+    const button=document.createElement('button');
+    const canvas=document.createElement('canvas');
+    const number=document.createElement('span');
+    button.type='button';
+    button.setAttribute('aria-label',(i+1)+'번 프레임');
+    number.textContent=i+1;
+    button.append(canvas,number);
+    button.addEventListener('click',() => select(i));
+    get('frames').append(button);
+    thumbs.push({button,canvas});
+  }
+
+  function paint(canvas,sheet,row,index,region) {
+    const {x,y,w,h}=region;
+    if (canvas.width!==w || canvas.height!==h) {
+      canvas.width=w;
+      canvas.height=h;
+    }
+    const brush=canvas.getContext('2d');
+    brush.clearRect(0,0,w,h);
+    brush.imageSmoothingEnabled=false;
+    brush.drawImage(sheet,index*128+x,row*160+y,w,h,0,0,w,h);
+  }
+
+  function thumbnails() {
+    thumbs.forEach(({canvas},i) => paint(canvas,candidate,Number(direction.value),i,full));
+  }
+
+  function render() {
+    const row=Number(direction.value);
+    const region=regions[get('zoom').value];
+    paint(get('candidate'),candidate,row,frame,region);
+    paint(get('reference'),reference,referenceRows[row],frame,region);
+    get('position').textContent=(frame+1)+' / 8';
+    get('support').textContent=contact[frame];
+    thumbs.forEach(({button},i) => {
+      if (i===frame) button.setAttribute('aria-current','true');
+      else button.removeAttribute('aria-current');
+    });
+    document.body.dataset.frame=String(frame+1);
+  }
+
+  function tick(now) {
+    if (clock!==null) {
+      const delta=(now-clock)*Number(get('speed').value);
+      elapsed=delta>=90?90:elapsed+delta;
+    }
+    clock=now;
+    if (elapsed>=90) {
+      elapsed-=90;
+      frame=(frame+1)%8;
+      render();
+    }
+    request=requestAnimationFrame(tick);
+  }
+
+  function playback(active) {
+    playing=active;
+    cancelAnimationFrame(request);
+    clock=null;
+    elapsed=0;
+    playButton.textContent=active?'일시정지':'재생';
+    playButton.setAttribute('aria-pressed',String(active));
+    if (active) request=requestAnimationFrame(tick);
+  }
+
+  function select(i) {
+    playback(false);
+    frame=(i+8)%8;
+    render();
+  }
+
+  get('prev').addEventListener('click',() => select(frame-1));
+  get('next').addEventListener('click',() => select(frame+1));
+  playButton.addEventListener('click',() => playback(!playing));
+  get('zoom').addEventListener('change',render);
+  direction.addEventListener('change',() => {
+    thumbnails();
+    render();
+  });
+  document.addEventListener('visibilitychange',() => { clock=null; });
+  document.addEventListener('keydown',event => {
+    if (event.target instanceof HTMLSelectElement || !['ArrowLeft','ArrowRight'].includes(event.key)) return;
+    event.preventDefault();
+    select(frame+(event.key==='ArrowLeft'?-1:1));
+  });
+  thumbnails();
+  render();
+  document.body.dataset.ready='true';
+})();
+</script>
+</body>
+</html>
