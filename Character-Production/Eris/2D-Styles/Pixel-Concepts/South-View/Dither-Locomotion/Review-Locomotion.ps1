@@ -120,6 +120,27 @@ public static class IrisLocomotionReview
         }
         return total - main;
     }
+    public static string ComparisonStrip(Bitmap atlas, Rectangle[] cels, Rectangle crop)
+    {
+        using (var strip = new Bitmap(cels.Length * crop.Width, crop.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+        using (var g = Graphics.FromImage(strip))
+        using (var bytes = new System.IO.MemoryStream())
+        {
+            g.CompositingMode = CompositingMode.SourceCopy;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = PixelOffsetMode.Half;
+            for (int i = 0; i < cels.Length; i++)
+            {
+                var from = new Rectangle(cels[i].X + crop.X, cels[i].Y + crop.Y, crop.Width, crop.Height);
+                var to = new Rectangle(i * crop.Width, 0, crop.Width, crop.Height);
+                g.DrawImage(atlas, to, from, GraphicsUnit.Pixel);
+            }
+            g.Flush();
+            strip.Save(bytes, System.Drawing.Imaging.ImageFormat.Png);
+            return "data:image/png;base64," + Convert.ToBase64String(bytes.ToArray());
+        }
+    }
+
     public static void PairSheet(Bitmap candidate, Bitmap baseline, Rectangle[] cels, Rectangle crop, int zoom, string output)
     {
         const int pad = 9, label = 21;
@@ -234,6 +255,48 @@ try {
     $output = [IO.Directory]::CreateDirectory($OutputDirectory).FullName
     $board = Join-Path $output "$Clip-$Direction-adjacent.png"
     [IrisLocomotionReview]::PairSheet($image, $baseline, $cels, $crop, $Zoom, $board)
+    if ($baseline) {
+        $directionLabel = ($manifest.directions | Where-Object id -eq $Direction).label
+        $contacts = @(
+            foreach ($frame in $row.frames) {
+                $left = $frame.legPose.left
+                $right = $frame.legPose.right
+                if (!$left -and !$right) { '' }
+                elseif ($left.grounded -and $right.grounded) { 'dual' }
+                elseif ($left.grounded) { "left-$($left.contact)" }
+                elseif ($right.grounded) { "right-$($right.contact)" }
+                else { 'air' }
+            }
+        )
+        $data = @{
+            title = "$($manifest.character) $directionLabel $($motion.label)"
+            width = $crop.Width
+            height = $crop.Height
+            frameCount = $count
+            frameDurationMs = $motion.frameDurationMs
+            candidate = [IrisLocomotionReview]::ComparisonStrip($image, $cels, $crop)
+            before = [IrisLocomotionReview]::ComparisonStrip($baseline, $cels, $crop)
+            contact = $contacts
+        }
+        $template = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'Review-Comparison.template.html') -Raw -Encoding UTF8
+        $json = (ConvertTo-Json -InputObject $data -Depth 4 -Compress).Replace('<', '\u003c')
+        $html = $template.Replace('__REVIEW_DATA__', $json)
+        $comparison = Join-Path $output "$Clip-$Direction-comparison.html"
+        $utf8 = [Text.UTF8Encoding]::new($false)
+        [IO.File]::WriteAllText($comparison, $html, $utf8)
+        "Comparison saved to $comparison"
+        if ($env:ORCA_CHAT_SCRATCH_DIR -and
+            (Test-Path -LiteralPath $env:ORCA_CHAT_SCRATCH_DIR -PathType Container) -and
+            $utf8.GetByteCount($html) -lt 512KB) {
+            $fileName = 'iris-comparison-' + [Guid]::NewGuid().ToString('N').Substring(0, 8) + '.html'
+            try {
+                Copy-Item -LiteralPath $comparison -Destination (Join-Path $env:ORCA_CHAT_SCRATCH_DIR $fileName)
+                "Orca preview $fileName"
+            } catch {
+                Write-Warning "Open the comparison from $comparison"
+            }
+        }
+    }
     $pairs | Format-Table -AutoSize
     "Adjacent frames: $board"
     "Playback: index.html?clip=$Clip&facing=$Direction ($($motion.frameDurationMs) ms per cel)"
