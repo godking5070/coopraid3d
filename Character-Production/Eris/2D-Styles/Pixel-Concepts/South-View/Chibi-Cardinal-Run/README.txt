@@ -13,9 +13,16 @@ index.html의 방향 메뉴로 왼쪽 둥근 치비와 오른쪽 08 기준 모�
 - 왼쪽은 오른쪽 보폭을 좌우 반전하고 반 주기를 옮겼습니다. 왼쪽에서 보이는 파란 꽃·리본을 붙였습니다. 오른쪽 행은 ../Run-Concept-Comparison/Iris_10_Run_E.png와 픽셀이 일치합니다.
 - 네 방향의 32장이 각각 끊긴 픽셀 없이 연결되어 있는지 검사했습니다. 확대해서 손목·소매, 치마·허벅지, 발목·부츠를 대조했습니다. 위·아래의 2번과 6번에서 화면에 더 가까운 부츠 쪽이 반대로 교대하는 것도 확인했습니다.
 - 추가 검수에서 위 3·7번의 소매 끝 돌기, 위 4·8번의 소매 안쪽 밝은 선, 아래 5번의 머리칼 경계를 정리했습니다. 32장의 알파와 연결 상태를 다시 검사했고, 부츠 사이 투명 영역이 발과 발 사이의 여백임을 확대판에서 확인했습니다.
+- 위 4·8번 소매 안쪽에 남았던 투명 틈을 메워 둥근 윤곽을 이었습니다. 4번과 8번의 소매 확대를 기존 시트와 대조하고 3→4→5번과 7→8→1번을 재생해 프레임 연결을 확인했습니다.
 - Chrome의 데스크톱 및 390px 모바일 에뮬레이션에서 전체·얼굴·손·발 확대의 픽셀을 시트와 대조했습니다. 1× 및 0.5×에서 각 방향이 1→8→1로 빠짐없이 재생되는지 확인했습니다. Unity와 실제 휴대폰에서의 재생은 미검증입니다.
 
 ## 내장 이미지 생성 프롬프트
+
+### 위 4·8번 소매 경계 보정
+
+편집 입력은 bd0b5ee의 위쪽 4번 포즈와 소매 확대입니다. 생성 결과를 기존 팔꿈치 위치에 맞추고, 소매 안쪽의 명암과 윤곽을 4번과 반대 팔이 같은 자세를 취하는 8번에 적용했습니다.
+
+Use case: precise-object-edit. Image 1 is Iris's exact rear-facing fourth running pose. Image 2 zooms in on the only area to repair: the sleeve on the viewer's RIGHT and the dress edge just inside it beneath the pink hair. Redraw this junction with one connected rounded cream sleeve silhouette and a smooth continuous lower contour. Remove the narrow pale vertical strip *beside* the sleeve and the sharp dark cleft biting into its inner contour. The pink locks sit in front, the solid soft ivory cuff/elbow emerges beneath them for just a short arc, and the muted plum contour curves naturally into the dark navy side of the dress. Keep the physical gap between the lower elbow and waist short and smoothly open, no bright disconnected strips, hard notch, trailing pixel, or second cream shape. The hand and forearm are tucked forward and are completely hidden from this rear camera. Preserve this exact orientation, proportions, pose, all other pixels and graphics as far as possible; pink hair, ivory rear hood with embroidery, outfit hem and raised boot positions stay aligned. Keep exact source game sprite aesthetic, soft cream fabric, dark plum outline with thin smooth square stepped pixels, and the same palette. Output a single complete sprite in true transparent RGBA, with broad margins and no captions, arrows, ground, checkerboard, edges or other elements.
 
 ### 위쪽 소매 수정
 
