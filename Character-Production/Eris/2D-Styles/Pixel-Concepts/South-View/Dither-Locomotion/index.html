@@ -267,8 +267,10 @@
 
     function animate(now) {
       if (lastTime !== null && playing) {
-        const delta = Math.min(now - lastTime, 100) * Number(speed.value);
-        phase = (phase + delta) % clip.durationMs;
+        const delta = (now - lastTime) * Number(speed.value);
+        // Restart timing at the next cel after a late render.
+        const next = (Math.floor(phase / clip.frameDurationMs) + 1) * clip.frameDurationMs;
+        phase = (delta >= clip.frameDurationMs ? next : phase + delta) % clip.durationMs;
       }
       lastTime = now;
       paint();
