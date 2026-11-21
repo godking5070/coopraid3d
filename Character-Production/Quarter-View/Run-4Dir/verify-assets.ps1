@@ -3,7 +3,9 @@ Add-Type -AssemblyName System.Drawing
 
 $manifestPath = Join-Path $PSScriptRoot 'roster.json'
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-if ($manifest.characters.Count -ne 12 -or ($manifest.directionRows -join ',') -ne 's,e,n,w' -or
+if ($manifest.characters.Count -ne 13 -or $manifest.cameraPitchDegrees -ne 30 -or
+    $manifest.cameraPitchFrom -ne 'horizontal' -or $manifest.cameraProjection -ne 'orthographic' -or
+    ($manifest.directionRows -join ',') -ne 's,e,n,w' -or
     ($manifest.frameSizePx -join ',') -ne '128,160' -or $manifest.framesPerDirection -ne 8) {
     throw 'Unexpected roster, atlas grid, or direction order.'
 }
@@ -129,6 +131,11 @@ foreach ($item in $manifest.characters) {
         $_.minimumVisibleNearBootPx -gt 0
     })
     if ($feet.Count -ne 4) { throw "Incomplete ankle, forefoot or ground contact audit for $id." }
+    $motion = @($result[0].directions | Where-Object {
+        $_.facePixelChangesAfterAlignment -eq 0 -and $_.maxBoneLengthChangePx -lt .45 -and
+        $_.chestPoseTransitions -ge 6 -and $_.maxChestStepPx -le 3
+    })
+    if ($motion.Count -ne 4) { throw "Incomplete face, body or limb continuity audit for $id." }
     $files = @{
         atlas = "$id/$($id)_Run_4Dir.png"
         frames = "$id/$($id)_Run_4Dir_Frames.png"
@@ -144,4 +151,7 @@ foreach ($item in $manifest.characters) {
         (Join-Path $PSScriptRoot $files.preview),[int[]]$item.durationsMs)
     Write-Output "$id passed 32 cels and 8 GIF frames"
 }
-Write-Output 'Verified 384 cels, their 768 boot joint measurements, file hashes, and 12 GIF timelines.'
+$count = $manifest.characters.Count
+$cels = $count * 32
+$joints = $cels * 2
+Write-Output "Verified $cels cels, $joints boot joint measurements, file hashes, and $count GIF timelines."
