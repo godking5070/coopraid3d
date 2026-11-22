@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "character": "이리스",
+  "clip": "run",
+  "facing": {
+    "id": "sw",
+    "label": "왼쪽 앞",
+    "cameraPitchReferenceDegrees": 50
+  },
+  "loop": true,
+  "inPlace": true,
+  "durationMs": 837.5,
+  "frameDurationMs": 52.34375,
+  "sampleRateFps": 19.104477611940297,
+  "frameCount": 16,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "order": "row-major from top left"
+  },
+  "pivotNormalizedUnity": [
+    0.5,
+    0.125
+  ],
+  "coordinates": "Frame size and pixel pivots use pixels from the top left. Unity's normalized pivot uses the bottom-left origin.",
+  "atlases": [
+    {
+      "id": "01-pixel-art",
+      "label": "레트로 도트",
+      "sourceIdle": "../01-pixel-art.png",
+      "file": "01-pixel-art-run-arm-16.png",
+      "imageSizePx": [
+        512,
+        640
+      ],
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        140
+      ],
+      "unityFilterMode": "Point",
+      "generatedSheetSha256": "2226f5186e1979781e5f591810db5d0fd21372a9b047359df3365b8b2653a299"
+    },
+    {
+      "id": "02-cel-shading",
+      "label": "셀 채색",
+      "sourceIdle": "../02-cel-shading.png",
+      "file": "02-cel-shading-run-arm-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "b2b81e272b8ab5506355eee49d042b78c7b15346d4131eeb724b3d8dc657ce2d"
+    },
+    {
+      "id": "03-paper-cutout",
+      "label": "종이 콜라주",
+      "sourceIdle": "../03-paper-cutout.png",
+      "file": "03-paper-cutout-run-arm-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "9f36e1fae8a558f32fc09464da1df50495f689bbaa8a7caba7de1160554960be"
+    },
+    {
+      "id": "04-gouache",
+      "label": "과슈",
+      "sourceIdle": "../04-gouache.png",
+      "file": "04-gouache-run-arm-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "1c366dcb9cde2db31c4a0197b7c1d2eb42780e0ee646e46a9446890bb17d107e"
+    },
+    {
+      "id": "05-stained-glass",
+      "label": "스테인드글라스",
+      "sourceIdle": "../05-stained-glass.png",
+      "file": "05-stained-glass-run-arm-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "36695d0d0af93aa487a80e872ef9874f74e0417ab614ecd4d9f92550e074cb41"
+    }
+  ],
+  "sourceMotion": {
+    "libraryTitle": "Mixamo Jogging",
+    "action": "Eris_Run_Calm",
+    "branch": "godking5070/캐릭터-컨셉아트",
+    "revision": "db50f36",
+    "blend": "Character-Production/Eris/Texturing/Iris_Concept_Textured.blend",
+    "blendSha256": "bbf489796eb63aaf3c978f10ed36728c07f812c36265f90e0a897589561c4d64",
+    "originalFbx": "Character-Production/Eris/Animation/Source/Mixamo_Run.fbx",
+    "sourceFps": 30,
+    "periodFrames": 25.125,
+    "sampledFrames": [
+      8.25,
+      9.8203125,
+      11.390625,
+      12.9609375,
+      14.53125,
+      16.1015625,
+      17.671875,
+      19.2421875,
+      20.8125,
+      22.3828125,
+      23.953125,
+      25.5234375,
+      27.09375,
+      28.6640625,
+      30.234375,
+      31.8046875
+    ],
+    "cameraProjection": "perspective",
+    "cameraAzimuthDegrees": 45,
+    "cameraPitchDegrees": 50,
+    "referenceAtlas": "../Run-SW-3D-16/rig-reference.png",
+    "armReferenceAtlas": "shoulder-guide.png",
+    "projectedJoints": "../Run-SW-3D-16/projected-joints.json"
+  },
+  "frameOrigin": {
+    "method": "Full redraw with the built-in ImageGen tool as one new 16-cel atlas per style.",
+    "armConstruction": "Shoulder cap, exposed upper arm, navy band and sleeve follow one connected contour. Construction guide uses the projected left shoulder, elbow and wrist.",
+    "registration": "The whole cel is uniformly scaled and translated using the closed head curve from the Mixamo guide.",
+    "prompts": "imagegen-prompts.txt"
+  }
+}
