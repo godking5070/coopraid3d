@@ -1,0 +1,27 @@
+이리스 달리기 16프레임 · 2D 파츠 버전
+
+같은 얼굴·후드·의상·팔·다리 파츠를 한 주기 전체에 써서 그림체와 색이 프레임마다 달라지지 않도록 했습니다.
+내장 ImageGen은 그림체별 파츠를 한 번 만드는 데 사용했습니다. Image 1은 상위 폴더의 이리스 대기 PNG이고, Image 2는 Parts/parts-template.png입니다.
+Parts 아래 여섯 파츠는 위쪽 행에 몸통·왼팔·오른팔, 아래쪽 행에 왼쪽 부츠·오른쪽 부츠·맨다리 순서입니다.
+Run-SW-3D-16의 3D 관절 위치를 사용해 같은 2D 파츠를 움직였습니다. 시작과 끝의 위치 차이는 주기에 걸쳐 분산했고, 인접 관절 표본을 가볍게 평활했습니다. 좌우 발이 교차할 때는 3D 카메라 깊이로 순서를 정했습니다.
+4열 4행 투명 PNG이며 16프레임, 총 837.5ms입니다. 걷기와 달리기의 프레임 크기와 피벗을 공유합니다.
+
+공통 프롬프트
+Draw a high-quality reusable layered 2D animation-parts atlas for Iris, closely matching the finished character and medium of Image 1. Use its exact face, blue eyes with gold stars, emblem, lobed blue flower with golden star, cream-to-pink curls, ivory hood and navy band, ivory and navy dress with its gold buttons and embroidery, puffy sleeves, fur cuffs and gold-buckled boots. She has her familiar adult-proportioned stylized chibi design. The camera for every part is the same overhead front-left three-quarter view as Image 1, slightly leaning as for a light jog. Image 2 shows the strict layout and coarse shape of each required modular part only. The professional illustrated parts should carry the actual appearance from Image 1, not the flat colors and labels from Image 2.
+
+One single landscape PNG with exactly SIX separate pieces in a regular THREE column by TWO row sheet, centered one per cell and surrounded by generous isolated transparent space. First row left: complete Iris head, hood, hair, collar, flared navy and ivory dress with embroidered hem, short shoulder caps and skin shoulder patches. Complete this dress underneath where sleeves normally overlap so it is ready to receive overlaid limbs. This is only the central upper-body clothing puppet layer and ends cleanly at the dress hem, with no attached arms or legs. First row middle: separate full nearer (anatomical left) arm, with a narrow plain shoulder patch and navy upper arm band, from shoulder down to the slightly bent puffy ivory sleeve and short forearm, one authentic blue flower embroidery, fluffy cuffs and a small relaxed closed hand. Follow template pose with shoulder above, elbow bent toward screen-right then forearm aimed down-left. First row right: a matching slightly smaller far (anatomical right) arm, same bend direction, its own fully visible shoulder cap and sleeve, down-left facing hand, a little softer lighting. Bottom row left and middle: two separate fur cuff and buckled boot pieces, near then far, toes pointing down-left, completely cut out at the top of the fur; no visible bare skin above. Bottom row right: an independent short shape of the exposed bare leg between dress hem and boot, a gently bent thigh and shin with continuous peach skin and medium-specific shading, smoothly outlined, no details on it. Every component is a clean isolated complete 2D puppet part with alpha transparency. Keep a generous 9% padding per part. No seams, injury, extra pieces, cast shadows, floor, labels, lettering, guides, marks or boxes. Preserve the reference attitude and the specific medium, so that the parts can be smoothly animated as a single Iris character.
+
+Parts/01-pixel-art-parts.png
+The drawing language is exactly Image 1: authentic medium-density console RPG pixel art. Each pose is a crisp game sprite on a square pixel grid with selective dark-indigo stepped outlines and the same warm color clusters. No smooth outlining or gradient rendering. Preserve the recognizable star centers and burgundy/pink curl clusters even in small pixels. Aim for about 105 logical pixels tall per pose.
+
+Parts/02-cel-shading-parts.png
+Copy Image 1's anime animation cel aesthetic precisely: smoothly tapered deep blue outer lines, lighter interior lines, strong hard-edged solid shadow shapes, flat warm cream, muted coral-pink and rich navy. Keep the hair reflections and bright star pupils consistent. No brush texture or pixel treatment.
+
+Parts/03-paper-cutout-parts.png
+Copy Image 1's layered dyed cut-paper look precisely: tactile fine matte fibers, almost no ink outlines, shaped layers of ribbons and ivory panels and small contact shadows only inside the silhouette. Same head, curl paths and gold paper fastening across the walk. Cut out the character on true alpha, with no paper background.
+
+Parts/04-gouache-parts.png
+Copy Image 1's opaque storybook gouache precisely: fine visible directional dry-brush texture inside the silhouette, matte warm ivory, lavender in the shadows, ultramarine/navy coat and rose-peach hair. Preserve face and material appearances from pose to pose. No paper background or flecks outside the silhouette.
+
+Parts/05-stained-glass-parts.png
+Copy Image 1's original stained-glass rendering precisely: dark navy lead contours, delicate interior lines in the opalescent ivory panels and rose hair, rich cobalt coat glass and honey gold fastenings. Repeat the same panel boundaries in the fabric and hair throughout. No window surround, background, glow or light rays.

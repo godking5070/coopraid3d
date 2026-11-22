@@ -1,0 +1,489 @@
+{
+  "version": 1,
+  "character": "이리스",
+  "clip": "run",
+  "facing": {
+    "id": "sw",
+    "label": "왼쪽 앞",
+    "cameraPitchReferenceDegrees": 50
+  },
+  "loop": true,
+  "inPlace": true,
+  "durationMs": 837.5,
+  "frameDurationMs": 52.34375,
+  "sampleRateFps": 19.104477611940297,
+  "frameCount": 16,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "order": "row-major from top left"
+  },
+  "pivotNormalizedUnity": [
+    0.5,
+    0.125
+  ],
+  "coordinates": "Frame size and pixel pivots use pixels from the top left. Unity's normalized pivot uses the bottom-left origin.",
+  "atlases": [
+    {
+      "id": "01-pixel-art",
+      "label": "레트로 도트",
+      "sourceIdle": "../01-pixel-art.png",
+      "file": "01-pixel-art-run-rig-16.png",
+      "imageSizePx": [
+        512,
+        640
+      ],
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        140
+      ],
+      "unityFilterMode": "Point",
+      "parts": "Parts/01-pixel-art-parts.png",
+      "bodyHeightOn320x384Px": 196,
+      "anchors": {
+        "bodyPivot": [
+          0.425,
+          0.7
+        ],
+        "bodyLeftShoulder": [
+          0.57,
+          0.57
+        ],
+        "bodyRightShoulder": [
+          0.31,
+          0.52
+        ],
+        "leftArm": {
+          "shoulder": [
+            0.46,
+            0.11
+          ],
+          "elbow": [
+            0.61,
+            0.51
+          ],
+          "wrist": [
+            0.27,
+            0.8
+          ]
+        },
+        "rightArm": {
+          "shoulder": [
+            0.74,
+            0.14
+          ],
+          "elbow": [
+            0.67,
+            0.445
+          ],
+          "wrist": [
+            0.215,
+            0.76
+          ]
+        },
+        "leg": {
+          "hip": [
+            0.62,
+            0.08
+          ],
+          "knee": [
+            0.36,
+            0.48
+          ],
+          "ankle": [
+            0.65,
+            0.92
+          ]
+        },
+        "bootAnkle": [
+          0.59,
+          0.19
+        ]
+      }
+    },
+    {
+      "id": "02-cel-shading",
+      "label": "셀 채색",
+      "sourceIdle": "../02-cel-shading.png",
+      "file": "02-cel-shading-run-rig-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "Parts/02-cel-shading-parts.png",
+      "bodyHeightOn320x384Px": 196,
+      "anchors": {
+        "bodyPivot": [
+          0.4,
+          0.69
+        ],
+        "bodyLeftShoulder": [
+          0.54,
+          0.56
+        ],
+        "bodyRightShoulder": [
+          0.31,
+          0.52
+        ],
+        "leftArm": {
+          "shoulder": [
+            0.47,
+            0.1
+          ],
+          "elbow": [
+            0.68,
+            0.49
+          ],
+          "wrist": [
+            0.29,
+            0.82
+          ]
+        },
+        "rightArm": {
+          "shoulder": [
+            0.71,
+            0.11
+          ],
+          "elbow": [
+            0.61,
+            0.48
+          ],
+          "wrist": [
+            0.25,
+            0.81
+          ]
+        },
+        "leg": {
+          "hip": [
+            0.63,
+            0.08
+          ],
+          "knee": [
+            0.38,
+            0.48
+          ],
+          "ankle": [
+            0.65,
+            0.92
+          ]
+        },
+        "bootAnkle": [
+          0.59,
+          0.19
+        ]
+      }
+    },
+    {
+      "id": "03-paper-cutout",
+      "label": "종이 콜라주",
+      "sourceIdle": "../03-paper-cutout.png",
+      "file": "03-paper-cutout-run-rig-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "Parts/03-paper-cutout-parts.png",
+      "bodyHeightOn320x384Px": 198,
+      "anchors": {
+        "bodyPivot": [
+          0.425,
+          0.7
+        ],
+        "bodyLeftShoulder": [
+          0.565,
+          0.57
+        ],
+        "bodyRightShoulder": [
+          0.31,
+          0.525
+        ],
+        "leftArm": {
+          "shoulder": [
+            0.74,
+            0.09
+          ],
+          "elbow": [
+            0.57,
+            0.49
+          ],
+          "wrist": [
+            0.23,
+            0.79
+          ]
+        },
+        "rightArm": {
+          "shoulder": [
+            0.62,
+            0.1
+          ],
+          "elbow": [
+            0.67,
+            0.48
+          ],
+          "wrist": [
+            0.24,
+            0.8
+          ]
+        },
+        "leg": {
+          "hip": [
+            0.56,
+            0.09
+          ],
+          "knee": [
+            0.26,
+            0.425
+          ],
+          "ankle": [
+            0.73,
+            0.94
+          ]
+        },
+        "bootAnkle": [
+          0.59,
+          0.19
+        ]
+      }
+    },
+    {
+      "id": "04-gouache",
+      "label": "과슈",
+      "sourceIdle": "../04-gouache.png",
+      "file": "04-gouache-run-rig-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "Parts/04-gouache-parts.png",
+      "bodyHeightOn320x384Px": 198,
+      "anchors": {
+        "bodyPivot": [
+          0.43,
+          0.7
+        ],
+        "bodyLeftShoulder": [
+          0.58,
+          0.55
+        ],
+        "bodyRightShoulder": [
+          0.315,
+          0.52
+        ],
+        "leftArm": {
+          "shoulder": [
+            0.57,
+            0.1
+          ],
+          "elbow": [
+            0.7,
+            0.52
+          ],
+          "wrist": [
+            0.3,
+            0.81
+          ]
+        },
+        "rightArm": {
+          "shoulder": [
+            0.8,
+            0.1
+          ],
+          "elbow": [
+            0.63,
+            0.47
+          ],
+          "wrist": [
+            0.19,
+            0.8
+          ]
+        },
+        "leg": {
+          "hip": [
+            0.66,
+            0.08
+          ],
+          "knee": [
+            0.38,
+            0.42
+          ],
+          "ankle": [
+            0.65,
+            0.92
+          ]
+        },
+        "bootAnkle": [
+          0.59,
+          0.19
+        ]
+      }
+    },
+    {
+      "id": "05-stained-glass",
+      "label": "스테인드글라스",
+      "sourceIdle": "../05-stained-glass.png",
+      "file": "05-stained-glass-run-rig-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "Parts/05-stained-glass-parts.png",
+      "bodyHeightOn320x384Px": 196,
+      "anchors": {
+        "bodyPivot": [
+          0.44,
+          0.7
+        ],
+        "bodyLeftShoulder": [
+          0.57,
+          0.55
+        ],
+        "bodyRightShoulder": [
+          0.31,
+          0.52
+        ],
+        "leftArm": {
+          "shoulder": [
+            0.6,
+            0.1
+          ],
+          "elbow": [
+            0.7,
+            0.46
+          ],
+          "wrist": [
+            0.24,
+            0.79
+          ]
+        },
+        "rightArm": {
+          "shoulder": [
+            0.72,
+            0.095
+          ],
+          "elbow": [
+            0.63,
+            0.49
+          ],
+          "wrist": [
+            0.2,
+            0.8
+          ]
+        },
+        "leg": {
+          "hip": [
+            0.59,
+            0.08
+          ],
+          "knee": [
+            0.34,
+            0.43
+          ],
+          "ankle": [
+            0.67,
+            0.93
+          ]
+        },
+        "bootAnkle": [
+          0.59,
+          0.19
+        ]
+      }
+    }
+  ],
+  "sourceMotion": {
+    "libraryTitle": "Mixamo Jogging",
+    "action": "Eris_Run_Calm",
+    "branch": "godking5070/캐릭터-컨셉아트",
+    "revision": "db50f36",
+    "blend": "Character-Production/Eris/Texturing/Iris_Concept_Textured.blend",
+    "blendSha256": "bbf489796eb63aaf3c978f10ed36728c07f812c36265f90e0a897589561c4d64",
+    "originalFbx": "Character-Production/Eris/Animation/Source/Mixamo_Run.fbx",
+    "sourceFps": 30,
+    "periodFrames": 25.125,
+    "sampledFrames": [
+      8.25,
+      9.8203125,
+      11.390625,
+      12.9609375,
+      14.53125,
+      16.1015625,
+      17.671875,
+      19.2421875,
+      20.8125,
+      22.3828125,
+      23.953125,
+      25.5234375,
+      27.09375,
+      28.6640625,
+      30.234375,
+      31.8046875
+    ],
+    "cameraProjection": "perspective",
+    "cameraAzimuthDegrees": 45,
+    "cameraPitchDegrees": 50,
+    "referenceAtlas": "../Run-SW-3D-16/rig-reference.png",
+    "armReferenceAtlas": "../Run-SW-3D-16/middle-arm-reference.png",
+    "projectedJoints": "../Run-SW-3D-16/projected-joints.json"
+  },
+  "animationMethod": {
+    "artwork": "One body drawing and one reusable limb set per style throughout the cycle.",
+    "joints": "Sampled from the same 16 poses of Eris_Run_Calm (Mixamo Jogging). Close the cyclic pose drift, then smooth neighboring samples with .12/.76/.12 weights.",
+    "partCellSizePx": [
+      640,
+      640
+    ],
+    "partGrid": {
+      "columns": 3,
+      "rows": 2,
+      "order": [
+        "body",
+        "leftArm",
+        "rightArm",
+        "leftBoot",
+        "rightBoot",
+        "leg"
+      ]
+    },
+    "anchors": "Anchors are fractions of the part's extracted padded bounds starting at the top left."
+  }
+}
