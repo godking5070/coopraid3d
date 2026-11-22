@@ -164,5 +164,11 @@
     "method": "Full redraw in the built-in ImageGen tool, one new 16-cel sheet per style.",
     "registration": "Each complete drawing is uniformly scaled and translated on its cell. The hood ornament follows the closed head curve from the 3D guide.",
     "prompts": "imagegen-prompts.txt"
+  },
+  "motionCorrection": {
+    "sourceRevision": "710e9f0fbd609ddd6e28e8947479a6b6c01da844",
+    "target": "Anatomical left cuff and wrist",
+    "method": "Cyclic smoothing of wrist deviations from the projected Mixamo trajectory, applied as a local displacement of the existing artwork.",
+    "maximumWristOffsetPxOn320x384": 6.93
   }
 }
