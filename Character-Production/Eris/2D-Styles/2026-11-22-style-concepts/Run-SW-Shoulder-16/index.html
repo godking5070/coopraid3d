@@ -197,7 +197,7 @@
     const frameDuration = 52.34375;
     let frame = 0;
     let playbackId = null;
-    let startedAt = 0;
+    let nextFrameAt = 0;
     let speed = Number(speedSelect.value);
 
     function positionFrame(element, index) {
@@ -244,9 +244,13 @@
     }
 
     function tick(now) {
-      const elapsed = Math.max(0, now - startedAt);
-      const index = Math.floor(elapsed * speed / frameDuration) % frameCount;
-      if (index !== frame) showFrame(index);
+      if (now >= nextFrameAt) {
+        const interval = frameDuration / speed;
+        showFrame((frame + 1) % frameCount);
+        // A late paint starts a fresh interval so the frame has time to display.
+        if (now - nextFrameAt > interval / 2) nextFrameAt = now;
+        nextFrameAt += interval;
+      }
       playbackId = requestAnimationFrame(tick);
     }
 
@@ -254,7 +258,7 @@
       if (playbackId !== null) cancelAnimationFrame(playbackId);
       playbackId = null;
       if (playing) {
-        startedAt = performance.now() - frame * frameDuration / speed;
+        nextFrameAt = performance.now() + frameDuration / speed;
         playbackId = requestAnimationFrame(tick);
       }
       playButton.textContent = playing ? '일시정지' : '재생';
@@ -265,7 +269,7 @@
     document.querySelector('#next-frame').addEventListener('click', () => selectFrame(frame + 1));
     speedSelect.addEventListener('change', () => {
       speed = Number(speedSelect.value);
-      if (playbackId !== null) startedAt = performance.now() - frame * frameDuration / speed;
+      if (playbackId !== null) nextFrameAt = performance.now() + frameDuration / speed;
     });
     frameSlider.addEventListener('input', () => selectFrame(Number(frameSlider.value) - 1));
     document.addEventListener('keydown', event => {
