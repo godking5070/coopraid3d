@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "character": "이리스",
+  "clip": "run",
+  "facing": {
+    "id": "sw",
+    "label": "왼쪽 앞",
+    "cameraPitchReferenceDegrees": 50
+  },
+  "loop": true,
+  "inPlace": true,
+  "durationMs": 837.5,
+  "frameDurationMs": 52.34375,
+  "sampleRateFps": 19.104477611940297,
+  "frameCount": 16,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "order": "row-major from top left"
+  },
+  "pivotNormalizedUnity": [
+    0.5,
+    0.125
+  ],
+  "coordinates": "Frame size and pixel pivots use pixels from the top left. Unity's normalized pivot uses the bottom-left origin.",
+  "atlases": [
+    {
+      "id": "01-pixel-art",
+      "label": "레트로 도트",
+      "sourceIdle": "../01-pixel-art.png",
+      "file": "01-pixel-art-run-sw-16.png",
+      "imageSizePx": [
+        512,
+        640
+      ],
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        140
+      ],
+      "unityFilterMode": "Point",
+      "parts": "../Run-SW-Continuous-16-v2/Parts/01-pixel-art-drawings.png",
+      "sourceArtworkSha256": "43a3cea9e286c5302cedf0ddb567049ef57b906e5aed2d352dffa04eae19aac6"
+    },
+    {
+      "id": "02-cel-shading",
+      "label": "셀 채색",
+      "sourceIdle": "../02-cel-shading.png",
+      "file": "02-cel-shading-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "../Run-SW-Continuous-16-v2/Parts/02-cel-shading-drawings.png",
+      "sourceArtworkSha256": "7e0502567bb89eb5c8d9507ce9556ac62e3d15257fb0fd36f62535932f902b6d"
+    },
+    {
+      "id": "03-paper-cutout",
+      "label": "종이 콜라주",
+      "sourceIdle": "../03-paper-cutout.png",
+      "file": "03-paper-cutout-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "../Run-SW-Continuous-16-v2/Parts/03-paper-cutout-drawings.png",
+      "sourceArtworkSha256": "c1496568a3d804341064b7940b124a343dbe5547e953d5bc687afb9e01cb0c51"
+    },
+    {
+      "id": "04-gouache",
+      "label": "과슈",
+      "sourceIdle": "../04-gouache.png",
+      "file": "04-gouache-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "../Run-SW-Continuous-16-v2/Parts/04-gouache-drawings.png",
+      "sourceArtworkSha256": "416eca778f345382fbd6023c5892a161a328bbdcced3fc69fea7a9a9f972f401"
+    },
+    {
+      "id": "05-stained-glass",
+      "label": "스테인드글라스",
+      "sourceIdle": "../05-stained-glass.png",
+      "file": "05-stained-glass-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "parts": "../Run-SW-Continuous-16-v2/Parts/05-stained-glass-drawings.png",
+      "sourceArtworkSha256": "3ceaa7b57535f1aa2430e2a1604d15cdc31af970d16f9e0b582cce9b63831b5e"
+    }
+  ],
+  "sourceMotion": {
+    "libraryTitle": "Mixamo Jogging",
+    "action": "Eris_Run_Calm",
+    "branch": "godking5070/캐릭터-컨셉아트",
+    "revision": "db50f36",
+    "blend": "Character-Production/Eris/Texturing/Iris_Concept_Textured.blend",
+    "blendSha256": "bbf489796eb63aaf3c978f10ed36728c07f812c36265f90e0a897589561c4d64",
+    "originalFbx": "Character-Production/Eris/Animation/Source/Mixamo_Run.fbx",
+    "sourceFps": 30,
+    "periodFrames": 25.125,
+    "sampledFrames": [
+      8.25,
+      9.8203125,
+      11.390625,
+      12.9609375,
+      14.53125,
+      16.1015625,
+      17.671875,
+      19.2421875,
+      20.8125,
+      22.3828125,
+      23.953125,
+      25.5234375,
+      27.09375,
+      28.6640625,
+      30.234375,
+      31.8046875
+    ],
+    "cameraProjection": "perspective",
+    "cameraAzimuthDegrees": 45,
+    "cameraPitchDegrees": 50,
+    "referenceAtlas": "../Run-SW-16/full-pose-reference.png",
+    "projectedJoints": "../Run-SW-3D-16/projected-joints.json"
+  },
+  "frameOrigin": {
+    "method": "Five complete full-body cycles rerendered from the approved 2D rig artwork with new continuous arm motion.",
+    "registration": "Mixamo world-space shoulder and elbow trajectories projected at 45 degree azimuth and 50 degree pitch. Cyclic angle curves feed fixed-length upper and lower arm segments, with silhouette retargeting for the far arm.",
+    "arms": "Alternate with the opposite foot. The forearm and fist follow the upper arm and elbow as a connected chain. The far sleeve crosses a hair edge anchored to the shoulder, with its depth based on the 3D wrist.",
+    "costume": "Each style shares one dress, button and motif drawing across the whole cycle. Foot and boot cuffs share their ankle anchors.",
+    "prompts": "../Run-SW-Continuous-16-v2/imagegen-prompts.txt"
+  },
+  "partsLayout": {
+    "columns": 3,
+    "rows": 2,
+    "order": [
+      "torso and outfit",
+      "near arm",
+      "far arm",
+      "near boot",
+      "far boot",
+      "bare leg"
+    ]
+  },
+  "armMotion": "arm-poses.json"
+}
