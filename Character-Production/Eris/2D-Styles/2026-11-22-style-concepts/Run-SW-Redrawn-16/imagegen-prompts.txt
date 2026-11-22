@@ -1,0 +1,34 @@
+이리스 왼쪽 앞 달리기 전체 재제작
+내장 ImageGen으로 그림체별 전신 16프레임을 한 장씩 생성했습니다. 새 2D 그림을 캔버스와 피벗에 배치할 때 기존 Mixamo Jogging의 머리 이동을 기준으로 사용했습니다.
+
+셀 채색 외 4종
+Image 1 — ../Run-SW-3D-16/rig-reference.png
+Image 2 — 해당 그림체의 ../*.png 정지 원화
+
+공통 프롬프트
+Use case: stylized-concept. Make one completely new in-game 2D sprite atlas for the original Astella character Iris, with 16 uniquely drawn full-body cels of a single continuous in-place jog. Input image 1 is a 4 columns by 4 rows sheet of the actual sampled Mixamo jogging motion. Follow its matching cell's pose, timing, viewpoint, scale, hip position and front/back limb overlaps. Input image 2 is the standing illustration of Iris, a reference for character construction, outfit and the requested 2D medium only. Draw the complete character in every cell from scratch.
+Pose and cinematography: fixed game camera 50 degrees above, same three-quarter angle toward screen lower left, with no zoom or change of facing. Use the exact phase order in the first sheet, left to right, then top to bottom. Two running steps in the cycle. Left and right knees and feet exchange weight; use the bent elbows and opposed arms in the guide. Track anatomical left wrist, nearer to viewer, through one continuous arc from cell to cell. Show occlusion where the arms and legs cross rather than adding extra limbs. Keep the final pose timed to continue into the first pose.
+Consistency: same head proportions and eye size, same cap profile, star-flower at the near temple, same curl groupings, sleeves and cuff width, six gold buttons in two columns, trim paths, identical boot design and consistent lengths throughout. Hold the likeness like a model sheet. Animate modest vertical bob and slight follow-through of the hair and coat. The small motion between adjacent poses is mostly in the arms and legs. Make each transition progressive, including the middle poses at the two foot changes.
+Layout: a clean portrait sheet in the exactly aligned 4x4 grid shown in image 1. Center 16 separate full-body characters at the corresponding reference position, with clear transparent gutters on all four sides of each tile. Include every hood and boot completely even at maximum stride. Real transparent background, no colored or checkerboard backdrop, no frame borders, labels, lines, floor, cast shadow, props, extras or signature.
+
+01-pixel-art-run-redrawn-16.png
+Medium: Hand-placed console RPG pixel art. Build each character out of deliberate square pixel clusters on the same coarse orthogonal grid, about 100 logical pixels tall. Sharp stepped dark-indigo edges, restrained 2–3 tone ramps, white and cream trimmed in gold, warm pink curl ends, legible sky-blue flower and deep-blue dress. Consistent pixel size throughout the entire sheet.
+
+03-paper-cutout-run-redrawn-16.png
+Medium: Hand-cut dyed-paper illustration with soft matte paper grain inside the silhouettes, crisp ivory and navy layered shapes, and the same curved pale coral ribbon shapes in the hair. Small internal layer shadows and no ink outline except an occasional fine cut edge. The graphic cutouts have clean, legible edges.
+
+04-gouache-run-redrawn-16.png
+Medium: Opaque hand-painted storybook gouache, consistent broad brush masses and fine dry-brush marks within the silhouette. Warm ivory, ultramarine navy, rose-peach hair ends, subtle lavender shadows and small rich gold accents. Keep the same locked contour and brush texture on the face, hood and outfit across the loop.
+
+05-stained-glass-run-redrawn-16.png
+Medium: Graphic hand-inked stained-glass illustration, opalescent ivory panels, blue and gold flower and eye accents, muted pink curl panes, cobalt/indigo dress and controlled dark-blue lead lines. Preserve the same pattern and seam topology throughout the loop. The only shape is the full-body sprite, with no surrounding window.
+
+02-cel-shading-run-redrawn-16.png
+Image 1 — cel-arm-guide.png
+Image 2 — ../02-cel-shading.png
+Image 3 — ../Run-SW-3D-16/rig-reference.png
+
+Use case: stylized-concept. Draw a brand-new full 16-frame 2D animation atlas, one complete cel per tile in a 4 columns by 4 rows grid. Subject is Iris, the original Astella character. Redraw every cel together from a clean canvas with a single, strictly consistent on-model construction.
+Image 1 is the required 16-frame pose template. The orange line is anatomical right, blue line is anatomical left (near side). Each line links shoulder, elbow, and wrist. The large blue endpoint is the wrist where the near cuff ends and the hand begins. Use this landmark in every matching tile. The cuff keeps the same volume and trim while rotating, with the base of the left hand following the gradual arc precisely. Both elbows are bent. The near sleeve swings inward and then gradually releases in frames 07, 08, 09, 10 and 11, preserving the intermediate hand positions rather than jumping. The full-body leg poses and perspective must match Image 1. Image 2 gives the 2D character design and hard-edged anime cel style. Image 3 shows the matching 3D motion unobscured and confirms how far limbs are hidden. The diagram's guides, grid lines, numbers and background are only for planning the poses.
+Maintain Iris's face and proportions, ivory embroidered hood, sky-blue flower with single gold star, curled cream-to-pink hair, navy-centered ivory coat with six gold buttons, wide cuffs, correctly foreshortened thighs and white chunky gold-buckled boots. Small flowing curl change; eyes, head shape, body volume and sleeve width stay consistent through the loop. Render in crisp dark navy lineart and solid hard-edged two-tone shadows. Use the same warm cream, coral pink and deep blue palette throughout.
+Exactly 16 isolated complete figures on real transparent alpha. Match the template's fixed 50-degree game camera and front-left facing at 45 degrees, head and body registration, and reading order. Keep ample transparent space around every pose. Cell 16 leads directly into cell 01. No text, diagram marks, extra hand, extra foot, duplicate characters, shadows outside the character, background or effect.

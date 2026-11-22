@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "character": "이리스",
+  "clip": "run",
+  "facing": {
+    "id": "sw",
+    "label": "왼쪽 앞",
+    "cameraPitchReferenceDegrees": 50
+  },
+  "loop": true,
+  "inPlace": true,
+  "durationMs": 837.5,
+  "frameDurationMs": 52.34375,
+  "sampleRateFps": 19.104477611940297,
+  "frameCount": 16,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "order": "row-major from top left"
+  },
+  "pivotNormalizedUnity": [
+    0.5,
+    0.125
+  ],
+  "coordinates": "Frame size and pixel pivots use pixels from the top left. Unity's normalized pivot uses the bottom-left origin.",
+  "atlases": [
+    {
+      "id": "01-pixel-art",
+      "label": "레트로 도트",
+      "sourceIdle": "../01-pixel-art.png",
+      "file": "01-pixel-art-run-redrawn-16.png",
+      "imageSizePx": [
+        512,
+        640
+      ],
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        140
+      ],
+      "unityFilterMode": "Point",
+      "generatedSheetSha256": "0fdbbb2ff10d841c9ff6179530ead2d64bc58831b119034845fba65171c03053"
+    },
+    {
+      "id": "02-cel-shading",
+      "label": "셀 채색",
+      "sourceIdle": "../02-cel-shading.png",
+      "file": "02-cel-shading-run-redrawn-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "34f7515e5076b8e91493309e18bd8591d4f1a50a2633c7671006281b233e31a6"
+    },
+    {
+      "id": "03-paper-cutout",
+      "label": "종이 콜라주",
+      "sourceIdle": "../03-paper-cutout.png",
+      "file": "03-paper-cutout-run-redrawn-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "ebad3c9a6759157ed6ba31c8dc974a4195f0dab238197ab4a8d9413c64e7ccda"
+    },
+    {
+      "id": "04-gouache",
+      "label": "과슈",
+      "sourceIdle": "../04-gouache.png",
+      "file": "04-gouache-run-redrawn-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "daa2a22ceae98e7d243ee4c1beb0733401181da30ae0cb2122f6d7730bca501c"
+    },
+    {
+      "id": "05-stained-glass",
+      "label": "스테인드글라스",
+      "sourceIdle": "../05-stained-glass.png",
+      "file": "05-stained-glass-run-redrawn-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "generatedSheetSha256": "d3fe2b3cd772684f1f9b9cc20819b05b1c72277d95c31c83de3545c21f97f512"
+    }
+  ],
+  "sourceMotion": {
+    "libraryTitle": "Mixamo Jogging",
+    "action": "Eris_Run_Calm",
+    "branch": "godking5070/캐릭터-컨셉아트",
+    "revision": "db50f36",
+    "blend": "Character-Production/Eris/Texturing/Iris_Concept_Textured.blend",
+    "blendSha256": "bbf489796eb63aaf3c978f10ed36728c07f812c36265f90e0a897589561c4d64",
+    "originalFbx": "Character-Production/Eris/Animation/Source/Mixamo_Run.fbx",
+    "sourceFps": 30,
+    "periodFrames": 25.125,
+    "sampledFrames": [
+      8.25,
+      9.8203125,
+      11.390625,
+      12.9609375,
+      14.53125,
+      16.1015625,
+      17.671875,
+      19.2421875,
+      20.8125,
+      22.3828125,
+      23.953125,
+      25.5234375,
+      27.09375,
+      28.6640625,
+      30.234375,
+      31.8046875
+    ],
+    "cameraProjection": "perspective",
+    "cameraAzimuthDegrees": 45,
+    "cameraPitchDegrees": 50,
+    "referenceAtlas": "../Run-SW-3D-16/rig-reference.png",
+    "armReferenceAtlas": "cel-arm-guide.png",
+    "projectedJoints": "../Run-SW-3D-16/projected-joints.json"
+  },
+  "frameOrigin": {
+    "method": "Full redraw in the built-in ImageGen tool, one new 16-cel sheet per style.",
+    "registration": "Each complete drawing is uniformly scaled and translated on its cell. The hood ornament follows the closed head curve from the 3D guide.",
+    "prompts": "imagegen-prompts.txt"
+  }
+}
