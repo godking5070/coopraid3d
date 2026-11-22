@@ -1,0 +1,31 @@
+이리스 3D 달리기 16프레임
+
+기준 모션은 8프레임 버전과 같은 Eris_Run_Calm(Mixamo Jogging)입니다. 한 주기 837.5ms와 50° 왼쪽 앞 카메라를 사용했습니다.
+Blender에서 실제 3D 리그의 중간 구간을 추가 렌더했습니다. projected-joints.json의 17번째 샘플은 반복 경계 확인용입니다.
+기존 2D 키는 홀수 번호 위치에 픽셀 그대로 배치했습니다. 새 2D 그림은 실제 3D 중간 자세를 기준으로 짝수 번호에 추가했습니다. 꽃 장식으로 전후 키에 정렬하고 3D 머리 위치의 편차를 반영했습니다.
+내장 ImageGen의 Image 1은 해당 그림체의 기존 8장 시트입니다. Image 2는 middle-arm-reference.png입니다. Image 3은 rig-reference.png의 짝수 번호 8장을 4열 2행으로 배열한 깨끗한 렌더입니다.
+
+공통 프롬프트
+Draw eight new in-between frames for the exact existing Iris 2D jog, as clean transparent full-body game sprites. This is an interpolation animation assignment, where the artwork and camera must stay on-model. Image 1 is the approved 8-pose 2D keyframe sheet for the art, costumes, silhouette, pose sizes and camera. It contains keys K1–K4 in the top row and K5–K8 in the bottom row. Image 2 is the exact real Mixamo 3D pose for each NEW midpoint. In Image 2 blue connects the anatomical left shoulder, elbow and wrist; red connects the right arm. Image 3 shows the same 3D poses without labels for the real overlap order and boot position. The midpoint poses were sampled between the 2D keys, not at the keys. Draw color and contours for every new sprite to match the exact 2D neighbors in Image 1; use the 3D images for placement and motion only. No visual trace of the guide lines or numbers.
+
+Arrange the new images in ONE strict 4 columns by 2 rows atlas. New top row depicts K1→K2 midpoint, K2→K3 midpoint, K3→K4 midpoint, K4→K5 midpoint. New bottom row depicts K5→K6 midpoint, K6→K7 midpoint, K7→K8 midpoint, and K8→K1 midpoint at the loop boundary. Inspect the two adjacent 2D artworks for every new frame, especially the final tile connecting the bottom-right key to the top-left key. Do not restage or change the model. Make the hood flower, head angle, hair and skirt contours, button placement, both boots, shoulder joint heights and outfit materials interpolate smoothly between the two nearby keys. Keep the near anatomical left hand down at waist, inside the continuous path of both adjacent keys. The near cuff MUST still attach to its visible shoulder on the viewer's right, and move gradually against the torso; keep hands small. Follow the exact corresponding 3D wrist positions, foot contacts, knee bends, and occlusion. No sudden arm raised to the face, no doubled cuffs or extra legs. Keep the exact facial identity, ivory hood, cobalt blue star flower, gold trim, pink curl tips, and compact proportions in Image 1.
+
+A single landscape RGBA image with exactly eight distinct sprites, one whole different true midpoint pose in every regularly spaced cell. Keep camera view looking 50 degrees downward facing lower left. Keep scale and body center stable, show whole hood and both boots with clear transparent whitespace around each sprite. No floor, checker pattern, guide overlays, panel outlines, labels, shadows, text, extra characters, props or backgrounds.
+
+01-pixel-art-run-3d-sw-16.png
+The drawing language is exactly the 2D keyframe sheet (Image 1): authentic medium-density console RPG pixel art. Each pose is a crisp game sprite on a square pixel grid with selective dark-indigo stepped outlines and the same warm color clusters. No smooth outlining or gradient rendering. Preserve the recognizable star centers and burgundy/pink curl clusters even in small pixels. Aim for about 105 logical pixels tall per pose.
+
+02-cel-shading-run-3d-sw-16.png
+Copy the 2D keyframe sheet (Image 1)'s anime animation cel aesthetic precisely: smoothly tapered deep blue outer lines, lighter interior lines, strong hard-edged solid shadow shapes, flat warm cream, muted coral-pink and rich navy. Keep the hair reflections and bright star pupils consistent. No brush texture or pixel treatment.
+
+03-paper-cutout-run-3d-sw-16.png
+Copy the 2D keyframe sheet (Image 1)'s layered dyed cut-paper look precisely: tactile fine matte fibers, almost no ink outlines, shaped layers of ribbons and ivory panels and small contact shadows only inside the silhouette. Same head, curl paths and gold paper fastening across the walk. Cut out the character on true alpha, with no paper background.
+
+04-gouache-run-3d-sw-16.png
+Copy the 2D keyframe sheet (Image 1)'s opaque storybook gouache precisely: fine visible directional dry-brush texture inside the silhouette, matte warm ivory, lavender in the shadows, ultramarine/navy coat and rose-peach hair. Preserve face and material appearances from pose to pose. No paper background or flecks outside the silhouette.
+
+05-stained-glass-run-3d-sw-16.png
+Copy the 2D keyframe sheet (Image 1)'s original stained-glass rendering precisely: dark navy lead contours, delicate interior lines in the opalescent ivory panels and rose hair, rich cobalt coat glass and honey gold fastenings. Repeat the same panel boundaries in the fabric and hair throughout. No window surround, background, glow or light rays.
+
+셀 채색 4번 왼팔 보정
+Make one narrowly scoped transparent sprite edit to Image 1, which is frame 4 of Iris's 16-frame jog. Images 2 and 3 are its adjacent approved 2D keys; Image 4 is the corresponding real midpoint of the 3D rig. Keep Image 1's whole body, style, line weight, hair, head and expression, silhouette, two legs, boot contacts, dress and shoulder position pixel-for-pixel as far as possible. Change only her near LEFT forearm sleeve and small hand, attached to the shoulder on viewer-right. The current hand is slightly too far back (viewer-right) compared with the adjacent two 2D keys. Move the hand about 22–24 pixels toward viewer-left within the original tile, toward the navy button panel, without raising her hand. Position the forearm on the waist with the wrist approximately halfway between its location in Images 2 and 3 relative to the flower and the center of her dress. Preserve white cuff size, unchanged gold stripe and tapered indigo animation outlines. Keep the other arm exactly as shown in Image 1. Keep image 1's angle, bob, size and crop, all limbs and the hood visible. Output one full-body transparent PNG with no background, objects, text, floor mark, shadow, panel border or labels.

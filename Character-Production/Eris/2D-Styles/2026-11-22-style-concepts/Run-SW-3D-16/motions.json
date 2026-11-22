@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "character": "이리스",
+  "clip": "run",
+  "facing": {
+    "id": "sw",
+    "label": "왼쪽 앞",
+    "cameraPitchReferenceDegrees": 50
+  },
+  "loop": true,
+  "inPlace": true,
+  "durationMs": 837.5,
+  "frameDurationMs": 52.34375,
+  "sampleRateFps": 19.104477611940297,
+  "frameCount": 16,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "order": "row-major from top left"
+  },
+  "pivotNormalizedUnity": [
+    0.5,
+    0.125
+  ],
+  "coordinates": "Frame size and pixel pivots use pixels from the top left. Unity's normalized pivot uses the bottom-left origin.",
+  "atlases": [
+    {
+      "id": "01-pixel-art",
+      "label": "레트로 도트",
+      "sourceIdle": "../01-pixel-art.png",
+      "file": "01-pixel-art-run-3d-sw-16.png",
+      "imageSizePx": [
+        512,
+        640
+      ],
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        140
+      ],
+      "unityFilterMode": "Point"
+    },
+    {
+      "id": "02-cel-shading",
+      "label": "셀 채색",
+      "sourceIdle": "../02-cel-shading.png",
+      "file": "02-cel-shading-run-3d-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear"
+    },
+    {
+      "id": "03-paper-cutout",
+      "label": "종이 콜라주",
+      "sourceIdle": "../03-paper-cutout.png",
+      "file": "03-paper-cutout-run-3d-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear"
+    },
+    {
+      "id": "04-gouache",
+      "label": "과슈",
+      "sourceIdle": "../04-gouache.png",
+      "file": "04-gouache-run-3d-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear"
+    },
+    {
+      "id": "05-stained-glass",
+      "label": "스테인드글라스",
+      "sourceIdle": "../05-stained-glass.png",
+      "file": "05-stained-glass-run-3d-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear"
+    }
+  ],
+  "sourceMotion": {
+    "libraryTitle": "Mixamo Jogging",
+    "action": "Eris_Run_Calm",
+    "branch": "godking5070/캐릭터-컨셉아트",
+    "revision": "db50f36",
+    "blend": "Character-Production/Eris/Texturing/Iris_Concept_Textured.blend",
+    "blendSha256": "bbf489796eb63aaf3c978f10ed36728c07f812c36265f90e0a897589561c4d64",
+    "originalFbx": "Character-Production/Eris/Animation/Source/Mixamo_Run.fbx",
+    "sourceFps": 30,
+    "periodFrames": 25.125,
+    "sampledFrames": [
+      8.25,
+      9.8203125,
+      11.390625,
+      12.9609375,
+      14.53125,
+      16.1015625,
+      17.671875,
+      19.2421875,
+      20.8125,
+      22.3828125,
+      23.953125,
+      25.5234375,
+      27.09375,
+      28.6640625,
+      30.234375,
+      31.8046875
+    ],
+    "cameraProjection": "perspective",
+    "cameraAzimuthDegrees": 45,
+    "cameraPitchDegrees": 50,
+    "referenceAtlas": "rig-reference.png",
+    "armReferenceAtlas": "middle-arm-reference.png",
+    "projectedJoints": "projected-joints.json"
+  },
+  "frameOrigin": {
+    "existingKeys": "../Run-SW-3D",
+    "preservedKeyFrames": [
+      1,
+      3,
+      5,
+      7,
+      9,
+      11,
+      13,
+      15
+    ],
+    "addedInBetweenFrames": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16
+    ]
+  }
+}
