@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>이리스 달리기 · 16프레임</title>
+<style>
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--background, #ffffff);
+    color: var(--foreground, #172030);
+    font: 14px/1.55 var(--font-sans, system-ui, sans-serif);
+  }
+  main { max-width: 660px; padding: 14px; margin: auto; }
+  .toolbar, .actions, .buttons, label { display: flex; align-items: center; gap: 8px; }
+  .toolbar { justify-content: space-between; flex-wrap: wrap; margin-bottom: 9px; }
+  .actions { flex-wrap: wrap; margin-bottom: 12px; }
+  button, select {
+    margin: 0;
+    min-height: 36px;
+    padding: 4px 10px;
+    border: 1px solid var(--border, #ced6e0);
+    border-radius: 7px;
+    background: var(--card, #ffffff);
+    color: var(--card-foreground, #172030);
+    font: inherit;
+    cursor: pointer;
+  }
+  button:hover, select:hover {
+    background: var(--accent, #e3ebf5);
+    color: var(--accent-foreground, #212c3f);
+  }
+  button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 2px solid var(--ring, #305eb0);
+    outline-offset: 2px;
+  }
+  button[aria-pressed="true"], .frame-list button[aria-current="true"] {
+    background: var(--primary, #315fa7);
+    color: var(--primary-foreground, #ffffff);
+    border-color: var(--primary, #315fa7);
+  }
+  .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  figure {
+    margin: 0;
+    border: 1px solid var(--border, #ced6e0);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--muted, #eff3f8);
+  }
+  figcaption { padding: 7px 10px 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stage {
+    position: relative;
+    width: min(100%, 270px);
+    aspect-ratio: 5 / 6;
+    margin-inline: auto;
+    overflow: hidden;
+  }
+  .zoomed .stage { width: min(100%, 320px); aspect-ratio: 216 / 137; }
+  .art {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--atlas);
+    background-size: 400% 400%;
+    background-repeat: no-repeat;
+  }
+  .zoomed .art {
+    left: calc(-100% * 44 / 216);
+    top: calc(-100% * 147 / 137);
+    width: calc(100% * 320 / 216);
+    height: calc(100% * 384 / 137);
+  }
+  .is-pixel .art { transform: scaleX(0.96); image-rendering: pixelated; }
+  .stack .stage { isolation: isolate; }
+  .stack .art + .art { mix-blend-mode: plus-lighter; }
+  .blend {
+    display: grid;
+    grid-template-columns: auto minmax(100px, 310px) auto;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 7px 8px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .blend input { width: 100%; margin: 0; accent-color: var(--primary, #315fa7); cursor: pointer; }
+  .frame-list {
+    display: grid;
+    grid-template-columns: repeat(16, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .frame-list button { padding: 2px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 580px) {
+    main { padding: 10px; }
+    .frame-list { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  }
+
+  .head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 12px; margin: 0 0 13px; }
+  .head h1 { font-size: clamp(21px, 4vw, 28px); margin: 0; }
+  .head span { color: var(--muted-foreground, #4d5d72); font-size: 13px; }
+  .buttons { flex-wrap: wrap; }
+  .style-tools, .playback { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .style-tools a { color: inherit; font-size: 13px; text-underline-offset: 3px; }
+  .playback #play { min-width: 68px; }
+  .single .stage { width: min(100%, 255px); }
+  .zoomed .single .stage { width: min(100%, 320px); }
+  .frame-list { margin-top: 12px; }
+</style>
+</head>
+<body>
+<main id="viewer">
+  <header class="head">
+    <h1>이리스 달리기</h1>
+    <span>왼쪽 앞 · 16프레임 · 24 FPS · 0.67초</span>
+  </header>
+  <div class="toolbar">
+    <div class="style-tools">
+      <label>그림체 <select id="style-picker"></select></label>
+      <a id="download" download>PNG 시트</a>
+    </div>
+    <div class="playback" role="group" aria-label="재생 조작">
+      <button type="button" id="play">재생</button>
+      <button type="button" id="previous" aria-label="이전 프레임">‹ 이전</button>
+      <button type="button" id="next" aria-label="다음 프레임">다음 ›</button>
+      <label>속도 <select id="speed">
+        <option value="1">1×</option>
+        <option value="0.5">0.5×</option>
+      </select></label>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="buttons" role="group" aria-label="비교 방식">
+      <button type="button" data-mode="single" aria-pressed="true">한 장</button>
+      <button type="button" data-mode="pair" aria-pressed="false">나란히</button>
+      <button type="button" data-mode="overlay" aria-pressed="false">겹쳐보기</button>
+    </div>
+    <button type="button" id="zoom" aria-pressed="false">상체 확대</button>
+  </div>
+  <figure class="single" id="single">
+    <figcaption data-label="0"></figcaption>
+    <div class="stage"><div class="art" data-frame="0" aria-hidden="true"></div></div>
+  </figure>
+  <div class="pair" id="pair" hidden>
+    <figure>
+      <figcaption data-label="0"></figcaption>
+      <div class="stage"><div class="art" data-frame="0" aria-hidden="true"></div></div>
+    </figure>
+    <figure>
+      <figcaption data-label="1"></figcaption>
+      <div class="stage"><div class="art" data-frame="1" aria-hidden="true"></div></div>
+    </figure>
+  </div>
+  <div id="overlay" hidden>
+    <figure class="stack">
+      <figcaption id="overlay-caption"></figcaption>
+      <div class="stage">
+        <div class="art" data-frame="0" aria-hidden="true"></div>
+        <div class="art" data-frame="1" aria-hidden="true"></div>
+      </div>
+    </figure>
+    <div class="blend">
+      <span data-label="0"></span>
+      <input type="range" id="blend" min="0" max="100" value="50" aria-label="앞뒤 프레임 비율">
+      <span data-label="1"></span>
+    </div>
+  </div>
+  <div class="frame-list" role="group" aria-label="프레임 선택" id="frame-list"></div>
+</main>
+<script>
+const styles = [{"name":"레트로 도트","atlas":"01-pixel-art-run-sw-16.png","pixel":true},{"name":"셀 채색","atlas":"02-cel-shading-run-sw-16.png","pixel":false},{"name":"종이 콜라주","atlas":"03-paper-cutout-run-sw-16.png","pixel":false},{"name":"과슈","atlas":"04-gouache-run-sw-16.png","pixel":false},{"name":"스테인드글라스","atlas":"05-stained-glass-run-sw-16.png","pixel":false}];
+const viewer = document.querySelector('#viewer');
+const stylePicker = document.querySelector('#style-picker');
+const frameList = document.querySelector('#frame-list');
+const blend = document.querySelector('#blend');
+const playButton = document.querySelector('#play');
+const speedSelect = document.querySelector('#speed');
+const download = document.querySelector('#download');
+const zoom = document.querySelector('#zoom');
+const layers = [...document.querySelectorAll('#overlay .art')];
+const overlayCaption = document.querySelector('#overlay-caption');
+const modeButtons = [...document.querySelectorAll('[data-mode]')];
+const labels = [0, 1].map(offset => [...viewer.querySelectorAll('[data-label="' + offset + '"]')]);
+const sprites = [0, 1].map(offset => [...viewer.querySelectorAll('[data-frame="' + offset + '"]')]);
+
+const frameCount = 16;
+const frameDuration = 1000 / 24;
+let frame = 0;
+let playbackId = null;
+let nextFrameAt = 0;
+let speed = Number(speedSelect.value);
+
+const number = index => String(index + 1).padStart(2, '0');
+const wrap = index => (index + frameCount) % frameCount;
+styles.forEach((style, index) => stylePicker.add(new Option(style.name, index)));
+stylePicker.selectedIndex = 1;
+
+const frameButtons = Array.from({ length: frameCount }, (_, index) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = number(index);
+  button.setAttribute('aria-label', number(index) + '번 프레임');
+  button.addEventListener('click', () => selectFrame(index));
+  frameList.appendChild(button);
+  return button;
+});
+
+function showBlend() {
+  const after = Number(blend.value);
+  layers[0].style.opacity = (100 - after) / 100;
+  layers[1].style.opacity = after / 100;
+  blend.setAttribute('aria-valuetext', number(frame) + '번 ' + (100 - after) + '%, '
+    + number(wrap(frame + 1)) + '번 ' + after + '%');
+}
+
+function showFrame(index) {
+  frameButtons[frame].removeAttribute('aria-current');
+  frame = index;
+  const next = wrap(index + 1);
+  overlayCaption.textContent = number(index) + '번 → ' + number(next) + '번';
+  [index, next].forEach((value, i) => {
+    labels[i].forEach(label => { label.textContent = number(value) + '번 · ' + (value % 2 === 0 ? '원본' : '연결'); });
+    const position = (value % 4) * 100 / 3 + '% ' + Math.floor(value / 4) * 100 / 3 + '%';
+    sprites[i].forEach(sprite => { sprite.style.backgroundPosition = position; });
+  });
+  frameButtons[frame].setAttribute('aria-current', 'true');
+  showBlend();
+}
+
+function showStyle() {
+  const style = styles[stylePicker.selectedIndex];
+  viewer.style.setProperty('--atlas', 'url("' + style.atlas + '")');
+  viewer.classList.toggle('is-pixel', style.pixel);
+  if (download) download.href = style.atlas;
+}
+
+function setMode(mode) {
+  modeButtons.forEach(button => {
+    const active = button.dataset.mode === mode;
+    button.setAttribute('aria-pressed', String(active));
+    document.getElementById(button.dataset.mode).hidden = !active;
+  });
+}
+
+function selectFrame(index) {
+  setPlaying(false);
+  showFrame(wrap(index));
+}
+
+function tick(now) {
+  if (now >= nextFrameAt) {
+    const interval = frameDuration / speed;
+    showFrame(wrap(frame + 1));
+    // Give a late frame a full interval instead of skipping cels.
+    if (now - nextFrameAt > interval / 2) nextFrameAt = now;
+    nextFrameAt += interval;
+  }
+  playbackId = requestAnimationFrame(tick);
+}
+
+function setPlaying(playing) {
+  if (playbackId !== null) cancelAnimationFrame(playbackId);
+  playbackId = null;
+  if (playing) {
+    setMode('single');
+    nextFrameAt = performance.now() + frameDuration / speed;
+    playbackId = requestAnimationFrame(tick);
+  }
+  playButton.textContent = playing ? '일시정지' : '재생';
+}
+
+playButton.addEventListener('click', () => setPlaying(playbackId === null));
+document.querySelector('#previous').addEventListener('click', () => selectFrame(frame - 1));
+document.querySelector('#next').addEventListener('click', () => selectFrame(frame + 1));
+speedSelect.addEventListener('change', () => {
+  speed = Number(speedSelect.value);
+  if (playbackId !== null) nextFrameAt = performance.now() + frameDuration / speed;
+});
+stylePicker.addEventListener('change', showStyle);
+blend.addEventListener('input', showBlend);
+zoom.addEventListener('click', () => {
+  zoom.setAttribute('aria-pressed', String(viewer.classList.toggle('zoomed')));
+});
+modeButtons.forEach(button => button.addEventListener('click', () => {
+  setPlaying(false);
+  setMode(button.dataset.mode);
+}));
+frameList.addEventListener('keydown', event => {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  event.preventDefault();
+  selectFrame(frame + (event.key === 'ArrowRight' ? 1 : -1));
+  frameButtons[frame].focus();
+});
+showStyle();
+showFrame(0);
+</script>
+</body>
+</html>

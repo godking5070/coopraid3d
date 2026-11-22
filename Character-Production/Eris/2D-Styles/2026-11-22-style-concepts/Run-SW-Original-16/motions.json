@@ -1,0 +1,381 @@
+{
+  "version": 1,
+  "character": "이리스",
+  "clip": "run",
+  "facing": {
+    "id": "sw",
+    "label": "왼쪽 앞",
+    "cameraPitchReferenceDegrees": 50
+  },
+  "loop": true,
+  "inPlace": true,
+  "durationMs": 666.6666666666666,
+  "frameDurationMs": 41.666666666666664,
+  "sampleRateFps": 24,
+  "frameCount": 16,
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "order": "row-major from top left"
+  },
+  "pivotNormalizedUnity": [
+    0.5,
+    0.125
+  ],
+  "coordinates": "Frame size and pixel pivots use pixels from the top left. Unity's normalized pivot uses the bottom-left origin.",
+  "atlases": [
+    {
+      "id": "01-pixel-art",
+      "label": "레트로 도트",
+      "sourceIdle": "../01-pixel-art.png",
+      "file": "01-pixel-art-run-sw-16.png",
+      "imageSizePx": [
+        512,
+        640
+      ],
+      "frameSizePx": [
+        128,
+        160
+      ],
+      "pivotPx": [
+        64,
+        140
+      ],
+      "unityFilterMode": "Point",
+      "originalAtlas": "../Run-SW/01-pixel-art-run-sw.png",
+      "originalAtlasSha256": "174c0504ee4055d11d5c70014ce296a767b7ef8aefbad755c311f1edc5b4a4ff",
+      "intermediateSources": [
+        {
+          "from": 1,
+          "to": 2,
+          "reference": "previous"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "reference": "previous"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "reference": "next"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "reference": "next"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "reference": "previous"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "reference": "next"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "reference": "next"
+        },
+        {
+          "from": 8,
+          "to": 1,
+          "reference": "previous"
+        }
+      ]
+    },
+    {
+      "id": "02-cel-shading",
+      "label": "셀 채색",
+      "sourceIdle": "../02-cel-shading.png",
+      "file": "02-cel-shading-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "originalAtlas": "../Run-SW/02-cel-shading-run-sw.png",
+      "originalAtlasSha256": "6f01df0bbabcd6bafb02e7e20aacafccd18634b509453e24c94e0960f903d32a",
+      "intermediateSources": [
+        {
+          "from": 1,
+          "to": 2,
+          "reference": "previous"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "reference": "previous"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "reference": "next"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "reference": "next"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "reference": "both"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "reference": "next"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "reference": "next"
+        },
+        {
+          "from": 8,
+          "to": 1,
+          "reference": "previous"
+        }
+      ]
+    },
+    {
+      "id": "03-paper-cutout",
+      "label": "종이 콜라주",
+      "sourceIdle": "../03-paper-cutout.png",
+      "file": "03-paper-cutout-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "originalAtlas": "../Run-SW/03-paper-cutout-run-sw.png",
+      "originalAtlasSha256": "f07205f5387bd1ec3c8293871895f8b3b295957b45b5d95d0afd53d4bbe94c2b",
+      "intermediateSources": [
+        {
+          "from": 1,
+          "to": 2,
+          "reference": "previous"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "reference": "previous"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "reference": "next"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "reference": "previous"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "reference": "previous"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "reference": "previous"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "reference": "next"
+        },
+        {
+          "from": 8,
+          "to": 1,
+          "reference": "next"
+        }
+      ]
+    },
+    {
+      "id": "04-gouache",
+      "label": "과슈",
+      "sourceIdle": "../04-gouache.png",
+      "file": "04-gouache-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "originalAtlas": "../Run-SW/04-gouache-run-sw.png",
+      "originalAtlasSha256": "588b0e4a81fa52f920e261005c683de425065d3b9251845220a3eb9966936398",
+      "intermediateSources": [
+        {
+          "from": 1,
+          "to": 2,
+          "reference": "previous"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "reference": "previous"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "reference": "next"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "reference": "next"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "reference": "previous"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "reference": "next"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "reference": "next"
+        },
+        {
+          "from": 8,
+          "to": 1,
+          "reference": "next"
+        }
+      ]
+    },
+    {
+      "id": "05-stained-glass",
+      "label": "스테인드글라스",
+      "sourceIdle": "../05-stained-glass.png",
+      "file": "05-stained-glass-run-sw-16.png",
+      "imageSizePx": [
+        1280,
+        1536
+      ],
+      "frameSizePx": [
+        320,
+        384
+      ],
+      "pivotPx": [
+        160,
+        336
+      ],
+      "unityFilterMode": "Bilinear",
+      "originalAtlas": "../Run-SW/05-stained-glass-run-sw.png",
+      "originalAtlasSha256": "f7f40df76fc971941bd8f2d049f12f4044b002c634c3385766e827979c674823",
+      "intermediateSources": [
+        {
+          "from": 1,
+          "to": 2,
+          "reference": "previous"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "reference": "previous"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "reference": "next"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "reference": "next"
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "reference": "previous"
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "reference": "next"
+        },
+        {
+          "from": 7,
+          "to": 8,
+          "reference": "next"
+        },
+        {
+          "from": 8,
+          "to": 1,
+          "reference": "next"
+        }
+      ]
+    }
+  ],
+  "poseReference": {
+    "preview": "../Run-SW/index.html",
+    "manifest": "../Run-SW/motions.json",
+    "revision": "72ea525",
+    "originalFrames": [
+      1,
+      3,
+      5,
+      7,
+      9,
+      11,
+      13,
+      15
+    ],
+    "insertedFrames": [
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    "correspondence": "The original eight full-body cels are stored verbatim on odd frames. Each even frame connects the previous key with the next, including the repeat boundary."
+  },
+  "motionReference": {
+    "action": "Eris_Run_Calm",
+    "projectedJoints": "../Run-SW-3D-16/projected-joints.json",
+    "cameraAzimuthDegrees": 45,
+    "cameraPitchDegrees": 50,
+    "purpose": "Reference for alternating foot contact, leg crossings, and the aerial-to-contact order of the original poses."
+  },
+  "frameOrigin": {
+    "originalDrawingPrompts": "../Run-SW/imagegen-prompts.txt",
+    "method": "The original eight raster cels retain all RGBA pixels. Intermediate cels use shape-preserving mesh deformation guided by cuffs, toes and sleeves. Sleeves crossing the body use the foreground drawing in the intermediate pose.",
+    "referenceTiming": "The source 0.6667 second cycle is preserved as 16 samples at 24 FPS."
+  }
+}
