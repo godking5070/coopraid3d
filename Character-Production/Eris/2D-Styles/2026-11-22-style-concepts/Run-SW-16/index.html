@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이리스 달리기</title>
+  <style>
+    html {
+      color-scheme: light dark;
+      background: var(--background, #f7f8fb);
+      color: var(--foreground, #202438);
+      font-family: var(--font-sans, system-ui, sans-serif);
+    }
+    body { margin: 0; }
+    main { max-width: 1050px; margin: auto; padding: clamp(14px, 3vw, 30px); }
+    h1 { margin: 0; font-size: clamp(22px, 4.5vw, 32px); }
+    header { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
+    header p { margin: 6px 0 0; font-size: 14px; color: var(--muted-foreground, #535c71); }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 14px; }
+    button {
+      min-width: 68px;
+      padding: 6px 11px;
+      border: 1px solid var(--border, #bcc2d1);
+      border-radius: 7px;
+      background: var(--card, #fff);
+      color: var(--card-foreground, #202438);
+      cursor: pointer;
+      font: inherit;
+    }
+    button:hover { background: var(--accent, #e0e5f0); color: var(--accent-foreground, #202438); }
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--ring, #5559ad); outline-offset: 3px; }
+    select {
+      padding: 5px;
+      border: 1px solid var(--border, #bcc2d1);
+      border-radius: 7px;
+      background: var(--card, #fff);
+      color: var(--card-foreground, #202438);
+      font: inherit;
+    }
+    label { display: flex; align-items: center; gap: 6px; }
+    input { width: 108px; margin: 0; accent-color: var(--primary, #5559ad); }
+    output { min-width: 38px; font-variant-numeric: tabular-nums; }
+    .frame-steps { display: flex; gap: 6px; }
+    .frame-steps button { min-width: 0; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 124px), 1fr)); gap: 9px; }
+    article {
+      background: var(--card, #fff);
+      color: var(--card-foreground, #202438);
+      border: 1px solid var(--border, #d6daea);
+      border-radius: 10px;
+      overflow: hidden;
+      text-align: center;
+    }
+    h2 { margin: 0; padding: 9px 3px; font-size: 14px; font-weight: 650; }
+    .stage {
+      display: grid;
+      place-items: center;
+      width: 100%;
+      min-height: 126px;
+      aspect-ratio: 5 / 6;
+      background: radial-gradient(ellipse at 50% 48%, #dae0ec, #c8cfdf);
+    }
+    .sprite, .frame-art {
+      display: block;
+      width: 100%;
+      aspect-ratio: 5 / 6;
+      background-image: var(--atlas);
+      background-repeat: no-repeat;
+      background-size: 400% 400%;
+      background-position: var(--column, 0%) var(--row, 0%);
+    }
+    .pixel { width: 96%; aspect-ratio: 4 / 5; image-rendering: pixelated; }
+    a { display: inline-block; padding: 8px; color: inherit; font-size: 13px; }
+    .frame-browser {
+      margin-top: 18px;
+      padding: 12px;
+      border: 1px solid var(--border, #d6daea);
+      border-radius: 10px;
+      background: var(--card, #fff);
+      color: var(--card-foreground, #202438);
+    }
+    .frame-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .frame-heading h2 { padding: 0; font-size: 16px; }
+    .frame-strip { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+    .frame-thumb { display: grid; min-width: 0; padding: 0; overflow: hidden; }
+    .frame-art { background-color: var(--muted, #dce3ef); }
+    .frame-strip.is-pixel .frame-art { aspect-ratio: 4 / 5; image-rendering: pixelated; }
+    .frame-number { padding: 3px; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .frame-thumb[aria-current="true"] { border-color: var(--primary, #5559ad); }
+    .frame-thumb[aria-current="true"] .frame-number { background: var(--primary, #5559ad); color: var(--primary-foreground, #fff); }
+    @media (max-width: 510px) {
+      .frame-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media (prefers-color-scheme: dark) {
+      .stage { background: radial-gradient(ellipse at 50% 48%, #3c455b, #2c3347); }
+      .frame-art { background-color: var(--muted, #3c455b); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>이리스 달리기</h1>
+        <p>왼쪽 앞 ↙ · 16프레임 · 약 0.84초 루프</p>
+      </div>
+      <div class="controls">
+        <button id="play" type="button">재생</button>
+        <div class="frame-steps" role="group" aria-label="프레임 단위 이동">
+          <button id="previous-frame" type="button" aria-label="이전 프레임">‹ 이전</button>
+          <button id="next-frame" type="button" aria-label="다음 프레임">다음 ›</button>
+        </div>
+        <label>속도 <select id="speed">
+          <option value="1">1×</option>
+          <option value="0.5">0.5×</option>
+        </select></label>
+        <label>프레임 <input id="frame" type="range" min="1" max="16" value="1"></label>
+        <output for="frame" aria-live="off">1 / 16</output>
+      </div>
+    </header>
+    <section class="cards" aria-label="그림체별 달리기">
+      <article>
+        <h2>레트로 도트</h2>
+        <div class="stage">
+          <div class="sprite pixel" role="img" aria-label="레트로 도트로 그린 이리스의 달리기"
+            style="--atlas: url('01-pixel-art-run-sw-16.png')"></div>
+        </div>
+        <a href="01-pixel-art-run-sw-16.png" download>PNG 시트</a>
+      </article>
+      <article>
+        <h2>셀 채색</h2>
+        <div class="stage">
+          <div class="sprite" role="img" aria-label="셀 채색으로 그린 이리스의 달리기"
+            style="--atlas: url('02-cel-shading-run-sw-16.png')"></div>
+        </div>
+        <a href="02-cel-shading-run-sw-16.png" download>PNG 시트</a>
+      </article>
+      <article>
+        <h2>종이 콜라주</h2>
+        <div class="stage">
+          <div class="sprite" role="img" aria-label="종이 콜라주로 그린 이리스의 달리기"
+            style="--atlas: url('03-paper-cutout-run-sw-16.png')"></div>
+        </div>
+        <a href="03-paper-cutout-run-sw-16.png" download>PNG 시트</a>
+      </article>
+      <article>
+        <h2>과슈</h2>
+        <div class="stage">
+          <div class="sprite" role="img" aria-label="과슈로 그린 이리스의 달리기"
+            style="--atlas: url('04-gouache-run-sw-16.png')"></div>
+        </div>
+        <a href="04-gouache-run-sw-16.png" download>PNG 시트</a>
+      </article>
+      <article>
+        <h2>스테인드글라스</h2>
+        <div class="stage">
+          <div class="sprite" role="img" aria-label="스테인드글라스로 그린 이리스의 달리기"
+            style="--atlas: url('05-stained-glass-run-sw-16.png')"></div>
+        </div>
+        <a href="05-stained-glass-run-sw-16.png" download>PNG 시트</a>
+      </article>
+      <article>
+        <h2>3D 기준</h2>
+        <div class="stage">
+          <div class="sprite" role="img" aria-label="Mixamo Jogging을 적용한 이리스 3D 모델"
+            style="--atlas: url('full-pose-reference.png')"></div>
+        </div>
+        <a href="full-pose-reference.png" download>PNG 시트</a>
+      </article>
+    </section>
+    <section id="frames" class="frame-browser" aria-labelledby="frame-heading">
+      <div class="frame-heading">
+        <h2 id="frame-heading">프레임별 보기</h2>
+        <label>그림체 <select id="frame-style"></select></label>
+      </div>
+      <div id="frame-strip" class="frame-strip" role="group" aria-label="프레임 선택"></div>
+    </section>
+  </main>
+  <script>
+    const main = document.querySelector('main');
+    const frameSlider = document.querySelector('#frame');
+    const frameCounter = document.querySelector('output');
+    const playButton = document.querySelector('#play');
+    const speedSelect = document.querySelector('#speed');
+    const frameStyle = document.querySelector('#frame-style');
+    const frameStrip = document.querySelector('#frame-strip');
+    const cards = [...document.querySelectorAll('.cards article')];
+    const frameCount = Number(frameSlider.max);
+    const frameDuration = 52.34375;
+    let frame = 0;
+    let playbackId = null;
+    let nextFrameAt = 0;
+    let speed = Number(speedSelect.value);
+
+    function positionFrame(element, index) {
+      element.style.setProperty('--column', (index % 4) * 100 / 3 + '%');
+      element.style.setProperty('--row', Math.floor(index / 4) * 100 / 3 + '%');
+    }
+
+    const frameButtons = Array.from({ length: frameCount }, (_, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'frame-thumb';
+      button.setAttribute('aria-label', (index + 1) + '번 프레임');
+      const art = document.createElement('span');
+      art.className = 'frame-art';
+      art.setAttribute('aria-hidden', 'true');
+      positionFrame(art, index);
+      const number = document.createElement('span');
+      number.className = 'frame-number';
+      number.textContent = index + 1;
+      button.append(art, number);
+      button.addEventListener('click', () => selectFrame(index));
+      frameStrip.append(button);
+      return button;
+    });
+
+    function showFrame(index) {
+      frameButtons[frame].removeAttribute('aria-current');
+      frame = index;
+      positionFrame(main, frame);
+      frameSlider.value = frame + 1;
+      frameCounter.value = (frame + 1) + ' / ' + frameCount;
+      frameButtons[frame].setAttribute('aria-current', 'true');
+    }
+
+    function selectFrame(index) {
+      setPlaying(false);
+      showFrame((index + frameCount) % frameCount);
+    }
+
+    function showThumbnails() {
+      const sprite = cards[frameStyle.selectedIndex].querySelector('.sprite');
+      frameStrip.style.setProperty('--atlas', sprite.style.getPropertyValue('--atlas'));
+      frameStrip.classList.toggle('is-pixel', sprite.classList.contains('pixel'));
+    }
+
+    function tick(now) {
+      if (now >= nextFrameAt) {
+        const interval = frameDuration / speed;
+        showFrame((frame + 1) % frameCount);
+        // A late paint starts a fresh interval so the frame has time to display.
+        if (now - nextFrameAt > interval / 2) nextFrameAt = now;
+        nextFrameAt += interval;
+      }
+      playbackId = requestAnimationFrame(tick);
+    }
+
+    function setPlaying(playing) {
+      if (playbackId !== null) cancelAnimationFrame(playbackId);
+      playbackId = null;
+      if (playing) {
+        nextFrameAt = performance.now() + frameDuration / speed;
+        playbackId = requestAnimationFrame(tick);
+      }
+      playButton.textContent = playing ? '일시정지' : '재생';
+    }
+
+    playButton.addEventListener('click', () => setPlaying(playbackId === null));
+    document.querySelector('#previous-frame').addEventListener('click', () => selectFrame(frame - 1));
+    document.querySelector('#next-frame').addEventListener('click', () => selectFrame(frame + 1));
+    speedSelect.addEventListener('change', () => {
+      speed = Number(speedSelect.value);
+      if (playbackId !== null) nextFrameAt = performance.now() + frameDuration / speed;
+    });
+    frameSlider.addEventListener('input', () => selectFrame(Number(frameSlider.value) - 1));
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey ||
+          (event.target instanceof Element && event.target.closest('input, select, textarea, [contenteditable]'))) return;
+      event.preventDefault();
+      selectFrame(frame + (event.key === 'ArrowLeft' ? -1 : 1));
+      if (frameStrip.contains(event.target)) frameButtons[frame].focus();
+    });
+    cards.forEach((card, index) => frameStyle.add(new Option(card.querySelector('h2').textContent, index)));
+    const defaultStyle = cards.findIndex(card => card.querySelector('h2').textContent === '셀 채색');
+    frameStyle.selectedIndex = defaultStyle >= 0 ? defaultStyle : cards.length - 1;
+    frameStyle.addEventListener('change', showThumbnails);
+    showThumbnails();
+    showFrame(0);
+    setPlaying(!matchMedia('(prefers-reduced-motion: reduce)').matches);
+  </script>
+</body>
+</html>

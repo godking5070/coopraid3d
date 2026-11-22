@@ -1,0 +1,32 @@
+이리스 왼쪽 앞 달리기 · 전신 16프레임 5종
+
+내장 ImageGen으로 그림체마다 한 장의 4×4 전신 시트를 생성했습니다.
+Image 1은 원본 Mixamo Jogging의 16개 자세를 Blender Workbench에서 단색으로 렌더한 full-pose-reference.png입니다.
+Image 2는 각 그림체의 상위 폴더 정지 원화입니다.
+셀 채색과 스테인드글라스의 Image 3은 양쪽 팔과 다리의 관절을 표시한 pose-overlap-guide.png입니다.
+
+공통 프롬프트
+Use case: stylized-concept. Draw a completely new coherent 2D sprite atlas of Iris, the original Astella game character, as one production sheet with sixteen distinct full-body cels of a closed in-place jog.
+Image 1 is the neutral 3D Mixamo motion guide: fixed 50-degree downward camera looking from the front-left, Iris facing down-left. Use the matching pose in every tile, with natural changes in weight-bearing foot, occlusion, and opposed bent arms. Image 2 is the visual model sheet for the character and requested 2D technique: its compact chibi construction, soft face, silhouette, folds, contour style and palette apply to the entire new animation.
+Work from full-body thumbnail through full-body inking and color on every cel. Keep the face, hat profile, costume pattern, skin tone, curls, sleeve volume, boot width, and spacing on model throughout. Draw the ivory ruffles, small continuous upper-arm skin segment, subtle navy garment trim, puff sleeves, skirt and boots as parts of the same outfit, with unified line weight, materials and lighting. Keep the navy details at the bonnet, neck, sleeve edges and coat in the same subdued dark-blue color family. Give the hands and shoulders clear depth against the torso with intentional overlaps. Preserve Iris's ivory petal hood, blue flower with gold star, blue eyes, long cream-blond to pastel-rose hair, gold-button navy/ivory coat and white fur-trimmed boots.
+Keep the natural small head bob and leave clean leg and arm silhouettes. Alternate two footfalls with soft follow-through of hair and coat. Each next pose progresses from the previous one, including frame 16 into 01. Draw all sixteen full bodies afresh in the same materials and proportions.
+Exactly 4 equally spaced columns by 4 equally spaced rows, top-left to bottom-right. Match the guide's scale and body placement inside each cell with ample transparent gaps around the complete figures. Real transparent alpha background. No grid lines, crop, text, cast shadow, floor, effects, extra characters or props.
+
+Image 3을 사용하는 두 그림체의 추가 프롬프트
+Image 3 maps every arm and every leg from the same 3D sample. The blue lines are anatomical left, orange anatomical right. Use it to resolve the original pose in each matching full figure. In cels 05 to 10, the near sleeve and its cuff swing in front of the body and are visibly layered over the coat, with a small knuckle shape connected to the cuff. Preserve the full length and volume of both arms across the whole cycle. The near arm goes back toward the hip in 12 to 16 and continues smoothly into the opening pose.
+The 16 cels should read as one finished drawing style from top to bottom. Use evenly weighted outer and interior outlines. The navy sleeve edge is narrow and shaded like the other trim on the whole outfit, and the fabric meets the single exposed upper-arm skin shape cleanly. Fill the entire ivory volume from the sleeve edge to the cuff with the same cel palette as the dress. Keep the strong compact character silhouette, gentle face and consistent hair, proportions, panel pattern and boot design. Make this a complete new 4×4 atlas. All traces, labels and numbered backgrounds are for motion reference.
+
+01-pixel-art-run-sw-16.png
+Medium: Original console RPG pixel art with consistent square pixel clusters, a restrained 16-bit ivory/navy/rose palette, crisp stepped edges of uniform weight, and legible paired boots and sleeve shapes. Keep the same small dark edge accents and warm skin palette on the whole figure.
+
+02-cel-shading-run-sw-16.png
+Medium: On-model 2D anime cels with clean thin dark-indigo linework along the whole figure, simple two-tone cel shadows, small gold accents and broad warm-ivory and muted rose shapes. Use the same contour weight and shadow treatment on hair, neckline, sleeves, skirt and boots.
+
+03-paper-cutout-run-sw-16.png
+Medium: Hand-cut, matte dyed-paper collage as in image 2. Use matching paper thickness and fine paper fiber throughout the body, broad simple folds, clean layered shapes and restrained internal contact shadows. Warm cream, navy, gold and pale rose. Keep its edges and palette homogeneous throughout the loop.
+
+04-gouache-run-sw-16.png
+Medium: Matte opaque storybook gouache as in image 2. Use soft painted shape boundaries, delicate short brush marks inside large opaque color masses. A coherent warm-ivory, ultramarine, rose and gold palette from hood and hair through sleeves and boots, with the same tactile brushwork on the whole figure.
+
+05-stained-glass-run-sw-16.png
+Medium: Original stained glass drawn as a full isolated 2D character. Use restrained and consistent lead contours of the same weight, opalescent ivory fabric and rose curl panes, rich indigo and honey-gold accessories. Use stable pane boundaries from cover and sleeves into dress and boots.
