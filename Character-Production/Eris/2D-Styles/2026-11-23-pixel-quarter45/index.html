@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이리스 45° 도트 시안</title>
+  <style>
+    html {
+      color-scheme: light dark;
+      background: var(--background, #f5f6fa);
+      color: var(--foreground, #1d2033);
+      font-family: var(--font-sans, system-ui, "Malgun Gothic", sans-serif);
+      --floor: #ad9bc4;
+    }
+    body { margin: 0; }
+    main { max-width: 1100px; margin: auto; padding: clamp(14px, 3vw, 30px); display: grid; gap: 24px; }
+    h1 { margin: 0; font-size: clamp(22px, 4.5vw, 30px); }
+    h2 { margin: 0; font-size: 18px; }
+    p { margin: 0; line-height: 1.6; max-width: 70ch; }
+    .muted { color: var(--muted-foreground, #5a5f78); font-size: 14px; }
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; position: sticky; top: 0; z-index: 2;
+      padding: 8px 10px; background: var(--card, #fff); border: 1px solid var(--border, #d6daea); border-radius: 10px; }
+    button { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px 5px 6px; border: 1px solid var(--border, #bcc2d1);
+      border-radius: 999px; background: var(--card, #fff); color: var(--card-foreground, #1d2033); cursor: pointer; font: inherit; font-size: 13px; }
+    button i { width: 16px; height: 16px; border-radius: 50%; display: block; border: 1px solid rgba(0,0,0,.2); }
+    button[aria-pressed="true"] { border-color: var(--primary, #3a55a8); box-shadow: 0 0 0 1px var(--primary, #3a55a8) inset; }
+    button:focus-visible { outline: 2px solid var(--ring, #3a55a8); outline-offset: 3px; }
+    img { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+
+    .floor { background: var(--floor); border-radius: 10px; padding: 18px 12px 12px; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-end; gap: 14px; }
+    .floor figure { margin: 0; display: grid; justify-items: center; gap: 6px; position: relative; }
+    .floor figure::before { content: ""; position: absolute; bottom: 22px; left: 50%; width: 72%; height: 12%; max-height: 18px;
+      transform: translateX(-50%); border-radius: 50%; background: rgba(0,0,0,.16); }
+    .floor img { position: relative; }
+    .floor figcaption { font-size: 12px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+    article { background: var(--card, #fff); color: var(--card-foreground, #1d2033); border: 1px solid var(--border, #d6daea);
+      border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; }
+    .stage { background: var(--floor); border-radius: 8px; height: 360px; display: grid; place-items: center; overflow: hidden; }
+    .stage img { max-height: 340px; width: auto; }
+    .meta { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .size { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--muted-foreground, #5a5f78); }
+    .tag { font-size: 12px; font-weight: 600; color: var(--primary, #3a55a8); letter-spacing: .04em; }
+  </style>
+</head>
+<body>
+<main>
+  <header style="display:grid;gap:8px">
+    <h1>이리스 45° 도트 시안</h1>
+    <p class="muted">원화와 참고 스프라이트를 기준으로 직접 찍은 도트 대기 자세 5종입니다. 45도로 내려다본 시점에서 이리스가 화면 왼쪽 아래를 봅니다.</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="바닥색">
+    <span class="muted">바닥색</span>
+    <button type="button" data-floor="#ad9bc4" aria-pressed="true"><i style="background:#ad9bc4"></i>라벤더</button>
+    <button type="button" data-floor="#6e7a73"><i style="background:#6e7a73"></i>석재</button>
+    <button type="button" data-floor="#5f7f4c"><i style="background:#5f7f4c"></i>풀밭</button>
+    <button type="button" data-floor="#cdb88f"><i style="background:#cdb88f"></i>모래</button>
+    <button type="button" data-floor="#262a3d"><i style="background:#262a3d"></i>밤</button>
+  </div>
+
+  <section style="display:grid;gap:10px">
+    <h2>실제 크기의 2배</h2>
+    <div class="floor">
+      <figure><img src="01-classic-mmo.png" width="94" alt="클래식 MMO 도트"><figcaption>클래식 MMO</figcaption></figure>
+      <figure><img src="02-hd-detail.png" width="178" alt="HD 고밀도 도트"><figcaption>HD 고밀도</figcaption></figure>
+      <figure><img src="03-tiny-sd.png" width="68" alt="초미니 SD 도트"><figcaption>초미니 SD</figcaption></figure>
+      <figure><img src="04-pastel-lineless.png" width="106" alt="파스텔 무외곽선 도트"><figcaption>파스텔 무외곽선</figcaption></figure>
+      <figure><img src="05-retro-dither.png" width="94" alt="레트로 디더 도트"><figcaption>레트로 디더</figcaption></figure>
+    </div>
+    <p class="muted">게임 화면에서 2배로 확대해 쓰는 경우의 크기입니다. 원본 PNG는 무접미 파일입니다.</p>
+  </section>
+
+  <section class="cards" aria-label="그림체별 확대">
+    <article>
+      <div class="stage"><img src="01-classic-mmo-x6.png" alt="클래식 MMO 도트 6배"></div>
+      <div class="meta"><span class="tag">STYLE 1 · 클래식 MMO</span><span class="size">47×75</span></div>
+      <p>검은 1px 외곽선, 4단 파스텔 명암, 머릿결 선. 보내준 참고 스프라이트에 가장 가깝습니다.</p>
+    </article>
+    <article>
+      <div class="stage"><img src="02-hd-detail-x4.png" alt="HD 고밀도 도트 4배"></div>
+      <div class="meta"><span class="tag">STYLE 2 · HD 고밀도</span><span class="size">89×144</span></div>
+      <p>5단 명암과 색이 든 외곽선(셀아웃)으로 부드럽게 정리했습니다. 별 동공과 단추가 가장 또렷합니다.</p>
+    </article>
+    <article>
+      <div class="stage"><img src="03-tiny-sd-x8.png" alt="초미니 SD 도트 8배"></div>
+      <div class="meta"><span class="tag">STYLE 3 · 초미니 SD</span><span class="size">34×49</span></div>
+      <p>약 2등신으로 머리를 키우고 몸을 줄였습니다. 화면에 캐릭터가 많을 때 유리하지만 소매와 후드 자락이 붙어 보입니다.</p>
+    </article>
+    <article>
+      <div class="stage"><img src="04-pastel-lineless-x6.png" alt="파스텔 무외곽선 도트 6배"></div>
+      <div class="meta"><span class="tag">STYLE 4 · 파스텔 무외곽선</span><span class="size">53×85</span></div>
+      <p>검은 선 없이 주변 색을 어둡게 한 외곽만 썼습니다. 가장 부드럽지만 밝은 바닥에서는 윤곽이 약합니다.</p>
+    </article>
+    <article>
+      <div class="stage"><img src="05-retro-dither-x6.png" alt="레트로 디더 도트 6배"></div>
+      <div class="meta"><span class="tag">STYLE 5 · 레트로 디더</span><span class="size">47×75</span></div>
+      <p>제한 팔레트와 남색 외곽선을 쓰고, 그림자와 분홍 머리끝을 체크무늬 디더로 표현했습니다.</p>
+    </article>
+  </section>
+</main>
+<script>
+  (function () {
+    var btns = document.querySelectorAll('button[data-floor]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.documentElement.style.setProperty('--floor', b.getAttribute('data-floor'));
+        btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>
