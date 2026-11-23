@@ -20,7 +20,7 @@ namespace Astella.TwoD
         public Text tooltipText;
 
         private static readonly int[] SkillBySlot = { 0, 1, -1, -1, 2, -1, -1, 4 };
-        private static readonly string[] SkillNames = { "기본 타격", "공명 기술", "은빛 가호", "별의 공명", "회피 대시" };
+        private readonly string[] _skillNames = { "기본 타격", "공명 기술", "은빛 가호", "별의 공명", "회피 대시" };
         private static readonly string[] SkillKeys = { "J", "Q", "E", "R", "Space" };
         private Sprite[] _normalPartyHealth;
         private GameObject _castRoot;
@@ -61,7 +61,7 @@ namespace Astella.TwoD
                     view.artwork.sprite = icon;
                     view.artwork.enabled = icon != null;
                 }
-                Text(view.nameText, skill >= 0 && icon == null ? SkillNames[skill] : "");
+                Text(view.nameText, skill >= 0 && icon == null ? _skillNames[skill] : "");
                 Text(view.keyText, skill >= 0 ? SkillKeys[skill] : "");
             }
             if (center != null)
@@ -76,6 +76,26 @@ namespace Astella.TwoD
             if (boss != null && boss.castFill != null && boss.castFill.transform.parent != boss.transform)
                 _castRoot = boss.castFill.transform.parent.gameObject;
         }
+
+        /// <summary>Names for skills 0-3 of the selected kit. Dash keeps its shared name.</summary>
+        public void SetSkillNames(string basic, string primary, string utility, string ultimate)
+        {
+            _skillNames[0] = basic;
+            _skillNames[1] = primary;
+            _skillNames[2] = utility;
+            _skillNames[3] = ultimate;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                var view = slots[i];
+                int skill = i < SkillBySlot.Length ? SkillBySlot[i] : -1;
+                if (view == null || skill < 0) continue;
+                bool hasIcon = view.artwork != null && view.artwork.enabled && view.artwork.sprite != null;
+                Text(view.nameText, hasIcon ? "" : _skillNames[skill]);
+            }
+            Visible(tooltipRoot, false);
+        }
+
+        public string SkillName(int skill) => _skillNames[skill];
 
         public void Show(bool value)
         {
@@ -92,7 +112,7 @@ namespace Astella.TwoD
             var enter = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
             enter.callback.AddListener(_ =>
             {
-                Text(tooltipText, $"{SkillNames[skill]}  [{(skill == 0 ? "LMB / J" : SkillKeys[skill])}]");
+                Text(tooltipText, $"{_skillNames[skill]}  [{(skill == 0 ? "LMB / J" : SkillKeys[skill])}]");
                 Visible(tooltipRoot, true);
             });
             var exit = new EventTrigger.Entry { eventID = EventTriggerType.PointerExit };
@@ -109,7 +129,7 @@ namespace Astella.TwoD
                 Gauge(player.healthFill, Fraction(hp, maxHp));
                 Text(player.valueText, Whole(hp) + " / " + Whole(maxHp));
                 Gauge(player.jobResourceFill, 1 - Fraction(dashCooldown, dashDuration));
-                Text(player.nameText, SkillNames[4]);
+                Text(player.nameText, _skillNames[4]);
                 Text(player.resourceText, Time(Mathf.Max(0, dashCooldown)));
             }
             if (center != null)

@@ -17,3 +17,11 @@ $taskExe = Join-Path $taskOutput 'Astella2DGeometryTests.exe'
 if ($LASTEXITCODE -ne 0) { throw 'Astella 2D geometry checks failed to compile.' }
 & $taskExe
 if ($LASTEXITCODE -ne 0) { throw 'Astella 2D geometry checks failed.' }
+
+$taskRulesExe = Join-Path $taskOutput 'Astella2DRulesTests.exe'
+& $Compiler /nologo /langversion:9.0 /target:exe "/out:$taskRulesExe" `
+    (Join-Path $taskRoot 'Assets/Astella2D/Runtime/Astella2DKits.cs') `
+    (Join-Path $PSScriptRoot 'Astella2DRulesTests.cs')
+if ($LASTEXITCODE -ne 0) { throw 'Astella 2D rules checks failed to compile.' }
+& $taskRulesExe
+if ($LASTEXITCODE -ne 0) { throw 'Astella 2D rules checks failed.' }

@@ -30,7 +30,7 @@ namespace Astella.TwoD.Editor
             public string[] checks;
             public int screenWidth, screenHeight, frame, attacks, damageEvents, dodges;
             public int observedAttacks, observedDamageEvents, observedDodges;
-            public float playerHealth, bossHealth;
+            public float playerHealth, bossHealth, autopilotBossRatio;
             public bool actualPlayMode, actualScreenshot;
         }
 
@@ -126,7 +126,7 @@ namespace Astella.TwoD.Editor
             SessionState.SetString(Key + "checks", "");
             SessionState.SetString(Key + "phase", "enter");
             SessionState.SetInt(Key + "errors", 0);
-            SessionState.SetFloat(Key + "deadline", (float)EditorApplication.timeSinceStartup + 180f);
+            SessionState.SetFloat(Key + "deadline", (float)EditorApplication.timeSinceStartup + 420f);
             PrepareGameView();
             HookChecks();
             EditorApplication.isPaused = false;
@@ -162,7 +162,7 @@ namespace Astella.TwoD.Editor
                 {
                     if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
                     StopChecks();
-                    Debug.Log("ASTELLA 2D PLAY CHECKS PASS: movement, dash, basic attack, defeat, restart, telegraph screenshot and hit.");
+                    Debug.Log("ASTELLA 2D PLAY CHECKS PASS: movement, dash, kit skills, revive, defeat, restart, telegraph hit, three encounters with blessings, victory, 13 kits and autopilot combat.");
                     EditorApplication.Exit(0);
                     return;
                 }
@@ -251,20 +251,68 @@ namespace Astella.TwoD.Editor
                         Record("basic-attack-and-boss-damage");
                         SessionState.SetInt(Key + "observedAttacks", game.Attacks);
                         SessionState.SetInt(Key + "observedDamageEvents", game.DamageEvents);
-                        Phase("death");
+                        Phase("skills");
                     }
                     else Require(elapsed < 5f, "Basic attacks did not damage the boss within five seconds in combat range.");
                 }
-                else if (phase == "death")
+                else if (phase == "skills")
                 {
-                    // A recent hit can temporarily block this damage. Wait for that window to end.
-                    if (!game.Finished) game.ApplyPlayerDamage(game.PlayerHealth + 10000f);
-                    if (!game.Finished)
+                    // Character 0 is the tank kit: Q strikes and guards, E guards the party, R spends full charge.
+                    float before = game.BossHealth;
+                    Require(game.TryUseSkill(1) && game.BossHealth < before && game.CooldownOf(1) > 0 && game.PlayerGuard > 0,
+                        "The tank's Q must hit the boss, start its cooldown and guard the player.");
+                    Record("kit-primary");
+                    Require(game.TryUseSkill(2) && game.CooldownOf(2) > 0, "The tank's E must start its cooldown.");
+                    Record("kit-utility");
+                    game.DebugChargeUltimate();
+                    before = game.BossHealth;
+                    Require(game.TryUseSkill(3) && game.BossHealth < before - 1000 && game.Ultimate <= 0,
+                        "R must spend the full charge and hit the boss hard.");
+                    Require(!game.TryUseSkill(3), "R must not fire again without charge.");
+                    Record("kit-ultimate");
+                    Phase("skills-hud");
+                }
+                else if (phase == "skills-hud")
+                {
+                    if (elapsed < .2f) return;
+                    var hud = RequirePrismHud();
+                    Require(hud.slots[1].cooldownShade.enabled && hud.slots[4].cooldownShade.enabled,
+                        "The Q and E cooldowns must show on the Prism slots.");
+                    Record("kit-cooldown-hud");
+                    Phase("down");
+                }
+                else if (phase == "down")
+                {
+                    if (!game.Downed) game.ApplyPlayerDamage(game.PlayerHealth + 100000f);
+                    if (!game.Downed)
                     {
-                        Require(elapsed < 4f, "Lethal damage never reached the defeat state.");
+                        Require(!game.Finished && elapsed < 4f, "Lethal damage with revives left must down the player, not end the run.");
                         return;
                     }
-                    Require(game.Finished && !game.Won && game.PlayerHealth <= 0, "Lethal damage must reach the actual defeat state.");
+                    Require(game.Running && !game.Finished && game.RevivesUsed >= 1 && game.RevivesLeft < 2,
+                        "A downed player must spend one shared revive.");
+                    Require(!game.TryUseSkill(0), "A downed player cannot act.");
+                    Record("downed-with-revive");
+                    Phase("revive");
+                }
+                else if (phase == "revive")
+                {
+                    if (game.Downed) { Require(elapsed < 5f, "The downed player was not revived."); return; }
+                    Require(game.Running && game.PlayerHealth > 0, "Revival must restore a live player in the same encounter.");
+                    Record("revived");
+                    Phase("death");
+                }
+                else if (phase == "death")
+                {
+                    // Spend the remaining revives. Invulnerability after a revive briefly blocks lethal damage.
+                    if (!game.Finished && !game.Downed) game.ApplyPlayerDamage(game.PlayerHealth + 100000f);
+                    if (!game.Finished)
+                    {
+                        Require(elapsed < 20f, "Lethal damage never reached the defeat state after revives ran out.");
+                        return;
+                    }
+                    Require(game.Finished && !game.Won && game.PlayerHealth <= 0 && game.RevivesLeft == 0 && game.ResultTitle == "원정 실패",
+                        "Lethal damage with no revives left must reach the actual defeat state.");
                     Record("defeat");
                     var wipe = UnityEngine.Object.FindObjectsByType<RaidRogue.RaidUIView>(FindObjectsSortMode.None)
                         .Single(view => view.viewId == "wipe");
@@ -323,6 +371,136 @@ namespace Astella.TwoD.Editor
                     Record("boss-telegraph-hit");
                     Require(RequirePrismHud().player.healthFill.Ratio < 1, "The Prism health bar must show the hit.");
                     Record("prism-health-after-hit");
+                    // Ranged archer: the basic attack reaches the boss from the spawn point.
+                    game.BeginRun(8);
+                    game.SetAutomation(true);
+                    Require(game.Running && game.Encounter == 0, "A new run must start at the first encounter.");
+                    game.DebugSetBossHealth(1);
+                    Phase("win");
+                }
+                else if (phase == "win")
+                {
+                    if (!game.Finished)
+                    {
+                        game.TryUseSkill(0);
+                        if (!game.Finished) { Require(elapsed < 5f, "The weakened boss was not defeated."); return; }
+                    }
+                    int encounter = game.Encounter;
+                    Require(game.Won && game.RewardOffered, "Winning encounter " + (encounter + 1) + " must offer blessings.");
+                    var reward = UnityEngine.Object.FindObjectsByType<RaidRogue.RaidUIView>(FindObjectsSortMode.None)
+                        .Single(view => view.viewId == "skill-reward" && view.isActiveAndEnabled);
+                    for (int i = 0; i < 3; i++)
+                        Require(!string.IsNullOrEmpty(game.OfferedBlessing(i)) &&
+                            reward.actions.Single(action => action.id == "choice." + i).button.IsInteractable(),
+                            "Each of the three blessing choices must be offered and clickable.");
+                    Record("reward-offer-" + (encounter + 1));
+                    if (encounter == 0) { CaptureNow("reward.png"); Phase("reward-shot"); return; }
+                    PickBlessing(game);
+                }
+                else if (phase == "reward-shot")
+                {
+                    if (!CaptureReady("reward.png")) { Require(elapsed < 15f, "Unity did not write the reward screenshot."); return; }
+                    Record("reward-screenshot");
+                    PickBlessing(game);
+                }
+                else if (phase == "final-telegraph")
+                {
+                    if (game.ActiveTelegraphs == 0) { Require(elapsed < 15f, "The final boss did not cast."); return; }
+                    if (elapsed < 1f) return;
+                    CaptureNow("encounter3.png");
+                    Phase("final-shot");
+                }
+                else if (phase == "final-shot")
+                {
+                    if (!CaptureReady("encounter3.png")) { Require(elapsed < 15f, "Unity did not write the encounter 3 screenshot."); return; }
+                    Record("encounter-3-screenshot");
+                    game.DebugSetBossHealth(1);
+                    Phase("final-win");
+                }
+                else if (phase == "final-win")
+                {
+                    if (!game.Finished)
+                    {
+                        if (game.Downed) { Require(elapsed < 10f, "The player stayed down during the final check."); return; }
+                        game.DebugSetBossHealth(1);
+                        game.TryUseSkill(0);
+                        if (!game.Finished) { Require(elapsed < 10f, "The final boss was not defeated."); return; }
+                    }
+                    Require(game.Won && !game.RewardOffered && game.ResultShown && game.ResultTitle == "원정 완료",
+                        "Winning the third encounter must show the expedition-complete result.");
+                    Record("final-victory");
+                    Phase("final-result");
+                }
+                else if (phase == "final-result")
+                {
+                    if (elapsed < .5f) return;
+                    CaptureNow("victory.png");
+                    Phase("roster");
+                }
+                else if (phase == "roster")
+                {
+                    if (!CaptureReady("victory.png")) { Require(elapsed < 15f, "Unity did not write the victory screenshot."); return; }
+                    var directions = new[] { Vector2.down, new Vector2(1, -1), Vector2.right, Vector2.one, Vector2.up, new Vector2(-1, 1), Vector2.left, -Vector2.one };
+                    for (int i = 0; i < Astella.TwoD.Astella2DRoster.All.Count; i++)
+                    {
+                        string name = Astella.TwoD.Astella2DRoster.All[i].Name;
+                        game.BeginRun(i);
+                        game.SetAutomation(true);
+                        var kit = game.PlayerKit;
+                        Require(game.Running && Mathf.Approximately(game.PlayerMaxHealth, kit.MaxHp) && game.LivingAllies == 3,
+                            name + " must start with its kit health and three allies.");
+                        foreach (var direction in directions)
+                            Require(Astella.TwoD.Astella2DRoster.Frame(i, direction) != null, name + " is missing a facing sprite.");
+                        game.DebugTeleport(game.BossPosition + new Vector2(0, -1.6f));
+                        for (int slot = 0; slot < 4; slot++)
+                        {
+                            if (slot == 3) game.DebugChargeUltimate();
+                            Require(game.TryUseSkill(slot), name + " could not use " + kit.Skill(slot).Name + " (slot " + slot + ").");
+                        }
+                        Require(game.BossHealth < game.BossMaxHealth, name + " skills must damage the boss.");
+                    }
+                    Record("roster-13-kits");
+                    game.ReturnToMenu();
+                    Phase("menu-shot");
+                }
+                else if (phase == "menu-shot")
+                {
+                    if (elapsed < .5f) return;
+                    CaptureNow("menu.png");
+                    Phase("menu-wait");
+                }
+                else if (phase == "menu-wait")
+                {
+                    if (!CaptureReady("menu.png")) { Require(elapsed < 15f, "Unity did not write the menu screenshot."); return; }
+                    Record("menu-screenshot");
+                    game.BeginRun(6);
+                    game.SetAutopilot(true);
+                    SessionState.SetInt(Key + "autopilotShot", 0);
+                    SessionState.SetFloat(Key + "autopilotFirstWin", -1);
+                    Phase("autopilot");
+                }
+                else if (phase == "autopilot")
+                {
+                    // The player is driven by the party AI for a stretch of real combat.
+                    if (SessionState.GetInt(Key + "autopilotShot", 0) == 0 && elapsed > 20f && game.Running)
+                    {
+                        CaptureNow("autopilot.png");
+                        SessionState.SetInt(Key + "autopilotShot", 1);
+                    }
+                    if (game.RewardOffered)
+                    {
+                        if (SessionState.GetFloat(Key + "autopilotFirstWin", -1) < 0) SessionState.SetFloat(Key + "autopilotFirstWin", elapsed);
+                        game.ChooseBlessing(0);
+                    }
+                    if (elapsed < 60f && !game.Finished) return;
+                    Debug.Log("ASTELLA 2D AUTOPILOT: encounter " + (game.Encounter + 1) + ", boss " + (game.BossHealth / Mathf.Max(1, game.BossMaxHealth)).ToString("P0") +
+                        ", first win at " + SessionState.GetFloat(Key + "autopilotFirstWin", -1).ToString("0.0") + "s, revives used " + game.RevivesUsed +
+                        ", dodges " + game.DodgeCount + ", finished " + game.Finished + ", won " + game.Won);
+                    Require(game.Attacks > 10 && game.DamageDealt > 1000, "Autopilot combat must keep attacking the boss.");
+                    Require(CaptureReady("autopilot.png") || SessionState.GetInt(Key + "autopilotShot", 0) == 0,
+                        "Unity did not write the autopilot screenshot.");
+                    Record("autopilot-combat");
+                    SessionState.SetFloat(Key + "autopilotBoss", game.BossHealth / Mathf.Max(1, game.BossMaxHealth));
                     string path = Path.Combine(SessionState.GetString(Key + "evidence", DefaultEvidence), "unity-play.png");
                     WriteReport(true, "", game, path);
                     Phase("exit");
@@ -337,6 +515,37 @@ namespace Astella.TwoD.Editor
                 Debug.LogException(error);
                 EditorApplication.Exit(1);
             }
+        }
+
+        // Clicks the authored reward button and verifies the next encounter starts fresh.
+        private static void PickBlessing(Astella2DGame game)
+        {
+            int encounter = game.Encounter;
+            var reward = UnityEngine.Object.FindObjectsByType<RaidRogue.RaidUIView>(FindObjectsSortMode.None)
+                .Single(view => view.viewId == "skill-reward" && view.isActiveAndEnabled);
+            reward.actions.Single(action => action.id == "choice." + (encounter % 3)).button.onClick.Invoke();
+            var next = Astella2DEncounters.Get(encounter + 1);
+            Require(game.Running && game.Encounter == encounter + 1 && Mathf.Approximately(game.BossMaxHealth, next.BossHp) &&
+                Mathf.Approximately(game.BossHealth, game.BossMaxHealth) && game.RevivesLeft >= 2,
+                "Choosing a blessing must start the next encounter with a fresh boss and revives.");
+            Record("encounter-" + (encounter + 2) + "-started");
+            if (game.Encounter < 2) game.DebugSetBossHealth(1);
+            Phase(game.Encounter < 2 ? "win" : "final-telegraph");
+        }
+
+        private static string EvidencePath(string name) => Path.Combine(SessionState.GetString(Key + "evidence", DefaultEvidence), name);
+
+        private static void CaptureNow(string name)
+        {
+            string path = EvidencePath(name);
+            if (File.Exists(path)) File.Delete(path);
+            ScreenCapture.CaptureScreenshot(path);
+        }
+
+        private static bool CaptureReady(string name)
+        {
+            string path = EvidencePath(name);
+            return File.Exists(path) && new FileInfo(path).Length > 1024;
         }
 
         private static Astella2DPrismView RequirePrismHud()
@@ -358,7 +567,7 @@ namespace Astella.TwoD.Editor
                 screenWidth = Screen.width, screenHeight = Screen.height, frame = Time.frameCount,
                 playerHealth = game != null ? game.PlayerHealth : 0, bossHealth = game != null ? game.BossHealth : 0,
                 attacks = game != null ? game.Attacks : 0, damageEvents = game != null ? game.DamageEvents : 0,
-                dodges = game != null ? game.DodgeCount : 0,
+                dodges = game != null ? game.DodgeCount : 0, autopilotBossRatio = SessionState.GetFloat(Key + "autopilotBoss", -1),
                 observedAttacks = SessionState.GetInt(Key + "observedAttacks", 0),
                 observedDamageEvents = SessionState.GetInt(Key + "observedDamageEvents", 0),
                 observedDodges = SessionState.GetInt(Key + "observedDodges", 0),

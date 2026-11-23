@@ -31,8 +31,13 @@ if ($LASTEXITCODE -ne 0) { throw 'Astella 2D geometry checks failed.' }
 # while enumerating current source files so newly added 2D code is included even
 # before Unity can regenerate its project files. This never launches the editor,
 # copies Library, restores packages, or changes the generated csproj files.
-$taskSources = @(& rg --files (Join-Path $taskRoot 'Assets') -g '*.cs')
-if ($LASTEXITCODE -ne 0 -or !$taskSources.Count) { throw 'Could not enumerate the project C# sources.' }
+if (Get-Command rg -ErrorAction SilentlyContinue) {
+    $taskSources = @(& rg --files (Join-Path $taskRoot 'Assets') -g '*.cs')
+    if ($LASTEXITCODE -ne 0) { $taskSources = @() }
+} else {
+    $taskSources = @(Get-ChildItem -LiteralPath (Join-Path $taskRoot 'Assets') -Recurse -File -Filter '*.cs' | ForEach-Object FullName)
+}
+if (!$taskSources.Count) { throw 'Could not enumerate the project C# sources.' }
 
 foreach ($taskAssembly in @('Assembly-CSharp', 'Assembly-CSharp-Editor')) {
     $taskProjectPath = Join-Path $OriginalProject "$taskAssembly.csproj"

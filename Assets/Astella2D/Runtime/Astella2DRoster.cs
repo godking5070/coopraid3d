@@ -4,15 +4,6 @@ using UnityEngine;
 
 namespace Astella.TwoD
 {
-    public enum PixelRole
-    {
-        Tank,
-        Healer,
-        Melee,
-        Ranged,
-        Caster
-    }
-
     public sealed class PixelCharacter
     {
         public string Id;

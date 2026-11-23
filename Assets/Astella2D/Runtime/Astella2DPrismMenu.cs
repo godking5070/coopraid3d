@@ -52,20 +52,19 @@ namespace Astella.TwoD
             var resultView = InstantiateView(presentation, "wipe", parent);
 
             // Read the authored binding keys, then connect their controls directly to the 2D game.
-            string[] blessings =
-            {
-                "별빛의 칼날\n\n공격력 +25%",
-                "은빛 생명\n\n최대 체력 +30%",
-                "공명의 발걸음\n\n대시 대기시간 -25%"
-            };
-            for (int i = 0; i < blessings.Length; i++)
+            // The blessing texts are filled per victory from the drawn offer.
+            var blessingLabels = new Text[3];
+            for (int i = 0; i < blessingLabels.Length; i++)
             {
                 int index = i;
-                Reference<Text>(rewardView, "_labels/[" + i + "]").text = blessings[i];
+                blessingLabels[i] = Reference<Text>(rewardView, "_labels/[" + i + "]");
                 Bind(ActionButton(rewardView, "choice." + i), () => reward(index));
             }
-            Reference<Text>(rewardView, "_header").text = "공명 수호자 격파";
-            Reference<Text>(rewardView, "_status").text = "다음 원정을 위한 축복을 고르세요.";
+            var rewardHeader = Reference<Text>(rewardView, "_header");
+            var rewardStatus = Reference<Text>(rewardView, "_status");
+            // The authored kicker line speaks about 3D skills; keep its style and replace only the words.
+            foreach (var text in rewardView.GetComponentsInChildren<Text>(true))
+                if (text.gameObject.name.EndsWith("Kicker", StringComparison.Ordinal)) text.text = "다음 원정을 위한 축복을 하나 고르세요";
             var rewardMenu = ActionButton(rewardView, "menu");
             Label(rewardMenu, "캐릭터 선택");
             Bind(rewardMenu, menu);
@@ -89,7 +88,8 @@ namespace Astella.TwoD
 
             return new Astella2DPrismOutcome(rewardView.gameObject, Reference<RectTransform>(rewardView, "_root").gameObject,
                 resultView.gameObject, Reference<GameObject>(resultView, "_root"),
-                Reference<Text>(resultView, "_title"), Reference<Text>(resultView, "_details"));
+                Reference<Text>(resultView, "_title"), Reference<Text>(resultView, "_details"),
+                rewardHeader, rewardStatus, blessingLabels);
         }
 
         private static RaidUIView InstantiateView(RaidUIPresentation presentation, string id, Transform parent)
@@ -129,9 +129,11 @@ namespace Astella.TwoD
     internal sealed class Astella2DPrismOutcome
     {
         private readonly GameObject rewardView, rewardRoot, resultView, resultRoot;
-        private readonly Text title, details;
+        private readonly Text title, details, rewardHeader, rewardStatus;
+        private readonly Text[] blessingLabels;
 
-        public Astella2DPrismOutcome(GameObject rewardView, GameObject rewardRoot, GameObject resultView, GameObject resultRoot, Text title, Text details)
+        public Astella2DPrismOutcome(GameObject rewardView, GameObject rewardRoot, GameObject resultView, GameObject resultRoot,
+            Text title, Text details, Text rewardHeader, Text rewardStatus, Text[] blessingLabels)
         {
             this.rewardView = rewardView;
             this.rewardRoot = rewardRoot;
@@ -139,19 +141,34 @@ namespace Astella.TwoD
             this.resultRoot = resultRoot;
             this.title = title;
             this.details = details;
+            this.rewardHeader = rewardHeader;
+            this.rewardStatus = rewardStatus;
+            this.blessingLabels = blessingLabels;
         }
 
-        public void Show(bool won, bool hasReward)
+        public bool RewardVisible => rewardView.activeInHierarchy;
+        public bool ResultVisible => resultView.activeInHierarchy;
+        public string ResultTitle => title.text;
+        public string BlessingText(int index) => blessingLabels[index].text;
+
+        /// <summary>Opens the reward choice with the drawn blessings, or the final result.</summary>
+        public void ShowReward(string header, string status, Blessing[] offer)
         {
             Hide();
-            if (won && hasReward)
-            {
-                Open(rewardView, rewardRoot);
-                return;
-            }
+            if (offer == null || offer.Length != blessingLabels.Length)
+                throw new ArgumentException("The reward view needs exactly three blessings.", nameof(offer));
+            rewardHeader.text = header;
+            rewardStatus.text = status;
+            for (int i = 0; i < offer.Length; i++)
+                blessingLabels[i].text = offer[i].Name + "\n\n" + offer[i].Description;
+            Open(rewardView, rewardRoot);
+        }
 
+        public void ShowResult(bool won, string body)
+        {
+            Hide();
             title.text = won ? "원정 완료" : "원정 실패";
-            details.text = won ? "세 번의 공명을 모두 잠재웠습니다." : "수호자의 장판을 읽고 다시 도전하세요.";
+            details.text = body;
             Open(resultView, resultRoot);
         }
 
