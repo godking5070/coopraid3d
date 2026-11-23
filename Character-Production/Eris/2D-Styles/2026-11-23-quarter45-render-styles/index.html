@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이리스 45° 화풍 시안</title>
+  <style>
+    html {
+      color-scheme: light dark;
+      background: var(--background, #f5f6fa);
+      color: var(--foreground, #1d2033);
+      font-family: var(--font-sans, system-ui, "Malgun Gothic", sans-serif);
+      --floor: #6e7a73;
+    }
+    body { margin: 0; }
+    main { max-width: 1080px; margin: auto; padding: clamp(14px, 3vw, 30px); display: grid; gap: 28px; }
+    h1 { margin: 0; font-size: clamp(22px, 4.5vw, 32px); }
+    h2 { margin: 0; font-size: 19px; }
+    h3 { margin: 0; font-size: 20px; }
+    p { margin: 0; max-width: 68ch; line-height: 1.6; }
+    header { display: grid; gap: 8px; }
+    .muted { color: var(--muted-foreground, #5a5f78); font-size: 14px; }
+    .specs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .spec { font-size: 12px; padding: 2px 9px; border: 1px solid var(--border, #d6daea); border-radius: 999px; color: var(--muted-foreground, #5a5f78); }
+
+    .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; position: sticky; top: 0; z-index: 2;
+      padding: 8px 10px; background: var(--card, #fff); border: 1px solid var(--border, #d6daea); border-radius: 10px; }
+    button {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 11px 5px 6px; border: 1px solid var(--border, #bcc2d1); border-radius: 999px;
+      background: var(--card, #fff); color: var(--card-foreground, #1d2033); cursor: pointer; font: inherit; font-size: 13px;
+    }
+    button i { width: 16px; height: 16px; border-radius: 50%; display: block; border: 1px solid rgba(0,0,0,.2); }
+    button:hover { background: var(--accent, #e0e5f0); color: var(--accent-foreground, #1d2033); }
+    button[aria-pressed="true"] { border-color: var(--primary, #3a55a8); box-shadow: 0 0 0 1px var(--primary, #3a55a8) inset; }
+    button:focus-visible { outline: 2px solid var(--ring, #3a55a8); outline-offset: 3px; }
+
+    .strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--floor); border-radius: 10px; padding: 16px 6px 10px; }
+    .strip figure { margin: 0; display: grid; justify-items: center; gap: 6px; }
+    .strip img { height: 180px; width: auto; max-width: 100%; object-fit: contain; image-rendering: pixelated; }
+    .strip figcaption { font-size: 12px; color: #f3f4f8; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+
+    .plate { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 22px; align-items: start;
+      background: var(--card, #fff); color: var(--card-foreground, #1d2033); border: 1px solid var(--border, #d6daea); border-radius: 12px; padding: 16px; }
+    .stage { background: var(--floor); border-radius: 8px; aspect-ratio: 852 / 1059; display: grid; place-items: center; overflow: hidden; }
+    .stage img { width: 100%; height: 100%; object-fit: contain; }
+    .stage img.px { image-rendering: pixelated; }
+    .info { display: grid; gap: 12px; min-width: 0; }
+    .tag { font-size: 12px; letter-spacing: .06em; color: var(--primary, #3a55a8); font-weight: 600; }
+    dl { margin: 0; display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 7px 10px; font-size: 14px; line-height: 1.55; }
+    dt { font-weight: 600; color: var(--muted-foreground, #5a5f78); }
+    dd { margin: 0; }
+    .files { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--muted-foreground, #5a5f78); overflow-wrap: anywhere; }
+    @media (max-width: 760px) { .plate { grid-template-columns: minmax(0, 1fr); } .strip img { height: 120px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>이리스 45° 화풍 시안</h1>
+    <p class="muted">텍스처·리깅된 이리스 3D 모델을 45도 쿼터뷰로 렌더링해 다섯 그림체로 합성했습니다. 모두 같은 모델·자세·카메라에서 나왔습니다.</p>
+    <div class="specs">
+      <span class="spec">직교 카메라 · 피치 45° · 요 45°</span>
+      <span class="spec">Eris_Idle_Calm 360f</span>
+      <span class="spec">투명 PNG</span>
+      <span class="spec">게임 크기 180px</span>
+    </div>
+  </header>
+
+  <div class="controls" role="group" aria-label="바닥색">
+    <span class="muted">바닥색</span>
+    <button type="button" data-floor="#6e7a73" aria-pressed="true"><i style="background:#6e7a73"></i>석재</button>
+    <button type="button" data-floor="#5f7f4c"><i style="background:#5f7f4c"></i>풀밭</button>
+    <button type="button" data-floor="#cdb88f"><i style="background:#cdb88f"></i>모래</button>
+    <button type="button" data-floor="#262a3d"><i style="background:#262a3d"></i>밤</button>
+    <button type="button" data-floor="#e9edf2"><i style="background:#e9edf2"></i>눈밭</button>
+  </div>
+
+  <section style="display:grid;gap:10px">
+    <h2>게임 크기에서 보기</h2>
+    <div class="strip">
+      <figure><img src="01-anime-cel-game.png" alt="애니메 셀, 게임 크기"><figcaption>애니메 셀</figcaption></figure>
+      <figure><img src="02-pixel-16bit-game.png" alt="16비트 픽셀, 실제 크기"><figcaption>16비트 픽셀</figcaption></figure>
+      <figure><img src="03-watercolor-storybook-game.png" alt="수채 동화, 게임 크기"><figcaption>수채 동화</figcaption></figure>
+      <figure><img src="04-manga-screentone-game.png" alt="만화 잉크, 게임 크기"><figcaption>만화 잉크</figcaption></figure>
+      <figure><img src="05-flat-vector-game.png" alt="플랫 벡터, 게임 크기"><figcaption>플랫 벡터</figcaption></figure>
+    </div>
+  </section>
+
+  <article class="plate">
+    <div class="stage"><img src="01-anime-cel.png" alt="애니메 셀 이리스 전신"></div>
+    <div class="info">
+      <div class="tag">STYLE 1</div>
+      <h3>애니메 셀</h3>
+      <p>남보라 외곽선, 라벤더 2단 그림자, 왼쪽 림라이트.</p>
+      <dl>
+        <dt>강점</dt><dd>게임 크기에서 가장 또렷합니다. 눈의 별과 꽃 장식이 그대로 읽힙니다.</dd>
+        <dt>주의</dt><dd>곱슬머리 안쪽 선이 많아 작은 크기에서 약간 복잡합니다.</dd>
+        <dt>애니</dt><dd>선·그림자가 자동이라 프레임이 늘어도 작업량이 거의 같습니다.</dd>
+      </dl>
+      <div class="files">01-anime-cel.png · 01-anime-cel-game.png</div>
+    </div>
+  </article>
+
+  <article class="plate">
+    <div class="stage"><img class="px" src="02-pixel-16bit.png" alt="16비트 픽셀 이리스 전신, 6배 확대"></div>
+    <div class="info">
+      <div class="tag">STYLE 2</div>
+      <h3>16비트 픽셀</h3>
+      <p>22색 팔레트, 6×6 블록 대표색, 1px 선택 외곽선. 실제 크기 142×176.</p>
+      <dl>
+        <dt>강점</dt><dd>쿼터뷰 RPG와 잘 맞고 용량이 작습니다. 외곽선 덕분에 어느 바닥에서도 윤곽이 유지됩니다.</dd>
+        <dt>주의</dt><dd>눈이 2~3픽셀이라 표정이 제한됩니다. 프레임마다 튀는 픽셀 정리가 필요할 수 있습니다.</dd>
+        <dt>애니</dt><dd>기존 도트 8방향 작업과 결이 같습니다.</dd>
+      </dl>
+      <div class="files">02-pixel-16bit-game.png (원본) · 02-pixel-16bit.png (×6)</div>
+    </div>
+  </article>
+
+  <article class="plate">
+    <div class="stage"><img src="03-watercolor-storybook.png" alt="수채 동화 이리스 전신"></div>
+    <div class="info">
+      <div class="tag">STYLE 3</div>
+      <h3>수채 동화</h3>
+      <p>물감이 고이는 가장자리, 종이 여백, 살짝 어긋난 연필 밑선.</p>
+      <dl>
+        <dt>강점</dt><dd>분위기가 가장 부드럽고 이리스의 다정한 인상과 잘 맞습니다.</dd>
+        <dt>주의</dt><dd>밝은 바닥에서 윤곽이 약합니다. 질감이 화면에 고정돼 움직이면 질감이 흐를 수 있습니다.</dd>
+        <dt>애니</dt><dd>질감을 캐릭터에 붙이는 처리가 추가로 필요합니다.</dd>
+      </dl>
+      <div class="files">03-watercolor-storybook.png · 03-watercolor-storybook-game.png</div>
+    </div>
+  </article>
+
+  <article class="plate">
+    <div class="stage"><img src="04-manga-screentone.png" alt="만화 잉크·스크린톤 이리스 전신"></div>
+    <div class="info">
+      <div class="tag">STYLE 4</div>
+      <h3>만화 잉크 · 스크린톤</h3>
+      <p>흑백 펜선과 45도 망점, 꽃·눈·클로버 문양만 파랑 별색.</p>
+      <dl>
+        <dt>강점</dt><dd>실루엣이 가장 강하고 어느 바닥에서도 눈에 띕니다.</dd>
+        <dt>주의</dt><dd>색 정보가 적어 다른 캐릭터와는 실루엣·별색으로 구분해야 합니다. 축소하면 망점이 회색으로 뭉칩니다.</dd>
+        <dt>애니</dt><dd>망점이 화면 기준이라 움직일 때 무늬가 고정돼 보입니다.</dd>
+      </dl>
+      <div class="files">04-manga-screentone.png · 04-manga-screentone-game.png</div>
+    </div>
+  </article>
+
+  <article class="plate">
+    <div class="stage"><img src="05-flat-vector.png" alt="플랫 벡터 이리스 전신"></div>
+    <div class="info">
+      <div class="tag">STYLE 5</div>
+      <h3>플랫 벡터</h3>
+      <p>선 없이 면으로만, 더 차갑고 진한 그림자, 같은 색 계열 외곽 띠.</p>
+      <dl>
+        <dt>강점</dt><dd>깔끔하고 UI 아이콘과 톤을 맞추기 쉽습니다.</dd>
+        <dt>주의</dt><dd>머리카락이 큰 덩어리로 단순화되고 얼굴 디테일이 적습니다. 밝은 바닥에서 윤곽이 약합니다.</dd>
+        <dt>애니</dt><dd>면 경계가 프레임마다 조금씩 바뀌므로 색 수를 줄이면 안정적입니다.</dd>
+      </dl>
+      <div class="files">05-flat-vector.png · 05-flat-vector-game.png</div>
+    </div>
+  </article>
+</main>
+<script>
+  (function () {
+    var btns = document.querySelectorAll('button[data-floor]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.documentElement.style.setProperty('--floor', b.getAttribute('data-floor'));
+        btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

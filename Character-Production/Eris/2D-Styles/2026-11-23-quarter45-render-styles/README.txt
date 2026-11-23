@@ -19,6 +19,7 @@
   04-manga-screentone     만화 잉크: 흑백 펜선 + 45도 망점 스크린톤 + 파랑 별색(꽃·눈·문양)
   05-flat-vector          플랫 벡터: 선 없이 면 분할, 색조가 바뀌는 3단 음영, 같은 색 계열 외곽 띠
 
+  index.html         5종 비교 페이지(Orca·브라우저에서 열기). 바닥색을 바꿔 가독성 비교
   *-game.png         게임 화면 크기 미리보기(높이 180px, 캐릭터 약 160px)
   contact-sheet.png  5종 큰 크기 비교 (회색 배경, 왼쪽부터 01→05)
   game-scale-sheet.png  5종 게임 크기 비교
