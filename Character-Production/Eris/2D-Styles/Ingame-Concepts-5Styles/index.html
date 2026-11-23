@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>이리스 (Iris) · 아스텔라 인게임 2D 캐릭터 시안 5종</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f141e;
+      --surface: #171f2e;
+      --surface-2: #1f293b;
+      --border: #324058;
+      --gold: #d9b97e;
+      --gold-soft: #f0dfb9;
+      --ink: #edf2f9;
+      --muted: #9aa8be;
+      --accent: #7ec8ff;
+      --stage-bg: #1a2434;
+      --card-size: 210px;
+      font-family: Pretendard, "Malgun Gothic", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55; }
+    a { color: var(--gold-soft); text-underline-offset: 3px; }
+    button, select, input { font: inherit; color: inherit; }
+    .wrap { width: min(1340px, 100%); margin: 0 auto; padding: 0 clamp(14px, 3vw, 28px); }
+
+    header.hero {
+      background: linear-gradient(135deg, #172236 0%, #101724 65%, #1c2435 100%);
+      border-bottom: 2px solid #8a734a;
+      padding: 26px 0 24px;
+    }
+    .hero-grid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 4vw, 38px);
+      letter-spacing: -.035em;
+      line-height: 1.15;
+    }
+    .hero p {
+      margin: 0;
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .ref-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #101726cc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+    .ref-pill img {
+      width: 54px;
+      height: 76px;
+      object-fit: cover;
+      border-radius: 7px;
+      border: 1px solid #4d5d7a;
+    }
+    .ref-pill strong { display: block; font-size: 13px; color: var(--ink); }
+    .ref-pill span { display: block; font-size: 11px; color: var(--muted); }
+
+    main { padding: 26px 0 48px; }
+    section + section { margin-top: 38px; }
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -.025em; }
+    .sub { margin: 0; color: var(--muted); font-size: 13px; }
+
+    /* Live Raid Arena Preview */
+    .arena-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .arena-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      min-height: 36px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .btn:hover { border-color: var(--gold); }
+    .btn[aria-pressed="true"] {
+      background: var(--gold);
+      color: #161820;
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+    .divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+    .range-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+    .range-box input { width: 110px; accent-color: var(--gold); }
+    .arena-viewport {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #3c4c66;
+      background: #0d121b;
+    }
+    #arenaCanvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      cursor: crosshair;
+    }
+    .arena-badge {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      background: #101622d9;
+      border: 1px solid #8a734a99;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .arena-badge strong { color: var(--gold-soft); }
+    .arena-hint {
+      margin: 10px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Cards Grid */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .15s, transform .15s;
+    }
+    .card.active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+    .card-stage {
+      height: 270px;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      background: var(--stage-bg);
+      cursor: pointer;
+      position: relative;
+    }
+    body[data-bg="light"] .card-stage { background: #e6edf5; }
+    body[data-bg="dark"] .card-stage { background: #1a2434; }
+    body[data-bg="arena"] .card-stage {
+      background: radial-gradient(circle at 50% 62%, #475468 0%, #2a3342 68%, #1d2431 100%);
+    }
+    body[data-bg="danger"] .card-stage {
+      background: radial-gradient(circle at 50% 62%, #8c3d3f 0%, #4b252e 65%, #231924 100%);
+    }
+    body[data-bg="grid"] .card-stage {
+      background-color: #d7dce4;
+      background-image: repeating-conic-gradient(#bcc4d0 0% 25%, transparent 0% 50%);
+      background-size: 18px 18px;
+    }
+    .card-stage img {
+      max-width: 100%;
+      height: var(--card-size);
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .pixel { image-rendering: pixelated; }
+    .tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #0e1420d8;
+      border: 1px solid #6b7d9a88;
+      color: var(--gold-soft);
+      font-size: 11px;
+      font-weight: 650;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .card-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .card-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .card-title h3 { margin: 0; font-size: 16px; }
+    .card-title .num { color: var(--gold); font-size: 12px; font-weight: 700; }
+    .card-en { font-size: 11.5px; color: var(--muted); }
+    .card-desc { margin: 4px 0 0; font-size: 13px; color: #d5deeb; }
+    .card-fit { margin: 2px 0 8px; font-size: 12px; color: var(--muted); }
+    .card-actions {
+      margin-top: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      border-top: 1px solid #263247;
+    }
+    .card-actions .btn, .card-actions a {
+      font-size: 12px;
+      min-height: 32px;
+      padding: 5px 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .meta-table th, .meta-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #263247;
+      text-align: left;
+    }
+    .meta-table th { color: var(--gold-soft); background: #141c2b; font-weight: 650; }
+    .meta-table tr:last-child td { border-bottom: 0; }
+
+    dialog {
+      width: min(680px, calc(100% - 24px));
+      padding: 0;
+      border: 1px solid var(--gold);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    dialog::backdrop { background: #070b13d8; }
+    .dlg-head, .dlg-foot {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .dlg-art {
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: radial-gradient(circle at 50% 60%, #424f63 0%, #232c3b 70%);
+    }
+    .dlg-art img { max-height: 62vh; max-width: 100%; object-fit: contain; }
+  </style>
+</head>
+<body data-bg="arena">
+  <header class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Astella · In-Game 2D Character Resource Study</span>
+        <h1>이리스(Iris) 인게임 2D 캐릭터 시안 5종</h1>
+        <p>원화 일러스트(<code>Iris_Concept_UserReference.png</code>)의 아이덴티티를 유지하면서, 아스텔라의 하향 45~50° 쿼터뷰 황혼 천문대 보스 레이드 전장에 맞춰 서로 다른 5가지 그림체로 제작한 투명 PNG 인게임 리소스입니다. 모든 스프라이트는 <strong>512 × 576 px</strong>, 발 기준점 <strong>(256, 512) px</strong>으로 통일했습니다.</p>
+      </div>
+      <a class="ref-pill" href="../../Texturing/Reference/Iris_Concept_UserReference.png" target="_blank" rel="noreferrer">
+        <img src="../../Texturing/Reference/Iris_Concept_UserReference.png" alt="이리스 원화 일러스트">
+        <div>
+          <strong>참조 원화 · 이리스</strong>
+          <span>Iris_Concept_UserReference.png</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section aria-labelledby="arena-title">
+      <div class="section-head">
+        <h2 id="arena-title">1. 아스텔라 레이드 전장 실배치 미리보기</h2>
+        <p class="sub">전장 바닥을 클릭하면 이리스가 이동합니다. 5가지 그림체와 위험 장판(붉은/청록) 위 시인성을 바로 비교해 보세요.</p>
+      </div>
+      <div class="arena-panel">
+        <div class="arena-toolbar" id="styleButtons"></div>
+        <div class="arena-toolbar">
+          <button class="btn" type="button" data-overlay="slam" aria-pressed="true">중앙 내려찍기 장판</button>
+          <button class="btn" type="button" data-overlay="ring" aria-pressed="false">외곽 고리 장판</button>
+          <button class="btn" type="button" data-overlay="stack" aria-pressed="false">집합(청록) 장판</button>
+          <button class="btn" type="button" data-overlay="none" aria-pressed="false">장판 끄기</button>
+          <span class="divider"></span>
+          <button class="btn" type="button" id="toggleAll" aria-pressed="false">5종 한꺼번에 배치 비교</button>
+          <label class="range-box">인게임 크기
+            <input type="range" id="arenaScale" min="0.7" max="1.6" step="0.05" value="1.05">
+            <output id="arenaScaleVal">105%</output>
+          </label>
+        </div>
+        <div class="arena-viewport">
+          <canvas id="arenaCanvas" width="1672" height="941"></canvas>
+          <div class="arena-badge" id="arenaBadge">로딩 중…</div>
+        </div>
+        <p class="arena-hint">
+          <span>배경: <code>StoneGuardianArena.png</code> · 보스: <code>StoneGuardian.png</code> (Stage 1 수호석상 전장 기준)</span>
+          <span id="arenaStatus">바닥 클릭으로 위치 이동 · 캐릭터 발 기준점(256, 512) 정렬 적용</span>
+        </p>
+      </div>
+    </section>
+
+    <section aria-labelledby="cards-title">
+      <div class="section-head">
+        <h2 id="cards-title">2. 그림체별 인게임 리소스 5종 비교</h2>
+        <p class="sub">배경색과 표시 높이를 바꿔 실루엣·외곽선·장판 위 대비를 확인하고 투명 PNG를 바로 내려받을 수 있습니다.</p>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" data-bg="arena" aria-pressed="true">현무암 전장 톤</button>
+        <button class="btn" type="button" data-bg="danger" aria-pressed="false">붉은 위험 장판 톤</button>
+        <button class="btn" type="button" data-bg="dark" aria-pressed="false">어두운 배경</button>
+        <button class="btn" type="button" data-bg="light" aria-pressed="false">밝은 배경</button>
+        <button class="btn" type="button" data-bg="grid" aria-pressed="false">투명 격자</button>
+        <label class="range-box">카드 표시 높이
+          <input type="range" id="cardSize" min="96" max="248" step="8" value="210">
+          <output id="cardSizeVal">210 px</output>
+        </label>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section aria-labelledby="unity-title">
+      <div class="section-head">
+        <h2 id="unity-title">3. Unity 2D Sprite 임포트 기준</h2>
+        <p class="sub">선택한 스타일의 PNG를 <code>Assets/</code> 아래에 복사한 뒤 아래 기준값으로 설정하면 발 기준점이 정확히 맞습니다.</p>
+      </div>
+      <table class="meta-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>권장 설정값</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Texture Type</td><td><code>Sprite (2D and UI)</code> · Alpha Is Transparency 체크</td></tr>
+          <tr><td>표준 캔버스 / 발 기준점</td><td><code>512 × 576 px</code> · Pixel Pivot <code>(256, 512)</code> (좌상단 기준) → Unity Normalized Pivot <code>(0.5, 0.111111)</code> (좌하단 기준)</td></tr>
+          <tr><td>Filter Mode / Compression</td><td>스타일 01·02·04·05: <code>Bilinear</code> / 스타일 03(HD 픽셀아트): <code>Point (no filter)</code> · Compression <code>None</code> (256×288 1:1 원본 도트 병행 제공)</td></tr>
+          <tr><td>메타데이터 파일</td><td><a href="manifest.json" target="_blank">manifest.json</a> · <a href="README.md" target="_blank">README.md</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <dialog id="lightbox">
+    <div class="dlg-head">
+      <div>
+        <strong id="dlgTitle"></strong>
+        <div id="dlgSub" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+      <form method="dialog"><button class="btn" type="submit">닫기</button></form>
+    </div>
+    <div class="dlg-art"><img id="dlgImg" alt=""></div>
+    <div class="dlg-foot">
+      <span id="dlgMeta" style="font-size:12px;color:var(--muted)"></span>
+      <a class="btn" id="dlgDownload" download>투명 PNG 내려받기</a>
+    </div>
+  </dialog>
+
+  <script id="inline-manifest" type="application/json">{
+  "formatVersion": 1,
+  "character": "이리스 / Iris",
+  "gameConcept": "Astella — 4인 협동 쿼터뷰 보스 레이드 (하향 45~50° 카메라, 황혼 천문대 현무암 전장)",
+  "referenceIllustration": "../../Texturing/Reference/Iris_Concept_UserReference.png",
+  "referenceSha256": "5341f946db6abf0c41f7f068044adb7b123db5cbe4615a01f9d34ab1f8d064ef",
+  "arenaReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardianArena.png",
+  "bossReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardian.png",
+  "canvasPx": [
+    512,
+    576
+  ],
+  "pivotPx": [
+    256,
+    512
+  ],
+  "unityNormalizedPivot": [
+    0.5,
+    0.111111
+  ],
+  "styles": [
+    {
+      "id": "01",
+      "slug": "01-handpainted-fantasy",
+      "title": "핸드페인팅 판타지 2D",
+      "english": "Hand-Painted Stylized Fantasy (Lineless)",
+      "tag": "전장 일체감",
+      "summary": "외곽선 없이 풍부한 붓터치와 황혼빛 푸른 음영·황금 림라이트로 입체감을 살린 핸드페인팅 판타지 스타일.",
+      "fit": "수호석상(StoneGuardian)과 황혼 천문대 전장 배경에 가장 자연스럽게 녹아드는 시그니처 회화풍입니다.",
+      "file": "Sprites/01-handpainted-fantasy.png",
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        150,
+        64,
+        237,
+        448
+      ],
+      "transparentFraction": 0.816,
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "sourceBackgroundRgb": [
+        90,
+        103,
+        122
+      ],
+      "sha256": "46f5c7919665978c8ca2cdfe8160341c47e8180d9faf1379d91ff0c53fe25b38"
+    },
+    {
+      "id": "02",
+      "slug": "02-crisp-action-cel",
+      "title": "선명한 액션 셀 쉐이딩",
+      "english": "Crisp Ink & Bold Action Cel-Shaded",
+      "tag": "레이드 시인성 최강",
+      "summary": "짙은 남색 외곽선과 선명한 2단 셀 명암, 역동적인 2.5~2.8등신 전투 대기 포즈로 시인성을 극대화한 액션 RPG 스타일.",
+      "fit": "4인 협동 보스 레이드의 붉은 위험 장판과 복잡한 패턴 속에서도 캐릭터 위치가 즉각 판독됩니다.",
+      "file": "Sprites/02-crisp-action-cel.png",
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        69,
+        64,
+        383,
+        448
+      ],
+      "transparentFraction": 0.6785,
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "sourceBackgroundRgb": [
+        254,
+        255,
+        254
+      ],
+      "sha256": "b5125579482ee4439e22541550ec4113bff712c958061f3e74bf974070460537"
+    },
+    {
+      "id": "03",
+      "slug": "03-hd-pixel-art",
+      "title": "모던 HD 픽셀아트",
+      "english": "Modern HD-2D Craft Pixel Art",
+      "tag": "HD-2D 레트로 매력",
+      "summary": "정사각형 픽셀 그리드와 1px 남색 외곽선·클러스터 음영으로 완성한 현대적 HD-2D 쿼터뷰 스프라이트.",
+      "fit": "입체적 현무암 전장 위에 선명한 도트 캐릭터를 올리는 HD-2D 컨셉에 최적이며 Point 필터로 또렷하게 표현됩니다.",
+      "file": "Sprites/03-hd-pixel-art.png",
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        144,
+        130,
+        202,
+        382
+      ],
+      "transparentFraction": 0.8422,
+      "filterMode": "Point",
+      "pixelArt": true,
+      "sourceBackgroundRgb": [
+        255,
+        255,
+        255
+      ],
+      "sha256": "5dcfe6b07a06ff851691e580cec28992f4070a8d0e076a8757bc5762c1453cc5",
+      "nativeFile": "Sprites/03-hd-pixel-art-256x288.png",
+      "nativeWidth": 256,
+      "nativeHeight": 288,
+      "nativePivotPx": [
+        128,
+        256
+      ],
+      "nativeSha256": "4294f341876d94fd5e172ebb2a7ddb932a4bca094b2bf03b3a517d60efe85011"
+    },
+    {
+      "id": "04",
+      "slug": "04-storybook-gouache",
+      "title": "동화풍 수채·과슈 2D",
+      "english": "Celestial Storybook Gouache & Delicate Line",
+      "tag": "별빛 동화 감성",
+      "summary": "섬세한 세피아·인디고 연필 선화와 부드러운 매트 과슈·수채 채색, 은은한 별빛 광택을 살린 일러스트형 2D.",
+      "fit": "아스텔라의 별빛·천문대 세계관과 이리스 원화의 포근하고 신비로운 분위기를 가장 감성적으로 전달합니다.",
+      "file": "Sprites/04-storybook-gouache.png",
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        131,
+        64,
+        267,
+        448
+      ],
+      "transparentFraction": 0.7799,
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "sourceBackgroundRgb": [
+        255,
+        255,
+        255
+      ],
+      "sha256": "9826a9bcf7372b21f7744db2b945a9820b1120c5acd5f04e9b5cc67e47e62d33"
+    },
+    {
+      "id": "05",
+      "slug": "05-spine-modular-flat",
+      "title": "모던 스파인 리깅형 2D",
+      "english": "Clean Modular Vector / Spine-Ready 2D",
+      "tag": "2D 본 애니메이션 최적",
+      "summary": "깔끔한 기하학 실루엣과 명확한 파츠 분리, 정돈된 소프트 그라데이션으로 설계한 현대적 플랫 벡터 2D.",
+      "fit": "Spine / Unity 2D Animation 본 리깅으로 12개 직업과 다양한 스킬 모션을 확장할 때 가장 효율적이고 선명합니다.",
+      "file": "Sprites/05-spine-modular-flat.png",
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        143,
+        64,
+        255,
+        448
+      ],
+      "transparentFraction": 0.7618,
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "sourceBackgroundRgb": [
+        128,
+        128,
+        128
+      ],
+      "sha256": "8320d43b1196926a76e92e027af264adf2244d94d4c1e9473958740d785d84ec"
+    }
+  ]
+}</script>
+  <script>
+    (async () => {
+      let manifest;
+      try {
+        const resp = await fetch('manifest.json');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        manifest = await resp.json();
+      } catch {
+        manifest = JSON.parse(document.getElementById('inline-manifest').textContent);
+      }
+      const styles = manifest.styles;
+
+      const loadImg = (src) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load ' + src));
+        img.src = src;
+      });
+
+      const [arenaImg, bossImg, ...spriteImgs] = await Promise.all([
+        loadImg(manifest.arenaReference),
+        loadImg(manifest.bossReference),
+        ...styles.map(s => loadImg(s.file))
+      ]);
+
+      let selectedIndex = 0;
+      let overlayMode = 'slam';
+      let showAll = false;
+      let scaleMult = 1.05;
+      const player = { x: 7.4, z: 4.9, flipX: false };
+
+      const styleButtonsEl = document.getElementById('styleButtons');
+      const cardsEl = document.getElementById('cards');
+      const canvas = document.getElementById('arenaCanvas');
+      const ctx = canvas.getContext('2d');
+      const badgeEl = document.getElementById('arenaBadge');
+
+      const plaza = { radius: 18, x: 836, y: 452, horizontal: 758, vertical: 323, depth: 0.185 };
+      const project = (x, z) => {
+        const depth = z / plaza.radius;
+        const scale = 1 / (1 - plaza.depth * depth);
+        return {
+          x: plaza.x + plaza.horizontal * x / plaza.radius * scale,
+          y: plaza.y + plaza.vertical * depth * scale,
+          scale
+        };
+      };
+      const inverse = (px, py) => {
+        const h = py - plaza.y;
+        const depth = h / (plaza.vertical + plaza.depth * h);
+        return {
+          x: plaza.radius * (px - plaza.x) * (1 - plaza.depth * depth) / plaza.horizontal,
+          z: plaza.radius * depth
+        };
+      };
+      const traceCircle = (x, z, r) => {
+        for (let i = 0; i <= 96; i++) {
+          const a = (i / 96) * Math.PI * 2;
+          const p = project(x + Math.cos(a) * r, z + Math.sin(a) * r);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+      };
+      const drawShadow = (x, y, rx, ry) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(rx, ry);
+        const g = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
+        g.addColorStop(0, 'rgba(8, 10, 18, 0.68)');
+        g.addColorStop(1, 'rgba(8, 10, 18, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(-1, -1, 2, 2);
+        ctx.restore();
+      };
+
+      const drawTelegraph = () => {
+        if (overlayMode === 'none') return;
+        ctx.beginPath();
+        if (overlayMode === 'stack') {
+          traceCircle(-5.8, 6.2, 4);
+        } else if (overlayMode === 'ring') {
+          traceCircle(0, 0, 17);
+          traceCircle(0, 0, 8);
+        } else {
+          traceCircle(0, 0, 8);
+        }
+        const isStack = overlayMode === 'stack';
+        ctx.fillStyle = isStack ? 'rgba(60, 187, 196, 0.30)' : 'rgba(223, 64, 58, 0.38)';
+        ctx.fill('evenodd');
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = isStack ? 'rgba(23, 56, 63, 0.85)' : 'rgba(93, 33, 31, 0.85)';
+        ctx.stroke();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = isStack ? '#a4f5ed' : '#ffab8e';
+        ctx.stroke();
+      };
+
+      const drawSpriteAt = (idx, wx, wz, flipX, label) => {
+        const s = styles[idx];
+        const img = spriteImgs[idx];
+        const p = project(wx, wz);
+        const heightNorm = 448 / (s.inkBoundsPx ? s.inkBoundsPx[3] : 448);
+        const drawH = 190 * heightNorm * scaleMult * p.scale;
+        const drawW = drawH * (s.width / s.height);
+        const pivotNormX = s.pivotPx[0] / s.width;
+        const pivotNormY = s.pivotPx[1] / s.height;
+
+        drawShadow(p.x, p.y, 26 * scaleMult * p.scale, 9 * scaleMult * p.scale);
+        ctx.beginPath();
+        traceCircle(wx, wz, 0.65);
+        ctx.lineWidth = 2.8;
+        ctx.strokeStyle = idx === selectedIndex && !showAll ? 'rgba(161, 237, 255, 0.9)' : 'rgba(235, 210, 155, 0.75)';
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (flipX) ctx.scale(-1, 1);
+        ctx.imageSmoothingEnabled = !s.pixelArt;
+        ctx.drawImage(img, -drawW * pivotNormX, -drawH * pivotNormY, drawW, drawH);
+        ctx.restore();
+
+        if (label) {
+          ctx.save();
+          ctx.font = '700 18px Pretendard, "Malgun Gothic", sans-serif';
+          const textW = ctx.measureText(label).width;
+          const bx = p.x - textW / 2 - 10;
+          const by = p.y + 14;
+          ctx.fillStyle = 'rgba(13, 19, 31, 0.86)';
+          ctx.strokeStyle = 'rgba(217, 185, 126, 0.7)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(bx, by, textW + 20, 28, 7);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#f3e7ce';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, p.x, by + 14.5);
+          ctx.restore();
+        }
+      };
+
+      const renderArena = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(arenaImg, 0, 0, canvas.width, canvas.height);
+        drawTelegraph();
+
+        const drawBoss = () => {
+          const bp = project(0, 0);
+          const bh = 292;
+          const bw = bh * (bossImg.naturalWidth / bossImg.naturalHeight);
+          drawShadow(bp.x, bp.y, 104, 26);
+          ctx.drawImage(bossImg, bp.x - 0.56 * bw, bp.y - 0.96 * bh, bw, bh);
+        };
+
+        if (showAll) {
+          drawBoss();
+          const spots = [
+            { x: -10.5, z: 5.4 },
+            { x: -5.3, z: 8.6 },
+            { x: 0.0, z: 9.8 },
+            { x: 5.3, z: 8.6 },
+            { x: 10.5, z: 5.4 }
+          ];
+          styles.forEach((s, i) => {
+            drawSpriteAt(i, spots[i].x, spots[i].z, false, `${s.id}. ${s.title}`);
+          });
+          badgeEl.innerHTML = '<strong>5종 동시 배치 비교</strong> · 전장 스케일 및 그림체 비교';
+        } else {
+          if (player.z < 0) drawSpriteAt(selectedIndex, player.x, player.z, player.flipX);
+          drawBoss();
+          if (player.z >= 0) drawSpriteAt(selectedIndex, player.x, player.z, player.flipX);
+          const cur = styles[selectedIndex];
+          badgeEl.innerHTML = `<strong>${cur.id}. ${cur.title}</strong> · ${cur.tag}`;
+        }
+      };
+
+      const selectStyle = (idx) => {
+        selectedIndex = idx;
+        showAll = false;
+        document.getElementById('toggleAll').setAttribute('aria-pressed', 'false');
+        styleButtonsEl.querySelectorAll('button').forEach((b, i) => {
+          b.setAttribute('aria-pressed', String(i === idx));
+        });
+        cardsEl.querySelectorAll('.card').forEach((c, i) => {
+          c.classList.toggle('active', i === idx);
+        });
+        renderArena();
+      };
+
+      styles.forEach((s, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn';
+        btn.textContent = `${s.id}. ${s.title}`;
+        btn.setAttribute('aria-pressed', String(idx === 0));
+        btn.addEventListener('click', () => selectStyle(idx));
+        styleButtonsEl.appendChild(btn);
+
+        const card = document.createElement('article');
+        card.className = 'card' + (idx === 0 ? ' active' : '');
+        const nativeLink = s.nativeFile
+          ? `<a class="btn" href="${s.nativeFile}" download>1:1 원본 도트</a>`
+          : '';
+        card.innerHTML = `
+          <div class="card-stage" role="button" tabindex="0" aria-label="${s.title} 확대 보기">
+            <span class="tag">${s.tag}</span>
+            <img src="${s.file}" alt="${s.title} 이리스 스프라이트" class="${s.pixelArt ? 'pixel' : ''}">
+          </div>
+          <div class="card-body">
+            <div class="card-title">
+              <h3>${s.title}</h3>
+              <span class="num">#${s.id}</span>
+            </div>
+            <div class="card-en">${s.english}</div>
+            <p class="card-desc">${s.summary}</p>
+            <p class="card-fit">${s.fit}</p>
+            <div class="card-actions">
+              <button class="btn" type="button" data-pick="${idx}">전장에 배치</button>
+              <a class="btn" href="${s.file}" download>PNG 저장</a>
+              ${nativeLink}
+            </div>
+          </div>
+        `;
+        card.querySelector('[data-pick]').addEventListener('click', () => {
+          selectStyle(idx);
+          document.getElementById('arena-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        const openLightbox = () => {
+          const dlg = document.getElementById('lightbox');
+          document.getElementById('dlgTitle').textContent = `${s.id}. ${s.title}`;
+          document.getElementById('dlgSub').textContent = `${s.english} · ${s.tag}`;
+          const imgEl = document.getElementById('dlgImg');
+          imgEl.src = s.file;
+          imgEl.className = s.pixelArt ? 'pixel' : '';
+          document.getElementById('dlgMeta').textContent = `${s.width}×${s.height} px · Pivot (${s.pivotPx[0]}, ${s.pivotPx[1]}) · Filter: ${s.filterMode}`;
+          document.getElementById('dlgDownload').href = s.file;
+          dlg.showModal();
+        };
+        card.querySelector('.card-stage').addEventListener('click', openLightbox);
+        card.querySelector('.card-stage').addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLightbox(); }
+        });
+        cardsEl.appendChild(card);
+      });
+
+      document.querySelectorAll('[data-overlay]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          overlayMode = btn.dataset.overlay;
+          document.querySelectorAll('[data-overlay]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+          renderArena();
+        });
+      });
+
+      document.getElementById('toggleAll').addEventListener('click', (e) => {
+        showAll = !showAll;
+        e.currentTarget.setAttribute('aria-pressed', String(showAll));
+        renderArena();
+      });
+
+      const arenaScale = document.getElementById('arenaScale');
+      arenaScale.addEventListener('input', () => {
+        scaleMult = parseFloat(arenaScale.value);
+        document.getElementById('arenaScaleVal').textContent = `${Math.round(scaleMult * 100)}%`;
+        renderArena();
+      });
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (showAll) {
+          showAll = false;
+          document.getElementById('toggleAll').setAttribute('aria-pressed', 'false');
+        }
+        const rect = canvas.getBoundingClientRect();
+        const u = (e.clientX - rect.left) / rect.width * canvas.width;
+        const v = (e.clientY - rect.top) / rect.height * canvas.height;
+        const pos = inverse(u, v);
+        const r = Math.hypot(pos.x, pos.z);
+        const clamp = Math.max(1, r / 17.0);
+        const nx = pos.x / clamp;
+        const nz = pos.z / clamp;
+        if (Math.abs(nx - player.x) > 0.15) player.flipX = nx > player.x;
+        player.x = nx;
+        player.z = nz;
+        renderArena();
+      });
+
+      document.querySelectorAll('[data-bg]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.body.dataset.bg = btn.dataset.bg;
+          document.querySelectorAll('[data-bg]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        });
+      });
+
+      const cardSize = document.getElementById('cardSize');
+      cardSize.addEventListener('input', () => {
+        document.documentElement.style.setProperty('--card-size', cardSize.value + 'px');
+        document.getElementById('cardSizeVal').textContent = cardSize.value + ' px';
+      });
+
+      renderArena();
+    })();
+  </script>
+</body>
+</html>
