@@ -1,0 +1,175 @@
+{
+  "formatVersion": 1,
+  "character": "이리스 / Iris",
+  "camera": "45° Top-Down Perspective (locked ground-plane foot pivot across all 8 directions & 8-frame run loops)",
+  "referenceIllustration": "../../Texturing/Reference/Iris_Concept_UserReference.png",
+  "arenaReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardianArena.png",
+  "bossReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardian.png",
+  "styles": [
+    {
+      "id": "02",
+      "slug": "02-action-cel",
+      "title": "02. 선명한 액션 셀 쉐이딩",
+      "english": "Crisp Ink & Bold Action Cel-Shaded",
+      "tag": "레이드 시인성 최강",
+      "description": "굵은 남색 외곽선과 컬러 내부선, 선명한 2단 셀 명암으로 붉은 위험 장판과 빠른 이동 중에도 실루엣이 즉각 읽힙니다.",
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "frameWidth": 256,
+      "frameHeight": 288,
+      "pivotPx": [
+        128,
+        256
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "idle8Dir": {
+        "file": "02-action-cel/Iris_02_Cel_Idle_8Dir.png",
+        "columns": 4,
+        "rows": 2,
+        "directions": [
+          "s",
+          "se",
+          "e",
+          "ne",
+          "n",
+          "nw",
+          "w",
+          "sw"
+        ],
+        "width": 1024,
+        "height": 576,
+        "sha256": "5554ab65177d86f38947f78ea4fe984b0c7c6baf8850a04ef3f6eb39b055f419"
+      },
+      "run4Dir": {
+        "file": "02-action-cel/Iris_02_Cel_Run_4Dir_8f.png",
+        "columns": 8,
+        "rows": 4,
+        "directions": [
+          "sw",
+          "se",
+          "nw",
+          "ne"
+        ],
+        "fps": 12,
+        "frameDurationMs": 83,
+        "loop": true,
+        "width": 2048,
+        "height": 1152,
+        "sha256": "5b684ae93562d2f744b6d1157de4c64ae8828fb2c14d118217d1fed29013b397"
+      }
+    },
+    {
+      "id": "03",
+      "slug": "03-hd-pixel",
+      "title": "03. 모던 HD 픽셀아트",
+      "english": "Modern HD-2D Craft Pixel Art",
+      "tag": "HD-2D 레트로 매력",
+      "description": "128×144 네이티브 픽셀 격자와 1px 남색 외곽선·36색 전용 팔레트로 입체 전장 위에서 또렷한 HD-2D 질감을 구현합니다.",
+      "filterMode": "Point",
+      "pixelArt": true,
+      "frameWidth": 128,
+      "frameHeight": 144,
+      "pivotPx": [
+        64,
+        128
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "idle8Dir": {
+        "file": "03-hd-pixel/Iris_03_Pixel_Idle_8Dir.png",
+        "columns": 4,
+        "rows": 2,
+        "directions": [
+          "s",
+          "se",
+          "e",
+          "ne",
+          "n",
+          "nw",
+          "w",
+          "sw"
+        ],
+        "width": 512,
+        "height": 288,
+        "sha256": "630964adb740b896c4e0ba72e24b8ca055c92d1fe85f512eb4598d97e5a1aa37"
+      },
+      "run4Dir": {
+        "file": "03-hd-pixel/Iris_03_Pixel_Run_4Dir_8f.png",
+        "columns": 8,
+        "rows": 4,
+        "directions": [
+          "sw",
+          "se",
+          "nw",
+          "ne"
+        ],
+        "fps": 12,
+        "frameDurationMs": 83,
+        "loop": true,
+        "width": 1024,
+        "height": 576,
+        "sha256": "62ecdacb7e806ffd05ba7db919638b2f4a6ac24555b541bc2dd0dd591d450a65"
+      }
+    },
+    {
+      "id": "04",
+      "slug": "04-storybook-gouache",
+      "title": "04. 동화풍 수채·과슈 2D",
+      "english": "Celestial Storybook Gouache & Delicate Line",
+      "tag": "별빛 동화 감성",
+      "description": "가느다란 세피아 선화, 부드러운 파스텔 과슈 붓터치와 은은한 별빛 광택으로 아스텔라의 천문대 동화 감성을 살렸습니다.",
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "frameWidth": 256,
+      "frameHeight": 288,
+      "pivotPx": [
+        128,
+        256
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "idle8Dir": {
+        "file": "04-storybook-gouache/Iris_04_Gouache_Idle_8Dir.png",
+        "columns": 4,
+        "rows": 2,
+        "directions": [
+          "s",
+          "se",
+          "e",
+          "ne",
+          "n",
+          "nw",
+          "w",
+          "sw"
+        ],
+        "width": 1024,
+        "height": 576,
+        "sha256": "b6b47b5cf3600baf902f91eda7dc1ca0ee9b2fb4157a95dba5ada3f7b22f3593"
+      },
+      "run4Dir": {
+        "file": "04-storybook-gouache/Iris_04_Gouache_Run_4Dir_8f.png",
+        "columns": 8,
+        "rows": 4,
+        "directions": [
+          "sw",
+          "se",
+          "nw",
+          "ne"
+        ],
+        "fps": 12,
+        "frameDurationMs": 83,
+        "loop": true,
+        "width": 2048,
+        "height": 1152,
+        "sha256": "89ea86a988613ed79baba00b034a195a4d909ff0f49caada0ba33476b8551e37"
+      }
+    }
+  ]
+}

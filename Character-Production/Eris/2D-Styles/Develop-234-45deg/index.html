@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>이리스 (Iris) · 45° 탑다운 2·3·4번 디벨롭 실플레이 프리뷰</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0e131d;
+      --surface: #161e2e;
+      --surface-2: #1f2a3e;
+      --border: #32425c;
+      --gold: #d9b97e;
+      --gold-soft: #f2e1bc;
+      --ink: #edf2fa;
+      --muted: #98a7bf;
+      font-family: Pretendard, "Malgun Gothic", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55; }
+    button, input { font: inherit; color: inherit; }
+    a { color: var(--gold-soft); text-underline-offset: 3px; }
+    .wrap { width: min(1320px, 100%); margin: 0 auto; padding: 0 clamp(14px, 3vw, 28px); }
+    header {
+      background: linear-gradient(135deg, #182338 0%, #101724 68%, #1d2538 100%);
+      border-bottom: 2px solid #8c744c;
+      padding: 22px 0 20px;
+    }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; }
+    header h1 { margin: 4px 0 6px; font-size: clamp(22px, 3.8vw, 34px); letter-spacing: -.03em; }
+    header p { margin: 0; color: var(--muted); font-size: 13.5px; max-width: 780px; }
+    main { padding: 22px 0 46px; }
+    section + section { margin-top: 34px; }
+    h2 { margin: 0 0 6px; font-size: 20px; }
+    .sub { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 15px;
+    }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      min-height: 36px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn:hover { border-color: var(--gold); }
+    .btn[aria-pressed="true"] {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #151822;
+      font-weight: 700;
+    }
+    .range { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-left: auto; }
+    .range input { width: 110px; accent-color: var(--gold); }
+    .viewport { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid #3c4d69; background: #0c111a; }
+    #arenaCanvas { display: block; width: 100%; height: auto; cursor: crosshair; outline: none; }
+    .badge {
+      position: absolute; left: 14px; top: 14px;
+      background: #0f1522de; border: 1px solid #8a734aa0;
+      border-radius: 8px; padding: 6px 12px; font-size: 13px; pointer-events: none;
+    }
+    .badge strong { color: var(--gold-soft); }
+    .hint { margin: 9px 0 0; font-size: 12.5px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+    .card.active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+    .stage-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #263349; }
+    .mini-box {
+      background: radial-gradient(circle at 50% 60%, #445266 0%, #242d3d 75%);
+      display: grid; place-items: center; padding: 10px; position: relative;
+    }
+    .mini-box.danger { background: radial-gradient(circle at 50% 60%, #863b3e 0%, #422029 75%); }
+    .mini-box span { position: absolute; left: 8px; top: 6px; font-size: 11px; color: var(--gold-soft); background: #0d1320cc; padding: 2px 7px; border-radius: 99px; }
+    .mini-box canvas { width: 148px; height: 166px; }
+    .card-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .card-body h3 { margin: 0; font-size: 16px; }
+    .card-body p { margin: 0; font-size: 12.5px; color: #cad4e5; }
+    .card-actions { margin-top: auto; padding-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .card-actions .btn { font-size: 12px; min-height: 32px; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">Astella · 45° Top-Down Character Development (Styles 02 · 03 · 04)</div>
+      <h1>이리스 45° 탑다운 2·3·4번 디벨롭 (8방향 대기 + 4방향 달리기)</h1>
+      <p>Blender 45° 하향 카메라 고정 피벗을 기준으로 <strong>02. 선명한 액션 셀</strong>, <strong>03. 모던 HD 픽셀아트</strong>, <strong>04. 동화풍 수채·과슈</strong> 3종의 8방향 대기 시트와 4방향 8프레임 달리기 시트를 제작했습니다. 전장을 클릭하거나 WASD/방향키로 직접 뛰어다니며 실시간으로 그림체를 바꿔 비교해 보세요.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>1. 아스텔라 45° 탑다운 레이드 실플레이 비교</h2>
+      <p class="sub">바닥을 클릭하거나 <strong>WASD / 방향키</strong>로 이동하세요. 이동 중 1·2·3 키 또는 버튼으로 그림체를 즉시 전환할 수 있습니다.</p>
+      <div class="panel">
+        <div class="toolbar" id="styleBtns"></div>
+        <div class="toolbar">
+          <button class="btn" type="button" data-overlay="slam" aria-pressed="true">중앙 내려찍기 장판</button>
+          <button class="btn" type="button" data-overlay="ring" aria-pressed="false">외곽 고리 장판</button>
+          <button class="btn" type="button" data-overlay="stack" aria-pressed="false">집합(청록) 장판</button>
+          <button class="btn" type="button" data-overlay="none" aria-pressed="false">장판 끄기</button>
+          <button class="btn" type="button" id="trioBtn" aria-pressed="false">3종 동시 달리기 비교</button>
+          <label class="range">캐릭터 크기
+            <input type="range" id="scaleRange" min="0.7" max="1.6" step="0.05" value="1.05">
+            <output id="scaleVal">105%</output>
+          </label>
+        </div>
+        <div class="viewport">
+          <canvas id="arenaCanvas" width="1672" height="941" tabindex="0"></canvas>
+          <div class="badge" id="arenaBadge">로딩 중…</div>
+        </div>
+        <p class="hint">
+          <span>조작: 바닥 클릭 이동 · WASD/방향키 이동 · 숫자키 1/2/3 스타일 전환</span>
+          <span id="statusText">45° 탑다운 발 기준점 정렬 · 12fps 8프레임 달리기 루프</span>
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. 스타일별 8방향 대기 &amp; 4방향 달리기 모션 검사</h2>
+      <p class="sub">각 스타일의 8방향 회전(대기)과 붉은 위험 장판 위 달리기 가독성을 동시에 확인하고 시트 PNG를 바로 내려받을 수 있습니다.</p>
+      <div class="toolbar">
+        <button class="btn" type="button" id="dirPrev">◀ 방향 회전</button>
+        <button class="btn" type="button" id="dirNext">방향 회전 ▶</button>
+        <button class="btn" type="button" id="autoTurn" aria-pressed="true">자동 8방향 회전</button>
+        <span style="font-size:12.5px;color:var(--muted)" id="dirLabel">방향: ↙ (SW)</span>
+      </div>
+      <div class="grid3" id="cards"></div>
+    </section>
+  </main>
+
+  <script id="inline-manifest" type="application/json">{
+  "formatVersion": 1,
+  "character": "이리스 / Iris",
+  "camera": "45° Top-Down Perspective (locked ground-plane foot pivot across all 8 directions & 8-frame run loops)",
+  "referenceIllustration": "../../Texturing/Reference/Iris_Concept_UserReference.png",
+  "arenaReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardianArena.png",
+  "bossReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardian.png",
+  "styles": [
+    {
+      "id": "02",
+      "slug": "02-action-cel",
+      "title": "02. 선명한 액션 셀 쉐이딩",
+      "english": "Crisp Ink & Bold Action Cel-Shaded",
+      "tag": "레이드 시인성 최강",
+      "description": "굵은 남색 외곽선과 컬러 내부선, 선명한 2단 셀 명암으로 붉은 위험 장판과 빠른 이동 중에도 실루엣이 즉각 읽힙니다.",
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "frameWidth": 256,
+      "frameHeight": 288,
+      "pivotPx": [
+        128,
+        256
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "idle8Dir": {
+        "file": "02-action-cel/Iris_02_Cel_Idle_8Dir.png",
+        "columns": 4,
+        "rows": 2,
+        "directions": [
+          "s",
+          "se",
+          "e",
+          "ne",
+          "n",
+          "nw",
+          "w",
+          "sw"
+        ],
+        "width": 1024,
+        "height": 576,
+        "sha256": "5554ab65177d86f38947f78ea4fe984b0c7c6baf8850a04ef3f6eb39b055f419"
+      },
+      "run4Dir": {
+        "file": "02-action-cel/Iris_02_Cel_Run_4Dir_8f.png",
+        "columns": 8,
+        "rows": 4,
+        "directions": [
+          "sw",
+          "se",
+          "nw",
+          "ne"
+        ],
+        "fps": 12,
+        "frameDurationMs": 83,
+        "loop": true,
+        "width": 2048,
+        "height": 1152,
+        "sha256": "5b684ae93562d2f744b6d1157de4c64ae8828fb2c14d118217d1fed29013b397"
+      }
+    },
+    {
+      "id": "03",
+      "slug": "03-hd-pixel",
+      "title": "03. 모던 HD 픽셀아트",
+      "english": "Modern HD-2D Craft Pixel Art",
+      "tag": "HD-2D 레트로 매력",
+      "description": "128×144 네이티브 픽셀 격자와 1px 남색 외곽선·36색 전용 팔레트로 입체 전장 위에서 또렷한 HD-2D 질감을 구현합니다.",
+      "filterMode": "Point",
+      "pixelArt": true,
+      "frameWidth": 128,
+      "frameHeight": 144,
+      "pivotPx": [
+        64,
+        128
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "idle8Dir": {
+        "file": "03-hd-pixel/Iris_03_Pixel_Idle_8Dir.png",
+        "columns": 4,
+        "rows": 2,
+        "directions": [
+          "s",
+          "se",
+          "e",
+          "ne",
+          "n",
+          "nw",
+          "w",
+          "sw"
+        ],
+        "width": 512,
+        "height": 288,
+        "sha256": "630964adb740b896c4e0ba72e24b8ca055c92d1fe85f512eb4598d97e5a1aa37"
+      },
+      "run4Dir": {
+        "file": "03-hd-pixel/Iris_03_Pixel_Run_4Dir_8f.png",
+        "columns": 8,
+        "rows": 4,
+        "directions": [
+          "sw",
+          "se",
+          "nw",
+          "ne"
+        ],
+        "fps": 12,
+        "frameDurationMs": 83,
+        "loop": true,
+        "width": 1024,
+        "height": 576,
+        "sha256": "62ecdacb7e806ffd05ba7db919638b2f4a6ac24555b541bc2dd0dd591d450a65"
+      }
+    },
+    {
+      "id": "04",
+      "slug": "04-storybook-gouache",
+      "title": "04. 동화풍 수채·과슈 2D",
+      "english": "Celestial Storybook Gouache & Delicate Line",
+      "tag": "별빛 동화 감성",
+      "description": "가느다란 세피아 선화, 부드러운 파스텔 과슈 붓터치와 은은한 별빛 광택으로 아스텔라의 천문대 동화 감성을 살렸습니다.",
+      "filterMode": "Bilinear",
+      "pixelArt": false,
+      "frameWidth": 256,
+      "frameHeight": 288,
+      "pivotPx": [
+        128,
+        256
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "idle8Dir": {
+        "file": "04-storybook-gouache/Iris_04_Gouache_Idle_8Dir.png",
+        "columns": 4,
+        "rows": 2,
+        "directions": [
+          "s",
+          "se",
+          "e",
+          "ne",
+          "n",
+          "nw",
+          "w",
+          "sw"
+        ],
+        "width": 1024,
+        "height": 576,
+        "sha256": "b6b47b5cf3600baf902f91eda7dc1ca0ee9b2fb4157a95dba5ada3f7b22f3593"
+      },
+      "run4Dir": {
+        "file": "04-storybook-gouache/Iris_04_Gouache_Run_4Dir_8f.png",
+        "columns": 8,
+        "rows": 4,
+        "directions": [
+          "sw",
+          "se",
+          "nw",
+          "ne"
+        ],
+        "fps": 12,
+        "frameDurationMs": 83,
+        "loop": true,
+        "width": 2048,
+        "height": 1152,
+        "sha256": "89ea86a988613ed79baba00b034a195a4d909ff0f49caada0ba33476b8551e37"
+      }
+    }
+  ]
+}</script>
+  <script>
+    (async () => {
+      let manifest;
+      try {
+        const r = await fetch('manifest.json');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        manifest = await r.json();
+      } catch {
+        manifest = JSON.parse(document.getElementById('inline-manifest').textContent);
+      }
+      const styles = manifest.styles;
+      const loadImg = src => new Promise((res, rej) => {
+        const im = new Image();
+        im.onload = () => res(im);
+        im.onerror = () => rej(new Error(src));
+        im.src = src;
+      });
+      const [arenaImg, bossImg, ...loaded] = await Promise.all([
+        loadImg(manifest.arenaReference),
+        loadImg(manifest.bossReference),
+        ...styles.flatMap(s => [loadImg(s.idle8Dir.file), loadImg(s.run4Dir.file)])
+      ]);
+      const assets = styles.map((s, i) => ({
+        spec: s,
+        idle: loaded[i * 2],
+        run: loaded[i * 2 + 1]
+      }));
+
+      let activeIdx = 0;
+      let overlayMode = 'slam';
+      let trioMode = false;
+      let scaleMult = 1.05;
+      let autoTurn = true;
+      let inspectDirIdx = 7; // sw
+      const dirArrows = ['↓ S', '↘ SE', '→ E', '↗ NE', '↑ N', '↖ NW', '← W', '↙ SW'];
+
+      const player = { x: 6.8, z: 5.5, tx: 6.8, tz: 5.5, dir8: 7, runDir4: 0, moving: false, runPhase: 0 };
+      const keys = new Set();
+
+      const canvas = document.getElementById('arenaCanvas');
+      const ctx = canvas.getContext('2d');
+      const badge = document.getElementById('arenaBadge');
+      const styleBtns = document.getElementById('styleBtns');
+      const cardsEl = document.getElementById('cards');
+
+      const plaza = { radius: 18, x: 836, y: 452, horizontal: 758, vertical: 323, depth: 0.185 };
+      const project = (x, z) => {
+        const d = z / plaza.radius;
+        const sc = 1 / (1 - plaza.depth * d);
+        return { x: plaza.x + plaza.horizontal * x / plaza.radius * sc, y: plaza.y + plaza.vertical * d * sc, scale: sc };
+      };
+      const inverse = (px, py) => {
+        const h = py - plaza.y;
+        const d = h / (plaza.vertical + plaza.depth * h);
+        return { x: plaza.radius * (px - plaza.x) * (1 - plaza.depth * d) / plaza.horizontal, z: plaza.radius * d };
+      };
+      const traceCircle = (x, z, r) => {
+        for (let i = 0; i <= 96; i++) {
+          const a = (i / 96) * Math.PI * 2;
+          const p = project(x + Math.cos(a) * r, z + Math.sin(a) * r);
+          if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+      };
+      const drawShadow = (c, x, y, rx, ry) => {
+        c.save(); c.translate(x, y); c.scale(rx, ry);
+        const g = c.createRadialGradient(0, 0, 0.1, 0, 0, 1);
+        g.addColorStop(0, 'rgba(8, 10, 18, 0.70)'); g.addColorStop(1, 'rgba(8, 10, 18, 0)');
+        c.fillStyle = g; c.fillRect(-1, -1, 2, 2); c.restore();
+      };
+
+      const angleToDir8 = (dx, dz) => {
+        // Screen +x = East, +z = South
+        const ang = Math.atan2(dx, dz); // 0 = South, +pi/2 = East, -pi/2 = West, pi = North
+        const idx = Math.round(((ang + Math.PI * 2) % (Math.PI * 2)) / (Math.PI / 4)) % 8;
+        return idx; // matches [s, se, e, ne, n, nw, w, sw]
+      };
+      const vecToRunRow = (dx, dz) => {
+        // RUN_DIRS = [sw, se, nw, ne]
+        if (dz >= 0) return dx <= 0 ? 0 : 1;
+        return dx <= 0 ? 2 : 3;
+      };
+
+      const drawCharacter = (asset, wx, wz, moving, dir8, runRow, frameIdx, label) => {
+        const s = asset.spec;
+        const p = project(wx, wz);
+        const drawH = 198 * scaleMult * p.scale;
+        const drawW = drawH * (s.frameWidth / s.frameHeight);
+        const pnx = s.pivotPx[0] / s.frameWidth;
+        const pny = s.pivotPx[1] / s.frameHeight;
+
+        drawShadow(ctx, p.x, p.y, 26 * scaleMult * p.scale, 9 * scaleMult * p.scale);
+        ctx.beginPath();
+        traceCircle(wx, wz, 0.65);
+        ctx.lineWidth = 2.8;
+        ctx.strokeStyle = 'rgba(161, 237, 255, 0.9)';
+        ctx.stroke();
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = !s.pixelArt;
+        if (moving) {
+          const sx = (frameIdx % 8) * s.frameWidth;
+          const sy = runRow * s.frameHeight;
+          ctx.drawImage(asset.run, sx, sy, s.frameWidth, s.frameHeight, p.x - drawW * pnx, p.y - drawH * pny, drawW, drawH);
+        } else {
+          const col = dir8 % 4;
+          const row = Math.floor(dir8 / 4);
+          ctx.drawImage(asset.idle, col * s.frameWidth, row * s.frameHeight, s.frameWidth, s.frameHeight, p.x - drawW * pnx, p.y - drawH * pny, drawW, drawH);
+        }
+        ctx.restore();
+
+        if (label) {
+          ctx.save();
+          ctx.font = '700 17px Pretendard, "Malgun Gothic", sans-serif';
+          const tw = ctx.measureText(label).width;
+          ctx.fillStyle = 'rgba(12, 18, 30, 0.86)';
+          ctx.strokeStyle = 'rgba(217, 185, 126, 0.75)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(p.x - tw / 2 - 10, p.y + 13, tw + 20, 27, 7);
+          ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#f3e7ce';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(label, p.x, p.y + 26.5);
+          ctx.restore();
+        }
+      };
+
+      const miniCanvases = [];
+      const setStyle = (idx) => {
+        activeIdx = idx;
+        trioMode = false;
+        document.getElementById('trioBtn').setAttribute('aria-pressed', 'false');
+        styleBtns.querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-pressed', String(i === idx)));
+        cardsEl.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('active', i === idx));
+      };
+
+      styles.forEach((s, idx) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn';
+        b.textContent = s.title;
+        b.setAttribute('aria-pressed', String(idx === 0));
+        b.addEventListener('click', () => setStyle(idx));
+        styleBtns.appendChild(b);
+
+        const card = document.createElement('article');
+        card.className = 'card' + (idx === 0 ? ' active' : '');
+        card.innerHTML = `
+          <div class="stage-row">
+            <div class="mini-box"><span>8방향 대기</span><canvas width="256" height="288"></canvas></div>
+            <div class="mini-box danger"><span>장판 위 달리기</span><canvas width="256" height="288"></canvas></div>
+          </div>
+          <div class="card-body">
+            <h3>${s.title}</h3>
+            <p>${s.description}</p>
+            <div class="card-actions">
+              <button class="btn" type="button" data-pick="${idx}">전장에서 플레이</button>
+              <a class="btn" href="${s.idle8Dir.file}" download>8방향 대기 시트</a>
+              <a class="btn" href="${s.run4Dir.file}" download>4방향 달리기 시트</a>
+            </div>
+          </div>
+        `;
+        const cIdle = card.querySelectorAll('canvas')[0];
+        const cRun = card.querySelectorAll('canvas')[1];
+        miniCanvases.push({ asset: assets[idx], cIdle, cRun });
+        card.querySelector('[data-pick]').addEventListener('click', () => {
+          setStyle(idx);
+          canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        cardsEl.appendChild(card);
+      });
+
+      document.querySelectorAll('[data-overlay]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          overlayMode = btn.dataset.overlay;
+          document.querySelectorAll('[data-overlay]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        });
+      });
+      document.getElementById('trioBtn').addEventListener('click', e => {
+        trioMode = !trioMode;
+        e.currentTarget.setAttribute('aria-pressed', String(trioMode));
+      });
+      document.getElementById('scaleRange').addEventListener('input', e => {
+        scaleMult = parseFloat(e.target.value);
+        document.getElementById('scaleVal').textContent = Math.round(scaleMult * 100) + '%';
+      });
+      document.getElementById('dirPrev').addEventListener('click', () => { autoTurn = false; document.getElementById('autoTurn').setAttribute('aria-pressed', 'false'); inspectDirIdx = (inspectDirIdx + 7) % 8; });
+      document.getElementById('dirNext').addEventListener('click', () => { autoTurn = false; document.getElementById('autoTurn').setAttribute('aria-pressed', 'false'); inspectDirIdx = (inspectDirIdx + 1) % 8; });
+      document.getElementById('autoTurn').addEventListener('click', e => { autoTurn = !autoTurn; e.currentTarget.setAttribute('aria-pressed', String(autoTurn)); });
+
+      canvas.addEventListener('pointerdown', e => {
+        canvas.focus();
+        if (trioMode) { trioMode = false; document.getElementById('trioBtn').setAttribute('aria-pressed', 'false'); }
+        const rect = canvas.getBoundingClientRect();
+        const u = (e.clientX - rect.left) / rect.width * canvas.width;
+        const v = (e.clientY - rect.top) / rect.height * canvas.height;
+        const pos = inverse(u, v);
+        const r = Math.hypot(pos.x, pos.z);
+        const clamp = Math.max(1, r / 17.0);
+        player.tx = pos.x / clamp;
+        player.tz = pos.z / clamp;
+      });
+      window.addEventListener('keydown', e => {
+        if (e.key === '1') setStyle(0);
+        else if (e.key === '2') setStyle(1);
+        else if (e.key === '3') setStyle(2);
+        else if (['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+          keys.add(e.key.toLowerCase());
+          if (e.key.startsWith('Arrow')) e.preventDefault();
+        }
+      });
+      window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+
+      let last = performance.now();
+      let turnTimer = 0;
+
+      const loop = (now) => {
+        const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
+        last = now;
+
+        // Keyboard movement
+        let kx = (keys.has('d') || keys.has('arrowright') ? 1 : 0) - (keys.has('a') || keys.has('arrowleft') ? 1 : 0);
+        let kz = (keys.has('s') || keys.has('arrowdown') ? 1 : 0) - (keys.has('w') || keys.has('arrowup') ? 1 : 0);
+        if (kx !== 0 || kz !== 0) {
+          const len = Math.hypot(kx, kz);
+          const nx = player.x + (kx / len) * dt * 8.5;
+          const nz = player.z + (kz / len) * dt * 8.5;
+          const r = Math.hypot(nx, nz);
+          const clamp = Math.max(1, r / 17.0);
+          player.x = player.tx = nx / clamp;
+          player.z = player.tz = nz / clamp;
+          player.dir8 = angleToDir8(kx, kz);
+          player.runDir4 = vecToRunRow(kx, kz);
+          player.moving = true;
+          player.runPhase += dt * 12;
+        } else {
+          const dx = player.tx - player.x, dz = player.tz - player.z;
+          const dist = Math.hypot(dx, dz);
+          if (dist > 0.08) {
+            const step = Math.min(1, dt * 8.5 / dist);
+            player.x += dx * step;
+            player.z += dz * step;
+            player.dir8 = angleToDir8(dx, dz);
+            player.runDir4 = vecToRunRow(dx, dz);
+            player.moving = true;
+            player.runPhase += dt * 12;
+          } else {
+            player.moving = false;
+          }
+        }
+
+        // Draw Arena
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(arenaImg, 0, 0, canvas.width, canvas.height);
+
+        if (overlayMode !== 'none') {
+          ctx.beginPath();
+          if (overlayMode === 'stack') traceCircle(-5.8, 6.2, 4);
+          else if (overlayMode === 'ring') { traceCircle(0, 0, 17); traceCircle(0, 0, 8); }
+          else traceCircle(0, 0, 8);
+          const st = overlayMode === 'stack';
+          ctx.fillStyle = st ? 'rgba(60,187,196,0.30)' : 'rgba(223,64,58,0.38)';
+          ctx.fill('evenodd');
+          ctx.lineWidth = 8; ctx.strokeStyle = st ? 'rgba(23,56,63,0.85)' : 'rgba(93,33,31,0.85)'; ctx.stroke();
+          ctx.lineWidth = 4; ctx.strokeStyle = st ? '#a4f5ed' : '#ffab8e'; ctx.stroke();
+        }
+
+        const drawBoss = () => {
+          const bp = project(0, 0);
+          const bh = 292, bw = bh * (bossImg.naturalWidth / bossImg.naturalHeight);
+          drawShadow(ctx, bp.x, bp.y, 104, 26);
+          ctx.drawImage(bossImg, bp.x - 0.56 * bw, bp.y - 0.96 * bh, bw, bh);
+        };
+
+        const runFrame = Math.floor(now / 83) % 8;
+        if (trioMode) {
+          drawBoss();
+          const orbit = now * 0.00085;
+          const spots = [
+            { x: -6.8 + Math.cos(orbit) * 2.4, z: 6.4 + Math.sin(orbit) * 1.4 },
+            { x: 0.0 + Math.cos(orbit) * 2.4, z: 8.8 + Math.sin(orbit) * 1.4 },
+            { x: 6.8 + Math.cos(orbit) * 2.4, z: 6.4 + Math.sin(orbit) * 1.4 }
+          ];
+          const vx = -Math.sin(orbit), vz = Math.cos(orbit);
+          const rRow = vecToRunRow(vx, vz);
+          assets.forEach((a, i) => drawCharacter(a, spots[i].x, spots[i].z, true, 7, rRow, runFrame, a.spec.title));
+          badge.innerHTML = '<strong>3종 동시 달리기 비교</strong> · 45° 탑다운 4방향 8프레임 루프';
+        } else {
+          const cur = assets[activeIdx];
+          if (player.z < 0) drawCharacter(cur, player.x, player.z, player.moving, player.dir8, player.runDir4, Math.floor(player.runPhase) % 8);
+          drawBoss();
+          if (player.z >= 0) drawCharacter(cur, player.x, player.z, player.moving, player.dir8, player.runDir4, Math.floor(player.runPhase) % 8);
+          badge.innerHTML = `<strong>${cur.spec.title}</strong> · ${player.moving ? '달리기(45°)' : '대기 · ' + dirArrows[player.dir8]}`;
+        }
+
+        // Update mini motion inspection cards
+        if (autoTurn) {
+          turnTimer += dt;
+          if (turnTimer >= 0.75) { turnTimer = 0; inspectDirIdx = (inspectDirIdx + 1) % 8; }
+        }
+        document.getElementById('dirLabel').textContent = '방향: ' + dirArrows[inspectDirIdx];
+        const runRowInsp = inspectDirIdx === 7 || inspectDirIdx === 0 || inspectDirIdx === 6 ? 0
+          : inspectDirIdx === 1 || inspectDirIdx === 2 ? 1
+          : inspectDirIdx === 5 ? 2 : 3;
+
+        miniCanvases.forEach(({ asset, cIdle, cRun }) => {
+          const s = asset.spec;
+          const ci = cIdle.getContext('2d');
+          ci.clearRect(0, 0, cIdle.width, cIdle.height);
+          ci.imageSmoothingEnabled = !s.pixelArt;
+          const col = inspectDirIdx % 4, row = Math.floor(inspectDirIdx / 4);
+          ci.drawImage(asset.idle, col * s.frameWidth, row * s.frameHeight, s.frameWidth, s.frameHeight, 0, 0, cIdle.width, cIdle.height);
+
+          const cr = cRun.getContext('2d');
+          cr.clearRect(0, 0, cRun.width, cRun.height);
+          cr.imageSmoothingEnabled = !s.pixelArt;
+          cr.drawImage(asset.run, runFrame * s.frameWidth, runRowInsp * s.frameHeight, s.frameWidth, s.frameHeight, 0, 0, cRun.width, cRun.height);
+        });
+
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>

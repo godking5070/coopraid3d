@@ -7,9 +7,9 @@
 | 번호 | 파일 | 그림체 | 카메라 각도 | 아스텔라 인게임 적합 포인트 |
 | --- | --- | --- | --- | --- |
 | 01 | `Sprites/01-handpainted-fantasy.png` | **핸드페인팅 판타지 2D** | **45° 탑다운 적용** | Blender 45° 가이드(`guide-45deg-sw`) 기준의 부감 원근과 수호석상·현무암 전장에 어우러지는 회화 질감 |
-| 02 | `Sprites/02-crisp-action-cel.png` | **선명한 액션 셀 쉐이딩** | 1차 15~20° *(45° 재생성 대기)* | 빠른 보스 패턴 회피와 붉은 위험 장판 위에서 캐릭터 위치와 실루엣이 즉각 읽히는 레이드 시인성 |
-| 03 | `Sprites/03-hd-pixel-art.png` (+ `03-hd-pixel-art-256x288.png`) | **모던 HD 픽셀아트** | 1차 15~20° *(45° 재생성 대기)* | 입체적 전장 위에 정사각형 도트와 1px 남색 외곽선으로 선명하게 대비되는 HD-2D 감성 (256×288 1:1 원본 도트 병행 제공) |
-| 04 | `Sprites/04-storybook-gouache.png` | **동화풍 수채·과슈 2D** | 1차 15~20° *(45° 재생성 대기)* | 별빛 천문대 세계관과 이리스 원화의 포근하고 신비로운 분위기를 감성적으로 살린 일러스트형 2D |
+| 02 | `Sprites/02-crisp-action-cel.png` | **선명한 액션 셀 쉐이딩** | **45° 탑다운 적용** | 빠른 보스 패턴 회피와 붉은 위험 장판 위에서 캐릭터 위치와 실루엣이 즉각 읽히는 레이드 시인성 |
+| 03 | `Sprites/03-hd-pixel-art.png` (+ `03-hd-pixel-art-128x144.png`) | **모던 HD 픽셀아트** | **45° 탑다운 적용** | 입체적 전장 위에 정사각형 도트와 1px 남색 외곽선으로 선명하게 대비되는 HD-2D 감성 (128×144 1:1 원본 도트 병행 제공) |
+| 04 | `Sprites/04-storybook-gouache.png` | **동화풍 수채·과슈 2D** | **45° 탑다운 적용** | 별빛 천문대 세계관과 이리스 원화의 포근하고 신비로운 분위기를 감성적으로 살린 일러스트형 2D |
 | 05 | `Sprites/05-spine-modular-flat.png` | **모던 스파인 리깅형 2D** | **45° 탑다운 적용** | Blender 45° 가이드 기준의 부감 구도와 Spine / Unity 2D Animation 본 리깅 확장에 최적화된 깔끔한 파츠 분리 |
 
 ## 리소스 규격 및 Unity 임포트 기준
@@ -20,7 +20,7 @@
 - **Unity Import 권장**:
   - `Texture Type`: `Sprite (2D and UI)`, `Alpha Is Transparency` 활성화
   - 스타일 01·02·04·05: `Filter Mode = Bilinear`
-  - 스타일 03(HD 픽셀아트): `Filter Mode = Point (no filter)`, `Compression = None` (`Sprites/03-hd-pixel-art-256x288.png` 1:1 원본 또는 2배 정수 확대 `03-hd-pixel-art.png` 사용 권장)
+  - 스타일 03(HD 픽셀아트): `Filter Mode = Point (no filter)`, `Compression = None` (`Sprites/03-hd-pixel-art-128x144.png` 1:1 원본 또는 2배 정수 확대 `03-hd-pixel-art.png` 사용 권장)
 
 ## 미리보기 확인 방법
 
