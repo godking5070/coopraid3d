@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>이리스 (Iris) · 동화풍 수채·과슈 45° 탑다운 8방향</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f141e;
+      --surface: #171f2e;
+      --surface-2: #202a3d;
+      --border: #33435e;
+      --gold: #d9b97e;
+      --gold-soft: #f2e1bc;
+      --ink: #edf2f9;
+      --muted: #98a8c0;
+      --card-h: 216px;
+      font-family: Pretendard, "Malgun Gothic", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.55; }
+    button, input { font: inherit; color: inherit; }
+    a { color: var(--gold-soft); text-underline-offset: 3px; }
+    .wrap { width: min(1340px, 100%); margin: 0 auto; padding: 0 clamp(14px, 3vw, 28px); }
+
+    header.hero {
+      background: linear-gradient(135deg, #182338 0%, #101724 65%, #1d2538 100%);
+      border-bottom: 2px solid #8a734a;
+      padding: 24px 0 22px;
+    }
+    .hero-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; color: var(--gold); text-transform: uppercase; }
+    header h1 { margin: 4px 0 7px; font-size: clamp(23px, 3.8vw, 35px); letter-spacing: -.03em; line-height: 1.15; }
+    header p { margin: 0; max-width: 740px; color: var(--muted); font-size: 14px; }
+    .ref-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .ref-pill {
+      display: flex; align-items: center; gap: 10px;
+      background: #101726cc; border: 1px solid var(--border); border-radius: 11px;
+      padding: 7px 11px; text-decoration: none;
+    }
+    .ref-pill img { width: 46px; height: 60px; object-fit: contain; border-radius: 6px; background: #222c40; }
+    .ref-pill strong { display: block; font-size: 12.5px; color: var(--ink); }
+    .ref-pill span { display: block; font-size: 11px; color: var(--muted); }
+
+    main { padding: 24px 0 48px; }
+    section + section { margin-top: 38px; }
+    h2 { margin: 0 0 6px; font-size: 21px; letter-spacing: -.02em; }
+    .sub { margin: 0 0 13px; color: var(--muted); font-size: 13px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 15px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .btn {
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 12px; min-height: 36px; font-size: 13px; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn:hover { border-color: var(--gold); }
+    .btn[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #161822; font-weight: 700; }
+    .range { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-left: auto; }
+    .range input { width: 110px; accent-color: var(--gold); }
+    .viewport { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid #3c4d69; background: #0c111a; }
+    #arenaCanvas { display: block; width: 100%; height: auto; cursor: crosshair; outline: none; }
+    .badge {
+      position: absolute; left: 14px; top: 14px;
+      background: #0f1522de; border: 1px solid #8a734aa0;
+      border-radius: 8px; padding: 6px 12px; font-size: 13px; pointer-events: none;
+    }
+    .badge strong { color: var(--gold-soft); }
+    .hint { margin: 9px 0 0; font-size: 12.5px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+    .turntable-wrap { display: grid; grid-template-columns: 320px 1fr; gap: 16px; align-items: start; }
+    @media (max-width: 820px) { .turntable-wrap { grid-template-columns: 1fr; } }
+    .turn-stage {
+      height: 310px; border-radius: 12px; display: grid; place-items: center; padding: 14px;
+      background: radial-gradient(circle at 50% 62%, #48566a 0%, #263042 72%, #1a2230 100%);
+      border: 1px solid var(--border); position: relative;
+    }
+    .turn-stage img { max-height: 270px; max-width: 100%; object-fit: contain; }
+    .turn-label {
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+      background: #0e1421de; border: 1px solid #8a734a88; color: var(--gold-soft);
+      font-size: 12.5px; font-weight: 700; padding: 3px 11px; border-radius: 99px; white-space: nowrap;
+    }
+
+    .grid8 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    @media (max-width: 900px) { .grid8 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .card.active { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+    .card-stage {
+      height: 240px; display: grid; place-items: center; padding: 10px; cursor: pointer; position: relative;
+      background: radial-gradient(circle at 50% 62%, #475468 0%, #2a3342 68%, #1d2431 100%);
+    }
+    body[data-bg="danger"] .card-stage { background: radial-gradient(circle at 50% 62%, #8c3d3f 0%, #4b252e 65%, #231924 100%); }
+    body[data-bg="dark"] .card-stage { background: #1a2434; }
+    body[data-bg="light"] .card-stage { background: #e8eef5; }
+    body[data-bg="grid"] .card-stage {
+      background-color: #d7dce4;
+      background-image: repeating-conic-gradient(#bcc4d0 0% 25%, transparent 0% 50%);
+      background-size: 18px 18px;
+    }
+    .card-stage img { height: var(--card-h); max-width: 100%; width: auto; object-fit: contain; }
+    .dir-pill {
+      position: absolute; top: 8px; left: 8px;
+      background: #0d1421d9; border: 1px solid #7586a488; color: var(--gold-soft);
+      font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+    }
+    .card-foot { padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .card-foot strong { font-size: 13.5px; }
+    .card-foot a { font-size: 12px; }
+
+    dialog { width: min(640px, calc(100% - 24px)); padding: 0; border: 1px solid var(--gold); border-radius: 14px; background: var(--surface); color: var(--ink); }
+    dialog::backdrop { background: #070b13d8; }
+    .dlg-bar { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .dlg-art { display: grid; place-items: center; padding: 16px; background: radial-gradient(circle at 50% 60%, #455368 0%, #232c3b 72%); }
+    .dlg-art img { max-height: 62vh; max-width: 100%; object-fit: contain; }
+  </style>
+</head>
+<body data-bg="arena">
+  <header class="hero">
+    <div class="wrap hero-row">
+      <div>
+        <div class="eyebrow">Astella · Pure 2D Celestial Storybook Gouache · 45° Top-Down 8-Directions</div>
+        <h1>이리스 동화풍 수채·과슈 45° 탑다운 8방향</h1>
+        <p>3D 모델링 참고 없이 순수 2D 동화풍 수채·과슈 원화(<code>04-storybook-gouache.png</code>)와 이리스 일러스트만을 기준으로 제작한 <strong>45° 탑다운 8방향 대기 스프라이트</strong>입니다. 모든 방향은 <strong>512 × 576 px</strong> 투명 PNG, 발 기준점 <strong>(256, 512) px</strong>(Unity 정규화 피벗 <code>0.5, 0.111111</code>)로 통일했습니다.</p>
+      </div>
+      <div class="ref-group">
+        <a class="ref-pill" href="../Ingame-Concepts-5Styles/Sprites/04-storybook-gouache.png" target="_blank" rel="noreferrer">
+          <img src="../Ingame-Concepts-5Styles/Sprites/04-storybook-gouache.png" alt="04 동화풍 수채 과슈 마스터">
+          <div><strong>스타일 기준</strong><span>04-storybook-gouache</span></div>
+        </a>
+        <a class="ref-pill" href="Iris_StorybookGouache_45deg_8Dir.png" download>
+          <img src="Sprites/Iris_Gouache_45deg_sw.png" alt="4x2 통합 시트">
+          <div><strong>4×2 통합 시트</strong><span>PNG 내려받기</span></div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2>1. 아스텔라 레이드 전장 8방향 실배치 &amp; 이동 테스트</h2>
+      <p class="sub">전장 바닥을 클릭하거나 <strong>WASD / 방향키</strong>로 이동하면 이동 방향에 맞춰 8방향 스프라이트가 자동 전환됩니다.</p>
+      <div class="panel">
+        <div class="toolbar">
+          <button class="btn" type="button" data-overlay="slam" aria-pressed="true">중앙 내려찍기 장판</button>
+          <button class="btn" type="button" data-overlay="ring" aria-pressed="false">외곽 고리 장판</button>
+          <button class="btn" type="button" data-overlay="stack" aria-pressed="false">집합(청록) 장판</button>
+          <button class="btn" type="button" data-overlay="none" aria-pressed="false">장판 끄기</button>
+          <button class="btn" type="button" id="all8Btn" aria-pressed="false">8방향 링 동시 배치</button>
+          <label class="range">캐릭터 크기
+            <input type="range" id="scaleRange" min="0.7" max="1.6" step="0.05" value="1.05">
+            <output id="scaleVal">105%</output>
+          </label>
+        </div>
+        <div class="viewport">
+          <canvas id="arenaCanvas" width="1672" height="941" tabindex="0"></canvas>
+          <div class="badge" id="arenaBadge">로딩 중…</div>
+        </div>
+        <p class="hint">
+          <span>조작: 전장 클릭 이동 · WASD / 방향키 이동 · Q/E 제자리 8방향 회전</span>
+          <span>배경: <code>StoneGuardianArena.png</code> · 보스: <code>StoneGuardian.png</code></span>
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. 8방향 턴테이블 &amp; 개별 스프라이트 검수</h2>
+      <p class="sub">자동 회전으로 45° 탑다운 각도·머리핀 위치(왼쪽 관자놀이)·실루엣 일관성을 확인하고, 개별 PNG 또는 4×2 시트를 내려받을 수 있습니다.</p>
+      <div class="toolbar">
+        <button class="btn" type="button" data-bg="arena" aria-pressed="true">현무암 전장 톤</button>
+        <button class="btn" type="button" data-bg="danger" aria-pressed="false">붉은 위험 장판 톤</button>
+        <button class="btn" type="button" data-bg="dark" aria-pressed="false">어두운 배경</button>
+        <button class="btn" type="button" data-bg="light" aria-pressed="false">밝은 배경</button>
+        <button class="btn" type="button" data-bg="grid" aria-pressed="false">투명 격자</button>
+        <label class="range">카드 높이
+          <input type="range" id="cardHeight" min="112" max="224" step="8" value="200">
+          <output id="cardHeightVal">200 px</output>
+        </label>
+      </div>
+
+      <div class="turntable-wrap">
+        <div class="panel">
+          <div class="turn-stage">
+            <img id="turnImg" alt="8방향 회전 미리보기">
+            <div class="turn-label" id="turnLabel">↓ 정면 (S)</div>
+          </div>
+          <div class="toolbar" style="margin-top:12px;margin-bottom:0;justify-content:center">
+            <button class="btn" type="button" id="turnPrev">◀ 이전</button>
+            <button class="btn" type="button" id="turnPlay" aria-pressed="true">자동 회전</button>
+            <button class="btn" type="button" id="turnNext">다음 ▶</button>
+          </div>
+        </div>
+        <div class="grid8" id="cards"></div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="lightbox">
+    <div class="dlg-bar">
+      <strong id="dlgTitle"></strong>
+      <form method="dialog"><button class="btn" type="submit">닫기</button></form>
+    </div>
+    <div class="dlg-art"><img id="dlgImg" alt=""></div>
+    <div class="dlg-bar">
+      <span id="dlgMeta" style="font-size:12px;color:var(--muted)"></span>
+      <a class="btn" id="dlgDl" download>투명 PNG 내려받기</a>
+    </div>
+  </dialog>
+
+  <script id="inline-manifest" type="application/json">{
+  "formatVersion": 1,
+  "character": "이리스 / Iris",
+  "style": "04. 동화풍 수채·과슈 2D (Pure 2D Celestial Storybook Gouache — Zero 3D reference)",
+  "camera": "45° Top-Down RPG View (8 Directions)",
+  "styleMaster": "../Ingame-Concepts-5Styles/Sprites/04-storybook-gouache.png",
+  "referenceIllustration": "../../Texturing/Reference/Iris_Concept_UserReference.png",
+  "arenaReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardianArena.png",
+  "bossReference": "../../../../ConceptArt/RaidVisualTests/StoneGuardian.png",
+  "sheet": {
+    "file": "Iris_StorybookGouache_45deg_8Dir.png",
+    "columns": 4,
+    "rows": 2,
+    "cellWidth": 512,
+    "cellHeight": 576,
+    "width": 2048,
+    "height": 1152,
+    "pivotPx": [
+      256,
+      512
+    ],
+    "unityNormalizedPivot": [
+      0.5,
+      0.111111
+    ],
+    "sha256": "2fb442edfc2b99f7eaefa437d669b1503ddca2944dabe5dbe6e9297dcce3f6af"
+  },
+  "directions": [
+    {
+      "index": 0,
+      "code": "s",
+      "arrow": "↓",
+      "label": "정면",
+      "file": "Sprites/Iris_Gouache_45deg_s.png",
+      "sheetCol": 0,
+      "sheetRow": 0,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        92,
+        70,
+        329,
+        442
+      ],
+      "transparentFraction": 0.6812,
+      "sha256": "f9ddc6f3e848320c41d6c9764c10ae97fde9d6b68e2d7c33c2443dfa7fb1cf0f"
+    },
+    {
+      "index": 1,
+      "code": "se",
+      "arrow": "↘",
+      "label": "우전방",
+      "file": "Sprites/Iris_Gouache_45deg_se.png",
+      "sheetCol": 1,
+      "sheetRow": 0,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        98,
+        70,
+        329,
+        442
+      ],
+      "transparentFraction": 0.699,
+      "sha256": "48a79eb23479daf4ab38d5a5752c1db052f9c9a879988846bf7a311d4db58668"
+    },
+    {
+      "index": 2,
+      "code": "e",
+      "arrow": "→",
+      "label": "우측",
+      "file": "Sprites/Iris_Gouache_45deg_e.png",
+      "sheetCol": 2,
+      "sheetRow": 0,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        94,
+        70,
+        269,
+        441
+      ],
+      "transparentFraction": 0.736,
+      "sha256": "43363e401d1e1bac610c23cb5a6cbef173892807e98f5bd3c10b5acf0e233f5f"
+    },
+    {
+      "index": 3,
+      "code": "ne",
+      "arrow": "↗",
+      "label": "우후방",
+      "file": "Sprites/Iris_Gouache_45deg_ne.png",
+      "sheetCol": 3,
+      "sheetRow": 0,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        90,
+        70,
+        313,
+        442
+      ],
+      "transparentFraction": 0.716,
+      "sha256": "3330a7490a17b7c74c2407f7041d104a17cd997ecd2476515c5a5be9f01b456f"
+    },
+    {
+      "index": 4,
+      "code": "n",
+      "arrow": "↑",
+      "label": "후면",
+      "file": "Sprites/Iris_Gouache_45deg_n.png",
+      "sheetCol": 0,
+      "sheetRow": 1,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        94,
+        70,
+        324,
+        442
+      ],
+      "transparentFraction": 0.7178,
+      "sha256": "1fb34811596f8e9606b33cecda7fb8b5c03bf2a696abf2fd35e76bf9d34a6c53"
+    },
+    {
+      "index": 5,
+      "code": "nw",
+      "arrow": "↖",
+      "label": "좌후방",
+      "file": "Sprites/Iris_Gouache_45deg_nw.png",
+      "sheetCol": 1,
+      "sheetRow": 1,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        111,
+        70,
+        293,
+        442
+      ],
+      "transparentFraction": 0.7215,
+      "sha256": "ea5a98e74053d17bff6ada7452aa77289e770c5acd811802857e54899aeef4aa"
+    },
+    {
+      "index": 6,
+      "code": "w",
+      "arrow": "←",
+      "label": "좌측",
+      "file": "Sprites/Iris_Gouache_45deg_w.png",
+      "sheetCol": 2,
+      "sheetRow": 1,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        151,
+        70,
+        264,
+        442
+      ],
+      "transparentFraction": 0.7409,
+      "sha256": "80212bd37cd68054c5cfeca2608ae489ceff8cc4502b6c609237ebf114b5bfd0"
+    },
+    {
+      "index": 7,
+      "code": "sw",
+      "arrow": "↙",
+      "label": "좌전방",
+      "file": "Sprites/Iris_Gouache_45deg_sw.png",
+      "sheetCol": 3,
+      "sheetRow": 1,
+      "width": 512,
+      "height": 576,
+      "pivotPx": [
+        256,
+        512
+      ],
+      "unityNormalizedPivot": [
+        0.5,
+        0.111111
+      ],
+      "inkBoundsPx": [
+        86,
+        70,
+        329,
+        442
+      ],
+      "transparentFraction": 0.701,
+      "sha256": "357de5f9423b7efd02ce76fb799c1b4451a26782cbade504acc7dd79f2d31c46"
+    }
+  ]
+}</script>
+  <script>
+    (async () => {
+      let manifest;
+      try {
+        const r = await fetch('manifest.json');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        manifest = await r.json();
+      } catch {
+        manifest = JSON.parse(document.getElementById('inline-manifest').textContent);
+      }
+      const dirs = manifest.directions;
+      const loadImg = src => new Promise((res, rej) => {
+        const im = new Image();
+        im.onload = () => res(im);
+        im.onerror = () => rej(new Error(src));
+        im.src = src;
+      });
+      const [arenaImg, bossImg, ...dirImgs] = await Promise.all([
+        loadImg(manifest.arenaReference),
+        loadImg(manifest.bossReference),
+        ...dirs.map(d => loadImg(d.file))
+      ]);
+
+      let overlayMode = 'slam';
+      let showAll8 = false;
+      let scaleMult = 1.05;
+      let turnIdx = 7; // sw
+      let autoTurn = true;
+
+      const player = { x: 7.4, z: 5.0, tx: 7.4, tz: 5.0, dirIdx: 7 };
+      const keys = new Set();
+
+      const canvas = document.getElementById('arenaCanvas');
+      const ctx = canvas.getContext('2d');
+      const badge = document.getElementById('arenaBadge');
+      const cardsEl = document.getElementById('cards');
+      const turnImg = document.getElementById('turnImg');
+      const turnLabel = document.getElementById('turnLabel');
+
+      const plaza = { radius: 18, x: 836, y: 452, horizontal: 758, vertical: 323, depth: 0.185 };
+      const project = (x, z) => {
+        const d = z / plaza.radius;
+        const sc = 1 / (1 - plaza.depth * d);
+        return { x: plaza.x + plaza.horizontal * x / plaza.radius * sc, y: plaza.y + plaza.vertical * d * sc, scale: sc };
+      };
+      const inverse = (px, py) => {
+        const h = py - plaza.y;
+        const d = h / (plaza.vertical + plaza.depth * h);
+        return { x: plaza.radius * (px - plaza.x) * (1 - plaza.depth * d) / plaza.horizontal, z: plaza.radius * d };
+      };
+      const traceCircle = (x, z, r) => {
+        for (let i = 0; i <= 96; i++) {
+          const a = (i / 96) * Math.PI * 2;
+          const p = project(x + Math.cos(a) * r, z + Math.sin(a) * r);
+          if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+      };
+      const drawShadow = (x, y, rx, ry) => {
+        ctx.save(); ctx.translate(x, y); ctx.scale(rx, ry);
+        const g = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
+        g.addColorStop(0, 'rgba(8, 10, 18, 0.68)'); g.addColorStop(1, 'rgba(8, 10, 18, 0)');
+        ctx.fillStyle = g; ctx.fillRect(-1, -1, 2, 2); ctx.restore();
+      };
+      const angleToDirIdx = (dx, dz) => {
+        const ang = Math.atan2(dx, dz); // 0=S, pi/2=E, pi=N, -pi/2=W
+        return Math.round(((ang + Math.PI * 2) % (Math.PI * 2)) / (Math.PI / 4)) % 8;
+      };
+
+      const drawIris = (idx, wx, wz, bobY = 0, label = '') => {
+        const d = dirs[idx];
+        const img = dirImgs[idx];
+        const p = project(wx, wz);
+        const drawH = 196 * scaleMult * p.scale;
+        const drawW = drawH * (d.width / d.height);
+        const pnx = d.pivotPx[0] / d.width;
+        const pny = d.pivotPx[1] / d.height;
+        drawShadow(p.x, p.y, 26 * scaleMult * p.scale, 9 * scaleMult * p.scale);
+        ctx.beginPath(); traceCircle(wx, wz, 0.64);
+        ctx.lineWidth = 2.6; ctx.strokeStyle = 'rgba(161, 237, 255, 0.88)'; ctx.stroke();
+        ctx.drawImage(img, p.x - drawW * pnx, p.y - drawH * pny - bobY * p.scale, drawW, drawH);
+        if (label) {
+          ctx.save();
+          ctx.font = '700 16px Pretendard, "Malgun Gothic", sans-serif';
+          const tw = ctx.measureText(label).width;
+          ctx.fillStyle = 'rgba(12, 18, 30, 0.86)';
+          ctx.strokeStyle = 'rgba(217, 185, 126, 0.72)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.roundRect(p.x - tw / 2 - 9, p.y + 11, tw + 18, 25, 6); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = '#f3e7ce'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(label, p.x, p.y + 23.5);
+          ctx.restore();
+        }
+      };
+
+      const updateTurntable = () => {
+        const d = dirs[turnIdx];
+        turnImg.src = d.file;
+        turnLabel.textContent = `${d.arrow} ${d.label} (${d.code.toUpperCase()})`;
+        cardsEl.querySelectorAll('.card').forEach((c, i) => c.classList.toggle('active', i === turnIdx));
+      };
+
+      dirs.forEach((d, idx) => {
+        const card = document.createElement('article');
+        card.className = 'card' + (idx === turnIdx ? ' active' : '');
+        card.innerHTML = `
+          <div class="card-stage" role="button" tabindex="0" aria-label="${d.label} 확대 보기">
+            <span class="dir-pill">${d.arrow} ${d.code.toUpperCase()}</span>
+            <img src="${d.file}" alt="이리스 ${d.label}">
+          </div>
+          <div class="card-foot">
+            <strong>${d.label}</strong>
+            <a href="${d.file}" download>PNG 저장</a>
+          </div>
+        `;
+        const openDlg = () => {
+          turnIdx = idx; autoTurn = false;
+          document.getElementById('turnPlay').setAttribute('aria-pressed', 'false');
+          updateTurntable();
+          const dlg = document.getElementById('lightbox');
+          document.getElementById('dlgTitle').textContent = `${d.arrow} ${d.label} (${d.code.toUpperCase()})`;
+          document.getElementById('dlgImg').src = d.file;
+          document.getElementById('dlgMeta').textContent = `${d.width}×${d.height} px · Pivot (${d.pivotPx[0]}, ${d.pivotPx[1]}) · Unity (0.5, 0.111111)`;
+          document.getElementById('dlgDl').href = d.file;
+          dlg.showModal();
+        };
+        card.querySelector('.card-stage').addEventListener('click', openDlg);
+        card.querySelector('.card-stage').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDlg(); } });
+        cardsEl.appendChild(card);
+      });
+      updateTurntable();
+
+      document.querySelectorAll('[data-overlay]').forEach(btn => btn.addEventListener('click', () => {
+        overlayMode = btn.dataset.overlay;
+        document.querySelectorAll('[data-overlay]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      }));
+      document.getElementById('all8Btn').addEventListener('click', e => {
+        showAll8 = !showAll8;
+        e.currentTarget.setAttribute('aria-pressed', String(showAll8));
+      });
+      document.getElementById('scaleRange').addEventListener('input', e => {
+        scaleMult = parseFloat(e.target.value);
+        document.getElementById('scaleVal').textContent = Math.round(scaleMult * 100) + '%';
+      });
+      document.querySelectorAll('[data-bg]').forEach(btn => btn.addEventListener('click', () => {
+        document.body.dataset.bg = btn.dataset.bg;
+        document.querySelectorAll('[data-bg]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      }));
+      document.getElementById('cardHeight').addEventListener('input', e => {
+        document.documentElement.style.setProperty('--card-h', e.target.value + 'px');
+        document.getElementById('cardHeightVal').textContent = e.target.value + ' px';
+      });
+      document.getElementById('turnPrev').addEventListener('click', () => { autoTurn = false; document.getElementById('turnPlay').setAttribute('aria-pressed', 'false'); turnIdx = (turnIdx + 7) % 8; updateTurntable(); });
+      document.getElementById('turnNext').addEventListener('click', () => { autoTurn = false; document.getElementById('turnPlay').setAttribute('aria-pressed', 'false'); turnIdx = (turnIdx + 1) % 8; updateTurntable(); });
+      document.getElementById('turnPlay').addEventListener('click', e => { autoTurn = !autoTurn; e.currentTarget.setAttribute('aria-pressed', String(autoTurn)); });
+
+      canvas.addEventListener('pointerdown', e => {
+        canvas.focus();
+        if (showAll8) { showAll8 = false; document.getElementById('all8Btn').setAttribute('aria-pressed', 'false'); }
+        const rect = canvas.getBoundingClientRect();
+        const u = (e.clientX - rect.left) / rect.width * canvas.width;
+        const v = (e.clientY - rect.top) / rect.height * canvas.height;
+        const pos = inverse(u, v);
+        const r = Math.hypot(pos.x, pos.z);
+        const clamp = Math.max(1, r / 17.0);
+        player.tx = pos.x / clamp; player.tz = pos.z / clamp;
+      });
+      window.addEventListener('keydown', e => {
+        const k = e.key.toLowerCase();
+        if (k === 'q') { player.dirIdx = (player.dirIdx + 7) % 8; return; }
+        if (k === 'e') { player.dirIdx = (player.dirIdx + 1) % 8; return; }
+        if (['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) {
+          keys.add(k);
+          if (k.startsWith('arrow')) e.preventDefault();
+        }
+      });
+      window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+
+      let last = performance.now();
+      let turnTimer = 0;
+      const loop = (now) => {
+        const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
+        last = now;
+        let moving = false;
+        const kx = (keys.has('d') || keys.has('arrowright') ? 1 : 0) - (keys.has('a') || keys.has('arrowleft') ? 1 : 0);
+        const kz = (keys.has('s') || keys.has('arrowdown') ? 1 : 0) - (keys.has('w') || keys.has('arrowup') ? 1 : 0);
+        if (kx !== 0 || kz !== 0) {
+          const len = Math.hypot(kx, kz);
+          const nx = player.x + (kx / len) * dt * 8.2;
+          const nz = player.z + (kz / len) * dt * 8.2;
+          const clamp = Math.max(1, Math.hypot(nx, nz) / 17.0);
+          player.x = player.tx = nx / clamp; player.z = player.tz = nz / clamp;
+          player.dirIdx = angleToDirIdx(kx, kz);
+          moving = true;
+        } else {
+          const dx = player.tx - player.x, dz = player.tz - player.z, dist = Math.hypot(dx, dz);
+          if (dist > 0.08) {
+            const step = Math.min(1, dt * 8.2 / dist);
+            player.x += dx * step; player.z += dz * step;
+            player.dirIdx = angleToDirIdx(dx, dz);
+            moving = true;
+          }
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(arenaImg, 0, 0, canvas.width, canvas.height);
+
+        if (overlayMode !== 'none') {
+          ctx.beginPath();
+          if (overlayMode === 'stack') traceCircle(-5.8, 6.2, 4);
+          else if (overlayMode === 'ring') { traceCircle(0, 0, 17); traceCircle(0, 0, 8); }
+          else traceCircle(0, 0, 8);
+          const st = overlayMode === 'stack';
+          ctx.fillStyle = st ? 'rgba(60,187,196,0.30)' : 'rgba(223,64,58,0.38)';
+          ctx.fill('evenodd');
+          ctx.lineWidth = 8; ctx.strokeStyle = st ? 'rgba(23,56,63,0.85)' : 'rgba(93,33,31,0.85)'; ctx.stroke();
+          ctx.lineWidth = 4; ctx.strokeStyle = st ? '#a4f5ed' : '#ffab8e'; ctx.stroke();
+        }
+
+        const drawBoss = () => {
+          const bp = project(0, 0);
+          const bh = 292, bw = bh * (bossImg.naturalWidth / bossImg.naturalHeight);
+          drawShadow(bp.x, bp.y, 104, 26);
+          ctx.drawImage(bossImg, bp.x - 0.56 * bw, bp.y - 0.96 * bh, bw, bh);
+        };
+
+        if (showAll8) {
+          // Place all 8 directions in a clear unobstructed ring around the boss!
+          const spotMap = {
+            s: [0.0, 12.6], se: [7.2, 10.2], e: [12.2, 3.4], ne: [9.8, -6.2],
+            n: [-4.2, -11.4], nw: [-10.8, -5.8], w: [-12.2, 3.4], sw: [-7.2, 10.2]
+          };
+          const ring = dirs.map((d, i) => {
+            const [wx, wz] = spotMap[d.code];
+            return { idx: i, x: wx, z: wz, label: `${d.arrow} ${d.code.toUpperCase()}` };
+          }).sort((a, b) => a.z - b.z);
+          ring.filter(r => r.z < 0).forEach(r => drawIris(r.idx, r.x, r.z, 0, r.label));
+          drawBoss();
+          ring.filter(r => r.z >= 0).forEach(r => drawIris(r.idx, r.x, r.z, 0, r.label));
+          badge.innerHTML = '<strong>8방향 링 동시 배치</strong> · 45° 탑다운 전방향 비교';
+        } else {
+          const bob = moving ? Math.abs(Math.sin(now * 0.015)) * 7 : Math.sin(now * 0.004) * 1.5;
+          if (player.z < 0) drawIris(player.dirIdx, player.x, player.z, bob);
+          drawBoss();
+          if (player.z >= 0) drawIris(player.dirIdx, player.x, player.z, bob);
+          const cur = dirs[player.dirIdx];
+          badge.innerHTML = `<strong>동화풍 수채·과슈 45°</strong> · ${cur.arrow} ${cur.label} (${cur.code.toUpperCase()})`;
+        }
+
+        if (autoTurn) {
+          turnTimer += dt;
+          if (turnTimer >= 0.72) { turnTimer = 0; turnIdx = (turnIdx + 1) % 8; updateTurntable(); }
+        }
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
